@@ -1,0 +1,137 @@
+# Draft - Context-Driven Development
+
+You are operating with the Draft methodology for Context-Driven Development.
+
+**Measure twice, code once.**
+
+## Core Workflow
+
+**Context → Spec & Plan → Implement**
+
+Every feature follows this lifecycle:
+1. **Setup** - Initialize project context (once per project)
+2. **New Track** - Create specification and plan
+3. **Implement** - Execute tasks with TDD workflow
+4. **Verify** - Confirm acceptance criteria met
+
+## Project Context Files
+
+When `draft/` exists in the project, always consider:
+- `draft/product.md` - Product vision and goals
+- `draft/tech-stack.md` - Technical constraints
+- `draft/workflow.md` - TDD and commit preferences
+- `draft/tracks.md` - Active work items
+
+## Available Commands
+
+| Command | Purpose |
+|---------|---------|
+| `@draft setup` | Initialize project (run once) |
+| `@draft new-track <description>` | Create feature/bug track |
+| `@draft implement` | Execute tasks from plan |
+| `@draft status` | Show progress overview |
+| `@draft revert` | Git-aware rollback |
+
+## Intent Mapping
+
+Recognize these natural language patterns:
+
+| User Says | Action |
+|-----------|--------|
+| "set up the project" | Run setup |
+| "new feature", "add X" | Create new track |
+| "start implementing" | Execute implement |
+| "what's the status" | Show status |
+| "undo", "revert" | Run revert |
+| "the plan" | Read active track's plan.md |
+| "the spec" | Read active track's spec.md |
+
+## Tracks
+
+A **track** is a high-level unit of work (feature, bug fix, refactor). Each track contains:
+- `spec.md` - Requirements and acceptance criteria
+- `plan.md` - Phased task breakdown
+- `metadata.json` - Status and timestamps
+
+Located at: `draft/tracks/<track-id>/`
+
+## Status Markers
+
+Recognize and use these throughout plan.md:
+- `[ ]` - Pending
+- `[~]` - In Progress
+- `[x]` - Completed
+- `[!]` - Blocked
+
+## TDD Workflow
+
+When implementing tasks (if TDD enabled in workflow.md):
+
+1. **Red** - Write failing test first
+2. **Green** - Implement minimum to pass
+3. **Refactor** - Clean up with tests green
+
+## Setup Command
+
+When user says "set up draft" or "@draft setup":
+
+1. Check if `draft/` already exists
+2. If not, create project context through dialogue:
+   - Ask about product vision and users
+   - Detect or ask about tech stack
+   - Ask about TDD and commit preferences
+3. Create:
+   - `draft/product.md`
+   - `draft/tech-stack.md`
+   - `draft/workflow.md`
+   - `draft/tracks.md`
+   - `draft/tracks/` directory
+
+## New Track Command
+
+When user says "new feature" or "@draft new-track <description>":
+
+1. Load context from `draft/` files
+2. Generate track ID (kebab-case from description)
+3. Create `draft/tracks/<track-id>/` with:
+   - `spec.md` - Requirements through dialogue
+   - `plan.md` - Phased task breakdown
+   - `metadata.json` - Status tracking
+4. Update `draft/tracks.md`
+
+## Implement Command
+
+When user says "implement" or "@draft implement":
+
+1. Find active track from `draft/tracks.md`
+2. Load spec.md and plan.md
+3. Find next pending task (`[ ]` or resume `[~]`)
+4. Execute with TDD workflow if enabled
+5. Update progress in plan.md and metadata.json
+6. Commit after each task
+
+## Status Command
+
+When user says "status" or "@draft status":
+
+1. Read `draft/tracks.md`
+2. For each active track, read metadata.json
+3. Display:
+   - Active tracks with progress
+   - Current phase and task
+   - Blocked items
+   - Recent completions
+
+## Proactive Behaviors
+
+1. **Context Loading** - Always read relevant draft files before acting
+2. **Progress Tracking** - Update plan.md and metadata.json after each task
+3. **Verification Prompts** - Ask for manual verification at phase boundaries
+4. **Commit Suggestions** - Suggest commits following workflow.md patterns
+
+## Error Recovery
+
+If user seems lost:
+- Check status to orient them
+- Reference the active track's spec.md for requirements
+- Suggest next steps based on plan.md state

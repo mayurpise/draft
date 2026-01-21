@@ -42,3 +42,34 @@ When user says... → Use command:
 If a user mentions "the plan" after using Draft, they likely mean:
 - `draft/tracks.md` (master list)
 - `draft/tracks/<track_id>/plan.md` (specific track plan)
+
+## Maintaining This Plugin
+
+This plugin supports multiple integrations (Claude Code, Cursor). When updating the methodology:
+
+### Source of Truth
+- `core/methodology.md` - Canonical methodology documentation
+- `core/templates/` - Template files for project setup
+- `core/agents/` - Agent behavior definitions
+
+### Sync Process
+
+When the user requests changes to the Draft methodology:
+
+1. **Update `core/methodology.md`** first with the conceptual change
+2. **Update Claude Code files** - Apply changes to relevant files in:
+   - `commands/` - Update command behavior
+   - `skills/draft/SKILL.md` - Update skill triggers/behavior
+   - `CLAUDE.md` - Update if core concepts change
+3. **Update Cursor integration** - Apply same changes to:
+   - `integrations/cursor/.cursorrules` - Keep in sync with methodology
+
+### Example
+
+User: "Add a new status marker [?] for 'Needs Review'"
+
+Action:
+1. Add `[?] - Needs Review` to `core/methodology.md` Status Markers section
+2. Add to `commands/implement.md` task scanning logic
+3. Add to `CLAUDE.md` Status Markers section
+4. Add to `integrations/cursor/.cursorrules` Status Markers section

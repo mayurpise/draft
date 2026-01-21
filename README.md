@@ -10,76 +10,37 @@ Also available for [Cursor](#cursor-integration).
 
 ### Claude Code
 
-**Quick Install (Recommended)**
+**Option 1: Load with --plugin-dir flag (Recommended)**
+
+```bash
+# Clone the plugin
+git clone https://github.com/mayurpise/draft.git ~/.claude/plugins/draft
+
+# Start Claude Code with the plugin
+claude --plugin-dir ~/.claude/plugins/draft
+```
+
+You can create an alias for convenience:
+```bash
+alias claude-draft='claude --plugin-dir ~/.claude/plugins/draft'
+```
+
+**Option 2: Quick Install Script**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/mayurpise/draft/main/install.sh | bash
 ```
 
-Then restart Claude Code.
+Then start Claude Code with:
+```bash
+claude --plugin-dir ~/.claude/plugins/draft
+```
 
 ---
 
-**Manual Installation**
-
-<details>
-<summary>Click to expand manual steps</summary>
-
-**Step 1: Clone the plugin**
-
-```bash
-git clone https://github.com/mayurpise/draft.git ~/.claude/plugins/draft
-```
-
-**Step 2: Register the plugin**
-
-Add to `~/.claude/plugins/installed_plugins.json` (create if doesn't exist):
-
-```json
-{
-  "version": 2,
-  "plugins": {
-    "draft@local": [
-      {
-        "scope": "user",
-        "installPath": "/home/YOUR_USERNAME/.claude/plugins/draft",
-        "version": "1.0.0",
-        "installedAt": "2026-01-20T00:00:00.000Z",
-        "lastUpdated": "2026-01-20T00:00:00.000Z"
-      }
-    ]
-  }
-}
-```
-
-> Replace `YOUR_USERNAME` with your actual username, or use `$HOME` path.
-
-**Step 3: Enable the plugin**
-
-Add to `~/.claude/settings.json`:
-
-```json
-{
-  "enabledPlugins": {
-    "draft@local": true
-  }
-}
-```
-
-If the file already exists, just add `"draft@local": true` to the `enabledPlugins` object.
-
-**Step 4: Restart Claude Code**
-
-Close and reopen Claude Code to load the plugin.
-
 **Verify installation:**
 
-```bash
-# In Claude Code, run:
-/draft:status
-```
-
-</details>
+After starting Claude Code with the plugin, type `/draft` and you should see the commands appear.
 
 ## Quick Start
 
@@ -94,6 +55,7 @@ Close and reopen Claude Code to load the plugin.
 
 | Command | Description |
 |---------|-------------|
+| `/draft` | Show overview and available commands |
 | `/draft:setup` | Initialize project context (run once) |
 | `/draft:new-track` | Create a new feature/bug track with spec and plan |
 | `/draft:implement` | Execute tasks from the current plan with TDD |
@@ -170,15 +132,13 @@ draft/
 ├── .claude-plugin/
 │   └── plugin.json       # Plugin manifest
 ├── CLAUDE.md             # Context file (auto-loaded)
-├── commands/             # Slash commands
-│   ├── setup.md
-│   ├── new-track.md
-│   ├── implement.md
-│   ├── status.md
-│   └── revert.md
-├── skills/
-│   └── draft/
-│       └── SKILL.md      # Auto-activation skill
+├── skills/               # Skill definitions
+│   ├── draft/SKILL.md       # Overview skill
+│   ├── setup/SKILL.md       # /draft:setup
+│   ├── new-track/SKILL.md   # /draft:new-track
+│   ├── implement/SKILL.md   # /draft:implement
+│   ├── status/SKILL.md      # /draft:status
+│   └── revert/SKILL.md      # /draft:revert
 ├── core/                 # Shared methodology
 │   ├── methodology.md
 │   ├── templates/

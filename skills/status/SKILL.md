@@ -1,5 +1,6 @@
 ---
-description: "Display current progress of tracks and active tasks"
+name: status
+description: Display current progress of Draft tracks and active tasks. Shows phases, completion percentages, and blocked items.
 ---
 
 # Draft Status
@@ -29,7 +30,7 @@ ACTIVE TRACKS
   Phase:  2/3 (Phase 2: [Phase Name])
   Tasks:  5/12 complete
   ├─ [x] Task 1.1: Description
-  ├─ [x] Task 1.2: Description  
+  ├─ [x] Task 1.2: Description
   ├─ [~] Task 2.1: Description  ← CURRENT
   ├─ [ ] Task 2.2: Description
   └─ [!] Task 2.3: Blocked - [reason]
@@ -41,11 +42,11 @@ ACTIVE TRACKS
 
 BLOCKED ITEMS
 ─────────────────────────────────────────────────────────
-• [track-id-1] Task 2.3: [blocked reason]
+- [track-id-1] Task 2.3: [blocked reason]
 
 RECENTLY COMPLETED
 ─────────────────────────────────────────────────────────
-• [track-id-3] - Completed [date]
+- [track-id-3] - Completed [date]
 
 QUICK STATS
 ─────────────────────────────────────────────────────────

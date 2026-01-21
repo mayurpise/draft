@@ -1,5 +1,6 @@
 ---
-description: "Execute tasks from the current track's plan using TDD workflow"
+name: implement
+description: Execute tasks from the current track's plan using TDD workflow. Implements tasks phase by phase with progress tracking.
 ---
 
 # Implement Track
@@ -110,7 +111,7 @@ When all phases complete:
    - Add completion date
 
 4. Announce:
-"✓ Track <track_id> completed!
+"Track <track_id> completed!
 
 Summary:
 - Phases: N/N
@@ -144,7 +145,7 @@ Next: Run `/draft:status` to see project overview."
 After each task, report:
 ```
 Task: [description]
-Status: ✓ Complete
+Status: Complete
 Phase Progress: N/M tasks
 Overall: X% complete
 ```

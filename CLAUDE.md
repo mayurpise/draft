@@ -24,7 +24,7 @@ Located in `draft/`:
 
 ## Status Markers
 - `[ ]` - Pending/New
-- `[~]` - In Progress  
+- `[~]` - In Progress
 - `[x]` - Completed
 - `[!]` - Blocked
 
@@ -58,8 +58,7 @@ When the user requests changes to the Draft methodology:
 
 1. **Update `core/methodology.md`** first with the conceptual change
 2. **Update Claude Code files** - Apply changes to relevant files in:
-   - `commands/` - Update command behavior
-   - `skills/draft/SKILL.md` - Update skill triggers/behavior
+   - `skills/` - Update skill behavior (each skill is in `skills/<name>/SKILL.md`)
    - `CLAUDE.md` - Update if core concepts change
 3. **Update Cursor integration** - Apply same changes to:
    - `integrations/cursor/.cursorrules` - Keep in sync with methodology
@@ -70,6 +69,6 @@ User: "Add a new status marker [?] for 'Needs Review'"
 
 Action:
 1. Add `[?] - Needs Review` to `core/methodology.md` Status Markers section
-2. Add to `commands/implement.md` task scanning logic
+2. Add to relevant skill files in `skills/`
 3. Add to `CLAUDE.md` Status Markers section
 4. Add to `integrations/cursor/.cursorrules` Status Markers section

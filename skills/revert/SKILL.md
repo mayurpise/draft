@@ -1,5 +1,6 @@
 ---
-description: "Git-aware revert that understands tracks, phases, and tasks"
+name: revert
+description: Git-aware revert that understands Draft tracks, phases, and tasks. Safely undo work at task, phase, or track level.
 ---
 
 # Draft Revert
@@ -90,7 +91,7 @@ git commit -m "revert(<track_id>): Revert [task/phase description]"
 ## Step 6: Confirm
 
 ```
-✓ Revert complete
+Revert complete
 
 Reverted:
   - [list of tasks/commits]
@@ -115,7 +116,7 @@ Revert cancelled. No changes made.
 
 If git revert has conflicts:
 ```
-⚠ Revert conflict detected in: [files]
+Revert conflict detected in: [files]
 
 Options:
 1. Resolve conflicts manually, then run: git revert --continue

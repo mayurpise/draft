@@ -1,5 +1,6 @@
 ---
-description: "Start a new feature or bug track. Generates spec.md and plan.md with phased tasks."
+name: new-track
+description: Start a new feature or bug track. Generates spec.md and plan.md with phased tasks for Context-Driven Development.
 ---
 
 # Create New Track
@@ -108,7 +109,7 @@ Create `draft/tracks/<track_id>/plan.md`:
 - [ ] **Task 1.1:** [Description]
   - Files: `path/to/file.ts`
   - Test: `path/to/file.test.ts`
-  
+
 - [ ] **Task 1.2:** [Description]
   - Files: `path/to/another.ts`
   - Test: `path/to/another.test.ts`
@@ -184,7 +185,7 @@ Add to `draft/tracks.md` under Active:
 ## Completion
 
 Announce:
-"✓ Track created: <track_id>
+"Track created: <track_id>
 
 Created:
 - draft/tracks/<track_id>/spec.md

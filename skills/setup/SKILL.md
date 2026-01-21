@@ -1,5 +1,6 @@
 ---
-description: "Initialize Draft project context for Context-Driven Development. Run once per project."
+name: setup
+description: Initialize Draft project context for Context-Driven Development. Run once per project to create product.md, tech-stack.md, workflow.md, and tracks.md.
 ---
 
 # Draft Setup
@@ -181,14 +182,14 @@ mkdir -p draft/code_styleguides
 ## Completion
 
 Announce:
-"✓ Draft initialized successfully!
+"Draft initialized successfully!
 
 Created:
 - draft/product.md
-- draft/tech-stack.md  
+- draft/tech-stack.md
 - draft/workflow.md
 - draft/tracks.md
 
 Next steps:
 1. Review and edit the generated files as needed
-2. Run `/draft:new-track \"Your feature description\"` to start planning"
+2. Run `/draft:new-track` to start planning a feature"

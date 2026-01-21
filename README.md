@@ -10,13 +10,76 @@ Also available for [Cursor](#cursor-integration).
 
 ### Claude Code
 
-```bash
-# Clone to plugins directory
-git clone https://github.com/mayurpise/draft.git ~/.claude/plugins/draft
+**Quick Install (Recommended)**
 
-# Or use directly
-claude --plugin-dir /path/to/draft
+```bash
+curl -fsSL https://raw.githubusercontent.com/mayurpise/draft/main/install.sh | bash
 ```
+
+Then restart Claude Code.
+
+---
+
+**Manual Installation**
+
+<details>
+<summary>Click to expand manual steps</summary>
+
+**Step 1: Clone the plugin**
+
+```bash
+git clone https://github.com/mayurpise/draft.git ~/.claude/plugins/draft
+```
+
+**Step 2: Register the plugin**
+
+Add to `~/.claude/plugins/installed_plugins.json` (create if doesn't exist):
+
+```json
+{
+  "version": 2,
+  "plugins": {
+    "draft@local": [
+      {
+        "scope": "user",
+        "installPath": "/home/YOUR_USERNAME/.claude/plugins/draft",
+        "version": "1.0.0",
+        "installedAt": "2026-01-20T00:00:00.000Z",
+        "lastUpdated": "2026-01-20T00:00:00.000Z"
+      }
+    ]
+  }
+}
+```
+
+> Replace `YOUR_USERNAME` with your actual username, or use `$HOME` path.
+
+**Step 3: Enable the plugin**
+
+Add to `~/.claude/settings.json`:
+
+```json
+{
+  "enabledPlugins": {
+    "draft@local": true
+  }
+}
+```
+
+If the file already exists, just add `"draft@local": true` to the `enabledPlugins` object.
+
+**Step 4: Restart Claude Code**
+
+Close and reopen Claude Code to load the plugin.
+
+**Verify installation:**
+
+```bash
+# In Claude Code, run:
+/draft:status
+```
+
+</details>
 
 ## Quick Start
 

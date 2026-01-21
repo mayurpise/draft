@@ -1,6 +1,5 @@
 ---
-description: Display current progress of tracks and active tasks
-allowed-tools: Bash(git:*), Bash(cat:*), Bash(ls:*), Read
+description: "Display current progress of tracks and active tasks"
 ---
 
 # Draft Status

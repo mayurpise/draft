@@ -1,6 +1,5 @@
 ---
-description: Git-aware revert that understands tracks, phases, and tasks
-allowed-tools: Bash(git:*), Read, Write, Edit
+description: "Git-aware revert that understands tracks, phases, and tasks"
 ---
 
 # Draft Revert

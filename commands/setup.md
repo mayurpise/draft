@@ -1,6 +1,5 @@
 ---
-description: Initialize Draft project context for Context-Driven Development. Run once per project.
-allowed-tools: Bash(git:*), Bash(ls:*), Bash(find:*), Bash(cat:*), Bash(mkdir:*), Read, Write, Edit
+description: "Initialize Draft project context for Context-Driven Development. Run once per project."
 ---
 
 # Draft Setup

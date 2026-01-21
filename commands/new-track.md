@@ -1,7 +1,5 @@
 ---
-description: Start a new feature or bug track. Generates spec.md and plan.md with phased tasks.
-argument-hint: <feature description>
-allowed-tools: Bash(git:*), Bash(date:*), Bash(mkdir:*), Read, Write, Edit
+description: "Start a new feature or bug track. Generates spec.md and plan.md with phased tasks."
 ---
 
 # Create New Track

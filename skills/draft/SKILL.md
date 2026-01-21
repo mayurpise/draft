@@ -1,10 +1,6 @@
 ---
 name: draft
-description: Context-Driven Development methodology for structured software delivery. Auto-activates when draft/ directory exists. Provides planning, specification, and implementation workflows.
-triggers:
-  - draft/ directory exists in project
-  - user mentions "track", "plan", "spec", "implement"
-  - user asks about project status or progress
+description: Context-Driven Development methodology for structured software delivery. Provides planning, specification, and implementation workflows.
 ---
 
 # Draft Skill

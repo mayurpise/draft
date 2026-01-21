@@ -1,6 +1,5 @@
 ---
-description: Execute tasks from the current track's plan using TDD workflow
-allowed-tools: Bash(*), Read, Write, Edit
+description: "Execute tasks from the current track's plan using TDD workflow"
 ---
 
 # Implement Track

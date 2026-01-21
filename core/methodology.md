@@ -139,6 +139,16 @@ See `core/agents/reviewer.md` for detailed process.
 
 ---
 
+## Communication Style
+
+Lead with conclusions. Be concise. Prioritize clarity over comprehensiveness.
+
+- Direct, professional tone
+- Code over explanation when implementing
+- Complete, runnable code blocks
+- Show only changed lines with context for updates
+- Ask clarifying questions only when requirements are genuinely ambiguous
+
 ## Principles
 
 1. **Plan before you build** - Create specs and plans that guide development

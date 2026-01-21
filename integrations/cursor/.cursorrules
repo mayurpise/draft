@@ -177,3 +177,15 @@ Only proceed if Stage 1 passes. Fix Critical issues before proceeding.
 - Skipping spec compliance check at phase boundary
 - Writing code before tests (when TDD enabled)
 - Reporting status without reading actual files
+
+---
+
+## Communication Style
+
+Lead with conclusions. Be concise. Prioritize clarity over comprehensiveness.
+
+- Direct, professional tone
+- Code over explanation when implementing
+- Complete, runnable code blocks
+- Show only changed lines with context for updates
+- Ask clarifying questions only when requirements are genuinely ambiguous

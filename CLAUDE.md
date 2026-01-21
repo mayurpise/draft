@@ -107,3 +107,13 @@ The `core/agents/` directory contains specialized agent definitions:
 - `planner.md` - Specification and plan creation
 - `debugger.md` - Systematic debugging process
 - `reviewer.md` - Two-stage code review
+
+## Communication Style
+
+Lead with conclusions. Be concise. Prioritize clarity over comprehensiveness.
+
+- Direct, professional tone
+- Code over explanation when implementing
+- Complete, runnable code blocks
+- Show only changed lines with context for updates
+- Ask clarifying questions only when requirements are genuinely ambiguous

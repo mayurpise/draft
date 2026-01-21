@@ -5,10 +5,26 @@
 **Mode:** [strict | flexible | none]
 
 ### Strict TDD
-- [ ] Write failing test first (Red)
-- [ ] Implement minimum code to pass (Green)
-- [ ] Refactor with tests green (Refactor)
-- [ ] Never write production code without a failing test
+
+**Iron Law:** No production code without a failing test first.
+
+The Cycle:
+1. **RED** - Write failing test, run it, VERIFY it FAILS
+2. **GREEN** - Write minimum code, run test, VERIFY it PASSES
+3. **REFACTOR** - Clean up, keep tests green throughout
+
+**Red Flags - Delete and Restart if:**
+- Code written before test exists
+- Test passes immediately (testing wrong thing or wrong code)
+- "Just this once" rationalization
+- "This is too simple to test"
+- Running test mentally instead of actually
+
+**Checklist:**
+- [ ] Test written and committed BEFORE implementation
+- [ ] Test fails with expected failure (not syntax error)
+- [ ] Minimum code to pass (no extra features)
+- [ ] Refactor preserves green state
 
 ### Flexible TDD
 - [ ] Tests required but can be written after implementation

@@ -73,3 +73,37 @@ When users say... → Use command:
 - "implement" / "start coding" / "work on the plan" → `/draft:implement`
 - "what's the status" / "show progress" → `/draft:status`
 - "undo" / "revert the last change" → `/draft:revert`
+
+## Quality Disciplines
+
+Draft enforces these quality disciplines throughout the development process:
+
+### Verification Before Completion
+**Iron Law:** No completion claims without fresh verification evidence.
+- Run verification command IN THE CURRENT MESSAGE
+- Show output as evidence
+- Only then mark tasks/phases complete
+
+### Strict TDD (when enabled)
+**Iron Law:** No production code without a failing test first.
+- RED: Write test, verify it FAILS
+- GREEN: Minimum code, verify it PASSES
+- REFACTOR: Keep tests green throughout
+
+### Systematic Debugging
+**Iron Law:** No fixes without root cause investigation first.
+- Investigate → Analyze → Hypothesize → Implement
+- See `core/agents/debugger.md`
+
+### Two-Stage Review
+At phase boundaries:
+1. **Spec Compliance:** Did we build what was specified?
+2. **Code Quality:** Is it well-crafted?
+- See `core/agents/reviewer.md`
+
+### Agents
+
+The `core/agents/` directory contains specialized agent definitions:
+- `planner.md` - Specification and plan creation
+- `debugger.md` - Systematic debugging process
+- `reviewer.md` - Two-stage code review

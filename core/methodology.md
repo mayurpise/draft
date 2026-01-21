@@ -100,9 +100,49 @@ Natural language patterns that map to Draft commands:
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |
 
+## Quality Disciplines
+
+### Verification Before Completion
+
+**Iron Law:** Evidence before claims, always.
+
+Every completion claim requires:
+1. Running verification command IN THE CURRENT MESSAGE
+2. Reading full output and confirming result
+3. Showing evidence with the claim
+4. Only then updating status markers
+
+**Never mark `[x]` without:**
+- Fresh test/build/lint run in this message
+- Confirmation that output shows success
+- Evidence visible in the response
+
+### Systematic Debugging
+
+**Iron Law:** No fixes without root cause investigation first.
+
+When blocked (`[!]`):
+1. **Investigate** - Read errors, reproduce, trace data flow (NO fixes yet)
+2. **Analyze** - Find similar working code, list differences
+3. **Hypothesize** - Single hypothesis, smallest possible test
+4. **Implement** - Regression test first, then fix, verify
+
+See `core/agents/debugger.md` for detailed process.
+
+### Two-Stage Review
+
+At phase boundaries:
+1. **Stage 1: Spec Compliance** - Did implementation match specification?
+2. **Stage 2: Code Quality** - Clean architecture, proper error handling, meaningful tests?
+
+See `core/agents/reviewer.md` for detailed process.
+
+---
+
 ## Principles
 
 1. **Plan before you build** - Create specs and plans that guide development
 2. **Maintain context** - Ensure agents follow style guides and product goals
 3. **Iterate safely** - Review plans before code is written
 4. **Work as a team** - Share project context across team members
+5. **Verify before claiming** - Evidence before assertions, always

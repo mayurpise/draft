@@ -67,9 +67,16 @@ Recognize and use these throughout plan.md:
 
 When implementing tasks (if TDD enabled in workflow.md):
 
-1. **Red** - Write failing test first
-2. **Green** - Implement minimum to pass
-3. **Refactor** - Clean up with tests green
+**Iron Law:** No production code without a failing test first.
+
+1. **RED** - Write failing test, run it, VERIFY it FAILS
+2. **GREEN** - Write minimum code, run test, VERIFY it PASSES
+3. **REFACTOR** - Clean up, keep tests green throughout
+
+**Red Flags - STOP if:**
+- About to write code before test exists
+- Test passes immediately (testing wrong thing)
+- Thinking "just this once" or "too simple to test"
 
 ## Setup Command
 
@@ -107,8 +114,10 @@ When user says "implement" or "@draft implement":
 2. Load spec.md and plan.md
 3. Find next pending task (`[ ]` or resume `[~]`)
 4. Execute with TDD workflow if enabled
-5. Update progress in plan.md and metadata.json
-6. Commit after each task
+5. **Verification Gate:** Run tests/build, show evidence BEFORE marking complete
+6. Update progress in plan.md and metadata.json
+7. **Phase Boundary:** Run two-stage review (spec compliance, then code quality)
+8. Commit after each task
 
 ## Status Command
 
@@ -135,3 +144,36 @@ If user seems lost:
 - Check status to orient them
 - Reference the active track's spec.md for requirements
 - Suggest next steps based on plan.md state
+
+---
+
+## Quality Disciplines
+
+### Verification Before Completion
+**Iron Law:** No completion claims without fresh verification evidence.
+- Run verification command (test/build/lint) IN THIS MESSAGE
+- Show output as evidence
+- Only then mark `[x]`
+
+### Systematic Debugging
+**Iron Law:** No fixes without root cause investigation first.
+
+When blocked (`[!]`):
+1. **Investigate** - Read errors, reproduce, trace (NO fixes yet)
+2. **Analyze** - Find similar working code, list differences
+3. **Hypothesize** - Single hypothesis, smallest test
+4. **Implement** - Regression test first, then fix
+
+### Two-Stage Review
+At phase boundaries:
+1. **Stage 1: Spec Compliance** - Did we build what was specified?
+2. **Stage 2: Code Quality** - Is the code well-crafted?
+
+Only proceed if Stage 1 passes. Fix Critical issues before proceeding.
+
+### Red Flags - STOP if you're:
+- Making completion claims without running verification
+- Fixing bugs without investigating root cause
+- Skipping spec compliance check at phase boundary
+- Writing code before tests (when TDD enabled)
+- Reporting status without reading actual files

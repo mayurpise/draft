@@ -7,6 +7,19 @@ description: Git-aware revert that understands Draft tracks, phases, and tasks. 
 
 Perform intelligent git revert that understands Draft's logical units of work.
 
+## Red Flags - STOP if you're:
+
+- Reverting without showing preview first
+- Skipping user confirmation
+- Not checking for uncommitted changes first
+- Reverting more than requested
+- Not updating Draft state after git revert
+- Assuming you know which commits to revert without checking
+
+**Preview and confirm before any destructive action.**
+
+---
+
 ## Step 1: Analyze What to Revert
 
 Ask user what level to revert:

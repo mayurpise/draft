@@ -30,6 +30,19 @@ Create a short, kebab-case ID from the description:
 - "Fix login bug" → `fix-login-bug`
 - Include timestamp suffix if needed: `add-user-auth-0120`
 
+## Red Flags - STOP if you're:
+
+- Writing spec without dialogue (assuming you understand requirements)
+- Copying requirements verbatim without clarifying questions
+- Creating plan before spec is approved
+- Skipping non-goals section ("everything is in scope")
+- Not referencing product.md and tech-stack.md for context
+- Rushing to get to implementation
+
+**The goal is understanding, not speed.**
+
+---
+
 ## Step 2: Create Specification
 
 Engage in dialogue to understand:

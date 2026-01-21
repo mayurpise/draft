@@ -34,28 +34,39 @@ For each task, follow this workflow based on `workflow.md`:
 
 ### If TDD Enabled:
 
-**3a. Write Failing Test**
+**Iron Law:** No production code without a failing test first.
+
+**3a. RED - Write Failing Test**
 ```
 1. Create/update test file as specified in task
 2. Write test that captures the requirement
-3. Run test to confirm it fails
-4. Announce: "Test written and failing as expected"
+3. RUN test - VERIFY it FAILS (not syntax error, actual assertion failure)
+4. Show test output with failure
+5. Announce: "Test failing as expected: [failure message]"
 ```
 
-**3b. Implement Minimum Code**
+**3b. GREEN - Implement Minimum Code**
 ```
-1. Write minimum code to make test pass
-2. Run test to confirm it passes
-3. Announce: "Implementation complete, test passing"
+1. Write MINIMUM code to make test pass (no extras)
+2. RUN test - VERIFY it PASSES
+3. Show test output with pass
+4. Announce: "Test passing: [evidence]"
 ```
 
-**3c. Refactor**
+**3c. REFACTOR - Clean with Tests Green**
 ```
 1. Review code for improvements
 2. Refactor while keeping tests green
-3. Run all related tests
-4. Announce: "Refactoring complete, all tests passing"
+3. RUN all related tests after each change
+4. Show final test output
+5. Announce: "Refactoring complete, all tests passing: [evidence]"
 ```
+
+**Red Flags - STOP and restart the cycle if:**
+- About to write code before test exists
+- Test passes immediately (testing wrong thing)
+- Thinking "just this once" or "too simple to test"
+- Running tests mentally instead of actually executing
 
 ### If TDD Not Enabled:
 
@@ -84,21 +95,59 @@ git add .
 git commit -m "feat(<track_id>): <task description>"
 ```
 
+## Verification Gate (REQUIRED)
+
+**Iron Law:** No completion claims without fresh verification evidence.
+
+Before marking ANY task/phase/track complete:
+
+1. **IDENTIFY:** What command proves this claim? (test, build, lint)
+2. **RUN:** Execute the FULL command (fresh, complete run)
+3. **READ:** Full output, check exit code
+4. **VERIFY:** Does output confirm the claim?
+   - If **NO**: Keep task as `[~]`, state actual status
+   - If **YES**: Show evidence, then mark `[x]`
+
+**Red Flags - STOP if you're thinking:**
+- "Should pass", "probably works"
+- Satisfaction before running verification
+- About to mark `[x]` without evidence THIS MESSAGE
+- "I already tested earlier"
+- "This is a simple change, no need to verify"
+
+---
+
 ## Step 5: Phase Boundary Check
 
 When all tasks in a phase are `[x]`:
 
-1. Announce: "Phase N complete. Verification required."
-2. Read verification steps from plan
-3. Guide user through verification
-4. Wait for user confirmation
-5. If verified:
+1. Announce: "Phase N complete. Running two-stage review."
+
+### Two-Stage Review (REQUIRED)
+
+**Stage 1: Spec Compliance**
+- Load track's `spec.md`
+- Verify all requirements for this phase are implemented
+- Check acceptance criteria coverage
+- **If gaps found:** List them, return to implementation
+
+**Stage 2: Code Quality** (only if Stage 1 passes)
+- Verify code follows project patterns (tech-stack.md)
+- Check error handling is appropriate
+- Verify tests cover real logic
+- Classify issues: Critical (must fix) > Important (should fix) > Minor (note)
+
+See `core/agents/reviewer.md` for detailed review process.
+
+2. Run verification steps from plan (tests, builds)
+3. Present review findings to user
+4. If review passes (no Critical issues):
    - Update phase status in plan
    - Update `metadata.json` phases.completed
    - Proceed to next phase
-6. If issues found:
-   - Document issues
-   - Ask if should fix before proceeding
+5. If Critical/Important issues found:
+   - Document issues in plan.md
+   - Fix before proceeding (don't skip)
 
 ## Step 6: Track Completion
 
@@ -127,13 +176,19 @@ Next: Run `/draft:status` to see project overview."
 **If blocked:**
 - Mark task as `[!]` Blocked
 - Add reason in plan.md
-- Skip to next non-blocked task
-- Announce: "Task blocked: [reason]. Moving to next task."
+- **REQUIRED:** Follow systematic debugging process (see `core/agents/debugger.md`)
+  1. **Investigate** - Read errors, reproduce, trace (NO fixes yet)
+  2. **Analyze** - Find similar working code, list differences
+  3. **Hypothesize** - Single hypothesis, smallest test
+  4. **Implement** - Regression test first, then fix
+- Do NOT attempt random fixes
+- Document root cause when found
 
 **If test fails unexpectedly:**
 - Don't mark complete
-- Announce failure details
-- Ask user how to proceed
+- Follow systematic debugging process above
+- Announce failure details with root cause analysis
+- Show evidence when resolved
 
 **If unsure about implementation:**
 - Ask clarifying questions

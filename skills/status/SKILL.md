@@ -7,6 +7,18 @@ description: Display current progress of Draft tracks and active tasks. Shows ph
 
 Display a comprehensive overview of project progress.
 
+## Red Flags - STOP if you're:
+
+- Reporting status without actually reading the files
+- Making up progress percentages
+- Skipping blocked items in the report
+- Not checking each active track's actual state
+- Summarizing without evidence from the files
+
+**Always read before reporting.**
+
+---
+
 ## Gather Data
 
 1. Read `draft/tracks.md` for track list

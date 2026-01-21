@@ -1,74 +1,75 @@
-# Draft - Context-Driven Development
+# CLAUDE.md
 
-Draft is a methodology for structured software development that ensures consistent, high-quality delivery through: **Context → Spec & Plan → Implement**.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Philosophy
+## Repository Overview
 
-"Measure twice, code once." By treating context as a managed artifact alongside code, the repository becomes a single source of truth that drives every agent interaction with deep, persistent project awareness.
+Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides slash commands (`/draft:setup`, `/draft:new-track`, `/draft:implement`, `/draft:status`, `/draft:revert`) for structured software development through specifications and plans before implementation.
 
-## Core Concepts
+## Architecture
 
-### Tracks
-A **track** is a high-level unit of work (feature, bug fix, refactor). Each track contains:
-- `spec.md` - Requirements and acceptance criteria
-- `plan.md` - Phased task breakdown
-- `metadata.json` - Status and timestamps
+### Plugin Structure
 
-### Project Context Files
-Located in `draft/`:
-- `product.md` - Product vision, users, goals
-- `product-guidelines.md` - Style, branding, UX standards
-- `tech-stack.md` - Languages, frameworks, patterns
-- `workflow.md` - TDD preferences, commit strategy
-- `tracks.md` - Master list of all tracks
+```
+.claude-plugin/plugin.json  # Plugin manifest (name, version, metadata)
+CLAUDE.md                   # Auto-loaded context for Claude Code
+skills/                     # Slash command implementations
+  └── <command>/SKILL.md    # Each skill defines one /draft:<command>
+core/                       # Canonical source of truth
+  ├── methodology.md        # Master methodology documentation
+  ├── templates/            # Template files for /draft:setup
+  └── agents/               # Agent behavior definitions
+integrations/cursor/        # Cursor IDE integration
+  └── .cursorrules          # Cursor rules file
+```
 
-## Status Markers
+### Key Files
+
+- **`skills/<name>/SKILL.md`**: Each file defines a slash command. The frontmatter (`name`, `description`) configures the command, and the body contains the execution instructions.
+- **`core/methodology.md`**: Single source of truth for the Draft methodology. All other files should reflect this.
+- **`integrations/cursor/.cursorrules`**: Cursor integration that mirrors the Claude Code functionality.
+
+## Maintaining the Plugin
+
+When updating the Draft methodology:
+
+1. Update `core/methodology.md` first
+2. Apply changes to `skills/` SKILL.md files as needed
+3. Update this `CLAUDE.md` if core concepts change
+4. Update `integrations/cursor/.cursorrules` to stay in sync
+
+### Adding a New Skill
+
+1. Create `skills/<skill-name>/SKILL.md` with frontmatter:
+   ```yaml
+   ---
+   name: skill-name
+   description: Brief description of what the skill does
+   ---
+   ```
+2. Add execution instructions in the body
+3. Document the command in `README.md`
+
+## Draft Methodology (for end-users)
+
+When users use Draft in their projects, it creates a `draft/` directory with:
+- `product.md`, `tech-stack.md`, `workflow.md` - Project context
+- `tracks.md` - Master list of work items
+- `tracks/<track-id>/` - Individual tracks containing `spec.md`, `plan.md`, `metadata.json`
+
+### Status Markers
+
+Used in spec.md and plan.md files:
 - `[ ]` - Pending/New
 - `[~]` - In Progress
 - `[x]` - Completed
 - `[!]` - Blocked
 
-## Intent Mapping
+### Intent Mapping
 
-When user says... → Use command:
+When users say... → Use command:
 - "set up draft" / "initialize project" → `/draft:setup`
 - "new feature" / "start a track" / "add feature X" → `/draft:new-track`
 - "implement" / "start coding" / "work on the plan" → `/draft:implement`
 - "what's the status" / "show progress" → `/draft:status`
 - "undo" / "revert the last change" → `/draft:revert`
-
-## File References
-
-If a user mentions "the plan" after using Draft, they likely mean:
-- `draft/tracks.md` (master list)
-- `draft/tracks/<track_id>/plan.md` (specific track plan)
-
-## Maintaining This Plugin
-
-This plugin supports multiple integrations (Claude Code, Cursor). When updating the methodology:
-
-### Source of Truth
-- `core/methodology.md` - Canonical methodology documentation
-- `core/templates/` - Template files for project setup
-- `core/agents/` - Agent behavior definitions
-
-### Sync Process
-
-When the user requests changes to the Draft methodology:
-
-1. **Update `core/methodology.md`** first with the conceptual change
-2. **Update Claude Code files** - Apply changes to relevant files in:
-   - `skills/` - Update skill behavior (each skill is in `skills/<name>/SKILL.md`)
-   - `CLAUDE.md` - Update if core concepts change
-3. **Update Cursor integration** - Apply same changes to:
-   - `integrations/cursor/.cursorrules` - Keep in sync with methodology
-
-### Example
-
-User: "Add a new status marker [?] for 'Needs Review'"
-
-Action:
-1. Add `[?] - Needs Review` to `core/methodology.md` Status Markers section
-2. Add to relevant skill files in `skills/`
-3. Add to `CLAUDE.md` Status Markers section
-4. Add to `integrations/cursor/.cursorrules` Status Markers section

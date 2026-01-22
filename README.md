@@ -45,7 +45,7 @@ After starting Claude Code with the plugin, type `/draft` and you should see the
 ## Quick Start
 
 ```bash
-/draft:setup                              # Initialize project (once)
+/draft:init                               # Initialize project (once)
 /draft:new-track "Add user authentication"  # Create a track
 /draft:implement                          # Start implementing
 /draft:status                             # Check progress
@@ -56,7 +56,7 @@ After starting Claude Code with the plugin, type `/draft` and you should see the
 | Command | Description |
 |---------|-------------|
 | `/draft` | Show overview and available commands |
-| `/draft:setup` | Initialize project context (run once) |
+| `/draft:init` | Initialize project context (run once) |
 | `/draft:new-track` | Create a new feature/bug track with spec and plan |
 | `/draft:implement` | Execute tasks from the current plan with TDD |
 | `/draft:status` | Display progress overview |
@@ -69,7 +69,7 @@ After starting Claude Code with the plugin, type `/draft` and you should see the
 │                    DRAFT WORKFLOW                       │
 ├─────────────────────────────────────────────────────────┤
 │                                                         │
-│   /draft:setup          One-time project initialization │
+│   /draft:init           One-time project initialization │
 │        │                                                │
 │        ▼                                                │
 │   /draft:new-track      Create spec.md + plan.md       │
@@ -134,7 +134,7 @@ draft/
 ├── CLAUDE.md             # Context file (auto-loaded)
 ├── skills/               # Skill definitions
 │   ├── draft/SKILL.md       # Overview skill
-│   ├── setup/SKILL.md       # /draft:setup
+│   ├── init/SKILL.md        # /draft:init
 │   ├── new-track/SKILL.md   # /draft:new-track
 │   ├── implement/SKILL.md   # /draft:implement
 │   ├── status/SKILL.md      # /draft:status
@@ -158,7 +158,7 @@ cp /path/to/draft/integrations/cursor/.cursorrules ~/my-project/.cursorrules
 
 Then use in Cursor:
 ```
-@draft setup
+@draft init
 @draft new-track "Add user authentication"
 @draft implement
 ```

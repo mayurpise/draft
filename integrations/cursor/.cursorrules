@@ -6,7 +6,7 @@ You are operating with the Draft methodology for Context-Driven Development.
 
 ## Core Workflow
 
-**Context → Spec & Plan → Implement**
+**Context -> Spec & Plan -> Implement**
 
 Every feature follows this lifecycle:
 1. **Setup** - Initialize project context (once per project)
@@ -26,7 +26,7 @@ When `draft/` exists in the project, always consider:
 
 | Command | Purpose |
 |---------|---------|
-| `@draft setup` | Initialize project (run once) |
+| `@draft init` | Initialize project (run once) |
 | `@draft new-track <description>` | Create feature/bug track |
 | `@draft implement` | Execute tasks from plan |
 | `@draft status` | Show progress overview |
@@ -38,7 +38,7 @@ Recognize these natural language patterns:
 
 | User Says | Action |
 |-----------|--------|
-| "set up the project" | Run setup |
+| "set up the project" | Run init |
 | "new feature", "add X" | Create new track |
 | "start implementing" | Execute implement |
 | "what's the status" | Show status |
@@ -63,87 +63,852 @@ Recognize and use these throughout plan.md:
 - `[x]` - Completed
 - `[!]` - Blocked
 
-## TDD Workflow
 
-When implementing tasks (if TDD enabled in workflow.md):
+---
 
-**Iron Law:** No production code without a failing test first.
+## Init Command
 
-1. **RED** - Write failing test, run it, VERIFY it FAILS
-2. **GREEN** - Write minimum code, run test, VERIFY it PASSES
-3. **REFACTOR** - Clean up, keep tests green throughout
+When user says "init draft" or "@draft init":
 
-**Red Flags - STOP if:**
-- About to write code before test exists
-- Test passes immediately (testing wrong thing)
-- Thinking "just this once" or "too simple to test"
+You are initializing a Draft project for Context-Driven Development.
 
-## Setup Command
+## Pre-Check
 
-When user says "set up draft" or "@draft setup":
+First, check if already initialized:
+```bash
+ls draft/ 2>/dev/null
+```
 
-1. Check if `draft/` already exists
-2. If not, create project context through dialogue:
-   - Ask about product vision and users
-   - Detect or ask about tech stack
-   - Ask about TDD and commit preferences
-3. Create:
-   - `draft/product.md`
-   - `draft/tech-stack.md`
-   - `draft/workflow.md`
-   - `draft/tracks.md`
-   - `draft/tracks/` directory
+If `draft/` exists with `product.md`, `tech-stack.md`, `workflow.md`, and `tracks.md`:
+- Announce: "Project already initialized. Use `@draft new-track` to create a feature or `@draft implement` to continue work."
+- Stop here.
+
+## Step 1: Project Discovery
+
+Analyze the current directory to classify the project:
+
+**Brownfield (Existing)** indicators:
+- Has `package.json`, `requirements.txt`, `go.mod`, `Cargo.toml`, etc.
+- Has `src/`, `lib/`, or similar code directories
+- Has git history with commits
+
+**Greenfield (New)** indicators:
+- Empty or near-empty directory
+- Only has README or basic config
+
+Respect `.gitignore` and `.claudeignore` when scanning.
+
+## Step 2: Product Definition
+
+Create `draft/product.md` through dialogue:
+
+1. Ask about the product's purpose and target users
+2. Ask about key features and goals
+3. Ask about constraints or requirements
+
+Template:
+```markdown
+# Product: [Name]
+
+## Vision
+[One paragraph describing what this product does and why it matters]
+
+## Target Users
+- [User type 1]: [Their needs]
+- [User type 2]: [Their needs]
+
+## Core Features
+1. [Feature 1]
+2. [Feature 2]
+3. [Feature 3]
+
+## Success Criteria
+- [Measurable goal 1]
+- [Measurable goal 2]
+
+## Constraints
+- [Technical/business constraint]
+```
+
+Present for approval, iterate if needed, then write to `draft/product.md`.
+
+## Step 3: Product Guidelines (Optional)
+
+Ask if they want to define product guidelines. If yes, create `draft/product-guidelines.md`:
+
+```markdown
+# Product Guidelines
+
+## Writing Style
+- Tone: [professional/casual/technical]
+- Voice: [first person/third person]
+
+## Visual Identity
+- Primary colors: [if applicable]
+- Typography preferences: [if applicable]
+
+## UX Principles
+- [Principle 1]
+- [Principle 2]
+```
+
+## Step 4: Tech Stack
+
+For Brownfield projects, auto-detect from:
+- `package.json` → Node.js/TypeScript
+- `requirements.txt` / `pyproject.toml` → Python
+- `go.mod` → Go
+- `Cargo.toml` → Rust
+
+Create `draft/tech-stack.md`:
+
+```markdown
+# Tech Stack
+
+## Languages
+- Primary: [Language] [Version]
+- Secondary: [if applicable]
+
+## Frameworks
+- [Framework 1]: [Purpose]
+- [Framework 2]: [Purpose]
+
+## Database
+- [Database]: [Purpose]
+
+## Testing
+- Unit: [Framework]
+- Integration: [Framework]
+- E2E: [Framework if applicable]
+
+## Build & Deploy
+- Build: [Tool]
+- CI/CD: [Platform]
+- Deploy: [Target]
+
+## Code Patterns
+- Architecture: [e.g., Clean Architecture, MVC]
+- State Management: [if applicable]
+- Error Handling: [pattern]
+```
+
+## Step 5: Workflow Configuration
+
+Create `draft/workflow.md` based on team preferences:
+
+```markdown
+# Development Workflow
+
+## Test-Driven Development
+- [ ] Write failing test first
+- [ ] Implement minimum code to pass
+- [ ] Refactor with passing tests
+
+## Commit Strategy
+- Format: `type(scope): description`
+- Types: feat, fix, docs, style, refactor, test, chore
+- Commit after each completed task
+
+## Code Review
+- Self-review before marking complete
+- Run linter and tests before commit
+
+## Phase Verification
+- Manual verification required at phase boundaries
+- Document verification steps in plan.md
+```
+
+Ask about their TDD preference (strict/flexible/none) and commit style.
+
+## Step 6: Initialize Tracks
+
+Create empty `draft/tracks.md`:
+
+```markdown
+# Tracks
+
+## Active
+<!-- No active tracks -->
+
+## Completed
+<!-- No completed tracks -->
+
+## Archived
+<!-- No archived tracks -->
+```
+
+## Step 7: Create Directory Structure
+
+```bash
+mkdir -p draft/tracks
+mkdir -p draft/code_styleguides
+```
+
+## Completion
+
+Announce:
+"Draft initialized successfully!
+
+Created:
+- draft/product.md
+- draft/tech-stack.md
+- draft/workflow.md
+- draft/tracks.md
+
+Next steps:
+1. Review and edit the generated files as needed
+2. Run `@draft new-track` to start planning a feature"
+
+---
 
 ## New Track Command
 
 When user says "new feature" or "@draft new-track <description>":
 
-1. Load context from `draft/` files
-2. Generate track ID (kebab-case from description)
-3. Create `draft/tracks/<track-id>/` with:
-   - `spec.md` - Requirements through dialogue
-   - `plan.md` - Phased task breakdown
-   - `metadata.json` - Status tracking
-4. Update `draft/tracks.md`
+You are creating a new track (feature, bug fix, or refactor) for Context-Driven Development.
+
+**Feature Description:** $ARGUMENTS
+
+## Pre-Check
+
+1. Verify Draft is initialized:
+```bash
+ls draft/product.md draft/tech-stack.md draft/workflow.md draft/tracks.md 2>/dev/null
+```
+
+If missing, tell user: "Project not initialized. Run `@draft init` first."
+
+2. Load context:
+- Read `draft/product.md` for product vision
+- Read `draft/tech-stack.md` for technical constraints
+- Read `draft/workflow.md` for development standards
+
+## Step 1: Generate Track ID
+
+Create a short, kebab-case ID from the description:
+- "Add user authentication" → `add-user-auth`
+- "Fix login bug" → `fix-login-bug`
+- Include timestamp suffix if needed: `add-user-auth-0120`
+
+## Red Flags - STOP if you're:
+
+- Writing spec without dialogue (assuming you understand requirements)
+- Copying requirements verbatim without clarifying questions
+- Creating plan before spec is approved
+- Skipping non-goals section ("everything is in scope")
+- Not referencing product.md and tech-stack.md for context
+- Rushing to get to implementation
+
+**The goal is understanding, not speed.**
+
+---
+
+## Step 2: Create Specification
+
+Engage in dialogue to understand:
+1. **What** - Exact scope and boundaries
+2. **Why** - Business/user value
+3. **Acceptance Criteria** - How we know it's done
+4. **Non-Goals** - What's explicitly out of scope
+
+Create `draft/tracks/<track_id>/spec.md`:
+
+```markdown
+# Specification: [Title]
+
+**Track ID:** <track_id>
+**Created:** [ISO date]
+**Status:** [ ] Draft
+
+## Summary
+[2-3 sentence description of what this track delivers]
+
+## Background
+[Why this is needed, context from product.md]
+
+## Requirements
+
+### Functional
+1. [Requirement 1]
+2. [Requirement 2]
+3. [Requirement 3]
+
+### Non-Functional
+- Performance: [if applicable]
+- Security: [if applicable]
+- Accessibility: [if applicable]
+
+## Acceptance Criteria
+- [ ] [Criterion 1]
+- [ ] [Criterion 2]
+- [ ] [Criterion 3]
+
+## Non-Goals
+- [What's explicitly out of scope]
+
+## Technical Approach
+[High-level approach based on tech-stack.md]
+
+## Open Questions
+- [Question 1]
+- [Question 2]
+```
+
+Present for approval. Iterate until approved.
+
+## Step 3: Create Plan
+
+Based on approved spec, create phased task breakdown.
+
+Create `draft/tracks/<track_id>/plan.md`:
+
+```markdown
+# Plan: [Title]
+
+**Track ID:** <track_id>
+**Spec:** ./spec.md
+**Status:** [ ] Not Started
+
+## Overview
+[Brief summary linking to spec]
+
+---
+
+## Phase 1: [Phase Name]
+**Goal:** [What this phase achieves]
+**Verification:** [How to verify phase completion]
+
+### Tasks
+- [ ] **Task 1.1:** [Description]
+  - Files: `path/to/file.ts`
+  - Test: `path/to/file.test.ts`
+
+- [ ] **Task 1.2:** [Description]
+  - Files: `path/to/another.ts`
+  - Test: `path/to/another.test.ts`
+
+---
+
+## Phase 2: [Phase Name]
+**Goal:** [What this phase achieves]
+**Verification:** [How to verify phase completion]
+
+### Tasks
+- [ ] **Task 2.1:** [Description]
+  - Depends on: Task 1.1, Task 1.2
+  - Files: `path/to/file.ts`
+
+---
+
+## Phase 3: Integration & Polish
+**Goal:** Final integration and cleanup
+**Verification:** All acceptance criteria from spec met
+
+### Tasks
+- [ ] **Task 3.1:** Integration testing
+- [ ] **Task 3.2:** Documentation update
+- [ ] **Task 3.3:** Code review and cleanup
+
+---
+
+## Notes
+- [Important consideration]
+- [Risk or dependency]
+```
+
+Present for approval. Iterate until approved.
+
+## Step 4: Create Metadata
+
+Create `draft/tracks/<track_id>/metadata.json`:
+
+```json
+{
+  "id": "<track_id>",
+  "title": "[Title]",
+  "type": "feature|bugfix|refactor",
+  "status": "planning",
+  "created": "[ISO timestamp]",
+  "updated": "[ISO timestamp]",
+  "phases": {
+    "total": 3,
+    "completed": 0
+  },
+  "tasks": {
+    "total": 0,
+    "completed": 0
+  }
+}
+```
+
+## Step 5: Update Master Tracks List
+
+Add to `draft/tracks.md` under Active:
+
+```markdown
+## Active
+
+### [track_id] - [Title]
+- **Status:** [ ] Planning
+- **Created:** [date]
+- **Phases:** 0/3
+- **Path:** `./tracks/<track_id>/`
+```
+
+## Completion
+
+Announce:
+"Track created: <track_id>
+
+Created:
+- draft/tracks/<track_id>/spec.md
+- draft/tracks/<track_id>/plan.md
+- draft/tracks/<track_id>/metadata.json
+
+Updated:
+- draft/tracks.md
+
+Next: Review the spec and plan, then run `@draft implement` to begin."
+
+---
 
 ## Implement Command
 
 When user says "implement" or "@draft implement":
 
-1. Find active track from `draft/tracks.md`
-2. Load spec.md and plan.md
-3. Find next pending task (`[ ]` or resume `[~]`)
-4. Execute with TDD workflow if enabled
-5. **Verification Gate:** Run tests/build, show evidence BEFORE marking complete
-6. Update progress in plan.md and metadata.json
-7. **Phase Boundary:** Run two-stage review (spec compliance, then code quality)
-8. Commit after each task
+You are implementing tasks from the active track's plan following the TDD workflow.
+
+## Step 1: Load Context
+
+1. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)
+2. Read the track's `spec.md` for requirements
+3. Read the track's `plan.md` for task list
+4. Read `draft/workflow.md` for TDD and commit preferences
+5. Read `draft/tech-stack.md` for technical context
+
+If no active track found:
+- Tell user: "No active track found. Run `@draft new-track` to create one."
+
+## Step 2: Find Next Task
+
+Scan `plan.md` for the first uncompleted task:
+- `[ ]` = Pending (pick this one)
+- `[~]` = In Progress (resume this one)
+- `[x]` = Completed (skip)
+- `[!]` = Blocked (skip, notify user)
+
+If resuming `[~]` task, check for partial work.
+
+## Step 3: Execute Task (TDD Workflow)
+
+For each task, follow this workflow based on `workflow.md`:
+
+### If TDD Enabled:
+
+**Iron Law:** No production code without a failing test first.
+
+**3a. RED - Write Failing Test**
+```
+1. Create/update test file as specified in task
+2. Write test that captures the requirement
+3. RUN test - VERIFY it FAILS (not syntax error, actual assertion failure)
+4. Show test output with failure
+5. Announce: "Test failing as expected: [failure message]"
+```
+
+**3b. GREEN - Implement Minimum Code**
+```
+1. Write MINIMUM code to make test pass (no extras)
+2. RUN test - VERIFY it PASSES
+3. Show test output with pass
+4. Announce: "Test passing: [evidence]"
+```
+
+**3c. REFACTOR - Clean with Tests Green**
+```
+1. Review code for improvements
+2. Refactor while keeping tests green
+3. RUN all related tests after each change
+4. Show final test output
+5. Announce: "Refactoring complete, all tests passing: [evidence]"
+```
+
+**Red Flags - STOP and restart the cycle if:**
+- About to write code before test exists
+- Test passes immediately (testing wrong thing)
+- Thinking "just this once" or "too simple to test"
+- Running tests mentally instead of actually executing
+
+### If TDD Not Enabled:
+
+**3a. Implement**
+```
+1. Implement the task as specified
+2. Test manually or run existing tests
+3. Announce: "Implementation complete"
+```
+
+## Step 4: Update Progress
+
+After completing each task:
+
+1. Update `plan.md`:
+   - Change `[ ]` to `[x]` for the completed task
+   - Add completion note with commit SHA if available
+
+2. Update `metadata.json`:
+   - Increment `tasks.completed`
+   - Update `updated` timestamp
+
+3. Commit (if workflow specifies):
+```bash
+git add .
+git commit -m "feat(<track_id>): <task description>"
+```
+
+## Verification Gate (REQUIRED)
+
+**Iron Law:** No completion claims without fresh verification evidence.
+
+Before marking ANY task/phase/track complete:
+
+1. **IDENTIFY:** What command proves this claim? (test, build, lint)
+2. **RUN:** Execute the FULL command (fresh, complete run)
+3. **READ:** Full output, check exit code
+4. **VERIFY:** Does output confirm the claim?
+   - If **NO**: Keep task as `[~]`, state actual status
+   - If **YES**: Show evidence, then mark `[x]`
+
+**Red Flags - STOP if you're thinking:**
+- "Should pass", "probably works"
+- Satisfaction before running verification
+- About to mark `[x]` without evidence THIS MESSAGE
+- "I already tested earlier"
+- "This is a simple change, no need to verify"
+
+---
+
+## Step 5: Phase Boundary Check
+
+When all tasks in a phase are `[x]`:
+
+1. Announce: "Phase N complete. Running two-stage review."
+
+### Two-Stage Review (REQUIRED)
+
+**Stage 1: Spec Compliance**
+- Load track's `spec.md`
+- Verify all requirements for this phase are implemented
+- Check acceptance criteria coverage
+- **If gaps found:** List them, return to implementation
+
+**Stage 2: Code Quality** (only if Stage 1 passes)
+- Verify code follows project patterns (tech-stack.md)
+- Check error handling is appropriate
+- Verify tests cover real logic
+- Classify issues: Critical (must fix) > Important (should fix) > Minor (note)
+
+See `core/agents/reviewer.md` for detailed review process.
+
+2. Run verification steps from plan (tests, builds)
+3. Present review findings to user
+4. If review passes (no Critical issues):
+   - Update phase status in plan
+   - Update `metadata.json` phases.completed
+   - Proceed to next phase
+5. If Critical/Important issues found:
+   - Document issues in plan.md
+   - Fix before proceeding (don't skip)
+
+## Step 6: Track Completion
+
+When all phases complete:
+
+1. Update `plan.md` status to `[x] Completed`
+2. Update `metadata.json` status to `"completed"`
+3. Update `draft/tracks.md`:
+   - Move from Active to Completed section
+   - Add completion date
+
+4. Announce:
+"Track <track_id> completed!
+
+Summary:
+- Phases: N/N
+- Tasks: M/M
+- Duration: [if tracked]
+
+All acceptance criteria from spec.md should be verified.
+
+Next: Run `@draft status` to see project overview."
+
+## Error Handling
+
+**If blocked:**
+- Mark task as `[!]` Blocked
+- Add reason in plan.md
+- **REQUIRED:** Follow systematic debugging process (see `core/agents/debugger.md`)
+  1. **Investigate** - Read errors, reproduce, trace (NO fixes yet)
+  2. **Analyze** - Find similar working code, list differences
+  3. **Hypothesize** - Single hypothesis, smallest test
+  4. **Implement** - Regression test first, then fix
+- Do NOT attempt random fixes
+- Document root cause when found
+
+**If test fails unexpectedly:**
+- Don't mark complete
+- Follow systematic debugging process above
+- Announce failure details with root cause analysis
+- Show evidence when resolved
+
+**If unsure about implementation:**
+- Ask clarifying questions
+- Reference spec.md for requirements
+- Don't proceed with assumptions
+
+## Progress Reporting
+
+After each task, report:
+```
+Task: [description]
+Status: Complete
+Phase Progress: N/M tasks
+Overall: X% complete
+```
+
+---
 
 ## Status Command
 
 When user says "status" or "@draft status":
 
-1. Read `draft/tracks.md`
-2. For each active track, read metadata.json
-3. Display:
-   - Active tracks with progress
-   - Current phase and task
-   - Blocked items
-   - Recent completions
+Display a comprehensive overview of project progress.
 
-## Proactive Behaviors
+## Red Flags - STOP if you're:
 
-1. **Context Loading** - Always read relevant draft files before acting
-2. **Progress Tracking** - Update plan.md and metadata.json after each task
-3. **Verification Prompts** - Ask for manual verification at phase boundaries
-4. **Commit Suggestions** - Suggest commits following workflow.md patterns
+- Reporting status without actually reading the files
+- Making up progress percentages
+- Skipping blocked items in the report
+- Not checking each active track's actual state
+- Summarizing without evidence from the files
 
-## Error Recovery
+**Always read before reporting.**
 
-If user seems lost:
-- Check status to orient them
-- Reference the active track's spec.md for requirements
-- Suggest next steps based on plan.md state
+---
+
+## Gather Data
+
+1. Read `draft/tracks.md` for track list
+2. For each active track, read:
+   - `draft/tracks/<id>/metadata.json` for stats
+   - `draft/tracks/<id>/plan.md` for task status
+
+## Output Format
+
+```
+═══════════════════════════════════════════════════════════
+                      DRAFT STATUS
+═══════════════════════════════════════════════════════════
+
+PROJECT: [from product.md title]
+
+ACTIVE TRACKS
+─────────────────────────────────────────────────────────
+[track-id-1] Feature Name
+  Status: [~] In Progress
+  Phase:  2/3 (Phase 2: [Phase Name])
+  Tasks:  5/12 complete
+  ├─ [x] Task 1.1: Description
+  ├─ [x] Task 1.2: Description
+  ├─ [~] Task 2.1: Description  ← CURRENT
+  ├─ [ ] Task 2.2: Description
+  └─ [!] Task 2.3: Blocked - [reason]
+
+[track-id-2] Another Feature
+  Status: [ ] Not Started
+  Phase:  0/2
+  Tasks:  0/6 complete
+
+BLOCKED ITEMS
+─────────────────────────────────────────────────────────
+- [track-id-1] Task 2.3: [blocked reason]
+
+RECENTLY COMPLETED
+─────────────────────────────────────────────────────────
+- [track-id-3] - Completed [date]
+
+QUICK STATS
+─────────────────────────────────────────────────────────
+Active Tracks:    2
+Total Tasks:      18
+Completed:        5 (28%)
+Blocked:          1
+═══════════════════════════════════════════════════════════
+```
+
+## If No Tracks
+
+```
+═══════════════════════════════════════════════════════════
+                      DRAFT STATUS
+═══════════════════════════════════════════════════════════
+
+PROJECT: [from product.md title]
+
+No active tracks.
+
+Get started:
+  @draft new-track "Your feature description"
+
+═══════════════════════════════════════════════════════════
+```
+
+## If Not Initialized
+
+```
+Draft not initialized in this project.
+
+Run @draft init to initialize.
+```
+
+---
+
+## Revert Command
+
+When user says "revert" or "@draft revert":
+
+Perform intelligent git revert that understands Draft's logical units of work.
+
+## Red Flags - STOP if you're:
+
+- Reverting without showing preview first
+- Skipping user confirmation
+- Not checking for uncommitted changes first
+- Reverting more than requested
+- Not updating Draft state after git revert
+- Assuming you know which commits to revert without checking
+
+**Preview and confirm before any destructive action.**
+
+---
+
+## Step 1: Analyze What to Revert
+
+Ask user what level to revert:
+
+1. **Task** - Revert a single task's commits
+2. **Phase** - Revert all commits in a phase
+3. **Track** - Revert entire track's commits
+
+If user specifies by name/description, find the matching commits.
+
+## Step 2: Find Related Commits
+
+For Draft-managed work, commits follow pattern:
+- `feat(<track_id>): <description>`
+- `fix(<track_id>): <description>`
+- `refactor(<track_id>): <description>`
+
+```bash
+# Find commits for a track
+git log --oneline --grep="<track_id>"
+
+# Find commits in date range (for phase)
+git log --oneline --since="<phase_start>" --until="<phase_end>" --grep="<track_id>"
+```
+
+## Step 3: Preview Revert
+
+Show user what will be reverted:
+
+```
+═══════════════════════════════════════════════════════════
+                    REVERT PREVIEW
+═══════════════════════════════════════════════════════════
+
+Reverting: [Task/Phase/Track] "[name]"
+
+Commits to revert (newest first):
+  abc1234 feat(add-auth): Add JWT validation
+  def5678 feat(add-auth): Create auth middleware
+  ghi9012 test(add-auth): Add auth middleware tests
+
+Files affected:
+  src/auth/middleware.ts
+  src/auth/jwt.ts
+  tests/auth/middleware.test.ts
+
+Plan.md changes:
+  Task 2.1: [x] → [ ]
+  Task 2.2: [x] → [ ]
+
+═══════════════════════════════════════════════════════════
+Proceed with revert? (yes/no)
+```
+
+## Step 4: Execute Revert
+
+If confirmed:
+
+```bash
+# Revert each commit in reverse order (newest first)
+git revert --no-commit <commit1>
+git revert --no-commit <commit2>
+# ... continue for all commits
+
+# Create single revert commit
+git commit -m "revert(<track_id>): Revert [task/phase description]"
+```
+
+## Step 5: Update Draft State
+
+1. Update `plan.md`:
+   - Change reverted tasks from `[x]` to `[ ]`
+   - Add revert note
+
+2. Update `metadata.json`:
+   - Decrement tasks.completed
+   - Decrement phases.completed if applicable
+   - Update timestamp
+
+3. Update `draft/tracks.md` if track status changed
+
+## Step 6: Confirm
+
+```
+Revert complete
+
+Reverted:
+  - [list of tasks/commits]
+
+Updated:
+  - draft/tracks/<track_id>/plan.md
+  - draft/tracks/<track_id>/metadata.json
+
+Git status:
+  - Created revert commit: [sha]
+
+The reverted tasks are now available to re-implement.
+Run @draft implement to continue.
+```
+
+## Abort Handling
+
+If user says no to preview:
+```
+Revert cancelled. No changes made.
+```
+
+If git revert has conflicts:
+```
+Revert conflict detected in: [files]
+
+Options:
+1. Resolve conflicts manually, then run: git revert --continue
+2. Abort revert: git revert --abort
+
+Draft state NOT updated (pending revert completion).
+```
 
 ---
 
@@ -178,6 +943,7 @@ Only proceed if Stage 1 passes. Fix Critical issues before proceeding.
 - Writing code before tests (when TDD enabled)
 - Reporting status without reading actual files
 
+
 ---
 
 ## Communication Style
@@ -189,3 +955,17 @@ Lead with conclusions. Be concise. Prioritize clarity over comprehensiveness.
 - Complete, runnable code blocks
 - Show only changed lines with context for updates
 - Ask clarifying questions only when requirements are genuinely ambiguous
+
+## Proactive Behaviors
+
+1. **Context Loading** - Always read relevant draft files before acting
+2. **Progress Tracking** - Update plan.md and metadata.json after each task
+3. **Verification Prompts** - Ask for manual verification at phase boundaries
+4. **Commit Suggestions** - Suggest commits following workflow.md patterns
+
+## Error Recovery
+
+If user seems lost:
+- Check status to orient them
+- Reference the active track's spec.md for requirements
+- Suggest next steps based on plan.md state

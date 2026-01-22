@@ -1,9 +1,9 @@
 ---
-name: setup
+name: init
 description: Initialize Draft project context for Context-Driven Development. Run once per project to create product.md, tech-stack.md, workflow.md, and tracks.md.
 ---
 
-# Draft Setup
+# Draft Init
 
 You are initializing a Draft project for Context-Driven Development.
 

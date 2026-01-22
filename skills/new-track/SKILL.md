@@ -16,7 +16,7 @@ You are creating a new track (feature, bug fix, or refactor) for Context-Driven 
 ls draft/product.md draft/tech-stack.md draft/workflow.md draft/tracks.md 2>/dev/null
 ```
 
-If missing, tell user: "Project not initialized. Run `/draft:setup` first."
+If missing, tell user: "Project not initialized. Run `/draft:init` first."
 
 2. Load context:
 - Read `draft/product.md` for product vision

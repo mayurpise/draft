@@ -11,7 +11,7 @@ Draft is a methodology for structured software development: **Context → Spec &
 
 | Command | Purpose |
 |---------|---------|
-| `/draft:setup` | Initialize project (run once) |
+| `/draft:init` | Initialize project (run once) |
 | `/draft:new-track` | Create feature/bug track with spec and plan |
 | `/draft:implement` | Execute tasks from plan with TDD |
 | `/draft:status` | Show progress overview |
@@ -19,7 +19,7 @@ Draft is a methodology for structured software development: **Context → Spec &
 
 ## Quick Start
 
-1. **First time?** Run `/draft:setup` to initialize your project
+1. **First time?** Run `/draft:init` to initialize your project
 2. **Starting a feature?** Run `/draft:new-track "your feature description"`
 3. **Ready to code?** Run `/draft:implement` to execute tasks
 4. **Check progress?** Run `/draft:status`
@@ -54,7 +54,7 @@ You can also use natural language:
 
 | Say this... | Runs this |
 |-------------|-----------|
-| "set up the project" | `/draft:setup` |
+| "set up the project" | `/draft:init` |
 | "new feature", "add X" | `/draft:new-track` |
 | "start implementing" | `/draft:implement` |
 | "what's the status" | `/draft:status` |

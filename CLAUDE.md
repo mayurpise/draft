@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides slash commands (`/draft:setup`, `/draft:new-track`, `/draft:implement`, `/draft:status`, `/draft:revert`) for structured software development through specifications and plans before implementation.
+Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides slash commands (`/draft:init`, `/draft:new-track`, `/draft:implement`, `/draft:status`, `/draft:revert`) for structured software development through specifications and plans before implementation.
 
 ## Architecture
 
@@ -17,7 +17,7 @@ skills/                     # Slash command implementations
   └── <command>/SKILL.md    # Each skill defines one /draft:<command>
 core/                       # Canonical source of truth
   ├── methodology.md        # Master methodology documentation
-  ├── templates/            # Template files for /draft:setup
+  ├── templates/            # Template files for /draft:init
   └── agents/               # Agent behavior definitions
 integrations/cursor/        # Cursor IDE integration
   └── .cursorrules          # Cursor rules file
@@ -68,7 +68,7 @@ Used in spec.md and plan.md files:
 ### Intent Mapping
 
 When users say... → Use command:
-- "set up draft" / "initialize project" → `/draft:setup`
+- "set up draft" / "initialize project" → `/draft:init`
 - "new feature" / "start a track" / "add feature X" → `/draft:new-track`
 - "implement" / "start coding" / "work on the plan" → `/draft:implement`
 - "what's the status" / "show progress" → `/draft:status`

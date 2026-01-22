@@ -21,7 +21,7 @@ ln -s /path/to/draft/integrations/cursor/.cursorrules /path/to/your/project/.cur
 Once installed, use these commands in Cursor chat:
 
 ```
-@draft setup              # Initialize project
+@draft init               # Initialize project
 @draft new-track "..."    # Create a feature track
 @draft implement          # Start implementing
 @draft status             # Check progress

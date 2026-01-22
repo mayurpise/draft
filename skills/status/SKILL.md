@@ -91,5 +91,5 @@ Get started:
 ```
 Draft not initialized in this project.
 
-Run /draft:setup to initialize.
+Run /draft:init to initialize.
 ```

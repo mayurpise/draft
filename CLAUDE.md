@@ -6,114 +6,100 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides slash commands (`/draft:init`, `/draft:new-track`, `/draft:implement`, `/draft:status`, `/draft:revert`) for structured software development through specifications and plans before implementation.
 
+## Build Commands
+
+```bash
+# Rebuild .cursorrules from skill files (run after changing skills)
+./scripts/build-cursorrules.sh
+```
+
+The `.cursorrules` file is auto-generated from skills - do not edit directly.
+
 ## Architecture
+
+### Source of Truth Hierarchy
+
+1. **`core/methodology.md`** - Master methodology documentation
+2. **`skills/<name>/SKILL.md`** - Skill implementations (derive from methodology)
+3. **`integrations/cursor/.cursorrules`** - Generated from skills via build script
 
 ### Plugin Structure
 
 ```
-.claude-plugin/plugin.json  # Plugin manifest (name, version, metadata)
-CLAUDE.md                   # Auto-loaded context for Claude Code
+.claude-plugin/plugin.json  # Plugin manifest
 skills/                     # Slash command implementations
-  └── <command>/SKILL.md    # Each skill defines one /draft:<command>
-core/                       # Canonical source of truth
-  ├── methodology.md        # Master methodology documentation
-  ├── templates/            # Template files for /draft:init
-  └── agents/               # Agent behavior definitions
-integrations/cursor/        # Cursor IDE integration
-  └── .cursorrules          # Cursor rules file
+  └── <command>/SKILL.md    # Frontmatter (name, description) + execution body
+core/
+  ├── methodology.md        # Master methodology (update first)
+  ├── templates/            # Templates used by /draft:init
+  └── agents/               # Specialized agent behaviors (debugger, reviewer, planner)
+integrations/cursor/
+  └── .cursorrules          # GENERATED - do not edit directly
 ```
 
-### Key Files
+### Skill File Format
 
-- **`skills/<name>/SKILL.md`**: Each file defines a slash command. The frontmatter (`name`, `description`) configures the command, and the body contains the execution instructions.
-- **`core/methodology.md`**: Single source of truth for the Draft methodology. All other files should reflect this.
-- **`integrations/cursor/.cursorrules`**: Cursor integration that mirrors the Claude Code functionality.
+```yaml
+---
+name: skill-name
+description: Brief description
+---
+# Execution instructions below...
+```
+
+The frontmatter configures the command; the body contains step-by-step instructions.
 
 ## Maintaining the Plugin
 
-When updating the Draft methodology:
+### Updating Methodology
 
 1. Update `core/methodology.md` first
-2. Apply changes to `skills/` SKILL.md files as needed
-3. Update this `CLAUDE.md` if core concepts change
-4. Update `integrations/cursor/.cursorrules` to stay in sync
+2. Apply changes to relevant `skills/` SKILL.md files
+3. Run `./scripts/build-cursorrules.sh` to regenerate Cursor integration
+4. Update this CLAUDE.md only if core concepts change
 
 ### Adding a New Skill
 
-1. Create `skills/<skill-name>/SKILL.md` with frontmatter:
-   ```yaml
-   ---
-   name: skill-name
-   description: Brief description of what the skill does
-   ---
-   ```
-2. Add execution instructions in the body
-3. Document the command in `README.md`
+1. Create `skills/<skill-name>/SKILL.md` with frontmatter
+2. Rebuild: `./scripts/build-cursorrules.sh`
+3. Document in README.md
 
-## Draft Methodology (for end-users)
+## End-User Context
 
-When users use Draft in their projects, it creates a `draft/` directory with:
-- `product.md`, `tech-stack.md`, `workflow.md` - Project context
-- `tracks.md` - Master list of work items
-- `tracks/<track-id>/` - Individual tracks containing `spec.md`, `plan.md`, `metadata.json`
+When users use Draft, it creates a `draft/` directory in their project:
+
+| File | Purpose |
+|------|---------|
+| `product.md` | Product vision, users, goals |
+| `product-guidelines.md` | Style, branding, UX standards (optional) |
+| `tech-stack.md` | Languages, frameworks, patterns |
+| `workflow.md` | TDD preferences, commit strategy |
+| `tracks.md` | Master list of all tracks |
+| `tracks/<id>/` | Individual tracks with `spec.md`, `plan.md`, `metadata.json` |
 
 ### Status Markers
 
-Used in spec.md and plan.md files:
-- `[ ]` - Pending/New
-- `[~]` - In Progress
-- `[x]` - Completed
-- `[!]` - Blocked
-
-### Intent Mapping
-
-When users say... → Use command:
-- "set up draft" / "initialize project" → `/draft:init`
-- "new feature" / "start a track" / "add feature X" → `/draft:new-track`
-- "implement" / "start coding" / "work on the plan" → `/draft:implement`
-- "what's the status" / "show progress" → `/draft:status`
-- "undo" / "revert the last change" → `/draft:revert`
+- `[ ]` Pending/New
+- `[~]` In Progress
+- `[x]` Completed
+- `[!]` Blocked
 
 ## Quality Disciplines
 
-Draft enforces these quality disciplines throughout the development process:
-
 ### Verification Before Completion
 **Iron Law:** No completion claims without fresh verification evidence.
-- Run verification command IN THE CURRENT MESSAGE
-- Show output as evidence
-- Only then mark tasks/phases complete
 
 ### Strict TDD (when enabled)
-**Iron Law:** No production code without a failing test first.
-- RED: Write test, verify it FAILS
-- GREEN: Minimum code, verify it PASSES
-- REFACTOR: Keep tests green throughout
+**Iron Law:** RED → GREEN → REFACTOR. No production code without a failing test first.
 
 ### Systematic Debugging
-**Iron Law:** No fixes without root cause investigation first.
-- Investigate → Analyze → Hypothesize → Implement
-- See `core/agents/debugger.md`
+**Iron Law:** Investigate → Analyze → Hypothesize → Implement. No fixes without root cause first.
+See `core/agents/debugger.md`.
 
 ### Two-Stage Review
-At phase boundaries:
-1. **Spec Compliance:** Did we build what was specified?
-2. **Code Quality:** Is it well-crafted?
-- See `core/agents/reviewer.md`
-
-### Agents
-
-The `core/agents/` directory contains specialized agent definitions:
-- `planner.md` - Specification and plan creation
-- `debugger.md` - Systematic debugging process
-- `reviewer.md` - Two-stage code review
+At phase boundaries: (1) Spec Compliance, (2) Code Quality.
+See `core/agents/reviewer.md`.
 
 ## Communication Style
 
-Lead with conclusions. Be concise. Prioritize clarity over comprehensiveness.
-
-- Direct, professional tone
-- Code over explanation when implementing
-- Complete, runnable code blocks
-- Show only changed lines with context for updates
-- Ask clarifying questions only when requirements are genuinely ambiguous
+Lead with conclusions. Be concise. Direct, professional tone. Code over explanation.

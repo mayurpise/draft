@@ -12,3 +12,7 @@ Thumbs.db
 # Archives
 *.zip
 *.tar.gz
+
+# Dependencies
+package-lock.json
+node_modules/

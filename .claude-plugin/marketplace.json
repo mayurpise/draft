@@ -10,7 +10,10 @@
   "plugins": [
     {
       "name": "draft",
-      "source": "github:mayurpise/draft",
+      "source": {
+        "source": "github",
+        "repo": "mayurpise/draft"
+      },
       "description": "Context-Driven Development: draft specs and plans before implementation. Structured workflows for features and fixes.",
       "version": "1.0.0",
       "author": {

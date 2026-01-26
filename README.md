@@ -10,36 +10,31 @@ Also available for [Cursor](#cursor-integration).
 
 ### Claude Code
 
-**Option 1: Git Clone (Recommended)**
+**Step 1: Clone the plugin**
 
 ```bash
 git clone https://github.com/mayurpise/draft.git ~/.claude/plugins/draft
-claude --plugin-dir ~/.claude/plugins/draft
 ```
 
-**Option 2: Quick Install Script**
+**Step 2: Run Claude Code with the plugin**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/mayurpise/draft/main/install.sh | bash
 claude --plugin-dir ~/.claude/plugins/draft
 ```
 
-**Option 3: Plugin Marketplace**
+**Tip:** Add an alias to your shell config (`~/.bashrc` or `~/.zshrc`) for convenience:
 
-> **Note:** Requires [SSH keys configured for GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) due to a [known Claude Code issue](https://github.com/anthropics/claude-code/issues/9719).
-
-```
-/plugin marketplace add mayurpise/draft
-/plugin install draft
+```bash
+alias claude-draft='claude --plugin-dir ~/.claude/plugins/draft'
 ```
 
-The plugin persists across sessions — no need to specify flags each time.
+Then just run `claude-draft` to start Claude Code with Draft enabled.
 
 ---
 
-**Verify installation:**
+**Verify installation:** Type `/draft` and you should see the commands appear.
 
-Type `/draft` and you should see the commands appear.
+> **Note:** The `/plugin marketplace` installation method requires [SSH keys for GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) due to a [known Claude Code issue](https://github.com/anthropics/claude-code/issues/9719). The `--plugin-dir` method above works without SSH configuration.
 
 ## Quick Start
 

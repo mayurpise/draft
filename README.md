@@ -10,22 +10,26 @@ Also available for [Cursor](#cursor-integration).
 
 ### Claude Code
 
-**Option 1: Load with --plugin-dir flag (Recommended)**
+**Option 1: Plugin Marketplace (Recommended)**
+
+From within Claude Code:
+```
+/plugin marketplace add mayurpise/draft
+/plugin install draft
+```
+
+The plugin persists across sessions — no need to specify flags each time.
+
+**Option 2: Development Mode (--plugin-dir)**
+
+For development or testing unreleased changes:
 
 ```bash
-# Clone the plugin
 git clone https://github.com/mayurpise/draft.git ~/.claude/plugins/draft
-
-# Start Claude Code with the plugin
 claude --plugin-dir ~/.claude/plugins/draft
 ```
 
-You can create an alias for convenience:
-```bash
-alias claude-draft='claude --plugin-dir ~/.claude/plugins/draft'
-```
-
-**Option 2: Quick Install Script**
+**Option 3: Quick Install Script**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/mayurpise/draft/main/install.sh | bash
@@ -40,7 +44,7 @@ claude --plugin-dir ~/.claude/plugins/draft
 
 **Verify installation:**
 
-After starting Claude Code with the plugin, type `/draft` and you should see the commands appear.
+Type `/draft` and you should see the commands appear.
 
 ## Quick Start
 

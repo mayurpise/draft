@@ -10,35 +10,30 @@ Also available for [Cursor](#cursor-integration).
 
 ### Claude Code
 
-**Option 1: Plugin Marketplace (Recommended)**
-
-From within Claude Code:
-```
-/plugin marketplace add mayurpise/draft
-/plugin install draft
-```
-
-The plugin persists across sessions — no need to specify flags each time.
-
-**Option 2: Development Mode (--plugin-dir)**
-
-For development or testing unreleased changes:
+**Option 1: Git Clone (Recommended)**
 
 ```bash
 git clone https://github.com/mayurpise/draft.git ~/.claude/plugins/draft
 claude --plugin-dir ~/.claude/plugins/draft
 ```
 
-**Option 3: Quick Install Script**
+**Option 2: Quick Install Script**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/mayurpise/draft/main/install.sh | bash
-```
-
-Then start Claude Code with:
-```bash
 claude --plugin-dir ~/.claude/plugins/draft
 ```
+
+**Option 3: Plugin Marketplace**
+
+> **Note:** Requires [SSH keys configured for GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) due to a [known Claude Code issue](https://github.com/anthropics/claude-code/issues/9719).
+
+```
+/plugin marketplace add mayurpise/draft
+/plugin install draft
+```
+
+The plugin persists across sessions — no need to specify flags each time.
 
 ---
 

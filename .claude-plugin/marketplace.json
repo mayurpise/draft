@@ -11,8 +11,8 @@
     {
       "name": "draft",
       "source": {
-        "source": "github",
-        "repo": "mayurpise/draft"
+        "source": "url",
+        "url": "https://github.com/mayurpise/draft.git"
       },
       "description": "Context-Driven Development: draft specs and plans before implementation. Structured workflows for features and fixes.",
       "version": "1.0.0",

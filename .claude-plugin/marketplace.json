@@ -1,0 +1,31 @@
+{
+  "name": "draft-plugins",
+  "owner": {
+    "name": "mayurpise",
+    "url": "https://github.com/mayurpise"
+  },
+  "metadata": {
+    "description": "Context-Driven Development plugins for Claude Code"
+  },
+  "plugins": [
+    {
+      "name": "draft",
+      "source": ".",
+      "description": "Context-Driven Development: draft specs and plans before implementation. Structured workflows for features and fixes.",
+      "version": "1.0.0",
+      "author": {
+        "name": "mayurpise"
+      },
+      "homepage": "https://github.com/mayurpise/draft",
+      "repository": "https://github.com/mayurpise/draft",
+      "license": "Apache-2.0",
+      "keywords": [
+        "context-driven-development",
+        "planning",
+        "specifications",
+        "tdd",
+        "workflow"
+      ]
+    }
+  ]
+}

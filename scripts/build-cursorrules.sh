@@ -10,32 +10,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 SKILLS_DIR="$ROOT_DIR/skills"
 OUTPUT_FILE="$ROOT_DIR/integrations/cursor/.cursorrules"
-METHODOLOGY_FILE="$ROOT_DIR/core/methodology.md"
-DEBUGGER_FILE="$ROOT_DIR/core/agents/debugger.md"
-REVIEWER_FILE="$ROOT_DIR/core/agents/reviewer.md"
 
 # Extract body content from a SKILL.md file (strip YAML frontmatter)
 extract_body() {
     local file="$1"
     # Skip lines until we find the closing ---, then print everything after
-    awk '
-        BEGIN { in_frontmatter = 0; found_end = 0 }
-        /^---$/ {
-            if (in_frontmatter == 0) {
-                in_frontmatter = 1
-                next
-            } else if (found_end == 0) {
-                found_end = 1
-                next
-            }
-        }
-        found_end == 1 { print }
-    ' "$file"
-}
-
-# Extract body from agent files (same format as SKILL.md)
-extract_agent_body() {
-    local file="$1"
     awk '
         BEGIN { in_frontmatter = 0; found_end = 0 }
         /^---$/ {
@@ -92,6 +71,8 @@ When `draft/` exists in the project, always consider:
 | `@draft implement` | Execute tasks from plan |
 | `@draft status` | Show progress overview |
 | `@draft revert` | Git-aware rollback |
+| `@draft jira-preview [track-id]` | Generate jira-export.md for review |
+| `@draft jira-create [track-id]` | Create Jira issues from export via MCP |
 
 ## Intent Mapping
 
@@ -104,6 +85,8 @@ Recognize these natural language patterns:
 | "start implementing" | Execute implement |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
+| "preview jira", "export to jira" | Run jira-preview |
+| "create jira", "push to jira" | Run jira-create |
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |
 
@@ -190,6 +173,32 @@ HEADER
         echo "When user says \"revert\" or \"@draft revert\":"
         echo ""
         extract_body "$SKILLS_DIR/revert/SKILL.md" | transform_syntax | tail -n +4
+    fi
+
+    echo ""
+    echo "---"
+    echo ""
+
+    # Jira Preview Command
+    if [[ -f "$SKILLS_DIR/jira-preview/SKILL.md" ]]; then
+        echo "## Jira Preview Command"
+        echo ""
+        echo "When user says \"preview jira\" or \"@draft jira-preview [track-id]\":"
+        echo ""
+        extract_body "$SKILLS_DIR/jira-preview/SKILL.md" | transform_syntax | tail -n +4
+    fi
+
+    echo ""
+    echo "---"
+    echo ""
+
+    # Jira Create Command
+    if [[ -f "$SKILLS_DIR/jira-create/SKILL.md" ]]; then
+        echo "## Jira Create Command"
+        echo ""
+        echo "When user says \"create jira\" or \"@draft jira-create [track-id]\":"
+        echo ""
+        extract_body "$SKILLS_DIR/jira-create/SKILL.md" | transform_syntax | tail -n +4
     fi
 
     echo ""

@@ -28,7 +28,7 @@ If missing, tell user: "Project not initialized. Run `/draft:init` first."
 Create a short, kebab-case ID from the description:
 - "Add user authentication" → `add-user-auth`
 - "Fix login bug" → `fix-login-bug`
-- Include timestamp suffix if needed: `add-user-auth-0120`
+- If collision risk, append ISO date suffix: `add-user-auth-20250126`
 
 ## Red Flags - STOP if you're:
 

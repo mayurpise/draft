@@ -157,9 +157,10 @@ A **track** is a high-level unit of work (feature, bug fix, refactor). Each trac
 
 ```
 draft/tracks/<track-id>/
-├── spec.md        # Requirements and acceptance criteria
-├── plan.md        # Phased task breakdown
-└── metadata.json  # Status and timestamps
+├── spec.md          # Requirements and acceptance criteria
+├── plan.md          # Phased task breakdown
+├── metadata.json    # Status and timestamps
+└── jira-export.md   # Jira stories for export (optional)
 ```
 
 ### Track Lifecycle
@@ -179,6 +180,7 @@ Located in `draft/` of the target project:
 | `product-guidelines.md` | Style, branding, UX standards (optional) |
 | `tech-stack.md` | Languages, frameworks, patterns |
 | `workflow.md` | TDD preferences, commit strategy |
+| `jira.md` | Jira project configuration (optional) |
 | `tracks.md` | Master list of all tracks |
 
 ## Status Markers
@@ -208,6 +210,22 @@ Good tasks are:
 - Have clear success criteria
 - Produce testable output
 - Fit in a single commit
+
+## Jira Integration (Optional)
+
+Sync tracks to Jira with a two-step workflow:
+
+1. **Preview** (`/draft:jira-preview`) - Generate `jira-export.md` with epic and stories
+2. **Review** - Adjust story points, descriptions, acceptance criteria as needed
+3. **Create** (`/draft:jira-create`) - Push to Jira via MCP server
+
+Story points are auto-calculated from task count:
+- 1-2 tasks = 1 point
+- 3-4 tasks = 2 points
+- 5-6 tasks = 3 points
+- 7+ tasks = 5 points
+
+Requires `jira.md` configuration with project key, board ID, and epic link field.
 
 ## TDD Workflow (Optional)
 

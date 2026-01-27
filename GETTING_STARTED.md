@@ -14,7 +14,7 @@ Draft is a lightweight assistant that works alongside **Claude Code** or **Curso
    ```bash
    /draft:init
    ```
-   This creates project context files: `product.md`, `tech-stack.md`, `workflow.md`, and `tracks.md`.
+   This creates project context files: `product.md`, `product-guidelines.md` (optional), `tech-stack.md`, `workflow.md`, and `tracks.md`.
 
 2. **Create a new track**
    ```bash

@@ -31,6 +31,8 @@ When `draft/` exists in the project, always consider:
 | `@draft implement` | Execute tasks from plan |
 | `@draft status` | Show progress overview |
 | `@draft revert` | Git-aware rollback |
+| `@draft jira-preview [track-id]` | Generate jira-export.md for review |
+| `@draft jira-create [track-id]` | Create Jira issues from export via MCP |
 
 ## Intent Mapping
 
@@ -43,6 +45,8 @@ Recognize these natural language patterns:
 | "start implementing" | Execute implement |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
+| "preview jira", "export to jira" | Run jira-preview |
+| "create jira", "push to jira" | Run jira-create |
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |
 
@@ -241,7 +245,6 @@ Create empty `draft/tracks.md`:
 
 ```bash
 mkdir -p draft/tracks
-mkdir -p draft/code_styleguides
 ```
 
 ## Completion
@@ -288,7 +291,7 @@ If missing, tell user: "Project not initialized. Run `@draft init` first."
 Create a short, kebab-case ID from the description:
 - "Add user authentication" → `add-user-auth`
 - "Fix login bug" → `fix-login-bug`
-- Include timestamp suffix if needed: `add-user-auth-0120`
+- If collision risk, append ISO date suffix: `add-user-auth-20250126`
 
 ## Red Flags - STOP if you're:
 
@@ -909,6 +912,388 @@ Options:
 
 Draft state NOT updated (pending revert completion).
 ```
+
+---
+
+## Jira Preview Command
+
+When user says "preview jira" or "@draft jira-preview [track-id]":
+
+Generate `jira-export.md` from the track's plan for review and editing before creating actual Jira issues.
+
+## Mapping Structure
+
+| Draft Concept | Jira Entity |
+|---------------|-------------|
+| Track | Epic |
+| Phase | Story |
+| Task | Sub-task (under story) |
+
+## Step 1: Load Context
+
+1. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)
+2. If track ID provided as argument, use that instead
+3. Read the track's `plan.md` for phases and tasks
+4. Read the track's `metadata.json` for title and type
+5. Read the track's `spec.md` for epic description
+6. Read `core/templates/jira.md` for field structure
+
+If no track found:
+- Tell user: "No track found. Run `@draft new-track` to create one, or specify track ID."
+
+## Step 2: Parse Plan Structure
+
+Extract from `plan.md`:
+
+### Epic (from track)
+- **Summary:** Track title from metadata.json or first `# Plan:` heading
+- **Description:** Overview section from spec.md
+- **Type:** Feature (from metadata.json type: feature|bugfix|refactor)
+
+### Stories (from phases)
+For each `## Phase N: [Name]` section:
+- **Summary:** Phase name
+- **Goal:** Extract from `**Goal:**` line
+- **Verification:** Extract from `**Verification:**` line
+
+### Sub-tasks (from tasks)
+For each `- [ ] **Task N.M:**` within a phase:
+- **Summary:** Task description (text after `**Task N.M:**`)
+- **Parent:** The phase's story
+- **Status:** Map `[ ]` → To Do, `[x]` → Done, `[~]` → In Progress, `[!]` → Blocked
+
+### Story Points Calculation
+Count tasks per phase and assign points to the **story**:
+
+| Task Count | Story Points |
+|------------|--------------|
+| 1-2 tasks  | 1 point      |
+| 3-4 tasks  | 2 points     |
+| 5-6 tasks  | 3 points     |
+| 7+ tasks   | 5 points     |
+
+## Step 3: Generate Export File
+
+Create `draft/tracks/<track_id>/jira-export.md`:
+
+```markdown
+# Jira Export: [Track Title]
+
+**Generated:** [ISO timestamp]
+**Track ID:** [track_id]
+**Status:** Ready for review
+
+> Edit this file to adjust story points, descriptions, or sub-tasks before running `@draft jira-create`.
+
+---
+
+## Epic
+
+**Summary:** [Track Title]
+**Issue Type:** Epic
+**Description:**
+{noformat}
+[Spec overview - first 2-3 paragraphs]
+{noformat}
+
+---
+
+## Story 1: [Phase 1 Name]
+
+**Summary:** Phase 1: [Phase Name]
+**Issue Type:** Story
+**Story Points:** [calculated based on task count]
+**Epic Link:** (will be set on creation)
+
+**Description:**
+{noformat}
+h3. Goal
+[Phase goal]
+
+h3. Verification
+[Phase verification criteria]
+{noformat}
+
+### Sub-tasks
+
+| # | Summary | Status |
+|---|---------|--------|
+| 1.1 | [Task 1.1 description] | To Do |
+| 1.2 | [Task 1.2 description] | Done |
+| 1.3 | [Task 1.3 description] | To Do |
+
+---
+
+## Story 2: [Phase 2 Name]
+
+**Summary:** Phase 2: [Phase Name]
+**Issue Type:** Story
+**Story Points:** [calculated]
+**Epic Link:** (will be set on creation)
+
+**Description:**
+{noformat}
+h3. Goal
+[Phase goal]
+
+h3. Verification
+[Phase verification criteria]
+{noformat}
+
+### Sub-tasks
+
+| # | Summary | Status |
+|---|---------|--------|
+| 2.1 | [Task 2.1 description] | To Do |
+| 2.2 | [Task 2.2 description] | To Do |
+
+---
+
+[Continue for all phases...]
+```
+
+## Step 4: Report
+
+```
+Jira Preview Generated
+
+Track: [track_id] - [title]
+Export: draft/tracks/<id>/jira-export.md
+
+Summary:
+- 1 epic
+- N stories (phases)
+- M sub-tasks (tasks)
+- P total story points
+
+Breakdown:
+- Phase 1: [name] - X pts, Y tasks
+- Phase 2: [name] - X pts, Y tasks
+- Phase 3: [name] - X pts, Y tasks
+
+Next steps:
+1. Review and edit jira-export.md (adjust points, descriptions, sub-tasks)
+2. Run `@draft jira-create` to create issues in Jira
+```
+
+## Error Handling
+
+**If plan.md has no phases:**
+- Tell user: "No phases found in plan.md. Run `@draft new-track` to generate a proper plan."
+
+**If spec.md missing:**
+- Use plan.md overview for epic description
+- Warn: "spec.md not found, using plan overview for epic description."
+
+**If jira-export.md already exists:**
+- Warn: "jira-export.md already exists. Overwriting with fresh generation."
+- Proceed with overwrite (user can always re-edit)
+
+**If phase has no tasks:**
+- Create story with 1 story point
+- Add note: "No sub-tasks defined for this phase"
+
+---
+
+## Jira Create Command
+
+When user says "create jira" or "@draft jira-create [track-id]":
+
+Create Jira epic, stories, and sub-tasks from `jira-export.md` using MCP-Jira. If no export file exists, auto-generates one first.
+
+## Mapping Structure
+
+| Draft Concept | Jira Entity |
+|---------------|-------------|
+| Track | Epic |
+| Phase | Story |
+| Task | Sub-task (under story) |
+
+## Step 1: Load Context
+
+1. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)
+2. If track ID provided as argument, use that instead
+3. Check for `draft/tracks/<track_id>/jira-export.md`
+
+If no track found:
+- Tell user: "No track found. Run `@draft new-track` to create one, or specify track ID."
+
+## Step 2: Ensure Export Exists
+
+**If `jira-export.md` exists:**
+- Read and parse the export file
+- Proceed to Step 3
+
+**If `jira-export.md` missing:**
+- Inform user: "No jira-export.md found. Generating preview first..."
+- Execute `@draft jira-preview` logic to generate it
+- Proceed to Step 3
+
+## Step 3: Check MCP-Jira Availability
+
+Attempt to detect MCP-Jira tools:
+1. Check if `mcp_jira_create_issue` or similar tool is available
+2. If unavailable:
+   ```
+   MCP-Jira not configured.
+
+   To create issues:
+   1. Configure MCP-Jira server in your settings
+   2. Run `@draft jira-create` again
+
+   Or manually import from:
+     draft/tracks/<id>/jira-export.md
+   ```
+   - Stop execution
+
+## Step 4: Parse Export File
+
+Extract from `jira-export.md`:
+
+### Epic
+- Summary (from `**Summary:**` line)
+- Description (from `{noformat}` block)
+- Issue Type: Epic
+
+### Stories
+For each `## Story N:` section:
+- Summary
+- Story Points (from `**Story Points:**` line)
+- Description (from `{noformat}` block)
+
+### Sub-tasks
+For each row in `### Sub-tasks` table:
+- Task number (e.g., 1.1, 1.2)
+- Summary
+- Status (To Do, Done, In Progress, Blocked)
+
+## Step 5: Create Issues via MCP
+
+### 5a. Create Epic
+```
+MCP call: create_issue
+- project: [from config or prompt]
+- issue_type: Epic
+- summary: [Epic summary]
+- description: [Epic description]
+```
+- Capture epic key (e.g., PROJ-123)
+- Report: "Created Epic: PROJ-123"
+
+### 5b. Create Stories (one per phase)
+For each story in export:
+```
+MCP call: create_issue
+- project: [same as epic]
+- issue_type: Story
+- summary: [Story summary]
+- description: [Story description]
+- story_points: [from export]
+- epic_link: [Epic key from step 5a]
+```
+- Capture story key (e.g., PROJ-124)
+- Report: "Created Story: PROJ-124 - Phase 1 (3 pts)"
+
+### 5c. Create Sub-tasks (one per task)
+For each sub-task under the story:
+```
+MCP call: create_issue
+- project: [same as epic]
+- issue_type: Sub-task
+- parent: [Story key from step 5b]
+- summary: [Task summary, e.g., "Task 1.1: Extract logging utilities"]
+- status: [Map from export: To Do, In Progress, Done]
+```
+- Capture sub-task key (e.g., PROJ-125)
+- Report: "  - Sub-task: PROJ-125 - Task 1.1"
+
+## Step 6: Update Tracking
+
+1. **Update plan.md:**
+   Add Jira keys to phase headers and tasks:
+   ```markdown
+   ## Phase 1: Setup [PROJ-124]
+   ...
+   - [x] **Task 1.1:** Extract logging utilities [PROJ-125]
+   - [x] **Task 1.2:** Extract security utilities [PROJ-126]
+   ```
+
+2. **Update jira-export.md:**
+   Change status and add keys:
+   ```markdown
+   **Status:** Created
+   **Epic Key:** PROJ-123
+
+   ## Story 1: [Phase Name] [PROJ-124]
+
+   ### Sub-tasks
+   | # | Summary | Status | Key |
+   |---|---------|--------|-----|
+   | 1.1 | Extract logging utilities | Done | PROJ-125 |
+   | 1.2 | Extract security utilities | Done | PROJ-126 |
+   ```
+
+## Step 7: Report
+
+```
+Jira Issues Created
+
+Track: [track_id] - [title]
+Project: [PROJ]
+
+Created:
+- Epic: PROJ-123 - [Track title]
+- Story: PROJ-124 - Phase 1: [name] (3 pts)
+  - Sub-task: PROJ-125 - Task 1.1
+  - Sub-task: PROJ-126 - Task 1.2
+  - Sub-task: PROJ-127 - Task 1.3
+- Story: PROJ-128 - Phase 2: [name] (5 pts)
+  - Sub-task: PROJ-129 - Task 2.1
+  - Sub-task: PROJ-130 - Task 2.2
+  [...]
+
+Total: 1 epic, N stories, M sub-tasks, P story points
+
+Updated:
+- plan.md (added issue keys to phases and tasks)
+- jira-export.md (marked as created with keys)
+```
+
+## Error Handling
+
+**If MCP call fails:**
+```
+Failed to create [Epic/Story/Sub-task]: [error message]
+
+Partial creation:
+- Epic: PROJ-123 (created)
+- Story 1: PROJ-124 (created)
+  - Sub-task 1.1: PROJ-125 (created)
+  - Sub-task 1.2: FAILED - [error]
+- Story 2: (skipped)
+
+Fix the issue and run `@draft jira-create` again.
+Already-created issues will be detected by keys in jira-export.md.
+```
+
+**If export has existing keys:**
+- Skip items that already have Jira keys
+- Only create items without keys
+- Report: "Skipped Story 1 (already exists: PROJ-124)"
+- Still create sub-tasks if story exists but sub-tasks don't have keys
+
+**If project not configured:**
+- Prompt user: "Which Jira project should issues be created in?"
+- Store in `draft/workflow.md` for future use
+
+**If plan.md phases don't match export:**
+- Warn: "Export has N stories but plan has M phases. Proceeding with export structure."
+- Create based on export (user may have manually edited it)
+
+**If sub-task creation not supported:**
+- Some Jira configurations may not allow sub-tasks
+- Fall back to adding tasks as checklist items in story description
+- Warn: "Sub-tasks not supported in this project. Tasks added to story description."
 
 ---
 

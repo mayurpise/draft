@@ -55,6 +55,8 @@ Then just run `claude-draft` to start Claude Code with Draft enabled.
 | `/draft:implement` | Execute tasks from the current plan with TDD |
 | `/draft:status` | Display progress overview |
 | `/draft:revert` | Git-aware rollback of tasks/phases/tracks |
+| `/draft:jira-preview` | Generate Jira export file for review |
+| `/draft:jira-create` | Create Jira issues from export via MCP |
 
 ## Workflow
 

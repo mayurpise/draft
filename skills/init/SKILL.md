@@ -176,7 +176,6 @@ Create empty `draft/tracks.md`:
 
 ```bash
 mkdir -p draft/tracks
-mkdir -p draft/code_styleguides
 ```
 
 ## Completion

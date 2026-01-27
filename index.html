@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draft: Context-Driven Development</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-secondary: #111113;
+            --bg-tertiary: #18181b;
+            --accent-cyan: #22d3ee;
+            --accent-amber: #fbbf24;
+            --accent-rose: #fb7185;
+            --accent-emerald: #34d399;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --glow-cyan: rgba(34, 211, 238, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Header */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(ellipse at 30% 20%, var(--glow-cyan) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(251, 113, 133, 0.08) 0%, transparent 40%);
+            animation: drift 20s ease-in-out infinite;
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-2%, 2%) rotate(1deg); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        h1 {
+            font-family: 'Instrument Serif', serif;
+            font-size: clamp(3.5rem, 10vw, 7rem);
+            font-weight: 400;
+            letter-spacing: -0.03em;
+            line-height: 1;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.8s ease-out 0.1s both;
+        }
+
+        h1 span {
+            font-style: italic;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-emerald));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .tagline strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            animation: fadeInUp 0.8s ease-out 0.5s both;
+        }
+
+        .scroll-indicator .arrow {
+            width: 24px;
+            height: 40px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .scroll-indicator .arrow::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 8px;
+            background: var(--accent-cyan);
+            border-radius: 2px;
+            animation: scrollBounce 1.5s ease-in-out infinite;
+        }
+
+        @keyframes scrollBounce {
+            0%, 100% { top: 8px; opacity: 1; }
+            50% { top: 18px; opacity: 0.3; }
+        }
+
+        /* Main content */
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem 8rem;
+        }
+
+        /* Section styling */
+        section {
+            margin-bottom: 6rem;
+        }
+
+        h2 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), transparent);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 2.5rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1.25rem;
+        }
+
+        strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Flow diagram */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 3rem 2rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin: 3rem 0;
+            overflow-x: auto;
+        }
+
+        .flow-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .flow-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .flow-step:hover .flow-icon {
+            transform: translateY(-4px);
+        }
+
+        .flow-icon.context {
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(34, 211, 238, 0.05));
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            color: var(--accent-cyan);
+        }
+
+        .flow-icon.spec {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.05));
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: var(--accent-amber);
+        }
+
+        .flow-icon.implement {
+            background: linear-gradient(135deg, rgba(52, 211, 153, 0.2), rgba(52, 211, 153, 0.05));
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            color: var(--accent-emerald);
+        }
+
+        .flow-step:hover .flow-icon.context { box-shadow: 0 8px 32px rgba(34, 211, 238, 0.2); }
+        .flow-step:hover .flow-icon.spec { box-shadow: 0 8px 32px rgba(251, 191, 36, 0.2); }
+        .flow-step:hover .flow-icon.implement { box-shadow: 0 8px 32px rgba(52, 211, 153, 0.2); }
+
+        .flow-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .flow-sublabel {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .flow-arrow {
+            color: var(--text-muted);
+            font-size: 1.5rem;
+        }
+
+        /* Problem cards */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .problem-card {
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: border-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .problem-card:hover {
+            border-color: var(--accent-rose);
+            transform: translateY(-2px);
+        }
+
+        .problem-card .icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .problem-card h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .problem-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Constraint hierarchy */
+        .hierarchy {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .hierarchy-level {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hierarchy-level:last-child {
+            border-bottom: none;
+        }
+
+        .hierarchy-level .num {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+            flex-shrink: 0;
+        }
+
+        .hierarchy-level .file {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-amber);
+            min-width: 180px;
+        }
+
+        .hierarchy-level .desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .hierarchy-level .arrow-down {
+            position: absolute;
+            left: 15px;
+            bottom: -12px;
+            color: var(--text-muted);
+        }
+
+        /* Comparison tables */
+        .comparison {
+            margin: 2rem 0;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .comparison-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: var(--bg-tertiary);
+        }
+
+        .comparison-header > div {
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .comparison-header > div:first-child {
+            border-right: 1px solid var(--border);
+            color: var(--accent-rose);
+        }
+
+        .comparison-header > div:last-child {
+            color: var(--accent-emerald);
+        }
+
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-top: 1px solid var(--border);
+        }
+
+        .comparison-row > div {
+            padding: 1rem 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .comparison-row > div:first-child {
+            border-right: 1px solid var(--border);
+            background: rgba(251, 113, 133, 0.03);
+        }
+
+        .comparison-row > div:last-child {
+            background: rgba(52, 211, 153, 0.03);
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        .code-header {
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .code-header .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .code-header .dot.red { background: #ef4444; }
+        .code-header .dot.yellow { background: #eab308; }
+        .code-header .dot.green { background: #22c55e; }
+
+        .code-header .filename {
+            margin-left: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        pre {
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        pre code {
+            color: var(--text-secondary);
+        }
+
+        .code-comment { color: var(--text-muted); }
+        .code-keyword { color: var(--accent-rose); }
+        .code-string { color: var(--accent-emerald); }
+        .code-file { color: var(--accent-amber); }
+
+        /* Document cards */
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .doc-card {
+            padding: 1.25rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .doc-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(34, 211, 238, 0.1);
+        }
+
+        .doc-card .icon {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .doc-card .name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-amber);
+            margin-bottom: 0.5rem;
+        }
+
+        .doc-card .purpose {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Status markers */
+        .status-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.9rem;
+        }
+
+        .status-marker {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-marker.pending { color: var(--text-muted); }
+        .status-marker.progress { color: var(--accent-amber); }
+        .status-marker.complete { color: var(--accent-emerald); }
+        .status-marker.blocked { color: var(--accent-rose); }
+
+        /* TDD workflow */
+        .tdd-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 2rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .tdd-step {
+            padding: 0.75rem 1.5rem;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: transform 0.3s ease;
+        }
+
+        .tdd-step:hover {
+            transform: scale(1.05);
+        }
+
+        .tdd-step.red {
+            background: rgba(251, 113, 133, 0.15);
+            border: 1px solid var(--accent-rose);
+            color: var(--accent-rose);
+        }
+
+        .tdd-step.green {
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid var(--accent-emerald);
+            color: var(--accent-emerald);
+        }
+
+        .tdd-step.refactor {
+            background: rgba(34, 211, 238, 0.15);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .tdd-step.commit {
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid var(--accent-amber);
+            color: var(--accent-amber);
+        }
+
+        .tdd-arrow {
+            color: var(--text-muted);
+            font-size: 1.25rem;
+        }
+
+        /* Jira Integration */
+        .jira-flow {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .jira-step {
+            flex: 1;
+            min-width: 180px;
+            display: flex;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: border-color 0.3s ease;
+        }
+
+        .jira-step:hover {
+            border-color: #6366f1;
+        }
+
+        .jira-num {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .jira-content h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .jira-content p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .jira-content code {
+            background: var(--bg-tertiary);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-amber);
+        }
+
+        .points-grid {
+            display: flex;
+            gap: 0.75rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .points-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .points-item .tasks {
+            color: var(--text-muted);
+        }
+
+        .points-item .points {
+            font-weight: 600;
+            color: #6366f1;
+        }
+
+        /* Principles */
+        .principles {
+            display: grid;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .principle {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: border-color 0.3s ease;
+        }
+
+        .principle:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .principle-num {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-emerald));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--bg-primary);
+            flex-shrink: 0;
+        }
+
+        .principle-content h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .principle-content p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Callout */
+        .callout {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(52, 211, 153, 0.05));
+            border: 1px solid rgba(34, 211, 238, 0.2);
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+
+        .callout-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--accent-cyan);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        /* Economics table */
+        .economics {
+            margin: 2rem 0;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .economics-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .economics-row:last-child {
+            border-bottom: none;
+        }
+
+        .economics-row.header {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .economics-row > div {
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .economics-row > div:not(:last-child) {
+            border-right: 1px solid var(--border);
+        }
+
+        .economics-row.header > div:nth-child(2) {
+            color: var(--accent-rose);
+        }
+
+        .economics-row.header > div:nth-child(3) {
+            color: var(--accent-emerald);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .tagline {
+                font-size: 1.1rem;
+            }
+
+            .flow-diagram {
+                flex-direction: column;
+                padding: 2rem 1.5rem;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+
+            .hierarchy-level {
+                flex-wrap: wrap;
+            }
+
+            .hierarchy-level .file {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .comparison-header,
+            .comparison-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-header > div:first-child,
+            .comparison-row > div:first-child {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .tdd-flow {
+                flex-direction: column;
+            }
+
+            .tdd-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-content">
+            <div class="badge">Context-Driven Development</div>
+            <h1>Measure twice,<br><span>code once.</span></h1>
+            <p class="tagline">Draft is a methodology that brings <strong>structure to AI-assisted development</strong> through documented context, specifications, and phased implementation.</p>
+        </div>
+        <div class="scroll-indicator">
+            <div class="arrow"></div>
+            <span>Explore</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- The Problem Section -->
+        <section id="problem">
+            <h2>The Core Problem</h2>
+            <p>AI coding assistants are powerful but undirected. Without structure, they make assumptions, choose arbitrary approaches, and produce code that doesn't fit your codebase.</p>
+            
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="icon">🎯</div>
+                    <h4>Assumption-Driven</h4>
+                    <p>Guesses at requirements instead of asking clarifying questions</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">🔀</div>
+                    <h4>Arbitrary Choices</h4>
+                    <p>Picks random technical approaches without considering your stack</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">🧩</div>
+                    <h4>Poor Fit</h4>
+                    <p>Produces code that doesn't match existing patterns or conventions</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">⏭️</div>
+                    <h4>No Checkpoints</h4>
+                    <p>Skips verification and claims completion without proof</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Core Workflow -->
+        <section id="workflow">
+            <h2>The Draft Workflow</h2>
+            <p>Draft solves this through <strong>Context-Driven Development</strong>: structured documents that constrain and guide AI behavior. By treating context as a managed artifact alongside code, your repository becomes the single source of truth.</p>
+            
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <div class="flow-icon context">📋</div>
+                    <div class="flow-label">Context</div>
+                    <div class="flow-sublabel">Define the landscape</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-icon spec">📝</div>
+                    <div class="flow-label">Spec & Plan</div>
+                    <div class="flow-sublabel">Document the approach</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-icon implement">⚡</div>
+                    <div class="flow-label">Implement</div>
+                    <div class="flow-sublabel">Execute with confidence</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Constraint Hierarchy -->
+        <section id="constraints">
+            <h2>The Constraint Hierarchy</h2>
+            <p>Each document layer narrows the solution space. By the time AI writes code, most decisions are already made.</p>
+
+            <div class="hierarchy">
+                <div class="hierarchy-level">
+                    <div class="num">1</div>
+                    <div class="file">product.md</div>
+                    <div class="desc">"Build a task manager for developers"</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">2</div>
+                    <div class="file">tech-stack.md</div>
+                    <div class="desc">"Use React, TypeScript, Tailwind"</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">3</div>
+                    <div class="file">spec.md</div>
+                    <div class="desc">"Add drag-and-drop reordering"</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">4</div>
+                    <div class="file">plan.md</div>
+                    <div class="desc">"Phase 1: sortable list, Phase 2: persistence"</div>
+                </div>
+            </div>
+
+            <div class="callout">
+                <div class="callout-title">
+                    <span>💡</span>
+                    Key Insight
+                </div>
+                <p>The AI becomes an executor of pre-approved work, not an autonomous decision-maker. Explicit specs, phased plans, verification steps, and status markers keep implementation focused and accountable.</p>
+            </div>
+        </section>
+
+        <!-- Human Review -->
+        <section id="review">
+            <h2>Review Before Code</h2>
+            <p><strong>This is Draft's most important feature.</strong> The workflow ensures human review happens on the approach, not the implementation details.</p>
+
+            <div class="comparison">
+                <div class="comparison-header">
+                    <div>Traditional AI Coding</div>
+                    <div>Draft Approach</div>
+                </div>
+                <div class="comparison-row">
+                    <div>AI writes code immediately</div>
+                    <div>AI writes spec first</div>
+                </div>
+                <div class="comparison-row">
+                    <div>Review happens on code PR</div>
+                    <div>Review happens on spec PR</div>
+                </div>
+                <div class="comparison-row">
+                    <div>Disagreements require rewriting code</div>
+                    <div>Disagreements resolved before coding</div>
+                </div>
+                <div class="comparison-row">
+                    <div>AI decisions are implicit</div>
+                    <div>AI decisions are documented</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Project Structure -->
+        <section id="structure">
+            <h2>Project Structure</h2>
+            <p>Draft uses a set of markdown files to capture project context, specifications, and implementation plans. Each file has a specific purpose.</p>
+
+            <div class="doc-grid">
+                <div class="doc-card">
+                    <div class="icon">🎯</div>
+                    <div class="name">product.md</div>
+                    <p class="purpose">Product vision, target users, and success criteria</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">🎨</div>
+                    <div class="name">product-guidelines.md</div>
+                    <p class="purpose">Style, branding, and UX standards</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">⚙️</div>
+                    <div class="name">tech-stack.md</div>
+                    <p class="purpose">Languages, frameworks, and patterns</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">🔄</div>
+                    <div class="name">workflow.md</div>
+                    <p class="purpose">TDD preferences and commit strategy</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">🎫</div>
+                    <div class="name">jira.md</div>
+                    <p class="purpose">Jira project config for sync (optional)</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">📋</div>
+                    <div class="name">tracks.md</div>
+                    <p class="purpose">Master list of all work tracks</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">📝</div>
+                    <div class="name">spec.md</div>
+                    <p class="purpose">Requirements for a specific track</p>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <span class="filename">project structure</span>
+                </div>
+<pre><code><span class="code-file">draft/</span>
+├── <span class="code-file">product.md</span>          <span class="code-comment"># Product vision and goals</span>
+├── <span class="code-file">tech-stack.md</span>       <span class="code-comment"># Technical choices</span>
+├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD and commit preferences</span>
+├── <span class="code-file">jira.md</span>             <span class="code-comment"># Jira project config (optional)</span>
+├── <span class="code-file">tracks.md</span>           <span class="code-comment"># Master track list</span>
+└── <span class="code-file">tracks/</span>
+    └── <span class="code-file">&lt;track-id&gt;/</span>
+        ├── <span class="code-file">spec.md</span>      <span class="code-comment"># Requirements</span>
+        ├── <span class="code-file">plan.md</span>      <span class="code-comment"># Phased task breakdown</span>
+        ├── <span class="code-file">metadata.json</span>
+        └── <span class="code-file">jira-export.md</span> <span class="code-comment"># Jira stories (optional)</span></code></pre>
+            </div>
+        </section>
+
+        <!-- Status Markers -->
+        <section id="status">
+            <h2>Status Markers</h2>
+            <p>Simple markers track progress throughout specs and plans. Progress is explicit, not assumed.</p>
+
+            <div class="status-list">
+                <div class="status-item">
+                    <span class="status-marker pending">[ ]</span>
+                    <span>Pending</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-marker progress">[~]</span>
+                    <span>In Progress</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-marker complete">[x]</span>
+                    <span>Completed</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-marker blocked">[!]</span>
+                    <span>Blocked</span>
+                </div>
+            </div>
+
+            <div class="callout">
+                <div class="callout-title">
+                    <span>⚠️</span>
+                    Iron Law
+                </div>
+                <p><strong>Evidence before claims, always.</strong> Never mark [x] without running verification, confirming output shows success, and showing evidence in the response.</p>
+            </div>
+        </section>
+
+        <!-- Jira Integration -->
+        <section id="jira">
+            <h2>Jira Integration</h2>
+            <p>Sync tracks to Jira with a two-step workflow. Preview before pushing to catch issues early.</p>
+
+            <div class="jira-flow">
+                <div class="jira-step">
+                    <div class="jira-num">1</div>
+                    <div class="jira-content">
+                        <h4>Preview</h4>
+                        <p>Generate <code>jira-export.md</code> with epic and stories</p>
+                    </div>
+                </div>
+                <div class="jira-step">
+                    <div class="jira-num">2</div>
+                    <div class="jira-content">
+                        <h4>Review</h4>
+                        <p>Adjust story points, descriptions, acceptance criteria</p>
+                    </div>
+                </div>
+                <div class="jira-step">
+                    <div class="jira-num">3</div>
+                    <div class="jira-content">
+                        <h4>Create</h4>
+                        <p>Push to Jira via MCP server</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Auto Story Points</h3>
+            <p>Story points are calculated from task count:</p>
+            <div class="points-grid">
+                <div class="points-item"><span class="tasks">1-2 tasks</span><span class="points">1 pt</span></div>
+                <div class="points-item"><span class="tasks">3-4 tasks</span><span class="points">2 pts</span></div>
+                <div class="points-item"><span class="tasks">5-6 tasks</span><span class="points">3 pts</span></div>
+                <div class="points-item"><span class="tasks">7+ tasks</span><span class="points">5 pts</span></div>
+            </div>
+        </section>
+
+        <!-- TDD Workflow -->
+        <section id="tdd">
+            <h2>TDD Workflow</h2>
+            <p>When enabled in workflow.md, implementation follows the classic test-driven development cycle.</p>
+
+            <div class="tdd-flow">
+                <div class="tdd-step red">🔴 Red</div>
+                <div class="tdd-arrow">→</div>
+                <div class="tdd-step green">🟢 Green</div>
+                <div class="tdd-arrow">→</div>
+                <div class="tdd-step refactor">🔵 Refactor</div>
+                <div class="tdd-arrow">→</div>
+                <div class="tdd-step commit">📦 Commit</div>
+            </div>
+
+            <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">Write failing test → Minimum code to pass → Clean up with tests green → Commit following conventions</p>
+        </section>
+
+        <!-- Economics -->
+        <section id="economics">
+            <h2>The Economics</h2>
+            <p>Writing specs feels slower. It isn't. The overhead is constant (~20% for simple tasks), but savings scale with complexity, team size, and criticality.</p>
+
+            <div class="economics">
+                <div class="economics-row header">
+                    <div>Scenario</div>
+                    <div>Without Spec</div>
+                    <div>With Spec</div>
+                </div>
+                <div class="economics-row">
+                    <div>Simple feature</div>
+                    <div>1 hour</div>
+                    <div>1.2 hours</div>
+                </div>
+                <div class="economics-row">
+                    <div>Feature with ambiguity</div>
+                    <div>3 hours + rework</div>
+                    <div>2 hours</div>
+                </div>
+                <div class="economics-row">
+                    <div>Feature requiring team input</div>
+                    <div>5 hours + meetings</div>
+                    <div>2.5 hours</div>
+                </div>
+                <div class="economics-row">
+                    <div>Wrong feature entirely</div>
+                    <div>Days wasted</div>
+                    <div>Caught in review</div>
+                </div>
+            </div>
+
+            <p><strong>For critical product development, Draft isn't overhead — it's risk mitigation.</strong></p>
+        </section>
+
+        <!-- Principles -->
+        <section id="principles">
+            <h2>Core Principles</h2>
+
+            <div class="principles">
+                <div class="principle">
+                    <div class="principle-num">1</div>
+                    <div class="principle-content">
+                        <h4>Plan before you build</h4>
+                        <p>Create specs and plans that guide development before writing code</p>
+                    </div>
+                </div>
+                <div class="principle">
+                    <div class="principle-num">2</div>
+                    <div class="principle-content">
+                        <h4>Maintain context</h4>
+                        <p>Ensure agents follow style guides and product goals consistently</p>
+                    </div>
+                </div>
+                <div class="principle">
+                    <div class="principle-num">3</div>
+                    <div class="principle-content">
+                        <h4>Iterate safely</h4>
+                        <p>Review plans before code is written, catch issues early</p>
+                    </div>
+                </div>
+                <div class="principle">
+                    <div class="principle-num">4</div>
+                    <div class="principle-content">
+                        <h4>Work as a team</h4>
+                        <p>Share project context across team members through git-tracked specs</p>
+                    </div>
+                </div>
+                <div class="principle">
+                    <div class="principle-num">5</div>
+                    <div class="principle-content">
+                        <h4>Verify before claiming</h4>
+                        <p>Evidence before assertions, always — run tests, show proof</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- When to Use -->
+        <section id="when">
+            <h2>When to Use Draft</h2>
+            
+            <h3>Good fit</h3>
+            <p>Features requiring design decisions, work that will be reviewed by others, complex multi-step implementations, anything where "just do it" has failed before.</p>
+
+            <h3>Overkill</h3>
+            <p>One-line bug fixes, typo corrections, exploratory prototypes you'll throw away.</p>
+
+            <div class="callout">
+                <div class="callout-title">
+                    <span>📌</span>
+                    Remember
+                </div>
+                <p>Draft adds structure. Use it when structure has value.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Draft Methodology — <a href="https://github.com/mayurpise/draft" target="_blank">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

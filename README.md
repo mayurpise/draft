@@ -134,7 +134,9 @@ draft/
 │   ├── new-track/SKILL.md   # /draft:new-track
 │   ├── implement/SKILL.md   # /draft:implement
 │   ├── status/SKILL.md      # /draft:status
-│   └── revert/SKILL.md      # /draft:revert
+│   ├── revert/SKILL.md      # /draft:revert
+│   ├── jira-preview/SKILL.md # /draft:jira-preview
+│   └── jira-create/SKILL.md  # /draft:jira-create
 ├── core/                 # Shared methodology
 │   ├── methodology.md
 │   ├── templates/

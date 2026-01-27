@@ -61,22 +61,27 @@ Then just run `claude-draft` to start Claude Code with Draft enabled.
 ## Workflow
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    DRAFT WORKFLOW                       │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│   /draft:init           One-time project initialization │
-│        │                                                │
-│        ▼                                                │
-│   /draft:new-track      Create spec.md + plan.md       │
-│        │                                                │
-│        ▼                                                │
-│   /draft:implement      TDD: Red → Green → Refactor    │
-│        │                                                │
-│        ▼                                                │
-│   /draft:status         Check progress anytime         │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│                       DRAFT WORKFLOW                          │
+├───────────────────────────────────────────────────────────────┤
+│                                                               │
+│   /draft:init             One-time project initialization    │
+│        │                                                      │
+│        ▼                                                      │
+│   /draft:new-track        Create spec.md + plan.md           │
+│        │                                                      │
+│        ├──────────────────────────────────┐                   │
+│        │                                  │ (optional)        │
+│        ▼                                  ▼                   │
+│   /draft:implement        /draft:jira-preview → jira-create  │
+│        │                                                      │
+│        ▼                                                      │
+│   /draft:status           Check progress anytime              │
+│        │                                                      │
+│        ▼                                                      │
+│   /draft:revert           Git-aware rollback if needed        │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
 ```
 
 ## Project Structure (After Setup)
@@ -84,15 +89,18 @@ Then just run `claude-draft` to start Claude Code with Draft enabled.
 ```
 your-project/
 ├── draft/
-│   ├── product.md        # Product vision and goals
-│   ├── tech-stack.md     # Technical choices
-│   ├── workflow.md       # TDD and commit preferences
-│   ├── tracks.md         # Master track list
+│   ├── product.md              # Product vision and goals
+│   ├── product-guidelines.md   # Style, branding, UX standards (optional)
+│   ├── tech-stack.md           # Technical choices
+│   ├── workflow.md             # TDD and commit preferences
+│   ├── jira.md                 # Jira project configuration (optional)
+│   ├── tracks.md               # Master track list
 │   └── tracks/
 │       └── <track-id>/
-│           ├── spec.md      # Requirements
-│           ├── plan.md      # Phased task breakdown
-│           └── metadata.json
+│           ├── spec.md         # Requirements
+│           ├── plan.md         # Phased task breakdown
+│           ├── metadata.json   # Status and timestamps
+│           └── jira-export.md  # Jira stories for export (optional)
 ```
 
 ## Core Concepts
@@ -121,6 +129,15 @@ When enabled in workflow.md:
 3. **Refactor** - Clean up with tests green
 4. **Commit** - Following project conventions
 
+### Jira Integration
+
+Sync tracks to Jira with two-step workflow:
+1. `/draft:jira-preview` - Generate `jira-export.md` with epic and stories
+2. Review and adjust story points, descriptions as needed
+3. `/draft:jira-create` - Push to Jira via MCP server
+
+Story points auto-calculated: 1-2 tasks = 1pt, 3-4 = 2pt, 5-6 = 3pt, 7+ = 5pt
+
 ## Plugin Structure
 
 ```
@@ -138,9 +155,16 @@ draft/
 │   ├── jira-preview/SKILL.md # /draft:jira-preview
 │   └── jira-create/SKILL.md  # /draft:jira-create
 ├── core/                 # Shared methodology
-│   ├── methodology.md
-│   ├── templates/
-│   └── agents/
+│   ├── methodology.md       # Master methodology docs
+│   ├── templates/           # Templates for init
+│   │   ├── product.md
+│   │   ├── product-guidelines.md
+│   │   ├── tech-stack.md
+│   │   ├── workflow.md
+│   │   └── jira.md
+│   └── agents/              # Specialized agent behaviors
+│       ├── debugger.md
+│       └── reviewer.md
 └── integrations/
     └── cursor/           # Cursor integration
         └── .cursorrules

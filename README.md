@@ -10,31 +10,12 @@ Also available for [Cursor](#cursor-integration).
 
 ### Claude Code
 
-**Step 1: Clone the plugin**
-
 ```bash
-git clone https://github.com/mayurpise/draft.git ~/.claude/plugins/draft
+/plugin marketplace add mayurpise/draft
+/plugin install draft
 ```
-
-**Step 2: Run Claude Code with the plugin**
-
-```bash
-claude --plugin-dir ~/.claude/plugins/draft
-```
-
-**Tip:** Add an alias to your shell config (`~/.bashrc` or `~/.zshrc`) for convenience:
-
-```bash
-alias claude-draft='claude --plugin-dir ~/.claude/plugins/draft'
-```
-
-Then just run `claude-draft` to start Claude Code with Draft enabled.
-
----
 
 **Verify installation:** Type `/draft` and you should see the commands appear.
-
-> **Note:** The `/plugin marketplace` installation method requires [SSH keys for GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) due to a [known Claude Code issue](https://github.com/anthropics/claude-code/issues/9719). The `--plugin-dir` method above works without SSH configuration.
 
 ## Quick Start
 

@@ -1095,7 +1095,7 @@
             <p>Prerequisites: <strong>Claude Code CLI</strong>, <strong>Git</strong>, and <strong>Node.js 18+</strong>.</p>
 
             <h3 style="margin-top: 2rem;">Other Editors</h3>
-            <p><strong>Cursor</strong> — Copy <code>.cursorrules</code> to your project root:</p>
+            <p><strong>Cursor</strong> — One command, no clone required:</p>
             <div class="code-block" style="margin-bottom: 1rem;">
                 <div class="code-header">
                     <div class="dot red"></div>
@@ -1103,9 +1103,9 @@
                     <div class="dot green"></div>
                     <span class="filename">cursor setup</span>
                 </div>
-<pre><code><span class="code-keyword">cp</span> integrations/cursor/.cursorrules <span class="code-string">~/my-project/.cursorrules</span></code></pre>
+<pre><code><span class="code-keyword">curl</span> -o .cursorrules <span class="code-string">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/cursor/.cursorrules</span></code></pre>
             </div>
-            <p><strong>GitHub Copilot</strong> — Copy <code>copilot-instructions.md</code> to your project's <code>.github/</code> directory:</p>
+            <p><strong>GitHub Copilot</strong> — One command, no clone required:</p>
             <div class="code-block">
                 <div class="code-header">
                     <div class="dot red"></div>
@@ -1113,7 +1113,7 @@
                     <div class="dot green"></div>
                     <span class="filename">copilot setup</span>
                 </div>
-<pre><code><span class="code-keyword">cp</span> integrations/copilot/.github/copilot-instructions.md <span class="code-string">~/my-project/.github/</span></code></pre>
+<pre><code><span class="code-keyword">mkdir</span> -p .github && <span class="code-keyword">curl</span> -o .github/copilot-instructions.md <span class="code-string">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md</span></code></pre>
             </div>
         </section>
 

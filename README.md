@@ -544,10 +544,16 @@ draft/
 
 ## Cursor Integration
 
-Copy `.cursorrules` to your project root:
+Download directly into your project (no clone required):
 
 ```bash
-cp /path/to/draft/integrations/cursor/.cursorrules ~/my-project/.cursorrules
+curl -o .cursorrules https://raw.githubusercontent.com/mayurpise/draft/main/integrations/cursor/.cursorrules
+```
+
+Or copy from a local clone:
+
+```bash
+cp /path/to/draft/integrations/cursor/.cursorrules .cursorrules
 ```
 
 Then use in Cursor:
@@ -561,16 +567,17 @@ See [integrations/cursor/README.md](integrations/cursor/README.md) for details.
 
 ## GitHub Copilot Integration
 
-Copy the `.github/` directory to your project root:
+Download directly into your project (no clone required):
 
 ```bash
-cp -r /path/to/draft/integrations/copilot/.github ~/my-project/.github
+mkdir -p .github
+curl -o .github/copilot-instructions.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md
 ```
 
-Or if you already have a `.github/` directory:
+Or copy from a local clone:
 
 ```bash
-cp /path/to/draft/integrations/copilot/.github/copilot-instructions.md ~/my-project/.github/
+cp /path/to/draft/integrations/copilot/.github/copilot-instructions.md .github/
 ```
 
 The instructions file works with GitHub Copilot Chat in VS Code, JetBrains, and Neovim. Commands use natural language (`draft init`, `draft new-track`) instead of `@` mentions.

@@ -208,6 +208,17 @@ cp ~/.claude/plugins/draft/integrations/cursor/.cursorrules /your-project/.curso
 
 This gives Cursor the same methodology awareness, though without slash commands.
 
+### GitHub Copilot Integration (Optional)
+
+Draft also works with GitHub Copilot via `copilot-instructions.md`:
+
+```bash
+# Copy to your project's .github/ directory
+cp ~/.claude/plugins/draft/integrations/copilot/.github/copilot-instructions.md /your-project/.github/
+```
+
+This gives Copilot the same methodology awareness. Commands use natural language (`draft init`, `draft new-track`) instead of `@` mentions.
+
 ---
 
 ## Core Workflow

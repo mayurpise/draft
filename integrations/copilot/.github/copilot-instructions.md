@@ -1029,23 +1029,26 @@ This prevents large, unreviewable code drops. Each chunk should be a coherent, r
 
 ---
 
-## Step 4: Update Progress
+## Step 4: Update Progress & Commit
+
+**Iron Law:** Every completed task gets its own commit. No batching. No skipping.
 
 After completing each task:
 
-1. Update `plan.md`:
-   - Change `[ ]` to `[x]` for the completed task
-   - Add completion note with commit SHA if available
+1. Commit FIRST (REQUIRED - non-negotiable):
+   - Stage only files changed by this task (never `git add .`)
+   - `git add <specific files>`
+   - `git commit -m "type(<track_id>): task description"`
+   - Do NOT proceed to the next task without committing
+   - Do NOT batch multiple tasks into one commit
 
-2. Update `metadata.json`:
+2. Update `plan.md`:
+   - Change `[ ]` to `[x]` for the completed task
+   - Add the commit SHA next to the task
+
+3. Update `metadata.json`:
    - Increment `tasks.completed`
    - Update `updated` timestamp
-
-3. Commit (if workflow specifies):
-```bash
-git add .
-git commit -m "feat(<track_id>): <task description>"
-```
 
 4. If `architecture.md` exists for the track:
    - Update module status markers (`[ ]` → `[~]` when first task in module starts, `[~]` → `[x]` when all tasks complete)
@@ -1496,9 +1499,14 @@ If user specifies by name/description, find the matching commits.
 
 ## Step 2: Find Related Commits
 
+**Primary method:** Read `plan.md` — every completed task has its commit SHA recorded inline. Use these SHAs directly.
+
+**Fallback method (if SHAs missing):** Search git log by track ID pattern:
+
 For Draft-managed work, commits follow pattern:
 - `feat(<track_id>): <description>`
 - `fix(<track_id>): <description>`
+- `test(<track_id>): <description>`
 - `refactor(<track_id>): <description>`
 
 ```bash
@@ -1508,6 +1516,8 @@ git log --oneline --grep="<track_id>"
 # Find commits in date range (for phase)
 git log --oneline --since="<phase_start>" --until="<phase_end>" --grep="<track_id>"
 ```
+
+**Cross-reference:** Verify SHAs from `plan.md` match the git log results. If mismatched, prefer git log as source of truth.
 
 ## Step 3: Preview Revert
 
@@ -1531,8 +1541,8 @@ Files affected:
   tests/auth/middleware.test.ts
 
 Plan.md changes:
-  Task 2.1: [x] → [ ]
-  Task 2.2: [x] → [ ]
+  Task 2.1: [x] (abc1234) → [ ]
+  Task 2.2: [x] (def5678) → [ ]
 
 ═══════════════════════════════════════════════════════════
 Proceed with revert? (yes/no)
@@ -1556,6 +1566,7 @@ git commit -m "revert(<track_id>): Revert [task/phase description]"
 
 1. Update `plan.md`:
    - Change reverted tasks from `[x]` to `[ ]`
+   - Remove the commit SHA from the reverted task line
    - Add revert note
 
 2. Update `metadata.json`:

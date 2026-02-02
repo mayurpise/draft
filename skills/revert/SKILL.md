@@ -32,9 +32,14 @@ If user specifies by name/description, find the matching commits.
 
 ## Step 2: Find Related Commits
 
+**Primary method:** Read `plan.md` — every completed task has its commit SHA recorded inline. Use these SHAs directly.
+
+**Fallback method (if SHAs missing):** Search git log by track ID pattern:
+
 For Draft-managed work, commits follow pattern:
 - `feat(<track_id>): <description>`
 - `fix(<track_id>): <description>`
+- `test(<track_id>): <description>`
 - `refactor(<track_id>): <description>`
 
 ```bash
@@ -44,6 +49,8 @@ git log --oneline --grep="<track_id>"
 # Find commits in date range (for phase)
 git log --oneline --since="<phase_start>" --until="<phase_end>" --grep="<track_id>"
 ```
+
+**Cross-reference:** Verify SHAs from `plan.md` match the git log results. If mismatched, prefer git log as source of truth.
 
 ## Step 3: Preview Revert
 
@@ -67,8 +74,8 @@ Files affected:
   tests/auth/middleware.test.ts
 
 Plan.md changes:
-  Task 2.1: [x] → [ ]
-  Task 2.2: [x] → [ ]
+  Task 2.1: [x] (abc1234) → [ ]
+  Task 2.2: [x] (def5678) → [ ]
 
 ═══════════════════════════════════════════════════════════
 Proceed with revert? (yes/no)
@@ -92,6 +99,7 @@ git commit -m "revert(<track_id>): Revert [task/phase description]"
 
 1. Update `plan.md`:
    - Change reverted tasks from `[x]` to `[ ]`
+   - Remove the commit SHA from the reverted task line
    - Add revert note
 
 2. Update `metadata.json`:

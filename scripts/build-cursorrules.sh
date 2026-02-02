@@ -3,6 +3,12 @@
 # Build .cursorrules from skill files
 # Skills become the single source of truth for Cursor integration
 #
+# Adding a new skill:
+#   1. Create skills/<name>/SKILL.md
+#   2. Add the skill name to SKILL_ORDER array below
+#   3. Add display name and trigger to the case statement
+#   4. Run this script
+#
 
 set -euo pipefail
 
@@ -10,6 +16,56 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 SKILLS_DIR="$ROOT_DIR/skills"
 OUTPUT_FILE="$ROOT_DIR/integrations/cursor/.cursorrules"
+
+# Ordered skill list — controls output order
+# Overview first, then workflow order
+SKILL_ORDER=(
+    draft
+    init
+    new-track
+    decompose
+    implement
+    coverage
+    status
+    revert
+    jira-preview
+    jira-create
+)
+
+# Display name and trigger phrase for each skill
+get_skill_header() {
+    local skill="$1"
+    case "$skill" in
+        draft)        echo "Draft Overview" ;;
+        init)         echo "Init Command" ;;
+        new-track)    echo "New Track Command" ;;
+        decompose)    echo "Decompose Command" ;;
+        implement)    echo "Implement Command" ;;
+        coverage)     echo "Coverage Command" ;;
+        status)       echo "Status Command" ;;
+        revert)       echo "Revert Command" ;;
+        jira-preview) echo "Jira Preview Command" ;;
+        jira-create)  echo "Jira Create Command" ;;
+        *)            echo "${skill^} Command" ;;
+    esac
+}
+
+get_skill_trigger() {
+    local skill="$1"
+    case "$skill" in
+        draft)        echo "\"help\" or \"@draft\"" ;;
+        init)         echo "\"init draft\" or \"@draft init\"" ;;
+        new-track)    echo "\"new feature\" or \"@draft new-track <description>\"" ;;
+        decompose)    echo "\"break into modules\" or \"@draft decompose\"" ;;
+        implement)    echo "\"implement\" or \"@draft implement\"" ;;
+        coverage)     echo "\"check coverage\" or \"@draft coverage\"" ;;
+        status)       echo "\"status\" or \"@draft status\"" ;;
+        revert)       echo "\"revert\" or \"@draft revert\"" ;;
+        jira-preview) echo "\"preview jira\" or \"@draft jira-preview [track-id]\"" ;;
+        jira-create)  echo "\"create jira\" or \"@draft jira-create [track-id]\"" ;;
+        *)            echo "\"@draft $skill\"" ;;
+    esac
+}
 
 # Extract body content from a SKILL.md file (strip YAML frontmatter)
 extract_body() {
@@ -30,9 +86,13 @@ extract_body() {
     ' "$file"
 }
 
-# Transform /draft: syntax to @draft syntax
+# Transform /draft: syntax to @draft syntax and replace dead agent references
 transform_syntax() {
-    sed -E 's|/draft:([a-z-]+)|@draft \1|g'
+    sed -E \
+        -e 's|/draft:([a-z-]+)|@draft \1|g' \
+        -e 's|See `core/agents/[a-z]+\.md`[^.]*\.?|(see Quality Disciplines section)|g' \
+        -e 's|\(see `core/agents/[a-z]+\.md`\)|(see Quality Disciplines section)|g' \
+        -e 's|`core/agents/[a-z]+\.md`|Quality Disciplines section|g'
 }
 
 # Build the complete .cursorrules file
@@ -66,9 +126,12 @@ When `draft/` exists in the project, always consider:
 
 | Command | Purpose |
 |---------|---------|
+| `@draft` | Show overview and available commands |
 | `@draft init` | Initialize project (run once) |
 | `@draft new-track <description>` | Create feature/bug track |
+| `@draft decompose` | Module decomposition with dependency mapping |
 | `@draft implement` | Execute tasks from plan |
+| `@draft coverage` | Code coverage report (target 95%+) |
 | `@draft status` | Show progress overview |
 | `@draft revert` | Git-aware rollback |
 | `@draft jira-preview [track-id]` | Generate jira-export.md for review |
@@ -82,11 +145,14 @@ Recognize these natural language patterns:
 |-----------|--------|
 | "set up the project" | Run init |
 | "new feature", "add X" | Create new track |
+| "break into modules", "decompose" | Run decompose |
 | "start implementing" | Execute implement |
+| "check coverage", "test coverage" | Run coverage |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
 | "preview jira", "export to jira" | Run jira-preview |
 | "create jira", "push to jira" | Run jira-create |
+| "help", "what commands" | Show draft overview |
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |
 
@@ -109,103 +175,29 @@ Recognize and use these throughout plan.md:
 
 HEADER
 
-    # Add each skill's content
-    echo ""
-    echo "---"
-    echo ""
-
-    # Init Command
-    if [[ -f "$SKILLS_DIR/init/SKILL.md" ]]; then
-        echo "## Init Command"
-        echo ""
-        echo "When user says \"init draft\" or \"@draft init\":"
-        echo ""
-        extract_body "$SKILLS_DIR/init/SKILL.md" | transform_syntax | tail -n +4
-    fi
-
-    echo ""
-    echo "---"
-    echo ""
-
-    # New Track Command
-    if [[ -f "$SKILLS_DIR/new-track/SKILL.md" ]]; then
-        echo "## New Track Command"
-        echo ""
-        echo "When user says \"new feature\" or \"@draft new-track <description>\":"
-        echo ""
-        extract_body "$SKILLS_DIR/new-track/SKILL.md" | transform_syntax | tail -n +4
-    fi
+    # Add each skill's content dynamically
+    for skill in "${SKILL_ORDER[@]}"; do
+        local skill_file="$SKILLS_DIR/$skill/SKILL.md"
+        if [[ -f "$skill_file" ]]; then
+            echo ""
+            echo "---"
+            echo ""
+            echo "## $(get_skill_header "$skill")"
+            echo ""
+            echo "When user says $(get_skill_trigger "$skill"):"
+            echo ""
+            extract_body "$skill_file" | transform_syntax | tail -n +4
+        else
+            echo "" >&2
+            echo "WARNING: Skill file not found: $skill_file" >&2
+        fi
+    done
 
     echo ""
     echo "---"
     echo ""
 
-    # Implement Command
-    if [[ -f "$SKILLS_DIR/implement/SKILL.md" ]]; then
-        echo "## Implement Command"
-        echo ""
-        echo "When user says \"implement\" or \"@draft implement\":"
-        echo ""
-        extract_body "$SKILLS_DIR/implement/SKILL.md" | transform_syntax | tail -n +4
-    fi
-
-    echo ""
-    echo "---"
-    echo ""
-
-    # Status Command
-    if [[ -f "$SKILLS_DIR/status/SKILL.md" ]]; then
-        echo "## Status Command"
-        echo ""
-        echo "When user says \"status\" or \"@draft status\":"
-        echo ""
-        extract_body "$SKILLS_DIR/status/SKILL.md" | transform_syntax | tail -n +4
-    fi
-
-    echo ""
-    echo "---"
-    echo ""
-
-    # Revert Command
-    if [[ -f "$SKILLS_DIR/revert/SKILL.md" ]]; then
-        echo "## Revert Command"
-        echo ""
-        echo "When user says \"revert\" or \"@draft revert\":"
-        echo ""
-        extract_body "$SKILLS_DIR/revert/SKILL.md" | transform_syntax | tail -n +4
-    fi
-
-    echo ""
-    echo "---"
-    echo ""
-
-    # Jira Preview Command
-    if [[ -f "$SKILLS_DIR/jira-preview/SKILL.md" ]]; then
-        echo "## Jira Preview Command"
-        echo ""
-        echo "When user says \"preview jira\" or \"@draft jira-preview [track-id]\":"
-        echo ""
-        extract_body "$SKILLS_DIR/jira-preview/SKILL.md" | transform_syntax | tail -n +4
-    fi
-
-    echo ""
-    echo "---"
-    echo ""
-
-    # Jira Create Command
-    if [[ -f "$SKILLS_DIR/jira-create/SKILL.md" ]]; then
-        echo "## Jira Create Command"
-        echo ""
-        echo "When user says \"create jira\" or \"@draft jira-create [track-id]\":"
-        echo ""
-        extract_body "$SKILLS_DIR/jira-create/SKILL.md" | transform_syntax | tail -n +4
-    fi
-
-    echo ""
-    echo "---"
-    echo ""
-
-    # Quality Disciplines
+    # Quality Disciplines with inlined agent summaries
     cat << 'QUALITY'
 ## Quality Disciplines
 
@@ -215,21 +207,76 @@ HEADER
 - Show output as evidence
 - Only then mark `[x]`
 
-### Systematic Debugging
+### Systematic Debugging (Debugger Agent)
 **Iron Law:** No fixes without root cause investigation first.
 
-When blocked (`[!]`):
-1. **Investigate** - Read errors, reproduce, trace (NO fixes yet)
+When blocked (`[!]`), follow the four phases IN ORDER:
+
+1. **Investigate** - Read errors, reproduce, trace data flow (NO fixes yet)
+   - Read full error message, stack trace, logs
+   - Reproduce consistently
+   - Trace data from input to error point
+   - Document what you observe
+
 2. **Analyze** - Find similar working code, list differences
+   - Compare working vs. failing cases
+   - Check and verify each assumption
+   - Narrow to the smallest change that breaks
+
 3. **Hypothesize** - Single hypothesis, smallest test
+   - One cause, one test — predict outcome before running
+   - If wrong, return to Analyze (don't try random fixes)
+
 4. **Implement** - Regression test first, then fix
+   - Write a test that fails now, will pass after fix
+   - Minimal fix for root cause only
+   - Run full test suite to confirm no breakage
+   - Document root cause in plan.md
 
-### Two-Stage Review
-At phase boundaries:
-1. **Stage 1: Spec Compliance** - Did we build what was specified?
-2. **Stage 2: Code Quality** - Is the code well-crafted?
+**Anti-patterns:** "Let me try this...", changing multiple things at once, skipping reproduction, fixing without understanding. If after 3 hypothesis cycles no root cause found: document findings, list eliminations, ask for external input.
 
-Only proceed if Stage 1 passes. Fix Critical issues before proceeding.
+### Two-Stage Review (Reviewer Agent)
+At phase boundaries, run BOTH stages in order:
+
+**Stage 1: Spec Compliance** — Did we build what was specified?
+- All functional requirements implemented
+- All acceptance criteria met
+- No missing features, no scope creep
+- Edge cases and error scenarios addressed
+
+**If Stage 1 FAILS:** Stop. List gaps and return to implementation.
+
+**Stage 2: Code Quality** (only if Stage 1 passes) — Is the code well-crafted?
+- Follows project patterns (tech-stack.md)
+- Appropriate error handling
+- Tests cover real logic (not implementation details)
+- No obvious performance or security issues
+
+**Issue Classification:**
+- **Critical** — Blocks release, breaks functionality, security issue → Must fix before proceeding
+- **Important** — Degrades quality, creates tech debt → Should fix before phase complete
+- **Minor** — Style, optimization → Note for later, don't block
+
+Only proceed to next phase if Stage 1 passes and no Critical issues remain.
+
+### Architecture Agent (when architecture mode enabled)
+
+**Module Decomposition Rules:**
+1. Single Responsibility — each module owns one concern
+2. Size Constraint — 1-3 files per module; split if more
+3. Clear API Boundary — every module has a defined public interface
+4. Minimal Coupling — communicate through interfaces, not internals
+5. Testable in Isolation — each module can be unit-tested independently
+
+**Cycle-Breaking:** When circular dependencies detected:
+- Extract shared interface into a new `<concern>-types` or `<concern>-core` module
+- Invert dependency (accept callback/interface instead of importing)
+- Merge if modules are actually one concern split artificially
+
+**Story Lifecycle:**
+1. Placeholder during `@draft decompose` → "[placeholder]" in architecture.md
+2. Written during `@draft implement` → code comment at file top, summary in architecture.md
+3. Updated during refactoring → code comment is source of truth
 
 ### Red Flags - STOP if you're:
 - Making completion claims without running verification
@@ -293,6 +340,15 @@ main() {
     echo "Generated: $OUTPUT_FILE"
     echo "Lines: $line_count"
 
+    # Count skills included
+    local skill_count=0
+    for skill in "${SKILL_ORDER[@]}"; do
+        if [[ -f "$SKILLS_DIR/$skill/SKILL.md" ]]; then
+            skill_count=$((skill_count + 1))
+        fi
+    done
+    echo "Skills: $skill_count/${#SKILL_ORDER[@]}"
+
     # Verify no /draft: references remain
     local old_syntax_count
     old_syntax_count=$(grep -c "/draft:" "$OUTPUT_FILE" 2>/dev/null || true)
@@ -310,6 +366,18 @@ main() {
     new_syntax_count=$(grep -c "@draft" "$OUTPUT_FILE" 2>/dev/null || true)
     new_syntax_count=${new_syntax_count:-0}
     echo "Found $new_syntax_count '@draft' references"
+
+    # Verify no dead agent references
+    local dead_refs
+    dead_refs=$(grep -c "See \`core/agents/" "$OUTPUT_FILE" 2>/dev/null || true)
+    dead_refs=${dead_refs:-0}
+
+    if [[ "$dead_refs" -gt 0 ]]; then
+        echo "WARNING: Found $dead_refs dead 'See core/agents/' references"
+        exit 1
+    else
+        echo "Agent refs check: OK (no dead references)"
+    fi
 }
 
 main "$@"

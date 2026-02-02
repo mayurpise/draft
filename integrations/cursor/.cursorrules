@@ -26,9 +26,12 @@ When `draft/` exists in the project, always consider:
 
 | Command | Purpose |
 |---------|---------|
+| `@draft` | Show overview and available commands |
 | `@draft init` | Initialize project (run once) |
 | `@draft new-track <description>` | Create feature/bug track |
+| `@draft decompose` | Module decomposition with dependency mapping |
 | `@draft implement` | Execute tasks from plan |
+| `@draft coverage` | Code coverage report (target 95%+) |
 | `@draft status` | Show progress overview |
 | `@draft revert` | Git-aware rollback |
 | `@draft jira-preview [track-id]` | Generate jira-export.md for review |
@@ -42,11 +45,14 @@ Recognize these natural language patterns:
 |-----------|--------|
 | "set up the project" | Run init |
 | "new feature", "add X" | Create new track |
+| "break into modules", "decompose" | Run decompose |
 | "start implementing" | Execute implement |
+| "check coverage", "test coverage" | Run coverage |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
 | "preview jira", "export to jira" | Run jira-preview |
 | "create jira", "push to jira" | Run jira-create |
+| "help", "what commands" | Show draft overview |
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |
 
@@ -67,6 +73,78 @@ Recognize and use these throughout plan.md:
 - `[x]` - Completed
 - `[!]` - Blocked
 
+
+---
+
+## Draft Overview
+
+When user says "help" or "@draft":
+
+Draft is a methodology for structured software development: **Context → Spec & Plan → Implement**
+
+## Available Commands
+
+| Command | Purpose |
+|---------|---------|
+| `@draft init` | Initialize project (run once) |
+| `@draft new-track` | Create feature/bug track with spec and plan |
+| `@draft implement` | Execute tasks from plan with TDD |
+| `@draft status` | Show progress overview |
+| `@draft revert` | Git-aware rollback |
+| `@draft decompose` | Module decomposition with dependency mapping |
+| `@draft coverage` | Code coverage report (target 95%+) |
+
+## Quick Start
+
+1. **First time?** Run `@draft init` to initialize your project
+2. **Starting a feature?** Run `@draft new-track "your feature description"`
+3. **Ready to code?** Run `@draft implement` to execute tasks
+4. **Check progress?** Run `@draft status`
+
+## Core Workflow
+
+Every feature follows this lifecycle:
+1. **Setup** - Initialize project context (once per project)
+2. **New Track** - Create specification and plan
+3. **Implement** - Execute tasks with TDD workflow
+4. **Verify** - Confirm acceptance criteria met
+
+## Context Files
+
+When `draft/` exists, these files guide development:
+- `draft/product.md` - Product vision and goals
+- `draft/tech-stack.md` - Technical constraints
+- `draft/workflow.md` - TDD and commit preferences
+- `draft/tracks.md` - Active work items
+
+## Status Markers
+
+Used throughout plan.md files:
+- `[ ]` - Pending
+- `[~]` - In Progress
+- `[x]` - Completed
+- `[!]` - Blocked
+
+## Intent Mapping
+
+You can also use natural language:
+
+| Say this... | Runs this |
+|-------------|-----------|
+| "set up the project" | `@draft init` |
+| "new feature", "add X" | `@draft new-track` |
+| "start implementing" | `@draft implement` |
+| "what's the status" | `@draft status` |
+| "undo", "revert" | `@draft revert` |
+| "break into modules" | `@draft decompose` |
+| "check coverage" | `@draft coverage` |
+
+## Need Help?
+
+- Run `/draft` (this command) for overview
+- Run `@draft status` to see current state
+- Check `draft/tracks/<track_id>/spec.md` for requirements
+- Check `draft/tracks/<track_id>/plan.md` for task details
 
 ---
 
@@ -223,6 +301,34 @@ Create `draft/workflow.md` based on team preferences:
 ```
 
 Ask about their TDD preference (strict/flexible/none) and commit style.
+
+## Step 5.5: Architecture Mode (Optional)
+
+Ask the developer: "Enable Architecture Mode? This adds module decomposition, algorithm stories, execution state design, function skeletons, and coverage checkpoints to ALL tracks. Recommended for complex multi-module projects."
+
+### If Yes:
+
+Add an Architecture Mode section to `draft/workflow.md`:
+
+```markdown
+## Architecture Mode
+- Enabled: Yes
+- Coverage target: 95%
+
+### What this enables:
+- `@draft decompose` to break project/tracks into modules
+- Story writing (algorithm documentation) before implementation
+- Execution state design before coding
+- Function skeleton generation and approval
+- ~200-line implementation chunk reviews
+- `@draft coverage` for test coverage measurement
+```
+
+Suggest: "Run `@draft decompose project` after creating your first track to set up project-wide module architecture."
+
+### If No:
+
+Skip. Standard Draft workflow continues. Developer can enable later by adding `Architecture Mode` section to `workflow.md` manually.
 
 ## Step 6: Initialize Tracks
 
@@ -475,6 +581,256 @@ Next: Review the spec and plan, then run `@draft implement` to begin."
 
 ---
 
+## Decompose Command
+
+When user says "break into modules" or "@draft decompose":
+
+You are decomposing a project or track into modules with clear responsibilities, dependencies, and implementation order.
+
+## Red Flags - STOP if you're:
+
+- Defining modules without understanding the codebase
+- Creating modules with circular dependencies
+- Making modules too large (>3 files) or too small (single function)
+- Skipping dependency analysis
+- Not waiting for developer approval at checkpoints
+
+---
+
+## Step 1: Determine Scope
+
+Check for an argument:
+- `project` or no argument with no active track → **Project-wide** decomposition → `draft/architecture.md`
+- Track ID or active track exists → **Track-scoped** decomposition → `draft/tracks/<id>/architecture.md`
+
+## Step 2: Load Context
+
+1. Read `draft/product.md` for product understanding
+2. Read `draft/tech-stack.md` for technical patterns
+3. If track-scoped:
+   - Read track's `spec.md` for requirements
+   - Read track's `plan.md` for existing task breakdown
+
+For brownfield projects, scan the existing codebase using these concrete steps:
+
+### Codebase Scanning Patterns
+
+**Directory structure** — Map top-level organization:
+```bash
+ls -d src/*/ lib/*/ app/*/ packages/*/ 2>/dev/null
+```
+
+**Entry points** — Find main files and exports:
+- Look for: `index.ts`, `main.ts`, `app.ts`, `mod.rs`, `__init__.py`, `main.go`
+- Check `package.json` `main`/`exports` fields, `pyproject.toml` entry points, `go.mod` module path
+
+**Existing module boundaries** — Identify by:
+- Directory-per-feature patterns (e.g., `src/auth/`, `src/users/`)
+- Package files (`package.json` in subdirs, `__init__.py`, `go` package declarations)
+- Barrel exports (`index.ts` re-exporting from a directory)
+
+**Dependency patterns** — Trace imports:
+- Search for `import` / `require` / `from` statements across source files
+- Identify which directories import from which other directories
+- Flag cross-cutting imports (e.g., `utils/` imported everywhere)
+
+**File type filters by language:**
+| Language | Source Extensions | Config Files |
+|----------|-------------------|--------------|
+| TypeScript/JS | `*.ts`, `*.tsx`, `*.js`, `*.jsx` | `tsconfig.json`, `package.json` |
+| Python | `*.py` | `pyproject.toml`, `setup.py`, `requirements.txt` |
+| Go | `*.go` | `go.mod`, `go.sum` |
+| Rust | `*.rs` | `Cargo.toml` |
+
+**What to ignore:** `node_modules/`, `__pycache__/`, `target/`, `dist/`, `build/`, `.git/`, vendored dependencies. Always respect `.gitignore` and `.claudeignore`.
+
+## Step 3: Module Identification
+
+Propose a module breakdown through dialogue:
+
+For each module, define:
+- **Name** - Short, descriptive identifier
+- **Responsibility** - One sentence: what this module owns
+- **Files** - Expected source files (existing or to be created)
+- **API Surface** - Public functions, classes, or interfaces
+- **Dependencies** - Which other modules it imports from
+- **Complexity** - Low / Medium / High
+
+### Module Guidelines (see Quality Disciplines section)
+
+- Each module should have a single responsibility
+- Target 1-3 files per module
+- Every module needs a clear API boundary
+- Modules should be testable in isolation
+- Each module typically contains: API, control flow, execution state, functions
+
+### CHECKPOINT (MANDATORY)
+
+**STOP.** Present the module breakdown to the developer.
+
+```
+═══════════════════════════════════════════════════════════
+                   MODULE BREAKDOWN
+═══════════════════════════════════════════════════════════
+
+Scope: [Project / Track: <track-id>]
+
+MODULE 1: [name]
+  Responsibility: [one sentence]
+  Files: [file list]
+  API: [public interface summary]
+  Dependencies: [none / module names]
+  Complexity: [Low/Medium/High]
+
+MODULE 2: [name]
+  ...
+
+═══════════════════════════════════════════════════════════
+```
+
+**Wait for developer approval.** Developer may add, remove, rename, or reorganize modules.
+
+## Step 4: Dependency Mapping
+
+After modules are approved:
+
+1. **Map dependencies** - For each module, list what it imports from other modules
+2. **Detect cycles** - If circular dependencies exist, propose how to break them (extract shared interface into new module)
+3. **Generate ASCII diagram** - Visual representation of dependency graph
+4. **Generate dependency table** - Tabular format for reference
+5. **Determine implementation order** - Topological sort (implement leaves first, then dependents)
+
+### CHECKPOINT (MANDATORY)
+
+**STOP.** Present the dependency diagram and implementation order.
+
+```
+═══════════════════════════════════════════════════════════
+                 DEPENDENCY ANALYSIS
+═══════════════════════════════════════════════════════════
+
+DIAGRAM
+─────────────────────────────────────────────────────────
+[auth] ──> [database]
+   │            │
+   └──> [config] <──┘
+            │
+      [logging] (no deps)
+
+TABLE
+─────────────────────────────────────────────────────────
+Module     | Depends On        | Depended By
+---------- | ----------------- | -----------------
+logging    | -                 | auth, database, config
+config     | logging           | auth, database
+database   | config, logging   | auth
+auth       | database, config  | -
+
+IMPLEMENTATION ORDER
+─────────────────────────────────────────────────────────
+1. logging (leaf - no dependencies)
+2. config (depends on: logging)
+3. database (depends on: config, logging)
+4. auth (depends on: database, config)
+
+Parallel opportunities: config and database can start after logging.
+═══════════════════════════════════════════════════════════
+```
+
+**Wait for developer approval.**
+
+## Step 5: Generate architecture.md
+
+Write the architecture document using the template from `core/templates/architecture.md`:
+
+**Location:**
+- Project-wide: `draft/architecture.md`
+- Track-scoped: `draft/tracks/<id>/architecture.md`
+
+**Contents:**
+- Overview section (what the system/feature does, inputs, outputs, constraints)
+- Module definitions with all fields from Step 3
+- Dependency diagram from Step 4
+- Dependency table from Step 4
+- Implementation order from Step 4
+- Story placeholder per module (see Quality Disciplines section Story Lifecycle for how this gets populated during `@draft implement`)
+- Status marker per module (`[ ] Not Started`)
+- Notes section for architecture decisions
+
+## Step 6: Update Plan (Track-Scoped Only)
+
+If this is a track-scoped decomposition and a `plan.md` exists:
+
+1. Review existing phases against the module implementation order
+2. Propose restructuring phases to align with module boundaries
+3. Each module becomes a phase or maps to existing phases
+
+### Plan Merge Rules
+
+When restructuring plan.md around modules, follow these rules for existing tasks:
+
+**Completed tasks `[x]`:** Preserve exactly as-is. Map them to the appropriate module phase. Do not rename, reorder, or modify. Add a note: `(preserved from original plan)`.
+
+**In-progress tasks `[~]`:** Map to the appropriate module phase. Flag for developer review if the task spans multiple modules:
+```markdown
+- [~] **Task 2.1:** Original task description
+  - ⚠ REVIEW: This task may need splitting across modules [auth] and [database]
+```
+
+**Pending tasks `[ ]`:** Remap freely to module phases. Split tasks that span module boundaries into per-module tasks. Preserve the original task description in the new task.
+
+**Blocked tasks `[!]`:** Preserve the blocked status and reason. Map to appropriate module. If the blocker is in a different module, add a cross-module dependency note.
+
+**Conflict handling:** If a task doesn't map cleanly to any module:
+1. List it under a `### Unmapped Tasks` section at the end
+2. Flag it for developer decision
+3. Never silently drop tasks
+
+### CHECKPOINT (MANDATORY)
+
+**STOP.** Present the updated plan structure.
+
+```
+PROPOSED PLAN RESTRUCTURE
+─────────────────────────────────────────────────────────
+Phase 1: [Module A] (Foundation)
+  - Task 1.1: [existing or new task]
+  - Task 1.2: ...
+
+Phase 2: [Module B] (depends on Module A)
+  - Task 2.1: ...
+  ...
+```
+
+**Wait for developer approval before writing changes to plan.md.**
+
+## Completion
+
+Announce:
+```
+Architecture decomposition complete.
+
+Created: [path to architecture.md]
+Modules: [count]
+Implementation order: [module names in order]
+
+Next steps:
+- Review architecture.md and edit as needed
+- Run @draft implement to start building (stories, execution state,
+  and skeleton checkpoints will activate automatically)
+- Run @draft coverage after implementation to verify test quality
+```
+
+## Updating architecture.md
+
+When revisiting decomposition (running `@draft decompose` on an existing architecture.md):
+1. Read the existing architecture.md
+2. Ask developer what changed (new modules, removed modules, restructured boundaries)
+3. Follow the same checkpoint process for changes
+4. Update the document, preserving completed module statuses and stories
+
+---
+
 ## Implement Command
 
 When user says "implement" or "@draft implement":
@@ -488,6 +844,8 @@ You are implementing tasks from the active track's plan following the TDD workfl
 3. Read the track's `plan.md` for task list
 4. Read `draft/workflow.md` for TDD and commit preferences
 5. Read `draft/tech-stack.md` for technical context
+6. Check if `architecture_mode: true` in `workflow.md` → enables pre-implementation design steps
+7. If architecture mode is on, check for `draft/tracks/<id>/architecture.md` or `draft/architecture.md`
 
 If no active track found:
 - Tell user: "No active track found. Run `@draft new-track` to create one."
@@ -502,9 +860,99 @@ Scan `plan.md` for the first uncompleted task:
 
 If resuming `[~]` task, check for partial work.
 
-## Step 3: Execute Task (TDD Workflow)
+## Step 2.5: Write Story (Architecture Mode Only)
 
-For each task, follow this workflow based on `workflow.md`:
+**Activation:** Only runs when `architecture_mode: true` is set in `workflow.md`.
+
+When the next task involves creating or substantially modifying a code file:
+
+1. **Check if file already has a Story comment** - If yes, skip this step
+2. **Skip for trivial tasks** - Config files, type definitions, simple one-liners
+3. **Write a natural-language algorithm description** as a comment block at the top of the target file
+
+### Story Format
+
+```
+// Story: [Module/File Name]
+//
+// Input:  [what this module/function receives]
+// Process:
+//   1. [first algorithmic step]
+//   2. [second algorithmic step]
+//   3. [third algorithmic step]
+// Output: [what this module/function produces]
+//
+// Dependencies: [what this module relies on]
+// Side effects: [any mutations, I/O, or external calls]
+```
+
+Adapt comment syntax to the language (`#` for Python, `/* */` for CSS, etc.).
+
+### CHECKPOINT (MANDATORY)
+
+**STOP.** Present the Story to the developer for review.
+
+- Developer may refine, modify, or rewrite the Story
+- **Do NOT proceed to execution state or implementation until Story is approved**
+- Developer can say "skip" to bypass this checkpoint for the current task
+
+(see Quality Disciplines section)
+
+---
+
+## Step 3: Execute Task
+
+### Step 3.0: Design Before Code (Architecture Mode Only)
+
+**Activation:** Only runs when `architecture_mode: true` is set in `workflow.md`.
+**Skip for trivial tasks** - Config updates, type-only changes, single-function tasks where the design is obvious.
+
+#### 3.0a. Execution State Design
+
+Study the control flow for the task and propose intermediate state variables:
+
+1. Read the Story (from Step 2.5) to understand the Input -> Output path
+2. Study similar patterns in the existing codebase
+3. Propose execution state: input state, intermediate state, output state, error state
+
+Present in this format:
+```
+EXECUTION STATE: [Task/Module Name]
+─────────────────────────────────────────────────────────
+Input State:
+  - variableName: Type — purpose
+
+Intermediate State:
+  - variableName: Type — purpose
+
+Output State:
+  - variableName: Type — purpose
+
+Error State:
+  - variableName: Type — purpose
+```
+
+**CHECKPOINT (MANDATORY):** Present execution state to developer. Wait for approval. Developer may add, remove, or modify state variables. Developer can say "skip" to bypass.
+
+#### 3.0b. Function Skeleton Generation
+
+Generate function/method stubs based on the approved execution state:
+
+1. Create stubs with complete signatures (all parameters, return types)
+2. Include a one-line docstring describing purpose and when it's called
+3. No implementation bodies — use `// TODO`, `pass`, `unimplemented!()`, etc.
+4. Order functions to match control flow sequence
+5. Follow naming conventions from `tech-stack.md`
+
+**CHECKPOINT (MANDATORY):** Present skeletons to developer. Wait for approval. Developer may rename functions, change signatures, add/remove methods. Developer can say "skip" to bypass.
+
+(see Quality Disciplines section)
+
+---
+
+### Step 3.1: Implement (TDD Workflow)
+
+For each task, follow this workflow based on `workflow.md`. If skeletons were generated in Step 3.0b, fill them in using the TDD cycle below.
 
 ### If TDD Enabled:
 
@@ -551,6 +999,23 @@ For each task, follow this workflow based on `workflow.md`:
 3. Announce: "Implementation complete"
 ```
 
+### Implementation Chunk Limit (Architecture Mode Only)
+
+**Activation:** Only applies when `architecture_mode: true` is set in `workflow.md`.
+
+If the implementation diff for a task exceeds **~200 lines**:
+
+1. **STOP** after ~200 lines of implementation
+2. Present the chunk for developer review
+3. **CHECKPOINT (MANDATORY):** Wait for developer approval of the chunk
+4. Commit the approved chunk: `feat(<track_id>): <task description> (chunk N)`
+5. Continue with the next chunk
+6. Repeat until the task is fully implemented
+
+This prevents large, unreviewable code drops. Each chunk should be a coherent, reviewable unit.
+
+---
+
 ## Step 4: Update Progress
 
 After completing each task:
@@ -568,6 +1033,10 @@ After completing each task:
 git add .
 git commit -m "feat(<track_id>): <task description>"
 ```
+
+4. If `architecture.md` exists for the track:
+   - Update module status markers (`[ ]` → `[~]` when first task in module starts, `[~]` → `[x]` when all tasks complete)
+   - Fill in Story placeholders with the approved story from Step 2.5
 
 ## Verification Gate (REQUIRED)
 
@@ -611,7 +1080,7 @@ When all tasks in a phase are `[x]`:
 - Verify tests cover real logic
 - Classify issues: Critical (must fix) > Important (should fix) > Minor (note)
 
-See `core/agents/reviewer.md` for detailed review process.
+(see Quality Disciplines section)
 
 2. Run verification steps from plan (tests, builds)
 3. Present review findings to user
@@ -650,7 +1119,7 @@ Next: Run `@draft status` to see project overview."
 **If blocked:**
 - Mark task as `[!]` Blocked
 - Add reason in plan.md
-- **REQUIRED:** Follow systematic debugging process (see `core/agents/debugger.md`)
+- **REQUIRED:** Follow systematic debugging process (see Quality Disciplines section)
   1. **Investigate** - Read errors, reproduce, trace (NO fixes yet)
   2. **Analyze** - Find similar working code, list differences
   3. **Hypothesize** - Single hypothesis, smallest test
@@ -681,6 +1150,190 @@ Overall: X% complete
 
 ---
 
+## Coverage Command
+
+When user says "check coverage" or "@draft coverage":
+
+You are computing and reporting code coverage for the active track or a specific module. This complements the TDD workflow — TDD is the process (write test, implement, refactor), coverage is the measurement (how much code do those tests exercise).
+
+## Red Flags - STOP if you're:
+
+- Reporting coverage without actually running the coverage tool
+- Making up coverage percentages
+- Skipping uncovered line analysis
+- Not presenting the report for developer approval
+- Treating this as a replacement for TDD (it's not — TDD stays in `@draft implement`)
+
+---
+
+## Step 1: Load Context
+
+1. Read `draft/tech-stack.md` for test framework and language info
+2. Find active track from `draft/tracks.md`
+3. If track has `architecture.md`, identify current module for scoping
+4. Read `draft/workflow.md` for coverage target (default: 95%)
+
+If no active track and no argument provided:
+- Tell user: "No active track. Provide a path or track ID, or run `@draft new-track` first."
+
+## Step 2: Detect Coverage Tool
+
+Auto-detect from tech stack:
+
+| Language | Coverage Tools |
+|----------|---------------|
+| JavaScript/TypeScript | `jest --coverage`, `vitest --coverage`, `c8`, `nyc` |
+| Python | `pytest --cov`, `coverage run`, `coverage.py` |
+| Go | `go test -coverprofile=coverage.out` |
+| Rust | `cargo tarpaulin`, `cargo llvm-cov` |
+| C/C++ | `gcov`, `lcov` |
+| Java/Kotlin | `jacoco`, `gradle jacocoTestReport` |
+| Ruby | `simplecov` |
+
+**Detection order:**
+1. Check `tech-stack.md` for explicit testing section
+2. Check config files (`jest.config.*`, `vitest.config.*`, `pytest.ini`, `setup.cfg`, `pyproject.toml`, `.nycrc`)
+3. Check `package.json` scripts for coverage commands
+4. If not detectable, ask the developer which tool and command to use
+
+## Step 3: Determine Scope
+
+**Priority order:**
+1. If argument provided (path or module name): use as scope filter
+2. If track has `architecture.md` with an in-progress module: scope to that module's files
+3. If active track exists: scope to files changed in the track (use `git diff` against base branch)
+4. Fallback: run coverage for entire project
+
+Build the coverage command with the appropriate scope/filter flags.
+
+## Step 4: Run Coverage
+
+1. Execute the coverage command
+2. Capture full output
+3. If command fails:
+   - Check if dependencies are installed (test framework, coverage plugin)
+   - Suggest installation command
+   - Ask developer to fix and retry
+
+## Step 5: Parse and Present Report
+
+Parse coverage output and present in a standardized format:
+
+```
+═══════════════════════════════════════════════════════════
+                     COVERAGE REPORT
+═══════════════════════════════════════════════════════════
+Track: [track-id]
+Module: [module name, if applicable]
+Target: [from workflow.md, default 95%]
+
+SUMMARY
+─────────────────────────────────────────────────────────
+Overall: 87.3% (target: 95%)  ← BELOW TARGET
+
+PER-FILE BREAKDOWN
+─────────────────────────────────────────────────────────
+src/auth/middleware.ts    96.2%  PASS
+src/auth/jwt.ts           72.1%  FAIL
+src/auth/types.ts        100.0%  PASS
+
+UNCOVERED LINES
+─────────────────────────────────────────────────────────
+src/auth/jwt.ts:45-52    Error handler for malformed token
+src/auth/jwt.ts:78       Defensive null check (unreachable via public API)
+
+═══════════════════════════════════════════════════════════
+```
+
+## Step 6: Analyze Gaps
+
+For files below target:
+
+1. **Identify uncovered lines** - List specific line ranges and what they contain
+2. **Classify each gap:**
+   - **Testable** - Can and should be covered. Suggest specific test to write.
+   - **Defensive** - Assertions, error handlers for impossible states. Acceptable to leave uncovered.
+   - **Infrastructure** - Framework boilerplate, main entry points. Usually acceptable.
+3. **Suggest tests** for testable gaps:
+   ```
+   SUGGESTED TESTS
+   ─────────────────────────────────────────────────────────
+   1. Test malformed JWT token handling (jwt.ts:45-52)
+      - Input: token with invalid signature
+      - Expected: throws AuthError with code INVALID_TOKEN
+
+   2. Test expired token rejection (jwt.ts:60-65)
+      - Input: token with exp in the past
+      - Expected: throws AuthError with code TOKEN_EXPIRED
+   ```
+
+## Step 7: Developer Review
+
+### CHECKPOINT (MANDATORY)
+
+**STOP.** Present the full coverage report and gap analysis.
+
+Ask developer:
+- Accept current coverage? (if at or above target)
+- Write additional tests for testable gaps?
+- Justify and document acceptable uncovered lines?
+- Adjust coverage target for this track?
+
+**Wait for developer approval before recording results.**
+
+## Step 8: Record Results
+
+After developer approves:
+
+1. **Update plan.md** - Add coverage note to the relevant phase:
+   ```markdown
+   **Coverage:** 96.2% (target: 95%) - PASS
+   - Uncovered: defensive null checks in jwt.ts (justified)
+   ```
+
+2. **Update architecture.md** (if exists) - Add coverage to module status:
+   ```markdown
+   - **Status:** [x] Complete (Coverage: 96.2%)
+   ```
+
+3. **Update metadata.json** - Add coverage field if not present:
+   ```json
+   {
+     "coverage": {
+       "overall": 96.2,
+       "target": 95,
+       "timestamp": "2025-01-15T10:30:00Z"
+     }
+   }
+   ```
+
+## Completion
+
+Announce:
+```
+Coverage report complete.
+
+Overall: [percentage]% (target: [target]%)
+Status: [PASS / BELOW TARGET]
+Files analyzed: [count]
+Gaps documented: [count testable] testable, [count justified] justified
+
+Results recorded in:
+- plan.md (phase notes)
+- architecture.md (module status) [if applicable]
+- metadata.json (coverage data)
+```
+
+## Re-running Coverage
+
+When coverage is run again on the same track/module:
+1. Compare with previous results
+2. Show delta: "Coverage improved from 87.3% to 96.2% (+8.9%)"
+3. Highlight newly covered lines
+4. Update all records with latest results
+
+---
+
 ## Status Command
 
 When user says "status" or "@draft status":
@@ -705,6 +1358,8 @@ Display a comprehensive overview of project progress.
 2. For each active track, read:
    - `draft/tracks/<id>/metadata.json` for stats
    - `draft/tracks/<id>/plan.md` for task status
+   - `draft/tracks/<id>/architecture.md` for module status (if exists)
+3. Check for project-wide `draft/architecture.md` (if exists)
 
 ## Output Format
 
@@ -732,6 +1387,12 @@ ACTIVE TRACKS
   Phase:  0/2
   Tasks:  0/6 complete
 
+MODULES (if architecture.md exists)
+─────────────────────────────────────────────────────────
+Module A         [x] Complete  (Coverage: 96.2%)
+Module B         [~] In Progress - 3/5 tasks
+Module C         [ ] Not Started
+
 BLOCKED ITEMS
 ─────────────────────────────────────────────────────────
 - [track-id-1] Task 2.3: [blocked reason]
@@ -748,6 +1409,21 @@ Completed:        5 (28%)
 Blocked:          1
 ═══════════════════════════════════════════════════════════
 ```
+
+## Module Reporting
+
+When `architecture.md` exists for a track (track-level or project-level):
+
+1. Read the architecture.md module definitions
+2. For each module, determine status from its status marker:
+   - `[ ]` Not Started
+   - `[~]` In Progress — count completed vs total tasks mapped to this module
+   - `[x]` Complete — include coverage percentage if recorded
+   - `[!]` Blocked — include reason
+3. Display in the MODULES section of the track report
+4. If project-wide `draft/architecture.md` exists, show a project-level module summary after QUICK STATS
+
+---
 
 ## If No Tracks
 
@@ -1305,21 +1981,76 @@ Already-created issues will be detected by keys in jira-export.md.
 - Show output as evidence
 - Only then mark `[x]`
 
-### Systematic Debugging
+### Systematic Debugging (Debugger Agent)
 **Iron Law:** No fixes without root cause investigation first.
 
-When blocked (`[!]`):
-1. **Investigate** - Read errors, reproduce, trace (NO fixes yet)
+When blocked (`[!]`), follow the four phases IN ORDER:
+
+1. **Investigate** - Read errors, reproduce, trace data flow (NO fixes yet)
+   - Read full error message, stack trace, logs
+   - Reproduce consistently
+   - Trace data from input to error point
+   - Document what you observe
+
 2. **Analyze** - Find similar working code, list differences
+   - Compare working vs. failing cases
+   - Check and verify each assumption
+   - Narrow to the smallest change that breaks
+
 3. **Hypothesize** - Single hypothesis, smallest test
+   - One cause, one test — predict outcome before running
+   - If wrong, return to Analyze (don't try random fixes)
+
 4. **Implement** - Regression test first, then fix
+   - Write a test that fails now, will pass after fix
+   - Minimal fix for root cause only
+   - Run full test suite to confirm no breakage
+   - Document root cause in plan.md
 
-### Two-Stage Review
-At phase boundaries:
-1. **Stage 1: Spec Compliance** - Did we build what was specified?
-2. **Stage 2: Code Quality** - Is the code well-crafted?
+**Anti-patterns:** "Let me try this...", changing multiple things at once, skipping reproduction, fixing without understanding. If after 3 hypothesis cycles no root cause found: document findings, list eliminations, ask for external input.
 
-Only proceed if Stage 1 passes. Fix Critical issues before proceeding.
+### Two-Stage Review (Reviewer Agent)
+At phase boundaries, run BOTH stages in order:
+
+**Stage 1: Spec Compliance** — Did we build what was specified?
+- All functional requirements implemented
+- All acceptance criteria met
+- No missing features, no scope creep
+- Edge cases and error scenarios addressed
+
+**If Stage 1 FAILS:** Stop. List gaps and return to implementation.
+
+**Stage 2: Code Quality** (only if Stage 1 passes) — Is the code well-crafted?
+- Follows project patterns (tech-stack.md)
+- Appropriate error handling
+- Tests cover real logic (not implementation details)
+- No obvious performance or security issues
+
+**Issue Classification:**
+- **Critical** — Blocks release, breaks functionality, security issue → Must fix before proceeding
+- **Important** — Degrades quality, creates tech debt → Should fix before phase complete
+- **Minor** — Style, optimization → Note for later, don't block
+
+Only proceed to next phase if Stage 1 passes and no Critical issues remain.
+
+### Architecture Agent (when architecture mode enabled)
+
+**Module Decomposition Rules:**
+1. Single Responsibility — each module owns one concern
+2. Size Constraint — 1-3 files per module; split if more
+3. Clear API Boundary — every module has a defined public interface
+4. Minimal Coupling — communicate through interfaces, not internals
+5. Testable in Isolation — each module can be unit-tested independently
+
+**Cycle-Breaking:** When circular dependencies detected:
+- Extract shared interface into a new `<concern>-types` or `<concern>-core` module
+- Invert dependency (accept callback/interface instead of importing)
+- Merge if modules are actually one concern split artificially
+
+**Story Lifecycle:**
+1. Placeholder during `@draft decompose` → "[placeholder]" in architecture.md
+2. Written during `@draft implement` → code comment at file top, summary in architecture.md
+3. Updated during refactoring → code comment is source of truth
 
 ### Red Flags - STOP if you're:
 - Making completion claims without running verification

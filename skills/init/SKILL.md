@@ -155,6 +155,34 @@ Create `draft/workflow.md` based on team preferences:
 
 Ask about their TDD preference (strict/flexible/none) and commit style.
 
+## Step 5.5: Architecture Mode (Optional)
+
+Ask the developer: "Enable Architecture Mode? This adds module decomposition, algorithm stories, execution state design, function skeletons, and coverage checkpoints to ALL tracks. Recommended for complex multi-module projects."
+
+### If Yes:
+
+Add an Architecture Mode section to `draft/workflow.md`:
+
+```markdown
+## Architecture Mode
+- Enabled: Yes
+- Coverage target: 95%
+
+### What this enables:
+- `/draft:decompose` to break project/tracks into modules
+- Story writing (algorithm documentation) before implementation
+- Execution state design before coding
+- Function skeleton generation and approval
+- ~200-line implementation chunk reviews
+- `/draft:coverage` for test coverage measurement
+```
+
+Suggest: "Run `/draft:decompose project` after creating your first track to set up project-wide module architecture."
+
+### If No:
+
+Skip. Standard Draft workflow continues. Developer can enable later by adding `Architecture Mode` section to `workflow.md` manually.
+
 ## Step 6: Initialize Tracks
 
 Create empty `draft/tracks.md`:

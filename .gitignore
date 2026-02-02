@@ -16,3 +16,6 @@ Thumbs.db
 # Dependencies
 package-lock.json
 node_modules/
+AGENTS.md
+CLOUDE.md
+/draft/

@@ -202,7 +202,10 @@ You should see the list of available Draft commands. If not, check that the plug
 Draft also works as a Cursor rules file:
 
 ```bash
-# Copy .cursorrules to your project root
+# Download directly (no clone required)
+curl -o .cursorrules https://raw.githubusercontent.com/mayurpise/draft/main/integrations/cursor/.cursorrules
+
+# Or copy from a local clone
 cp ~/.claude/plugins/draft/integrations/cursor/.cursorrules /your-project/.cursorrules
 ```
 
@@ -213,7 +216,11 @@ This gives Cursor the same methodology awareness, though without slash commands.
 Draft also works with GitHub Copilot via `copilot-instructions.md`:
 
 ```bash
-# Copy to your project's .github/ directory
+# Download directly (no clone required)
+mkdir -p .github
+curl -o .github/copilot-instructions.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md
+
+# Or copy from a local clone
 cp ~/.claude/plugins/draft/integrations/copilot/.github/copilot-instructions.md /your-project/.github/
 ```
 

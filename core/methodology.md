@@ -140,6 +140,62 @@ The overhead is constant (~20% for simple tasks). The savings scale with:
 
 For critical product development, Draft isn't overhead — it's risk mitigation.
 
+## Installation & Getting Started
+
+### Prerequisites
+
+- **Claude Code CLI** — Install from [claude.ai/code](https://claude.ai/code) or via `npm install -g @anthropic-ai/claude-code`
+- **Git** — Version control is required for track history, revert, and commit workflows
+- **Node.js 18+** — Required for Claude Code CLI
+
+### Install Draft Plugin
+
+```bash
+# From Claude Code CLI
+claude plugin install draft
+
+# Or clone and install locally
+git clone https://github.com/anthropics/draft.git ~/.claude/plugins/draft
+```
+
+### Verify Installation
+
+```bash
+# Run the overview command
+/draft
+```
+
+You should see the list of available Draft commands. If not, check that the plugin directory is correctly placed under `~/.claude/plugins/`.
+
+### Quick Start
+
+```bash
+# 1. Initialize project context (once per project)
+/draft:init
+
+# 2. Create a feature track with spec and plan
+/draft:new-track "Add user authentication"
+
+# 3. Review the generated spec.md and plan.md, then implement
+/draft:implement
+
+# 4. Check progress at any time
+/draft:status
+```
+
+### Cursor Integration (Optional)
+
+Draft also works as a Cursor rules file:
+
+```bash
+# Copy .cursorrules to your project root
+cp ~/.claude/plugins/draft/integrations/cursor/.cursorrules /your-project/.cursorrules
+```
+
+This gives Cursor the same methodology awareness, though without slash commands.
+
+---
+
 ## Core Workflow
 
 ```
@@ -210,6 +266,328 @@ Good tasks are:
 - Have clear success criteria
 - Produce testable output
 - Fit in a single commit
+
+## Command Workflows
+
+### `/draft:init` — Initialize Project
+
+Initializes a Draft project by creating the `draft/` directory and context files. Run once per project.
+
+#### Project Discovery
+
+Draft auto-classifies the project:
+
+- **Brownfield (existing codebase):** Detected by the presence of `package.json`, `requirements.txt`, `go.mod`, `Cargo.toml`, `src/`, or git history with commits. Draft scans the existing stack and pre-fills `tech-stack.md`.
+- **Greenfield (new project):** Empty or near-empty directory. Developer provides all context through dialogue.
+
+#### Initialization Sequence
+
+1. **Product definition** — Dialogue to define product vision, users, goals, constraints → `draft/product.md`
+2. **Product guidelines (optional)** — Writing style, visual identity, UX principles → `draft/product-guidelines.md`
+3. **Tech stack** — Auto-detected for brownfield; manual for greenfield → `draft/tech-stack.md`
+4. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
+5. **Architecture mode opt-in (optional)** — Enables module decomposition, stories, execution state, skeletons, coverage checkpoints. Adds an Architecture Mode section to `workflow.md`. Recommended for complex multi-module projects.
+6. **Tracks registry** — Empty tracks list → `draft/tracks.md`
+7. **Directory structure** — Creates `draft/tracks/` directory
+
+If `draft/` already exists with context files, init reports "already initialized" and stops.
+
+---
+
+### `/draft:new-track` — Create Feature Track
+
+Creates a new track (feature, bug fix, or refactor) with a specification and phased plan.
+
+#### Specification Creation
+
+Engages in dialogue to understand scope before generating `spec.md`:
+- **What** — Exact scope and boundaries
+- **Why** — Business/user value
+- **Acceptance criteria** — How we know it's done
+- **Non-goals** — What's explicitly out of scope
+- **Technical approach** — High-level approach based on tech-stack.md
+
+The spec is presented for approval and iterated until the developer is satisfied.
+
+#### Plan Creation
+
+Based on the approved spec, generates a phased task breakdown in `plan.md`:
+- Tasks organized into phases (Foundation → Implementation → Integration → Polish)
+- Each task specifies target files and test files
+- Dependencies between tasks are documented
+- Verification criteria defined per phase
+
+Also creates `metadata.json` (status tracking) and registers the track in `draft/tracks.md`.
+
+#### Track ID
+
+Auto-generated kebab-case from the description: "Add user authentication" → `add-user-auth`.
+
+---
+
+### `/draft:implement` — Execute Tasks
+
+Implements tasks from the active track's plan, following the TDD workflow when enabled.
+
+#### Task Selection
+
+Scans `plan.md` for the first uncompleted task:
+- `[ ]` Pending — picks this one
+- `[~]` In Progress — resumes this one
+- `[x]` Completed — skips
+- `[!]` Blocked — skips, notifies user
+
+#### TDD Cycle (when enabled in `workflow.md`)
+
+1. **RED** — Write a failing test that captures the requirement. Run the test, verify it fails with an assertion failure (not a syntax error).
+2. **GREEN** — Write the minimum code to make the test pass. Run the test, verify it passes.
+3. **REFACTOR** — Clean up the code while keeping tests green. Run all related tests after each change.
+
+Red flags that stop the cycle: writing code before a test exists, test passes immediately, running tests mentally instead of executing.
+
+#### Architecture Mode Checkpoints (when enabled)
+
+Before the TDD cycle, three additional mandatory checkpoints:
+
+1. **Story** — Natural-language algorithm description (Input → Process → Output) written as a comment at the top of the code file. Developer approves before proceeding.
+2. **Execution State** — Define intermediate state variables needed for processing. Developer approves.
+3. **Function Skeletons** — Generate function stubs with complete signatures and docstrings, no implementation bodies. Developer approves.
+
+Additionally, implementation chunks are limited to ~200 lines with a review checkpoint after each chunk.
+
+#### Progress Updates
+
+After each task: update `plan.md` status markers, increment `metadata.json` counters, commit per workflow conventions.
+
+#### Phase Boundary Review
+
+When all tasks in a phase are `[x]`, a two-stage review is triggered:
+1. **Stage 1: Spec Compliance** — Verify all requirements for the phase are implemented
+2. **Stage 2: Code Quality** — Verify patterns, error handling, test quality; classify issues as Critical/Important/Minor
+
+Only proceeds to the next phase if no Critical issues remain.
+
+#### Track Completion
+
+When all phases complete: update `plan.md`, `metadata.json`, and `draft/tracks.md`. Move the track from Active to Completed.
+
+---
+
+### `/draft:status` — Show Progress
+
+Displays a comprehensive overview of project progress:
+- All active tracks with phase and task counts
+- Current task indicator
+- Module status (if `architecture.md` exists) with coverage percentages
+- Blocked items with reasons
+- Recently completed tracks
+- Quick stats summary
+
+---
+
+### `/draft:revert` — Git-Aware Rollback
+
+Safely undo work at three levels:
+
+| Level | What It Reverts |
+|-------|----------------|
+| **Task** | Single task's commits |
+| **Phase** | All commits in a phase |
+| **Track** | Entire track's commits |
+
+#### Revert Process
+
+1. **Identify commits** — Finds commits matching the track's commit pattern (`feat(<track_id>): ...`)
+2. **Preview** — Shows commits, affected files, and plan.md status changes before executing
+3. **Confirm** — Requires explicit user confirmation
+4. **Execute** — Runs `git revert --no-commit` for each commit (newest first), then creates a single revert commit
+5. **Update Draft state** — Reverts task markers from `[x]` to `[ ]`, decrements metadata counters
+
+If a revert produces merge conflicts, Draft reports the conflicted files and halts. The user resolves conflicts manually, then runs `git revert --continue`.
+
+---
+
+### `/draft:decompose` — Module Decomposition
+
+Breaks a project or track into modules with clear responsibilities, dependencies, and implementation order.
+
+#### Scope
+
+- **Project-wide** (`/draft:decompose project`) → `draft/architecture.md`
+- **Track-scoped** (`/draft:decompose` with active track) → `draft/tracks/<id>/architecture.md`
+
+#### Process
+
+1. **Load context** — Read product.md, tech-stack.md, spec.md; scan codebase for brownfield projects (directory structure, entry points, existing module boundaries, import patterns)
+2. **Module identification** — Propose modules with: name, responsibility, files, API surface, dependencies, complexity. Each module targets 1-3 files with a single responsibility.
+3. **CHECKPOINT** — Developer reviews and modifies module breakdown
+4. **Dependency mapping** — Map inter-module imports, detect cycles, generate ASCII dependency diagram, determine implementation order via topological sort
+5. **CHECKPOINT** — Developer reviews dependency diagram and implementation order
+6. **Generate `architecture.md`** — Module definitions, dependency diagram/table, implementation order, story placeholders
+7. **Update plan.md (track-scoped only)** — Restructure phases to align with module boundaries, preserving completed/in-progress task states
+
+#### Cycle Breaking
+
+When circular dependencies are detected, Draft proposes one of: extract shared interface module, invert dependency direction, or merge the coupled modules.
+
+---
+
+### `/draft:coverage` — Code Coverage Report
+
+Measures test coverage quality after implementation. Complements TDD — TDD is the process, coverage is the measurement.
+
+#### Process
+
+1. **Detect coverage tool** — Auto-detect from tech-stack.md or project config files (jest, vitest, pytest-cov, go test -coverprofile, cargo tarpaulin, etc.)
+2. **Determine scope** — Argument-provided path, architecture module files, track-changed files, or full project
+3. **Run coverage** — Execute the coverage command and capture output
+4. **Report** — Per-file breakdown with line/branch percentages and uncovered line ranges
+5. **Gap analysis** — Classify uncovered lines:
+   - **Testable** — Should be covered; suggests specific tests to write
+   - **Defensive** — Error handlers for impossible states; acceptable to leave uncovered
+   - **Infrastructure** — Framework boilerplate; acceptable
+6. **CHECKPOINT** — Developer reviews and approves
+7. **Record results** — Update plan.md with coverage section, architecture.md module status, and metadata.json
+
+Target: 95%+ line coverage (configurable in `workflow.md`).
+
+---
+
+### `/draft:jira-preview` — Preview Jira Issues
+
+Generates a `jira-export.md` file from the track's plan for review before creating Jira issues.
+
+#### Mapping
+
+| Draft Concept | Jira Entity |
+|---------------|-------------|
+| Track | Epic |
+| Phase | Story |
+| Task | Sub-task |
+
+Story points are auto-calculated from task count per phase (1-2 tasks = 1pt, 3-4 = 2pt, 5-6 = 3pt, 7+ = 5pt).
+
+The export file is editable — adjust points, descriptions, or sub-tasks before running `/draft:jira-create`.
+
+---
+
+### `/draft:jira-create` — Create Jira Issues
+
+Creates Jira epic, stories, and sub-tasks from `jira-export.md` via MCP-Jira integration. Auto-generates the export file if missing.
+
+Creates issues in order: Epic → Stories (one per phase) → Sub-tasks (one per task). Updates plan.md and jira-export.md with Jira issue keys after creation.
+
+Requires MCP-Jira server configuration and `draft/jira.md` with project key.
+
+---
+
+## Architecture Mode (Optional)
+
+For complex projects, Draft supports a more granular pre-implementation design workflow. Enable it during `/draft:init` or by adding `Architecture Mode` to `workflow.md`. See `core/agents/architect.md` for detailed decomposition rules, story writing, and skeleton generation.
+
+### Module Decomposition
+
+Use `/draft:decompose` to break a project or track into modules:
+
+- **Project-wide:** `draft/architecture.md` — overall codebase module structure
+- **Per-track:** `draft/tracks/<id>/architecture.md` — module breakdown for a specific feature
+
+Each module defines: responsibility, files, API surface, dependencies, complexity. Modules are ordered by dependency graph (topological sort) to determine implementation sequence.
+
+### Pre-Implementation Design
+
+When architecture mode is enabled, `/draft:implement` gains three additional checkpoints before the TDD cycle:
+
+1. **Story** — Natural-language algorithm description (Input → Process → Output) written as a comment at the top of the code file. Captures the "how" before coding. Mandatory checkpoint for developer approval.
+
+2. **Execution State** — Define intermediate state variables (input state, intermediate state, output state, error state) needed for processing. Bridges the gap between algorithm and code structure. Mandatory checkpoint.
+
+3. **Function Skeletons** — Generate function/method stubs with complete signatures, types, and docstrings. No implementation bodies. Developer approves names, signatures, and structure before TDD begins. Mandatory checkpoint.
+
+Additionally, implementation chunks are limited to ~200 lines with a review checkpoint after each chunk.
+
+### Code Coverage
+
+Use `/draft:coverage` after implementation to measure test quality:
+
+- Auto-detects coverage tool from `tech-stack.md`
+- Targets 95%+ line coverage (configurable in `workflow.md`)
+- Reports per-file breakdown and identifies uncovered lines
+- Classifies gaps: testable (should add tests), defensive (acceptable), infrastructure (acceptable)
+- Results recorded in `plan.md` and `architecture.md` using the following format:
+
+#### Coverage Results Format (plan.md)
+
+Add a `## Coverage` section at the end of the relevant phase:
+
+```markdown
+## Coverage
+- **Overall:** 96.2% line coverage (target: 95%)
+- **Tool:** jest --coverage
+- **Date:** 2026-02-01
+
+| File | Lines | Covered | % | Uncovered Lines |
+|------|-------|---------|---|-----------------|
+| src/auth.ts | 120 | 116 | 96.7% | 45, 88, 112, 119 |
+| src/config.ts | 80 | 80 | 100% | - |
+
+### Gaps
+- **Testable:** `auth.ts:45` — error branch for expired token (add test)
+- **Defensive:** `auth.ts:88` — unreachable fallback (acceptable)
+- **Infrastructure:** `auth.ts:112,119` — logging statements (acceptable)
+```
+
+#### Coverage Results Format (architecture.md)
+
+Update each module's status line to include coverage:
+
+```markdown
+- **Status:** [x] Complete — 96.7% coverage
+```
+
+And add a coverage summary in the Notes section:
+
+```markdown
+## Notes
+- Overall coverage: 96.2% (target: 95%)
+- Uncovered gaps classified and documented in plan.md
+```
+
+Coverage complements TDD — TDD is the process (write test, implement, refactor), coverage is the measurement.
+
+### When to Use Architecture Mode
+
+**Good fit:**
+- Multi-module features with component dependencies
+- New projects where architecture decisions haven't been made
+- Complex algorithms or data transformations
+- Teams wanting maximum review granularity
+
+**Overkill:**
+- Simple features touching 1-2 files
+- Bug fixes with clear scope
+- Configuration changes
+
+### Workflow with Architecture Mode
+
+```
+/draft:init (enable architecture mode)
+     │
+/draft:new-track
+     │
+/draft:decompose → architecture.md
+     │
+/draft:implement
+     │  ├── Story → CHECKPOINT
+     │  ├── Execution State → CHECKPOINT
+     │  ├── Skeletons → CHECKPOINT
+     │  ├── TDD (red/green/refactor)
+     │  └── ~200-line chunk review → CHECKPOINT
+     │
+/draft:coverage → coverage report → CHECKPOINT
+```
+
+---
 
 ## Jira Integration (Optional)
 
@@ -286,6 +664,76 @@ At phase boundaries:
 2. **Stage 2: Code Quality** - Clean architecture, proper error handling, meaningful tests?
 
 See `core/agents/reviewer.md` for detailed process.
+
+---
+
+## Agents
+
+Draft includes three specialized agent behaviors that activate during specific workflow phases.
+
+### Debugger Agent
+
+Activated when a task is blocked (`[!]`). Enforces root cause investigation before any fix attempts.
+
+**Four-Phase Process:**
+
+| Phase | Goal | Output |
+|-------|------|--------|
+| **1. Investigate** | Understand what's happening (NO fixes) | Failure description and reproduction steps |
+| **2. Analyze** | Find root cause, not symptoms | Root cause hypothesis with evidence |
+| **3. Hypothesize** | Test with minimal change | Confirmed root cause or return to Phase 2 |
+| **4. Implement** | Fix with confidence | Regression test + minimal fix + verification |
+
+**Anti-patterns:** "Quick fixes" without understanding, changing multiple things at once, skipping reproduction, deleting code to "test".
+
+**Escalation:** After 3 failed hypothesis cycles, document findings, list what's been eliminated, and ask for external input.
+
+See `core/agents/debugger.md` for the full process.
+
+### Reviewer Agent
+
+Activated at phase boundaries during `/draft:implement`. Performs a two-stage review before proceeding to the next phase.
+
+**Stage 1: Spec Compliance** — Did they build what was specified?
+- Requirements coverage (all functional requirements implemented)
+- Scope adherence (no missing features, no scope creep)
+- Behavior correctness (edge cases, error scenarios, integration points)
+
+If Stage 1 fails, gaps are listed and implementation resumes. Stage 2 does not run.
+
+**Stage 2: Code Quality** — Is the code well-crafted?
+- Architecture (follows project patterns, separation of concerns)
+- Error handling (appropriate level, helpful user-facing errors)
+- Testing (tests real logic, edge case coverage, maintainability)
+- Maintainability (readable, no performance issues, no security vulnerabilities)
+
+**Issue Classification:**
+
+| Severity | Definition | Action |
+|----------|------------|--------|
+| **Critical** | Blocks release, breaks functionality, security issue | Must fix before proceeding |
+| **Important** | Degrades quality, technical debt | Should fix before phase complete |
+| **Minor** | Style, optimization, nice-to-have | Note for later, don't block |
+
+See `core/agents/reviewer.md` for the output template and full process.
+
+### Architect Agent
+
+Activated during `/draft:decompose` and `/draft:implement` (when architecture mode is enabled). Guides structured pre-implementation design.
+
+**Capabilities:**
+- **Module decomposition** — Single responsibility, 1-3 files per module, clear API boundaries, testable in isolation
+- **Dependency analysis** — Import mapping, cycle detection, topological sort for implementation order
+- **Story writing** — Natural-language algorithm descriptions (Input → Process → Output); 5-15 lines max; describes the algorithm, not the implementation
+- **Execution state design** — Define input/intermediate/output/error state variables before coding
+- **Function skeleton generation** — Complete signatures with types and docstrings, no implementation bodies, ordered by control flow
+
+**Story Lifecycle:**
+1. **Placeholder** — Created during `/draft:decompose` in architecture.md
+2. **Written** — Filled in during `/draft:implement` as code comments; developer approves
+3. **Updated** — Maintained when algorithms change during refactoring
+
+See `core/agents/architect.md` for module rules, API surface examples, and cycle-breaking framework.
 
 ---
 

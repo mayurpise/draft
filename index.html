@@ -748,6 +748,115 @@
             color: #6366f1;
         }
 
+        /* Architecture Mode */
+        .arch-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 2rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin: 2rem 0;
+        }
+
+        .arch-flow-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .arch-flow-step {
+            padding: 0.6rem 1.25rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .arch-flow-step.story {
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: var(--accent-amber);
+        }
+
+        .arch-flow-step.exec-state {
+            background: rgba(251, 113, 133, 0.15);
+            border: 1px solid rgba(251, 113, 133, 0.3);
+            color: var(--accent-rose);
+        }
+
+        .arch-flow-step.skeleton {
+            background: rgba(34, 211, 238, 0.15);
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            color: var(--accent-cyan);
+        }
+
+        .arch-flow-step.tdd-ref {
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            color: var(--accent-emerald);
+        }
+
+        .arch-flow-step.coverage {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #a78bfa;
+        }
+
+        .arch-flow-checkpoint {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent-rose);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .arch-flow-arrow {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .arch-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .arch-feature {
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: border-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .arch-feature:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .arch-feature .label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #a78bfa;
+            margin-bottom: 0.5rem;
+        }
+
+        .arch-feature h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .arch-feature p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
         /* Principles */
         .principles {
             display: grid;
@@ -927,6 +1036,15 @@
             .tdd-arrow {
                 transform: rotate(90deg);
             }
+
+            .arch-flow-row {
+                flex-wrap: wrap;
+            }
+
+            .arch-flow-step {
+                font-size: 0.8rem;
+                padding: 0.5rem 1rem;
+            }
         }
     </style>
 </head>
@@ -945,6 +1063,97 @@
     </header>
 
     <main>
+        <!-- Installation Section -->
+        <section id="install">
+            <h2>Getting Started</h2>
+            <p>Install Draft as a Claude Code plugin and initialize your project in under a minute.</p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <span class="filename">installation</span>
+                </div>
+<pre><code><span class="code-comment"># Install the plugin</span>
+<span class="code-keyword">/plugin marketplace add</span> <span class="code-string">mayurpise/draft</span>
+<span class="code-keyword">/plugin install</span> <span class="code-string">draft</span>
+
+<span class="code-comment"># Initialize your project (once)</span>
+<span class="code-keyword">/draft:init</span>
+
+<span class="code-comment"># Create a feature track</span>
+<span class="code-keyword">/draft:new-track</span> <span class="code-string">"Add user authentication"</span>
+
+<span class="code-comment"># Start implementing</span>
+<span class="code-keyword">/draft:implement</span>
+
+<span class="code-comment"># Check progress</span>
+<span class="code-keyword">/draft:status</span></code></pre>
+            </div>
+
+            <p>Prerequisites: <strong>Claude Code CLI</strong>, <strong>Git</strong>, and <strong>Node.js 18+</strong>.</p>
+        </section>
+
+        <!-- Command Reference Section -->
+        <section id="commands">
+            <h2>Command Reference</h2>
+            <p>Draft provides 10 slash commands for the full development lifecycle.</p>
+
+            <div class="doc-grid">
+                <div class="doc-card">
+                    <div class="icon">📋</div>
+                    <div class="name">/draft</div>
+                    <p class="purpose">Overview and intent mapping</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">🚀</div>
+                    <div class="name">/draft:init</div>
+                    <p class="purpose">Initialize project context (once per project)</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">📝</div>
+                    <div class="name">/draft:new-track</div>
+                    <p class="purpose">Create spec + plan for a feature or fix</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">⚡</div>
+                    <div class="name">/draft:implement</div>
+                    <p class="purpose">Execute tasks with TDD workflow</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">📊</div>
+                    <div class="name">/draft:status</div>
+                    <p class="purpose">Display progress overview</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">⏪</div>
+                    <div class="name">/draft:revert</div>
+                    <p class="purpose">Git-aware rollback at any level</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">🏗️</div>
+                    <div class="name">/draft:decompose</div>
+                    <p class="purpose">Module decomposition + dependency mapping</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">📈</div>
+                    <div class="name">/draft:coverage</div>
+                    <p class="purpose">Code coverage report (target 95%+)</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">👁️</div>
+                    <div class="name">/draft:jira-preview</div>
+                    <p class="purpose">Generate Jira export for review</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">🎫</div>
+                    <div class="name">/draft:jira-create</div>
+                    <p class="purpose">Push issues to Jira via MCP</p>
+                </div>
+            </div>
+        </section>
+
         <!-- The Problem Section -->
         <section id="problem">
             <h2>The Core Problem</h2>
@@ -974,6 +1183,74 @@
             </div>
         </section>
 
+        <!-- Chat-Driven Development Problems -->
+        <section id="chat-problems">
+            <h2>Problems with Chat-Driven Development</h2>
+            <p>Traditional AI chat interfaces have fundamental limitations that get worse over time.</p>
+
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="icon">🪟</div>
+                    <h4>Context Window Fills Up</h4>
+                    <p>Long chats exhaust token limits; AI loses early context and forgets decisions</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">🌀</div>
+                    <h4>Hallucination Increases</h4>
+                    <p>More tokens in context means more confusion and worse decisions</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">💨</div>
+                    <h4>No Persistent Memory</h4>
+                    <p>Close the chat, lose the context. Every session starts from zero.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">🔍</div>
+                    <h4>Unsearchable History</h4>
+                    <p>"Where did I work on feature X?" — good luck finding it in chat logs</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">👻</div>
+                    <h4>No Team Visibility</h4>
+                    <p>Your chat history is invisible to colleagues. No review, no audit trail.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">🔄</div>
+                    <h4>Repeated Context Loading</h4>
+                    <p>Every new session requires re-explaining the project from scratch</p>
+                </div>
+            </div>
+
+            <h3>How Draft Solves This</h3>
+
+            <div class="comparison">
+                <div class="comparison-header">
+                    <div>Chat-Driven</div>
+                    <div>Draft Approach</div>
+                </div>
+                <div class="comparison-row">
+                    <div>Context in ephemeral chat</div>
+                    <div>File-based persistent memory</div>
+                </div>
+                <div class="comparison-row">
+                    <div>No version history</div>
+                    <div>Git-tracked specs with diffs and blame</div>
+                </div>
+                <div class="comparison-row">
+                    <div>Loads entire project every session</div>
+                    <div>Scoped context per track</div>
+                </div>
+                <div class="comparison-row">
+                    <div>Unsearchable conversations</div>
+                    <div>Grep-able specs and plans</div>
+                </div>
+                <div class="comparison-row">
+                    <div>Invisible to teammates</div>
+                    <div>PR-reviewable planning artifacts</div>
+                </div>
+            </div>
+        </section>
+
         <!-- Core Workflow -->
         <section id="workflow">
             <h2>The Draft Workflow</h2>
@@ -990,6 +1267,12 @@
                     <div class="flow-icon spec">📝</div>
                     <div class="flow-label">Spec & Plan</div>
                     <div class="flow-sublabel">Document the approach</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-icon" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.05)); border: 1px solid rgba(139, 92, 246, 0.3); color: #a78bfa;">🏗️</div>
+                    <div class="flow-label">Decompose</div>
+                    <div class="flow-sublabel">Module architecture</div>
                 </div>
                 <div class="flow-arrow">→</div>
                 <div class="flow-step">
@@ -1107,6 +1390,11 @@
                     <div class="name">spec.md</div>
                     <p class="purpose">Requirements for a specific track</p>
                 </div>
+                <div class="doc-card">
+                    <div class="icon">🏗️</div>
+                    <div class="name">architecture.md</div>
+                    <p class="purpose">Module decomposition and dependencies (optional)</p>
+                </div>
             </div>
 
             <div class="code-block">
@@ -1119,13 +1407,15 @@
 <pre><code><span class="code-file">draft/</span>
 ├── <span class="code-file">product.md</span>          <span class="code-comment"># Product vision and goals</span>
 ├── <span class="code-file">tech-stack.md</span>       <span class="code-comment"># Technical choices</span>
-├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD and commit preferences</span>
+├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD, commit, architecture mode</span>
+├── <span class="code-file">architecture.md</span>     <span class="code-comment"># Project-wide modules (optional)</span>
 ├── <span class="code-file">jira.md</span>             <span class="code-comment"># Jira project config (optional)</span>
 ├── <span class="code-file">tracks.md</span>           <span class="code-comment"># Master track list</span>
 └── <span class="code-file">tracks/</span>
     └── <span class="code-file">&lt;track-id&gt;/</span>
         ├── <span class="code-file">spec.md</span>      <span class="code-comment"># Requirements</span>
         ├── <span class="code-file">plan.md</span>      <span class="code-comment"># Phased task breakdown</span>
+        ├── <span class="code-file">architecture.md</span> <span class="code-comment"># Track modules (optional)</span>
         ├── <span class="code-file">metadata.json</span>
         └── <span class="code-file">jira-export.md</span> <span class="code-comment"># Jira stories (optional)</span></code></pre>
             </div>
@@ -1221,6 +1511,204 @@
             <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">Write failing test → Minimum code to pass → Clean up with tests green → Commit following conventions</p>
         </section>
 
+        <!-- Architecture Mode -->
+        <section id="architecture">
+            <h2>Architecture Mode</h2>
+            <p>For complex projects, Draft supports a deeper pre-implementation design workflow. Enable it during <code>/draft:init</code> to add module decomposition, algorithm documentation, and structured design checkpoints to <strong>all tracks</strong>.</p>
+
+            <div class="arch-features">
+                <div class="arch-feature">
+                    <div class="label">/draft:decompose</div>
+                    <h4>Module Decomposition</h4>
+                    <p>Break projects or tracks into modules with dependency diagrams and implementation order</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">Step 2.5</div>
+                    <h4>Algorithm Stories</h4>
+                    <p>Natural-language Input → Process → Output descriptions at the top of each code file</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">Step 3.0a</div>
+                    <h4>Execution State</h4>
+                    <p>Define intermediate variables and data structures before writing any code</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">Step 3.0b</div>
+                    <h4>Function Skeletons</h4>
+                    <p>Generate stubs with complete signatures and types, approved before TDD begins</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">~200 lines</div>
+                    <h4>Chunk Reviews</h4>
+                    <p>Implementation limited to ~200-line chunks with mandatory review after each</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">/draft:coverage</div>
+                    <h4>Code Coverage</h4>
+                    <p>Auto-detect tooling, measure coverage, target 95%+ with gap analysis</p>
+                </div>
+            </div>
+
+            <h3>Implementation Flow with Architecture Mode</h3>
+            <p>Each task gains structured design checkpoints before the TDD cycle. Every checkpoint requires developer approval.</p>
+
+            <div class="arch-flow">
+                <div class="arch-flow-row">
+                    <span class="arch-flow-step story">Story</span>
+                    <span class="arch-flow-arrow">→</span>
+                    <span class="arch-flow-checkpoint">checkpoint</span>
+                    <span class="arch-flow-arrow">→</span>
+                    <span class="arch-flow-step exec-state">Execution State</span>
+                    <span class="arch-flow-arrow">→</span>
+                    <span class="arch-flow-checkpoint">checkpoint</span>
+                </div>
+                <div class="arch-flow-row" style="padding-left: 1rem;">
+                    <span class="arch-flow-arrow">→</span>
+                    <span class="arch-flow-step skeleton">Skeletons</span>
+                    <span class="arch-flow-arrow">→</span>
+                    <span class="arch-flow-checkpoint">checkpoint</span>
+                    <span class="arch-flow-arrow">→</span>
+                    <span class="arch-flow-step tdd-ref">TDD (Red → Green → Refactor)</span>
+                </div>
+                <div class="arch-flow-row" style="padding-left: 1rem;">
+                    <span class="arch-flow-arrow">→</span>
+                    <span class="arch-flow-step coverage">/draft:coverage → 95%+ target</span>
+                </div>
+            </div>
+
+            <div class="callout">
+                <div class="callout-title">
+                    <span>⚙️</span>
+                    Opt-In
+                </div>
+                <p>Architecture Mode is optional. Simple features, bug fixes, and config changes use the standard Draft workflow. Enable it when module boundaries, algorithm design, and coverage measurement add value.</p>
+            </div>
+        </section>
+
+        <!-- Revert Workflow -->
+        <section id="revert">
+            <h2>Revert Workflow</h2>
+            <p>Git-aware rollback that understands Draft's logical units of work. Safely undo at any granularity.</p>
+
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <div class="flow-icon" style="background: linear-gradient(135deg, rgba(251, 113, 133, 0.2), rgba(251, 113, 133, 0.05)); border: 1px solid rgba(251, 113, 133, 0.3); color: var(--accent-rose);">1</div>
+                    <div class="flow-label">Task</div>
+                    <div class="flow-sublabel">Single task's commits</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-icon" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.05)); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--accent-amber);">2</div>
+                    <div class="flow-label">Phase</div>
+                    <div class="flow-sublabel">All commits in a phase</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-icon" style="background: linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(34, 211, 238, 0.05)); border: 1px solid rgba(34, 211, 238, 0.3); color: var(--accent-cyan);">3</div>
+                    <div class="flow-label">Track</div>
+                    <div class="flow-sublabel">Entire track's commits</div>
+                </div>
+            </div>
+
+            <div class="hierarchy">
+                <div class="hierarchy-level">
+                    <div class="num">1</div>
+                    <div class="file">Preview</div>
+                    <div class="desc">Show commits, affected files, and plan.md changes before executing</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">2</div>
+                    <div class="file">Confirm</div>
+                    <div class="desc">Explicit user confirmation required — no silent reverts</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">3</div>
+                    <div class="file">Execute</div>
+                    <div class="desc">Git revert (newest first) + single revert commit + Draft state update</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quality Disciplines -->
+        <section id="quality">
+            <h2>Quality Disciplines</h2>
+            <p>Three built-in agents enforce quality at every stage of implementation.</p>
+
+            <h3>Systematic Debugging</h3>
+            <p>When a task is blocked, Draft enforces a four-phase investigation process. No random fixes allowed.</p>
+
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <div class="flow-icon" style="background: linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(34, 211, 238, 0.05)); border: 1px solid rgba(34, 211, 238, 0.3); color: var(--accent-cyan);">1</div>
+                    <div class="flow-label">Investigate</div>
+                    <div class="flow-sublabel">Read errors, reproduce</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-icon" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.05)); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--accent-amber);">2</div>
+                    <div class="flow-label">Analyze</div>
+                    <div class="flow-sublabel">Find root cause</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-icon" style="background: linear-gradient(135deg, rgba(251, 113, 133, 0.2), rgba(251, 113, 133, 0.05)); border: 1px solid rgba(251, 113, 133, 0.3); color: var(--accent-rose);">3</div>
+                    <div class="flow-label">Hypothesize</div>
+                    <div class="flow-sublabel">Smallest possible test</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-icon implement">4</div>
+                    <div class="flow-label">Implement</div>
+                    <div class="flow-sublabel">Regression test + fix</div>
+                </div>
+            </div>
+
+            <h3>Two-Stage Review</h3>
+            <p>At every phase boundary, a mandatory review runs before proceeding.</p>
+
+            <div class="comparison">
+                <div class="comparison-header">
+                    <div>Stage 1: Spec Compliance</div>
+                    <div>Stage 2: Code Quality</div>
+                </div>
+                <div class="comparison-row">
+                    <div>All functional requirements implemented?</div>
+                    <div>Follows project patterns from tech-stack.md?</div>
+                </div>
+                <div class="comparison-row">
+                    <div>Acceptance criteria met?</div>
+                    <div>Appropriate error handling?</div>
+                </div>
+                <div class="comparison-row">
+                    <div>No scope creep or missing features?</div>
+                    <div>Tests cover real logic, not implementation details?</div>
+                </div>
+                <div class="comparison-row">
+                    <div>Edge cases and error scenarios handled?</div>
+                    <div>Issues classified: Critical &gt; Important &gt; Minor</div>
+                </div>
+            </div>
+
+            <h3>Code Coverage</h3>
+            <p>After implementation, <code>/draft:coverage</code> measures test quality with auto-detected tooling and gap classification.</p>
+
+            <div class="doc-grid" style="grid-template-columns: repeat(3, 1fr);">
+                <div class="doc-card">
+                    <div class="icon">✅</div>
+                    <div class="name">Testable</div>
+                    <p class="purpose">Should be covered. Suggests specific tests to write.</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">🛡️</div>
+                    <div class="name">Defensive</div>
+                    <p class="purpose">Error handlers for impossible states. Acceptable to leave.</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">⚙️</div>
+                    <div class="name">Infrastructure</div>
+                    <p class="purpose">Framework boilerplate and entry points. Acceptable.</p>
+                </div>
+            </div>
+        </section>
+
         <!-- Economics -->
         <section id="economics">
             <h2>The Economics</h2>
@@ -1303,25 +1791,83 @@
         <!-- When to Use -->
         <section id="when">
             <h2>When to Use Draft</h2>
-            
+
             <h3>Good fit</h3>
-            <p>Features requiring design decisions, work that will be reviewed by others, complex multi-step implementations, anything where "just do it" has failed before.</p>
+            <div class="problem-grid">
+                <div class="problem-card" style="border-color: rgba(52, 211, 153, 0.3);">
+                    <div class="icon">🏗️</div>
+                    <h4>Design Decisions</h4>
+                    <p>Features requiring architecture choices, API design, or data model decisions</p>
+                </div>
+                <div class="problem-card" style="border-color: rgba(52, 211, 153, 0.3);">
+                    <div class="icon">👥</div>
+                    <h4>Team Review</h4>
+                    <p>Work that will be reviewed by others — specs are faster to review than code</p>
+                </div>
+                <div class="problem-card" style="border-color: rgba(52, 211, 153, 0.3);">
+                    <div class="icon">📦</div>
+                    <h4>Multi-Step Work</h4>
+                    <p>Complex implementations spanning multiple files, modules, or phases</p>
+                </div>
+                <div class="problem-card" style="border-color: rgba(52, 211, 153, 0.3);">
+                    <div class="icon">🔁</div>
+                    <h4>Repeated Failures</h4>
+                    <p>Anything where "just do it" has resulted in rework or misalignment</p>
+                </div>
+            </div>
 
             <h3>Overkill</h3>
-            <p>One-line bug fixes, typo corrections, exploratory prototypes you'll throw away.</p>
+            <p>One-line bug fixes, typo corrections, exploratory prototypes you'll throw away, simple config changes.</p>
+
+            <h3>Constraint Mechanisms</h3>
+            <p>How Draft keeps AI focused and accountable:</p>
+
+            <div class="economics">
+                <div class="economics-row header">
+                    <div>Mechanism</div>
+                    <div>Effect</div>
+                    <div>Prevents</div>
+                </div>
+                <div class="economics-row">
+                    <div>Explicit spec</div>
+                    <div>AI only implements what's documented</div>
+                    <div>Scope creep</div>
+                </div>
+                <div class="economics-row">
+                    <div>Phased plans</div>
+                    <div>AI works on one phase at a time</div>
+                    <div>Over-engineering</div>
+                </div>
+                <div class="economics-row">
+                    <div>Verification steps</div>
+                    <div>Each phase requires proof of completion</div>
+                    <div>False claims</div>
+                </div>
+                <div class="economics-row">
+                    <div>Status markers</div>
+                    <div>Progress is tracked, not assumed</div>
+                    <div>Lost context</div>
+                </div>
+                <div class="economics-row">
+                    <div>Two-stage review</div>
+                    <div>Spec compliance before code quality</div>
+                    <div>Quality gaps</div>
+                </div>
+            </div>
 
             <div class="callout">
                 <div class="callout-title">
                     <span>📌</span>
                     Remember
                 </div>
-                <p>Draft adds structure. Use it when structure has value.</p>
+                <p>Draft adds structure. Use it when structure has value. The AI becomes an executor of pre-approved work, not an autonomous decision-maker.</p>
             </div>
         </section>
     </main>
 
     <footer>
         <p>Draft Methodology — <a href="https://github.com/mayurpise/draft" target="_blank">View on GitHub</a></p>
+        <p style="margin-top: 0.5rem;">Adapted from <a href="https://github.com/gemini-cli-extensions/conductor" target="_blank">gemini-cli-extensions/conductor</a>. Licensed under Apache 2.0.</p>
     </footer>
 </body>
 </html>

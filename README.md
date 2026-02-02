@@ -346,6 +346,20 @@ When enabled in `workflow.md`:
 
 **Iron Law:** No production code without a failing test first.
 
+## Team Workflow: Alignment Before Code
+
+Draft's most powerful application is team-wide. Every markdown file goes through **commit → review → update → merge** before a single line of code is written.
+
+### The PR cycle on documents
+
+1. **Project context** — Tech lead runs `/draft:init`. Team reviews `product.md`, `tech-stack.md`, and `workflow.md` via PR. Product managers review vision without reading code.
+2. **Spec & plan** — Lead runs `/draft:new-track`. Team reviews requirements, acceptance criteria, and phased task breakdown via PR. Disagreements resolved by editing a paragraph, not rewriting code.
+3. **Architecture** — Lead runs `/draft:decompose`. Team reviews module boundaries, API surfaces, dependency graph, and implementation order via PR.
+4. **Work distribution** — Lead runs `/draft:jira-preview` and `/draft:jira-create`. Stories created from the approved plan. Individual team members pick up Jira stories.
+5. **Implementation** — Only after all documents are merged does coding start. Every developer has full context: what to build (`spec.md`), in what order (`plan.md`), with what boundaries (`architecture.md`).
+
+The CLI is single-user, but the artifacts are the collaboration layer. Draft handles planning. Git handles review. Jira handles distribution.
+
 ## Architecture Mode
 
 Enable during `/draft:init` for granular pre-implementation design. Recommended for complex multi-module projects.

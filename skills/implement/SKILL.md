@@ -14,6 +14,8 @@ You are implementing tasks from the active track's plan following the TDD workfl
 3. Read the track's `plan.md` for task list
 4. Read `draft/workflow.md` for TDD and commit preferences
 5. Read `draft/tech-stack.md` for technical context
+6. Check if `architecture_mode: true` in `workflow.md` → enables pre-implementation design steps
+7. If architecture mode is on, check for `draft/tracks/<id>/architecture.md` or `draft/architecture.md`
 
 If no active track found:
 - Tell user: "No active track found. Run `/draft:new-track` to create one."
@@ -28,9 +30,99 @@ Scan `plan.md` for the first uncompleted task:
 
 If resuming `[~]` task, check for partial work.
 
-## Step 3: Execute Task (TDD Workflow)
+## Step 2.5: Write Story (Architecture Mode Only)
 
-For each task, follow this workflow based on `workflow.md`:
+**Activation:** Only runs when `architecture_mode: true` is set in `workflow.md`.
+
+When the next task involves creating or substantially modifying a code file:
+
+1. **Check if file already has a Story comment** - If yes, skip this step
+2. **Skip for trivial tasks** - Config files, type definitions, simple one-liners
+3. **Write a natural-language algorithm description** as a comment block at the top of the target file
+
+### Story Format
+
+```
+// Story: [Module/File Name]
+//
+// Input:  [what this module/function receives]
+// Process:
+//   1. [first algorithmic step]
+//   2. [second algorithmic step]
+//   3. [third algorithmic step]
+// Output: [what this module/function produces]
+//
+// Dependencies: [what this module relies on]
+// Side effects: [any mutations, I/O, or external calls]
+```
+
+Adapt comment syntax to the language (`#` for Python, `/* */` for CSS, etc.).
+
+### CHECKPOINT (MANDATORY)
+
+**STOP.** Present the Story to the developer for review.
+
+- Developer may refine, modify, or rewrite the Story
+- **Do NOT proceed to execution state or implementation until Story is approved**
+- Developer can say "skip" to bypass this checkpoint for the current task
+
+See `core/agents/architect.md` for story writing guidelines.
+
+---
+
+## Step 3: Execute Task
+
+### Step 3.0: Design Before Code (Architecture Mode Only)
+
+**Activation:** Only runs when `architecture_mode: true` is set in `workflow.md`.
+**Skip for trivial tasks** - Config updates, type-only changes, single-function tasks where the design is obvious.
+
+#### 3.0a. Execution State Design
+
+Study the control flow for the task and propose intermediate state variables:
+
+1. Read the Story (from Step 2.5) to understand the Input -> Output path
+2. Study similar patterns in the existing codebase
+3. Propose execution state: input state, intermediate state, output state, error state
+
+Present in this format:
+```
+EXECUTION STATE: [Task/Module Name]
+─────────────────────────────────────────────────────────
+Input State:
+  - variableName: Type — purpose
+
+Intermediate State:
+  - variableName: Type — purpose
+
+Output State:
+  - variableName: Type — purpose
+
+Error State:
+  - variableName: Type — purpose
+```
+
+**CHECKPOINT (MANDATORY):** Present execution state to developer. Wait for approval. Developer may add, remove, or modify state variables. Developer can say "skip" to bypass.
+
+#### 3.0b. Function Skeleton Generation
+
+Generate function/method stubs based on the approved execution state:
+
+1. Create stubs with complete signatures (all parameters, return types)
+2. Include a one-line docstring describing purpose and when it's called
+3. No implementation bodies — use `// TODO`, `pass`, `unimplemented!()`, etc.
+4. Order functions to match control flow sequence
+5. Follow naming conventions from `tech-stack.md`
+
+**CHECKPOINT (MANDATORY):** Present skeletons to developer. Wait for approval. Developer may rename functions, change signatures, add/remove methods. Developer can say "skip" to bypass.
+
+See `core/agents/architect.md` for execution state and skeleton guidelines.
+
+---
+
+### Step 3.1: Implement (TDD Workflow)
+
+For each task, follow this workflow based on `workflow.md`. If skeletons were generated in Step 3.0b, fill them in using the TDD cycle below.
 
 ### If TDD Enabled:
 
@@ -77,6 +169,23 @@ For each task, follow this workflow based on `workflow.md`:
 3. Announce: "Implementation complete"
 ```
 
+### Implementation Chunk Limit (Architecture Mode Only)
+
+**Activation:** Only applies when `architecture_mode: true` is set in `workflow.md`.
+
+If the implementation diff for a task exceeds **~200 lines**:
+
+1. **STOP** after ~200 lines of implementation
+2. Present the chunk for developer review
+3. **CHECKPOINT (MANDATORY):** Wait for developer approval of the chunk
+4. Commit the approved chunk: `feat(<track_id>): <task description> (chunk N)`
+5. Continue with the next chunk
+6. Repeat until the task is fully implemented
+
+This prevents large, unreviewable code drops. Each chunk should be a coherent, reviewable unit.
+
+---
+
 ## Step 4: Update Progress
 
 After completing each task:
@@ -94,6 +203,10 @@ After completing each task:
 git add .
 git commit -m "feat(<track_id>): <task description>"
 ```
+
+4. If `architecture.md` exists for the track:
+   - Update module status markers (`[ ]` → `[~]` when first task in module starts, `[~]` → `[x]` when all tasks complete)
+   - Fill in Story placeholders with the approved story from Step 2.5
 
 ## Verification Gate (REQUIRED)
 

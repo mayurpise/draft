@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- `/draft:decompose` — Module decomposition with dependency mapping, cycle detection, and implementation ordering
+- `/draft:coverage` — Auto-detect coverage tooling, run reports, classify gaps (testable / defensive / infrastructure), target 95%+
+- `/draft:jira-preview` — Generate `jira-export.md` from track plan with auto-calculated story points
+- `/draft:jira-create` — Push epics, stories, and sub-tasks to Jira via MCP integration
+- Architecture Mode — opt-in during `/draft:init` for granular pre-implementation design:
+  - Algorithm stories (Input → Process → Output documentation)
+  - Execution state design (intermediate variables defined before coding)
+  - Function skeletons (stubs with full type signatures approved before TDD)
+  - Chunk reviews (~200-line implementation limits with mandatory review)
+- Architect agent (`core/agents/architect.md`) — module decomposition, story writing, skeleton generation
+- Team Workflow documentation — commit → review → update → merge cycle on all markdown artifacts before code
+- "Alignment Before Code" section across methodology, README, and landing page
+- Landing page (`index.html`) — full visual landing page with:
+  - Installation / Getting Started section
+  - Command Reference (all 10 commands)
+  - Chat-Driven Development Problems section (6 problem cards + comparison table)
+  - Revert Workflow visualization (3 levels + Preview → Confirm → Execute)
+  - Quality Disciplines section (debugging flow, review comparison, coverage cards)
+  - Architecture Mode deep-dive with checkpoint explanations and decomposition process
+  - Constraint Mechanisms table
+  - Engineering rationale ("why it exists") for every workflow step
+
+### Changed
+- `core/methodology.md` — Full overhaul: added Installation & Getting Started, expanded all 9 command workflows, added Agent summaries, added Team Workflow section
+- `README.md` — Full rewrite: detailed installation, all 10 commands with usage/examples/output, Architecture Mode section, Quality Disciplines, Troubleshooting FAQ, Contributing guide, Team Workflow section
+- `index.html` — Expanded all workflow sections with Problem/Solution framing and engineering rationale
+- Debugger agent and Reviewer agent documentation expanded in methodology
+- `.cursorrules` regenerated from updated skill files
+
 ## [1.0.0] - 2025-01-25
 
 ### Added

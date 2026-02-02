@@ -83,6 +83,20 @@ The workflow:
 - **Accountability** — Clear record of what was requested vs. delivered
 - **Onboarding** — New team members read specs to understand features
 
+### Team Workflow: Alignment Before Code
+
+Draft's artifacts are designed for team collaboration through standard git workflows. Before any code is written, every markdown file goes through **commit → review → update → merge** until the team is aligned.
+
+**The PR cycle on documents:**
+
+1. **Project context** — Tech lead runs `/draft:init`. Team reviews `product.md`, `tech-stack.md`, and `workflow.md` via PR. Product managers review vision without reading code. Engineers review technical choices without context-switching into implementation.
+2. **Spec & plan** — Lead runs `/draft:new-track`. Team reviews `spec.md` (requirements, acceptance criteria) and `plan.md` (phased task breakdown, dependencies) via PR. Disagreements surface as markdown comments — resolved by editing a paragraph, not rewriting a module.
+3. **Architecture** — Lead runs `/draft:decompose`. Team reviews `architecture.md` (module boundaries, API surfaces, dependency graph, implementation order) via PR. Senior engineers validate architecture without touching the codebase.
+4. **Work distribution** — Lead runs `/draft:jira-preview` and `/draft:jira-create`. Epics, stories, and sub-tasks are created from the approved plan. Individual team members pick up Jira stories and implement — with or without `/draft:implement`.
+5. **Implementation** — Only after all documents are merged does coding start. Every developer has full context: what to build (`spec.md`), in what order (`plan.md`), with what boundaries (`architecture.md`).
+
+**Why this works:** The CLI is single-user, but the artifacts it produces are the collaboration layer. Draft handles planning and decomposition. Git handles review. Jira handles distribution. Changing a sentence in `spec.md` takes seconds. Changing an architectural decision after 2,000 lines of code takes days.
+
 ### When to Use Draft
 
 **Good fit:**

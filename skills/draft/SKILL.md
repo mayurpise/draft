@@ -16,6 +16,8 @@ Draft is a methodology for structured software development: **Context → Spec &
 | `/draft:implement` | Execute tasks from plan with TDD |
 | `/draft:status` | Show progress overview |
 | `/draft:revert` | Git-aware rollback |
+| `/draft:decompose` | Module decomposition with dependency mapping |
+| `/draft:coverage` | Code coverage report (target 95%+) |
 
 ## Quick Start
 
@@ -59,6 +61,8 @@ You can also use natural language:
 | "start implementing" | `/draft:implement` |
 | "what's the status" | `/draft:status` |
 | "undo", "revert" | `/draft:revert` |
+| "break into modules" | `/draft:decompose` |
+| "check coverage" | `/draft:coverage` |
 
 ## Need Help?
 

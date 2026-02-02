@@ -25,6 +25,8 @@ Display a comprehensive overview of project progress.
 2. For each active track, read:
    - `draft/tracks/<id>/metadata.json` for stats
    - `draft/tracks/<id>/plan.md` for task status
+   - `draft/tracks/<id>/architecture.md` for module status (if exists)
+3. Check for project-wide `draft/architecture.md` (if exists)
 
 ## Output Format
 
@@ -52,6 +54,12 @@ ACTIVE TRACKS
   Phase:  0/2
   Tasks:  0/6 complete
 
+MODULES (if architecture.md exists)
+─────────────────────────────────────────────────────────
+Module A         [x] Complete  (Coverage: 96.2%)
+Module B         [~] In Progress - 3/5 tasks
+Module C         [ ] Not Started
+
 BLOCKED ITEMS
 ─────────────────────────────────────────────────────────
 - [track-id-1] Task 2.3: [blocked reason]
@@ -68,6 +76,21 @@ Completed:        5 (28%)
 Blocked:          1
 ═══════════════════════════════════════════════════════════
 ```
+
+## Module Reporting
+
+When `architecture.md` exists for a track (track-level or project-level):
+
+1. Read the architecture.md module definitions
+2. For each module, determine status from its status marker:
+   - `[ ]` Not Started
+   - `[~]` In Progress — count completed vs total tasks mapped to this module
+   - `[x]` Complete — include coverage percentage if recorded
+   - `[!]` Blocked — include reason
+3. Display in the MODULES section of the track report
+4. If project-wide `draft/architecture.md` exists, show a project-level module summary after QUICK STATS
+
+---
 
 ## If No Tracks
 

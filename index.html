@@ -1255,7 +1255,7 @@
         <section id="workflow">
             <h2>The Draft Workflow</h2>
             <p>Draft solves this through <strong>Context-Driven Development</strong>: structured documents that constrain and guide AI behavior. By treating context as a managed artifact alongside code, your repository becomes the single source of truth.</p>
-            
+
             <div class="flow-diagram">
                 <div class="flow-step">
                     <div class="flow-icon context">📋</div>
@@ -1281,6 +1281,18 @@
                     <div class="flow-sublabel">Execute with confidence</div>
                 </div>
             </div>
+
+            <h3>Step 1: Context — Why it exists</h3>
+            <p>Without context, AI reinvents your project from scratch every session. It guesses your tech stack, ignores your conventions, and builds features that don't fit. <strong><code>/draft:init</code></strong> fixes this by creating persistent files that tell the AI who your users are (<code>product.md</code>), what technologies to use (<code>tech-stack.md</code>), and how your team works (<code>workflow.md</code>). These files live in git, survive across sessions, and load automatically — so the AI always starts with your ground truth instead of assumptions.</p>
+
+            <h3>Step 2: Spec & Plan — Why it exists</h3>
+            <p>When you ask AI to "add authentication," it immediately writes code. If the approach is wrong, you discover it during code review — after hours of work. <strong><code>/draft:new-track</code></strong> forces the AI to write a specification and phased plan <em>before touching code</em>. You review the approach in a quick spec PR, not a massive code PR. Disagreements get resolved in a 5-minute document edit instead of a multi-hour rewrite. The plan breaks work into phases with verification steps, so the AI tackles one thing at a time instead of attempting everything at once.</p>
+
+            <h3>Step 3: Decompose — Why it exists (optional)</h3>
+            <p>For multi-module features, jumping straight to implementation creates tangled code with unclear boundaries. <strong><code>/draft:decompose</code></strong> maps your feature into discrete modules with defined responsibilities, API surfaces, and a dependency graph. This gives you an implementation order (build the database layer before the API layer) and prevents circular dependencies. Each module is small enough to reason about, test independently, and review in isolation.</p>
+
+            <h3>Step 4: Implement — Why it exists</h3>
+            <p>Even with a plan, AI can drift: skip tests, claim completion without proof, or make sweeping changes across unrelated files. <strong><code>/draft:implement</code></strong> executes one task at a time from the plan, follows the TDD cycle (write test first, then code, then refactor), runs a verification gate before marking anything complete, and triggers a two-stage review at phase boundaries. The AI can only work on what's specified, in the order specified, with proof required at every step.</p>
         </section>
 
         <!-- Constraint Hierarchy -->
@@ -1323,7 +1335,7 @@
         <!-- Human Review -->
         <section id="review">
             <h2>Review Before Code</h2>
-            <p><strong>This is Draft's most important feature.</strong> The workflow ensures human review happens on the approach, not the implementation details.</p>
+            <p><strong>This is Draft's most important feature.</strong> In traditional AI coding, you discover the AI's design decisions during code review — after it's already built the wrong thing. With Draft, the AI writes a spec first. You review the approach in a document, not a diff. Disagreements are resolved by editing a paragraph, not rewriting a module.</p>
 
             <div class="comparison">
                 <div class="comparison-header">
@@ -1332,20 +1344,89 @@
                 </div>
                 <div class="comparison-row">
                     <div>AI writes code immediately</div>
-                    <div>AI writes spec first</div>
+                    <div>AI writes spec first — you approve the approach</div>
                 </div>
                 <div class="comparison-row">
-                    <div>Review happens on code PR</div>
-                    <div>Review happens on spec PR</div>
+                    <div>Review happens on code PR (too late)</div>
+                    <div>Review happens on spec PR (cheap to change)</div>
                 </div>
                 <div class="comparison-row">
                     <div>Disagreements require rewriting code</div>
-                    <div>Disagreements resolved before coding</div>
+                    <div>Disagreements resolved by editing a document</div>
                 </div>
                 <div class="comparison-row">
-                    <div>AI decisions are implicit</div>
-                    <div>AI decisions are documented</div>
+                    <div>AI decisions are implicit and buried in code</div>
+                    <div>AI decisions are documented and git-tracked</div>
                 </div>
+            </div>
+
+            <p><strong>Practical impact:</strong> Faster reviews (approve approach, not implementation details). Fewer rewrites (catch design issues before code exists). Knowledge transfer (specs document <em>why</em>, not just <em>what</em>). Onboarding (new team members read specs to understand features).</p>
+        </section>
+
+        <!-- Team Workflow -->
+        <section id="team-workflow">
+            <h2>Team Workflow: Alignment Before Code</h2>
+            <p>Draft's most powerful application is team-wide: <strong>every markdown file goes through commit → review → update → merge before a single line of code is written.</strong> By the time implementation starts, the entire team has already agreed on what to build, how to build it, and in what order.</p>
+
+            <h3>The PR cycle on documents, not code</h3>
+            <div class="hierarchy">
+                <div class="hierarchy-level">
+                    <div class="num">1</div>
+                    <div class="file">product.md + tech-stack.md + workflow.md</div>
+                    <div class="desc">Tech lead runs <code>/draft:init</code>. Team reviews project vision, technical choices, and workflow preferences via PR. Product managers review <code>product.md</code> without reading code. Engineers review <code>tech-stack.md</code> without context-switching into implementation.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">2</div>
+                    <div class="file">spec.md + plan.md</div>
+                    <div class="desc">Lead runs <code>/draft:new-track</code>. Team reviews requirements, acceptance criteria, phased task breakdown, and dependencies via PR. Disagreements surface as markdown comments — resolved by editing a paragraph, not rewriting a module.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">3</div>
+                    <div class="file">architecture.md</div>
+                    <div class="desc">Lead runs <code>/draft:decompose</code>. Team reviews module boundaries, API surfaces, dependency graph, and implementation order via PR. Senior engineers validate the architecture without touching the codebase.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">4</div>
+                    <div class="file">jira-export.md → Jira stories</div>
+                    <div class="desc">Lead runs <code>/draft:jira-preview</code> and <code>/draft:jira-create</code>. Epics, stories, and sub-tasks are created from the approved plan. Individual team members pick up Jira stories and implement — with or without Draft's <code>/draft:implement</code>.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">5</div>
+                    <div class="file">Implementation begins</div>
+                    <div class="desc">Only after all documents are merged does coding start. Every developer has full context: what to build (<code>spec.md</code>), in what order (<code>plan.md</code>), with what boundaries (<code>architecture.md</code>). No guessing, no assumptions, no "I thought we were doing it differently."</div>
+                </div>
+            </div>
+
+            <h3>Why this changes how teams work</h3>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <div>Traditional AI Development</div>
+                    <div>Draft Team Workflow</div>
+                </div>
+                <div class="comparison-row">
+                    <div>Developer gets a Jira ticket and asks AI to build it</div>
+                    <div>Developer gets a Jira ticket with linked spec, plan, and architecture already reviewed</div>
+                </div>
+                <div class="comparison-row">
+                    <div>Each developer makes independent design decisions</div>
+                    <div>Design decisions are made once in documents, reviewed by the team</div>
+                </div>
+                <div class="comparison-row">
+                    <div>Integration problems surface during code review</div>
+                    <div>Integration problems surface during architecture review — before any code exists</div>
+                </div>
+                <div class="comparison-row">
+                    <div>New team members read code to understand features</div>
+                    <div>New team members read <code>spec.md</code> and <code>plan.md</code> to understand features</div>
+                </div>
+            </div>
+
+            <div class="callout">
+                <div class="callout-title">
+                    <span>💡</span>
+                    Key Insight
+                </div>
+                <p>The CLI is single-user, but the artifacts it produces are the collaboration layer. Draft handles planning and decomposition. Git handles review. Jira handles distribution. <strong>Changing a sentence in spec.md takes seconds. Changing an architectural decision after 2,000 lines of code takes days.</strong></p>
             </div>
         </section>
 
@@ -1496,7 +1577,7 @@
         <!-- TDD Workflow -->
         <section id="tdd">
             <h2>TDD Workflow</h2>
-            <p>When enabled in workflow.md, implementation follows the classic test-driven development cycle.</p>
+            <p>AI-generated code without tests is a liability — it works until it doesn't, and you have no safety net. When TDD is enabled in <code>workflow.md</code>, Draft forces the AI to <strong>prove its code works</strong> at every step.</p>
 
             <div class="tdd-flow">
                 <div class="tdd-step red">🔴 Red</div>
@@ -1508,49 +1589,104 @@
                 <div class="tdd-step commit">📦 Commit</div>
             </div>
 
-            <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">Write failing test → Minimum code to pass → Clean up with tests green → Commit following conventions</p>
+            <div class="hierarchy">
+                <div class="hierarchy-level">
+                    <div class="num" style="background: rgba(251, 113, 133, 0.2); color: var(--accent-rose);">R</div>
+                    <div class="file" style="color: var(--accent-rose);">Red — Write failing test</div>
+                    <div class="desc">Define what "correct" means before any code exists. The test must fail with an assertion error (not a syntax error), proving it actually tests the requirement. This prevents the AI from writing tests that pass vacuously.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num" style="background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald);">G</div>
+                    <div class="file" style="color: var(--accent-emerald);">Green — Minimum code to pass</div>
+                    <div class="desc">Write the simplest implementation that makes the test pass. No extras, no "improvements," no abstractions for hypothetical futures. This prevents the AI from over-engineering — every line of code is justified by a failing test.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num" style="background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan);">R</div>
+                    <div class="file" style="color: var(--accent-cyan);">Refactor — Clean with tests green</div>
+                    <div class="desc">Improve code structure while tests stay green. Remove duplication, clarify naming, extract functions. The test suite acts as a safety net — if refactoring breaks anything, you know immediately.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num" style="background: rgba(251, 191, 36, 0.2); color: var(--accent-amber);">C</div>
+                    <div class="file" style="color: var(--accent-amber);">Commit — Following conventions</div>
+                    <div class="desc">One task = one commit. The commit message follows project conventions (<code>feat(track-id): description</code>). Small, focused commits make reverts surgical and git blame useful.</div>
+                </div>
+            </div>
+
+            <p><strong>Why this matters for engineers:</strong> Every completed task has a test proving it works. You can refactor with confidence, onboard new team members who read tests as documentation, and revert individual tasks without collateral damage. The AI can't claim "it should work" — it has to show evidence.</p>
         </section>
 
         <!-- Architecture Mode -->
         <section id="architecture">
             <h2>Architecture Mode</h2>
-            <p>For complex projects, Draft supports a deeper pre-implementation design workflow. Enable it during <code>/draft:init</code> to add module decomposition, algorithm documentation, and structured design checkpoints to <strong>all tracks</strong>.</p>
+            <p>Standard Draft gives you specs and plans. Architecture Mode goes deeper — it forces the AI to <strong>design before it codes</strong>. Every module gets a dependency analysis. Every algorithm gets documented in plain language. Every function signature gets approved before implementation begins. This is how you build complex features without the AI creating a tangled mess.</p>
+
+            <h3>Why Architecture Mode exists</h3>
+            <p>When AI builds a multi-module feature, it makes ad-hoc decisions about module boundaries, function signatures, and data flow. These decisions compound — a bad interface choice in module A cascades through modules B, C, and D. By the time you notice, the entire implementation needs restructuring. Architecture Mode front-loads these decisions into reviewable checkpoints where changes cost minutes instead of hours.</p>
 
             <div class="arch-features">
                 <div class="arch-feature">
                     <div class="label">/draft:decompose</div>
                     <h4>Module Decomposition</h4>
-                    <p>Break projects or tracks into modules with dependency diagrams and implementation order</p>
+                    <p><strong>Problem:</strong> AI creates tangled code with unclear boundaries. <strong>Solution:</strong> Break the feature into 1-3 file modules with defined APIs, dependencies, and implementation order. You review the architecture before any code is written.</p>
                 </div>
                 <div class="arch-feature">
                     <div class="label">Step 2.5</div>
                     <h4>Algorithm Stories</h4>
-                    <p>Natural-language Input → Process → Output descriptions at the top of each code file</p>
+                    <p><strong>Problem:</strong> AI jumps to code without understanding the algorithm. <strong>Solution:</strong> Write a natural-language Input → Process → Output description at the top of each file. You approve the algorithm before the AI writes a single line of implementation.</p>
                 </div>
                 <div class="arch-feature">
                     <div class="label">Step 3.0a</div>
                     <h4>Execution State</h4>
-                    <p>Define intermediate variables and data structures before writing any code</p>
+                    <p><strong>Problem:</strong> AI invents random variable names and data structures on the fly. <strong>Solution:</strong> Define all intermediate state variables (input, processing, output, error) before coding. You control the data model.</p>
                 </div>
                 <div class="arch-feature">
                     <div class="label">Step 3.0b</div>
                     <h4>Function Skeletons</h4>
-                    <p>Generate stubs with complete signatures and types, approved before TDD begins</p>
+                    <p><strong>Problem:</strong> AI creates functions with unclear signatures and unexpected interfaces. <strong>Solution:</strong> Generate stubs with complete types, parameters, and docstrings — no bodies. You approve function names and contracts before TDD begins.</p>
                 </div>
                 <div class="arch-feature">
                     <div class="label">~200 lines</div>
                     <h4>Chunk Reviews</h4>
-                    <p>Implementation limited to ~200-line chunks with mandatory review after each</p>
+                    <p><strong>Problem:</strong> AI dumps 500+ lines in one shot, making review impossible. <strong>Solution:</strong> Implementation is capped at ~200-line chunks with mandatory developer review after each. Every chunk is a reviewable, committable unit.</p>
                 </div>
                 <div class="arch-feature">
                     <div class="label">/draft:coverage</div>
                     <h4>Code Coverage</h4>
-                    <p>Auto-detect tooling, measure coverage, target 95%+ with gap analysis</p>
+                    <p><strong>Problem:</strong> AI writes tests that look good but miss critical paths. <strong>Solution:</strong> Auto-detect your coverage tool, run it, classify every uncovered line (testable / defensive / infrastructure), and suggest specific tests for gaps.</p>
                 </div>
             </div>
 
-            <h3>Implementation Flow with Architecture Mode</h3>
-            <p>Each task gains structured design checkpoints before the TDD cycle. Every checkpoint requires developer approval.</p>
+            <h3>How each checkpoint helps engineers</h3>
+
+            <div class="hierarchy">
+                <div class="hierarchy-level">
+                    <div class="num" style="background: rgba(251, 191, 36, 0.2); color: var(--accent-amber);">1</div>
+                    <div class="file" style="color: var(--accent-amber);">Story checkpoint</div>
+                    <div class="desc">The AI writes a plain-language algorithm description: what goes in, what processing happens, what comes out. You review the logic before any code exists. If the approach is wrong, you fix it in English — not in a 200-line diff.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num" style="background: rgba(251, 113, 133, 0.2); color: var(--accent-rose);">2</div>
+                    <div class="file" style="color: var(--accent-rose);">Execution State checkpoint</div>
+                    <div class="desc">The AI defines every intermediate variable: input state, processing state, output state, error state. You see the exact data model before implementation. Bad variable names, missing error states, or wrong data structures get caught here — not during debugging.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num" style="background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan);">3</div>
+                    <div class="file" style="color: var(--accent-cyan);">Skeleton checkpoint</div>
+                    <div class="desc">The AI generates function stubs with full type signatures, parameters, and docstrings — but no implementation bodies. You approve the public API, function names, and contracts. When TDD starts, the structure is locked; only the bodies get filled in.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num" style="background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald);">4</div>
+                    <div class="file" style="color: var(--accent-emerald);">TDD + Chunk review</div>
+                    <div class="desc">Implementation happens inside the pre-approved skeletons using TDD. If the diff exceeds ~200 lines, it stops for review. You never see a 500-line code dump — every chunk is small enough to read, understand, and approve.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num" style="background: rgba(139, 92, 246, 0.2); color: #a78bfa;">5</div>
+                    <div class="file" style="color: #a78bfa;">Coverage checkpoint</div>
+                    <div class="desc">After implementation, <code>/draft:coverage</code> measures test quality. Every uncovered line is classified: testable (needs a test), defensive (acceptable), or infrastructure (acceptable). You decide what matters, not the AI.</div>
+                </div>
+            </div>
+
+            <h3>Implementation Flow</h3>
 
             <div class="arch-flow">
                 <div class="arch-flow-row">
@@ -1576,19 +1712,50 @@
                 </div>
             </div>
 
+            <h3>The decomposition process</h3>
+            <p>Before Architecture Mode's checkpoints activate, <code>/draft:decompose</code> maps your feature into modules. Here's what happens concretely:</p>
+
+            <div class="hierarchy">
+                <div class="hierarchy-level">
+                    <div class="num">1</div>
+                    <div class="file">Scan</div>
+                    <div class="desc">Analyze your codebase: directory structure, entry points, existing module boundaries, import patterns. For new projects, work from the spec.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">2</div>
+                    <div class="file">Propose modules</div>
+                    <div class="desc">Each module gets: name, single responsibility, 1-3 files, public API surface with typed signatures, dependencies on other modules, and complexity rating. You review and modify.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">3</div>
+                    <div class="file">Map dependencies</div>
+                    <div class="desc">Generate a dependency graph with ASCII diagram. Detect circular dependencies and propose fixes (extract shared interface, invert dependency, or merge modules). You review the graph.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">4</div>
+                    <div class="file">Order implementation</div>
+                    <div class="desc">Topological sort determines build order: implement leaf modules first (no dependencies), then dependents. Identifies which modules can be built in parallel.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">5</div>
+                    <div class="file">Generate architecture.md</div>
+                    <div class="desc">All of the above is written to a reviewable markdown file with module definitions, dependency diagram, implementation order, and story placeholders for each module.</div>
+                </div>
+            </div>
+
             <div class="callout">
                 <div class="callout-title">
                     <span>⚙️</span>
                     Opt-In
                 </div>
-                <p>Architecture Mode is optional. Simple features, bug fixes, and config changes use the standard Draft workflow. Enable it when module boundaries, algorithm design, and coverage measurement add value.</p>
+                <p>Architecture Mode is optional. Simple features, bug fixes, and config changes use the standard Draft workflow. Enable it when module boundaries, algorithm design, and coverage measurement add value. <strong>Good fit:</strong> multi-module features, new projects, complex algorithms, teams wanting maximum review granularity. <strong>Overkill:</strong> simple features touching 1-2 files, bug fixes with clear scope, configuration changes.</p>
             </div>
         </section>
 
         <!-- Revert Workflow -->
         <section id="revert">
             <h2>Revert Workflow</h2>
-            <p>Git-aware rollback that understands Draft's logical units of work. Safely undo at any granularity.</p>
+            <p>AI makes mistakes. When it does, you need to undo cleanly — not just <code>git reset --hard</code> and lose everything. Draft's revert understands the logical structure of your work. It knows which commits belong to which task, which tasks belong to which phase, and it updates both git history and Draft's tracking state together. You pick the granularity, review what will change, and confirm before anything happens.</p>
 
             <div class="flow-diagram">
                 <div class="flow-step">
@@ -1630,10 +1797,10 @@
         <!-- Quality Disciplines -->
         <section id="quality">
             <h2>Quality Disciplines</h2>
-            <p>Three built-in agents enforce quality at every stage of implementation.</p>
+            <p>AI's default failure mode is to guess at fixes, skip verification, and claim success. Draft embeds three quality agents directly into the workflow — they activate automatically at the right moments and enforce disciplined engineering practices.</p>
 
             <h3>Systematic Debugging</h3>
-            <p>When a task is blocked, Draft enforces a four-phase investigation process. No random fixes allowed.</p>
+            <p><strong>The problem:</strong> When AI hits an error, it tries random changes hoping something sticks. Each "fix" often introduces new bugs. <strong>The solution:</strong> When a task is blocked (<code>[!]</code>), the Debugger Agent enforces a four-phase process that mirrors how senior engineers actually debug — understand first, then fix.</p>
 
             <div class="flow-diagram">
                 <div class="flow-step">
@@ -1661,8 +1828,10 @@
                 </div>
             </div>
 
+            <p><strong>Why this matters:</strong> After 3 failed hypothesis cycles, the agent escalates to you with everything it has learned and eliminated — no more silent spirals of random attempts. Root cause is documented in plan.md, so the team learns from every bug.</p>
+
             <h3>Two-Stage Review</h3>
-            <p>At every phase boundary, a mandatory review runs before proceeding.</p>
+            <p><strong>The problem:</strong> AI happily moves on to the next phase even if it missed requirements or wrote poor code. <strong>The solution:</strong> At every phase boundary, the Reviewer Agent runs two sequential checks. Stage 1 catches what's missing. Stage 2 catches what's messy. Only when both pass does the work proceed.</p>
 
             <div class="comparison">
                 <div class="comparison-header">
@@ -1687,8 +1856,10 @@
                 </div>
             </div>
 
+            <p><strong>Why this matters:</strong> Critical issues (broken functionality, security vulnerabilities) must be fixed before proceeding — no exceptions. Important issues should be fixed. Minor issues are noted but don't block. This prevents both perfectionism paralysis and quality erosion.</p>
+
             <h3>Code Coverage</h3>
-            <p>After implementation, <code>/draft:coverage</code> measures test quality with auto-detected tooling and gap classification.</p>
+            <p><strong>The problem:</strong> TDD ensures you write tests, but doesn't guarantee those tests are comprehensive. You can have 100% of your tests passing while 40% of your code is untested. <strong>The solution:</strong> <code>/draft:coverage</code> runs your project's coverage tool and classifies every uncovered line, so you know exactly what's tested, what's not, and whether that matters.</p>
 
             <div class="doc-grid" style="grid-template-columns: repeat(3, 1fr);">
                 <div class="doc-card">

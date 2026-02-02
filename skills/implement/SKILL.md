@@ -186,23 +186,26 @@ This prevents large, unreviewable code drops. Each chunk should be a coherent, r
 
 ---
 
-## Step 4: Update Progress
+## Step 4: Update Progress & Commit
+
+**Iron Law:** Every completed task gets its own commit. No batching. No skipping.
 
 After completing each task:
 
-1. Update `plan.md`:
-   - Change `[ ]` to `[x]` for the completed task
-   - Add completion note with commit SHA if available
+1. Commit FIRST (REQUIRED - non-negotiable):
+   - Stage only files changed by this task (never `git add .`)
+   - `git add <specific files>`
+   - `git commit -m "type(<track_id>): task description"`
+   - Do NOT proceed to the next task without committing
+   - Do NOT batch multiple tasks into one commit
 
-2. Update `metadata.json`:
+2. Update `plan.md`:
+   - Change `[ ]` to `[x]` for the completed task
+   - Add the commit SHA next to the task
+
+3. Update `metadata.json`:
    - Increment `tasks.completed`
    - Update `updated` timestamp
-
-3. Commit (if workflow specifies):
-```bash
-git add .
-git commit -m "feat(<track_id>): <task description>"
-```
 
 4. If `architecture.md` exists for the track:
    - Update module status markers (`[ ]` → `[~]` when first task in module starts, `[~]` → `[x]` when all tasks complete)

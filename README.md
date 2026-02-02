@@ -4,7 +4,7 @@
 
 A Claude Code plugin for Context-Driven Development. Draft specs and plans before implementation with structured workflows for features and fixes.
 
-Also available for [Cursor](#cursor-integration) and [GitHub Copilot](#github-copilot-integration).
+Also available for [Cursor](#cursor-integration), [GitHub Copilot](#github-copilot-integration), and [Gemini](#gemini-integration).
 
 ## Why Draft?
 
@@ -508,7 +508,7 @@ If `/draft:coverage` can't detect your tool, check `draft/tech-stack.md` for an 
 ./scripts/build-integrations.sh
 ```
 
-Integration files (`.cursorrules`, `copilot-instructions.md`) are auto-generated from skill files. Do not edit them directly.
+Integration files (`.cursorrules`, `copilot-instructions.md`, `GEMINI.md`) are auto-generated from skill files. Do not edit them directly.
 
 ### Plugin Structure
 
@@ -538,8 +538,10 @@ draft/
 └── integrations/
     ├── cursor/
     │   └── .cursorrules     # GENERATED from skills
-    └── copilot/.github/
-        └── copilot-instructions.md  # GENERATED from skills
+    ├── copilot/.github/
+    │   └── copilot-instructions.md  # GENERATED from skills
+    └── gemini/
+        └── GEMINI.md        # GENERATED from skills
 ```
 
 ## Cursor Integration
@@ -581,6 +583,22 @@ cp /path/to/draft/integrations/copilot/.github/copilot-instructions.md .github/
 ```
 
 The instructions file works with GitHub Copilot Chat in VS Code, JetBrains, and Neovim. Commands use natural language (`draft init`, `draft new-track`) instead of `@` mentions.
+
+## Gemini Integration
+
+Download directly into your project (no clone required):
+
+```bash
+curl -o GEMINI.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/GEMINI.md
+```
+
+Or copy from a local clone:
+
+```bash
+cp /path/to/draft/integrations/gemini/GEMINI.md GEMINI.md
+```
+
+Place `GEMINI.md` at the root of your project. It works with Gemini Code Assist and Gemini CLI. Commands use `@draft` syntax.
 
 ## Credits
 

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Google Gemini integration (`integrations/gemini/GEMINI.md`) — generated from skills via build script, uses `@draft` syntax
+- `/draft:init refresh` — Re-scan tech stack, update product vision, review workflow settings without touching tracks
 - `/draft:decompose` — Module decomposition with dependency mapping, cycle detection, and implementation ordering
 - `/draft:coverage` — Auto-detect coverage tooling, run reports, classify gaps (testable / defensive / infrastructure), target 95%+
 - `/draft:jira-preview` — Generate `jira-export.md` from track plan with auto-calculated story points
@@ -31,11 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Engineering rationale ("why it exists") for every workflow step
 
 ### Changed
-- `core/methodology.md` — Full overhaul: added Installation & Getting Started, expanded all 9 command workflows, added Agent summaries, added Team Workflow section
-- `README.md` — Full rewrite: detailed installation, all 10 commands with usage/examples/output, Architecture Mode section, Quality Disciplines, Troubleshooting FAQ, Contributing guide, Team Workflow section
-- `index.html` — Expanded all workflow sections with Problem/Solution framing and engineering rationale
+- `core/methodology.md` — Full overhaul: added Installation & Getting Started, expanded all 9 command workflows, added Agent summaries, added Team Workflow section, added Gemini integration section
+- `README.md` — Full rewrite: detailed installation, all 10 commands with usage/examples/output, Architecture Mode section, Quality Disciplines, Troubleshooting FAQ, Contributing guide, Team Workflow section, Gemini integration section
+- `index.html` — Expanded all workflow sections with Problem/Solution framing and engineering rationale; added Gemini to Getting Started
+- `scripts/build-integrations.sh` — Gemini output moved to `integrations/gemini/GEMINI.md` (consistent with other integrations)
 - Debugger agent and Reviewer agent documentation expanded in methodology
-- `.cursorrules` regenerated from updated skill files
+- `.cursorrules`, `copilot-instructions.md`, `GEMINI.md` regenerated from updated skill files
 
 ## [1.0.0] - 2025-01-25
 

@@ -19,6 +19,7 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 SKILLS_DIR="$ROOT_DIR/skills"
 CURSOR_OUTPUT="$ROOT_DIR/integrations/cursor/.cursorrules"
 COPILOT_OUTPUT="$ROOT_DIR/integrations/copilot/.github/copilot-instructions.md"
+GEMINI_OUTPUT="$ROOT_DIR/integrations/gemini/GEMINI.md"
 
 # ─────────────────────────────────────────────────────────
 # Shared: skill ordering and metadata
@@ -59,7 +60,7 @@ get_cursor_trigger() {
     local skill="$1"
     case "$skill" in
         draft)        echo "\"help\" or \"@draft\"" ;;
-        init)         echo "\"init draft\" or \"@draft init\"" ;;
+        init)         echo "\"init draft\" or \"@draft init [refresh]\"" ;;
         new-track)    echo "\"new feature\" or \"@draft new-track <description>\"" ;;
         decompose)    echo "\"break into modules\" or \"@draft decompose\"" ;;
         implement)    echo "\"implement\" or \"@draft implement\"" ;;
@@ -77,7 +78,7 @@ get_copilot_trigger() {
     local skill="$1"
     case "$skill" in
         draft)        echo "\"help\" or \"draft\"" ;;
-        init)         echo "\"init draft\" or \"draft init\"" ;;
+        init)         echo "\"init draft\" or \"draft init [refresh]\"" ;;
         new-track)    echo "\"new feature\" or \"draft new-track <description>\"" ;;
         decompose)    echo "\"break into modules\" or \"draft decompose\"" ;;
         implement)    echo "\"implement\" or \"draft implement\"" ;;
@@ -507,6 +508,15 @@ COPILOT_STORY
 }
 
 # ─────────────────────────────────────────────────────────
+# Gemini: build GEMINI.md
+# ─────────────────────────────────────────────────────────
+
+build_gemini() {
+    # Reuse Cursor rules as they share @draft syntax and Markdown format
+    build_cursorrules
+}
+
+# ─────────────────────────────────────────────────────────
 # Verification helpers
 # ─────────────────────────────────────────────────────────
 
@@ -579,6 +589,7 @@ main() {
     # Ensure output directories exist
     mkdir -p "$(dirname "$CURSOR_OUTPUT")"
     mkdir -p "$(dirname "$COPILOT_OUTPUT")"
+    mkdir -p "$(dirname "$GEMINI_OUTPUT")"
 
     # Generate Cursor integration
     echo "── Cursor ──────────────────────────────────────"
@@ -592,6 +603,13 @@ main() {
     build_copilot > "$COPILOT_OUTPUT"
     echo "  Generated: $COPILOT_OUTPUT"
     verify_output "Copilot" "$COPILOT_OUTPUT" "no" || exit 1
+    echo ""
+
+    # Generate Gemini integration
+    echo "── Gemini ──────────────────────────────────────"
+    build_gemini > "$GEMINI_OUTPUT"
+    echo "  Generated: $GEMINI_OUTPUT"
+    verify_output "Gemini" "$GEMINI_OUTPUT" "yes" || exit 1
     echo ""
 
     echo "All integrations built successfully."

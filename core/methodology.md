@@ -226,6 +226,20 @@ cp ~/.claude/plugins/draft/integrations/copilot/.github/copilot-instructions.md 
 
 This gives Copilot the same methodology awareness. Commands use natural language (`draft init`, `draft new-track`) instead of `@` mentions.
 
+### Gemini Integration (Optional)
+
+Draft also works with Gemini Code Assist and Gemini CLI via `GEMINI.md`:
+
+```bash
+# Download directly (no clone required)
+curl -o GEMINI.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/GEMINI.md
+
+# Or copy from a local clone
+cp ~/.claude/plugins/draft/integrations/gemini/GEMINI.md /your-project/GEMINI.md
+```
+
+Place `GEMINI.md` at the root of your project. Commands use `@draft` syntax.
+
 ---
 
 ## Core Workflow

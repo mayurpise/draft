@@ -9,14 +9,27 @@ You are initializing a Draft project for Context-Driven Development.
 
 ## Pre-Check
 
-First, check if already initialized:
+Check for arguments:
+- If argument is `refresh`: Proceed to **Refresh Mode**.
+- If no argument: Check if already initialized.
+
+### Standard Init Check
 ```bash
 ls draft/ 2>/dev/null
 ```
 
-If `draft/` exists with `product.md`, `tech-stack.md`, `workflow.md`, and `tracks.md`:
-- Announce: "Project already initialized. Use `/draft:new-track` to create a feature or `/draft:implement` to continue work."
+If `draft/` exists with context files:
+- Announce: "Project already initialized. Use `/draft:init refresh` to update context or `/draft:new-track` to create a feature."
 - Stop here.
+
+### Refresh Mode
+If the user runs `/draft:init refresh`:
+1. **Tech Stack Refresh**: Re-scan `package.json`, `go.mod`, etc. Compare with `draft/tech-stack.md`. Propose updates.
+2. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
+3. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
+4. **Preserve**: Do NOT modify `draft/tracks.md` unless explicitly requested.
+
+Stop here after refreshing. Continue to standard steps ONLY for fresh init.
 
 ## Step 1: Project Discovery
 

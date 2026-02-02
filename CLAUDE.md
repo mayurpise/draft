@@ -13,7 +13,7 @@ Draft is a Claude Code plugin that implements Context-Driven Development methodo
 ./scripts/build-integrations.sh
 ```
 
-Integration files (`.cursorrules`, `copilot-instructions.md`) are auto-generated from skills - do not edit directly.
+Integration files (`.cursorrules`, `copilot-instructions.md`, `GEMINI.md`) are auto-generated from skills - do not edit directly.
 
 ## Architecture
 
@@ -23,6 +23,7 @@ Integration files (`.cursorrules`, `copilot-instructions.md`) are auto-generated
 2. **`skills/<name>/SKILL.md`** - Skill implementations (derive from methodology)
 3. **`integrations/cursor/.cursorrules`** - Generated from skills via build script
 4. **`integrations/copilot/.github/copilot-instructions.md`** - Generated from skills via build script
+5. **`integrations/gemini/GEMINI.md`** - Generated from skills via build script
 
 ### Plugin Structure
 
@@ -38,6 +39,8 @@ integrations/cursor/
   └── .cursorrules          # GENERATED - do not edit directly
 integrations/copilot/.github/
   └── copilot-instructions.md  # GENERATED - do not edit directly
+integrations/gemini/
+  └── GEMINI.md             # GENERATED - do not edit directly
 ```
 
 ### Skill File Format
@@ -58,7 +61,7 @@ The frontmatter configures the command; the body contains step-by-step instructi
 
 1. Update `core/methodology.md` first
 2. Apply changes to relevant `skills/` SKILL.md files
-3. Run `./scripts/build-integrations.sh` to regenerate all integrations (Cursor + Copilot)
+3. Run `./scripts/build-integrations.sh` to regenerate all integrations (Cursor + Copilot + Gemini)
 4. Update this CLAUDE.md only if core concepts change
 
 ### Adding a New Skill

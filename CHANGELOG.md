@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- GitHub Copilot integration (`integrations/copilot/.github/copilot-instructions.md`) — generated from skills via build script
 - Google Gemini integration (`integrations/gemini/GEMINI.md`) — generated from skills via build script, uses `@draft` syntax
 - `/draft:init refresh` — Re-scan tech stack, update product vision, review workflow settings without touching tracks
 - `/draft:decompose` — Module decomposition with dependency mapping, cycle detection, and implementation ordering
@@ -33,12 +34,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Engineering rationale ("why it exists") for every workflow step
 
 ### Changed
+- `/draft:implement` — Mandatory per-task commits with SHA tracking; revert skill updated to match
 - `core/methodology.md` — Full overhaul: added Installation & Getting Started, expanded all 9 command workflows, added Agent summaries, added Team Workflow section, added Gemini integration section
-- `README.md` — Full rewrite: detailed installation, all 10 commands with usage/examples/output, Architecture Mode section, Quality Disciplines, Troubleshooting FAQ, Contributing guide, Team Workflow section, Gemini integration section
-- `index.html` — Expanded all workflow sections with Problem/Solution framing and engineering rationale; added Gemini to Getting Started
-- `scripts/build-integrations.sh` — Gemini output moved to `integrations/gemini/GEMINI.md` (consistent with other integrations)
+- `README.md` — Full rewrite: detailed installation, all 10 commands with usage/examples/output, Architecture Mode section, Quality Disciplines, Troubleshooting FAQ, Contributing guide, Team Workflow section, Gemini integration section; direct raw GitHub URLs for Cursor and Copilot setup
+- `index.html` — Expanded all workflow sections with Problem/Solution framing and engineering rationale; added Gemini and Copilot to Getting Started
+- `scripts/build-integrations.sh` — Unified build script now generates Cursor, Copilot, and Gemini integrations
 - Debugger agent and Reviewer agent documentation expanded in methodology
 - `.cursorrules`, `copilot-instructions.md`, `GEMINI.md` regenerated from updated skill files
+
+### Removed
+- `install.sh` — Unused installation script removed
+- Conductor attribution removed from landing page footer
 
 ## [1.0.0] - 2025-01-25
 

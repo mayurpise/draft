@@ -9,11 +9,11 @@ Draft is a Claude Code plugin that implements Context-Driven Development methodo
 ## Build Commands
 
 ```bash
-# Rebuild .cursorrules from skill files (run after changing skills)
-./scripts/build-cursorrules.sh
+# Rebuild all integrations from skill files (run after changing skills)
+./scripts/build-integrations.sh
 ```
 
-The `.cursorrules` file is auto-generated from skills - do not edit directly.
+Integration files (`.cursorrules`, `copilot-instructions.md`) are auto-generated from skills - do not edit directly.
 
 ## Architecture
 
@@ -22,6 +22,7 @@ The `.cursorrules` file is auto-generated from skills - do not edit directly.
 1. **`core/methodology.md`** - Master methodology documentation
 2. **`skills/<name>/SKILL.md`** - Skill implementations (derive from methodology)
 3. **`integrations/cursor/.cursorrules`** - Generated from skills via build script
+4. **`integrations/copilot/.github/copilot-instructions.md`** - Generated from skills via build script
 
 ### Plugin Structure
 
@@ -35,6 +36,8 @@ core/
   └── agents/               # Specialized agent behaviors (debugger, reviewer, planner)
 integrations/cursor/
   └── .cursorrules          # GENERATED - do not edit directly
+integrations/copilot/.github/
+  └── copilot-instructions.md  # GENERATED - do not edit directly
 ```
 
 ### Skill File Format
@@ -55,13 +58,13 @@ The frontmatter configures the command; the body contains step-by-step instructi
 
 1. Update `core/methodology.md` first
 2. Apply changes to relevant `skills/` SKILL.md files
-3. Run `./scripts/build-cursorrules.sh` to regenerate Cursor integration
+3. Run `./scripts/build-integrations.sh` to regenerate all integrations (Cursor + Copilot)
 4. Update this CLAUDE.md only if core concepts change
 
 ### Adding a New Skill
 
 1. Create `skills/<skill-name>/SKILL.md` with frontmatter
-2. Rebuild: `./scripts/build-cursorrules.sh`
+2. Rebuild: `./scripts/build-integrations.sh`
 3. Document in README.md
 
 ## End-User Context

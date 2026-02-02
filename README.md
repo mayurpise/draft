@@ -4,7 +4,7 @@
 
 A Claude Code plugin for Context-Driven Development. Draft specs and plans before implementation with structured workflows for features and fixes.
 
-Also available for [Cursor](#cursor-integration).
+Also available for [Cursor](#cursor-integration) and [GitHub Copilot](#github-copilot-integration).
 
 ## Why Draft?
 
@@ -493,22 +493,22 @@ If `/draft:coverage` can't detect your tool, check `draft/tech-stack.md` for an 
 ### Adding a New Skill
 
 1. Create `skills/<skill-name>/SKILL.md` with YAML frontmatter (`name`, `description`) and execution instructions
-2. Run `./scripts/build-cursorrules.sh` to regenerate Cursor integration
+2. Run `./scripts/build-integrations.sh` to regenerate all integrations
 3. Document in this README
 
 ### Updating Methodology
 
 1. Update `core/methodology.md` first (source of truth)
 2. Apply changes to relevant `skills/` SKILL.md files
-3. Run `./scripts/build-cursorrules.sh`
+3. Run `./scripts/build-integrations.sh`
 
-### Rebuilding Cursorrules
+### Rebuilding Integrations
 
 ```bash
-./scripts/build-cursorrules.sh
+./scripts/build-integrations.sh
 ```
 
-The `.cursorrules` file is auto-generated from skill files. Do not edit it directly.
+Integration files (`.cursorrules`, `copilot-instructions.md`) are auto-generated from skill files. Do not edit them directly.
 
 ### Plugin Structure
 
@@ -536,8 +536,10 @@ draft/
 │       ├── debugger.md
 │       └── reviewer.md
 └── integrations/
-    └── cursor/
-        └── .cursorrules     # GENERATED from skills
+    ├── cursor/
+    │   └── .cursorrules     # GENERATED from skills
+    └── copilot/.github/
+        └── copilot-instructions.md  # GENERATED from skills
 ```
 
 ## Cursor Integration
@@ -556,6 +558,22 @@ Then use in Cursor:
 ```
 
 See [integrations/cursor/README.md](integrations/cursor/README.md) for details.
+
+## GitHub Copilot Integration
+
+Copy the `.github/` directory to your project root:
+
+```bash
+cp -r /path/to/draft/integrations/copilot/.github ~/my-project/.github
+```
+
+Or if you already have a `.github/` directory:
+
+```bash
+cp /path/to/draft/integrations/copilot/.github/copilot-instructions.md ~/my-project/.github/
+```
+
+The instructions file works with GitHub Copilot Chat in VS Code, JetBrains, and Neovim. Commands use natural language (`draft init`, `draft new-track`) instead of `@` mentions.
 
 ## Credits
 

@@ -67,14 +67,54 @@ If no validation section exists, use defaults:
 Run all 5 validators:
 
 #### 3.1 Architecture Conformance
-- Check if `draft/architecture.md` exists
-- If yes, parse for documented patterns (search for sections like "Patterns", "Standards", "Conventions")
-- Validate code conforms to documented patterns
-- Example patterns to check:
-  - Middleware usage in API routes
-  - Repository pattern for database access
-  - Component structure conventions
-- Report violations with file:line references
+
+**Goal:** Verify code follows documented architectural patterns.
+
+**Process:**
+
+1. **Check for architecture.md:**
+   ```bash
+   ls draft/architecture.md 2>/dev/null
+   ```
+   If missing, skip this check with message: "No architecture.md found - skipping pattern validation"
+
+2. **Parse architectural patterns:**
+   - Read `draft/architecture.md`
+   - Search for sections: "Patterns", "Standards", "Conventions", "Code Organization"
+   - Extract documented rules (look for bullets, numbered lists, bolded statements)
+   - Common pattern types:
+     - File organization (e.g., "All components in src/components/")
+     - Naming conventions (e.g., "Test files must end in .test.ts")
+     - Structural rules (e.g., "All API routes use auth middleware")
+     - Dependency rules (e.g., "UI components cannot import from database layer")
+
+3. **Validate patterns:**
+   - For each documented pattern, verify compliance using grep/find
+   - Example checks:
+     ```bash
+     # Pattern: "All API routes use auth middleware"
+     grep -r "app\.(get|post|put|delete)" --include="*.ts" | grep -v "authMiddleware"
+
+     # Pattern: "Test files end in .test.ts"
+     find . -path "*/test/*" -name "*.ts" ! -name "*.test.ts"
+
+     # Pattern: "No direct database imports in UI layer"
+     grep -r "import.*from.*database" src/components/
+     ```
+
+4. **Report violations:**
+   - List file:line for each violation
+   - Include pattern name and expected behavior
+   - Classify severity based on architecture.md language:
+     - "MUST" / "REQUIRED" → ✗ Critical
+     - "SHOULD" / "RECOMMENDED" → ⚠ Warning
+
+**Output format:**
+```
+✓ All API routes use auth middleware (15 files checked)
+✗ **CRITICAL:** src/components/UserList.tsx:12 - Direct database import (violates layer separation)
+⚠ src/utils/helper.ts - Missing header comment (recommended by standards)
+```
 
 #### 3.2 Dead Code Detection
 - Scan for unused exports/functions

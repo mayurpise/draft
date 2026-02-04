@@ -117,10 +117,52 @@ Run all 5 validators:
 ```
 
 #### 3.2 Dead Code Detection
-- Scan for unused exports/functions
-- Track exports vs imports across codebase
-- Flag unreferenced code (may be public API, manual review needed)
-- Scope: project source files (exclude node_modules, build artifacts)
+
+**Goal:** Identify unused exports and unreferenced code.
+
+**Process:**
+
+1. **Identify source directories:**
+   - Read `tech-stack.md` for project structure hints
+   - Common patterns: `src/`, `lib/`, `app/`, `packages/`
+   - Exclude: `node_modules/`, `dist/`, `build/`, `coverage/`, `*.test.*`, `*.spec.*`
+
+2. **Find all exports:**
+   ```bash
+   # JavaScript/TypeScript
+   grep -r "export \(default\|const\|function\|class\|interface\|type\)" src/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx"
+
+   # Python
+   grep -r "^def \|^class " --include="*.py" | grep -v "^    "  # Top-level only
+
+   # Go
+   grep -r "^func [A-Z]" --include="*.go"  # Exported functions (capitalized)
+   ```
+
+3. **Track imports/references:**
+   - For each exported symbol, search for imports/usage across codebase
+   - Exclude self-references (same file)
+   ```bash
+   # Check if 'UserService' is imported anywhere
+   grep -r "import.*UserService" src/ --exclude="user-service.ts"
+   grep -r "UserService" src/ --exclude="user-service.ts"
+   ```
+
+4. **Flag unreferenced exports:**
+   - Exports with zero external references → potential dead code
+   - Note: May be public API, CLI entry points, or future use
+   - Classify as ⚠ Warning (not Critical) - requires manual review
+
+**Output format:**
+```
+⚠ src/utils/old-parser.ts:15 - Function 'parseOldFormat' has no references (0 imports)
+⚠ src/components/Deprecated.tsx - Entire file unreferenced (no imports)
+✓ src/services/user.ts - All exports referenced
+```
+
+**Performance optimization:**
+- Limit to files changed in last 90 days if full scan takes >10s
+- Use `git log --since="90 days ago" --name-only --pretty=format: | sort -u`
 
 #### 3.3 Dependency Cycle Detection
 - Build dependency graph from import statements

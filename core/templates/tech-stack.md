@@ -80,6 +80,37 @@
 
 ---
 
+## Component Overview
+
+```mermaid
+graph TD
+    subgraph Frontend["Frontend"]
+        UI["UI Framework"]
+        State["State Management"]
+    end
+    subgraph Backend["Backend"]
+        API["API Layer"]
+        BL["Business Logic"]
+        DAL["Data Access"]
+    end
+    subgraph Infrastructure["Infrastructure"]
+        DB[(Database)]
+        Cache[(Cache)]
+        Queue["Message Queue"]
+    end
+    UI --> State
+    State --> API
+    API --> BL
+    BL --> DAL
+    DAL --> DB
+    DAL --> Cache
+    BL --> Queue
+```
+
+> Replace with actual components and their relationships from the codebase. For detailed architecture analysis see `draft/architecture.md`.
+
+---
+
 ## External Services
 
 | Service | Purpose | Credentials Location |

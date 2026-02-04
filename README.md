@@ -80,6 +80,8 @@ Shows available commands and guides you to the right workflow. Also supports nat
 | "undo", "revert" | `/draft:revert` |
 | "break into modules" | `/draft:decompose` |
 | "check coverage" | `/draft:coverage` |
+| "preview jira", "export to jira" | `/draft:jira-preview` |
+| "create jira issues" | `/draft:jira-create` |
 
 ---
 

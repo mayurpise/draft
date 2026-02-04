@@ -171,7 +171,11 @@ graph LR
 
 ---
 
-## Module Dependency Diagram
+## Phase 3: Module Discovery
+
+> **Init vs Decompose**: `/draft:init` discovers and documents **existing** modules by analyzing the codebase's import graph and directory boundaries. `/draft:decompose` plans **new** modules for features or refactors. Both write to this section — init sets the baseline, decompose extends it. Existing modules (`[x] Existing`) should not be removed by decompose.
+
+### Module Dependency Diagram
 
 ```mermaid
 graph LR
@@ -181,45 +185,51 @@ graph LR
     C --> D
 ```
 
-## Dependency Table
+> Generated from import/require analysis. Use actual module names from the codebase.
 
-| Module | Depends On | Depended By |
-|--------|-----------|-------------|
-| Module A | - | Module B, Module C |
-| Module B | Module A | Module D |
-| Module C | Module A | Module D |
-| Module D | Module B, Module C | - |
+### Dependency Table
 
-## Modules
+| Module | Depends On | Depended By | Circular? |
+|--------|-----------|-------------|-----------|
+| Module A | - | Module B, Module C | No |
+| Module B | Module A | Module D | No |
+| Module C | Module A | Module D | No |
+| Module D | Module B, Module C | - | No |
 
-### Module: [name]
-- **Responsibility:** [one sentence]
-- **Files:** [expected source files]
-- **API Surface:** [Use language-specific format from `core/agents/architect.md`. Examples:]
+### Modules
+
+#### Module: [name]
+- **Responsibility:** [one sentence — what this module does]
+- **Files:** [actual source files in this module]
+- **API Surface:** [Key exported functions/classes/interfaces. Use language-specific format:]
   - TypeScript: `createUser(data: CreateUserInput): Promise<User>`, `interface UserRepository { ... }`
   - Python: `create_user(data: CreateUserInput) -> User`, `class UserRepository(Protocol): ...`
   - Go: `func CreateUser(data CreateUserInput) (*User, error)`, `type UserRepository interface { ... }`
   - Rust: `pub fn create_user(data: CreateUserInput) -> Result<User, Error>`, `pub trait UserRepository { ... }`
 - **Dependencies:** [which modules it imports from]
 - **Complexity:** [Low / Medium / High]
-- **Story:** [placeholder - filled during `/draft:implement`. See `core/agents/architect.md` Story Lifecycle for format. Will become a summary + file reference, e.g.: "Documented in `src/auth.ts:1-12` — validates token, resolves user, checks permissions"]
-- **Status:** [ ] Not Started
+- **Story:** [Brief summary of what this module currently does with file references, e.g.: "Handles user authentication via JWT — see `src/auth/index.ts:1-45`"]
+- **Status:** [x] Existing
 
-### Module: [name]
+#### Module: [name]
 - **Responsibility:** [one sentence]
-- **Files:** [expected source files]
+- **Files:** [actual source files]
 - **API Surface:** [Use language-specific format — see first module example above]
 - **Dependencies:** [which modules it imports from]
 - **Complexity:** [Low / Medium / High]
-- **Story:** [placeholder - filled during `/draft:implement`. See `core/agents/architect.md` Story Lifecycle for format. Will become a summary + file reference, e.g.: "Documented in `src/auth.ts:1-12` — validates token, resolves user, checks permissions"]
-- **Status:** [ ] Not Started
+- **Story:** [Brief summary with file references]
+- **Status:** [x] Existing
 
-## Implementation Order
+### Dependency Order
 
-1. [Module with no dependencies] (leaf node)
+1. [Leaf module — no dependencies] (foundational)
 2. [Module depending on #1]
 3. [Module depending on #1]
-4. [Module depending on #2 and #3]
+4. [Module depending on #2 and #3] (most dependent)
+
+> Topological ordering from leaf to root. Helps engineers understand which parts are foundational vs. built on top.
+
+---
 
 ## Notes
 

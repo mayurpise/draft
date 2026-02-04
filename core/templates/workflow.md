@@ -92,6 +92,34 @@ Do not proceed to next phase until verification passes.
 
 ---
 
+## Validation
+
+### Auto-Validation
+- [ ] Auto-validate at track completion
+
+When enabled, runs `/draft:validate --track <id>` automatically when `/draft:implement` completes a track.
+
+### Blocking Behavior
+- [ ] Block on validation failures
+
+When enabled, halt track completion if critical (✗) issues found. Requires fixes before marking complete.
+
+When disabled (default), validation failures produce warnings only. Issues documented in `draft/tracks/<id>/validation-report.md`.
+
+### Validation Scope
+- [x] Architecture conformance
+- [x] Dead code detection
+- [x] Dependency cycle detection
+- [x] Security scan
+- [x] Performance anti-patterns
+- [x] Spec compliance (track-level only)
+- [x] Architectural impact (track-level only)
+- [x] Regression risk (track-level only)
+
+Uncheck categories to skip during validation. All enabled by default.
+
+---
+
 ## Session Management
 
 ### Starting a Session

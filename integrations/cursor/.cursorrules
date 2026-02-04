@@ -1236,19 +1236,35 @@ When all tasks in a phase are `[x]`:
 
 When all phases complete:
 
-1. Update `plan.md` status to `[x] Completed`
-2. Update `metadata.json` status to `"completed"`
-3. Update `draft/tracks.md`:
+1. **Run validation (if enabled):**
+   - Read `draft/workflow.md` validation configuration
+   - Check if auto-validation enabled:
+     ```markdown
+     ## Validation
+     - [x] Auto-validate at track completion
+     ```
+   - If enabled, run `@draft validate --track <track_id>`
+   - Check validation results:
+     - If block-on-failure enabled AND critical issues found → HALT, require fixes
+     - Otherwise, document warnings and continue
+
+2. Update `plan.md` status to `[x] Completed`
+3. Update `metadata.json` status to `"completed"`
+4. Update `draft/tracks.md`:
    - Move from Active to Completed section
    - Add completion date
 
-4. Announce:
+5. Announce:
 "Track <track_id> completed!
 
 Summary:
 - Phases: N/N
 - Tasks: M/M
 - Duration: [if tracked]
+
+[If validation ran:]
+Validation: ✓ [pass] | ⚠ [warn] | ✗ [critical]
+Report: draft/tracks/<track_id>/validation-report.md
 
 All acceptance criteria from spec.md should be verified.
 

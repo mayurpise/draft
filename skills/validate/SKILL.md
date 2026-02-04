@@ -547,9 +547,90 @@ Summary:
 ```
 
 #### 3.8 Regression Risk
-- Identify changed files
-- Build dependency graph to find affected modules
-- Report blast radius (module count, critical paths affected)
+
+**Goal:** Analyze the blast radius of track changes to identify regression risk.
+
+**Process:**
+
+1. **Identify changed files:**
+   ```bash
+   git diff --name-only main..HEAD
+   ```
+
+2. **Find reverse dependencies (who imports these files):**
+   ```bash
+   # For each changed file, find all files that import it
+   for file in <changed-files>; do
+     # Extract module name/path
+     module_path=$(echo $file | sed 's/\.[^.]*$//')  # Remove extension
+
+     # Search for imports of this module
+     grep -r "import.*from ['\"].*$module_path" src/ --include="*.ts" --include="*.js" --include="*.py"
+   done
+   ```
+
+3. **Build affected module tree:**
+   - Start with changed files (direct impact)
+   - Find files that import changed files (1st degree impact)
+   - Recursively find files that import 1st degree files (2nd degree impact)
+   - Stop at 2-3 degrees to avoid full tree explosion
+
+4. **Identify critical paths:**
+   - Critical path indicators:
+     - Authentication/authorization modules
+     - Database connection/transaction handling
+     - Payment processing
+     - API entry points (routes, controllers)
+   - Check if changed files or their dependents match critical patterns:
+     ```bash
+     grep -E "(auth|login|session|payment|transaction|database|db)" <affected-files>
+     ```
+
+5. **Calculate blast radius:**
+   - Count unique affected files
+   - Classify by degree (direct, 1st, 2nd)
+   - Flag if critical paths affected
+
+**Output format:**
+```
+Regression Risk Analysis
+
+Changed Files: 3
+- src/services/user.ts
+- src/models/user.ts
+- src/utils/validation.ts
+
+Blast Radius:
+- Direct impact: 3 files
+- 1st degree: 14 files (import changed modules)
+- 2nd degree: 27 files (transitively affected)
+- Total affected: 44 files
+
+Critical Paths Affected:
+⚠ Authentication flow (src/auth/middleware.ts imports src/services/user.ts)
+⚠ User API endpoints (src/api/users.ts imports src/services/user.ts)
+✓ Payment processing not affected
+
+Risk Level: MEDIUM
+- Moderate blast radius (44 files)
+- 2 critical paths affected
+- Recommendation: Run full integration tests, especially auth flow
+
+Affected Modules by Degree:
+[1st] src/api/users.ts
+[1st] src/auth/middleware.ts
+[1st] src/components/UserProfile.tsx
+[2nd] src/api/posts.ts (via users.ts)
+[2nd] src/pages/Dashboard.tsx (via UserProfile.tsx)
+... (39 more files)
+```
+
+**Risk Classification:**
+- **LOW:** <10 affected files, no critical paths
+- **MEDIUM:** 10-50 affected files or 1-2 critical paths
+- **HIGH:** >50 affected files or 3+ critical paths
+
+**Performance:** Limit dependency traversal to 2 degrees and top 50 most-impacted files to keep report concise.
 
 ## Step 4: Generate Validation Report
 

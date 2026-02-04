@@ -94,9 +94,10 @@ Run once per project. Creates the `draft/` directory with context files.
 
 **What it does:**
 1. Detects brownfield (existing code) vs greenfield (new project)
-2. **Architecture Discovery (brownfield only)** — Deep two-phase codebase analysis:
+2. **Architecture Discovery (brownfield only)** — Deep three-phase codebase analysis:
    - **Phase 1: Orientation** — Directory structure, entry points, critical paths, request/response flow (mermaid `sequenceDiagram`), tech stack inventory. Generates system architecture diagram (mermaid `graph TD`).
    - **Phase 2: Logic** — Data lifecycle mapping (mermaid `flowchart LR`), primary domain objects, design pattern recognition, anti-pattern/complexity hotspot detection, convention extraction, external dependency mapping (mermaid `graph LR`).
+   - **Phase 3: Module Discovery** — Reverse-engineers existing modules from import graph and directory boundaries. Documents each module's responsibility, files, API surface, dependencies, and complexity. Generates module dependency diagram (mermaid `graph LR`), dependency table, and topological ordering. `/draft:decompose` extends (not replaces) these when planning new features.
    - Produces `draft/architecture.md` — persistent context every future track references instead of re-analyzing the codebase.
 3. Creates `draft/product.md` through dialogue about vision, users, goals
 4. Optionally creates `draft/product-guidelines.md` for style/branding/UX

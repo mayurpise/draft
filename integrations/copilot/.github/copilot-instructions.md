@@ -93,6 +93,8 @@ Draft is a methodology for structured software development: **Context → Spec &
 | `draft revert` | Git-aware rollback |
 | `draft decompose` | Module decomposition with dependency mapping |
 | `draft coverage` | Code coverage report (target 95%+) |
+| `draft jira-preview` | Generate Jira export for review |
+| `draft jira-create` | Push issues to Jira via MCP |
 
 ## Quick Start
 
@@ -138,6 +140,8 @@ You can also use natural language:
 | "undo", "revert" | `draft revert` |
 | "break into modules" | `draft decompose` |
 | "check coverage" | `draft coverage` |
+| "preview jira", "export to jira" | `draft jira-preview` |
+| "create jira issues" | `draft jira-create` |
 
 ## Need Help?
 

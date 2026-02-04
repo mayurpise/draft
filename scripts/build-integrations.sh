@@ -32,6 +32,7 @@ SKILL_ORDER=(
     decompose
     implement
     coverage
+    validate
     status
     revert
     jira-preview
@@ -47,6 +48,7 @@ get_skill_header() {
         decompose)    echo "Decompose Command" ;;
         implement)    echo "Implement Command" ;;
         coverage)     echo "Coverage Command" ;;
+        validate)     echo "Validate Command" ;;
         status)       echo "Status Command" ;;
         revert)       echo "Revert Command" ;;
         jira-preview) echo "Jira Preview Command" ;;
@@ -65,6 +67,7 @@ get_cursor_trigger() {
         decompose)    echo "\"break into modules\" or \"@draft decompose\"" ;;
         implement)    echo "\"implement\" or \"@draft implement\"" ;;
         coverage)     echo "\"check coverage\" or \"@draft coverage\"" ;;
+        validate)     echo "\"validate\" or \"@draft validate [--track <id>]\"" ;;
         status)       echo "\"status\" or \"@draft status\"" ;;
         revert)       echo "\"revert\" or \"@draft revert\"" ;;
         jira-preview) echo "\"preview jira\" or \"@draft jira-preview [track-id]\"" ;;
@@ -83,6 +86,7 @@ get_copilot_trigger() {
         decompose)    echo "\"break into modules\" or \"draft decompose\"" ;;
         implement)    echo "\"implement\" or \"draft implement\"" ;;
         coverage)     echo "\"check coverage\" or \"draft coverage\"" ;;
+        validate)     echo "\"validate\" or \"draft validate [--track <id>]\"" ;;
         status)       echo "\"status\" or \"draft status\"" ;;
         revert)       echo "\"revert\" or \"draft revert\"" ;;
         jira-preview) echo "\"preview jira\" or \"draft jira-preview [track-id]\"" ;;

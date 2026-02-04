@@ -324,10 +324,91 @@ Run all 5 validators:
 - Third-party code (node_modules, vendor)
 
 #### 3.5 Performance Anti-Patterns
-- N+1 query detection (loops with database calls)
-- Blocking I/O in async contexts (sync file reads, network calls)
-- Synchronous operations in hot paths
-- Flag with file:line and explanation
+
+**Goal:** Identify common performance issues that degrade application responsiveness.
+
+**Process:**
+
+1. **N+1 Query Detection:**
+   ```bash
+   # Loops with database calls inside (JavaScript/TypeScript)
+   grep -rE "for\s*\(.*\)\s*\{" src/ -A 5 --include="*.ts" --include="*.js" | grep -E "(await.*find|query|execute|get)"
+
+   # .map() with async database calls
+   grep -rE "\.map\(.*=>.*\{" src/ -A 3 | grep -E "(await.*find|query)"
+
+   # Python loops with ORM queries
+   grep -rE "for .* in .*:" --include="*.py" -A 3 | grep -E "(\.get\(|\.filter\(|\.query\()"
+   ```
+   - Context: Show loop + query lines
+   - Severity: ⚠ Warning
+   - Suggestion: Use bulk queries (IN clause, joins, eager loading)
+
+2. **Blocking I/O in Async Contexts:**
+   ```bash
+   # Synchronous file operations in async functions (Node.js)
+   grep -rE "async.*function" src/ -A 10 --include="*.ts" --include="*.js" | grep -E "fs\.(readFileSync|writeFileSync|readSync)"
+
+   # Synchronous crypto in async code
+   grep -rE "async.*function" src/ -A 10 | grep -E "(crypto\.pbkdf2Sync|bcrypt\.hashSync)"
+
+   # Python blocking calls in async functions
+   grep -rE "async def" --include="*.py" -A 10 | grep -E "(open\(|requests\.|time\.sleep)"
+   ```
+   - Severity: ⚠ Warning
+   - Suggestion: Use async alternatives (fs.promises, bcrypt.hash, aiohttp)
+
+3. **Synchronous Operations in Hot Paths:**
+   ```bash
+   # Sync operations in HTTP handlers/middleware
+   grep -rE "(app\.(get|post|put|delete)|router\.|@(Get|Post|Put|Delete))" src/ -A 10 | grep -E "(Sync\(|\.join\(|JSON\.parse)"
+
+   # Heavy computation in request handlers (regex, JSON parsing large payloads)
+   grep -rE "(req\.(body|query|params))" src/ -A 3 | grep -E "JSON\.parse.*req\."
+   ```
+   - Severity: ⚠ Warning (unless proven hot path via profiling)
+   - Suggestion: Move to worker threads, use streaming parsers
+
+4. **Missing Pagination:**
+   ```bash
+   # Database queries without LIMIT
+   grep -rE "find\(\)\.toArray\(\)|findAll\(\)|query\(.*SELECT.*FROM" src/ | grep -v "LIMIT\|limit\|take"
+   ```
+   - Severity: ⚠ Warning
+   - Suggestion: Add pagination (LIMIT/OFFSET, cursor-based)
+
+5. **Inefficient String Concatenation in Loops:**
+   ```bash
+   # String concatenation in loops (JavaScript)
+   grep -rE "for\s*\(.*\)\s*\{" src/ -A 5 | grep -E "\+\s*['\"]"
+
+   # Python string concat in loops
+   grep -rE "for .* in .*:" --include="*.py" -A 3 | grep -E "\+\s*['\"]"
+   ```
+   - Severity: ⚠ Warning (micro-optimization, usually not critical)
+   - Suggestion: Use array.join() or StringBuilder
+
+**Output format:**
+```
+⚠ src/api/users.ts:34 - Potential N+1 query
+   Code: for (const user of users) { await db.posts.find({ userId: user.id }) }
+   Impact: 1 query per user (N+1 pattern)
+   Fix: Use JOIN or IN clause: db.posts.find({ userId: { $in: userIds } })
+
+⚠ src/services/crypto.ts:12 - Blocking I/O in async function
+   Code: async hashPassword() { bcrypt.hashSync(password, 10) }
+   Impact: Blocks event loop during CPU-intensive hashing
+   Fix: Use async variant: await bcrypt.hash(password, 10)
+
+⚠ src/api/posts.ts:56 - Missing pagination
+   Code: const posts = await db.posts.find()
+   Impact: Could fetch millions of records
+   Fix: Add limit: find().limit(100)
+
+✓ No N+1 queries detected in hot paths
+```
+
+**Note:** Performance warnings require context - mark as ⚠ Warning, not ✗ Critical, unless clearly in hot path.
 
 ### Track-Level Validation (specific track)
 

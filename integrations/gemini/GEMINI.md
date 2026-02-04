@@ -32,6 +32,7 @@ When `draft/` exists in the project, always consider:
 | `@draft decompose` | Module decomposition with dependency mapping |
 | `@draft implement` | Execute tasks from plan |
 | `@draft coverage` | Code coverage report (target 95%+) |
+| `@draft validate` | Validate track quality (architecture, security, performance) |
 | `@draft status` | Show progress overview |
 | `@draft revert` | Git-aware rollback |
 | `@draft jira-preview [track-id]` | Generate jira-export.md for review |
@@ -48,6 +49,7 @@ Recognize these natural language patterns:
 | "break into modules", "decompose" | Run decompose |
 | "start implementing" | Execute implement |
 | "check coverage", "test coverage" | Run coverage |
+| "validate", "check quality" | Run validate |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
 | "preview jira", "export to jira" | Run jira-preview |
@@ -93,6 +95,7 @@ Draft is a methodology for structured software development: **Context → Spec &
 | `@draft revert` | Git-aware rollback |
 | `@draft decompose` | Module decomposition with dependency mapping |
 | `@draft coverage` | Code coverage report (target 95%+) |
+| `@draft validate` | Validate track quality (architecture, security, performance) |
 | `@draft jira-preview` | Generate Jira export for review |
 | `@draft jira-create` | Push issues to Jira via MCP |
 
@@ -140,6 +143,7 @@ You can also use natural language:
 | "undo", "revert" | `@draft revert` |
 | "break into modules" | `@draft decompose` |
 | "check coverage" | `@draft coverage` |
+| "validate", "check quality" | `@draft validate` |
 | "preview jira", "export to jira" | `@draft jira-preview` |
 | "create jira issues" | `@draft jira-create` |
 

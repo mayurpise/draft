@@ -479,10 +479,72 @@ Spec Compliance: 4/5 criteria covered
 - Manual review needed if no match (list as uncovered)
 
 #### 3.7 Architectural Impact
-- Analyze changed files from git diff
-- Check for new dependencies not in `tech-stack.md`
-- Verify changes follow architectural patterns from `architecture.md`
-- Flag pattern violations
+
+**Goal:** Detect if track changes introduce new dependencies or violate architectural patterns.
+
+**Process:**
+
+1. **Get changed files:**
+   ```bash
+   # Get files modified in current branch vs main
+   git diff --name-only main..HEAD
+
+   # Or from track metadata (git log since track creation)
+   git log --since="<track-created-date>" --name-only --pretty=format: | sort -u
+   ```
+
+2. **Detect new dependencies:**
+   - Parse import statements from changed files
+   - Extract package/module names
+   ```bash
+   # JavaScript/TypeScript - extract npm packages
+   grep "import.*from ['\"]" <changed-files> | grep -v "^\./" | grep -v "^@/"
+
+   # Python - extract pip packages
+   grep "^import \|^from .* import" <changed-files> | grep -v "^\."
+
+   # Go - extract go modules
+   grep "import \"" <changed-files> | grep -v "^\."
+   ```
+
+3. **Cross-reference with tech-stack.md:**
+   - Read `draft/tech-stack.md`
+   - Extract documented dependencies (frameworks, libraries)
+   - Compare imported packages against documented list
+   - Flag any new packages not in tech-stack.md
+
+4. **Check architectural pattern compliance:**
+   - If `draft/architecture.md` exists, read documented patterns
+   - Run same pattern checks as Section 3.1 but scoped to changed files only
+   - Common violations:
+     - UI layer importing from database layer
+     - Breaking module boundaries
+     - Violating dependency direction rules
+
+**Output format:**
+```
+Architectural Impact Analysis
+
+New Dependencies Detected:
+⚠ axios (src/api/client.ts:3)
+   Not documented in tech-stack.md
+   Recommendation: Update tech-stack.md or use existing fetch API
+
+✓ All imports use documented dependencies
+
+Pattern Violations:
+✗ src/components/UserProfile.tsx:15 - Direct database import
+   Pattern: UI components cannot import from database layer
+   File imports: import { db } from '../database/client'
+   Fix: Use API service layer instead
+
+✓ No architectural pattern violations detected
+
+Summary:
+- 1 new dependency (requires documentation)
+- 1 pattern violation (critical)
+- 12 files changed, 11 compliant
+```
 
 #### 3.8 Regression Risk
 - Identify changed files

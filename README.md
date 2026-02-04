@@ -80,6 +80,7 @@ Shows available commands and guides you to the right workflow. Also supports nat
 | "undo", "revert" | `/draft:revert` |
 | "break into modules" | `/draft:decompose` |
 | "check coverage" | `/draft:coverage` |
+| "validate", "check quality" | `/draft:validate` |
 | "preview jira", "export to jira" | `/draft:jira-preview` |
 | "create jira issues" | `/draft:jira-create` |
 
@@ -302,6 +303,34 @@ Creates Jira issues from `jira-export.md` via MCP-Jira integration.
 ```
 
 Creates Epic → Stories → Sub-tasks in order. Updates plan.md and jira-export.md with issue keys. Auto-generates the export file if missing. Requires MCP-Jira server configuration.
+
+---
+
+### `/draft:validate` — Validate Codebase Quality
+
+Systematic validation using Draft context (architecture.md, product.md, tech-stack.md).
+
+```bash
+# Validate entire codebase
+/draft:validate
+
+# Validate specific track
+/draft:validate --track <track-id>
+```
+
+**Project-Level Checks:**
+- Architecture conformance (violations of architecture.md patterns)
+- Dead code detection (unused exports, unreferenced code)
+- Dependency cycle detection (circular imports)
+- Security scan (hardcoded secrets, SQL injection, XSS, missing validation)
+- Performance anti-patterns (N+1 queries, blocking I/O in async)
+
+**Track-Level Checks** (in addition to project-level scoped to changed files):
+- Spec compliance (acceptance criteria have corresponding tests)
+- Architectural impact (new dependencies not in tech-stack.md, pattern violations)
+- Regression risk (blast radius analysis, critical paths affected)
+
+Generates report at `draft/validation-report.md` (project) or `draft/tracks/<id>/validation-report.md` (track). Auto-runs at track completion when enabled in workflow.md. Non-blocking by default (warnings only).
 
 ---
 

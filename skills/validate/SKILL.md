@@ -165,9 +165,72 @@ Run all 5 validators:
 - Use `git log --since="90 days ago" --name-only --pretty=format: | sort -u`
 
 #### 3.3 Dependency Cycle Detection
-- Build dependency graph from import statements
-- Detect circular dependencies
-- Report cycles with file chain (A → B → C → A)
+
+**Goal:** Detect circular dependencies that can cause runtime errors and complicate maintenance.
+
+**Process:**
+
+1. **Build dependency graph:**
+   - Parse import statements from source files
+   ```bash
+   # JavaScript/TypeScript - extract imports
+   grep -r "import.*from" src/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx"
+
+   # Python
+   grep -r "^import \|^from .* import" --include="*.py"
+
+   # Go
+   grep -r "^import" --include="*.go"
+   ```
+
+2. **Detect cycles using tools:**
+   - **JavaScript/TypeScript:**
+     ```bash
+     # Use madge if available
+     npx madge --circular src/
+
+     # Fallback: manual cycle detection
+     # For each file, trace import chain and detect if it imports itself transitively
+     ```
+
+   - **Python:**
+     ```bash
+     # Use pydeps if available
+     pydeps --show-cycles src/
+
+     # Fallback: parse import statements and build adjacency list
+     ```
+
+   - **Go:**
+     ```bash
+     # Go detects cycles at compile time
+     go list -f '{{.ImportPath}} {{.Imports}}' ./... | grep cycle
+     ```
+
+3. **Manual cycle detection (fallback):**
+   - Build adjacency list: `file -> [imported files]`
+   - Run depth-first search (DFS) with visited tracking
+   - If visiting a node already in current path → cycle detected
+   - Record cycle chain
+
+4. **Report cycles:**
+   - Show complete cycle chain (A → B → C → A)
+   - Classify as ✗ Critical (cycles break modularity)
+   - Suggest breaking the cycle (extract interface, dependency injection)
+
+**Output format:**
+```
+✗ **CRITICAL:** Circular dependency detected
+   src/services/user.ts → src/models/user.ts → src/services/auth.ts → src/services/user.ts
+   Suggestion: Extract shared types to src/types/user.ts
+
+✓ No circular dependencies detected (42 files analyzed)
+```
+
+**Tool detection priority:**
+1. Check package.json for madge/pydeps/eslint-plugin-import
+2. Try running tool directly (may be globally installed)
+3. Fall back to manual detection if no tools available
 
 #### 3.4 Security Scan
 - Pattern matching for common vulnerabilities:

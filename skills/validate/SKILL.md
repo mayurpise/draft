@@ -415,9 +415,68 @@ Run all 5 validators:
 Run project-level checks scoped to changed files, PLUS:
 
 #### 3.6 Spec Compliance
-- Parse `draft/tracks/<track-id>/spec.md` for acceptance criteria
-- Verify each criterion has corresponding test coverage
-- Report uncovered criteria
+
+**Goal:** Verify all acceptance criteria from spec.md have corresponding test coverage.
+
+**Process:**
+
+1. **Parse acceptance criteria:**
+   ```bash
+   # Read spec.md and extract acceptance criteria section
+   grep -A 100 "## Acceptance Criteria" draft/tracks/<track-id>/spec.md
+   ```
+
+2. **Extract individual criteria:**
+   - Look for checkbox list items: `- [ ] Criterion text`
+   - Parse each criterion into testable requirement
+   - Example: "User can login with email and password" → need login test
+
+3. **Search for corresponding tests:**
+   - For each criterion, search test files for related tests
+   - Common test file patterns:
+     ```bash
+     # Find test files
+     find . -name "*.test.ts" -o -name "*.test.js" -o -name "*.spec.ts" -o -name "*.spec.py"
+
+     # Search for test cases related to criterion
+     grep -r "describe\|it\|test\|def test_" <test-files> | grep -i "<criterion-keywords>"
+     ```
+
+4. **Match criteria to tests:**
+   - Extract keywords from criterion (e.g., "login", "email", "password")
+   - Search test files for test cases with those keywords
+   - Check test descriptions match criterion intent
+   - Example matching:
+     ```
+     Criterion: "User can login with email and password"
+     Keywords: login, email, password
+     Found: it("should login user with valid email and password")
+     Status: ✓ Covered
+     ```
+
+5. **Report uncovered criteria:**
+   - List criteria without matching tests
+   - Suggest test cases to write
+
+**Output format:**
+```
+Spec Compliance: 4/5 criteria covered
+
+✓ Criterion: "User can login with email and password"
+   Test: src/auth/auth.test.ts:12 - "should login user with valid email and password"
+
+✗ Criterion: "System sends password reset email"
+   Status: No matching test found
+   Suggestion: Add test in src/auth/password-reset.test.ts
+
+✓ Criterion: "Invalid credentials show error message"
+   Test: src/auth/auth.test.ts:34 - "should show error for invalid credentials"
+```
+
+**Matching strategy:**
+- Exact keyword match (high confidence)
+- Fuzzy match with keyword overlap (medium confidence)
+- Manual review needed if no match (list as uncovered)
 
 #### 3.7 Architectural Impact
 - Analyze changed files from git diff

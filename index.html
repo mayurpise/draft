@@ -1315,7 +1315,7 @@
             </div>
 
             <h3>Step 1: Context — Why it exists</h3>
-            <p>Without context, AI reinvents your project from scratch every session. It guesses your tech stack, ignores your conventions, and builds features that don't fit. <strong><code>/draft:init</code></strong> fixes this by creating persistent files that tell the AI who your users are (<code>product.md</code>), what technologies to use (<code>tech-stack.md</code>), and how your team works (<code>workflow.md</code>). These files live in git, survive across sessions, and load automatically — so the AI always starts with your ground truth instead of assumptions.</p>
+            <p>Without context, AI reinvents your project from scratch every session. It guesses your tech stack, ignores your conventions, and builds features that don't fit. <strong><code>/draft:init</code></strong> fixes this by creating persistent files that tell the AI who your users are (<code>product.md</code>), what technologies to use (<code>tech-stack.md</code>), and how your team works (<code>workflow.md</code>). For existing codebases, it also generates <code>architecture.md</code> — a deep system map with mermaid diagrams covering directory structure, entry points, data flows, design patterns, and external dependencies. This means every future track gets immediate, rich context without re-analyzing the codebase. These files live in git, survive across sessions, and load automatically — so the AI always starts with your ground truth instead of assumptions.</p>
 
             <h3>Step 2: Spec & Plan — Why it exists</h3>
             <p>When you ask AI to "add authentication," it immediately writes code. If the approach is wrong, you discover it during code review — after hours of work. <strong><code>/draft:new-track</code></strong> forces the AI to write a specification and phased plan <em>before touching code</em>. You review the approach in a quick spec PR, not a massive code PR. Disagreements get resolved in a 5-minute document edit instead of a multi-hour rewrite. The plan breaks work into phases with verification steps, so the AI tackles one thing at a time instead of attempting everything at once.</p>
@@ -1345,11 +1345,16 @@
                 </div>
                 <div class="hierarchy-level">
                     <div class="num">3</div>
+                    <div class="file">architecture.md</div>
+                    <div class="desc">"Express API &rarr; Service layer &rarr; Prisma ORM &rarr; PostgreSQL"</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">4</div>
                     <div class="file">spec.md</div>
                     <div class="desc">"Add drag-and-drop reordering"</div>
                 </div>
                 <div class="hierarchy-level">
-                    <div class="num">4</div>
+                    <div class="num">5</div>
                     <div class="file">plan.md</div>
                     <div class="desc">"Phase 1: sortable list, Phase 2: persistence"</div>
                 </div>
@@ -1404,8 +1409,8 @@
             <div class="hierarchy">
                 <div class="hierarchy-level">
                     <div class="num">1</div>
-                    <div class="file">product.md + tech-stack.md + workflow.md</div>
-                    <div class="desc">Tech lead runs <code>/draft:init</code>. Team reviews project vision, technical choices, and workflow preferences via PR. Product managers review <code>product.md</code> without reading code. Engineers review <code>tech-stack.md</code> without context-switching into implementation.</div>
+                    <div class="file">product.md + tech-stack.md + architecture.md + workflow.md</div>
+                    <div class="desc">Tech lead runs <code>/draft:init</code>. For brownfield projects, Draft performs deep architecture discovery — generating <code>architecture.md</code> with mermaid diagrams of system structure, data flows, and patterns. Team reviews project vision, technical choices, system architecture, and workflow preferences via PR. Product managers review <code>product.md</code> without reading code. Engineers review <code>architecture.md</code> and <code>tech-stack.md</code> without context-switching into implementation.</div>
                 </div>
                 <div class="hierarchy-level">
                     <div class="num">2</div>
@@ -1484,6 +1489,11 @@
                     <p class="purpose">Languages, frameworks, and patterns</p>
                 </div>
                 <div class="doc-card">
+                    <div class="icon">🗺️</div>
+                    <div class="name">architecture.md</div>
+                    <p class="purpose">System map, data flows, patterns, mermaid diagrams (brownfield)</p>
+                </div>
+                <div class="doc-card">
                     <div class="icon">🔄</div>
                     <div class="name">workflow.md</div>
                     <p class="purpose">TDD preferences and commit strategy</p>
@@ -1505,7 +1515,7 @@
                 </div>
                 <div class="doc-card">
                     <div class="icon">🏗️</div>
-                    <div class="name">architecture.md</div>
+                    <div class="name">track architecture.md</div>
                     <p class="purpose">Module decomposition and dependencies (optional)</p>
                 </div>
             </div>
@@ -1520,8 +1530,8 @@
 <pre><code><span class="code-file">draft/</span>
 ├── <span class="code-file">product.md</span>          <span class="code-comment"># Product vision and goals</span>
 ├── <span class="code-file">tech-stack.md</span>       <span class="code-comment"># Technical choices</span>
+├── <span class="code-file">architecture.md</span>     <span class="code-comment"># System map + mermaid diagrams (brownfield)</span>
 ├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD, commit, architecture mode</span>
-├── <span class="code-file">architecture.md</span>     <span class="code-comment"># Project-wide modules (optional)</span>
 ├── <span class="code-file">jira.md</span>             <span class="code-comment"># Jira project config (optional)</span>
 ├── <span class="code-file">tracks.md</span>           <span class="code-comment"># Master track list</span>
 └── <span class="code-file">tracks/</span>
@@ -1645,6 +1655,88 @@
             </div>
 
             <p><strong>Why this matters for engineers:</strong> Every completed task has a test proving it works. You can refactor with confidence, onboard new team members who read tests as documentation, and revert individual tasks without collateral damage. The AI can't claim "it should work" — it has to show evidence.</p>
+        </section>
+
+        <!-- Architecture Discovery -->
+        <section id="architecture-discovery">
+            <h2>Architecture Discovery</h2>
+            <p>For brownfield projects, <code>/draft:init</code> doesn't just detect your tech stack — it performs a <strong>deep two-phase codebase analysis</strong> that generates <code>architecture.md</code>. This document becomes the persistent context every future track references, so the AI never has to re-analyze your codebase from scratch.</p>
+
+            <h3>Why this exists</h3>
+            <p>Without architecture discovery, every new track starts cold. The AI explores your codebase, builds a mental model, and starts working — then loses that understanding when the session ends. The next track starts the same exploration over again. Architecture discovery pays the analysis cost once during init, then every track, every question, and every implementation gets immediate, rich context about how your system actually works.</p>
+
+            <h3>Phase 1: Orientation (The System Map)</h3>
+            <p>Scans the codebase to produce a high-level system map with mermaid diagrams.</p>
+
+            <div class="arch-features">
+                <div class="arch-feature">
+                    <div class="label">graph TD</div>
+                    <h4>System Architecture</h4>
+                    <p>Layered architecture diagram showing actual components — presentation, business logic, and data layers with real names from the codebase.</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">graph TD</div>
+                    <h4>Directory Hierarchy</h4>
+                    <p>Maps every top-level directory to its single responsibility and key files. Generates a tree diagram of the project structure.</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">table</div>
+                    <h4>Entry Points</h4>
+                    <p>Identifies all entry points: API routes, main loops, event listeners, CLI commands, serverless handlers. Critical paths through the system.</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">sequenceDiagram</div>
+                    <h4>Request/Response Flow</h4>
+                    <p>Traces one representative request through the full stack with actual file and class names — not generic placeholders.</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">table</div>
+                    <h4>Tech Stack Inventory</h4>
+                    <p>Cross-references detected dependencies with config files. Records language versions, framework versions, and where each is configured.</p>
+                </div>
+            </div>
+
+            <h3>Phase 2: Logic (The "How" &amp; "Why")</h3>
+            <p>Examines specific files and functions to understand business logic, data flows, and patterns.</p>
+
+            <div class="arch-features">
+                <div class="arch-feature">
+                    <div class="label">flowchart LR</div>
+                    <h4>Data Lifecycle</h4>
+                    <p>Maps how 3-5 primary domain objects enter the system, where they're modified, and where they're persisted. Mermaid flowchart of the data pipeline.</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">table</div>
+                    <h4>Design Patterns</h4>
+                    <p>Identifies dominant patterns: Repository, Factory, Middleware, Observer, etc. Documents where each is used and why.</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">table</div>
+                    <h4>Complexity Hotspots</h4>
+                    <p>Flags god objects, circular dependencies, and high-complexity areas. Unclear business logic is marked "Unknown/Legacy Context Required" — never guessed.</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">table</div>
+                    <h4>Conventions</h4>
+                    <p>Extracts existing conventions: error handling, logging, naming, validation patterns. New code must respect these guardrails.</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">graph LR</div>
+                    <h4>External Dependencies</h4>
+                    <p>Maps external service integrations: auth providers, email services, storage, queues, third-party APIs. Mermaid diagram of all connections.</p>
+                </div>
+            </div>
+
+            <h3>Refresh Mode</h3>
+            <p><code>/draft:init refresh</code> re-scans the codebase and diffs against the existing <code>architecture.md</code>. It detects new directories, removed components, changed integration points, and new domain objects — then updates all mermaid diagrams to reflect the current state. Changes are presented for review before writing.</p>
+
+            <div class="callout">
+                <div class="callout-title">
+                    <span>💡</span>
+                    Key Insight
+                </div>
+                <p><strong>Pay the analysis cost once, benefit on every track.</strong> Architecture discovery turns your codebase into a documented system that any AI assistant can understand instantly. Every <code>/draft:new-track</code> starts with full context: where things are, how they connect, what patterns to follow, and what to avoid.</p>
+            </div>
         </section>
 
         <!-- Architecture Mode -->

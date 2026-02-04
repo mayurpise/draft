@@ -687,6 +687,26 @@ Create structured markdown report.
 - ⚠ - Warning (non-critical issue)
 - ✗ - Critical issue (requires attention)
 
+### Implementation
+
+1. **Collect all validation results** from Steps 3.1-3.8
+2. **Count status markers:** total ✓, ⚠, ✗ across all sections
+3. **Generate report file** using template above
+4. **Write to correct path:**
+   ```bash
+   # Project-level
+   cat > draft/validation-report.md <<'EOF'
+   [report content]
+   EOF
+
+   # Track-level
+   cat > draft/tracks/<track-id>/validation-report.md <<'EOF'
+   [report content]
+   EOF
+   ```
+5. **Include timestamp:** ISO 8601 format (e.g., `2026-02-03T14:30:00Z`)
+6. **Omit empty sections:** If a validation category has no findings, show "✓ No issues detected"
+
 ## Step 5: Present Results
 
 Announce validation results:

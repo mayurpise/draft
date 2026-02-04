@@ -804,6 +804,12 @@
             color: #a78bfa;
         }
 
+        .arch-flow-step.validate {
+            background: rgba(34, 211, 238, 0.15);
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            color: var(--accent-cyan);
+        }
+
         .arch-flow-checkpoint {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.7rem;
@@ -1088,6 +1094,12 @@
 <span class="code-comment"># Start implementing</span>
 <span class="code-keyword">/draft:implement</span>
 
+<span class="code-comment"># Verify test coverage (95%+ target)</span>
+<span class="code-keyword">/draft:coverage</span>
+
+<span class="code-comment"># Validate quality (architecture, security, performance)</span>
+<span class="code-keyword">/draft:validate</span>
+
 <span class="code-comment"># Check progress</span>
 <span class="code-keyword">/draft:status</span></code></pre>
             </div>
@@ -1335,6 +1347,9 @@
 
             <h3>Step 4: Implement — Why it exists</h3>
             <p>Even with a plan, AI can drift: skip tests, claim completion without proof, or make sweeping changes across unrelated files. <strong><code>/draft:implement</code></strong> executes one task at a time from the plan, follows the TDD cycle (write test first, then code, then refactor), runs a verification gate before marking anything complete, and triggers a two-stage review at phase boundaries. The AI can only work on what's specified, in the order specified, with proof required at every step.</p>
+
+            <h3>Step 5: Verify Quality — Why it exists</h3>
+            <p>Passing tests doesn't guarantee good code. AI can violate architectural patterns, introduce security vulnerabilities, or create performance bottlenecks — all while every test passes. <strong><code>/draft:coverage</code></strong> measures test completeness (95%+ target) and classifies uncovered lines. <strong><code>/draft:validate</code></strong> runs context-aware quality checks: architecture conformance (patterns from architecture.md), security scans (hardcoded secrets, SQL injection, XSS), performance anti-patterns (N+1 queries, blocking I/O), and regression risk (blast radius of changes). Both generate reports with file:line references and actionable remediation. Auto-runs at track completion when enabled in workflow.md — non-blocking by default to maintain velocity while surfacing issues.</p>
         </section>
 
         <!-- Constraint Hierarchy -->
@@ -1439,8 +1454,8 @@
                 </div>
                 <div class="hierarchy-level">
                     <div class="num">5</div>
-                    <div class="file">Implementation begins</div>
-                    <div class="desc">Only after all documents are merged does coding start. Every developer has full context: what to build (<code>spec.md</code>), in what order (<code>plan.md</code>), with what boundaries (<code>architecture.md</code>). No guessing, no assumptions, no "I thought we were doing it differently."</div>
+                    <div class="file">Implementation + Verification</div>
+                    <div class="desc">Only after all documents are merged does coding start. Every developer has full context: what to build (<code>spec.md</code>), in what order (<code>plan.md</code>), with what boundaries (<code>architecture.md</code>). After implementation, <code>/draft:coverage</code> verifies tests (95%+ target) and <code>/draft:validate</code> checks quality (architecture conformance, security, performance). Both generate reports in the track directory for PR review.</div>
                 </div>
             </div>
 
@@ -1541,7 +1556,8 @@
 ├── <span class="code-file">product.md</span>          <span class="code-comment"># Product vision and goals</span>
 ├── <span class="code-file">tech-stack.md</span>       <span class="code-comment"># Technical choices</span>
 ├── <span class="code-file">architecture.md</span>     <span class="code-comment"># System map + mermaid diagrams (brownfield)</span>
-├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD, commit, architecture mode</span>
+├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD, commit, validation, architecture mode</span>
+├── <span class="code-file">validation-report.md</span> <span class="code-comment"># Project-level quality checks (generated)</span>
 ├── <span class="code-file">jira.md</span>             <span class="code-comment"># Jira project config (optional)</span>
 ├── <span class="code-file">tracks.md</span>           <span class="code-comment"># Master track list</span>
 └── <span class="code-file">tracks/</span>
@@ -1550,6 +1566,7 @@
         ├── <span class="code-file">plan.md</span>      <span class="code-comment"># Phased task breakdown</span>
         ├── <span class="code-file">architecture.md</span> <span class="code-comment"># Track modules (optional)</span>
         ├── <span class="code-file">metadata.json</span>
+        ├── <span class="code-file">validation-report.md</span> <span class="code-comment"># Quality checks (generated)</span>
         └── <span class="code-file">jira-export.md</span> <span class="code-comment"># Jira stories (optional)</span></code></pre>
             </div>
         </section>
@@ -1847,6 +1864,11 @@
                     <div class="file" style="color: #a78bfa;">Coverage checkpoint</div>
                     <div class="desc">After implementation, <code>/draft:coverage</code> measures test quality. Every uncovered line is classified: testable (needs a test), defensive (acceptable), or infrastructure (acceptable). You decide what matters, not the AI.</div>
                 </div>
+                <div class="hierarchy-level">
+                    <div class="num" style="background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan);">6</div>
+                    <div class="file" style="color: var(--accent-cyan);">Validation checkpoint</div>
+                    <div class="desc">After coverage verification, <code>/draft:validate</code> runs systematic quality checks using Draft context. Detects architecture violations (patterns from architecture.md), security issues (hardcoded secrets, SQL injection, XSS), performance anti-patterns (N+1 queries, blocking I/O), and regression risks (blast radius analysis). Generates <code>validation-report.md</code> with actionable fixes. Non-blocking by default — surfaces issues without halting progress.</div>
+                </div>
             </div>
 
             <h3>Implementation Flow</h3>
@@ -1872,6 +1894,8 @@
                 <div class="arch-flow-row" style="padding-left: 1rem;">
                     <span class="arch-flow-arrow">→</span>
                     <span class="arch-flow-step coverage">/draft:coverage → 95%+ target</span>
+                    <span class="arch-flow-arrow">→</span>
+                    <span class="arch-flow-step validate">/draft:validate → quality checks</span>
                 </div>
             </div>
 
@@ -2214,6 +2238,11 @@
                     <div>Two-stage review</div>
                     <div>Spec compliance before code quality</div>
                     <div>Quality gaps</div>
+                </div>
+                <div class="economics-row">
+                    <div>Validation checks</div>
+                    <div>Context-aware quality validation (architecture, security, performance)</div>
+                    <div>Pattern violations, vulnerabilities, tech debt</div>
                 </div>
             </div>
 

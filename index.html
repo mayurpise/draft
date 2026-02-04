@@ -1315,7 +1315,7 @@
             </div>
 
             <h3>Step 1: Context — Why it exists</h3>
-            <p>Without context, AI reinvents your project from scratch every session. It guesses your tech stack, ignores your conventions, and builds features that don't fit. <strong><code>/draft:init</code></strong> fixes this by creating persistent files that tell the AI who your users are (<code>product.md</code>), what technologies to use (<code>tech-stack.md</code>), and how your team works (<code>workflow.md</code>). For existing codebases, it also generates <code>architecture.md</code> — a deep system map with mermaid diagrams covering directory structure, entry points, data flows, design patterns, and external dependencies. This means every future track gets immediate, rich context without re-analyzing the codebase. These files live in git, survive across sessions, and load automatically — so the AI always starts with your ground truth instead of assumptions.</p>
+            <p>Without context, AI reinvents your project from scratch every session. It guesses your tech stack, ignores your conventions, and builds features that don't fit. <strong><code>/draft:init</code></strong> fixes this by creating persistent files that tell the AI who your users are (<code>product.md</code>), what technologies to use (<code>tech-stack.md</code>), and how your team works (<code>workflow.md</code>). For existing codebases, it also generates <code>architecture.md</code> — a deep system map with mermaid diagrams covering directory structure, entry points, data flows, design patterns, existing module dependencies, and external integrations. This means every future track gets immediate, rich context without re-analyzing the codebase. These files live in git, survive across sessions, and load automatically — so the AI always starts with your ground truth instead of assumptions.</p>
 
             <h3>Step 2: Spec & Plan — Why it exists</h3>
             <p>When you ask AI to "add authentication," it immediately writes code. If the approach is wrong, you discover it during code review — after hours of work. <strong><code>/draft:new-track</code></strong> forces the AI to write a specification and phased plan <em>before touching code</em>. You review the approach in a quick spec PR, not a massive code PR. Disagreements get resolved in a 5-minute document edit instead of a multi-hour rewrite. The plan breaks work into phases with verification steps, so the AI tackles one thing at a time instead of attempting everything at once.</p>
@@ -1660,7 +1660,7 @@
         <!-- Architecture Discovery -->
         <section id="architecture-discovery">
             <h2>Architecture Discovery</h2>
-            <p>For brownfield projects, <code>/draft:init</code> doesn't just detect your tech stack — it performs a <strong>deep two-phase codebase analysis</strong> that generates <code>architecture.md</code>. This document becomes the persistent context every future track references, so the AI never has to re-analyze your codebase from scratch.</p>
+            <p>For brownfield projects, <code>/draft:init</code> doesn't just detect your tech stack — it performs a <strong>deep three-phase codebase analysis</strong> that generates <code>architecture.md</code>. This document becomes the persistent context every future track references, so the AI never has to re-analyze your codebase from scratch.</p>
 
             <h3>Why this exists</h3>
             <p>Without architecture discovery, every new track starts cold. The AI explores your codebase, builds a mental model, and starts working — then loses that understanding when the session ends. The next track starts the same exploration over again. Architecture discovery pays the analysis cost once during init, then every track, every question, and every implementation gets immediate, rich context about how your system actually works.</p>
@@ -1727,8 +1727,37 @@
                 </div>
             </div>
 
+            <h3>Phase 3: Module Discovery (Existing Modules)</h3>
+            <p>Reverse-engineers the existing module structure from import graphs and directory boundaries. This is discovering <strong>what already exists</strong> — not planning new modules (that's <code>/draft:decompose</code>).</p>
+
+            <div class="arch-features">
+                <div class="arch-feature">
+                    <div class="label">graph LR</div>
+                    <h4>Module Dependencies</h4>
+                    <p>Analyzes imports to build a dependency graph of existing modules. Detects circular dependencies. Mermaid diagram with actual module names.</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">table</div>
+                    <h4>Module Inventory</h4>
+                    <p>Each module documented with: responsibility, source files, exported API surface, dependencies, complexity rating, and a story summarizing what it does.</p>
+                </div>
+                <div class="arch-feature">
+                    <div class="label">topological sort</div>
+                    <h4>Dependency Order</h4>
+                    <p>Topological ordering from leaf modules (foundational, no dependencies) to the most dependent. Shows which parts of the system are the foundation.</p>
+                </div>
+            </div>
+
+            <div class="callout">
+                <div class="callout-title">
+                    <span>⚙️</span>
+                    Init vs Decompose
+                </div>
+                <p><code>/draft:init</code> discovers and documents <strong>existing</strong> modules (marked <code>[x] Existing</code>). <code>/draft:decompose</code> plans <strong>new</strong> modules for features or refactors. Both write to the same section of <code>architecture.md</code> — init sets the baseline, decompose extends it. Existing modules are never removed by decompose.</p>
+            </div>
+
             <h3>Refresh Mode</h3>
-            <p><code>/draft:init refresh</code> re-scans the codebase and diffs against the existing <code>architecture.md</code>. It detects new directories, removed components, changed integration points, and new domain objects — then updates all mermaid diagrams to reflect the current state. Changes are presented for review before writing.</p>
+            <p><code>/draft:init refresh</code> re-scans the codebase and diffs against the existing <code>architecture.md</code>. It detects new directories, removed components, changed integration points, new domain objects, and new or merged modules — then updates all mermaid diagrams and module documentation to reflect the current state. Changes are presented for review before writing.</p>
 
             <div class="callout">
                 <div class="callout-title">

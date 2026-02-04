@@ -333,9 +333,10 @@ Draft auto-classifies the project:
 #### Initialization Sequence
 
 1. **Project discovery** — Classify as brownfield (existing) or greenfield (new)
-2. **Architecture discovery (brownfield only)** — Two-phase deep analysis of the existing codebase → `draft/architecture.md`:
+2. **Architecture discovery (brownfield only)** — Three-phase deep analysis of the existing codebase → `draft/architecture.md`:
    - **Phase 1: Orientation** — Directory structure, entry points, critical paths, request/response flows, tech stack inventory. Generates mermaid diagrams: system architecture (`graph TD`), directory hierarchy (`graph TD`), request flow (`sequenceDiagram`).
    - **Phase 2: Logic** — Data lifecycle mapping, primary domain objects, design pattern recognition, anti-pattern/complexity hotspot flagging, convention extraction, external dependency mapping. Generates mermaid diagrams: data flow (`flowchart LR`), external integrations (`graph LR`).
+   - **Phase 3: Module Discovery** — Reverse-engineers existing modules from import graph and directory boundaries. Documents each module's responsibility, files, API surface, dependencies, and complexity. Generates module dependency diagram (`graph LR`), dependency table, and topological dependency order. `/draft:decompose` later extends (not replaces) these modules when planning new features.
    - This document becomes persistent context — every future track references it instead of re-analyzing the codebase.
 3. **Product definition** — Dialogue to define product vision, users, goals, constraints → `draft/product.md`
 4. **Product guidelines (optional)** — Writing style, visual identity, UX principles → `draft/product-guidelines.md`

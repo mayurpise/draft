@@ -172,12 +172,14 @@ If `draft/` exists with context files:
 ### Refresh Mode
 If the user runs `@draft init refresh`:
 1. **Tech Stack Refresh**: Re-scan `package.json`, `go.mod`, etc. Compare with `draft/tech-stack.md`. Propose updates.
-2. **Architecture Refresh**: If `draft/architecture.md` exists, re-run architecture discovery (Phase 1 & 2 from Step 1.5) and diff against the existing document:
+2. **Architecture Refresh**: If `draft/architecture.md` exists, re-run architecture discovery (Phase 1, 2 & 3 from Step 1.5) and diff against the existing document:
    - Detect new directories, files, or modules added since last scan
    - Identify removed or renamed components
    - Update mermaid diagrams to reflect structural changes
    - Flag new external dependencies or changed integration points
    - Update data lifecycle if new domain objects were introduced
+   - Discover new modules or detect removed/merged modules; update the Module Dependency Diagram, Dependency Table, and Dependency Order accordingly
+   - Preserve any modules added by `@draft decompose` (planned modules for new features) — only update `[x] Existing` modules
    - Present a summary of changes for developer review before writing
    - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now using Step 1.5
 3. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
@@ -261,9 +263,31 @@ Examine specific files and functions to produce the **Logic** sections of `archi
 
 5. **External Dependencies**: Map external service integrations. Generate a mermaid `graph LR` showing the application's connections to auth providers, email services, storage, queues, third-party APIs, etc.
 
+### Phase 3: Module Discovery (Existing Modules)
+
+Analyze the codebase's import graph and directory boundaries to discover and document the **existing** module structure. This is reverse-engineering what already exists — not planning new modules (that's what `@draft decompose` does for new features).
+
+1. **Module Identification**: Identify logical modules from directory structure, namespace boundaries, and import clusters. Each module should have:
+   - A clear single responsibility derived from the code it contains
+   - A list of actual source files (not planned files)
+   - Key exported functions, classes, or interfaces (the detected API surface)
+   - Dependencies on other discovered modules (from import/require analysis)
+   - Complexity rating (Low / Medium / High) based on file count, cyclomatic complexity, and coupling
+
+2. **Module Dependency Diagram**: Generate a mermaid `graph LR` diagram showing how discovered modules depend on each other. Use actual module/directory names from the codebase.
+
+3. **Dependency Table**: Create a table mapping each module to what it depends on and what depends on it. Flag any circular dependencies detected.
+
+4. **Dependency Order**: Produce a topological ordering of existing modules — from leaf modules (no dependencies) to the most dependent. This helps engineers understand which parts of the system are foundational vs. which are built on top.
+
+**Important distinctions:**
+- For each module, set **Story** to a brief summary of what the module currently does (not a placeholder). Reference key files, e.g.: "Handles user authentication via JWT — see `src/auth/index.ts:1-45`"
+- Set **Status** to `[x] Existing` — these modules already exist in the codebase
+- `@draft decompose` may later add **new** planned modules alongside these existing ones when planning a feature or refactor. Existing modules discovered here should not be removed or overwritten by decompose — they serve as the baseline.
+
 ### Architecture Discovery Output
 
-Write the completed Phase 1 and Phase 2 sections to `draft/architecture.md`. Leave the Module Dependency Diagram, Modules, and Implementation Order sections as placeholders — those are filled by `@draft decompose`.
+Write all Phase 1, Phase 2, and Phase 3 sections to `draft/architecture.md`.
 
 Present the architecture document for developer review before proceeding to Step 2.
 

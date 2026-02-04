@@ -11,13 +11,15 @@ Also available for [Cursor](#cursor-integration), [GitHub Copilot](#github-copil
 AI coding assistants are powerful but undirected. Without structure, they make assumptions about requirements, choose arbitrary technical approaches, and skip verification. Draft solves this through **Context-Driven Development**: structured documents that constrain and guide AI behavior.
 
 ```
-product.md  →  "Build a task manager for developers"
+product.md       →  "Build a task manager for developers"
   ↓
-tech-stack.md  →  "Use React, TypeScript, Tailwind"
+tech-stack.md    →  "Use React, TypeScript, Tailwind"
   ↓
-spec.md  →  "Add drag-and-drop reordering"
+architecture.md  →  "Express API → Service layer → Prisma ORM → PostgreSQL"
   ↓
-plan.md  →  "Phase 1: sortable list, Phase 2: persistence"
+spec.md          →  "Add drag-and-drop reordering"
+  ↓
+plan.md          →  "Phase 1: sortable list, Phase 2: persistence"
 ```
 
 Each layer narrows the solution space. By the time AI writes code, most decisions are already made.
@@ -86,27 +88,39 @@ Shows available commands and guides you to the right workflow. Also supports nat
 Run once per project. Creates the `draft/` directory with context files.
 
 ```bash
-/draft:init
+/draft:init            # Fresh initialization
+/draft:init refresh    # Update existing context
 ```
 
 **What it does:**
-1. Detects brownfield (existing code) vs greenfield (new project) — auto-fills tech stack for existing projects
-2. Creates `draft/product.md` through dialogue about vision, users, goals
-3. Optionally creates `draft/product-guidelines.md` for style/branding/UX
-4. Creates `draft/tech-stack.md` with languages, frameworks, patterns
-5. Creates `draft/workflow.md` with TDD preference, commit style, review process
-6. Optionally enables Architecture Mode (module decomposition, stories, skeletons, coverage)
-7. Creates `draft/tracks.md` as the master track registry
+1. Detects brownfield (existing code) vs greenfield (new project)
+2. **Architecture Discovery (brownfield only)** — Deep two-phase codebase analysis:
+   - **Phase 1: Orientation** — Directory structure, entry points, critical paths, request/response flow (mermaid `sequenceDiagram`), tech stack inventory. Generates system architecture diagram (mermaid `graph TD`).
+   - **Phase 2: Logic** — Data lifecycle mapping (mermaid `flowchart LR`), primary domain objects, design pattern recognition, anti-pattern/complexity hotspot detection, convention extraction, external dependency mapping (mermaid `graph LR`).
+   - Produces `draft/architecture.md` — persistent context every future track references instead of re-analyzing the codebase.
+3. Creates `draft/product.md` through dialogue about vision, users, goals
+4. Optionally creates `draft/product-guidelines.md` for style/branding/UX
+5. Creates `draft/tech-stack.md` with languages, frameworks, patterns (with mermaid component diagram)
+6. Creates `draft/workflow.md` with TDD preference, commit style, review process
+7. Optionally enables Architecture Mode (module decomposition, stories, skeletons, coverage)
+8. Creates `draft/tracks.md` as the master track registry
 
-**Output:**
+**Output (brownfield):**
 ```
 draft/
+├── architecture.md        # System map with mermaid diagrams
 ├── product.md
-├── product-guidelines.md   (optional)
+├── product-guidelines.md  (optional)
 ├── tech-stack.md
 ├── workflow.md
 └── tracks.md
 ```
+
+**Refresh mode** (`/draft:init refresh`):
+- Re-scans tech stack and compares with existing `tech-stack.md`
+- Re-runs architecture discovery and diffs against existing `architecture.md` — detects new directories, removed components, changed integrations, new domain objects. Updates mermaid diagrams.
+- Asks about product vision and workflow changes
+- Never modifies `tracks.md` unless explicitly requested
 
 ---
 
@@ -352,7 +366,7 @@ Draft's most powerful application is team-wide. Every markdown file goes through
 
 ### The PR cycle on documents
 
-1. **Project context** — Tech lead runs `/draft:init`. Team reviews `product.md`, `tech-stack.md`, and `workflow.md` via PR. Product managers review vision without reading code.
+1. **Project context** — Tech lead runs `/draft:init`. Team reviews `product.md`, `tech-stack.md`, `architecture.md` (brownfield), and `workflow.md` via PR. Product managers review vision without reading code. Engineers review system architecture without exploring the codebase.
 2. **Spec & plan** — Lead runs `/draft:new-track`. Team reviews requirements, acceptance criteria, and phased task breakdown via PR. Disagreements resolved by editing a paragraph, not rewriting code.
 3. **Architecture** — Lead runs `/draft:decompose`. Team reviews module boundaries, API surfaces, dependency graph, and implementation order via PR.
 4. **Work distribution** — Lead runs `/draft:jira-preview` and `/draft:jira-create`. Stories created from the approved plan. Individual team members pick up Jira stories.
@@ -449,8 +463,8 @@ your-project/
 │   ├── product.md              # Product vision and goals
 │   ├── product-guidelines.md   # Style, branding, UX standards (optional)
 │   ├── tech-stack.md           # Technical choices
+│   ├── architecture.md         # System map + mermaid diagrams (brownfield)
 │   ├── workflow.md             # TDD, commit, architecture mode preferences
-│   ├── architecture.md         # Project-wide module decomposition (optional)
 │   ├── jira.md                 # Jira project configuration (optional)
 │   ├── tracks.md               # Master track list
 │   └── tracks/

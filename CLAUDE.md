@@ -79,6 +79,7 @@ When users use Draft, it creates a `draft/` directory in their project:
 | `product.md` | Product vision, users, goals |
 | `product-guidelines.md` | Style, branding, UX standards (optional) |
 | `tech-stack.md` | Languages, frameworks, patterns |
+| `architecture.md` | System map, data flows, patterns, mermaid diagrams (brownfield) |
 | `workflow.md` | TDD preferences, commit strategy |
 | `tracks.md` | Master list of all tracks |
 | `tracks/<id>/` | Individual tracks with `spec.md`, `plan.md`, `metadata.json` |

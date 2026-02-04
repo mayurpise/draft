@@ -172,9 +172,17 @@ If `draft/` exists with context files:
 ### Refresh Mode
 If the user runs `@draft init refresh`:
 1. **Tech Stack Refresh**: Re-scan `package.json`, `go.mod`, etc. Compare with `draft/tech-stack.md`. Propose updates.
-2. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
-3. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
-4. **Preserve**: Do NOT modify `draft/tracks.md` unless explicitly requested.
+2. **Architecture Refresh**: If `draft/architecture.md` exists, re-run architecture discovery (Phase 1 & 2 from Step 1.5) and diff against the existing document:
+   - Detect new directories, files, or modules added since last scan
+   - Identify removed or renamed components
+   - Update mermaid diagrams to reflect structural changes
+   - Flag new external dependencies or changed integration points
+   - Update data lifecycle if new domain objects were introduced
+   - Present a summary of changes for developer review before writing
+   - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now using Step 1.5
+3. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
+4. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
+5. **Preserve**: Do NOT modify `draft/tracks.md` unless explicitly requested.
 
 Stop here after refreshing. Continue to standard steps ONLY for fresh init.
 
@@ -192,6 +200,79 @@ Analyze the current directory to classify the project:
 - Only has README or basic config
 
 Respect `.gitignore` and `.claudeignore` when scanning.
+
+If **Brownfield**: proceed to Step 1.5 (Architecture Discovery).
+If **Greenfield**: skip to Step 2 (Product Definition).
+
+## Step 1.5: Architecture Discovery (Brownfield Only)
+
+For existing codebases, perform a two-phase deep analysis to generate `draft/architecture.md`. This document becomes the persistent context that every future track references — pay the analysis cost once, benefit on every track.
+
+Use the template from `core/templates/architecture.md`.
+
+### Phase 1: Orientation (The System Map)
+
+Analyze the codebase to produce the **Orientation** sections of `architecture.md`:
+
+1. **System Overview**: Write a "Key Takeaway" paragraph summarizing the system's primary purpose and function. Generate a mermaid `graph TD` diagram showing the system's layered architecture (presentation, logic, data layers with actual component names).
+
+2. **Directory Structure**: Scan top-level directories. For each, identify its single responsibility and key files. Generate:
+   - A table mapping directory → responsibility → key files
+   - A mermaid `graph TD` tree diagram of the directory hierarchy
+
+3. **Entry Points & Critical Paths**: Identify all entry points into the system:
+   - Application startup (main/index files)
+   - API routes or HTTP handlers
+   - Background jobs, workers, or scheduled tasks
+   - CLI commands
+   - Event listeners or serverless handlers
+
+4. **Request/Response Flow**: Trace one representative request through the full stack. Generate a mermaid `sequenceDiagram` showing the actual participants (not generic placeholders — use real file/class names from the codebase).
+
+5. **Tech Stack Inventory**: Cross-reference detected dependencies with config files. Record language versions, framework versions, and the config file that defines each. This feeds into the more detailed `draft/tech-stack.md`.
+
+### Phase 2: Logic (The "How" & "Why")
+
+Examine specific files and functions to produce the **Logic** sections of `architecture.md`:
+
+1. **Data Lifecycle**: Identify the 3-5 primary domain objects (e.g., User, Order, Transaction). For each, map:
+   - Where it enters the system (creation point)
+   - Where it is modified (transformation points)
+   - Where it is persisted (storage)
+   - Generate a mermaid `flowchart LR` showing the data pipeline
+
+2. **Design Patterns**: Identify dominant patterns in the codebase:
+   - Repository, Factory, Singleton, Middleware, Observer, Strategy, etc.
+   - Document where each pattern is used and why
+
+3. **Anti-Patterns & Complexity Hotspots**: Flag problem areas:
+   - God objects or functions (500+ lines)
+   - Circular dependencies between modules
+   - High cyclomatic complexity
+   - Code deviating from dominant patterns
+   - Mark unclear business logic as "Unknown/Legacy Context Required" — never guess
+
+4. **Conventions & Guardrails**: Extract existing conventions:
+   - Error handling patterns
+   - Logging approach
+   - Naming conventions (files, functions, classes)
+   - Validation patterns
+   - New code must respect these
+
+5. **External Dependencies**: Map external service integrations. Generate a mermaid `graph LR` showing the application's connections to auth providers, email services, storage, queues, third-party APIs, etc.
+
+### Architecture Discovery Output
+
+Write the completed Phase 1 and Phase 2 sections to `draft/architecture.md`. Leave the Module Dependency Diagram, Modules, and Implementation Order sections as placeholders — those are filled by `@draft decompose`.
+
+Present the architecture document for developer review before proceeding to Step 2.
+
+### Operational Constraints for Architecture Discovery
+- **Bottom-Line First**: Start with the Key Takeaway summary
+- **Code-to-Context Ratio**: Explain intent, not syntax
+- **No Hallucinations**: If a dependency or business reason is unclear, flag it as "Unknown/Legacy Context Required"
+- **Mermaid Diagrams**: Use actual component/file names from the codebase, not generic placeholders
+- **Respect Boundaries**: Only analyze code in the repository; do not make assumptions about external services
 
 ## Step 2: Product Definition
 
@@ -368,7 +449,22 @@ mkdir -p draft/tracks
 
 ## Completion
 
-Announce:
+For **Brownfield** projects, announce:
+"Draft initialized successfully!
+
+Created:
+- draft/architecture.md (system map with mermaid diagrams)
+- draft/product.md
+- draft/tech-stack.md
+- draft/workflow.md
+- draft/tracks.md
+
+Next steps:
+1. Review draft/architecture.md — verify the system map matches your understanding
+2. Review and edit the other generated files as needed
+3. Run `@draft new-track` to start planning a feature"
+
+For **Greenfield** projects, announce:
 "Draft initialized successfully!
 
 Created:

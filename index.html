@@ -1130,7 +1130,7 @@
         <!-- Command Reference Section -->
         <section id="commands">
             <h2>Command Reference</h2>
-            <p>Draft provides 10 slash commands for the full development lifecycle.</p>
+            <p>Draft provides 11 slash commands for the full development lifecycle.</p>
 
             <div class="doc-grid">
                 <div class="doc-card">
@@ -1172,6 +1172,11 @@
                     <div class="icon">📈</div>
                     <div class="name">/draft:coverage</div>
                     <p class="purpose">Code coverage report (target 95%+)</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">✅</div>
+                    <div class="name">/draft:validate</div>
+                    <p class="purpose">Systematic quality validation (architecture, security, performance)</p>
                 </div>
                 <div class="doc-card">
                     <div class="icon">👁️</div>
@@ -2031,6 +2036,34 @@
                     <p class="purpose">Framework boilerplate and entry points. Acceptable.</p>
                 </div>
             </div>
+
+            <h3>Systematic Validation</h3>
+            <p><strong>The problem:</strong> AI can pass all tests while violating architectural patterns, introducing security vulnerabilities, or creating performance bottlenecks. Tests measure "does it work" but not "is it good." <strong>The solution:</strong> <code>/draft:validate</code> uses Draft context (architecture.md, tech-stack.md) to catch quality issues tests miss — architecture violations, hardcoded secrets, N+1 queries, missing input validation, and more.</p>
+
+            <div class="doc-grid" style="grid-template-columns: repeat(4, 1fr);">
+                <div class="doc-card">
+                    <div class="icon">🏗️</div>
+                    <div class="name">Architecture</div>
+                    <p class="purpose">Pattern violations, layer boundaries, dependency rules</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">🔒</div>
+                    <div class="name">Security</div>
+                    <p class="purpose">Hardcoded secrets, SQL injection, XSS, weak hashing</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">⚡</div>
+                    <div class="name">Performance</div>
+                    <p class="purpose">N+1 queries, blocking I/O, missing pagination</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">📋</div>
+                    <div class="name">Regression</div>
+                    <p class="purpose">Blast radius analysis, critical path detection</p>
+                </div>
+            </div>
+
+            <p><strong>Why this matters:</strong> Validation runs automatically at track completion (configurable in workflow.md). Non-blocking by default — issues documented in <code>validation-report.md</code> with file:line references and remediation guidance. Complements coverage (quantitative test metrics) with qualitative codebase health checks.</p>
         </section>
 
         <!-- Economics -->

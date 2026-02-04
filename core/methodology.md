@@ -23,6 +23,7 @@ Draft solves this through **Context-Driven Development**: structured documents t
 | `product.md` | Defines users, goals, success criteria | AI building features nobody asked for |
 | `product-guidelines.md` | Style, branding, UX patterns | Inconsistent UI/UX decisions |
 | `tech-stack.md` | Languages, frameworks, patterns | AI introducing random dependencies |
+| `architecture.md` | System map, data flows, patterns, mermaid diagrams | AI re-analyzing codebase every session |
 | `workflow.md` | TDD preference, commit style, review process | AI skipping tests or making giant commits |
 | `spec.md` | Acceptance criteria for a specific track | Scope creep, gold-plating |
 | `plan.md` | Ordered phases with verification steps | AI attempting everything at once |
@@ -33,6 +34,8 @@ Draft solves this through **Context-Driven Development**: structured documents t
 product.md          →  "Build a task manager for developers"
   ↓
 tech-stack.md       →  "Use React, TypeScript, Tailwind"
+  ↓
+architecture.md     →  "Express API → Service layer → Prisma ORM → PostgreSQL"
   ↓
 spec.md             →  "Add drag-and-drop reordering"
   ↓
@@ -281,6 +284,7 @@ Located in `draft/` of the target project:
 | `product.md` | Product vision, users, goals |
 | `product-guidelines.md` | Style, branding, UX standards (optional) |
 | `tech-stack.md` | Languages, frameworks, patterns |
+| `architecture.md` | System map, data flows, patterns, mermaid diagrams (brownfield) |
 | `workflow.md` | TDD preferences, commit strategy |
 | `jira.md` | Jira project configuration (optional) |
 | `tracks.md` | Master list of all tracks |
@@ -328,13 +332,18 @@ Draft auto-classifies the project:
 
 #### Initialization Sequence
 
-1. **Product definition** — Dialogue to define product vision, users, goals, constraints → `draft/product.md`
-2. **Product guidelines (optional)** — Writing style, visual identity, UX principles → `draft/product-guidelines.md`
-3. **Tech stack** — Auto-detected for brownfield; manual for greenfield → `draft/tech-stack.md`
-4. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
-5. **Architecture mode opt-in (optional)** — Enables module decomposition, stories, execution state, skeletons, coverage checkpoints. Adds an Architecture Mode section to `workflow.md`. Recommended for complex multi-module projects.
-6. **Tracks registry** — Empty tracks list → `draft/tracks.md`
-7. **Directory structure** — Creates `draft/tracks/` directory
+1. **Project discovery** — Classify as brownfield (existing) or greenfield (new)
+2. **Architecture discovery (brownfield only)** — Two-phase deep analysis of the existing codebase → `draft/architecture.md`:
+   - **Phase 1: Orientation** — Directory structure, entry points, critical paths, request/response flows, tech stack inventory. Generates mermaid diagrams: system architecture (`graph TD`), directory hierarchy (`graph TD`), request flow (`sequenceDiagram`).
+   - **Phase 2: Logic** — Data lifecycle mapping, primary domain objects, design pattern recognition, anti-pattern/complexity hotspot flagging, convention extraction, external dependency mapping. Generates mermaid diagrams: data flow (`flowchart LR`), external integrations (`graph LR`).
+   - This document becomes persistent context — every future track references it instead of re-analyzing the codebase.
+3. **Product definition** — Dialogue to define product vision, users, goals, constraints → `draft/product.md`
+4. **Product guidelines (optional)** — Writing style, visual identity, UX principles → `draft/product-guidelines.md`
+5. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield → `draft/tech-stack.md`
+6. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
+7. **Architecture mode opt-in (optional)** — Enables module decomposition, stories, execution state, skeletons, coverage checkpoints. Adds an Architecture Mode section to `workflow.md`. Recommended for complex multi-module projects.
+8. **Tracks registry** — Empty tracks list → `draft/tracks.md`
+9. **Directory structure** — Creates `draft/tracks/` directory
 
 If `draft/` already exists with context files, init reports "already initialized" and stops.
 

@@ -233,12 +233,95 @@ Run all 5 validators:
 3. Fall back to manual detection if no tools available
 
 #### 3.4 Security Scan
-- Pattern matching for common vulnerabilities:
-  - Hardcoded secrets (API keys, passwords, tokens)
-  - SQL injection patterns (string concatenation in queries)
-  - Missing input validation at system boundaries
-  - Insecure auth/session handling
-- Flag findings with severity (✗ critical, ⚠ warning)
+
+**Goal:** Detect common security vulnerabilities (OWASP Top 10 basics).
+
+**Process:**
+
+1. **Hardcoded Secrets Detection:**
+   ```bash
+   # API keys, tokens, passwords in source code
+   grep -rE "(api[_-]?key|API[_-]?KEY|secret|SECRET|password|PASSWORD|token|TOKEN)\s*=\s*['\"][^'\"]{8,}" src/ --exclude="*.test.*" --exclude="*.spec.*"
+
+   # AWS credentials
+   grep -rE "AKIA[0-9A-Z]{16}" src/
+
+   # Private keys
+   grep -rE "BEGIN (RSA |EC |DSA )?PRIVATE KEY" src/
+
+   # Database URLs with credentials
+   grep -rE "(postgres|mysql|mongodb)://[^:]+:[^@]+@" src/
+   ```
+   - Exclude: `.env.example`, test fixtures, documentation
+   - Severity: ✗ Critical
+
+2. **SQL Injection Patterns:**
+   ```bash
+   # String concatenation in queries (JavaScript/TypeScript)
+   grep -rE "(query|execute)\s*\(\s*['\"`].*\$\{|query.*\+\s*[a-zA-Z]" src/ --include="*.ts" --include="*.js"
+
+   # Python f-strings in queries
+   grep -rE "execute\(f['\"]|cursor\.execute\(.*\{" --include="*.py"
+
+   # Raw SQL construction
+   grep -rE "\"SELECT.*\"\s*\+|'SELECT.*'\s*\+" src/
+   ```
+   - Severity: ✗ Critical
+
+3. **Missing Input Validation:**
+   ```bash
+   # API routes without validation middleware
+   # Check if request parameters used directly without validation
+   grep -rE "req\.(body|params|query)\.[a-zA-Z]+\s*\)" src/routes/ src/api/ --include="*.ts" --include="*.js"
+
+   # Look for sanitization/validation patterns nearby
+   # If missing, flag as warning
+   ```
+   - Severity: ⚠ Warning (manual review needed)
+
+4. **Insecure Auth/Session Handling:**
+   ```bash
+   # JWT without secret validation
+   grep -rE "jwt\.decode\(" src/ --include="*.ts" --include="*.js"  # Should use verify, not decode
+
+   # Session cookies without httpOnly/secure flags
+   grep -rE "cookie\(.*\)" src/ | grep -v "httpOnly.*secure"
+
+   # Weak password hashing (MD5, SHA1)
+   grep -rE "(md5|MD5|sha1|SHA1)\(" src/
+   ```
+   - Severity: ✗ Critical (JWT, weak hashing), ⚠ Warning (cookie flags)
+
+5. **Cross-Site Scripting (XSS):**
+   ```bash
+   # Dangerous HTML insertion
+   grep -rE "innerHTML\s*=|dangerouslySetInnerHTML" src/ --include="*.tsx" --include="*.jsx"
+
+   # Unescaped user input in templates
+   grep -rE "\{\{.*req\.(body|params|query)" src/
+   ```
+   - Severity: ✗ Critical
+
+**Output format:**
+```
+✗ **CRITICAL:** src/auth/jwt.ts:23 - Hardcoded JWT secret "my-secret-key"
+   Risk: Secret exposed in version control
+   Fix: Move to environment variable (process.env.JWT_SECRET)
+
+✗ **CRITICAL:** src/api/users.ts:45 - SQL injection risk
+   Code: query("SELECT * FROM users WHERE id = " + userId)
+   Fix: Use parameterized queries
+
+⚠ src/routes/posts.ts:67 - Missing input validation on req.body.email
+   Recommendation: Add validation middleware or zod schema
+
+✓ No hardcoded secrets detected (38 files scanned)
+```
+
+**Exclusions:**
+- Test files (*.test.*, *.spec.*)
+- Example/documentation files
+- Third-party code (node_modules, vendor)
 
 #### 3.5 Performance Anti-Patterns
 - N+1 query detection (loops with database calls)

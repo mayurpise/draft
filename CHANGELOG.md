@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `/draft:validate` — Systematic codebase quality validation using Draft context (architecture.md, product.md, tech-stack.md):
+  - Project-level validation: architecture conformance, dead code detection, dependency cycles, security scan (OWASP basics), performance anti-patterns (N+1 queries, blocking I/O)
+  - Track-level validation: spec compliance (acceptance criteria coverage), architectural impact (new dependencies, pattern violations), regression risk (blast radius analysis)
+  - Auto-runs at track completion when enabled in workflow.md (non-blocking by default)
+  - Generates reports: `draft/validation-report.md` (project), `draft/tracks/<id>/validation-report.md` (track)
+  - Configurable scope and blocking behavior via workflow.md
+  - Integrated with `/draft:implement` for automatic quality checks
 - **Architecture Discovery for brownfield projects** — `/draft:init` now performs deep three-phase codebase analysis for existing projects:
   - Phase 1 (Orientation): Directory structure, entry points, critical paths, request/response flows, tech stack inventory with mermaid diagrams (`graph TD`, `sequenceDiagram`)
   - Phase 2 (Logic): Data lifecycle mapping, primary domain objects, design pattern recognition, anti-pattern/complexity hotspot flagging, convention extraction, external dependency mapping with mermaid diagrams (`flowchart LR`, `graph LR`)

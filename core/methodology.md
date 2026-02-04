@@ -346,7 +346,17 @@ Draft auto-classifies the project:
 8. **Tracks registry** — Empty tracks list → `draft/tracks.md`
 9. **Directory structure** — Creates `draft/tracks/` directory
 
-If `draft/` already exists with context files, init reports "already initialized" and stops.
+If `draft/` already exists with context files, init reports "already initialized" and suggests using `/draft:init refresh` or `/draft:new-track`.
+
+#### Refresh Mode (`/draft:init refresh`)
+
+Re-scans and updates existing context without starting from scratch:
+
+1. **Tech Stack Refresh** — Re-scans `package.json`, `go.mod`, etc. Compares with existing `draft/tech-stack.md`. Proposes updates.
+2. **Architecture Refresh** — Re-runs architecture discovery (Phase 1, 2 & 3) and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `/draft:decompose`. Presents changes for review before writing.
+3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
+4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
+5. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
 
 ---
 
@@ -681,6 +691,10 @@ Natural language patterns that map to Draft commands:
 | "start implementing" | Execute tasks from plan |
 | "what's the status" | Show progress overview |
 | "undo", "revert" | Rollback changes |
+| "break into modules" | Module decomposition |
+| "check coverage" | Code coverage report |
+| "preview jira", "export to jira" | Preview Jira issues |
+| "create jira issues" | Create Jira issues via MCP |
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |
 

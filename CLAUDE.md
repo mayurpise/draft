@@ -80,9 +80,10 @@ When users use Draft, it creates a `draft/` directory in their project:
 | `product-guidelines.md` | Style, branding, UX standards (optional) |
 | `tech-stack.md` | Languages, frameworks, patterns |
 | `architecture.md` | System map, data flows, patterns, mermaid diagrams (brownfield) |
-| `workflow.md` | TDD preferences, commit strategy |
+| `workflow.md` | TDD preferences, commit strategy, validation config |
 | `tracks.md` | Master list of all tracks |
-| `tracks/<id>/` | Individual tracks with `spec.md`, `plan.md`, `metadata.json` |
+| `tracks/<id>/` | Individual tracks with `spec.md`, `plan.md`, `metadata.json`, `validation-report.md` |
+| `validation-report.md` | Project-level validation results (architecture, security, performance) |
 
 ### Status Markers
 
@@ -106,6 +107,9 @@ See `core/agents/debugger.md`.
 ### Two-Stage Review
 At phase boundaries: (1) Spec Compliance, (2) Code Quality.
 See `core/agents/reviewer.md`.
+
+### Validation (when enabled)
+At track completion: Systematic quality checks using Draft context (architecture.md, tech-stack.md). Non-blocking by default. Reports in `draft/tracks/<id>/validation-report.md`.
 
 ## Communication Style
 

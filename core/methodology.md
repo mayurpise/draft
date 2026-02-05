@@ -364,21 +364,52 @@ Re-scans and updates existing context without starting from scratch:
 
 Creates a new track (feature, bug fix, or refactor) with a specification and phased plan.
 
-#### Specification Creation
+#### Context Loading
+
+Every new track loads the full project context before spec creation:
+- `draft/product.md` — product vision, users, goals
+- `draft/tech-stack.md` — languages, frameworks, patterns
+- `draft/architecture.md` — system map, modules, data flows (if exists)
+- `draft/product-guidelines.md` — UX standards, style (if exists)
+- `draft/workflow.md` — TDD preference, commit conventions
+- `draft/tracks.md` — existing tracks (check for overlap/dependencies)
+
+Every spec includes a **Context References** section that explicitly links back to these documents with a one-line description of how each is relevant to this track. This ensures every track is grounded in the big picture.
+
+#### Track Types
+
+New track auto-detects the track type from the description and dialogue:
+
+| Type | Indicators | Spec Template | Plan Structure |
+|------|-----------|---------------|----------------|
+| **Feature / Refactor** | "add", "implement", "refactor", "improve" | Standard spec | Flexible phases |
+| **Bug / RCA** | "fix", "bug", "investigate", Jira bug ticket, "root cause", production incident | Bug spec with Code Locality, Blast Radius | Fixed 3-phase: Investigate → RCA → Fix |
+
+#### Specification Creation (Feature)
 
 Engages in dialogue to understand scope before generating `spec.md`:
 - **What** — Exact scope and boundaries
 - **Why** — Business/user value
 - **Acceptance criteria** — How we know it's done
 - **Non-goals** — What's explicitly out of scope
-- **Technical approach** — High-level approach based on tech-stack.md
+- **Technical approach** — High-level approach based on tech-stack.md and architecture.md
+
+#### Specification Creation (Bug / RCA)
+
+For bugs, incidents, and Jira-sourced issues. Focused investigation, not broad exploration:
+- **Symptoms** — Exact error, affected users/flows, frequency
+- **Reproduction** — Steps to trigger, environment conditions
+- **Blast Radius** — What's broken AND what's not (scopes the investigation)
+- **Code Locality** — Direct `file:line` references to suspect area, entry point, related code
+- **Investigation Constraints** — Stay in the blast radius, respect module boundaries
 
 The spec is presented for approval and iterated until the developer is satisfied.
 
 #### Plan Creation
 
 Based on the approved spec, generates a phased task breakdown in `plan.md`:
-- Tasks organized into phases (Foundation → Implementation → Integration → Polish)
+- **Feature tracks:** Tasks organized into phases (Foundation → Implementation → Integration → Polish)
+- **Bug tracks:** Fixed 3-phase structure: Investigate & Reproduce → Root Cause Analysis → Fix & Verify. Includes an RCA Log table for tracking hypotheses.
 - Each task specifies target files and test files
 - Dependencies between tasks are documented
 - Verification criteria defined per phase
@@ -727,6 +758,25 @@ When blocked (`[!]`):
 
 See `core/agents/debugger.md` for detailed process.
 
+### Root Cause Analysis (Bug Tracks)
+
+**Iron Law:** No fix without a confirmed root cause. No investigation without scope boundaries.
+
+For bug tracks (from Jira incidents, production bugs, regressions):
+1. **Reproduce & Scope** - Confirm bug, define blast radius, map to architecture.md modules
+2. **Trace & Analyze** - Follow data/control flow with `file:line` references, differential analysis
+3. **Hypothesize & Confirm** - One hypothesis at a time, log all results (including failures)
+4. **Fix & Prevent** - Regression test first, minimal fix within blast radius, blameless RCA summary
+
+Key practices (from Google SRE and distributed systems engineering):
+- **Blast radius first** — Know what's broken AND what isn't before investigating
+- **Differential analysis** — Compare working vs. failing cases systematically
+- **5 Whys** — Trace from symptom to systemic root cause
+- **Blameless RCA** — Focus on systems and processes, not individuals
+- **Code locality** — Every claim cites `file:line`, no hand-waving
+
+See `core/agents/rca.md` for detailed process.
+
 ### Two-Stage Review
 
 At phase boundaries:
@@ -759,6 +809,32 @@ Activated when a task is blocked (`[!]`). Enforces root cause investigation befo
 **Escalation:** After 3 failed hypothesis cycles, document findings, list what's been eliminated, and ask for external input.
 
 See `core/agents/debugger.md` for the full process.
+
+### RCA Agent
+
+Activated for bug/RCA tracks created via `/draft:new-track`. Provides structured Root Cause Analysis methodology extending the debugger agent with practices from Google SRE postmortem culture and distributed systems debugging.
+
+**Four-Phase Process:**
+
+| Phase | Goal | Output |
+|-------|------|--------|
+| **1. Reproduce & Scope** | Confirm bug, define blast radius, map to architecture.md modules | Reproduction steps + scoped investigation area |
+| **2. Trace & Analyze** | Follow data/control flow to the divergence point | Flow trace with `file:line` references |
+| **3. Hypothesize & Confirm** | Test one hypothesis at a time, document all results | Confirmed root cause with evidence |
+| **4. Fix & Prevent** | Regression test first, minimal fix, RCA summary | Fix + test + blameless RCA document |
+
+**Key Techniques:**
+- **Differential Analysis** — Compare working vs. failing cases systematically
+- **5 Whys** — Trace from immediate cause to systemic root cause
+- **Blast Radius Scoping** — Define investigation boundaries before diving in
+- **Hypothesis Logging** — Track every hypothesis (failed ones narrow the search)
+- **Code Locality** — Every claim must cite `file:line`
+
+**Root Cause Classification:** logic error, race condition, data corruption, config error, dependency issue, missing validation, state management, resource exhaustion.
+
+**Anti-patterns:** Fixing symptoms without root cause, investigating the entire system, shotgun debugging, skipping failed hypothesis documentation, fixing adjacent issues "while we're here".
+
+See `core/agents/rca.md` for the full process including distributed systems considerations.
 
 ### Reviewer Agent
 

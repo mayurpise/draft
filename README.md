@@ -1,15 +1,15 @@
-# Draft 
+# Draft
 https://getdraft.dev/
 
-**Measure twice, code once.**
+**Ship fast. Ship right.**
 
-A Claude Code plugin for Context-Driven Development. Draft specs and plans before implementation with structured workflows for features and fixes.
+Enterprise discipline for AI-assisted development. Draft brings structure — specs, plans, tracks, validation — so AI acceleration doesn't mean technical debt.
 
 Also available for [Cursor](#cursor-integration), [GitHub Copilot](#github-copilot-integration), and [Gemini](#gemini-integration).
 
 ## Why Draft?
 
-AI coding assistants are powerful but undirected. Without structure, they make assumptions about requirements, choose arbitrary technical approaches, and skip verification. Draft solves this through **Context-Driven Development**: structured documents that constrain and guide AI behavior.
+AI coding tools are fast. They're also chaotic. Without structure, they make assumptions about requirements, choose arbitrary technical approaches, and skip verification. Draft solves this through **Context-Driven Development**: structured documents that constrain and guide AI behavior.
 
 ```
 product.md       →  "Build a task manager for developers"

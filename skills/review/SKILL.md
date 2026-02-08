@@ -97,7 +97,7 @@ Once track is resolved:
 
 3. **Read plan.md:**
    - Load `draft/tracks/<id>/plan.md`
-   - Extract commit SHAs (pattern: `<SHA>` or `commit <SHA>`)
+   - Extract commit SHAs from completed task lines. Match 7+ character hex strings in parentheses after task markers, e.g., `- [x] **Task 1.1:** Description (7a7dc85)`. Collect all unique SHAs in order of appearance.
    - Determine commit range:
      - First commit: `git rev-parse <first_SHA>^` (parent of first)
      - Last commit: `<last_SHA>`

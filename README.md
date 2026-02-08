@@ -1,5 +1,5 @@
 # Draft 
-https://mayurpise.github.io/draft/
+https://getdraft.dev/
 
 **Measure twice, code once.**
 

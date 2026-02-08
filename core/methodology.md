@@ -748,6 +748,7 @@ Natural language patterns that map to Draft commands:
 | "check coverage" | Code coverage report |
 | "validate", "check quality" | Codebase quality validation |
 | "hunt bugs", "find bugs" | Systematic bug discovery |
+| "review code", "review track" | Code review orchestrator (track/project) |
 | "preview jira", "export to jira" | Preview Jira issues |
 | "create jira issues" | Create Jira issues via MCP |
 | "the plan" | Read active track's plan.md |

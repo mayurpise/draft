@@ -83,6 +83,7 @@ Shows available commands and guides you to the right workflow. Also supports nat
 | "check coverage" | `/draft:coverage` |
 | "validate", "check quality" | `/draft:validate` |
 | "hunt bugs", "find bugs" | `/draft:bughunt` |
+| "review code", "review track" | `/draft:review` |
 | "preview jira", "export to jira" | `/draft:jira-preview` |
 | "create jira issues" | `/draft:jira-create` |
 
@@ -366,6 +367,57 @@ Systematic bug hunting across the entire codebase, enhanced by Draft context whe
 - `spec.md` / `plan.md` — Verifies implemented features match track requirements
 
 **Output:** Generates report at `draft/bughunt-report.md` (project) or `draft/tracks/<id>/bughunt-report.md` (track). Unlike `/draft:validate` which checks compliance, `/draft:bughunt` discovers defects — correctness bugs, security vulnerabilities, performance issues, and reliability problems.
+
+---
+
+### `/draft:review` — Code Review Orchestrator
+
+Standalone code review command that orchestrates reviewer agent, validate, and bughunt into a unified review workflow.
+
+```bash
+# Review active track (auto-detect)
+/draft:review
+
+# Review specific track by ID or name
+/draft:review --track add-user-auth
+/draft:review --track "user authentication"
+
+# Comprehensive review (includes validate + bughunt)
+/draft:review --track my-feature --full
+
+# Review uncommitted changes
+/draft:review --project
+
+# Review specific files
+/draft:review --files "src/**/*.ts"
+
+# Review commit range
+/draft:review --commits main...feature-branch
+```
+
+**Track-Level Review** (with spec.md and plan.md):
+1. **Stage 1: Spec Compliance** — Verifies all requirements and acceptance criteria met
+2. **Stage 2: Code Quality** — Checks architecture, error handling, testing, maintainability
+3. **Optional**: Runs `/draft:validate` and `/draft:bughunt` with `--with-validate`, `--with-bughunt`, or `--full`
+4. Generates unified report: `draft/tracks/<id>/review-report.md`
+
+**Project-Level Review** (without track context):
+1. **Code Quality Only** — Stage 2 checks (no spec to verify against)
+2. Supports `--project` (uncommitted), `--files <pattern>`, `--commits <range>`
+3. Generates report: `draft/review-report.md`
+
+**Features:**
+- Fuzzy track matching (ID or name)
+- Smart diff chunking (<300 lines full, ≥300 lines file-by-file)
+- Unified findings from multiple quality tools
+- Critical/Important/Minor severity classification
+- Updates metadata.json with review history
+
+**When to use:**
+- Before marking track complete
+- Pre-PR review of track work
+- Review external PRs or work done outside `/draft:implement`
+- Quick quality check on uncommitted changes
 
 ---
 

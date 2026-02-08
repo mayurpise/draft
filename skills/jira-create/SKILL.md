@@ -17,9 +17,14 @@ Create Jira epic, stories, and sub-tasks from `jira-export.md` using MCP-Jira. I
 
 ## Step 1: Load Context
 
-1. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)
-2. If track ID provided as argument, use that instead
-3. Check for `draft/tracks/<track_id>/jira-export.md`
+1. **Capture git context first:**
+   ```bash
+   git branch --show-current    # Current branch name
+   git rev-parse --short HEAD   # Current commit hash
+   ```
+2. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)
+3. If track ID provided as argument, use that instead
+4. Check for `draft/tracks/<track_id>/jira-export.md`
 
 If no track found:
 - Tell user: "No track found. Run `/draft:new-track` to create one, or specify track ID."
@@ -73,6 +78,12 @@ For each row in `### Sub-tasks` table:
 - Summary
 - Status (To Do, Done, In Progress, Blocked)
 
+### Quality Findings (if present)
+If export contains `## Quality Reports` section:
+- Parse validation findings table
+- Parse bughunt findings table
+- Extract severity, category, file, issue for each
+
 ## Step 5: Create Issues via MCP
 
 ### 5a. Create Epic
@@ -112,6 +123,52 @@ MCP call: create_issue
 ```
 - Capture sub-task key (e.g., PROJ-125)
 - Report: "  - Sub-task: PROJ-125 - Task 1.1"
+
+### 5d. Create Bug Issues (from Bug Hunt Report)
+
+For **each bug** in the `## Bug Issues` section of jira-export.md, create a separate Bug issue:
+
+```
+MCP call: create_issue
+- project: [same as epic]
+- issue_type: Bug
+- summary: [Category] [Brief issue description]
+- description: {noformat}
+  h3. Location
+  [file:line]
+
+  h3. Category
+  [Bug category from report]
+
+  h3. Issue
+  [Full issue description]
+
+  h3. Impact
+  [User-visible or system failure mode]
+
+  h3. Recommended Fix
+  [Fix recommendation from report]
+
+  ---
+  🤖 Generated with Draft (Bug Hunt)
+  Branch: [branch-name] | Commit: [short-hash]
+  {noformat}
+- epic_link: [Epic key from step 5a]
+- priority: [Map from severity]
+```
+
+**Priority Mapping:**
+| Severity | Jira Priority |
+|----------|---------------|
+| Critical | Highest |
+| High | High |
+| Medium | Medium |
+| Low | Low |
+
+- Capture bug key (e.g., PROJ-131)
+- Report: "- Bug: PROJ-131 - [Critical] Correctness: Off-by-one error"
+
+**All bugs from bughunt-report.md get their own Bug issue.** They are linked to the Epic but separate from Stories (phases). This keeps implementation work (Stories/Sub-tasks) distinct from defect tracking (Bugs).
 
 ## Step 6: Update Tracking
 
@@ -158,7 +215,12 @@ Created:
   - Sub-task: PROJ-130 - Task 2.2
   [...]
 
-Total: 1 epic, N stories, M sub-tasks, P story points
+Bugs (from Bug Hunt):
+- Bug: PROJ-131 - [Critical] Correctness: Off-by-one error in pagination
+- Bug: PROJ-132 - [High] Concurrency: Race condition in cache update
+- Bug: PROJ-133 - [Medium] Security: Missing input validation
+
+Total: 1 epic, N stories, M sub-tasks, B bugs, P story points
 
 Updated:
 - plan.md (added issue keys to phases and tasks)

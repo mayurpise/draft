@@ -14,8 +14,10 @@ Thumbs.db
 *.tar.gz
 
 # Dependencies
-package-lock.json
 node_modules/
-AGENTS.md
-CLOUDE.md
-/draft/
+
+# Generated / local
+# (none currently)
+
+INDUSTRY_REVIEW.md
+RECOMMENDATIONS.md

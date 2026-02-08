@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Draft: Context-Driven Development</title>
+    <meta name="description" content="Draft: Context-Driven Development methodology. A Claude Code plugin for structured AI-assisted software development with specs, plans, and quality gates.">
+    <meta name="author" content="mayurpise">
+    <meta name="theme-color" content="#0a0a0b">
+    <meta property="og:title" content="Draft: Context-Driven Development">
+    <meta property="og:description" content="Measure twice, code once. A Claude Code plugin that enforces structured specs and plans before AI writes code.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mayurpise.github.io/draft">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Draft: Context-Driven Development">
+    <meta name="twitter:description" content="Measure twice, code once. A Claude Code plugin that enforces structured specs and plans before AI writes code.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
@@ -810,6 +820,12 @@
             color: var(--accent-cyan);
         }
 
+        .arch-flow-step.bughunt {
+            background: rgba(251, 113, 133, 0.15);
+            border: 1px solid rgba(251, 113, 133, 0.3);
+            color: var(--accent-rose);
+        }
+
         .arch-flow-checkpoint {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.7rem;
@@ -1052,9 +1068,26 @@
                 padding: 0.5rem 1rem;
             }
         }
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+            padding: 8px 16px;
+            z-index: 100;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            text-decoration: none;
+            transition: top 0.2s;
+        }
+        .skip-link:focus {
+            top: 0;
+        }
     </style>
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <!-- Hero Section -->
     <header class="hero">
         <div class="hero-content">
@@ -1068,7 +1101,7 @@
         </div>
     </header>
 
-    <main>
+    <main id="main-content">
         <!-- Installation Section -->
         <section id="install">
             <h2>Getting Started</h2>
@@ -1099,6 +1132,9 @@
 
 <span class="code-comment"># Validate quality (architecture, security, performance)</span>
 <span class="code-keyword">/draft:validate</span>
+
+<span class="code-comment"># Hunt for bugs across the codebase</span>
+<span class="code-keyword">/draft:bughunt</span>
 
 <span class="code-comment"># Check progress</span>
 <span class="code-keyword">/draft:status</span></code></pre>
@@ -1142,7 +1178,7 @@
         <!-- Command Reference Section -->
         <section id="commands">
             <h2>Command Reference</h2>
-            <p>Draft provides 12 slash commands for the full development lifecycle.</p>
+            <p>Draft provides 13 slash commands for the full development lifecycle.</p>
 
             <div class="doc-grid">
                 <div class="doc-card">
@@ -1194,6 +1230,11 @@
                     <div class="icon">✅</div>
                     <div class="name">/draft:validate</div>
                     <p class="purpose">Systematic quality validation (architecture, security, performance)</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">🔍</div>
+                    <div class="name">/draft:bughunt</div>
+                    <p class="purpose">Exhaustive bug hunt across 12 dimensions (correctness, security, performance)</p>
                 </div>
                 <div class="doc-card">
                     <div class="icon">👁️</div>
@@ -1349,7 +1390,7 @@
             <p>Even with a plan, AI can drift: skip tests, claim completion without proof, or make sweeping changes across unrelated files. <strong><code>/draft:implement</code></strong> executes one task at a time from the plan, follows the TDD cycle (write test first, then code, then refactor), runs a verification gate before marking anything complete, and triggers a two-stage review at phase boundaries. The AI can only work on what's specified, in the order specified, with proof required at every step.</p>
 
             <h3>Step 5: Verify Quality — Why it exists</h3>
-            <p>Passing tests doesn't guarantee good code. AI can violate architectural patterns, introduce security vulnerabilities, or create performance bottlenecks — all while every test passes. <strong><code>/draft:coverage</code></strong> measures test completeness (95%+ target) and classifies uncovered lines. <strong><code>/draft:validate</code></strong> runs context-aware quality checks: architecture conformance (patterns from architecture.md), security scans (hardcoded secrets, SQL injection, XSS), performance anti-patterns (N+1 queries, blocking I/O), and regression risk (blast radius of changes). Both generate reports with file:line references and actionable remediation. Auto-runs at track completion when enabled in workflow.md — non-blocking by default to maintain velocity while surfacing issues.</p>
+            <p>Passing tests doesn't guarantee good code. AI can violate architectural patterns, introduce security vulnerabilities, or create performance bottlenecks — all while every test passes. <strong><code>/draft:coverage</code></strong> measures test completeness (95%+ target) and classifies uncovered lines. <strong><code>/draft:validate</code></strong> runs context-aware compliance checks: architecture conformance (patterns from architecture.md), security scans (hardcoded secrets, SQL injection, XSS), performance anti-patterns (N+1 queries, blocking I/O), and regression risk (blast radius of changes). <strong><code>/draft:bughunt</code></strong> goes deeper — exhaustive bug hunting across 12 dimensions (correctness, reliability, security, performance, concurrency, state management, API contracts, accessibility, and more) using Draft context to find architecture violations, spec non-compliance, and framework-specific issues. All three generate reports with file:line references and actionable fixes.</p>
         </section>
 
         <!-- Constraint Hierarchy -->
@@ -1455,7 +1496,7 @@
                 <div class="hierarchy-level">
                     <div class="num">5</div>
                     <div class="file">Implementation + Verification</div>
-                    <div class="desc">Only after all documents are merged does coding start. Every developer has full context: what to build (<code>spec.md</code>), in what order (<code>plan.md</code>), with what boundaries (<code>architecture.md</code>). After implementation, <code>/draft:coverage</code> verifies tests (95%+ target) and <code>/draft:validate</code> checks quality (architecture conformance, security, performance). Both generate reports in the track directory for PR review.</div>
+                    <div class="desc">Only after all documents are merged does coding start. Every developer has full context: what to build (<code>spec.md</code>), in what order (<code>plan.md</code>), with what boundaries (<code>architecture.md</code>). After implementation, <code>/draft:coverage</code> verifies tests (95%+ target), <code>/draft:validate</code> checks compliance (architecture conformance, security, performance), and <code>/draft:bughunt</code> finds defects across 12 dimensions. All three generate reports in the track directory for PR review.</div>
                 </div>
             </div>
 
@@ -1558,6 +1599,7 @@
 ├── <span class="code-file">architecture.md</span>     <span class="code-comment"># System map + mermaid diagrams (brownfield)</span>
 ├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD, commit, validation, architecture mode</span>
 ├── <span class="code-file">validation-report.md</span> <span class="code-comment"># Project-level quality checks (generated)</span>
+├── <span class="code-file">bughunt-report.md</span>    <span class="code-comment"># Project-level bug hunt findings (generated)</span>
 ├── <span class="code-file">jira.md</span>             <span class="code-comment"># Jira project config (optional)</span>
 ├── <span class="code-file">tracks.md</span>           <span class="code-comment"># Master track list</span>
 └── <span class="code-file">tracks/</span>
@@ -1567,6 +1609,7 @@
         ├── <span class="code-file">architecture.md</span> <span class="code-comment"># Track modules (optional)</span>
         ├── <span class="code-file">metadata.json</span>
         ├── <span class="code-file">validation-report.md</span> <span class="code-comment"># Quality checks (generated)</span>
+        ├── <span class="code-file">bughunt-report.md</span> <span class="code-comment"># Bug hunt findings (generated)</span>
         └── <span class="code-file">jira-export.md</span> <span class="code-comment"># Jira stories (optional)</span></code></pre>
             </div>
         </section>
@@ -1895,7 +1938,9 @@
                     <span class="arch-flow-arrow">→</span>
                     <span class="arch-flow-step coverage">/draft:coverage → 95%+ target</span>
                     <span class="arch-flow-arrow">→</span>
-                    <span class="arch-flow-step validate">/draft:validate → quality checks</span>
+                    <span class="arch-flow-step validate">/draft:validate → compliance</span>
+                    <span class="arch-flow-arrow">→</span>
+                    <span class="arch-flow-step bughunt">/draft:bughunt → defect discovery</span>
                 </div>
             </div>
 
@@ -2093,6 +2138,54 @@
             </div>
 
             <p><strong>Why this matters:</strong> Validation runs automatically at track completion (configurable in workflow.md). Non-blocking by default — issues documented in <code>validation-report.md</code> with file:line references and remediation guidance. Complements coverage (quantitative test metrics) with qualitative codebase health checks.</p>
+
+            <h3>Exhaustive Bug Hunt</h3>
+            <p><strong>The problem:</strong> Validation checks compliance with declared architecture. But real bugs — logic errors, race conditions, security vulnerabilities, accessibility issues — require deeper analysis across multiple dimensions. <strong>The solution:</strong> <code>/draft:bughunt</code> performs exhaustive defect discovery across 12 analysis dimensions, enhanced by Draft context when available.</p>
+
+            <div class="doc-grid" style="grid-template-columns: repeat(4, 1fr);">
+                <div class="doc-card">
+                    <div class="icon">🎯</div>
+                    <div class="name">Correctness</div>
+                    <p class="purpose">Logic errors, edge cases, invalid assumptions, state bugs</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">🔄</div>
+                    <div class="name">Concurrency</div>
+                    <p class="purpose">Race conditions, stale responses, ordering issues</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">🔐</div>
+                    <div class="name">Security</div>
+                    <p class="purpose">XSS, injection, auth bypass, secrets exposure</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">⚡</div>
+                    <div class="name">Performance</div>
+                    <p class="purpose">N+1 queries, blocking I/O, memory leaks, re-renders</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">♿</div>
+                    <div class="name">Accessibility</div>
+                    <p class="purpose">Keyboard nav, focus management, ARIA, screen readers</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">📊</div>
+                    <div class="name">State</div>
+                    <p class="purpose">Source-of-truth violations, derived state bugs, leaks</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">🔌</div>
+                    <div class="name">API Contracts</div>
+                    <p class="purpose">Schema drift, weak typing, missing validation</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">🧪</div>
+                    <div class="name">Tests</div>
+                    <p class="purpose">Coverage gaps, snapshot misuse, flaky tests</p>
+                </div>
+            </div>
+
+            <p><strong>Why this matters:</strong> Unlike validate (which checks compliance), bughunt discovers defects. Run it project-wide for full codebase analysis, or use <code>--track &lt;id&gt;</code> to focus on a specific feature. When Draft context exists, bughunt uses architecture.md to flag module boundary violations, tech-stack.md for framework-specific anti-patterns, and spec.md/plan.md to verify implementation matches requirements. Findings are severity-ranked (Critical/High/Medium/Low) with file:line locations and minimal fix recommendations in <code>bughunt-report.md</code>.</p>
         </section>
 
         <!-- Economics -->
@@ -2257,7 +2350,7 @@
     </main>
 
     <footer>
-        <p>Draft Methodology — <a href="https://github.com/mayurpise/draft" target="_blank">View on GitHub</a></p>
+        <p>Draft Methodology — <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer">View on GitHub</a></p>
     </footer>
 </body>
 </html>

@@ -81,6 +81,7 @@ Shows available commands and guides you to the right workflow. Also supports nat
 | "break into modules" | `/draft:decompose` |
 | "check coverage" | `/draft:coverage` |
 | "validate", "check quality" | `/draft:validate` |
+| "hunt bugs", "find bugs" | `/draft:bughunt` |
 | "preview jira", "export to jira" | `/draft:jira-preview` |
 | "create jira issues" | `/draft:jira-create` |
 
@@ -334,6 +335,39 @@ Generates report at `draft/validation-report.md` (project) or `draft/tracks/<id>
 
 ---
 
+### `/draft:bughunt` — Exhaustive Bug Hunt
+
+Systematic bug hunting across the entire codebase, enhanced by Draft context when available.
+
+```bash
+# Hunt bugs across entire repo
+/draft:bughunt
+
+# Hunt bugs for specific track
+/draft:bughunt --track <track-id>
+```
+
+**What it does:**
+1. Loads Draft context if available (`architecture.md`, `tech-stack.md`, `product.md`, `workflow.md`)
+2. For track-level hunts, also loads `spec.md` and `plan.md` to verify implementation matches requirements
+3. Analyzes code across 12 dimensions: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, tests, maintainability
+4. Generates severity-ranked findings (Critical/High/Medium/Low) with file locations and fix recommendations
+
+**Scope options:**
+- **Entire repo** — Full codebase analysis
+- **Specific paths** — Target directories or files
+- **Track-level** — Focus on files relevant to a specific track, verify spec compliance
+
+**Draft context enhances the hunt:**
+- `architecture.md` — Flags violations of intended module boundaries and patterns
+- `tech-stack.md` — Applies framework-specific checks (React anti-patterns, Node gotchas, etc.)
+- `product.md` — Catches bugs that violate product requirements or user flows
+- `spec.md` / `plan.md` — Verifies implemented features match track requirements
+
+**Output:** Generates report at `draft/bughunt-report.md` (project) or `draft/tracks/<id>/bughunt-report.md` (track). Unlike `/draft:validate` which checks compliance, `/draft:bughunt` discovers defects — correctness bugs, security vulnerabilities, performance issues, and reliability problems.
+
+---
+
 ## Workflow
 
 ```
@@ -357,6 +391,8 @@ Generates report at `draft/validation-report.md` (project) or `draft/tracks/<id>
 │        │                                                         │
 │        ▼                                                         │
 │   /draft:status            Check progress anytime                │
+│        │                                                         │
+│        ├─── (optional) ─── /draft:bughunt → bug report           │
 │        │                                                         │
 │        ▼                                                         │
 │   /draft:revert            Git-aware rollback if needed          │
@@ -505,7 +541,9 @@ your-project/
 │           ├── plan.md         # Phased task breakdown
 │           ├── metadata.json   # Status and timestamps
 │           ├── architecture.md # Track-level module decomposition (optional)
-│           └── jira-export.md  # Jira stories for export (optional)
+│           ├── jira-export.md  # Jira stories for export (optional)
+│           ├── validation-report.md # Quality validation results (generated)
+│           └── bughunt-report.md # Bug hunt findings (generated)
 ```
 
 ## Troubleshooting
@@ -572,6 +610,8 @@ draft/
 │   ├── revert/SKILL.md
 │   ├── decompose/SKILL.md
 │   ├── coverage/SKILL.md
+│   ├── validate/SKILL.md
+│   ├── bughunt/SKILL.md
 │   ├── jira-preview/SKILL.md
 │   └── jira-create/SKILL.md
 ├── core/

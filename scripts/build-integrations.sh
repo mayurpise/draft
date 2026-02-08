@@ -33,6 +33,7 @@ SKILL_ORDER=(
     implement
     coverage
     validate
+    bughunt
     status
     revert
     jira-preview
@@ -49,6 +50,7 @@ get_skill_header() {
         implement)    echo "Implement Command" ;;
         coverage)     echo "Coverage Command" ;;
         validate)     echo "Validate Command" ;;
+        bughunt)      echo "Bug Hunt Command" ;;
         status)       echo "Status Command" ;;
         revert)       echo "Revert Command" ;;
         jira-preview) echo "Jira Preview Command" ;;
@@ -68,6 +70,7 @@ get_cursor_trigger() {
         implement)    echo "\"implement\" or \"@draft implement\"" ;;
         coverage)     echo "\"check coverage\" or \"@draft coverage\"" ;;
         validate)     echo "\"validate\" or \"@draft validate [--track <id>]\"" ;;
+        bughunt)      echo "\"hunt bugs\" or \"@draft bughunt [--track <id>]\"" ;;
         status)       echo "\"status\" or \"@draft status\"" ;;
         revert)       echo "\"revert\" or \"@draft revert\"" ;;
         jira-preview) echo "\"preview jira\" or \"@draft jira-preview [track-id]\"" ;;
@@ -87,6 +90,7 @@ get_copilot_trigger() {
         implement)    echo "\"implement\" or \"draft implement\"" ;;
         coverage)     echo "\"check coverage\" or \"draft coverage\"" ;;
         validate)     echo "\"validate\" or \"draft validate [--track <id>]\"" ;;
+        bughunt)      echo "\"hunt bugs\" or \"draft bughunt [--track <id>]\"" ;;
         status)       echo "\"status\" or \"draft status\"" ;;
         revert)       echo "\"revert\" or \"draft revert\"" ;;
         jira-preview) echo "\"preview jira\" or \"draft jira-preview [track-id]\"" ;;
@@ -102,6 +106,30 @@ get_copilot_trigger() {
 # Extract body content from a SKILL.md file (strip YAML frontmatter)
 extract_body() {
     local file="$1"
+
+    # Check for frontmatter delimiters
+    if ! grep -q "^---$" "$file"; then
+        echo "ERROR: Missing YAML frontmatter in $file" >&2
+        echo "  Skill files must start with --- delimiter" >&2
+        return 1
+    fi
+
+    # Extract and validate frontmatter (use || true to ignore SIGPIPE from head)
+    local frontmatter
+    frontmatter=$(awk '/^---$/{flag=!flag;next}flag' "$file" | head -20 || true)
+
+    # Validate required fields
+    if ! echo "$frontmatter" | grep -q "^name:"; then
+        echo "ERROR: Missing 'name:' field in frontmatter of $file" >&2
+        return 1
+    fi
+
+    if ! echo "$frontmatter" | grep -q "^description:"; then
+        echo "ERROR: Missing 'description:' field in frontmatter of $file" >&2
+        return 1
+    fi
+
+    # Extract body (existing logic)
     awk '
         BEGIN { in_frontmatter = 0; found_end = 0 }
         /^---$/ {
@@ -117,25 +145,19 @@ extract_body() {
     ' "$file"
 }
 
-# Base transform: /draft: → @draft, remove dead agent references
+# Base transform: /draft: → @draft
 transform_cursor_syntax() {
     sed -E \
-        -e 's|/draft:([a-z-]+)|@draft \1|g' \
-        -e 's|See `core/agents/[a-z]+\.md`[^.]*\.?|(see Quality Disciplines section)|g' \
-        -e 's|\(see `core/agents/[a-z]+\.md`\)|(see Quality Disciplines section)|g' \
-        -e 's|`core/agents/[a-z]+\.md`|Quality Disciplines section|g'
+        -e 's|/draft:([a-z-]+)|@draft \1|g'
 }
 
-# Copilot transform: /draft: → draft (no @), remove dead agent references
+# Copilot transform: /draft: → draft (no @)
 transform_copilot_syntax() {
     sed -E \
         -e 's|/draft:([a-z-]+)|draft \1|g' \
         -e 's|@draft |draft |g' \
         -e 's|`@draft`|`draft`|g' \
-        -e 's|`@draft |`draft |g' \
-        -e 's|See `core/agents/[a-z]+\.md`[^.]*\.?|(see Quality Disciplines section)|g' \
-        -e 's|\(see `core/agents/[a-z]+\.md`\)|(see Quality Disciplines section)|g' \
-        -e 's|`core/agents/[a-z]+\.md`|Quality Disciplines section|g'
+        -e 's|`@draft |`draft |g'
 }
 
 # ─────────────────────────────────────────────────────────
@@ -256,11 +278,17 @@ PROACTIVE
 }
 
 # ─────────────────────────────────────────────────────────
-# Cursor: build .cursorrules
+# Shared integration builder
 # ─────────────────────────────────────────────────────────
 
-build_cursorrules() {
-    cat << 'HEADER'
+build_integration() {
+    local command_prefix="$1"        # "@draft" | "draft"
+    local get_trigger_fn="$2"        # "get_cursor_trigger" | "get_copilot_trigger"
+    local transform_fn="$3"          # "transform_cursor_syntax" | "transform_copilot_syntax"
+    local story_marker="$4"          # "@draft" | "draft"
+
+    # Header (common for all integrations)
+    cat << 'COMMON_HEADER'
 # Draft - Context-Driven Development
 
 You are operating with the Draft methodology for Context-Driven Development.
@@ -289,16 +317,24 @@ When `draft/` exists in the project, always consider:
 
 | Command | Purpose |
 |---------|---------|
-| `@draft` | Show overview and available commands |
-| `@draft init` | Initialize project (run once) |
-| `@draft new-track <description>` | Create feature/bug track |
-| `@draft decompose` | Module decomposition with dependency mapping |
-| `@draft implement` | Execute tasks from plan |
-| `@draft coverage` | Code coverage report (target 95%+) |
-| `@draft status` | Show progress overview |
-| `@draft revert` | Git-aware rollback |
-| `@draft jira-preview [track-id]` | Generate jira-export.md for review |
-| `@draft jira-create [track-id]` | Create Jira issues from export via MCP |
+COMMON_HEADER
+
+    # Command table with parameterized prefix
+    echo "| \`${command_prefix}\` | Show overview and available commands |"
+    echo "| \`${command_prefix} init\` | Initialize project (run once) |"
+    echo "| \`${command_prefix} new-track <description>\` | Create feature/bug track |"
+    echo "| \`${command_prefix} decompose\` | Module decomposition with dependency mapping |"
+    echo "| \`${command_prefix} implement\` | Execute tasks from plan |"
+    echo "| \`${command_prefix} coverage\` | Code coverage report (target 95%+) |"
+    echo "| \`${command_prefix} validate [--track <id>]\` | Codebase quality validation |"
+    echo "| \`${command_prefix} bughunt [--track <id>]\` | Systematic bug discovery |"
+    echo "| \`${command_prefix} status\` | Show progress overview |"
+    echo "| \`${command_prefix} revert\` | Git-aware rollback |"
+    echo "| \`${command_prefix} jira-preview [track-id]\` | Generate jira-export.md for review |"
+    echo "| \`${command_prefix} jira-create [track-id]\` | Create Jira issues from export via MCP |"
+
+    # Rest of header (common)
+    cat << 'COMMON_HEADER2'
 
 ## Intent Mapping
 
@@ -311,6 +347,8 @@ Recognize these natural language patterns:
 | "break into modules", "decompose" | Run decompose |
 | "start implementing" | Execute implement |
 | "check coverage", "test coverage" | Run coverage |
+| "validate", "check quality" | Run validation |
+| "hunt bugs", "find bugs" | Run bug hunt |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
 | "preview jira", "export to jira" | Run jira-preview |
@@ -336,9 +374,16 @@ Recognize and use these throughout plan.md:
 - `[x]` - Completed
 - `[!]` - Blocked
 
-HEADER
+COMMON_HEADER2
 
+    # Skill loop with parameterized trigger and transform functions
     for skill in "${SKILL_ORDER[@]}"; do
+        # Validate skill name format (security: prevent path traversal)
+        if [[ ! "$skill" =~ ^[a-z0-9-]+$ ]]; then
+            echo "ERROR: Invalid skill name '$skill' (must be lowercase alphanumeric + hyphens)" >&2
+            exit 1
+        fi
+
         local skill_file="$SKILLS_DIR/$skill/SKILL.md"
         if [[ -f "$skill_file" ]]; then
             echo ""
@@ -346,9 +391,9 @@ HEADER
             echo ""
             echo "## $(get_skill_header "$skill")"
             echo ""
-            echo "When user says $(get_cursor_trigger "$skill"):"
+            echo "When user says $($get_trigger_fn "$skill"):"
             echo ""
-            extract_body "$skill_file" | transform_cursor_syntax | tail -n +4
+            extract_body "$skill_file" | $transform_fn | tail -n +4
         else
             echo "" >&2
             echo "WARNING: Skill file not found: $skill_file" >&2
@@ -360,20 +405,19 @@ HEADER
     echo ""
 
     emit_quality_disciplines
-    # Story lifecycle lines use @draft for Cursor
-    cat << 'CURSOR_STORY'
-1. Placeholder during `@draft decompose` → "[placeholder]" in architecture.md
-2. Written during `@draft implement` → code comment at file top, summary in architecture.md
-3. Updated during refactoring → code comment is source of truth
 
-### Red Flags - STOP if you're:
-- Making completion claims without running verification
-- Fixing bugs without investigating root cause
-- Skipping spec compliance check at phase boundary
-- Writing code before tests (when TDD enabled)
-- Reporting status without reading actual files
-
-CURSOR_STORY
+    # Story lifecycle with parameterized command marker
+    echo "1. Placeholder during \`${story_marker} decompose\` → \"[placeholder]\" in architecture.md"
+    echo "2. Written during \`${story_marker} implement\` → code comment at file top, summary in architecture.md"
+    echo "3. Updated during refactoring → code comment is source of truth"
+    echo ""
+    echo "### Red Flags - STOP if you're:"
+    echo "- Making completion claims without running verification"
+    echo "- Fixing bugs without investigating root cause"
+    echo "- Skipping spec compliance check at phase boundary"
+    echo "- Writing code before tests (when TDD enabled)"
+    echo "- Reporting status without reading actual files"
+    echo ""
 
     echo ""
     echo "---"
@@ -381,6 +425,14 @@ CURSOR_STORY
 
     emit_communication
     emit_proactive
+}
+
+# ─────────────────────────────────────────────────────────
+# Cursor: build .cursorrules
+# ─────────────────────────────────────────────────────────
+
+build_cursorrules() {
+    build_integration "@draft" "get_cursor_trigger" "transform_cursor_syntax" "@draft"
 }
 
 # ─────────────────────────────────────────────────────────
@@ -388,127 +440,7 @@ CURSOR_STORY
 # ─────────────────────────────────────────────────────────
 
 build_copilot() {
-    cat << 'HEADER'
-# Draft - Context-Driven Development
-
-You are operating with the Draft methodology for Context-Driven Development.
-
-**Measure twice, code once.**
-
-## Core Workflow
-
-**Context -> Spec & Plan -> Implement**
-
-Every feature follows this lifecycle:
-1. **Setup** - Initialize project context (once per project)
-2. **New Track** - Create specification and plan
-3. **Implement** - Execute tasks with TDD workflow
-4. **Verify** - Confirm acceptance criteria met
-
-## Project Context Files
-
-When `draft/` exists in the project, always consider:
-- `draft/product.md` - Product vision and goals
-- `draft/tech-stack.md` - Technical constraints
-- `draft/workflow.md` - TDD and commit preferences
-- `draft/tracks.md` - Active work items
-
-## Available Commands
-
-| Command | Purpose |
-|---------|---------|
-| `draft` | Show overview and available commands |
-| `draft init` | Initialize project (run once) |
-| `draft new-track <description>` | Create feature/bug track |
-| `draft decompose` | Module decomposition with dependency mapping |
-| `draft implement` | Execute tasks from plan |
-| `draft coverage` | Code coverage report (target 95%+) |
-| `draft status` | Show progress overview |
-| `draft revert` | Git-aware rollback |
-| `draft jira-preview [track-id]` | Generate jira-export.md for review |
-| `draft jira-create [track-id]` | Create Jira issues from export via MCP |
-
-## Intent Mapping
-
-Recognize these natural language patterns:
-
-| User Says | Action |
-|-----------|--------|
-| "set up the project" | Run init |
-| "new feature", "add X" | Create new track |
-| "break into modules", "decompose" | Run decompose |
-| "start implementing" | Execute implement |
-| "check coverage", "test coverage" | Run coverage |
-| "what's the status" | Show status |
-| "undo", "revert" | Run revert |
-| "preview jira", "export to jira" | Run jira-preview |
-| "create jira", "push to jira" | Run jira-create |
-| "help", "what commands" | Show draft overview |
-| "the plan" | Read active track's plan.md |
-| "the spec" | Read active track's spec.md |
-
-## Tracks
-
-A **track** is a high-level unit of work (feature, bug fix, refactor). Each track contains:
-- `spec.md` - Requirements and acceptance criteria
-- `plan.md` - Phased task breakdown
-- `metadata.json` - Status and timestamps
-
-Located at: `draft/tracks/<track-id>/`
-
-## Status Markers
-
-Recognize and use these throughout plan.md:
-- `[ ]` - Pending
-- `[~]` - In Progress
-- `[x]` - Completed
-- `[!]` - Blocked
-
-HEADER
-
-    for skill in "${SKILL_ORDER[@]}"; do
-        local skill_file="$SKILLS_DIR/$skill/SKILL.md"
-        if [[ -f "$skill_file" ]]; then
-            echo ""
-            echo "---"
-            echo ""
-            echo "## $(get_skill_header "$skill")"
-            echo ""
-            echo "When user says $(get_copilot_trigger "$skill"):"
-            echo ""
-            extract_body "$skill_file" | transform_copilot_syntax | tail -n +4
-        else
-            echo "" >&2
-            echo "WARNING: Skill file not found: $skill_file" >&2
-        fi
-    done
-
-    echo ""
-    echo "---"
-    echo ""
-
-    emit_quality_disciplines
-    # Story lifecycle lines use draft (no @) for Copilot
-    cat << 'COPILOT_STORY'
-1. Placeholder during `draft decompose` → "[placeholder]" in architecture.md
-2. Written during `draft implement` → code comment at file top, summary in architecture.md
-3. Updated during refactoring → code comment is source of truth
-
-### Red Flags - STOP if you're:
-- Making completion claims without running verification
-- Fixing bugs without investigating root cause
-- Skipping spec compliance check at phase boundary
-- Writing code before tests (when TDD enabled)
-- Reporting status without reading actual files
-
-COPILOT_STORY
-
-    echo ""
-    echo "---"
-    echo ""
-
-    emit_communication
-    emit_proactive
+    build_integration "draft" "get_copilot_trigger" "transform_copilot_syntax" "draft"
 }
 
 # ─────────────────────────────────────────────────────────
@@ -516,8 +448,8 @@ COPILOT_STORY
 # ─────────────────────────────────────────────────────────
 
 build_gemini() {
-    # Reuse Cursor rules as they share @draft syntax and Markdown format
-    build_cursorrules
+    # Gemini uses @draft syntax like Cursor
+    build_integration "@draft" "get_cursor_trigger" "transform_cursor_syntax" "@draft"
 }
 
 # ─────────────────────────────────────────────────────────
@@ -568,16 +500,8 @@ verify_output() {
         fi
     fi
 
-    # Verify no dead agent references
-    local dead_refs
-    dead_refs=$(grep -c "See \`core/agents/" "$output_file" 2>/dev/null || true)
-    dead_refs=${dead_refs:-0}
-    if [[ "$dead_refs" -gt 0 ]]; then
-        echo "  WARNING: Found $dead_refs dead 'See core/agents/' references"
-        return 1
-    else
-        echo "  Agent refs check: OK (no dead references)"
-    fi
+    # Note: Agent references to core/agents/*.md are now preserved (not stripped)
+    echo "  Agent refs: preserved (not stripped)"
 
     return 0
 }

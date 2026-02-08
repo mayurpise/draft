@@ -14,11 +14,19 @@ You are implementing tasks from the active track's plan following the TDD workfl
 3. Read the track's `plan.md` for task list
 4. Read `draft/workflow.md` for TDD and commit preferences
 5. Read `draft/tech-stack.md` for technical context
-6. Check if `architecture_mode: true` in `workflow.md` → enables pre-implementation design steps
-7. If architecture mode is on, check for `draft/tracks/<id>/architecture.md` or `draft/architecture.md`
+6. **Check for architecture.md:**
+   - Track-level: `draft/tracks/<id>/architecture.md`
+   - Project-level: `draft/architecture.md`
+   - If either exists → **Enable architecture mode** (Story, Execution State, Skeletons)
+   - If neither exists → Standard TDD workflow
 
 If no active track found:
 - Tell user: "No active track found. Run `/draft:new-track` to create one."
+
+**Architecture Mode Activation:**
+- Automatically enabled when `architecture.md` exists (file-based, no flag needed)
+- Track-level architecture.md created by `/draft:decompose`
+- Project-level architecture.md created by `/draft:init` (brownfield only)
 
 ## Step 2: Find Next Task
 
@@ -32,7 +40,7 @@ If resuming `[~]` task, check for partial work.
 
 ## Step 2.5: Write Story (Architecture Mode Only)
 
-**Activation:** Only runs when `architecture_mode: true` is set in `workflow.md`.
+**Activation:** Only runs when `architecture.md` exists (track-level or project-level).
 
 When the next task involves creating or substantially modifying a code file:
 
@@ -74,7 +82,7 @@ See `core/agents/architect.md` for story writing guidelines.
 
 ### Step 3.0: Design Before Code (Architecture Mode Only)
 
-**Activation:** Only runs when `architecture_mode: true` is set in `workflow.md`.
+**Activation:** Only runs when `architecture.md` exists (track-level or project-level).
 **Skip for trivial tasks** - Config updates, type-only changes, single-function tasks where the design is obvious.
 
 #### 3.0a. Execution State Design
@@ -171,7 +179,7 @@ For each task, follow this workflow based on `workflow.md`. If skeletons were ge
 
 ### Implementation Chunk Limit (Architecture Mode Only)
 
-**Activation:** Only applies when `architecture_mode: true` is set in `workflow.md`.
+**Activation:** Only when `architecture.md` exists (track-level or project-level).
 
 If the implementation diff for a task exceeds **~200 lines**:
 

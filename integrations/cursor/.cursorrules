@@ -32,6 +32,8 @@ When `draft/` exists in the project, always consider:
 | `@draft decompose` | Module decomposition with dependency mapping |
 | `@draft implement` | Execute tasks from plan |
 | `@draft coverage` | Code coverage report (target 95%+) |
+| `@draft validate [--track <id>]` | Codebase quality validation |
+| `@draft bughunt [--track <id>]` | Systematic bug discovery |
 | `@draft status` | Show progress overview |
 | `@draft revert` | Git-aware rollback |
 | `@draft jira-preview [track-id]` | Generate jira-export.md for review |
@@ -48,6 +50,8 @@ Recognize these natural language patterns:
 | "break into modules", "decompose" | Run decompose |
 | "start implementing" | Execute implement |
 | "check coverage", "test coverage" | Run coverage |
+| "validate", "check quality" | Run validation |
+| "hunt bugs", "find bugs" | Run bug hunt |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
 | "preview jira", "export to jira" | Run jira-preview |
@@ -122,10 +126,13 @@ When `draft/` exists, these files guide development:
 ## Status Markers
 
 Used throughout plan.md files:
-- `[ ]` - Pending
-- `[~]` - In Progress
-- `[x]` - Completed
-- `[!]` - Blocked
+
+| Marker | Meaning |
+|--------|---------|
+| `[ ]` | Pending |
+| `[~]` | In Progress |
+| `[x]` | Completed |
+| `[!]` | Blocked |
 
 ## Intent Mapping
 
@@ -424,33 +431,8 @@ Create `draft/workflow.md` based on team preferences:
 
 Ask about their TDD preference (strict/flexible/none) and commit style.
 
-## Step 5.5: Architecture Mode (Optional)
-
-Ask the developer: "Enable Architecture Mode? This adds module decomposition, algorithm stories, execution state design, function skeletons, and coverage checkpoints to ALL tracks. Recommended for complex multi-module projects."
-
-### If Yes:
-
-Add an Architecture Mode section to `draft/workflow.md`:
-
-```markdown
-## Architecture Mode
-- Enabled: Yes
-- Coverage target: 95%
-
-### What this enables:
-- `@draft decompose` to break project/tracks into modules
-- Story writing (algorithm documentation) before implementation
-- Execution state design before coding
-- Function skeleton generation and approval
-- ~200-line implementation chunk reviews
-- `@draft coverage` for test coverage measurement
-```
-
-Suggest: "Run `@draft decompose project` after creating your first track to set up project-wide module architecture."
-
-### If No:
-
-Skip. Standard Draft workflow continues. Developer can enable later by adding `Architecture Mode` section to `workflow.md` manually.
+**Note on Architecture Mode:**
+Architecture features (Story, Execution State, Skeletons, Chunk Reviews) are automatically enabled when you run `@draft decompose` on a track. No opt-in needed - the presence of `architecture.md` activates these features.
 
 ## Step 6: Initialize Tracks
 
@@ -765,7 +747,7 @@ Create `draft/tracks/<track_id>/plan.md`:
 
 ### Step 3B: Bug & RCA Plan
 
-Bug tracks follow a fixed 3-phase structure based on systematic RCA methodology. (see Quality Disciplines section)
+Bug tracks follow a fixed 3-phase structure based on systematic RCA methodology. See `core/agents/rca.md` for the full process.
 
 Create `draft/tracks/<track_id>/plan.md`:
 
@@ -1001,7 +983,7 @@ For each module, define:
 - **Dependencies** - Which other modules it imports from
 - **Complexity** - Low / Medium / High
 
-### Module Guidelines (see Quality Disciplines section)
+### Module Guidelines (see `core/agents/architect.md`)
 
 - Each module should have a single responsibility
 - Target 1-3 files per module
@@ -1098,7 +1080,7 @@ Write the architecture document using the template from `core/templates/architec
 - Dependency diagram from Step 4
 - Dependency table from Step 4
 - Implementation order from Step 4
-- Story placeholder per module (see Quality Disciplines section Story Lifecycle for how this gets populated during `@draft implement`)
+- Story placeholder per module (see `core/agents/architect.md` Story Lifecycle for how this gets populated during `@draft implement`)
 - Status marker per module (`[ ] Not Started`)
 - Notes section for architecture decisions
 
@@ -1189,11 +1171,19 @@ You are implementing tasks from the active track's plan following the TDD workfl
 3. Read the track's `plan.md` for task list
 4. Read `draft/workflow.md` for TDD and commit preferences
 5. Read `draft/tech-stack.md` for technical context
-6. Check if `architecture_mode: true` in `workflow.md` → enables pre-implementation design steps
-7. If architecture mode is on, check for `draft/tracks/<id>/architecture.md` or `draft/architecture.md`
+6. **Check for architecture.md:**
+   - Track-level: `draft/tracks/<id>/architecture.md`
+   - Project-level: `draft/architecture.md`
+   - If either exists → **Enable architecture mode** (Story, Execution State, Skeletons)
+   - If neither exists → Standard TDD workflow
 
 If no active track found:
 - Tell user: "No active track found. Run `@draft new-track` to create one."
+
+**Architecture Mode Activation:**
+- Automatically enabled when `architecture.md` exists (file-based, no flag needed)
+- Track-level architecture.md created by `@draft decompose`
+- Project-level architecture.md created by `@draft init` (brownfield only)
 
 ## Step 2: Find Next Task
 
@@ -1207,7 +1197,7 @@ If resuming `[~]` task, check for partial work.
 
 ## Step 2.5: Write Story (Architecture Mode Only)
 
-**Activation:** Only runs when `architecture_mode: true` is set in `workflow.md`.
+**Activation:** Only runs when `architecture.md` exists (track-level or project-level).
 
 When the next task involves creating or substantially modifying a code file:
 
@@ -1241,7 +1231,7 @@ Adapt comment syntax to the language (`#` for Python, `/* */` for CSS, etc.).
 - **Do NOT proceed to execution state or implementation until Story is approved**
 - Developer can say "skip" to bypass this checkpoint for the current task
 
-(see Quality Disciplines section)
+See `core/agents/architect.md` for story writing guidelines.
 
 ---
 
@@ -1249,7 +1239,7 @@ Adapt comment syntax to the language (`#` for Python, `/* */` for CSS, etc.).
 
 ### Step 3.0: Design Before Code (Architecture Mode Only)
 
-**Activation:** Only runs when `architecture_mode: true` is set in `workflow.md`.
+**Activation:** Only runs when `architecture.md` exists (track-level or project-level).
 **Skip for trivial tasks** - Config updates, type-only changes, single-function tasks where the design is obvious.
 
 #### 3.0a. Execution State Design
@@ -1291,7 +1281,7 @@ Generate function/method stubs based on the approved execution state:
 
 **CHECKPOINT (MANDATORY):** Present skeletons to developer. Wait for approval. Developer may rename functions, change signatures, add/remove methods. Developer can say "skip" to bypass.
 
-(see Quality Disciplines section)
+See `core/agents/architect.md` for execution state and skeleton guidelines.
 
 ---
 
@@ -1346,7 +1336,7 @@ For each task, follow this workflow based on `workflow.md`. If skeletons were ge
 
 ### Implementation Chunk Limit (Architecture Mode Only)
 
-**Activation:** Only applies when `architecture_mode: true` is set in `workflow.md`.
+**Activation:** Only when `architecture.md` exists (track-level or project-level).
 
 If the implementation diff for a task exceeds **~200 lines**:
 
@@ -1428,7 +1418,7 @@ When all tasks in a phase are `[x]`:
 - Verify tests cover real logic
 - Classify issues: Critical (must fix) > Important (should fix) > Minor (note)
 
-(see Quality Disciplines section)
+See `core/agents/reviewer.md` for detailed review process.
 
 2. Run verification steps from plan (tests, builds)
 3. Present review findings to user
@@ -1483,7 +1473,7 @@ Next: Run `@draft status` to see project overview."
 **If blocked:**
 - Mark task as `[!]` Blocked
 - Add reason in plan.md
-- **REQUIRED:** Follow systematic debugging process (see Quality Disciplines section)
+- **REQUIRED:** Follow systematic debugging process (see `core/agents/debugger.md`)
   1. **Investigate** - Read errors, reproduce, trace (NO fixes yet)
   2. **Analyze** - Find similar working code, list differences
   3. **Hypothesize** - Single hypothesis, smallest test
@@ -2449,6 +2439,307 @@ When called from `@draft implement` at track completion:
 
 ---
 
+## Bug Hunt Command
+
+When user says "hunt bugs" or "@draft bughunt [--track <id>]":
+
+You are conducting an exhaustive bug hunt on this Git repository, enhanced by Draft context when available.
+
+## Pre-Check
+
+### 0. Capture Git Context
+
+Before starting analysis, capture the current git state:
+
+```bash
+git branch --show-current    # Current branch name
+git rev-parse --short HEAD   # Current commit hash
+```
+
+Store this for the report header. All bugs found are relative to this specific branch/commit.
+
+### 1. Load Draft Context (if available)
+
+If `draft/` directory exists, read and internalize:
+
+- [ ] `draft/architecture.md` - Module boundaries, dependencies, intended patterns
+- [ ] `draft/tech-stack.md` - Frameworks, libraries, known constraints
+- [ ] `draft/product.md` - Product intent, user flows, requirements
+- [ ] `draft/workflow.md` - Team conventions, testing preferences
+
+Use this context to:
+- Flag violations of intended architecture as bugs (coupling, boundary violations)
+- Apply framework-specific checks from tech-stack (React anti-patterns, Node gotchas, etc.)
+- Catch bugs that violate product requirements or user flows
+- Prioritize areas relevant to active tracks
+
+### 2. Confirm Scope
+
+Ask user to confirm scope:
+- **Entire repo** - Full codebase analysis
+- **Specific paths** - Target directories or files
+- **Track-level** (`--track <id>`) - Focus on files relevant to a specific track
+
+### 3. Load Track Context (if track-level)
+
+If running for a specific track, also load:
+- [ ] `draft/tracks/<id>/spec.md` - Requirements, acceptance criteria, edge cases
+- [ ] `draft/tracks/<id>/plan.md` - Implementation tasks, phases, dependencies
+
+Use track context to:
+- Verify implemented features match spec requirements
+- Check edge cases listed in spec are handled
+- Identify bugs in areas touched by the track's plan
+- Focus analysis on files modified/created by the track
+
+If no Draft context exists, proceed with code-only analysis.
+
+## Analysis Dimensions
+
+Analyze systematically across all dimensions. Do not skip any.
+
+### 1. Correctness
+- Logical errors, invalid assumptions, edge cases
+- Incorrect state transitions, stale or inconsistent UI state
+- Error handling gaps, silent failures
+- Off-by-one errors, boundary conditions
+
+### 2. Reliability & Resilience
+- Crash paths, unhandled exceptions
+- Reload/refresh behavior, retry logic
+- UI behavior on partial backend failure
+- Broken recovery after errors, navigation
+
+### 3. Security
+- XSS, injection vectors, unsafe rendering
+- Client-side trust assumptions
+- Secrets, tokens, auth data exposure
+- CSRF, insecure deserialization
+- Path traversal, command injection
+
+### 4. Performance (Backend + UI)
+- Inefficient algorithms and data fetching
+- N+1 queries, over-fetching, chatty APIs
+- Blocking work on main/UI thread
+- Excessive re-renders, unnecessary state updates
+- Large bundles, unused code, slow startup paths
+- Unbounded memory growth (listeners, caches, stores)
+
+### 5. UI Responsiveness & Perceived Performance
+- Long tasks blocking input
+- Jank during scrolling, typing, resizing
+- Layout thrashing, forced reflows
+- Expensive animations or transitions
+- Poor loading states, flicker, content shifts
+
+### 6. Concurrency & Ordering
+- Race conditions between async calls
+- Stale responses overwriting newer state
+- Incorrect cancellation or debouncing
+- Event ordering assumptions
+- Deadlocks, livelocks
+
+### 7. State Management
+- Source-of-truth violations
+- Derived state bugs (computed from stale data)
+- Global state misuse
+- Memory leaks from subscriptions or observers
+- Inconsistent state across components
+
+### 8. API & Contracts
+- UI assumptions not guaranteed by backend
+- Schema drift, weak typing, missing validation
+- Backward compatibility risks
+- Undocumented API behavior dependencies
+
+### 9. Accessibility & UX Correctness
+- Keyboard navigation gaps
+- Focus management bugs
+- ARIA misuse or absence
+- Broken tab order or unreadable states
+- UI behavior that contradicts user intent
+- Color contrast, screen reader compatibility
+
+### 10. Configuration & Build
+- Fragile environment assumptions
+- Build-time vs runtime config leaks
+- Dev-only code shipping to prod
+- Missing environment variable validation
+- CI gaps affecting builds or tests
+
+### 11. Tests
+- Missing coverage for critical flows
+- Snapshot misuse (testing implementation, not behavior)
+- Tests that assert implementation instead of behavior
+- Mismatch between test and real user interaction
+- Flaky tests, timing dependencies
+
+### 12. Maintainability
+- Dead code, unused exports, orphaned files
+- Over-abstracted hooks/components
+- Tight coupling between layers
+- Refactoring hazards (implicit dependencies)
+- Inconsistent naming, patterns
+
+## Bug Verification Protocol
+
+**CRITICAL: No bug is valid without verification.** Before declaring any finding as a bug, complete ALL applicable verification steps:
+
+### Verification Checklist (for each potential bug)
+
+1. **Code Path Verification**
+   - [ ] Read the actual code at the suspected location
+   - [ ] Trace the data flow from input to the bug location
+   - [ ] Check if there are guards, validators, or error handlers upstream
+   - [ ] Verify the code path is actually reachable in production
+
+2. **Context Cross-Reference**
+   - [ ] Check `architecture.md` — Is this behavior intentional by design?
+   - [ ] Check `tech-stack.md` — Does the framework handle this case?
+   - [ ] Check `product.md` — Is this actually a requirement violation?
+   - [ ] Check existing tests — Is this behavior already tested and expected?
+
+3. **Framework/Library Verification**
+   - [ ] Verify the framework doesn't already handle this (e.g., React escapes XSS, ORM sanitizes SQL)
+   - [ ] Check library documentation for default behaviors
+   - [ ] Look for middleware, interceptors, or global handlers that may address the issue
+
+4. **Codebase Pattern Check**
+   - [ ] Search for similar patterns elsewhere in codebase
+   - [ ] If pattern is used consistently, verify it's actually buggy (not just unfamiliar)
+   - [ ] Check if there's a project-specific utility/wrapper that handles the concern
+
+5. **False Positive Elimination**
+   - [ ] Is this dead code that's never executed?
+   - [ ] Is this test/mock/stub code not in production?
+   - [ ] Is this intentionally disabled (feature flag, config)?
+   - [ ] Is there a comment explaining why this appears unsafe but is actually safe?
+
+### Confidence Levels
+
+Only report bugs with HIGH or CONFIRMED confidence:
+
+| Level | Criteria | Action |
+|-------|----------|--------|
+| **CONFIRMED** | Verified through code trace, no mitigating factors found | Report as bug |
+| **HIGH** | Strong evidence, checked context, no obvious mitigation | Report as bug |
+| **MEDIUM** | Suspicious but couldn't verify all factors | Report with caveat in "Confidence" field |
+| **LOW** | Possible issue but likely handled elsewhere | Do NOT report |
+
+### Evidence Requirements
+
+Each reported bug MUST include:
+- **Code Evidence:** The actual problematic code snippet
+- **Trace:** How data reaches this point (caller chain or data flow)
+- **Verification Done:** Which checks from the checklist were completed
+- **Why Not a False Positive:** Explicit statement of why this isn't handled elsewhere
+
+## Analysis Rules
+
+- **Do not execute code** - Reason from source only
+- **Do not assume frameworks "handle it"** - Verify explicitly by checking docs/code
+- **Do not assume code is buggy** - Verify it's actually reachable and unguarded
+- **Trace data flow completely** - From input source to bug location
+- **Cross-reference ALL Draft context** - Check architecture, tech-stack, product, tests
+- **Check for existing mitigations** - Middleware, wrappers, utilities, global handlers
+- **Search for patterns** - If used elsewhere without issues, investigate why
+
+## Output Format
+
+For each verified bug:
+
+```markdown
+### [SEVERITY] Category: Brief Title
+
+**Location:** `path/to/file.ts:123`
+**Confidence:** [CONFIRMED | HIGH | MEDIUM]
+
+**Code Evidence:**
+```[language]
+// The actual problematic code
+```
+
+**Data Flow Trace:**
+[How data reaches this point: caller → caller → this function]
+
+**Issue:** [Precise technical description of what is wrong]
+
+**Impact:** [User-visible effect or system failure mode]
+
+**Verification Done:**
+- [x] Traced code path from [entry point]
+- [x] Checked architecture.md — not intentional
+- [x] Verified framework doesn't handle this
+- [x] No upstream guards found in [files checked]
+
+**Why Not a False Positive:**
+[Explicit statement: "No sanitization exists because X", "Framework Y doesn't escape Z in this context", etc.]
+
+**Fix:** [Minimal code change or mitigation]
+```
+
+Severity levels:
+- **CRITICAL** - Data loss, security vulnerability, crashes in production
+- **HIGH** - Incorrect behavior affecting users, significant performance issues
+- **MEDIUM** - Edge case bugs, minor UX issues, code quality concerns
+- **LOW** - Maintainability issues, minor inconsistencies, cleanup opportunities
+
+## Report Generation
+
+Generate report at:
+- **Project-level:** `draft/bughunt-report.md`
+- **Track-level:** `draft/tracks/<track-id>/bughunt-report.md` (if analyzing specific track)
+
+Report structure:
+
+```markdown
+# Bug Hunt Report
+
+**Branch:** `[branch-name]`
+**Commit:** `[short-hash]`
+**Date:** YYYY-MM-DD HH:MM
+**Scope:** [Entire repo | Specific paths | Track: <track-id>]
+**Draft Context:** [Loaded | Not available]
+
+## Summary
+
+| Severity | Count | Confirmed | High Confidence |
+|----------|-------|-----------|-----------------|
+| Critical | N | X | Y |
+| High | N | X | Y |
+| Medium | N | X | Y |
+| Low | N | X | Y |
+
+## Critical Issues
+
+[Issues...]
+
+## High Issues
+
+[Issues...]
+
+## Medium Issues
+
+[Issues...]
+
+## Low Issues
+
+[Issues...]
+```
+
+## Final Instructions
+
+- **No unverified bugs** — Every finding must pass the verification protocol
+- **Evidence required** — Include code snippets and trace for every bug
+- **Explicit false positive elimination** — State why each bug isn't handled elsewhere
+- Do not skip dimensions — analyze all 12
+- Assume the reader is a senior engineer who will verify your findings
+- If Draft context is available, explicitly note which architectural violations or product requirement bugs were found
+- Be precise about file locations and line numbers
+- Include git branch and commit in report header
+
+---
+
 ## Status Command
 
 When user says "status" or "@draft status":
@@ -2730,12 +3021,20 @@ Generate `jira-export.md` from the track's plan for review and editing before cr
 
 ## Step 1: Load Context
 
-1. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)
-2. If track ID provided as argument, use that instead
-3. Read the track's `plan.md` for phases and tasks
-4. Read the track's `metadata.json` for title and type
-5. Read the track's `spec.md` for epic description
-6. Read `core/templates/jira.md` for field structure
+1. **Capture git context first:**
+   ```bash
+   git branch --show-current    # Current branch name
+   git rev-parse --short HEAD   # Current commit hash
+   ```
+2. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)
+3. If track ID provided as argument, use that instead
+4. Read the track's `plan.md` for phases and tasks
+5. Read the track's `metadata.json` for title and type
+6. Read the track's `spec.md` for epic description
+7. Read `core/templates/jira.md` for field structure
+8. Check for quality reports:
+   - `draft/tracks/<id>/validation-report.md` — compliance findings
+   - `draft/tracks/<id>/bughunt-report.md` — defect findings
 
 If no track found:
 - Tell user: "No track found. Run `@draft new-track` to create one, or specify track ID."
@@ -2771,7 +3070,17 @@ Count tasks per phase and assign points to the **story**:
 | 5-6 tasks  | 3 points     |
 | 7+ tasks   | 5 points     |
 
-## Step 3: Generate Export File
+## Step 3: Extract Quality Findings (if reports exist)
+
+If `validation-report.md` or `bughunt-report.md` exists in the track directory:
+
+1. Parse findings by severity (Critical, High, Medium, Low)
+2. Extract: severity, category, file location, issue description, fix recommendation
+3. Group by severity for the export
+
+**Critical/High findings** should be highlighted — consider suggesting additional stories or tasks to address them before the track is complete.
+
+## Step 4: Generate Export File
 
 Create `draft/tracks/<track_id>/jira-export.md`:
 
@@ -2780,6 +3089,8 @@ Create `draft/tracks/<track_id>/jira-export.md`:
 
 **Generated:** [ISO timestamp]
 **Track ID:** [track_id]
+**Branch:** `[branch-name]`
+**Commit:** `[short-hash]`
 **Status:** Ready for review
 
 > Edit this file to adjust story points, descriptions, or sub-tasks before running `@draft jira-create`.
@@ -2793,6 +3104,10 @@ Create `draft/tracks/<track_id>/jira-export.md`:
 **Description:**
 {noformat}
 [Spec overview - first 2-3 paragraphs]
+
+---
+🤖 Generated with Draft (Context-Driven Development)
+Branch: [branch-name] | Commit: [short-hash]
 {noformat}
 
 ---
@@ -2811,6 +3126,9 @@ h3. Goal
 
 h3. Verification
 [Phase verification criteria]
+
+---
+🤖 Generated with Draft
 {noformat}
 
 ### Sub-tasks
@@ -2837,6 +3155,9 @@ h3. Goal
 
 h3. Verification
 [Phase verification criteria]
+
+---
+🤖 Generated with Draft
 {noformat}
 
 ### Sub-tasks
@@ -2849,9 +3170,94 @@ h3. Verification
 ---
 
 [Continue for all phases...]
+
+---
+
+## Quality Reports
+
+### Validation Findings (informational)
+| Severity | Category | File | Issue |
+|----------|----------|------|-------|
+| High | Security | src/auth.ts:45 | Hardcoded API key |
+| Medium | Architecture | src/utils.ts:12 | Layer boundary violation |
+
+> Validation findings are compliance issues. Include in Epic description for awareness.
+
+---
+
+## Bug Issues (from Bug Hunt Report)
+
+Each bug from `bughunt-report.md` becomes a separate **Bug** issue linked to the Epic.
+
+### Bug 1: [CRITICAL] Off-by-one error in pagination
+
+**Summary:** [Correctness] Off-by-one error in pagination
+**Issue Type:** Bug
+**Priority:** Highest
+**Epic Link:** (will be set on creation)
+
+**Description:**
+{noformat}
+h3. Location
+src/calc.ts:78
+
+h3. Category
+Correctness
+
+h3. Issue
+[Full description from bughunt-report.md]
+
+h3. Impact
+[User-visible or system failure mode]
+
+h3. Recommended Fix
+[Fix recommendation from report]
+
+---
+🤖 Generated with Draft (Bug Hunt)
+Branch: [branch-name] | Commit: [short-hash]
+{noformat}
+
+---
+
+### Bug 2: [HIGH] Race condition in cache update
+
+**Summary:** [Concurrency] Race condition in cache update
+**Issue Type:** Bug
+**Priority:** High
+**Epic Link:** (will be set on creation)
+
+**Description:**
+{noformat}
+h3. Location
+src/api.ts:92
+
+h3. Category
+Concurrency
+
+h3. Issue
+[Full description from bughunt-report.md]
+
+h3. Impact
+[User-visible or system failure mode]
+
+h3. Recommended Fix
+[Fix recommendation from report]
+
+---
+🤖 Generated with Draft (Bug Hunt)
+Branch: [branch-name] | Commit: [short-hash]
+{noformat}
+
+---
+
+[Continue for all bugs from bughunt-report.md...]
+
+> **Priority Mapping:** Critical → Highest, High → High, Medium → Medium, Low → Low
+> All bugs are linked to the Epic but are separate from Stories (phases).
 ```
 
-## Step 4: Report
+## Step 5: Report
 
 ```
 Jira Preview Generated
@@ -2864,14 +3270,20 @@ Summary:
 - N stories (phases)
 - M sub-tasks (tasks)
 - P total story points
+- B bugs (from bughunt-report.md)
 
 Breakdown:
 - Phase 1: [name] - X pts, Y tasks
 - Phase 2: [name] - X pts, Y tasks
 - Phase 3: [name] - X pts, Y tasks
 
+Bugs (if bughunt-report.md exists):
+- X critical bugs
+- Y high bugs
+- Z medium/low bugs
+
 Next steps:
-1. Review and edit jira-export.md (adjust points, descriptions, sub-tasks)
+1. Review and edit jira-export.md (adjust points, descriptions, sub-tasks, bug priorities)
 2. Run `@draft jira-create` to create issues in Jira
 ```
 
@@ -2910,9 +3322,14 @@ Create Jira epic, stories, and sub-tasks from `jira-export.md` using MCP-Jira. I
 
 ## Step 1: Load Context
 
-1. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)
-2. If track ID provided as argument, use that instead
-3. Check for `draft/tracks/<track_id>/jira-export.md`
+1. **Capture git context first:**
+   ```bash
+   git branch --show-current    # Current branch name
+   git rev-parse --short HEAD   # Current commit hash
+   ```
+2. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)
+3. If track ID provided as argument, use that instead
+4. Check for `draft/tracks/<track_id>/jira-export.md`
 
 If no track found:
 - Tell user: "No track found. Run `@draft new-track` to create one, or specify track ID."
@@ -2966,6 +3383,12 @@ For each row in `### Sub-tasks` table:
 - Summary
 - Status (To Do, Done, In Progress, Blocked)
 
+### Quality Findings (if present)
+If export contains `## Quality Reports` section:
+- Parse validation findings table
+- Parse bughunt findings table
+- Extract severity, category, file, issue for each
+
 ## Step 5: Create Issues via MCP
 
 ### 5a. Create Epic
@@ -3005,6 +3428,52 @@ MCP call: create_issue
 ```
 - Capture sub-task key (e.g., PROJ-125)
 - Report: "  - Sub-task: PROJ-125 - Task 1.1"
+
+### 5d. Create Bug Issues (from Bug Hunt Report)
+
+For **each bug** in the `## Bug Issues` section of jira-export.md, create a separate Bug issue:
+
+```
+MCP call: create_issue
+- project: [same as epic]
+- issue_type: Bug
+- summary: [Category] [Brief issue description]
+- description: {noformat}
+  h3. Location
+  [file:line]
+
+  h3. Category
+  [Bug category from report]
+
+  h3. Issue
+  [Full issue description]
+
+  h3. Impact
+  [User-visible or system failure mode]
+
+  h3. Recommended Fix
+  [Fix recommendation from report]
+
+  ---
+  🤖 Generated with Draft (Bug Hunt)
+  Branch: [branch-name] | Commit: [short-hash]
+  {noformat}
+- epic_link: [Epic key from step 5a]
+- priority: [Map from severity]
+```
+
+**Priority Mapping:**
+| Severity | Jira Priority |
+|----------|---------------|
+| Critical | Highest |
+| High | High |
+| Medium | Medium |
+| Low | Low |
+
+- Capture bug key (e.g., PROJ-131)
+- Report: "- Bug: PROJ-131 - [Critical] Correctness: Off-by-one error"
+
+**All bugs from bughunt-report.md get their own Bug issue.** They are linked to the Epic but separate from Stories (phases). This keeps implementation work (Stories/Sub-tasks) distinct from defect tracking (Bugs).
 
 ## Step 6: Update Tracking
 
@@ -3051,7 +3520,12 @@ Created:
   - Sub-task: PROJ-130 - Task 2.2
   [...]
 
-Total: 1 epic, N stories, M sub-tasks, P story points
+Bugs (from Bug Hunt):
+- Bug: PROJ-131 - [Critical] Correctness: Off-by-one error in pagination
+- Bug: PROJ-132 - [High] Concurrency: Race condition in cache update
+- Bug: PROJ-133 - [Medium] Security: Missing input validation
+
+Total: 1 epic, N stories, M sub-tasks, B bugs, P story points
 
 Updated:
 - plan.md (added issue keys to phases and tasks)

@@ -1,0 +1,16 @@
+{
+  "id": "enterprise-readiness",
+  "title": "Enterprise Readiness Features",
+  "type": "feature",
+  "status": "planning",
+  "created": "2026-02-07T00:00:00.000Z",
+  "updated": "2026-02-07T00:00:00.000Z",
+  "phases": {
+    "total": 4,
+    "completed": 0
+  },
+  "tasks": {
+    "total": 20,
+    "completed": 0
+  }
+}

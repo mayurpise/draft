@@ -76,7 +76,7 @@ Represent API surfaces using the conventions of the project's primary language:
 
 Use the project's primary language from `tech-stack.md`. Include function signatures with types, exported interfaces/traits/protocols, and key data structures.
 
-### Ingredients (from AGENTS.md)
+### Ingredients
 
 Each module typically contains some combination of:
 - **API** - Public interface exposed to other modules

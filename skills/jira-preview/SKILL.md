@@ -17,12 +17,20 @@ Generate `jira-export.md` from the track's plan for review and editing before cr
 
 ## Step 1: Load Context
 
-1. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)
-2. If track ID provided as argument, use that instead
-3. Read the track's `plan.md` for phases and tasks
-4. Read the track's `metadata.json` for title and type
-5. Read the track's `spec.md` for epic description
-6. Read `core/templates/jira.md` for field structure
+1. **Capture git context first:**
+   ```bash
+   git branch --show-current    # Current branch name
+   git rev-parse --short HEAD   # Current commit hash
+   ```
+2. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)
+3. If track ID provided as argument, use that instead
+4. Read the track's `plan.md` for phases and tasks
+5. Read the track's `metadata.json` for title and type
+6. Read the track's `spec.md` for epic description
+7. Read `core/templates/jira.md` for field structure
+8. Check for quality reports:
+   - `draft/tracks/<id>/validation-report.md` — compliance findings
+   - `draft/tracks/<id>/bughunt-report.md` — defect findings
 
 If no track found:
 - Tell user: "No track found. Run `/draft:new-track` to create one, or specify track ID."
@@ -58,7 +66,17 @@ Count tasks per phase and assign points to the **story**:
 | 5-6 tasks  | 3 points     |
 | 7+ tasks   | 5 points     |
 
-## Step 3: Generate Export File
+## Step 3: Extract Quality Findings (if reports exist)
+
+If `validation-report.md` or `bughunt-report.md` exists in the track directory:
+
+1. Parse findings by severity (Critical, High, Medium, Low)
+2. Extract: severity, category, file location, issue description, fix recommendation
+3. Group by severity for the export
+
+**Critical/High findings** should be highlighted — consider suggesting additional stories or tasks to address them before the track is complete.
+
+## Step 4: Generate Export File
 
 Create `draft/tracks/<track_id>/jira-export.md`:
 
@@ -67,6 +85,8 @@ Create `draft/tracks/<track_id>/jira-export.md`:
 
 **Generated:** [ISO timestamp]
 **Track ID:** [track_id]
+**Branch:** `[branch-name]`
+**Commit:** `[short-hash]`
 **Status:** Ready for review
 
 > Edit this file to adjust story points, descriptions, or sub-tasks before running `/draft:jira-create`.
@@ -80,6 +100,10 @@ Create `draft/tracks/<track_id>/jira-export.md`:
 **Description:**
 {noformat}
 [Spec overview - first 2-3 paragraphs]
+
+---
+🤖 Generated with Draft (Context-Driven Development)
+Branch: [branch-name] | Commit: [short-hash]
 {noformat}
 
 ---
@@ -98,6 +122,9 @@ h3. Goal
 
 h3. Verification
 [Phase verification criteria]
+
+---
+🤖 Generated with Draft
 {noformat}
 
 ### Sub-tasks
@@ -124,6 +151,9 @@ h3. Goal
 
 h3. Verification
 [Phase verification criteria]
+
+---
+🤖 Generated with Draft
 {noformat}
 
 ### Sub-tasks
@@ -136,9 +166,94 @@ h3. Verification
 ---
 
 [Continue for all phases...]
+
+---
+
+## Quality Reports
+
+### Validation Findings (informational)
+| Severity | Category | File | Issue |
+|----------|----------|------|-------|
+| High | Security | src/auth.ts:45 | Hardcoded API key |
+| Medium | Architecture | src/utils.ts:12 | Layer boundary violation |
+
+> Validation findings are compliance issues. Include in Epic description for awareness.
+
+---
+
+## Bug Issues (from Bug Hunt Report)
+
+Each bug from `bughunt-report.md` becomes a separate **Bug** issue linked to the Epic.
+
+### Bug 1: [CRITICAL] Off-by-one error in pagination
+
+**Summary:** [Correctness] Off-by-one error in pagination
+**Issue Type:** Bug
+**Priority:** Highest
+**Epic Link:** (will be set on creation)
+
+**Description:**
+{noformat}
+h3. Location
+src/calc.ts:78
+
+h3. Category
+Correctness
+
+h3. Issue
+[Full description from bughunt-report.md]
+
+h3. Impact
+[User-visible or system failure mode]
+
+h3. Recommended Fix
+[Fix recommendation from report]
+
+---
+🤖 Generated with Draft (Bug Hunt)
+Branch: [branch-name] | Commit: [short-hash]
+{noformat}
+
+---
+
+### Bug 2: [HIGH] Race condition in cache update
+
+**Summary:** [Concurrency] Race condition in cache update
+**Issue Type:** Bug
+**Priority:** High
+**Epic Link:** (will be set on creation)
+
+**Description:**
+{noformat}
+h3. Location
+src/api.ts:92
+
+h3. Category
+Concurrency
+
+h3. Issue
+[Full description from bughunt-report.md]
+
+h3. Impact
+[User-visible or system failure mode]
+
+h3. Recommended Fix
+[Fix recommendation from report]
+
+---
+🤖 Generated with Draft (Bug Hunt)
+Branch: [branch-name] | Commit: [short-hash]
+{noformat}
+
+---
+
+[Continue for all bugs from bughunt-report.md...]
+
+> **Priority Mapping:** Critical → Highest, High → High, Medium → Medium, Low → Low
+> All bugs are linked to the Epic but are separate from Stories (phases).
 ```
 
-## Step 4: Report
+## Step 5: Report
 
 ```
 Jira Preview Generated
@@ -151,14 +266,20 @@ Summary:
 - N stories (phases)
 - M sub-tasks (tasks)
 - P total story points
+- B bugs (from bughunt-report.md)
 
 Breakdown:
 - Phase 1: [name] - X pts, Y tasks
 - Phase 2: [name] - X pts, Y tasks
 - Phase 3: [name] - X pts, Y tasks
 
+Bugs (if bughunt-report.md exists):
+- X critical bugs
+- Y high bugs
+- Z medium/low bugs
+
 Next steps:
-1. Review and edit jira-export.md (adjust points, descriptions, sub-tasks)
+1. Review and edit jira-export.md (adjust points, descriptions, sub-tasks, bug priorities)
 2. Run `/draft:jira-create` to create issues in Jira
 ```
 

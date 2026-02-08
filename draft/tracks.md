@@ -1,42 +1,25 @@
-# Tracks
+# Draft Tracks
+
+Master registry of all tracks (features, bug fixes, refactors).
+
+---
 
 ## Active
-<!-- No active tracks -->
+
+### enterprise-readiness - Enterprise Readiness Features
+- **Status:** [ ] Planning
+- **Created:** 2026-02-07
+- **Phases:** 0/4
+- **Path:** `./tracks/enterprise-readiness/`
+
+---
 
 ## Completed
 
-### add-validate-command - Add Validate Command
-- **Status:** [x] Completed
-- **Created:** 2026-02-03
-- **Completed:** 2026-02-03
-- **Phases:** 5/5
-- **Path:** `./tracks/add-validate-command/`
+_No completed tracks yet._
 
-### add-copilot-integration - Add GitHub Copilot Integration
-- **Status:** [x] Completed
-- **Created:** 2026-02-01
-- **Completed:** 2026-02-01
-- **Phases:** 4/4
-- **Path:** `./tracks/add-copilot-integration/`
-
-### update-project-docs - Update Project Documentation
-- **Status:** [x] Completed
-- **Created:** 2026-02-01
-- **Completed:** 2026-02-01
-- **Phases:** 4/4
-- **Path:** `./tracks/update-project-docs/`
-
-### sync-cursorrules - Sync .cursorrules with Draft Skills
-- **Status:** [x] Completed
-- **Created:** 2026-02-01
-- **Phases:** 4/4
-- **Path:** `./tracks/sync-cursorrules/`
-
-### review-architecture-md - Review & Fix architecture.md Feature
-- **Status:** [x] Completed
-- **Created:** 2026-02-01
-- **Phases:** 3/3
-- **Path:** `./tracks/review-architecture-md/`
+---
 
 ## Archived
-<!-- No archived tracks -->
+
+_No archived tracks yet._

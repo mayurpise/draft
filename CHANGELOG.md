@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-02-07
+
 ### Added
+- `/draft:bughunt` — Exhaustive bug hunting across 12 analysis dimensions (correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, tests, maintainability):
+  - Project-level analysis: full codebase bug discovery
+  - Track-level analysis (`--track <id>`): focused hunt using spec.md and plan.md to verify implementation matches requirements
+  - Draft context integration: uses architecture.md for module boundary violations, tech-stack.md for framework-specific anti-patterns, product.md for product requirement bugs
+  - Severity-ranked findings (Critical/High/Medium/Low) with file:line locations and fix recommendations
+  - Generates reports: `draft/bughunt-report.md` (project), `draft/tracks/<id>/bughunt-report.md` (track)
+  - Complements `/draft:validate` (compliance checking) with defect discovery
 - `/draft:validate` — Systematic codebase quality validation using Draft context (architecture.md, product.md, tech-stack.md):
   - Project-level validation: architecture conformance, dead code detection, dependency cycles, security scan (OWASP basics), performance anti-patterns (N+1 queries, blocking I/O)
   - Track-level validation: spec compliance (acceptance criteria coverage), architectural impact (new dependencies, pattern violations), regression risk (blast radius analysis)
@@ -40,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "Alignment Before Code" section across methodology, README, and landing page
 - Landing page (`index.html`) — full visual landing page with:
   - Installation / Getting Started section
-  - Command Reference (all 10 commands)
+  - Command Reference (all 12 commands)
   - Chat-Driven Development Problems section (6 problem cards + comparison table)
   - Revert Workflow visualization (3 levels + Preview → Confirm → Execute)
   - Quality Disciplines section (debugging flow, review comparison, coverage cards)
@@ -51,7 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `/draft:implement` — Mandatory per-task commits with SHA tracking; revert skill updated to match
 - `core/methodology.md` — Full overhaul: added Installation & Getting Started, expanded all 9 command workflows, added Agent summaries, added Team Workflow section, added Gemini integration section
-- `README.md` — Full rewrite: detailed installation, all 10 commands with usage/examples/output, Architecture Mode section, Quality Disciplines, Troubleshooting FAQ, Contributing guide, Team Workflow section, Gemini integration section; direct raw GitHub URLs for Cursor and Copilot setup
+- `README.md` — Full rewrite: detailed installation, all 12 commands with usage/examples/output, Architecture Mode section, Quality Disciplines, Troubleshooting FAQ, Contributing guide, Team Workflow section, Gemini integration section; direct raw GitHub URLs for Cursor and Copilot setup
 - `index.html` — Expanded all workflow sections with Problem/Solution framing and engineering rationale; added Gemini and Copilot to Getting Started
 - `scripts/build-integrations.sh` — Unified build script now generates Cursor, Copilot, and Gemini integrations
 - Debugger agent and Reviewer agent documentation expanded in methodology

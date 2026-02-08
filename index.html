@@ -552,9 +552,15 @@
         /* Document cards */
         .doc-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
             margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .doc-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .doc-card {
@@ -594,6 +600,87 @@
             font-size: 0.85rem;
             color: var(--text-muted);
             margin: 0;
+        }
+
+        .doc-card {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .card-summary {
+            position: relative;
+        }
+
+        .expand-indicator {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: transform 0.3s ease, color 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .doc-card.expanded .expand-indicator {
+            transform: rotate(180deg);
+            color: var(--accent-cyan);
+        }
+
+        .card-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease;
+            opacity: 0;
+        }
+
+        .doc-card.expanded .card-details {
+            max-height: 1000px;
+            opacity: 1;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .card-details h4 {
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .card-details ol,
+        .card-details ul {
+            margin: 0 0 1.25rem 0;
+            padding-left: 1.25rem;
+        }
+
+        .card-details li {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .card-details code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-tertiary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--accent-amber);
+            border: 1px solid var(--border);
+        }
+
+        .card-details .usage-examples {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         /* Status markers */
@@ -1266,75 +1353,336 @@
             <p>Draft provides 13 slash commands for the full development lifecycle.</p>
 
             <div class="doc-grid">
+                <!-- /draft -->
                 <div class="doc-card">
-                    <div class="icon">📋</div>
-                    <div class="name">/draft</div>
-                    <p class="purpose">Overview and intent mapping</p>
+                    <div class="card-summary">
+                        <div class="icon">📋</div>
+                        <div class="name">/draft</div>
+                        <p class="purpose">Overview and intent mapping</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ul>
+                            <li>Shows available commands and guides you to the right workflow</li>
+                            <li>Maps natural language intent to commands (e.g., "set up project" → <code>/draft:init</code>)</li>
+                        </ul>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft</code>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- /draft:init -->
                 <div class="doc-card">
-                    <div class="icon">🚀</div>
-                    <div class="name">/draft:init</div>
-                    <p class="purpose">Initialize project context (product, tech-stack, workflow, architecture)</p>
+                    <div class="card-summary">
+                        <div class="icon">🚀</div>
+                        <div class="name">/draft:init</div>
+                        <p class="purpose">Initialize project context</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ol>
+                            <li>Detects brownfield (existing) vs greenfield (new) project</li>
+                            <li><strong>Architecture discovery</strong> (brownfield): 3-phase analysis with mermaid diagrams</li>
+                            <li>Creates <code>product.md</code>, <code>tech-stack.md</code>, <code>workflow.md</code></li>
+                            <li>Optionally enables Architecture Mode for module decomposition</li>
+                            <li>Creates <code>tracks.md</code> master registry</li>
+                        </ol>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:init</code>
+                            <code>/draft:init refresh</code>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- /draft:new-track -->
                 <div class="doc-card">
-                    <div class="icon">🔄</div>
-                    <div class="name">/draft:init refresh</div>
-                    <p class="purpose">Update context files (re-scan tech stack, architecture, workflow)</p>
+                    <div class="card-summary">
+                        <div class="icon">📝</div>
+                        <div class="name">/draft:new-track</div>
+                        <p class="purpose">Create spec + plan for feature or fix</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ol>
+                            <li>Generates kebab-case track ID</li>
+                            <li>Creates <code>spec.md</code> through dialogue (scope, acceptance criteria)</li>
+                            <li>Creates phased <code>plan.md</code> from approved spec</li>
+                            <li>Registers track in <code>tracks.md</code></li>
+                        </ol>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:new-track "Add user authentication"</code>
+                            <code>/draft:new-track "Fix login redirect bug"</code>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- /draft:implement -->
                 <div class="doc-card">
-                    <div class="icon">📝</div>
-                    <div class="name">/draft:new-track</div>
-                    <p class="purpose">Create spec + plan for a feature or fix</p>
+                    <div class="card-summary">
+                        <div class="icon">⚡</div>
+                        <div class="name">/draft:implement</div>
+                        <p class="purpose">Execute tasks with TDD workflow</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ol>
+                            <li>Finds next uncompleted task in active track</li>
+                            <li>Executes TDD cycle: RED → GREEN → REFACTOR</li>
+                            <li>Updates plan status markers and metadata</li>
+                            <li>At phase boundaries: runs two-stage review</li>
+                            <li>Marks track complete when all phases done</li>
+                        </ol>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:implement</code>
+                            <code>/draft:implement add-user-auth</code>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- /draft:status -->
                 <div class="doc-card">
-                    <div class="icon">⚡</div>
-                    <div class="name">/draft:implement</div>
-                    <p class="purpose">Execute tasks with TDD workflow</p>
+                    <div class="card-summary">
+                        <div class="icon">📊</div>
+                        <div class="name">/draft:status</div>
+                        <p class="purpose">Display progress overview</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ul>
+                            <li>Shows all active tracks with completion percentages</li>
+                            <li>Displays current phase and task breakdown</li>
+                            <li>Highlights blocked items</li>
+                            <li>Quick stats: active tracks, total/completed tasks</li>
+                        </ul>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:status</code>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- /draft:revert -->
                 <div class="doc-card">
-                    <div class="icon">📊</div>
-                    <div class="name">/draft:status</div>
-                    <p class="purpose">Display progress overview</p>
+                    <div class="card-summary">
+                        <div class="icon">⏪</div>
+                        <div class="name">/draft:revert</div>
+                        <p class="purpose">Git-aware rollback</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ol>
+                            <li>Identifies commits by track pattern</li>
+                            <li>Shows preview with affected files and plan changes</li>
+                            <li>Requires explicit confirmation</li>
+                            <li>Executes <code>git revert</code> (newest first)</li>
+                            <li>Updates plan markers from <code>[x]</code> back to <code>[ ]</code></li>
+                        </ol>
+                        <h4>Revert levels:</h4>
+                        <ul>
+                            <li><strong>Task:</strong> Single task's commits</li>
+                            <li><strong>Phase:</strong> All commits in a phase</li>
+                            <li><strong>Track:</strong> Entire track's commits</li>
+                        </ul>
+                    </div>
                 </div>
+
+                <!-- /draft:decompose -->
                 <div class="doc-card">
-                    <div class="icon">⏪</div>
-                    <div class="name">/draft:revert</div>
-                    <p class="purpose">Git-aware rollback at any level</p>
+                    <div class="card-summary">
+                        <div class="icon">🏗️</div>
+                        <div class="name">/draft:decompose</div>
+                        <p class="purpose">Module decomposition + dependency mapping</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ol>
+                            <li>Proposes modules with: name, responsibility, files, API, dependencies</li>
+                            <li><strong>CHECKPOINT:</strong> Developer reviews module breakdown</li>
+                            <li>Maps dependencies, detects cycles, generates dependency diagram</li>
+                            <li><strong>CHECKPOINT:</strong> Developer reviews implementation order</li>
+                            <li>Creates <code>architecture.md</code> with module definitions</li>
+                        </ol>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:decompose project</code>
+                            <code>/draft:decompose</code>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- /draft:coverage -->
                 <div class="doc-card">
-                    <div class="icon">🏗️</div>
-                    <div class="name">/draft:decompose</div>
-                    <p class="purpose">Module decomposition + dependency mapping</p>
+                    <div class="card-summary">
+                        <div class="icon">📈</div>
+                        <div class="name">/draft:coverage</div>
+                        <p class="purpose">Code coverage report (target 95%+)</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ol>
+                            <li>Auto-detects coverage tool (jest, vitest, pytest-cov, go test, etc.)</li>
+                            <li>Runs coverage and captures output</li>
+                            <li>Reports per-file breakdown with uncovered line ranges</li>
+                            <li>Classifies gaps: testable, defensive, infrastructure</li>
+                            <li>Records results in plan, architecture, and metadata</li>
+                        </ol>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:coverage</code>
+                            <code>/draft:coverage src/auth</code>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- /draft:validate -->
                 <div class="doc-card">
-                    <div class="icon">📈</div>
-                    <div class="name">/draft:coverage</div>
-                    <p class="purpose">Code coverage report (target 95%+)</p>
+                    <div class="card-summary">
+                        <div class="icon">✅</div>
+                        <div class="name">/draft:validate</div>
+                        <p class="purpose">Systematic quality validation</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>Project-level checks:</h4>
+                        <ul>
+                            <li>Architecture conformance</li>
+                            <li>Dead code detection</li>
+                            <li>Dependency cycle detection</li>
+                            <li>Security scan (secrets, SQL injection, XSS)</li>
+                            <li>Performance anti-patterns</li>
+                        </ul>
+                        <h4>Track-level checks:</h4>
+                        <ul>
+                            <li>Spec compliance</li>
+                            <li>Architectural impact</li>
+                            <li>Regression risk analysis</li>
+                        </ul>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:validate</code>
+                            <code>/draft:validate --track add-user-auth</code>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- /draft:bughunt -->
                 <div class="doc-card">
-                    <div class="icon">✅</div>
-                    <div class="name">/draft:validate</div>
-                    <p class="purpose">Systematic quality validation (architecture, security, performance)</p>
+                    <div class="card-summary">
+                        <div class="icon">🔍</div>
+                        <div class="name">/draft:bughunt</div>
+                        <p class="purpose">Exhaustive bug hunt across 12 dimensions</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ol>
+                            <li>Loads Draft context (architecture, tech-stack, product)</li>
+                            <li>For tracks: verifies implementation matches spec</li>
+                            <li>Analyzes code: correctness, security, performance, concurrency, etc.</li>
+                            <li>Generates severity-ranked findings with fix recommendations</li>
+                        </ol>
+                        <h4>12 dimensions analyzed:</h4>
+                        <ul>
+                            <li>Correctness, reliability, security, performance</li>
+                            <li>UI responsiveness, concurrency, state management</li>
+                            <li>API contracts, accessibility, configuration, tests, maintainability</li>
+                        </ul>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:bughunt</code>
+                            <code>/draft:bughunt --track my-feature</code>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- /draft:review -->
                 <div class="doc-card">
-                    <div class="icon">🔍</div>
-                    <div class="name">/draft:bughunt</div>
-                    <p class="purpose">Exhaustive bug hunt across 12 dimensions (correctness, security, performance)</p>
+                    <div class="card-summary">
+                        <div class="icon">👁️</div>
+                        <div class="name">/draft:review</div>
+                        <p class="purpose">Code review orchestrator</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>Track-level review:</h4>
+                        <ol>
+                            <li><strong>Stage 1:</strong> Spec compliance verification</li>
+                            <li><strong>Stage 2:</strong> Code quality checks</li>
+                            <li>Optional: Runs <code>/draft:validate</code> and <code>/draft:bughunt</code></li>
+                            <li>Generates unified report with severity classification</li>
+                        </ol>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:review</code>
+                            <code>/draft:review --track add-user-auth</code>
+                            <code>/draft:review --full</code>
+                            <code>/draft:review --project</code>
+                            <code>/draft:review --files "src/**/*.ts"</code>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- /draft:jira-preview -->
                 <div class="doc-card">
-                    <div class="icon">👁️</div>
-                    <div class="name">/draft:review</div>
-                    <p class="purpose">Code review orchestrator (track/project-level) with quality tool integration</p>
+                    <div class="card-summary">
+                        <div class="icon">📋</div>
+                        <div class="name">/draft:jira-preview</div>
+                        <p class="purpose">Generate Jira export for review</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ul>
+                            <li>Generates <code>jira-export.md</code> from track plan</li>
+                            <li>Maps: Track → Epic, Phase → Story, Task → Sub-task</li>
+                            <li>Auto-calculates story points from task count</li>
+                            <li>File is editable before creating issues</li>
+                        </ul>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:jira-preview</code>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- /draft:jira-create -->
                 <div class="doc-card">
-                    <div class="icon">👁️</div>
-                    <div class="name">/draft:jira-preview</div>
-                    <p class="purpose">Generate Jira export for review</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">🎫</div>
-                    <div class="name">/draft:jira-create</div>
-                    <p class="purpose">Push issues to Jira via MCP</p>
+                    <div class="card-summary">
+                        <div class="icon">🎫</div>
+                        <div class="name">/draft:jira-create</div>
+                        <p class="purpose">Push issues to Jira via MCP</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ol>
+                            <li>Creates issues from <code>jira-export.md</code></li>
+                            <li>Creates Epic → Stories → Sub-tasks in order</li>
+                            <li>Updates plan and export with issue keys</li>
+                            <li>Auto-generates export if missing</li>
+                        </ol>
+                        <h4>Requirements:</h4>
+                        <ul>
+                            <li>MCP-Jira server configured in Claude Code settings</li>
+                        </ul>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:jira-create</code>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -2460,5 +2808,29 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        function toggleCommandCard(card) {
+            card.classList.toggle('expanded');
+        }
+
+        // Close other cards when opening a new one (optional - remove if you want multiple cards open)
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.doc-card');
+            cards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // Don't close if clicking on a link inside the card
+                    if (e.target.tagName === 'A') return;
+
+                    // Optional: close other cards
+                    // cards.forEach(c => {
+                    //     if (c !== card) c.classList.remove('expanded');
+                    // });
+
+                    toggleCommandCard(this);
+                });
+            });
+        });
+    </script>
 </body>
 </html>

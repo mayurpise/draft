@@ -133,7 +133,7 @@ draft/
 
 ### `/draft:new-track` — Create Feature Track
 
-Creates a new track (feature, bug fix, or refactor) with a specification and phased plan.
+Creates a new track (feature, bug fix, or refactor) through **collaborative intake** — a structured conversation where AI acts as an expert collaborator, not just a questioner.
 
 ```bash
 /draft:new-track "Add user authentication"
@@ -141,11 +141,54 @@ Creates a new track (feature, bug fix, or refactor) with a specification and pha
 ```
 
 **What it does:**
-1. Generates a kebab-case track ID (`add-user-auth`)
-2. Engages in dialogue to create `spec.md` — scope, acceptance criteria, non-goals
-3. Creates phased `plan.md` from the approved spec — tasks with files, tests, dependencies
-4. Creates `metadata.json` for status tracking
-5. Registers the track in `draft/tracks.md`
+1. Creates `spec-draft.md` and `plan-draft.md` immediately (skeleton structure)
+2. Conducts **collaborative intake** — structured questions asked one at a time:
+   - **Problem Space:** What problem? Why now? Who's affected? Scope boundaries?
+   - **Solution Space:** Simplest version? Why this approach? What's out of scope?
+   - **Risk & Constraints:** What could go wrong? Dependencies? Assumptions?
+   - **Success Criteria:** How do we know it's done? Verification strategy?
+3. **AI actively contributes** at each step:
+   - Pattern recognition from industry experience
+   - Trade-off analysis with citations (DDD, Clean Architecture, OWASP, etc.)
+   - Risk identification you may not see
+   - Fact-checking against your `architecture.md` and `tech-stack.md`
+4. Updates drafts progressively as conversation evolves
+5. **Checkpoints between phases** — summarizes progress, asks to continue or refine
+6. On confirmation: promotes `spec-draft.md` → `spec.md`, creates phased `plan.md`
+7. Registers the track in `draft/tracks.md`
+
+**Collaborative Intake Flow:**
+```
+/draft:new-track "description"
+     │
+     ├─> Creates spec-draft.md + plan-draft.md (skeleton)
+     │
+     ├─> Phase 1: Existing docs? (ingest if provided)
+     │   └─> AI: Extracts context, identifies gaps
+     │
+     ├─> Phase 2: Problem Space (one question at a time)
+     │   └─> AI: Pattern recognition, domain concepts, why probes
+     │   └─> CHECKPOINT: "Does this capture the problem?"
+     │
+     ├─> Phase 3: Solution Space
+     │   └─> AI: Alternatives with trade-offs, architecture fit
+     │   └─> CHECKPOINT: "Ready to discuss risks?"
+     │
+     ├─> Phase 4: Risks & Constraints
+     │   └─> AI: Surfaces risks, cites OWASP/failure patterns
+     │   └─> CHECKPOINT: "Anything else that could derail this?"
+     │
+     ├─> Phase 5: Success Criteria
+     │   └─> AI: Suggests measurable acceptance criteria
+     │   └─> CHECKPOINT: "Ready to finalize?"
+     │
+     └─> Finalization: spec.md + plan.md created
+```
+
+**AI Guidance Sources:**
+- Books: Domain-Driven Design, Clean Architecture, DDIA, Release It!, Building Microservices
+- Standards: OWASP Top 10, 12-Factor App, SOLID
+- Patterns: GoF, Enterprise Integration Patterns, Resilience patterns
 
 **Output:**
 ```
@@ -154,6 +197,8 @@ draft/tracks/add-user-auth/
 ├── plan.md           # Phased task breakdown
 └── metadata.json     # Status and timestamps
 ```
+
+**Why this matters:** Junior engineers get senior-level guidance. Senior engineers can't skip thinking "because obvious." Both produce consistent, well-documented specifications with traceable reasoning.
 
 ---
 

@@ -1,0 +1,16 @@
+{
+  "id": "fix-review-findings",
+  "title": "Fix Review Command Findings",
+  "type": "refactor",
+  "status": "completed",
+  "created": "2026-02-08T00:00:00Z",
+  "updated": "2026-02-08T00:00:00Z",
+  "phases": {
+    "total": 1,
+    "completed": 1
+  },
+  "tasks": {
+    "total": 6,
+    "completed": 6
+  }
+}

@@ -38,7 +38,7 @@ Extract and validate command arguments from user input.
 
 1. **Scope flag requirement:** At least one scope flag OR no flags (auto-detect track)
 2. **Mutual exclusivity:** Only one of `--track`, `--project`, `--files`, `--commits`
-3. **Flag conflicts:** `--full` cannot be combined with `--with-validate` or `--with-bughunt`
+3. **Flag conflicts:** If both `--full` and `--with-validate`/`--with-bughunt` are provided, treat as `--full` and ignore the redundant flags
 
 ### Default Behavior
 

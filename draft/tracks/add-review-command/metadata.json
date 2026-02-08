@@ -1,0 +1,16 @@
+{
+  "id": "add-review-command",
+  "title": "Add /draft:review Command",
+  "type": "feature",
+  "status": "in-progress",
+  "created": "2026-02-07T21:30:00Z",
+  "updated": "2026-02-07T22:15:00Z",
+  "phases": {
+    "total": 4,
+    "completed": 3
+  },
+  "tasks": {
+    "total": 21,
+    "completed": 18
+  }
+}

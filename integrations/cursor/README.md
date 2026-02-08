@@ -21,9 +21,14 @@ ln -s /path/to/draft/integrations/cursor/.cursorrules /path/to/your/project/.cur
 Once installed, use these commands in Cursor chat:
 
 ```
+@draft                    # Show overview and commands
 @draft init               # Initialize project (once)
 @draft new-track "..."    # Create a feature track
+@draft decompose          # Module decomposition
 @draft implement          # Start implementing
+@draft coverage           # Code coverage report
+@draft validate           # Codebase quality validation
+@draft bughunt            # Systematic bug discovery
 @draft status             # Check progress
 @draft revert             # Git-aware rollback
 @draft jira-preview       # Generate Jira export file

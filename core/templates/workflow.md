@@ -118,6 +118,8 @@ When disabled (default), validation failures produce warnings only. Issues docum
 
 Uncheck categories to skip during validation. All enabled by default.
 
+> **How to configure:** Edit the checkboxes above directly in this file. Change `[x]` to `[ ]` to disable a validation category. The `/draft:validate` command reads these settings before running.
+
 ---
 
 ## Session Management

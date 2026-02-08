@@ -82,7 +82,7 @@ Use Cases:
 - [ ] Tasks complete
 - [ ] Functional Testing complete
 - [ ] 100% code unit tested or Automated
-- [ ] Acceptance criterias met
+- [ ] Acceptance criteria met
 - [ ] i18n impact review
 
 ### Other

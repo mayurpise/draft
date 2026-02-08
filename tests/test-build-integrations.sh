@@ -1,5 +1,25 @@
 #!/usr/bin/env bash
 # Test suite for build-integrations.sh
+#
+# What this tests:
+# - Build script exists and is executable
+# - Output files are generated (Cursor, Copilot, Gemini)
+# - Output files have expected structure (> 100 lines)
+# - Syntax transformations are correct (/draft: → @draft for Cursor/Gemini, → draft for Copilot)
+# - No @draft references in Copilot output
+# - Idempotency (rebuilds produce identical output)
+#
+# What this does NOT test:
+# - Skill content correctness
+# - Skill frontmatter validation (handled by build script)
+# - Error handling for malformed skill files
+# - Individual skill inclusion/exclusion
+#
+# Usage:
+#   ./tests/test-build-integrations.sh
+#
+# Expected runtime: < 2 seconds
+# Exit code: Number of failed tests (0 = all pass)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -7,6 +27,7 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 BUILD_SCRIPT="$ROOT_DIR/scripts/build-integrations.sh"
 CURSOR_OUTPUT="$ROOT_DIR/integrations/cursor/.cursorrules"
 COPILOT_OUTPUT="$ROOT_DIR/integrations/copilot/.github/copilot-instructions.md"
+GEMINI_OUTPUT="$ROOT_DIR/integrations/gemini/GEMINI.md"
 BASELINE="/tmp/cursorrules-baseline"
 
 PASS=0
@@ -58,19 +79,20 @@ if [[ -f "$CURSOR_OUTPUT" ]]; then
     AT_DRAFT=$(grep -c '@draft' "$CURSOR_OUTPUT" 2>/dev/null || true)
     assert "Cursor output contains @draft references" \
         "$([[ "${AT_DRAFT:-0}" -gt 0 ]] && echo true || echo false)"
-    DEAD_REFS=$(grep -c 'See `core/agents/' "$CURSOR_OUTPUT" 2>/dev/null || true)
-    assert "Cursor output contains no dead agent references" \
-        "$([[ "${DEAD_REFS:-0}" -eq 0 ]] && echo true || echo false)"
+    # Agent references are now preserved (not stripped) as of bugfix
+    echo "  SKIP: Agent references now preserved (not checking)"
 fi
 
-# --- Cursor regression test ---
+# --- Idempotency test ---
 echo ""
-echo "## Cursor regression"
-if [[ -f "$BASELINE" && -f "$CURSOR_OUTPUT" ]]; then
-    assert "Cursor output matches baseline (no regression)" \
+echo "## Idempotency"
+if [[ -f "$CURSOR_OUTPUT" ]]; then
+    cp "$CURSOR_OUTPUT" "$BASELINE"
+    "$BUILD_SCRIPT" > /dev/null 2>&1 || true
+    assert "Cursor output is idempotent (rebuild produces same result)" \
         "$(diff -q "$BASELINE" "$CURSOR_OUTPUT" > /dev/null 2>&1 && echo true || echo false)"
 else
-    assert "Cursor output matches baseline (no regression)" "false"
+    assert "Cursor output is idempotent (rebuild produces same result)" "false"
 fi
 
 # --- Copilot output tests ---
@@ -89,13 +111,32 @@ if [[ -f "$COPILOT_OUTPUT" ]]; then
     DRAFT_COLON=$(grep -c '/draft:' "$COPILOT_OUTPUT" 2>/dev/null || true)
     assert "Copilot output contains no /draft: references" \
         "$([[ "${DRAFT_COLON:-0}" -eq 0 ]] && echo true || echo false)"
-    DEAD_REFS=$(grep -c 'See `core/agents/' "$COPILOT_OUTPUT" 2>/dev/null || true)
-    assert "Copilot output contains no dead agent references" \
-        "$([[ "${DEAD_REFS:-0}" -eq 0 ]] && echo true || echo false)"
+    # Agent references are now preserved (not stripped) as of bugfix
+    echo "  SKIP: Agent references now preserved (not checking)"
     assert "Copilot output contains Draft methodology header" \
         "$(grep -q '# Draft - Context-Driven Development' "$COPILOT_OUTPUT" && echo true || echo false)"
     assert "Copilot output uses 'draft <cmd>' syntax (not @draft)" \
         "$(grep -q 'draft init' "$COPILOT_OUTPUT" && echo true || echo false)"
+fi
+
+# --- Gemini output tests ---
+echo ""
+echo "## Gemini output"
+assert "Gemini GEMINI.md generated" \
+    "$([[ -f "$GEMINI_OUTPUT" ]] && echo true || echo false)"
+
+if [[ -f "$GEMINI_OUTPUT" ]]; then
+    LINES=$(wc -l < "$GEMINI_OUTPUT" | tr -d ' ')
+    assert "Gemini output has content (>100 lines)" \
+        "$([[ "$LINES" -gt 100 ]] && echo true || echo false)"
+    DRAFT_COLON=$(grep -c '/draft:' "$GEMINI_OUTPUT" 2>/dev/null || true)
+    assert "Gemini output contains no /draft: references" \
+        "$([[ "${DRAFT_COLON:-0}" -eq 0 ]] && echo true || echo false)"
+    AT_DRAFT=$(grep -c '@draft' "$GEMINI_OUTPUT" 2>/dev/null || true)
+    assert "Gemini output contains @draft references" \
+        "$([[ "${AT_DRAFT:-0}" -gt 0 ]] && echo true || echo false)"
+    # Agent references are now preserved (not stripped) as of bugfix
+    echo "  SKIP: Agent references now preserved (not checking)"
 fi
 
 # --- Summary ---

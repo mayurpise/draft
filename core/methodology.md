@@ -342,7 +342,7 @@ Draft auto-classifies the project:
 4. **Product guidelines (optional)** — Writing style, visual identity, UX principles → `draft/product-guidelines.md`
 5. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield → `draft/tech-stack.md`
 6. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
-7. **Architecture mode opt-in (optional)** — Enables module decomposition, stories, execution state, skeletons, coverage checkpoints. Adds an Architecture Mode section to `workflow.md`. Recommended for complex multi-module projects.
+7. **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `/draft:decompose` on a track. File-based activation - no opt-in needed.
 8. **Tracks registry** — Empty tracks list → `draft/tracks.md`
 9. **Directory structure** — Creates `draft/tracks/` directory
 
@@ -418,7 +418,14 @@ Also creates `metadata.json` (status tracking) and registers the track in `draft
 
 #### Track ID
 
-Auto-generated kebab-case from the description: "Add user authentication" → `add-user-auth`.
+Auto-generated kebab-case from the description:
+- Full description converted to lowercase
+- Spaces replaced with hyphens
+- Special characters removed
+- Examples:
+  - "Add user authentication" → `add-user-authentication`
+  - "Fix: login bug" → `fix-login-bug`
+  - "Update project docs" → `update-project-docs`
 
 ---
 
@@ -442,7 +449,9 @@ Scans `plan.md` for the first uncompleted task:
 
 Red flags that stop the cycle: writing code before a test exists, test passes immediately, running tests mentally instead of executing.
 
-#### Architecture Mode Checkpoints (when enabled)
+#### Architecture Mode Checkpoints (when architecture.md exists)
+
+**Activation:** Automatically enabled when track has `draft/tracks/<id>/architecture.md` (created by `/draft:decompose`).
 
 Before the TDD cycle, three additional mandatory checkpoints:
 
@@ -578,9 +587,16 @@ Requires MCP-Jira server configuration and `draft/jira.md` with project key.
 
 ---
 
-## Architecture Mode (Optional)
+## Architecture Mode
 
-For complex projects, Draft supports a more granular pre-implementation design workflow. Enable it during `/draft:init` or by adding `Architecture Mode` to `workflow.md`. See `core/agents/architect.md` for detailed decomposition rules, story writing, and skeleton generation.
+Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `architecture.md` exists** - no manual configuration needed.
+
+**How it works:**
+1. Run `/draft:decompose` on a track → Creates `draft/tracks/<id>/architecture.md`
+2. Run `/draft:implement` → Automatically detects architecture.md and enables architecture features
+3. Features: Story writing, Execution State design, Function Skeletons, ~200-line chunk reviews
+
+See `core/agents/architect.md` for detailed decomposition rules, story writing, and skeleton generation.
 
 ### Module Decomposition
 
@@ -593,7 +609,7 @@ Each module defines: responsibility, files, API surface, dependencies, complexit
 
 ### Pre-Implementation Design
 
-When architecture mode is enabled, `/draft:implement` gains three additional checkpoints before the TDD cycle:
+When `architecture.md` exists for a track, `/draft:implement` automatically enables three additional checkpoints before the TDD cycle:
 
 1. **Story** — Natural-language algorithm description (Input → Process → Output) written as a comment at the top of the code file. Captures the "how" before coding. Mandatory checkpoint for developer approval.
 
@@ -668,11 +684,15 @@ Coverage complements TDD — TDD is the process (write test, implement, refactor
 ### Workflow with Architecture Mode
 
 ```
-/draft:init (enable architecture mode)
+/draft:init
+     │ (creates draft/architecture.md for brownfield)
      │
-/draft:new-track
+/draft:new-track "feature"
+     │ (creates draft/tracks/feature/spec.md + plan.md)
      │
-/draft:decompose → architecture.md
+/draft:decompose
+     │ (creates draft/tracks/feature/architecture.md)
+     │ → Architecture mode AUTO-ENABLED
      │
 /draft:implement
      │  ├── Story → CHECKPOINT
@@ -683,6 +703,8 @@ Coverage complements TDD — TDD is the process (write test, implement, refactor
      │
 /draft:coverage → coverage report → CHECKPOINT
 ```
+
+**Key insight:** Running `/draft:decompose` automatically enables architecture features for that track. No manual configuration needed.
 
 ---
 
@@ -724,6 +746,8 @@ Natural language patterns that map to Draft commands:
 | "undo", "revert" | Rollback changes |
 | "break into modules" | Module decomposition |
 | "check coverage" | Code coverage report |
+| "validate", "check quality" | Codebase quality validation |
+| "hunt bugs", "find bugs" | Systematic bug discovery |
 | "preview jira", "export to jira" | Preview Jira issues |
 | "create jira issues" | Create Jira issues via MCP |
 | "the plan" | Read active track's plan.md |

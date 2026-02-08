@@ -47,10 +47,13 @@ When `draft/` exists, these files guide development:
 ## Status Markers
 
 Used throughout plan.md files:
-- `[ ]` - Pending
-- `[~]` - In Progress
-- `[x]` - Completed
-- `[!]` - Blocked
+
+| Marker | Meaning |
+|--------|---------|
+| `[ ]` | Pending |
+| `[~]` | In Progress |
+| `[x]` | Completed |
+| `[!]` | Blocked |
 
 ## Intent Mapping
 

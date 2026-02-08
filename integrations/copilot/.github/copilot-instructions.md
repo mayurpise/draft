@@ -2749,7 +2749,7 @@ Extract and validate command arguments from user input.
 
 1. **Scope flag requirement:** At least one scope flag OR no flags (auto-detect track)
 2. **Mutual exclusivity:** Only one of `--track`, `--project`, `--files`, `--commits`
-3. **Flag conflicts:** `--full` cannot be combined with `--with-validate` or `--with-bughunt`
+3. **Flag conflicts:** If both `--full` and `--with-validate`/`--with-bughunt` are provided, treat as `--full` and ignore the redundant flags
 
 ### Default Behavior
 
@@ -2808,7 +2808,7 @@ Once track is resolved:
 
 3. **Read plan.md:**
    - Load `draft/tracks/<id>/plan.md`
-   - Extract commit SHAs (pattern: `<SHA>` or `commit <SHA>`)
+   - Extract commit SHAs from completed task lines. Match 7+ character hex strings in parentheses after task markers, e.g., `- [x] **Task 1.1:** Description (7a7dc85)`. Collect all unique SHAs in order of appearance.
    - Determine commit range:
      - First commit: `git rev-parse <first_SHA>^` (parent of first)
      - Last commit: `<last_SHA>`

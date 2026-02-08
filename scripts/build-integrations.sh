@@ -165,6 +165,72 @@ transform_copilot_syntax() {
 }
 
 # ─────────────────────────────────────────────────────────
+# Shared: core files to inline
+# ─────────────────────────────────────────────────────────
+
+CORE_DIR="$ROOT_DIR/core"
+
+# Core files referenced by skills - inline into integrations
+CORE_FILES=(
+    # Methodology
+    "methodology.md"
+    "knowledge-base.md"
+    # Templates
+    "templates/intake-questions.md"
+    "templates/architecture.md"
+    "templates/jira.md"
+    "templates/product.md"
+    "templates/product-guidelines.md"
+    "templates/tech-stack.md"
+    "templates/workflow.md"
+    # Agents
+    "agents/architect.md"
+    "agents/debugger.md"
+    "agents/planner.md"
+    "agents/rca.md"
+    "agents/reviewer.md"
+)
+
+# Emit all core files as appendices
+# Takes transform function as argument to apply correct syntax
+emit_core_files() {
+    local transform_fn="$1"
+
+    echo ""
+    echo "---"
+    echo ""
+    echo "# Core Reference Files"
+    echo ""
+    echo "> These files are inlined for integrations that cannot access the core/ directory at runtime."
+    echo ""
+
+    for core_file in "${CORE_FILES[@]}"; do
+        local full_path="$CORE_DIR/$core_file"
+        if [[ -f "$full_path" ]]; then
+            local file_name
+            file_name=$(basename "$core_file")
+            local dir_name
+            dir_name=$(dirname "$core_file")
+
+            echo ""
+            echo "---"
+            echo ""
+            echo "## core/${core_file}"
+            echo ""
+            echo "<core-file path=\"core/${core_file}\">"
+            echo ""
+            # Apply transform to core file content
+            cat "$full_path" | $transform_fn
+            echo ""
+            echo "</core-file>"
+        else
+            echo "" >&2
+            echo "WARNING: Core file not found: $full_path" >&2
+        fi
+    done
+}
+
+# ─────────────────────────────────────────────────────────
 # Shared: quality disciplines, communication, behaviors
 # ─────────────────────────────────────────────────────────
 
@@ -429,6 +495,9 @@ COMMON_HEADER2
 
     emit_communication
     emit_proactive
+
+    # Inline core files for integrations that can't access core/ at runtime
+    emit_core_files "$transform_fn"
 }
 
 # ─────────────────────────────────────────────────────────

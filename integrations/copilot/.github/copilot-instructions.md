@@ -493,7 +493,7 @@ Next steps:
 
 When user says "new feature" or "draft new-track <description>":
 
-You are creating a new track (feature, bug fix, or refactor) for Context-Driven Development.
+You are creating a new track (feature, bug fix, or refactor) for Context-Driven Development. This is a **collaborative process** — you are an active participant providing guidance, fact-checking, and expertise grounded in vetted sources.
 
 **Feature Description:** $ARGUMENTS
 
@@ -514,6 +514,10 @@ If missing, tell user: "Project not initialized. Run `draft init` first."
 - Read `draft/workflow.md` — TDD preference, commit conventions, review process
 - Read `draft/tracks.md` — existing tracks to check for overlap or dependencies
 
+3. Load guidance references:
+- Read `core/templates/intake-questions.md` — structured questions for intake
+- Read `core/knowledge-base.md` — vetted sources for AI guidance
+
 ## Step 1: Generate Track ID
 
 Create a short, kebab-case ID from the description:
@@ -521,342 +525,300 @@ Create a short, kebab-case ID from the description:
 - "Fix login bug" → `fix-login-bug`
 - If collision risk, append ISO date suffix: `add-user-auth-20250126`
 
-## Red Flags - STOP if you're:
+## Step 2: Create Draft Files
 
-- Writing spec without dialogue (assuming you understand requirements)
-- Copying requirements verbatim without clarifying questions
-- Creating plan before spec is approved
-- Skipping non-goals section ("everything is in scope")
-- Not referencing product.md, tech-stack.md, and architecture.md for context
-- Creating a bug track without checking if it needs the RCA flow (see Step 2B)
-- Rushing to get to implementation
+Create the track directory and draft files immediately with skeleton structure:
 
-**The goal is understanding, not speed.**
-
----
-
-## Step 2: Determine Track Type
-
-Based on the feature description and dialogue:
-
-- **Feature / Refactor** → Proceed to Step 2A (Standard Specification)
-- **Bug / RCA / Jira Incident** → Proceed to Step 2B (Bug & RCA Specification)
-
-Indicators for bug/RCA track: Jira bug ticket reference, production incident, error reports, regression, "fix", "investigate", "root cause".
-
----
-
-## Step 2A: Create Specification (Feature / Refactor)
-
-Engage in dialogue to understand:
-1. **What** - Exact scope and boundaries
-2. **Why** - Business/user value
-3. **Acceptance Criteria** - How we know it's done
-4. **Non-Goals** - What's explicitly out of scope
-
-Create `draft/tracks/<track_id>/spec.md`:
+### Create `draft/tracks/<track_id>/spec-draft.md`:
 
 ```markdown
-# Specification: [Title]
+# Specification Draft: [Title]
 
 **Track ID:** <track_id>
 **Created:** [ISO date]
-**Status:** [ ] Draft
+**Status:** [ ] Drafting
+
+> This is a working draft. Content will evolve through conversation.
 
 ## Context References
-> These documents define the big picture. This track operates within their constraints.
-- **Product:** `draft/product.md` — [1-line: how this track serves product goals]
-- **Tech Stack:** `draft/tech-stack.md` — [1-line: key stack constraints for this track]
-- **Architecture:** `draft/architecture.md` — [1-line: affected modules/components/flows]
-- **Guidelines:** `draft/product-guidelines.md` — [1-line: relevant UX/style constraints, or "N/A"]
+- **Product:** `draft/product.md` — [pending]
+- **Tech Stack:** `draft/tech-stack.md` — [pending]
+- **Architecture:** `draft/architecture.md` — [pending]
 
-## Summary
-[2-3 sentence description of what this track delivers]
+## Problem Statement
+[To be developed through intake conversation]
 
-## Background
-[Why this is needed, grounded in product.md goals and architecture.md context]
+## Background & Why Now
+[To be developed through intake conversation]
 
 ## Requirements
-
 ### Functional
-1. [Requirement 1]
-2. [Requirement 2]
-3. [Requirement 3]
+[To be developed through intake conversation]
 
 ### Non-Functional
-- Performance: [if applicable]
-- Security: [if applicable]
-- Accessibility: [if applicable]
+[To be developed through intake conversation]
 
 ## Acceptance Criteria
-- [ ] [Criterion 1]
-- [ ] [Criterion 2]
-- [ ] [Criterion 3]
+[To be developed through intake conversation]
 
 ## Non-Goals
-- [What's explicitly out of scope]
+[To be developed through intake conversation]
 
 ## Technical Approach
-[High-level approach grounded in tech-stack.md patterns and architecture.md modules]
+[To be developed through intake conversation]
 
 ## Open Questions
-- [Question 1]
-- [Question 2]
+[Tracked during conversation]
+
+## Conversation Log
+> Key decisions and reasoning captured during intake.
+
+[Conversation summary will be added here]
 ```
 
-Present for approval. Iterate until approved.
-
----
-
-## Step 2B: Create Specification (Bug & RCA)
-
-For bugs, incidents, or Jira-sourced issues. This flow prioritizes precision over breadth — investigate in and around the bug, not the whole system.
-
-**If a Jira ticket is referenced**, extract: summary, description, reproduction steps, environment, severity, linked issues.
-
-Engage in focused dialogue:
-1. **Symptoms** - Exact error, affected users/flows, frequency
-2. **Reproduction** - Steps to trigger, environment conditions
-3. **Blast Radius** - What works, what doesn't, boundary of the failure
-4. **Severity** - P0 (outage) / P1 (major degradation) / P2 (significant) / P3 (minor)
-
-Create `draft/tracks/<track_id>/spec.md`:
+### Create `draft/tracks/<track_id>/plan-draft.md`:
 
 ```markdown
-# Bug Specification: [Title]
+# Plan Draft: [Title]
 
 **Track ID:** <track_id>
-**Type:** bugfix
-**Created:** [ISO date]
-**Status:** [ ] Draft
-**Severity:** [P0/P1/P2/P3]
-**Jira:** [ticket key, or "N/A"]
+**Spec:** ./spec-draft.md
+**Status:** [ ] Drafting
 
-## Context References
-> These documents define the system. The bug exists within this context.
-- **Architecture:** `draft/architecture.md` — [affected module/component/service]
-- **Tech Stack:** `draft/tech-stack.md` — [relevant framework/library versions]
-- **Product:** `draft/product.md` — [affected user flow/feature]
-
-## Symptoms
-[Precise description: what happens, what should happen, who is affected]
-
-## Reproduction
-1. [Step 1]
-2. [Step 2]
-3. [Expected: ...]
-4. [Actual: ...]
-
-**Environment:** [OS, runtime version, config, deployment target]
-**Frequency:** [always / intermittent / edge case]
-**First observed:** [date/commit/release if known]
-
-## Blast Radius
-- **Affected:** [specific flows, endpoints, users]
-- **Not affected:** [what still works — narrows investigation scope]
-
-## Code Locality
-> Direct references to the area of investigation. Stay focused here.
-- **Entry point:** `path/to/file.ts:line` — [brief description]
-- **Suspect area:** `path/to/file.ts:line-range` — [why this is suspect]
-- **Related code:** `path/to/related.ts` — [connection to the bug]
-- **Data flow:** [brief trace: input → processing → failure point]
-
-## Investigation Constraints
-- [ ] Do NOT modify code outside the blast radius without explicit approval
-- [ ] Reference architecture.md for module boundaries — respect them
-- [ ] Check existing tests in the suspect area before writing new ones
-- [ ] Document every hypothesis, even failed ones
-
-## Acceptance Criteria
-- [ ] Root cause identified and documented
-- [ ] Regression test reproducing the exact failure
-- [ ] Fix addresses root cause (not symptoms)
-- [ ] Existing tests pass
-- [ ] No changes outside blast radius without approval
-
-## Non-Goals
-- [What's explicitly out of scope — resist the urge to "fix while we're here"]
-```
-
-Present for approval. Iterate until approved.
-
-**After spec approval**, the plan for bug tracks follows a fixed 3-phase structure. See Step 3.
-
-## Step 3: Create Plan
-
-Based on approved spec, create phased task breakdown.
-
-### Step 3A: Feature / Refactor Plan
-
-Create `draft/tracks/<track_id>/plan.md`:
-
-```markdown
-# Plan: [Title]
-
-**Track ID:** <track_id>
-**Spec:** ./spec.md
-**Status:** [ ] Not Started
+> This is a working draft. Phases will be defined after spec is finalized.
 
 ## Overview
-[Brief summary linking to spec and relevant architecture.md modules]
+[To be developed after spec finalization]
 
----
-
-## Phase 1: [Phase Name]
-**Goal:** [What this phase achieves]
-**Verification:** [How to verify phase completion]
-
-### Tasks
-- [ ] **Task 1.1:** [Description]
-  - Files: `path/to/file.ts`
-  - Test: `path/to/file.test.ts`
-
-- [ ] **Task 1.2:** [Description]
-  - Files: `path/to/another.ts`
-  - Test: `path/to/another.test.ts`
-
----
-
-## Phase 2: [Phase Name]
-**Goal:** [What this phase achieves]
-**Verification:** [How to verify phase completion]
-
-### Tasks
-- [ ] **Task 2.1:** [Description]
-  - Depends on: Task 1.1, Task 1.2
-  - Files: `path/to/file.ts`
-
----
-
-## Phase 3: Integration & Polish
-**Goal:** Final integration and cleanup
-**Verification:** All acceptance criteria from spec met
-
-### Tasks
-- [ ] **Task 3.1:** Integration testing
-- [ ] **Task 3.2:** Documentation update
-- [ ] **Task 3.3:** Code review and cleanup
-
----
+## Phases
+[To be developed after spec finalization]
 
 ## Notes
-- [Important consideration]
-- [Risk or dependency]
+[Tracked during conversation]
 ```
 
-### Step 3B: Bug & RCA Plan
-
-Bug tracks follow a fixed 3-phase structure based on systematic RCA methodology. See `core/agents/rca.md` for the full process.
-
-Create `draft/tracks/<track_id>/plan.md`:
-
-```markdown
-# Plan: [Title]
-
-**Track ID:** <track_id>
-**Type:** bugfix
-**Spec:** ./spec.md
-**Status:** [ ] Not Started
-
-## Overview
-[Brief: what's broken, where it's breaking, severity]
+Announce: "Created draft files. Let's build out the specification through conversation."
 
 ---
 
-## Phase 1: Investigate & Reproduce
-**Goal:** Confirm the bug, establish reproduction, trace the failure
-**Verification:** Bug reproduced reliably with documented steps
+## Step 3: Collaborative Intake
 
-### Tasks
-- [ ] **Task 1.1:** Reproduce the bug
-  - Run reproduction steps from spec
-  - Document exact error output, stack trace, logs
-  - Files: [entry point from spec's Code Locality]
+Follow the structured intake from `core/templates/intake-questions.md`. You are an **active collaborator**, not just a questioner.
 
-- [ ] **Task 1.2:** Trace the data/control flow
-  - Trace from entry point to failure point
-  - Document the path: `file:line` → `file:line` → failure
-  - Map against `draft/architecture.md` module boundaries
-  - Files: [suspect area from spec]
+### Your Role as AI Collaborator
 
-- [ ] **Task 1.3:** Establish blast radius boundary
-  - Confirm what works and what doesn't
-  - Identify the exact boundary of the failure
-  - Document: "Bug is in [module/layer], not in [adjacent module/layer]"
+For each question:
+1. **Ask** the question clearly
+2. **Listen** to the user's response
+3. **Contribute** your expertise:
+   - Pattern recognition from industry experience
+   - Trade-off analysis with citations from knowledge-base.md
+   - Risk identification the user may not see
+   - Fact-checking against project context (architecture.md, tech-stack.md)
+   - Alternative approaches with pros/cons
+4. **Update** spec-draft.md with what's been established
+5. **Summarize** periodically: "Here's what we have so far..."
 
----
+### Citation Style
 
-## Phase 2: Root Cause Analysis
-**Goal:** Identify and confirm the root cause with evidence
-**Verification:** Root cause confirmed via targeted test
+Ground advice in vetted sources:
+- "Consider CQRS here (DDIA, Ch. 11) — separates read/write concerns."
+- "This could violate the Dependency Rule (Clean Architecture)."
+- "Circuit breaker pattern (Release It!) would help prevent cascade failures."
+- "Watch for OWASP A01:2021 — Broken Access Control."
 
-### Tasks
-- [ ] **Task 2.1:** Analyze — compare working vs. failing paths
-  - Find similar code that works correctly
-  - List differences between working and failing cases
-  - Check assumptions (data types, nullability, timing, state)
-  - Files: [suspect area + related code from spec]
+### Red Flags - STOP if you're:
 
-- [ ] **Task 2.2:** Hypothesize and test
-  - Form single hypothesis based on analysis
-  - Predict: "If hypothesis is correct, then [X] should happen"
-  - Write minimal test to prove/disprove
-  - If disproved: document, return to 2.1 with updated understanding
-  - Files: [test file for suspect area]
+- Asking questions without contributing expertise
+- Accepting answers without probing deeper with "why"
+- Not citing sources when giving architectural advice
+- Skipping risk identification
+- Not updating drafts as conversation progresses
+- Rushing toward generation instead of understanding
+- Not referencing product.md, tech-stack.md, architecture.md
 
-- [ ] **Task 2.3:** Document root cause
-  - Write root cause statement: what, why, how, since when
-  - Reference specific code: `file:line` with explanation
-  - Classify: logic error / race condition / data corruption / config / dependency
+**The goal is collaborative understanding, not speed.**
 
 ---
 
-## Phase 3: Fix & Verify
-**Goal:** Fix the root cause, prevent regression, verify no side effects
-**Verification:** Regression test passes, existing tests pass, fix is minimal
+## Step 3A: Intake Flow (Feature / Refactor)
 
-### Tasks
-- [ ] **Task 3.1:** Write regression test
-  - Test MUST fail before fix, pass after
-  - Test reproduces the exact failure from Phase 1
-  - Files: [test file]
+### Phase 1: Existing Documentation
+- "Do you have existing documentation for this work? (PRD, RFC, design doc, Jira ticket)"
+- If yes: Ingest, extract key points, identify gaps
+- AI contribution: "I've extracted [X, Y, Z]. I notice [gap] isn't covered yet."
 
-- [ ] **Task 3.2:** Implement minimal fix
-  - Address root cause only — no refactoring, no "while we're here"
-  - Stay within blast radius from spec
-  - Files: [suspect area]
+### Phase 2: Problem Space
+Walk through problem questions from intake-questions.md:
+- What problem are we solving?
+- Why does this problem matter now?
+- Who experiences this pain?
+- What's the scope boundary?
 
-- [ ] **Task 3.3:** Verify fix
-  - Run regression test — must pass
-  - Run full test suite — no new failures
-  - Run reproduction steps from spec — bug resolved
-  - Verify no changes outside blast radius
+After each answer:
+- Contribute relevant patterns, similar problems, domain concepts
+- Challenge assumptions with "why" questions
+- Update spec-draft.md Problem Statement section
 
-- [ ] **Task 3.4:** Write RCA summary
-  - Update spec.md with root cause findings
-  - Document: timeline, root cause, fix, prevention measures
-  - Reference: `file:line` for every claim
+**Checkpoint:** "Here's the problem as I understand it: [summary]. Does this capture it?"
+
+### Phase 3: Solution Space
+Walk through solution questions:
+- What's the simplest version that solves this?
+- Why this approach over alternatives?
+- What are we explicitly NOT doing?
+- How does this fit with current architecture?
+
+After each answer:
+- Present 2-3 alternative approaches with trade-offs
+- Cross-reference architecture.md for integration points
+- Suggest tech-stack.md patterns to leverage
+- Update spec-draft.md Technical Approach and Non-Goals sections
+
+**Checkpoint:** "The proposed approach is [summary]. I've identified these alternatives: [list]. Your reasoning for this choice is [X]. Correct?"
+
+### Phase 4: Risk & Constraints
+Walk through risk questions:
+- What could go wrong?
+- What dependencies or blockers exist?
+- Why might this fail?
+- Security or compliance considerations?
+
+After each answer:
+- Surface risks user may not have considered
+- Reference OWASP, distributed systems fallacies, failure modes
+- Fact-check assumptions against project context
+- Update spec-draft.md with risks as Open Questions
+
+**Checkpoint:** "Key risks identified: [list]. Are there others you're aware of?"
+
+### Phase 5: Success Criteria
+Walk through success questions:
+- How do we know this is complete?
+- How will we verify it works?
+- What would make stakeholders accept this?
+
+After each answer:
+- Suggest measurable, testable acceptance criteria
+- Recommend testing strategies appropriate to feature type
+- Align with product.md goals
+- Update spec-draft.md Acceptance Criteria section
+
+**Checkpoint:** "Acceptance criteria so far: [list]. Missing anything?"
 
 ---
 
-## RCA Log
-> Track every hypothesis — failed ones are as valuable as the correct one.
+## Step 3B: Intake Flow (Bug & RCA)
 
-| # | Hypothesis | Evidence | Result |
-|---|-----------|----------|--------|
-| 1 | | | |
+For bugs, incidents, or Jira-sourced issues. Tighter scope, investigation-focused.
 
-## Notes
-- [Important consideration]
-- [Risk or dependency]
-```
+### Phase 1: Symptoms & Context
+- "What's the exact error or unexpected behavior?"
+- "Who is affected? How often does this occur?"
+- "When did this start? Any recent changes?"
 
-Present for approval. Iterate until approved.
+AI contribution: Pattern recognition for common bug types, severity assessment.
 
-## Step 4: Create Metadata
+### Phase 2: Reproduction
+- "What are the exact steps to reproduce?"
+- "What environment conditions are required?"
+- "What's the expected vs actual behavior?"
 
-Create `draft/tracks/<track_id>/metadata.json`:
+AI contribution: Suggest additional reproduction scenarios, edge cases to check.
+
+### Phase 3: Blast Radius
+- "What still works correctly?"
+- "Where does the failure boundary lie?"
+
+AI contribution: Help narrow investigation scope, reference architecture.md for module boundaries.
+
+### Phase 4: Code Locality
+- "Where do you suspect the bug is?"
+- "What's the entry point and failure point?"
+
+AI contribution: Suggest investigation approach, reference debugging patterns.
+
+Update spec-draft.md with bug-specific structure after gathering sufficient context.
+
+---
+
+## Step 4: Draft Review & Refinement
+
+After completing intake sections:
+
+1. Present complete spec-draft.md summary
+2. List any remaining Open Questions
+3. Ask: "Want to refine any section, or ready to finalize?"
+
+If refining:
+- Continue conversation on specific sections
+- Update drafts as discussion progresses
+- Return to this step when ready
+
+---
+
+## Step 5: Finalize Specification
+
+When user confirms spec is ready:
+
+1. Update spec-draft.md status to `[x] Complete`
+2. Rename `spec-draft.md` → `spec.md`
+3. Update Context References with specific connections to product.md, tech-stack.md, architecture.md
+4. Add Conversation Log summary with key decisions and reasoning
+
+Present final spec.md for acknowledgment.
+
+---
+
+## Step 6: Create Plan
+
+Based on finalized spec, build out plan-draft.md:
+
+### For Feature / Refactor:
+Create phased breakdown:
+- Phase 1: Foundation / Setup
+- Phase 2: Core Implementation
+- Phase 3: Integration & Polish
+
+For each phase:
+- Define Goal and Verification criteria
+- Break into specific Tasks with file references
+- Identify dependencies between tasks
+
+AI contribution:
+- Suggest task ordering based on dependencies
+- Reference tech-stack.md for implementation patterns
+- Identify testing requirements per task
+- Flag integration points with architecture.md modules
+
+### For Bug & RCA:
+Use fixed 3-phase structure:
+- Phase 1: Investigate & Reproduce
+- Phase 2: Root Cause Analysis
+- Phase 3: Fix & Verify
+
+Reference `core/agents/rca.md` for detailed process.
+
+Present plan-draft.md for review.
+
+---
+
+## Step 7: Finalize Plan
+
+When user confirms plan is ready:
+
+1. Update plan-draft.md status to `[x] Complete`
+2. Rename `plan-draft.md` → `plan.md`
+3. Validate phases against spec requirements
+4. Ensure all acceptance criteria are covered by tasks
+
+Present final plan.md for acknowledgment.
+
+---
+
+## Step 8: Create Metadata & Update Tracks
+
+### Create `draft/tracks/<track_id>/metadata.json`:
 
 ```json
 {
@@ -877,9 +839,9 @@ Create `draft/tracks/<track_id>/metadata.json`:
 }
 ```
 
-## Step 5: Update Master Tracks List
+### Update `draft/tracks.md`:
 
-Add to `draft/tracks.md` under Active:
+Add under Active:
 
 ```markdown
 ## Active
@@ -890,6 +852,14 @@ Add to `draft/tracks.md` under Active:
 - **Phases:** 0/3
 - **Path:** `./tracks/<track_id>/`
 ```
+
+### Cleanup
+
+Remove draft files if they still exist:
+- Delete `spec-draft.md` (now `spec.md`)
+- Delete `plan-draft.md` (now `plan.md`)
+
+---
 
 ## Completion
 
@@ -903,6 +873,8 @@ Created:
 
 Updated:
 - draft/tracks.md
+
+Key decisions documented in spec.md Conversation Log.
 
 Next: Review the spec and plan, then run `draft implement` to begin."
 
@@ -4337,3 +4309,3314 @@ If user seems lost:
 - Check status to orient them
 - Reference the active track's spec.md for requirements
 - Suggest next steps based on plan.md state
+
+---
+
+# Core Reference Files
+
+> These files are inlined for integrations that cannot access the core/ directory at runtime.
+
+
+---
+
+## core/methodology.md
+
+<core-file path="core/methodology.md">
+
+# Draft Methodology
+
+**Measure twice, code once.**
+
+Draft is a methodology for Context-Driven Development that ensures consistent, high-quality delivery through: **Context → Spec & Plan → Implement**.
+
+## Philosophy
+
+### The Core Problem
+
+AI coding assistants are powerful but undirected. Without structure, they:
+- Make assumptions about requirements
+- Choose arbitrary technical approaches
+- Produce code that doesn't fit the existing codebase
+- Lack accountability checkpoints
+
+Draft solves this through **Context-Driven Development**: structured documents that constrain and guide AI behavior. By treating context as a managed artifact alongside code, your repository becomes a single source of truth that drives every agent interaction with deep, persistent project awareness.
+
+### Why Each Document Exists
+
+| Document | Purpose | Prevents |
+|----------|---------|----------|
+| `product.md` | Defines users, goals, success criteria | AI building features nobody asked for |
+| `product-guidelines.md` | Style, branding, UX patterns | Inconsistent UI/UX decisions |
+| `tech-stack.md` | Languages, frameworks, patterns | AI introducing random dependencies |
+| `architecture.md` | System map, data flows, patterns, mermaid diagrams | AI re-analyzing codebase every session |
+| `workflow.md` | TDD preference, commit style, review process | AI skipping tests or making giant commits |
+| `spec.md` | Acceptance criteria for a specific track | Scope creep, gold-plating |
+| `plan.md` | Ordered phases with verification steps | AI attempting everything at once |
+
+### The Constraint Hierarchy
+
+```
+product.md          →  "Build a task manager for developers"
+  ↓
+tech-stack.md       →  "Use React, TypeScript, Tailwind"
+  ↓
+architecture.md     →  "Express API → Service layer → Prisma ORM → PostgreSQL"
+  ↓
+spec.md             →  "Add drag-and-drop reordering"
+  ↓
+plan.md             →  "Phase 1: sortable list, Phase 2: persistence"
+```
+
+Each layer narrows the solution space. By the time AI writes code, most decisions are already made.
+
+### Keeping AI Constrained
+
+Without constraints, AI will:
+1. **Over-engineer** — add abstractions, utilities, "improvements" you didn't ask for
+2. **Assume context** — guess at requirements instead of asking
+3. **Lose focus** — drift across the codebase making tangential changes
+4. **Skip verification** — claim completion without proving it works
+
+| Mechanism | Effect |
+|-----------|--------|
+| Explicit spec | AI can only implement what's documented |
+| Phased plans | AI works on one phase at a time |
+| Verification steps | Each phase requires proof of completion |
+| Status markers | Progress is tracked, not assumed |
+
+The AI becomes an executor of pre-approved work, not an autonomous decision-maker.
+
+### Human Review Before AI Codes
+
+**This is Draft's most important feature.**
+
+The workflow:
+1. Developer runs `draft new-track` — AI creates `spec.md` and `plan.md`
+2. Developer reviews and edits these documents
+3. Developer commits them for peer review
+4. Team approves the approach
+5. *Only then* does `draft implement` begin
+
+| Traditional AI Coding | Draft Approach |
+|-----------------------|----------------|
+| AI writes code immediately | AI writes spec first |
+| Review happens on code PR | Review happens on spec PR |
+| Disagreements require rewriting code | Disagreements resolved before coding |
+| AI decisions are implicit | AI decisions are documented |
+
+**Benefits:**
+- **Faster reviews** — Reviewers approve approach, not implementation details
+- **Fewer rewrites** — Catch design issues before code exists
+- **Knowledge transfer** — Specs document *why*, not just *what*
+- **Accountability** — Clear record of what was requested vs. delivered
+- **Onboarding** — New team members read specs to understand features
+
+### Team Workflow: Alignment Before Code
+
+Draft's artifacts are designed for team collaboration through standard git workflows. Before any code is written, every markdown file goes through **commit → review → update → merge** until the team is aligned.
+
+**The PR cycle on documents:**
+
+1. **Project context** — Tech lead runs `draft init`. Team reviews `product.md`, `tech-stack.md`, and `workflow.md` via PR. Product managers review vision without reading code. Engineers review technical choices without context-switching into implementation.
+2. **Spec & plan** — Lead runs `draft new-track`. Team reviews `spec.md` (requirements, acceptance criteria) and `plan.md` (phased task breakdown, dependencies) via PR. Disagreements surface as markdown comments — resolved by editing a paragraph, not rewriting a module.
+3. **Architecture** — Lead runs `draft decompose`. Team reviews `architecture.md` (module boundaries, API surfaces, dependency graph, implementation order) via PR. Senior engineers validate architecture without touching the codebase.
+4. **Work distribution** — Lead runs `draft jira-preview` and `draft jira-create`. Epics, stories, and sub-tasks are created from the approved plan. Individual team members pick up Jira stories and implement — with or without `draft implement`.
+5. **Implementation** — Only after all documents are merged does coding start. Every developer has full context: what to build (`spec.md`), in what order (`plan.md`), with what boundaries (`architecture.md`).
+
+**Why this works:** The CLI is single-user, but the artifacts it produces are the collaboration layer. Draft handles planning and decomposition. Git handles review. Jira handles distribution. Changing a sentence in `spec.md` takes seconds. Changing an architectural decision after 2,000 lines of code takes days.
+
+### When to Use Draft
+
+**Good fit:**
+- Features requiring design decisions
+- Work that will be reviewed by others
+- Complex multi-step implementations
+- Anything where "just do it" has failed before
+
+**Overkill:**
+- One-line bug fixes
+- Typo corrections
+- Exploratory prototypes you'll throw away
+
+Draft adds structure. Use it when structure has value.
+
+### Problems with Chat-Driven Development
+
+Traditional AI chat interfaces have fundamental limitations:
+
+| Problem | Impact |
+|---------|--------|
+| **Context window fills up** | Long chats exhaust token limits; AI loses early context |
+| **Hallucination increases with context size** | More tokens → more confusion → worse decisions |
+| **No persistent memory** | Close the chat, lose the context |
+| **Unsearchable history** | "Where did I work on feature X?" — good luck finding it |
+| **No team visibility** | Your chat history is invisible to colleagues |
+| **Repeated context loading** | Every session starts from zero |
+
+### How Draft Solves This
+
+| Draft Approach | Benefit |
+|----------------|---------|
+| **File-based context** | Persistent memory on the filesystem |
+| **Git-tracked specs** | Version history, diffs, blame |
+| **Scoped context loading** | Only load what's needed for the current track |
+| **Fewer tokens used** | Smaller context → better AI decisions |
+| **Searchable artifacts** | `grep` your specs, not chat logs |
+| **Team-visible planning** | Specs and plans are PR-reviewable |
+
+### The Economics
+
+Writing specs feels slower. It isn't.
+
+| Scenario | Without Spec | With Spec |
+|----------|--------------|-----------|
+| Simple feature | 1 hour | 1.2 hours |
+| Feature with ambiguity | 3 hours + rework | 2 hours |
+| Feature requiring team input | 5 hours + meetings + rework | 2.5 hours |
+| Wrong feature entirely | Days wasted | Caught in review |
+
+The overhead is constant (~20% for simple tasks). The savings scale with:
+- **Complexity** — More moving parts = more value from upfront planning
+- **Team size** — More reviewers = more value from documented decisions
+- **Criticality** — Higher stakes = more value from discipline
+
+For critical product development, Draft isn't overhead — it's risk mitigation.
+
+## Installation & Getting Started
+
+### Prerequisites
+
+- **Claude Code CLI** — Install from [claude.ai/code](https://claude.ai/code) or via `npm install -g @anthropic-ai/claude-code`
+- **Git** — Version control is required for track history, revert, and commit workflows
+- **Node.js 18+** — Required for Claude Code CLI
+
+### Install Draft Plugin
+
+```bash
+# From Claude Code CLI
+claude plugin install draft
+
+# Or clone and install locally
+git clone https://github.com/anthropics/draft.git ~/.claude/plugins/draft
+```
+
+### Verify Installation
+
+```bash
+# Run the overview command
+/draft
+```
+
+You should see the list of available Draft commands. If not, check that the plugin directory is correctly placed under `~/.claude/plugins/`.
+
+### Quick Start
+
+```bash
+# 1. Initialize project context (once per project)
+draft init
+
+# 2. Create a feature track with spec and plan
+draft new-track "Add user authentication"
+
+# 3. Review the generated spec.md and plan.md, then implement
+draft implement
+
+# 4. Check progress at any time
+draft status
+```
+
+### Cursor Integration (Optional)
+
+Draft also works as a Cursor rules file:
+
+```bash
+# Download directly (no clone required)
+curl -o .cursorrules https://raw.githubusercontent.com/mayurpise/draft/main/integrations/cursor/.cursorrules
+
+# Or copy from a local clone
+cp ~/.claude/plugins/draft/integrations/cursor/.cursorrules /your-project/.cursorrules
+```
+
+This gives Cursor the same methodology awareness, though without slash commands.
+
+### GitHub Copilot Integration (Optional)
+
+Draft also works with GitHub Copilot via `copilot-instructions.md`:
+
+```bash
+# Download directly (no clone required)
+mkdir -p .github
+curl -o .github/copilot-instructions.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md
+
+# Or copy from a local clone
+cp ~/.claude/plugins/draft/integrations/copilot/.github/copilot-instructions.md /your-project/.github/
+```
+
+This gives Copilot the same methodology awareness. Commands use natural language (`draft init`, `draft new-track`) instead of `@` mentions.
+
+### Gemini Integration (Optional)
+
+Draft also works with Gemini Code Assist and Gemini CLI via `GEMINI.md`:
+
+```bash
+# Download directly (no clone required)
+curl -o GEMINI.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/GEMINI.md
+
+# Or copy from a local clone
+cp ~/.claude/plugins/draft/integrations/gemini/GEMINI.md /your-project/GEMINI.md
+```
+
+Place `GEMINI.md` at the root of your project. Commands use `draft` syntax.
+
+---
+
+## Core Workflow
+
+```
+Context → Spec & Plan → Implement
+```
+
+1. **Setup** - Initialize project context (once per project)
+2. **New Track** - Create specification and plan
+3. **Implement** - Execute tasks with optional TDD workflow
+4. **Verify** - Confirm acceptance criteria met
+
+## Tracks
+
+A **track** is a high-level unit of work (feature, bug fix, refactor). Each track contains:
+
+```
+draft/tracks/<track-id>/
+├── spec.md          # Requirements and acceptance criteria
+├── plan.md          # Phased task breakdown
+├── metadata.json    # Status and timestamps
+└── jira-export.md   # Jira stories for export (optional)
+```
+
+### Track Lifecycle
+
+1. **Planning** - Spec and plan are being drafted
+2. **In Progress** - Tasks are being implemented
+3. **Completed** - All acceptance criteria met
+4. **Archived** - Track is archived for reference
+
+## Project Context Files
+
+Located in `draft/` of the target project:
+
+| File | Purpose |
+|------|---------|
+| `product.md` | Product vision, users, goals |
+| `product-guidelines.md` | Style, branding, UX standards (optional) |
+| `tech-stack.md` | Languages, frameworks, patterns |
+| `architecture.md` | System map, data flows, patterns, mermaid diagrams (brownfield) |
+| `workflow.md` | TDD preferences, commit strategy |
+| `jira.md` | Jira project configuration (optional) |
+| `tracks.md` | Master list of all tracks |
+
+## Status Markers
+
+Used throughout spec.md and plan.md:
+
+| Marker | Meaning |
+|--------|---------|
+| `[ ]` | Pending/New |
+| `[~]` | In Progress |
+| `[x]` | Completed |
+| `[!]` | Blocked |
+
+## Plan Structure
+
+Plans are organized into phases:
+
+1. **Foundation** - Core data structures, interfaces
+2. **Implementation** - Main functionality
+3. **Integration** - Connecting components
+4. **Polish** - Error handling, edge cases, docs
+
+### Task Granularity
+
+Good tasks are:
+- Completable in a focused session
+- Have clear success criteria
+- Produce testable output
+- Fit in a single commit
+
+## Command Workflows
+
+### `draft init` — Initialize Project
+
+Initializes a Draft project by creating the `draft/` directory and context files. Run once per project.
+
+#### Project Discovery
+
+Draft auto-classifies the project:
+
+- **Brownfield (existing codebase):** Detected by the presence of `package.json`, `requirements.txt`, `go.mod`, `Cargo.toml`, `src/`, or git history with commits. Draft scans the existing stack and pre-fills `tech-stack.md`.
+- **Greenfield (new project):** Empty or near-empty directory. Developer provides all context through dialogue.
+
+#### Initialization Sequence
+
+1. **Project discovery** — Classify as brownfield (existing) or greenfield (new)
+2. **Architecture discovery (brownfield only)** — Three-phase deep analysis of the existing codebase → `draft/architecture.md`:
+   - **Phase 1: Orientation** — Directory structure, entry points, critical paths, request/response flows, tech stack inventory. Generates mermaid diagrams: system architecture (`graph TD`), directory hierarchy (`graph TD`), request flow (`sequenceDiagram`).
+   - **Phase 2: Logic** — Data lifecycle mapping, primary domain objects, design pattern recognition, anti-pattern/complexity hotspot flagging, convention extraction, external dependency mapping. Generates mermaid diagrams: data flow (`flowchart LR`), external integrations (`graph LR`).
+   - **Phase 3: Module Discovery** — Reverse-engineers existing modules from import graph and directory boundaries. Documents each module's responsibility, files, API surface, dependencies, and complexity. Generates module dependency diagram (`graph LR`), dependency table, and topological dependency order. `draft decompose` later extends (not replaces) these modules when planning new features.
+   - This document becomes persistent context — every future track references it instead of re-analyzing the codebase.
+3. **Product definition** — Dialogue to define product vision, users, goals, constraints → `draft/product.md`
+4. **Product guidelines (optional)** — Writing style, visual identity, UX principles → `draft/product-guidelines.md`
+5. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield → `draft/tech-stack.md`
+6. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
+7. **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `draft decompose` on a track. File-based activation - no opt-in needed.
+8. **Tracks registry** — Empty tracks list → `draft/tracks.md`
+9. **Directory structure** — Creates `draft/tracks/` directory
+
+If `draft/` already exists with context files, init reports "already initialized" and suggests using `draft init refresh` or `draft new-track`.
+
+#### Refresh Mode (`draft init refresh`)
+
+Re-scans and updates existing context without starting from scratch:
+
+1. **Tech Stack Refresh** — Re-scans `package.json`, `go.mod`, etc. Compares with existing `draft/tech-stack.md`. Proposes updates.
+2. **Architecture Refresh** — Re-runs architecture discovery (Phase 1, 2 & 3) and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `draft decompose`. Presents changes for review before writing.
+3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
+4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
+5. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
+
+---
+
+### `draft new-track` — Create Feature Track
+
+Creates a new track (feature, bug fix, or refactor) with a specification and phased plan.
+
+#### Context Loading
+
+Every new track loads the full project context before spec creation:
+- `draft/product.md` — product vision, users, goals
+- `draft/tech-stack.md` — languages, frameworks, patterns
+- `draft/architecture.md` — system map, modules, data flows (if exists)
+- `draft/product-guidelines.md` — UX standards, style (if exists)
+- `draft/workflow.md` — TDD preference, commit conventions
+- `draft/tracks.md` — existing tracks (check for overlap/dependencies)
+
+Every spec includes a **Context References** section that explicitly links back to these documents with a one-line description of how each is relevant to this track. This ensures every track is grounded in the big picture.
+
+#### Track Types
+
+New track auto-detects the track type from the description and dialogue:
+
+| Type | Indicators | Spec Template | Plan Structure |
+|------|-----------|---------------|----------------|
+| **Feature / Refactor** | "add", "implement", "refactor", "improve" | Standard spec | Flexible phases |
+| **Bug / RCA** | "fix", "bug", "investigate", Jira bug ticket, "root cause", production incident | Bug spec with Code Locality, Blast Radius | Fixed 3-phase: Investigate → RCA → Fix |
+
+#### Specification Creation (Feature)
+
+Engages in dialogue to understand scope before generating `spec.md`:
+- **What** — Exact scope and boundaries
+- **Why** — Business/user value
+- **Acceptance criteria** — How we know it's done
+- **Non-goals** — What's explicitly out of scope
+- **Technical approach** — High-level approach based on tech-stack.md and architecture.md
+
+#### Specification Creation (Bug / RCA)
+
+For bugs, incidents, and Jira-sourced issues. Focused investigation, not broad exploration:
+- **Symptoms** — Exact error, affected users/flows, frequency
+- **Reproduction** — Steps to trigger, environment conditions
+- **Blast Radius** — What's broken AND what's not (scopes the investigation)
+- **Code Locality** — Direct `file:line` references to suspect area, entry point, related code
+- **Investigation Constraints** — Stay in the blast radius, respect module boundaries
+
+The spec is presented for approval and iterated until the developer is satisfied.
+
+#### Plan Creation
+
+Based on the approved spec, generates a phased task breakdown in `plan.md`:
+- **Feature tracks:** Tasks organized into phases (Foundation → Implementation → Integration → Polish)
+- **Bug tracks:** Fixed 3-phase structure: Investigate & Reproduce → Root Cause Analysis → Fix & Verify. Includes an RCA Log table for tracking hypotheses.
+- Each task specifies target files and test files
+- Dependencies between tasks are documented
+- Verification criteria defined per phase
+
+Also creates `metadata.json` (status tracking) and registers the track in `draft/tracks.md`.
+
+#### Track ID
+
+Auto-generated kebab-case from the description:
+- Full description converted to lowercase
+- Spaces replaced with hyphens
+- Special characters removed
+- Examples:
+  - "Add user authentication" → `add-user-authentication`
+  - "Fix: login bug" → `fix-login-bug`
+  - "Update project docs" → `update-project-docs`
+
+---
+
+### `draft implement` — Execute Tasks
+
+Implements tasks from the active track's plan, following the TDD workflow when enabled.
+
+#### Task Selection
+
+Scans `plan.md` for the first uncompleted task:
+- `[ ]` Pending — picks this one
+- `[~]` In Progress — resumes this one
+- `[x]` Completed — skips
+- `[!]` Blocked — skips, notifies user
+
+#### TDD Cycle (when enabled in `workflow.md`)
+
+1. **RED** — Write a failing test that captures the requirement. Run the test, verify it fails with an assertion failure (not a syntax error).
+2. **GREEN** — Write the minimum code to make the test pass. Run the test, verify it passes.
+3. **REFACTOR** — Clean up the code while keeping tests green. Run all related tests after each change.
+
+Red flags that stop the cycle: writing code before a test exists, test passes immediately, running tests mentally instead of executing.
+
+#### Architecture Mode Checkpoints (when architecture.md exists)
+
+**Activation:** Automatically enabled when track has `draft/tracks/<id>/architecture.md` (created by `draft decompose`).
+
+Before the TDD cycle, three additional mandatory checkpoints:
+
+1. **Story** — Natural-language algorithm description (Input → Process → Output) written as a comment at the top of the code file. Developer approves before proceeding.
+2. **Execution State** — Define intermediate state variables needed for processing. Developer approves.
+3. **Function Skeletons** — Generate function stubs with complete signatures and docstrings, no implementation bodies. Developer approves.
+
+Additionally, implementation chunks are limited to ~200 lines with a review checkpoint after each chunk.
+
+#### Progress Updates
+
+After each task: update `plan.md` status markers, increment `metadata.json` counters, commit per workflow conventions.
+
+#### Phase Boundary Review
+
+When all tasks in a phase are `[x]`, a two-stage review is triggered:
+1. **Stage 1: Spec Compliance** — Verify all requirements for the phase are implemented
+2. **Stage 2: Code Quality** — Verify patterns, error handling, test quality; classify issues as Critical/Important/Minor
+
+Only proceeds to the next phase if no Critical issues remain.
+
+#### Track Completion
+
+When all phases complete: update `plan.md`, `metadata.json`, and `draft/tracks.md`. Move the track from Active to Completed.
+
+---
+
+### `draft status` — Show Progress
+
+Displays a comprehensive overview of project progress:
+- All active tracks with phase and task counts
+- Current task indicator
+- Module status (if `architecture.md` exists) with coverage percentages
+- Blocked items with reasons
+- Recently completed tracks
+- Quick stats summary
+
+---
+
+### `draft revert` — Git-Aware Rollback
+
+Safely undo work at three levels:
+
+| Level | What It Reverts |
+|-------|----------------|
+| **Task** | Single task's commits |
+| **Phase** | All commits in a phase |
+| **Track** | Entire track's commits |
+
+#### Revert Process
+
+1. **Identify commits** — Finds commits matching the track's commit pattern (`feat(<track_id>): ...`)
+2. **Preview** — Shows commits, affected files, and plan.md status changes before executing
+3. **Confirm** — Requires explicit user confirmation
+4. **Execute** — Runs `git revert --no-commit` for each commit (newest first), then creates a single revert commit
+5. **Update Draft state** — Reverts task markers from `[x]` to `[ ]`, decrements metadata counters
+
+If a revert produces merge conflicts, Draft reports the conflicted files and halts. The user resolves conflicts manually, then runs `git revert --continue`.
+
+---
+
+### `draft decompose` — Module Decomposition
+
+Breaks a project or track into modules with clear responsibilities, dependencies, and implementation order.
+
+#### Scope
+
+- **Project-wide** (`draft decompose project`) → `draft/architecture.md`
+- **Track-scoped** (`draft decompose` with active track) → `draft/tracks/<id>/architecture.md`
+
+#### Process
+
+1. **Load context** — Read product.md, tech-stack.md, spec.md; scan codebase for brownfield projects (directory structure, entry points, existing module boundaries, import patterns)
+2. **Module identification** — Propose modules with: name, responsibility, files, API surface, dependencies, complexity. Each module targets 1-3 files with a single responsibility.
+3. **CHECKPOINT** — Developer reviews and modifies module breakdown
+4. **Dependency mapping** — Map inter-module imports, detect cycles, generate ASCII dependency diagram, determine implementation order via topological sort
+5. **CHECKPOINT** — Developer reviews dependency diagram and implementation order
+6. **Generate `architecture.md`** — Module definitions, dependency diagram/table, implementation order, story placeholders
+7. **Update plan.md (track-scoped only)** — Restructure phases to align with module boundaries, preserving completed/in-progress task states
+
+#### Cycle Breaking
+
+When circular dependencies are detected, Draft proposes one of: extract shared interface module, invert dependency direction, or merge the coupled modules.
+
+---
+
+### `draft coverage` — Code Coverage Report
+
+Measures test coverage quality after implementation. Complements TDD — TDD is the process, coverage is the measurement.
+
+#### Process
+
+1. **Detect coverage tool** — Auto-detect from tech-stack.md or project config files (jest, vitest, pytest-cov, go test -coverprofile, cargo tarpaulin, etc.)
+2. **Determine scope** — Argument-provided path, architecture module files, track-changed files, or full project
+3. **Run coverage** — Execute the coverage command and capture output
+4. **Report** — Per-file breakdown with line/branch percentages and uncovered line ranges
+5. **Gap analysis** — Classify uncovered lines:
+   - **Testable** — Should be covered; suggests specific tests to write
+   - **Defensive** — Error handlers for impossible states; acceptable to leave uncovered
+   - **Infrastructure** — Framework boilerplate; acceptable
+6. **CHECKPOINT** — Developer reviews and approves
+7. **Record results** — Update plan.md with coverage section, architecture.md module status, and metadata.json
+
+Target: 95%+ line coverage (configurable in `workflow.md`).
+
+---
+
+### `draft jira-preview` — Preview Jira Issues
+
+Generates a `jira-export.md` file from the track's plan for review before creating Jira issues.
+
+#### Mapping
+
+| Draft Concept | Jira Entity |
+|---------------|-------------|
+| Track | Epic |
+| Phase | Story |
+| Task | Sub-task |
+
+Story points are auto-calculated from task count per phase (1-2 tasks = 1pt, 3-4 = 2pt, 5-6 = 3pt, 7+ = 5pt).
+
+The export file is editable — adjust points, descriptions, or sub-tasks before running `draft jira-create`.
+
+---
+
+### `draft jira-create` — Create Jira Issues
+
+Creates Jira epic, stories, and sub-tasks from `jira-export.md` via MCP-Jira integration. Auto-generates the export file if missing.
+
+Creates issues in order: Epic → Stories (one per phase) → Sub-tasks (one per task). Updates plan.md and jira-export.md with Jira issue keys after creation.
+
+Requires MCP-Jira server configuration and `draft/jira.md` with project key.
+
+---
+
+## Architecture Mode
+
+Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `architecture.md` exists** - no manual configuration needed.
+
+**How it works:**
+1. Run `draft decompose` on a track → Creates `draft/tracks/<id>/architecture.md`
+2. Run `draft implement` → Automatically detects architecture.md and enables architecture features
+3. Features: Story writing, Execution State design, Function Skeletons, ~200-line chunk reviews
+
+See `core/agents/architect.md` for detailed decomposition rules, story writing, and skeleton generation.
+
+### Module Decomposition
+
+Use `draft decompose` to break a project or track into modules:
+
+- **Project-wide:** `draft/architecture.md` — overall codebase module structure
+- **Per-track:** `draft/tracks/<id>/architecture.md` — module breakdown for a specific feature
+
+Each module defines: responsibility, files, API surface, dependencies, complexity. Modules are ordered by dependency graph (topological sort) to determine implementation sequence.
+
+### Pre-Implementation Design
+
+When `architecture.md` exists for a track, `draft implement` automatically enables three additional checkpoints before the TDD cycle:
+
+1. **Story** — Natural-language algorithm description (Input → Process → Output) written as a comment at the top of the code file. Captures the "how" before coding. Mandatory checkpoint for developer approval.
+
+2. **Execution State** — Define intermediate state variables (input state, intermediate state, output state, error state) needed for processing. Bridges the gap between algorithm and code structure. Mandatory checkpoint.
+
+3. **Function Skeletons** — Generate function/method stubs with complete signatures, types, and docstrings. No implementation bodies. Developer approves names, signatures, and structure before TDD begins. Mandatory checkpoint.
+
+Additionally, implementation chunks are limited to ~200 lines with a review checkpoint after each chunk.
+
+### Code Coverage
+
+Use `draft coverage` after implementation to measure test quality:
+
+- Auto-detects coverage tool from `tech-stack.md`
+- Targets 95%+ line coverage (configurable in `workflow.md`)
+- Reports per-file breakdown and identifies uncovered lines
+- Classifies gaps: testable (should add tests), defensive (acceptable), infrastructure (acceptable)
+- Results recorded in `plan.md` and `architecture.md` using the following format:
+
+#### Coverage Results Format (plan.md)
+
+Add a `## Coverage` section at the end of the relevant phase:
+
+```markdown
+## Coverage
+- **Overall:** 96.2% line coverage (target: 95%)
+- **Tool:** jest --coverage
+- **Date:** 2026-02-01
+
+| File | Lines | Covered | % | Uncovered Lines |
+|------|-------|---------|---|-----------------|
+| src/auth.ts | 120 | 116 | 96.7% | 45, 88, 112, 119 |
+| src/config.ts | 80 | 80 | 100% | - |
+
+### Gaps
+- **Testable:** `auth.ts:45` — error branch for expired token (add test)
+- **Defensive:** `auth.ts:88` — unreachable fallback (acceptable)
+- **Infrastructure:** `auth.ts:112,119` — logging statements (acceptable)
+```
+
+#### Coverage Results Format (architecture.md)
+
+Update each module's status line to include coverage:
+
+```markdown
+- **Status:** [x] Complete — 96.7% coverage
+```
+
+And add a coverage summary in the Notes section:
+
+```markdown
+## Notes
+- Overall coverage: 96.2% (target: 95%)
+- Uncovered gaps classified and documented in plan.md
+```
+
+Coverage complements TDD — TDD is the process (write test, implement, refactor), coverage is the measurement.
+
+### When to Use Architecture Mode
+
+**Good fit:**
+- Multi-module features with component dependencies
+- New projects where architecture decisions haven't been made
+- Complex algorithms or data transformations
+- Teams wanting maximum review granularity
+
+**Overkill:**
+- Simple features touching 1-2 files
+- Bug fixes with clear scope
+- Configuration changes
+
+### Workflow with Architecture Mode
+
+```
+draft init
+     │ (creates draft/architecture.md for brownfield)
+     │
+draft new-track "feature"
+     │ (creates draft/tracks/feature/spec.md + plan.md)
+     │
+draft decompose
+     │ (creates draft/tracks/feature/architecture.md)
+     │ → Architecture mode AUTO-ENABLED
+     │
+draft implement
+     │  ├── Story → CHECKPOINT
+     │  ├── Execution State → CHECKPOINT
+     │  ├── Skeletons → CHECKPOINT
+     │  ├── TDD (red/green/refactor)
+     │  └── ~200-line chunk review → CHECKPOINT
+     │
+draft coverage → coverage report → CHECKPOINT
+```
+
+**Key insight:** Running `draft decompose` automatically enables architecture features for that track. No manual configuration needed.
+
+---
+
+## Jira Integration (Optional)
+
+Sync tracks to Jira with a two-step workflow:
+
+1. **Preview** (`draft jira-preview`) - Generate `jira-export.md` with epic and stories
+2. **Review** - Adjust story points, descriptions, acceptance criteria as needed
+3. **Create** (`draft jira-create`) - Push to Jira via MCP server
+
+Story points are auto-calculated from task count:
+- 1-2 tasks = 1 point
+- 3-4 tasks = 2 points
+- 5-6 tasks = 3 points
+- 7+ tasks = 5 points
+
+Requires `jira.md` configuration with project key, board ID, and epic link field.
+
+## TDD Workflow (Optional)
+
+When enabled in workflow.md:
+
+1. **Red** - Write failing test first
+2. **Green** - Implement minimum code to pass
+3. **Refactor** - Clean up with tests green
+4. **Commit** - Following project conventions
+
+## Intent Mapping
+
+Natural language patterns that map to Draft commands:
+
+| User Says | Action |
+|-----------|--------|
+| "set up the project" | Initialize Draft |
+| "new feature", "add X" | Create new track |
+| "start implementing" | Execute tasks from plan |
+| "what's the status" | Show progress overview |
+| "undo", "revert" | Rollback changes |
+| "break into modules" | Module decomposition |
+| "check coverage" | Code coverage report |
+| "validate", "check quality" | Codebase quality validation |
+| "hunt bugs", "find bugs" | Systematic bug discovery |
+| "review code", "review track" | Code review orchestrator (track/project) |
+| "preview jira", "export to jira" | Preview Jira issues |
+| "create jira issues" | Create Jira issues via MCP |
+| "the plan" | Read active track's plan.md |
+| "the spec" | Read active track's spec.md |
+
+## Quality Disciplines
+
+### Verification Before Completion
+
+**Iron Law:** Evidence before claims, always.
+
+Every completion claim requires:
+1. Running verification command IN THE CURRENT MESSAGE
+2. Reading full output and confirming result
+3. Showing evidence with the claim
+4. Only then updating status markers
+
+**Never mark `[x]` without:**
+- Fresh test/build/lint run in this message
+- Confirmation that output shows success
+- Evidence visible in the response
+
+### Systematic Debugging
+
+**Iron Law:** No fixes without root cause investigation first.
+
+When blocked (`[!]`):
+1. **Investigate** - Read errors, reproduce, trace data flow (NO fixes yet)
+2. **Analyze** - Find similar working code, list differences
+3. **Hypothesize** - Single hypothesis, smallest possible test
+4. **Implement** - Regression test first, then fix, verify
+
+See `core/agents/debugger.md` for detailed process.
+
+### Root Cause Analysis (Bug Tracks)
+
+**Iron Law:** No fix without a confirmed root cause. No investigation without scope boundaries.
+
+For bug tracks (from Jira incidents, production bugs, regressions):
+1. **Reproduce & Scope** - Confirm bug, define blast radius, map to architecture.md modules
+2. **Trace & Analyze** - Follow data/control flow with `file:line` references, differential analysis
+3. **Hypothesize & Confirm** - One hypothesis at a time, log all results (including failures)
+4. **Fix & Prevent** - Regression test first, minimal fix within blast radius, blameless RCA summary
+
+Key practices (from Google SRE and distributed systems engineering):
+- **Blast radius first** — Know what's broken AND what isn't before investigating
+- **Differential analysis** — Compare working vs. failing cases systematically
+- **5 Whys** — Trace from symptom to systemic root cause
+- **Blameless RCA** — Focus on systems and processes, not individuals
+- **Code locality** — Every claim cites `file:line`, no hand-waving
+
+See `core/agents/rca.md` for detailed process.
+
+### Two-Stage Review
+
+At phase boundaries:
+1. **Stage 1: Spec Compliance** - Did implementation match specification?
+2. **Stage 2: Code Quality** - Clean architecture, proper error handling, meaningful tests?
+
+See `core/agents/reviewer.md` for detailed process.
+
+---
+
+## Agents
+
+Draft includes three specialized agent behaviors that activate during specific workflow phases.
+
+### Debugger Agent
+
+Activated when a task is blocked (`[!]`). Enforces root cause investigation before any fix attempts.
+
+**Four-Phase Process:**
+
+| Phase | Goal | Output |
+|-------|------|--------|
+| **1. Investigate** | Understand what's happening (NO fixes) | Failure description and reproduction steps |
+| **2. Analyze** | Find root cause, not symptoms | Root cause hypothesis with evidence |
+| **3. Hypothesize** | Test with minimal change | Confirmed root cause or return to Phase 2 |
+| **4. Implement** | Fix with confidence | Regression test + minimal fix + verification |
+
+**Anti-patterns:** "Quick fixes" without understanding, changing multiple things at once, skipping reproduction, deleting code to "test".
+
+**Escalation:** After 3 failed hypothesis cycles, document findings, list what's been eliminated, and ask for external input.
+
+See `core/agents/debugger.md` for the full process.
+
+### RCA Agent
+
+Activated for bug/RCA tracks created via `draft new-track`. Provides structured Root Cause Analysis methodology extending the debugger agent with practices from Google SRE postmortem culture and distributed systems debugging.
+
+**Four-Phase Process:**
+
+| Phase | Goal | Output |
+|-------|------|--------|
+| **1. Reproduce & Scope** | Confirm bug, define blast radius, map to architecture.md modules | Reproduction steps + scoped investigation area |
+| **2. Trace & Analyze** | Follow data/control flow to the divergence point | Flow trace with `file:line` references |
+| **3. Hypothesize & Confirm** | Test one hypothesis at a time, document all results | Confirmed root cause with evidence |
+| **4. Fix & Prevent** | Regression test first, minimal fix, RCA summary | Fix + test + blameless RCA document |
+
+**Key Techniques:**
+- **Differential Analysis** — Compare working vs. failing cases systematically
+- **5 Whys** — Trace from immediate cause to systemic root cause
+- **Blast Radius Scoping** — Define investigation boundaries before diving in
+- **Hypothesis Logging** — Track every hypothesis (failed ones narrow the search)
+- **Code Locality** — Every claim must cite `file:line`
+
+**Root Cause Classification:** logic error, race condition, data corruption, config error, dependency issue, missing validation, state management, resource exhaustion.
+
+**Anti-patterns:** Fixing symptoms without root cause, investigating the entire system, shotgun debugging, skipping failed hypothesis documentation, fixing adjacent issues "while we're here".
+
+See `core/agents/rca.md` for the full process including distributed systems considerations.
+
+### Reviewer Agent
+
+Activated at phase boundaries during `draft implement`. Performs a two-stage review before proceeding to the next phase.
+
+**Stage 1: Spec Compliance** — Did they build what was specified?
+- Requirements coverage (all functional requirements implemented)
+- Scope adherence (no missing features, no scope creep)
+- Behavior correctness (edge cases, error scenarios, integration points)
+
+If Stage 1 fails, gaps are listed and implementation resumes. Stage 2 does not run.
+
+**Stage 2: Code Quality** — Is the code well-crafted?
+- Architecture (follows project patterns, separation of concerns)
+- Error handling (appropriate level, helpful user-facing errors)
+- Testing (tests real logic, edge case coverage, maintainability)
+- Maintainability (readable, no performance issues, no security vulnerabilities)
+
+**Issue Classification:**
+
+| Severity | Definition | Action |
+|----------|------------|--------|
+| **Critical** | Blocks release, breaks functionality, security issue | Must fix before proceeding |
+| **Important** | Degrades quality, technical debt | Should fix before phase complete |
+| **Minor** | Style, optimization, nice-to-have | Note for later, don't block |
+
+See `core/agents/reviewer.md` for the output template and full process.
+
+### Architect Agent
+
+Activated during `draft decompose` and `draft implement` (when architecture mode is enabled). Guides structured pre-implementation design.
+
+**Capabilities:**
+- **Module decomposition** — Single responsibility, 1-3 files per module, clear API boundaries, testable in isolation
+- **Dependency analysis** — Import mapping, cycle detection, topological sort for implementation order
+- **Story writing** — Natural-language algorithm descriptions (Input → Process → Output); 5-15 lines max; describes the algorithm, not the implementation
+- **Execution state design** — Define input/intermediate/output/error state variables before coding
+- **Function skeleton generation** — Complete signatures with types and docstrings, no implementation bodies, ordered by control flow
+
+**Story Lifecycle:**
+1. **Placeholder** — Created during `draft decompose` in architecture.md
+2. **Written** — Filled in during `draft implement` as code comments; developer approves
+3. **Updated** — Maintained when algorithms change during refactoring
+
+See `core/agents/architect.md` for module rules, API surface examples, and cycle-breaking framework.
+
+---
+
+## Communication Style
+
+Lead with conclusions. Be concise. Prioritize clarity over comprehensiveness.
+
+- Direct, professional tone
+- Code over explanation when implementing
+- Complete, runnable code blocks
+- Show only changed lines with context for updates
+- Ask clarifying questions only when requirements are genuinely ambiguous
+
+## Principles
+
+1. **Plan before you build** - Create specs and plans that guide development
+2. **Maintain context** - Ensure agents follow style guides and product goals
+3. **Iterate safely** - Review plans before code is written
+4. **Work as a team** - Share project context across team members
+5. **Verify before claiming** - Evidence before assertions, always
+
+</core-file>
+
+---
+
+## core/knowledge-base.md
+
+<core-file path="core/knowledge-base.md">
+
+# Knowledge Base
+
+AI guidance during track creation must be grounded in vetted sources. When providing advice, cite the source to ensure credibility and traceability.
+
+---
+
+## Books
+
+### Architecture & Design
+- **Domain-Driven Design** (Eric Evans) — Bounded contexts, ubiquitous language, aggregates, strategic design
+- **Clean Architecture** (Robert Martin) — Dependency rule, boundaries, use cases, separation of concerns
+- **Designing Data-Intensive Applications** (Martin Kleppmann) — Data models, replication, partitioning, consistency, stream processing
+- **Building Evolutionary Architectures** (Ford, Parsons, Kua) — Fitness functions, incremental change, architectural governance
+
+### Reliability & Operations
+- **Release It!** (Michael Nygard) — Stability patterns, circuit breakers, bulkheads, timeouts, failure modes
+- **Site Reliability Engineering** (Google) — SLOs, error budgets, toil reduction, incident response
+- **The Phoenix Project** (Kim, Behr, Spafford) — Flow, feedback, continuous improvement
+
+### Craft & Practice
+- **The Pragmatic Programmer** (Hunt, Thomas) — Tracer bullets, DRY, orthogonality, good enough software
+- **Clean Code** (Robert Martin) — Naming, functions, error handling, code smells
+- **Refactoring** (Martin Fowler) — Code smells, refactoring patterns, incremental improvement
+- **Working Effectively with Legacy Code** (Michael Feathers) — Seams, characterization tests, breaking dependencies
+
+### Microservices & Distribution
+- **Building Microservices** (Sam Newman) — Service boundaries, decomposition, communication patterns
+- **Microservices Patterns** (Chris Richardson) — Saga, CQRS, event sourcing, API gateway
+- **Enterprise Integration Patterns** (Hohpe, Woolf) — Messaging, routing, transformation, endpoints
+
+### Testing
+- **Growing Object-Oriented Software, Guided by Tests** (Freeman, Pryce) — TDD outside-in, mock objects
+- **Unit Testing Principles, Practices, and Patterns** (Khorikov) — Test pyramid, test doubles, maintainable tests
+
+---
+
+## Standards & Principles
+
+### Security
+- **OWASP Top 10** — Injection, broken auth, XSS, insecure deserialization, security misconfiguration
+- **OWASP ASVS** — Application Security Verification Standard, security requirements
+- **OWASP Cheat Sheets** — Specific guidance for auth, session management, input validation
+
+### Design Principles
+- **SOLID** — Single responsibility, open/closed, Liskov substitution, interface segregation, dependency inversion
+- **12-Factor App** — Codebase, dependencies, config, backing services, build/release/run, processes, port binding, concurrency, disposability, dev/prod parity, logs, admin processes
+- **KISS / YAGNI / DRY** — Simplicity, avoiding premature abstraction, avoiding duplication
+
+### API Design
+- **REST Constraints** — Stateless, cacheable, uniform interface, layered system
+- **GraphQL Best Practices** — Schema design, resolvers, N+1 prevention
+- **API Versioning Strategies** — URL, header, content negotiation
+
+### Cloud Native
+- **CNCF Patterns** — Containers, service mesh, observability, declarative configuration
+- **Twelve-Factor App** — Cloud-native application methodology
+- **GitOps Principles** — Declarative, versioned, automated, auditable
+
+---
+
+## Patterns
+
+### Creational (GoF)
+- Factory, Abstract Factory, Builder, Prototype, Singleton
+
+### Structural (GoF)
+- Adapter, Bridge, Composite, Decorator, Facade, Flyweight, Proxy
+
+### Behavioral (GoF)
+- Chain of Responsibility, Command, Iterator, Mediator, Memento, Observer, State, Strategy, Template Method, Visitor
+
+### Resilience
+- **Circuit Breaker** — Fail fast, prevent cascade failures
+- **Bulkhead** — Isolate failures, limit blast radius
+- **Retry with Backoff** — Transient failure recovery
+- **Timeout** — Bound wait time, fail deterministically
+- **Fallback** — Graceful degradation
+
+### Data
+- **CQRS** — Separate read/write models
+- **Event Sourcing** — Append-only event log as source of truth
+- **Saga** — Distributed transaction coordination
+- **Outbox** — Reliable event publishing
+
+### Integration (EIP)
+- Message Channel, Message Router, Message Translator, Message Endpoint
+- Publish-Subscribe, Request-Reply, Competing Consumers
+- Dead Letter Channel, Wire Tap, Content-Based Router
+
+---
+
+## Anti-Patterns to Flag
+
+### Distributed Systems
+- **Fallacies of Distributed Computing** — Network reliability, zero latency, infinite bandwidth, secure network, topology stability, single admin, zero transport cost, homogeneous network
+- **Distributed Monolith** — Microservices with tight coupling
+- **Shared Database** — Services coupled through data
+
+### Architecture
+- **Big Ball of Mud** — No discernible structure
+- **Golden Hammer** — Using one solution for everything
+- **Cargo Cult** — Copying patterns without understanding
+- **Premature Optimization** — Optimizing before measuring
+
+### Code
+- **God Class** — Class doing too much
+- **Feature Envy** — Method more interested in other class's data
+- **Shotgun Surgery** — Changes requiring many small edits across codebase
+- **Leaky Abstraction** — Implementation details bleeding through interface
+
+### Security
+- **Security by Obscurity** — Hiding instead of securing
+- **Trust on First Use** — Accepting unverified credentials
+- **Hardcoded Secrets** — Credentials in source code
+
+---
+
+## Citation Format
+
+When providing guidance, cite sources naturally:
+
+> "Consider CQRS here (DDIA, Ch. 11) — separates read/write concerns which fits your high-read workload."
+
+> "This violates the Dependency Rule (Clean Architecture) — domain shouldn't know about infrastructure."
+
+> "Watch for N+1 queries (common GraphQL pitfall) — use DataLoader pattern."
+
+> "Circuit breaker pattern (Release It!) would help here — fail fast instead of cascading timeouts."
+
+</core-file>
+
+---
+
+## core/templates/intake-questions.md
+
+<core-file path="core/templates/intake-questions.md">
+
+# Intake Questions
+
+Structured questions for track creation. **Ask ONE question at a time.** Wait for user response before proceeding. Update drafts progressively.
+
+---
+
+## Flow Instructions
+
+**CRITICAL:** This is a conversation, not a form. Follow this pattern for EACH question:
+
+1. **Ask** — One question only. Wait for response.
+2. **Listen** — Process the user's answer.
+3. **Contribute** — Add your expertise (patterns, risks, alternatives, citations).
+4. **Update** — Modify spec-draft.md with what's been established.
+5. **Bridge** — Summarize briefly, then ask the next question.
+
+**DO NOT** dump multiple questions at once. The value is in the dialogue.
+
+---
+
+## Phase 1: Initial Context
+
+### Question 1.1: Existing Documentation
+> Start here. Gather any existing context before diving in.
+
+**Ask:**
+> "Do you have existing documentation for this work? (PRD, RFC, design doc, Jira ticket, or any notes)"
+
+**If yes:**
+- Request the document or key excerpts
+- Ingest and extract: goals, requirements, constraints, open questions
+- Summarize: "I've extracted [X, Y, Z]. I notice [gap] isn't covered yet."
+
+**If no:**
+- Acknowledge: "No problem. Let's build this from scratch together."
+- Proceed to Phase 2
+
+**Update spec-draft.md:** Add any extracted context to relevant sections.
+
+---
+
+## Phase 2: Problem Space
+
+### Question 2.1: Problem Definition
+**Ask:**
+> "What problem are we solving?"
+
+**After response, contribute:**
+- Pattern recognition: "This sounds similar to [industry pattern]..."
+- Domain concepts: Reference Jobs-to-be-Done, DDD problem space if relevant
+- Clarifying probe: "When you say [X], do you mean [A] or [B]?"
+
+**Update spec-draft.md:** Problem Statement section.
+
+---
+
+### Question 2.2: Urgency & Impact
+**Ask:**
+> "Why does this problem matter now? What happens if we don't solve it?"
+
+**After response, contribute:**
+- Validate urgency: Is this symptom or root cause?
+- Impact analysis: Who's affected? How severely?
+- Reference: 5 Whys technique if they're describing symptoms
+
+**Update spec-draft.md:** Background & Why Now section.
+
+---
+
+### Question 2.3: Users & Workarounds
+**Ask:**
+> "Who experiences this pain? How do they currently cope?"
+
+**After response, contribute:**
+- User segmentation: Are there different user types with different needs?
+- Workaround analysis: Current workarounds often reveal requirements
+- Prior art: "Similar products handle this by [X]..."
+
+**Update spec-draft.md:** Add user context to Background.
+
+---
+
+### Question 2.4: Scope Boundary
+**Ask:**
+> "What's the scope boundary? Where does this problem end and adjacent problems begin?"
+
+**After response, contribute:**
+- Identify adjacent problems that should NOT be solved here
+- Reference: Bounded Context (DDD)
+- Flag scope creep risks: "I'd suggest explicitly excluding [X]..."
+
+**Update spec-draft.md:** Non-Goals section.
+
+---
+
+### Checkpoint: Problem Space Complete
+
+**Summarize:**
+> "Here's what we've established about the problem:
+> - Problem: [summary]
+> - Why now: [summary]
+> - Users: [summary]
+> - Scope: [in] / [out]
+>
+> Does this capture it accurately, or should we refine anything before moving to solutions?"
+
+**Wait for confirmation before proceeding.**
+
+---
+
+## Phase 3: Solution Space
+
+### Question 3.1: Simplest Solution
+**Ask:**
+> "What's the simplest version that solves this problem?"
+
+**After response, contribute:**
+- MVP identification: What's truly essential vs nice-to-have?
+- Gold-plating risks: "We could simplify by [X]..."
+- Reference: YAGNI, Walking Skeleton, Tracer Bullet (Pragmatic Programmer)
+
+**Update spec-draft.md:** Requirements > Functional section.
+
+---
+
+### Question 3.2: Approach Rationale
+**Ask:**
+> "Why this approach over alternatives?"
+
+**After response, contribute:**
+- Present 2-3 alternative approaches with trade-offs
+- Reference: Architecture Decision Records pattern
+- Probe: "Have you considered [alternative]? Trade-off would be [X]..."
+
+**Update spec-draft.md:** Technical Approach section.
+
+---
+
+### Question 3.3: Explicit Non-Goals
+**Ask:**
+> "What are we explicitly NOT doing? What should be out of scope?"
+
+**After response, contribute:**
+- Suggest common scope creep items to exclude
+- Reference: Anti-goals pattern, MoSCoW prioritization
+- "I'd recommend also excluding [X] to keep scope tight..."
+
+**Update spec-draft.md:** Non-Goals section (append to existing).
+
+---
+
+### Question 3.4: Architecture Fit
+**Ask:**
+> "How does this fit with the current architecture?"
+
+**After response, contribute:**
+- Cross-reference architecture.md for integration points
+- Identify affected modules/components
+- Reference: Clean Architecture boundaries, module coupling
+- Flag: "This will touch [modules]. Consider [integration pattern]..."
+
+**Update spec-draft.md:** Context References and Technical Approach.
+
+---
+
+### Question 3.5: Reusable Patterns
+**Ask:**
+> "What existing patterns or components can we leverage?"
+
+**After response, contribute:**
+- Search codebase context for reusable patterns
+- Suggest tech-stack.md conventions to follow
+- Reference: DRY, existing abstractions
+- "I see [existing component] could be extended for this..."
+
+**Update spec-draft.md:** Technical Approach section.
+
+---
+
+### Checkpoint: Solution Space Complete
+
+**Summarize:**
+> "Here's the proposed solution:
+> - Approach: [summary]
+> - Why this approach: [rationale]
+> - Not doing: [non-goals]
+> - Architecture fit: [affected modules]
+> - Reusing: [existing patterns]
+>
+> Ready to discuss risks, or want to refine the approach?"
+
+**Wait for confirmation before proceeding.**
+
+---
+
+## Phase 4: Risk & Constraints
+
+### Question 4.1: What Could Go Wrong
+**Ask:**
+> "What could go wrong with this approach?"
+
+**After response, contribute:**
+- Surface risks user may not have considered
+- Security: Reference OWASP Top 10 if relevant
+- Performance: Identify potential bottlenecks
+- Edge cases: "What happens when [edge case]?"
+- Reference: Failure mode analysis, distributed systems fallacies
+
+**Update spec-draft.md:** Open Questions section.
+
+---
+
+### Question 4.2: Dependencies & Blockers
+**Ask:**
+> "What dependencies or blockers exist? (External APIs, other teams, data, infrastructure)"
+
+**After response, contribute:**
+- Identify external dependencies and their reliability
+- Team dependencies: Who else needs to be involved?
+- Data dependencies: What data do we need? Where does it come from?
+- Reference: Critical path analysis
+
+**Update spec-draft.md:** Open Questions and Technical Approach.
+
+---
+
+### Question 4.3: Assumptions
+**Ask:**
+> "What assumptions are we making? Why might this fail?"
+
+**After response, contribute:**
+- List implicit assumptions explicitly
+- Fact-check against tech-stack.md and architecture.md
+- Reference: Pre-mortem technique
+- "I'm assuming [X]. If that's wrong, [consequence]..."
+
+**Update spec-draft.md:** Open Questions section.
+
+---
+
+### Question 4.4: Constraints
+**Ask:**
+> "What constraints must we operate within? (Timeline, tech limitations, compliance, performance requirements)"
+
+**After response, contribute:**
+- Identify tech constraints from tech-stack.md
+- Performance requirements: Latency, throughput, scale
+- Compliance: GDPR, SOC2, industry-specific
+- Reference: 12-Factor App constraints, NFR frameworks
+
+**Update spec-draft.md:** Requirements > Non-Functional section.
+
+---
+
+### Question 4.5: Security & Compliance
+**Ask:**
+> "Are there security or compliance considerations?"
+
+**After response, contribute:**
+- Flag relevant OWASP concerns
+- Data privacy: PII handling, encryption, access control
+- Authentication/authorization patterns
+- Reference: OWASP ASVS, security by design principles
+
+**Update spec-draft.md:** Requirements > Non-Functional section.
+
+---
+
+### Checkpoint: Risks Complete
+
+**Summarize:**
+> "Key risks and constraints identified:
+> - Risks: [list]
+> - Dependencies: [list]
+> - Assumptions: [list]
+> - Constraints: [list]
+> - Security: [considerations]
+>
+> Anything else that could derail this, or ready to define success criteria?"
+
+**Wait for confirmation before proceeding.**
+
+---
+
+## Phase 5: Success Criteria
+
+### Question 5.1: Definition of Done
+**Ask:**
+> "How do we know this is complete? What must be true when we're done?"
+
+**After response, contribute:**
+- Suggest measurable acceptance criteria
+- Convert vague criteria to testable outcomes
+- Reference: SMART criteria, Given-When-Then format
+- "I'd phrase that as: 'Given [X], when [Y], then [Z]'..."
+
+**Update spec-draft.md:** Acceptance Criteria section.
+
+---
+
+### Question 5.2: Verification Strategy
+**Ask:**
+> "How will we verify it works correctly?"
+
+**After response, contribute:**
+- Suggest testing strategies appropriate to feature type
+- Reference: Test pyramid, TDD practices
+- Integration testing: What integration points need testing?
+- "I'd recommend [unit/integration/e2e] tests for [component]..."
+
+**Update spec-draft.md:** Acceptance Criteria section.
+
+---
+
+### Question 5.3: Stakeholder Acceptance
+**Ask:**
+> "What would make stakeholders accept this? What does success look like to them?"
+
+**After response, contribute:**
+- Align with product.md goals
+- Suggest demo scenarios
+- Reference: Stakeholder analysis, acceptance criteria patterns
+- "For [stakeholder], I'd demonstrate [specific scenario]..."
+
+**Update spec-draft.md:** Acceptance Criteria section.
+
+---
+
+### Checkpoint: Success Criteria Complete
+
+**Summarize:**
+> "Success criteria defined:
+> - Done when: [criteria list]
+> - Verified by: [testing approach]
+> - Stakeholders accept when: [demo scenarios]
+>
+> Ready to finalize the spec?"
+
+**Wait for confirmation before proceeding.**
+
+---
+
+## Phase 6: Finalization
+
+### Spec Review
+
+**Present complete spec-draft.md:**
+> "Here's the complete specification:
+> [Display spec-draft.md content]
+>
+> Open questions remaining: [list any]
+>
+> Ready to finalize this spec, or any changes needed?"
+
+**If changes needed:**
+- Discuss specific sections
+- Update spec-draft.md
+- Return to this review step
+
+**If confirmed:**
+- Promote spec-draft.md → spec.md
+- Announce: "Spec finalized. Now let's create the implementation plan."
+
+---
+
+### Plan Creation
+
+**After spec is finalized, propose plan structure:**
+> "Based on the spec, I propose these phases:
+> - Phase 1: [name] — [goal]
+> - Phase 2: [name] — [goal]
+> - Phase 3: [name] — [goal]
+>
+> Each phase will have specific tasks with file references and tests.
+> Does this phasing make sense, or should we adjust?"
+
+**After confirmation:**
+- Build out detailed plan-draft.md with tasks
+- Present for review
+- On confirmation: promote plan-draft.md → plan.md
+
+---
+
+## Anti-Patterns
+
+**STOP if you're doing any of these:**
+
+- ❌ Asking multiple questions at once
+- ❌ Moving to next question before user responds
+- ❌ Accepting answers without contributing expertise
+- ❌ Not citing sources when giving advice
+- ❌ Skipping checkpoints between phases
+- ❌ Not updating drafts after each answer
+- ❌ Rushing to finalization without thorough exploration
+
+**The goal is collaborative understanding, not speed.**
+
+</core-file>
+
+---
+
+## core/templates/architecture.md
+
+<core-file path="core/templates/architecture.md">
+
+# Architecture: [Name]
+
+## System Overview
+
+**Key Takeaway:** [One-paragraph summary of the system's purpose, primary function, and what makes it tick]
+
+### System Architecture Diagram
+
+```mermaid
+graph TD
+    subgraph Presentation["Presentation Layer"]
+        A[Component/Route A]
+        B[Component/Route B]
+    end
+    subgraph Logic["Business Logic Layer"]
+        C[Service/Controller A]
+        D[Service/Controller B]
+    end
+    subgraph Data["Data Layer"]
+        E[Repository/Store]
+        F[(Database)]
+        G[(Cache)]
+    end
+    A --> C
+    B --> D
+    C --> E
+    D --> E
+    E --> F
+    E --> G
+```
+
+> Replace with actual system layers and components discovered during codebase analysis.
+
+---
+
+## Phase 1: Orientation
+
+### Directory Structure
+
+| Directory | Responsibility | Key Files |
+|-----------|---------------|-----------|
+| `src/` | Main application code | [entry point files] |
+| `tests/` | Test suites | [test config] |
+| `config/` | Configuration | [env, app config] |
+
+```mermaid
+graph TD
+    Root["project-root/"] --> Src["src/"]
+    Root --> Tests["tests/"]
+    Root --> Config["config/"]
+    Src --> Models["models/"]
+    Src --> Services["services/"]
+    Src --> Routes["routes/"]
+```
+
+> Map top-level directories and their single-sentence responsibilities. Respect `.gitignore`.
+
+### Entry Points & Critical Paths
+
+| Entry Point | Type | File | Description |
+|-------------|------|------|-------------|
+| Application startup | Main | `src/index.ts` | Initializes app, connects DB, starts server |
+| API routes | HTTP | `src/routes/` | Request handling entry |
+| Background jobs | Worker | `src/jobs/` | Scheduled/queued task entry |
+| CLI commands | CLI | `src/cli/` | Command-line interface entry |
+
+> Identify primary entry points: API routes, main loops, event listeners, CLI commands, serverless handlers.
+
+### Request/Response Flow
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Router
+    participant Controller
+    participant Service
+    participant Repository
+    participant DB
+
+    Client->>Router: HTTP Request
+    Router->>Controller: Route match
+    Controller->>Service: Business operation
+    Service->>Repository: Data access
+    Repository->>DB: Query
+    DB-->>Repository: Result
+    Repository-->>Service: Domain object
+    Service-->>Controller: Result
+    Controller-->>Client: HTTP Response
+```
+
+> Trace one representative request through the full stack. Replace with actual layers.
+
+### Tech Stack Inventory
+
+| Category | Technology | Version | Config File |
+|----------|-----------|---------|-------------|
+| Language | [e.g., TypeScript] | [e.g., 5.x] | `tsconfig.json` |
+| Framework | [e.g., Express] | [e.g., 4.18] | `package.json` |
+| Database | [e.g., PostgreSQL] | [e.g., 15] | `docker-compose.yml` |
+| ORM | [e.g., Prisma] | [e.g., 5.x] | `prisma/schema.prisma` |
+| Testing | [e.g., Jest] | [e.g., 29.x] | `jest.config.ts` |
+
+> Auto-detected from package manager files. Cross-referenced with `draft/tech-stack.md`.
+
+---
+
+## Phase 2: Logic
+
+### Data Lifecycle
+
+```mermaid
+flowchart LR
+    Input["Input\n(API/Event/CLI)"] --> Validate["Validation\n& Parsing"]
+    Validate --> Transform["Transform\n& Enrich"]
+    Transform --> Process["Business\nLogic"]
+    Process --> Persist["Persistence\n& Side Effects"]
+    Persist --> Output["Response\n& Events"]
+```
+
+> Map how primary data objects enter, transform, persist, and exit the system.
+
+### Primary Data Objects
+
+| Object | Created At | Modified At | Persisted In | Key Fields |
+|--------|-----------|-------------|--------------|------------|
+| [e.g., User] | `src/auth/register.ts` | `src/user/profile.ts` | `users` table | id, email, role |
+| [e.g., Order] | `src/orders/create.ts` | `src/orders/update.ts` | `orders` table | id, status, total |
+
+> Track the lifecycle of 3-5 primary domain objects through the system.
+
+### Design Patterns
+
+| Pattern | Where Used | Purpose |
+|---------|-----------|---------|
+| [e.g., Repository] | `src/repos/` | Data access abstraction |
+| [e.g., Factory] | `src/factories/` | Object creation |
+| [e.g., Middleware] | `src/middleware/` | Cross-cutting concerns |
+| [e.g., Observer/Events] | `src/events/` | Decoupled communication |
+
+### Anti-Patterns & Complexity Hotspots
+
+| Location | Issue | Severity | Notes |
+|----------|-------|----------|-------|
+| [e.g., `src/legacy/handler.ts`] | [e.g., God function, 500+ lines] | High | [Unknown/Legacy Context Required] |
+
+> Flag areas of high cyclomatic complexity, god objects, circular dependencies, or code that deviates from the dominant patterns. Mark unclear business reasons as "Unknown/Legacy Context Required".
+
+### Conventions & Guardrails
+
+| Convention | Pattern | Example |
+|-----------|---------|---------|
+| Error handling | [e.g., Custom error classes] | `throw new AppError('NOT_FOUND', 404)` |
+| Logging | [e.g., Structured JSON] | `logger.info({ userId, action })` |
+| Naming | [e.g., kebab-case files, PascalCase classes] | `user-service.ts`, `class UserService` |
+| Validation | [e.g., Zod schemas at boundaries] | `const schema = z.object({...})` |
+
+> Extract conventions the codebase already follows. New code must respect these.
+
+### External Dependencies & Integrations
+
+```mermaid
+graph LR
+    App["Application"] --> Auth["Auth Provider\n(e.g., OAuth)"]
+    App --> Email["Email Service\n(e.g., SendGrid)"]
+    App --> Storage["File Storage\n(e.g., S3)"]
+    App --> Queue["Message Queue\n(e.g., Redis/SQS)"]
+    App --> ThirdParty["Third-Party API\n(e.g., Stripe)"]
+```
+
+> Map external service dependencies. Identify which are critical vs. optional.
+
+---
+
+## Phase 3: Module Discovery
+
+> **Init vs Decompose**: `draft init` discovers and documents **existing** modules by analyzing the codebase's import graph and directory boundaries. `draft decompose` plans **new** modules for features or refactors. Both write to this section — init sets the baseline, decompose extends it. Existing modules (`[x] Existing`) should not be removed by decompose.
+
+### Module Dependency Diagram
+
+```mermaid
+graph LR
+    A["Module A"] --> B["Module B"]
+    A --> C["Module C"]
+    B --> D["Module D"]
+    C --> D
+```
+
+> Generated from import/require analysis. Use actual module names from the codebase.
+
+### Dependency Table
+
+| Module | Depends On | Depended By | Circular? |
+|--------|-----------|-------------|-----------|
+| Module A | - | Module B, Module C | No |
+| Module B | Module A | Module D | No |
+| Module C | Module A | Module D | No |
+| Module D | Module B, Module C | - | No |
+
+### Modules
+
+#### Module: [name]
+- **Responsibility:** [one sentence — what this module does]
+- **Files:** [actual source files in this module]
+- **API Surface:** [Key exported functions/classes/interfaces. Use language-specific format:]
+  - TypeScript: `createUser(data: CreateUserInput): Promise<User>`, `interface UserRepository { ... }`
+  - Python: `create_user(data: CreateUserInput) -> User`, `class UserRepository(Protocol): ...`
+  - Go: `func CreateUser(data CreateUserInput) (*User, error)`, `type UserRepository interface { ... }`
+  - Rust: `pub fn create_user(data: CreateUserInput) -> Result<User, Error>`, `pub trait UserRepository { ... }`
+- **Dependencies:** [which modules it imports from]
+- **Complexity:** [Low / Medium / High]
+- **Story:** [Brief summary of what this module currently does with file references, e.g.: "Handles user authentication via JWT — see `src/auth/index.ts:1-45`"]
+- **Status:** [x] Existing
+
+#### Module: [name]
+- **Responsibility:** [one sentence]
+- **Files:** [actual source files]
+- **API Surface:** [Use language-specific format — see first module example above]
+- **Dependencies:** [which modules it imports from]
+- **Complexity:** [Low / Medium / High]
+- **Story:** [Brief summary with file references]
+- **Status:** [x] Existing
+
+### Dependency Order
+
+1. [Leaf module — no dependencies] (foundational)
+2. [Module depending on #1]
+3. [Module depending on #1]
+4. [Module depending on #2 and #3] (most dependent)
+
+> Topological ordering from leaf to root. Helps engineers understand which parts are foundational vs. built on top.
+
+---
+
+## Notes
+
+- [Architecture decisions, trade-offs, or constraints worth documenting]
+- [Areas flagged as "Unknown/Legacy Context Required" need team input]
+
+</core-file>
+
+---
+
+## core/templates/jira.md
+
+<core-file path="core/templates/jira.md">
+
+# Jira Story Template (Minimal)
+
+## Summary
+[Brief, descriptive title]
+
+## Description
+
+```
+h3. Description:
+
+Problem Statement:
+[Describe the current problem or pain point]
+
+ * [Pain point 1]
+ * [Pain point 2]
+ * [Pain point 3]
+
+Solution:
+[Describe the proposed solution at a high level]
+
+Key Features:
+ # [Feature Category 1]
+
+ * [Feature detail 1]
+ * [Feature detail 2]
+
+ # [Feature Category 2]
+
+ * [Feature detail 1]
+ * [Feature detail 2]
+
+Benefits:
+ * [Benefit 1]: [Quantifiable impact]
+ * [Benefit 2]: [Quantifiable impact]
+
+Use Cases:
+ * [Use case 1]
+ * [Use case 2]
+ * [Use case 3]
+```
+
+## Acceptance Criteria
+
+```
+- [ ] [Criterion 1: Specific, testable requirement]
+- [ ] [Criterion 2: Specific, testable requirement]
+- [ ] [Criterion 3: Specific, testable requirement]
+```
+
+## Required Fields
+
+### Standard Fields
+- **Issue Type:** Story
+- **Priority:** Medium
+- **Components:** [Component name]
+- **Fix Version/s:** [Version or master]
+
+### People
+- **Assignee:** [Your email]
+- **Product Owner:** [PO email]
+- **Tech Lead:** [Tech lead email]
+- **Scrum Master:** [Scrum master email]
+
+### Team
+- **Developers:** [List developer emails]
+- **Reviewers:** [List reviewer emails]
+
+### Story Details
+- **Story Points:** [1/2/3/5/8/13]
+- **Work Type:** Operational Excellence
+- **Sub-Team:** [Sub-team name]
+- **Organization:** R&D
+
+### Development Status
+- **Development Status:** Not-Started
+
+### Security
+- **Requires Security Review:** Yes/No
+- **Security Review Status:** Review Needed
+
+### Quality Gates
+- [ ] Tasks complete
+- [ ] Functional Testing complete
+- [ ] 100% code unit tested or Automated
+- [ ] Acceptance criteria met
+- [ ] i18n impact review
+
+### Other
+- **Risk Assessment:** Toss Up
+- **Priority Level:** Normal
+- **Category:** Uncategorized
+- **Roadmap:** Future
+
+</core-file>
+
+---
+
+## core/templates/product.md
+
+<core-file path="core/templates/product.md">
+
+# Product: [Product Name]
+
+## Vision
+
+[One paragraph describing what this product does and why it matters to users]
+
+---
+
+## Target Users
+
+### Primary Users
+- **[User Type 1]**: [What they need, their context]
+- **[User Type 2]**: [What they need, their context]
+
+### Secondary Users
+- **[Admin/Support]**: [Their interaction with the product]
+
+---
+
+## Core Features
+
+### Must Have (P0)
+1. **[Feature 1]**: [Brief description]
+2. **[Feature 2]**: [Brief description]
+3. **[Feature 3]**: [Brief description]
+
+### Should Have (P1)
+1. **[Feature 4]**: [Brief description]
+2. **[Feature 5]**: [Brief description]
+
+### Nice to Have (P2)
+1. **[Feature 6]**: [Brief description]
+
+---
+
+## Success Criteria
+
+- [ ] [Measurable goal 1, e.g., "Users can complete signup in under 2 minutes"]
+- [ ] [Measurable goal 2]
+- [ ] [Measurable goal 3]
+
+---
+
+## Constraints
+
+### Technical
+- [Constraint, e.g., "Must support IE11"]
+- [Constraint, e.g., "API response time < 200ms"]
+
+### Business
+- [Constraint, e.g., "Must comply with GDPR"]
+- [Constraint, e.g., "Budget for external APIs: $X/month"]
+
+### Timeline
+- [Milestone 1]: [Date]
+- [Milestone 2]: [Date]
+
+---
+
+## Non-Goals
+
+Things explicitly out of scope for this product:
+
+- [Non-goal 1]
+- [Non-goal 2]
+
+---
+
+## Open Questions
+
+- [ ] [Question that needs resolution]
+- [ ] [Another question]
+
+</core-file>
+
+---
+
+## core/templates/product-guidelines.md
+
+<core-file path="core/templates/product-guidelines.md">
+
+# Product Guidelines
+
+## Writing Style
+- **Tone:** [professional / casual / technical — pick one and be consistent]
+- **Voice:** [first person "we" / third person "the system" / second person "you"]
+- **Terminology:** List domain-specific terms and their definitions
+  - Example: "Track" means a unit of work (feature, bug, refactor)
+  - Example: "Phase" means a group of related tasks within a track
+
+## Visual Identity
+- **Primary colors:** [hex values for main brand colors, if applicable]
+- **Secondary colors:** [hex values for accents, if applicable]
+- **Typography:** [font families for headings, body, code, if applicable]
+- **Logo usage:** [placement rules, minimum size, if applicable]
+
+## UX Principles
+
+Rank these by priority for your product:
+
+1. [e.g., "Convention over configuration" — minimize required decisions]
+2. [e.g., "Accessible by default" — WCAG AA compliance minimum]
+3. [e.g., "Progressive disclosure" — show complexity only when needed]
+4. [e.g., "Filesystem as UI" — use files and directories users already understand]
+
+## Error Handling
+- **Error message tone:** [helpful with fix suggestions / technical with codes / minimal]
+- **User feedback patterns:** [toasts / modals / inline messages / status bar]
+- **Error recovery:** [auto-retry / manual retry / graceful degradation]
+
+## Content Standards
+- **Date format:** [ISO 8601 `YYYY-MM-DD` / localized / relative "2 hours ago"]
+- **Number format:** [locale-specific rules, decimal separator, thousands grouping]
+- **Required disclaimers:** [legal, regulatory, or attribution requirements]
+- **Internationalization:** [i18n required / English-only / planned for future]
+
+</core-file>
+
+---
+
+## core/templates/tech-stack.md
+
+<core-file path="core/templates/tech-stack.md">
+
+# Tech Stack
+
+## Languages
+
+| Language | Version | Purpose |
+|----------|---------|---------|
+| [Primary] | [Version] | Main application code |
+| [Secondary] | [Version] | [Scripts/tooling/etc] |
+
+---
+
+## Frameworks & Libraries
+
+### Core
+| Name | Version | Purpose |
+|------|---------|---------|
+| [Framework] | [Version] | [Purpose] |
+| [Library] | [Version] | [Purpose] |
+
+### Development
+| Name | Version | Purpose |
+|------|---------|---------|
+| [Tool] | [Version] | [Purpose] |
+
+---
+
+## Database
+
+| Type | Technology | Purpose |
+|------|------------|---------|
+| Primary | [DB Name] | Main data storage |
+| Cache | [Cache Name] | [If applicable] |
+| Search | [Search Engine] | [If applicable] |
+
+---
+
+## Testing
+
+| Level | Framework | Coverage Target |
+|-------|-----------|-----------------|
+| Unit | [Framework] | [80%+] |
+| Integration | [Framework] | [Key flows] |
+| E2E | [Framework] | [Critical paths] |
+
+---
+
+## Build & Deploy
+
+### Build
+- **Tool**: [Webpack/Vite/esbuild/etc]
+- **Output**: [dist/build/etc]
+
+### CI/CD
+- **Platform**: [GitHub Actions/CircleCI/etc]
+- **Triggers**: [on push, PR, etc]
+
+### Deployment
+- **Target**: [Vercel/AWS/GCP/etc]
+- **Environments**: [dev, staging, prod]
+
+---
+
+## Code Patterns
+
+### Architecture
+- **Pattern**: [Clean Architecture/MVC/Hexagonal/etc]
+- **Rationale**: [Why this pattern]
+
+### State Management
+- **Approach**: [Redux/Zustand/Context/etc]
+- **Rationale**: [Why this approach]
+
+### Error Handling
+- **Strategy**: [Centralized/per-module/etc]
+- **Logging**: [Tool/service]
+
+### API Design
+- **Style**: [REST/GraphQL/gRPC]
+- **Conventions**: [Naming, versioning]
+
+---
+
+## Component Overview
+
+```mermaid
+graph TD
+    subgraph Frontend["Frontend"]
+        UI["UI Framework"]
+        State["State Management"]
+    end
+    subgraph Backend["Backend"]
+        API["API Layer"]
+        BL["Business Logic"]
+        DAL["Data Access"]
+    end
+    subgraph Infrastructure["Infrastructure"]
+        DB[(Database)]
+        Cache[(Cache)]
+        Queue["Message Queue"]
+    end
+    UI --> State
+    State --> API
+    API --> BL
+    BL --> DAL
+    DAL --> DB
+    DAL --> Cache
+    BL --> Queue
+```
+
+> Replace with actual components and their relationships from the codebase. For detailed architecture analysis see `draft/architecture.md`.
+
+---
+
+## External Services
+
+| Service | Purpose | Credentials Location |
+|---------|---------|---------------------|
+| [Service 1] | [Purpose] | [.env / secrets manager] |
+| [Service 2] | [Purpose] | [.env / secrets manager] |
+
+---
+
+## Code Style
+
+### Linting
+- **Tool**: [ESLint/Prettier/etc]
+- **Config**: [.eslintrc / prettier.config.js]
+
+### Formatting
+- **Indentation**: [2 spaces / 4 spaces / tabs]
+- **Line Length**: [80 / 100 / 120]
+- **Quotes**: [single / double]
+
+### Naming Conventions
+- **Files**: [kebab-case / camelCase / PascalCase]
+- **Functions**: [camelCase]
+- **Classes**: [PascalCase]
+- **Constants**: [SCREAMING_SNAKE_CASE]
+
+</core-file>
+
+---
+
+## core/templates/workflow.md
+
+<core-file path="core/templates/workflow.md">
+
+# Development Workflow
+
+## Test-Driven Development
+
+**Mode:** [strict | flexible | none]
+
+### Strict TDD
+
+**Iron Law:** No production code without a failing test first.
+
+The Cycle:
+1. **RED** - Write failing test, run it, VERIFY it FAILS
+2. **GREEN** - Write minimum code, run test, VERIFY it PASSES
+3. **REFACTOR** - Clean up, keep tests green throughout
+
+**Red Flags - Delete and Restart if:**
+- Code written before test exists
+- Test passes immediately (testing wrong thing or wrong code)
+- "Just this once" rationalization
+- "This is too simple to test"
+- Running test mentally instead of actually
+
+**Checklist:**
+- [ ] Test written and committed BEFORE implementation
+- [ ] Test fails with expected failure (not syntax error)
+- [ ] Minimum code to pass (no extra features)
+- [ ] Refactor preserves green state
+
+### Flexible TDD
+- [ ] Tests required but can be written after implementation
+- [ ] All code must have tests before marking complete
+- [ ] Refactoring encouraged
+
+### No TDD
+- [ ] Tests optional
+- [ ] Manual verification acceptable
+
+---
+
+## Commit Strategy
+
+**Format:** `type(scope): description`
+
+### Types
+| Type | Use For |
+|------|---------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation only |
+| `style` | Formatting, whitespace |
+| `refactor` | Code restructure without behavior change |
+| `test` | Adding or fixing tests |
+| `chore` | Build, tooling, dependencies |
+
+### Scope
+- Use track ID for Draft work: `feat(add-auth): ...`
+- Use component name otherwise: `fix(api): ...`
+
+### Commit Frequency
+- [ ] After each task completion
+- [ ] At phase boundaries
+- [ ] End of session
+
+---
+
+## Code Review
+
+### Self-Review Checklist
+- [ ] Code follows project style guide
+- [ ] Tests pass locally
+- [ ] No console.log or debug statements
+- [ ] Error handling complete
+- [ ] Edge cases considered
+
+### Before Marking Task Complete
+- [ ] Run linter
+- [ ] Run tests
+- [ ] Review diff
+
+---
+
+## Phase Verification
+
+At the end of each phase:
+
+1. **Run full test suite**
+2. **Manual smoke test** if applicable
+3. **Review against phase goals** in plan.md
+4. **Document any issues** found
+
+Do not proceed to next phase until verification passes.
+
+---
+
+## Validation
+
+### Auto-Validation
+- [ ] Auto-validate at track completion
+
+When enabled, runs `draft validate --track <id>` automatically when `draft implement` completes a track.
+
+### Blocking Behavior
+- [ ] Block on validation failures
+
+When enabled, halt track completion if critical (✗) issues found. Requires fixes before marking complete.
+
+When disabled (default), validation failures produce warnings only. Issues documented in `draft/tracks/<id>/validation-report.md`.
+
+### Validation Scope
+- [x] Architecture conformance
+- [x] Dead code detection
+- [x] Dependency cycle detection
+- [x] Security scan
+- [x] Performance anti-patterns
+- [x] Spec compliance (track-level only)
+- [x] Architectural impact (track-level only)
+- [x] Regression risk (track-level only)
+
+Uncheck categories to skip during validation. All enabled by default.
+
+> **How to configure:** Edit the checkboxes above directly in this file. Change `[x]` to `[ ]` to disable a validation category. The `draft validate` command reads these settings before running.
+
+---
+
+## Session Management
+
+### Starting a Session
+1. Run `draft status` to see current state
+2. Read active track's spec.md and plan.md
+3. Find current task (marked `[~]` or first `[ ]`)
+
+### Ending a Session
+1. Commit any pending changes
+2. Update plan.md with progress
+3. Add notes for next session if mid-task
+
+### Context Handoff
+If task exceeds 5 iterations:
+1. Document current state in plan.md
+2. Note any discoveries or blockers
+3. Suggest resumption approach
+
+</core-file>
+
+---
+
+## core/agents/architect.md
+
+<core-file path="core/agents/architect.md">
+
+---
+description: Architecture agent for module decomposition, story writing, execution state design, and function skeleton generation. Guides structured pre-implementation design.
+capabilities:
+  - Module identification and boundary definition
+  - Dependency graph analysis and implementation ordering
+  - Algorithm documentation (Stories)
+  - Execution state design
+  - Function skeleton generation
+---
+
+# Architect Agent
+
+You are an architecture agent for Draft-based development. You guide developers through structured pre-implementation design: decomposing systems into modules, documenting algorithms, designing execution state, and generating function skeletons.
+
+## Module Decomposition
+
+### Rules
+
+1. **Single Responsibility** - Each module owns one concern
+2. **Size Constraint** - 1-3 files per module. If more, split further.
+3. **Clear API Boundary** - Every module has a defined public interface
+4. **Minimal Coupling** - Modules communicate through interfaces, not internals
+5. **Testable in Isolation** - Each module can be unit-tested independently
+
+### Module Definition Format
+
+For each module, define:
+- **Name** - Short, descriptive (e.g., `auth`, `scheduler`, `parser`)
+- **Responsibility** - One sentence describing what it owns
+- **Files** - Expected source files
+- **API Surface** - Public functions/classes/interfaces (see language-specific examples below)
+- **Dependencies** - Which other modules it imports from
+- **Complexity** - Low / Medium / High
+
+Output format: Use the template at `core/templates/architecture.md` when generating architecture documents.
+
+### API Surface Examples by Language
+
+Represent API surfaces using the conventions of the project's primary language:
+
+**TypeScript:**
+```
+- API Surface:
+  - `createUser(data: CreateUserInput): Promise<User>`
+  - `deleteUser(id: string): Promise<void>`
+  - `interface UserRepository { findById, findByEmail, save }`
+  - `type CreateUserInput = { name: string; email: string }`
+```
+
+**Python:**
+```
+- API Surface:
+  - `create_user(data: CreateUserInput) -> User`
+  - `delete_user(user_id: str) -> None`
+  - `class UserRepository(Protocol): find_by_id, find_by_email, save`
+  - `@dataclass CreateUserInput: name: str, email: str`
+```
+
+**Go:**
+```
+- API Surface:
+  - `func CreateUser(data CreateUserInput) (*User, error)`
+  - `func DeleteUser(id string) error`
+  - `type UserRepository interface { FindByID, FindByEmail, Save }`
+  - `type CreateUserInput struct { Name, Email string }`
+```
+
+**Rust:**
+```
+- API Surface:
+  - `pub fn create_user(data: CreateUserInput) -> Result<User, Error>`
+  - `pub fn delete_user(id: &str) -> Result<(), Error>`
+  - `pub trait UserRepository { fn find_by_id, fn find_by_email, fn save }`
+  - `pub struct CreateUserInput { pub name: String, pub email: String }`
+```
+
+Use the project's primary language from `tech-stack.md`. Include function signatures with types, exported interfaces/traits/protocols, and key data structures.
+
+### Ingredients
+
+Each module typically contains some combination of:
+- **API** - Public interface exposed to other modules
+- **Control Flow** - Core logic and decision paths
+- **Execution State** - Intermediate data structures used during processing
+- **Functions** - Operations that transform inputs to outputs
+
+---
+
+## Dependency Analysis
+
+### Process
+
+1. **Identify edges** - Module A depends on Module B if A imports from B's API
+2. **Detect cycles** - Circular dependencies indicate poor boundaries. Break using the cycle-breaking framework below.
+3. **Topological sort** - Implementation order follows reverse dependency order (implement leaves first)
+4. **Identify parallelism** - Modules with no dependency relationship can be implemented concurrently
+
+### Dependency Diagram Format
+
+```
+[auth] ──> [database]
+   │            │
+   └──> [config] <──┘
+            │
+      [logging] (shared, no deps)
+```
+
+Use ASCII art. Arrow direction: `A ──> B` means A depends on B.
+
+### Cycle-Breaking Framework
+
+When modules form a circular dependency (A → B → A), apply this decision process:
+
+**Step 1: Identify the shared concern.** What data or behavior do both modules need from each other? Name it explicitly.
+
+**Step 2: Choose a strategy:**
+
+| Pattern | When to Use | Result |
+|---------|-------------|--------|
+| **Extract shared interface** | Both modules need the same abstraction (types, contracts) | New `<name>-types` or `<name>-shared` module containing only interfaces/types |
+| **Invert dependency** | One module only needs a callback or event from the other | Dependent module accepts a function/interface instead of importing directly |
+| **Merge modules** | The two modules are actually one concern split artificially | Combined module with single responsibility |
+
+**Step 3: Name the extracted module.** Use `<shared-concern>-types` for pure type modules, `<shared-concern>-core` for shared logic modules. Never use generic names like `shared` or `common`.
+
+**Step 4: Define the extracted module's API.** It should contain only what both modules need — nothing more.
+
+**Example:**
+
+Before (cycle):
+```
+[user-service] ──> [notification-service]
+       ↑                    │
+       └────────────────────┘
+```
+`user-service` imports `sendNotification` from `notification-service`.
+`notification-service` imports `getUserPreferences` from `user-service`.
+
+Analysis: Both modules need user preference data. Extract it.
+
+After (resolved):
+```
+[user-preferences] (new - extracted shared concern)
+       ↑         ↑
+       │         │
+[user-service]  [notification-service]
+       │
+       └──> [notification-service]
+```
+
+New module `user-preferences`:
+- **Responsibility:** Owns user notification/display preference data and access
+- **API Surface:** `getUserPreferences(userId): Preferences`
+- **Files:** `user-preferences.ts`, `user-preferences.test.ts`
+- **Dependencies:** none (leaf module)
+
+### Dependency Table Format
+
+| Module | Depends On | Depended By |
+|--------|-----------|-------------|
+| logging | - | auth, database, config |
+| config | logging | auth, database |
+| database | config, logging | auth |
+| auth | database, config, logging | - |
+
+---
+
+## Story Writing
+
+### Purpose
+
+A Story is a natural-language algorithm description placed at the top of a code file. It captures the **Input -> Output** path and the algorithmic approach before any code is written.
+
+### Story Lifecycle
+
+Stories flow through three stages:
+
+1. **Placeholder** — During `draft decompose`, each module in `architecture.md` gets a Story field set to `[placeholder - filled during draft implement]`. This signals that the module exists but its algorithm hasn't been documented yet.
+
+2. **Written** — During `draft implement` (with architecture mode), before coding each module's first file, write the Story as a code comment at the top of the file. Present it to the developer for approval. Once approved, update the module's Story field in `architecture.md` with a one-line summary referencing the file:
+   ```markdown
+   - **Story:** Documented in `src/auth.ts:1-12` — validates token, resolves user, checks permissions
+   ```
+
+3. **Updated** — If the algorithm changes during refactoring, update both the code comment and the `architecture.md` summary. The code comment is the source of truth; the `architecture.md` entry is a pointer.
+
+**Key rule:** The `architecture.md` Story field is never the full story — it's a summary + file reference. The complete story lives as a comment in the source code.
+
+### Story Format
+
+```
+// Story: [Module/File Name]
+//
+// Input:  [what this module/function receives]
+// Process:
+//   1. [first algorithmic step]
+//   2. [second algorithmic step]
+//   3. [third algorithmic step]
+// Output: [what this module/function produces]
+//
+// Dependencies: [what this module relies on]
+// Side effects: [any mutations, I/O, or external calls]
+```
+
+### Guidelines
+
+- **Describe the algorithm, not the implementation** - "Sort by priority, then deduplicate" not "Use Array.sort() with comparator"
+- **Use natural language** - No code syntax in stories
+- **Be specific about data flow** - Name the data, describe transformations
+- **Keep it concise** - 5-15 lines max. If longer, the module is too complex.
+- **Update when algorithm changes** - Story must reflect current logic
+
+### Anti-Patterns
+
+| Don't | Instead |
+|-------|---------|
+| Describe implementation details | Describe the algorithm |
+| List every function call | Describe the data transformation |
+| Copy the code in English | Explain the "why" and "how" at algorithm level |
+| Write a novel | 5-15 lines maximum |
+
+---
+
+## Execution State Design
+
+### Purpose
+
+Define the intermediate state variables your code will use during processing. This step bridges the gap between the Story (algorithm) and Function Skeletons (code structure).
+
+### Process
+
+1. **Read the Story** - Understand the Input -> Output path
+2. **Identify intermediate values** - What data exists between input and output?
+3. **Study similar code** - Look for patterns in the codebase
+4. **Propose state variables** - Name, type, purpose for each
+5. **Present for approval** - Developer refines before coding
+
+### Execution State Format
+
+```
+## Execution State: [Module Name]
+
+### Input State
+- `rawConfig: Config` - Unvalidated configuration from file
+
+### Intermediate State
+- `parsedEntries: Entry[]` - Config entries after parsing
+- `validEntries: Entry[]` - Entries that passed validation
+- `resolvedDeps: Map<string, string[]>` - Dependency graph after resolution
+
+### Output State
+- `buildPlan: BuildPlan` - Ordered list of build steps
+
+### Error State
+- `validationErrors: ValidationError[]` - Accumulated validation failures
+```
+
+### Guidelines
+
+- Name variables clearly - the name should explain the data's role
+- Include types - even if approximate
+- Separate input/intermediate/output/error states
+- Flag mutable vs. immutable state
+
+---
+
+## Function Skeleton Generation
+
+### Purpose
+
+Generate function/method stubs with complete signatures before writing implementation. Establishes the code structure that the developer approves before TDD begins.
+
+### Skeleton Format
+
+```typescript
+/**
+ * Parses raw configuration entries from file content.
+ * Called after file is read, before validation.
+ */
+function parseConfigEntries(rawContent: string): Entry[] {
+  // TODO: Implement after approval
+}
+
+/**
+ * Validates entries against schema rules.
+ * Returns valid entries; accumulates errors in validationErrors.
+ */
+function validateEntries(
+  entries: Entry[],
+  schema: Schema
+): { valid: Entry[]; errors: ValidationError[] } {
+  // TODO: Implement after approval
+}
+```
+
+### Guidelines
+
+- **Complete signatures** - All parameters, return types, generics
+- **Docstrings** - One sentence describing purpose + when it's called
+- **No implementation** - Body is `// TODO` or language equivalent (`pass`, `unimplemented!()`)
+- **Follow project naming conventions** - Match patterns from `tech-stack.md`
+- **Order matches control flow** - Functions appear in the order they're called
+
+### Anti-Patterns
+
+| Don't | Instead |
+|-------|---------|
+| Partial signatures (missing types) | Include all types |
+| Implementation in skeletons | Only stubs |
+| Generic names (`processData`) | Specific names (`validateEntries`) |
+| Skip error-handling functions | Include error paths |
+
+---
+
+## Integration with Draft
+
+### In `draft decompose`
+
+1. Analyze scope (project or track)
+2. Apply module decomposition rules
+3. Generate dependency diagram and table
+4. Present for developer approval at each checkpoint
+
+### In `draft implement` (when architecture mode enabled)
+
+1. **Before coding a file** - Write Story, present for approval
+2. **Before TDD cycle** - Design execution state, generate skeletons, present each for approval
+3. **After task completion** - Update module status in `architecture.md` if it exists
+
+### Escalation
+
+If module boundaries are unclear after analysis:
+1. Document what you know
+2. List the ambiguous boundaries
+3. Ask developer to clarify responsibility ownership
+4. Do NOT guess at boundaries - wrong boundaries are worse than no boundaries
+
+</core-file>
+
+---
+
+## core/agents/debugger.md
+
+<core-file path="core/agents/debugger.md">
+
+---
+description: Systematic debugging agent for blocked tasks. Enforces root cause investigation before any fix attempts.
+capabilities:
+  - Error analysis and reproduction
+  - Data flow tracing
+  - Hypothesis testing
+  - Regression test creation
+---
+
+# Debugger Agent
+
+**Iron Law:** No fixes without root cause investigation first.
+
+You are a systematic debugging agent. When a task is blocked (`[!]`), follow this process exactly.
+
+## The Four Phases
+
+### Phase 1: Investigate (NO FIXES)
+
+**Goal:** Understand what's happening before changing anything.
+
+1. **Read the error** - Full error message, stack trace, logs
+2. **Reproduce** - Can you trigger the error consistently?
+3. **Trace data flow** - Follow the data from input to error point
+4. **Document findings** - Write down what you observe
+
+**Red Flags - STOP if you're:**
+- Tempted to make a "quick fix"
+- Guessing at the cause
+- Changing code "to see what happens"
+
+**Output:** Clear description of the failure and reproduction steps.
+
+---
+
+### Phase 2: Analyze
+
+**Goal:** Find the root cause, not just the symptoms.
+
+1. **Find similar working code** - Where does this work correctly?
+2. **List differences** - What's different between working and failing cases?
+3. **Check assumptions** - What did you assume was true? Verify each.
+4. **Narrow the scope** - What's the smallest change that breaks it?
+
+**Questions to answer:**
+- Is this a data problem or code problem?
+- Is this a timing/race condition?
+- Is this an environment difference?
+- Is this a state management issue?
+
+**Output:** Root cause hypothesis with supporting evidence.
+
+---
+
+### Phase 3: Hypothesize
+
+**Goal:** Test your hypothesis with minimal change.
+
+1. **Single hypothesis** - One cause, one test
+2. **Smallest possible test** - What's the minimum to prove/disprove?
+3. **Predict the outcome** - If hypothesis is correct, what will happen?
+4. **Run the test** - Execute and compare to prediction
+
+**If hypothesis is wrong:**
+- Return to Phase 2
+- Do NOT try another random fix
+- Update your understanding
+
+**Output:** Confirmed root cause OR return to Phase 2.
+
+---
+
+### Phase 4: Implement
+
+**Goal:** Fix with confidence and prevent regression.
+
+1. **Write regression test FIRST** - Test that fails now, will pass after fix
+2. **Implement minimal fix** - Address root cause, nothing extra
+3. **Run regression test** - Verify it passes
+4. **Run full test suite** - No other breakage
+5. **Document root cause** - Update plan.md with findings
+
+**Output:** Fix committed with regression test.
+
+---
+
+## Anti-Patterns (NEVER DO)
+
+| Don't | Instead |
+|-------|---------|
+| "Let me try this..." | Follow the four phases |
+| Change multiple things at once | One change, one test |
+| Skip reproduction | Always reproduce first |
+| Fix without understanding | Find root cause first |
+| Skip regression test | Always add one |
+| Delete/comment out code to "test" | Use proper debugging |
+
+## When to Escalate
+
+If after 3 hypothesis cycles you haven't found root cause:
+1. Document all findings
+2. List what you've eliminated
+3. Ask for external input
+4. Consider if this needs architectural review
+
+## Integration with Draft
+
+When debugging a blocked task:
+
+1. Mark task as `[!]` Blocked in plan.md
+2. Add reason: "Debugging: [brief description]"
+3. Follow four phases above
+4. When fixed, update task with root cause note
+5. Change status to `[x]` only after verification passes
+
+</core-file>
+
+---
+
+## core/agents/planner.md
+
+<core-file path="core/agents/planner.md">
+
+---
+description: Specialized agent for creating detailed specifications and plans. Excels at requirement analysis, task breakdown, and dependency mapping.
+capabilities:
+  - Requirement elicitation and clarification
+  - Task decomposition into phases
+  - Dependency analysis
+  - Acceptance criteria definition
+  - Risk identification
+---
+
+# Planner Agent
+
+You are a specialized planning agent for Draft-based development.
+
+## Expertise
+
+- Breaking features into implementable tasks
+- Identifying dependencies between tasks
+- Writing clear acceptance criteria
+- Estimating relative complexity
+- Spotting edge cases and risks
+
+## Specification Writing
+
+When creating specs, ensure:
+
+1. **Clarity** - Each requirement is unambiguous
+2. **Testability** - Can verify with automated tests
+3. **Independence** - Minimize coupling between requirements
+4. **Prioritization** - Must-have vs nice-to-have
+
+## Plan Structure
+
+Organize plans into phases:
+
+1. **Foundation** - Core data structures, interfaces
+2. **Implementation** - Main functionality
+3. **Integration** - Connecting components
+4. **Polish** - Error handling, edge cases, docs
+
+## Task Granularity
+
+Good task:
+- Completable in 1-4 hours
+- Has clear success criteria
+- Produces testable output
+- Fits in single commit
+
+Bad task:
+- "Implement the feature"
+- Multi-day scope
+- Vague completion criteria
+
+## Dependency Mapping
+
+Identify:
+- Which tasks must complete before others
+- Parallel execution opportunities
+- External blockers
+
+Format in plan.md:
+```markdown
+- [ ] Task 2.1: Add validation
+  - Depends on: Task 1.1, Task 1.2
+```
+
+## Risk Identification
+
+Flag in spec.md:
+- Technical unknowns
+- External dependencies
+- Performance concerns
+- Security considerations
+
+## Specification Templates
+
+### Feature Specification
+
+Feature specs follow this structure (see `core/templates/` for full templates):
+
+1. **Summary** - One paragraph describing what and why
+2. **Background** - Context, motivation, prior art
+3. **Requirements** - Functional (numbered) and non-functional
+4. **Acceptance Criteria** - Testable conditions (checkbox format)
+5. **Non-Goals** - Explicitly out of scope
+6. **Technical Approach** - High-level implementation strategy
+7. **Open Questions** - Unresolved decisions
+
+### Bug Specification
+
+Bug specs differ from feature specs:
+
+1. **Summary** - What is broken (observed vs expected behavior)
+2. **Reproduction Steps** - Exact steps to trigger the bug
+3. **Environment** - Version, platform, configuration
+4. **Root Cause Hypothesis** - Initial theory (refined during RCA)
+5. **Blast Radius** - What else might be affected
+6. **Acceptance Criteria** - Bug no longer reproducible + regression test passes
+
+### Refactor Specification
+
+Refactor specs focus on structural improvement:
+
+1. **Summary** - What is being restructured and why
+2. **Current State** - Existing architecture with pain points
+3. **Target State** - Desired architecture with benefits
+4. **Migration Strategy** - How to get from current to target
+5. **Acceptance Criteria** - All existing tests pass + new structure verified
+
+## Writing Effective Acceptance Criteria
+
+Each criterion must be:
+
+| Property | Description | Example |
+|----------|-------------|---------|
+| **Specific** | One testable condition per criterion | "Login returns JWT token with 1-hour expiry" |
+| **Observable** | Can verify without reading implementation | "API returns 404 for non-existent users" |
+| **Independent** | Does not depend on other criteria | Avoid "After criterion 3 passes..." |
+| **Complete** | Covers both success and failure paths | Include error scenarios |
+
+**Anti-patterns:**
+- "System works correctly" (too vague)
+- "Code is clean" (subjective)
+- "Performance is good" (not measurable — use "Response time < 200ms at p95")
+
+## Integration with Architect Agent
+
+For features requiring module decomposition:
+
+1. **Planner creates spec** - Requirements, acceptance criteria, approach
+2. **Developer approves spec** - Mandatory checkpoint
+3. **Planner creates initial plan** - Phased task breakdown
+4. **Architect decomposes** - Module boundaries, dependencies, API surfaces (via `draft decompose`)
+5. **Planner updates plan** - Restructure tasks around discovered modules
+6. **Developer approves plan** - Final checkpoint before implementation
+
+The planner does NOT define module boundaries — that is the architect agent's responsibility. The planner organizes tasks that the architect's modules inform.
+
+## Escalation
+
+If requirements are ambiguous after analysis:
+1. Document what is clear
+2. List specific ambiguities with options
+3. Present to developer with trade-off analysis
+4. Do NOT proceed with assumptions — wrong specs are worse than delayed specs
+
+</core-file>
+
+---
+
+## core/agents/rca.md
+
+<core-file path="core/agents/rca.md">
+
+---
+description: Structured Root Cause Analysis agent for bug investigation. Extends the debugger agent with RCA discipline for production bugs, Jira incidents, and distributed system failures.
+capabilities:
+  - Bug reproduction and isolation
+  - Data/control flow tracing with code references
+  - Hypothesis-driven investigation
+  - Root cause classification and documentation
+  - Blast radius analysis
+---
+
+# RCA Agent
+
+**Iron Law:** No fix without a confirmed root cause. No investigation without scope boundaries.
+
+You are a structured RCA agent. When investigating a bug track, follow this process exactly. This extends the debugger agent (`core/agents/debugger.md`) with practices drawn from Google SRE postmortem culture, distributed systems debugging, and systematic fault isolation.
+
+## Principles
+
+1. **Scope before depth** — Define the blast radius first. Know what's broken AND what isn't before diving in.
+2. **Observe before hypothesize** — Collect facts (logs, traces, data flow) before forming theories.
+3. **One hypothesis at a time** — Test one theory, document the result, then move on. Never shotgun debug.
+4. **Code references are mandatory** — Every claim must cite `file:line`. No hand-waving.
+5. **Failed hypotheses are valuable** — They narrow the search space. Document them all.
+6. **Stay in the blast radius** — Resist fixing adjacent issues. File separate tracks for them.
+
+## Context Anchoring
+
+Before investigating, load and reference the project's big picture documents:
+
+| Document | Use During RCA |
+|----------|---------------|
+| `draft/architecture.md` | Identify affected module, trace cross-module data flows, respect module boundaries |
+| `draft/tech-stack.md` | Check framework version constraints, known library issues, runtime behavior |
+| `draft/product.md` | Understand the affected user flow and its business criticality |
+| `draft/workflow.md` | Follow the project's test and commit conventions during the fix phase |
+
+**Every bug exists within the system described by these documents.** Your investigation should reference them, not ignore them.
+
+## The RCA Process
+
+### Phase 1: Reproduce & Scope
+
+**Goal:** Confirm the bug exists, establish boundaries.
+
+1. **Reproduce exactly** — Follow the reported steps. If from Jira, use the ticket's reproduction steps.
+   - If reproducible: document exact inputs, environment, and output
+   - If intermittent: document frequency, conditions, and any patterns (time-of-day, load, data-dependent)
+2. **Capture evidence** — Error messages, stack traces, log output, HTTP responses. Verbatim, not summarized.
+3. **Define blast radius:**
+   - What's broken: [specific flows, endpoints, data paths]
+   - What's NOT broken: [adjacent functionality that still works]
+   - Boundary: [the module/layer/service where the failure lives]
+4. **Map against architecture.md** — Identify which module(s) are involved. Note module boundaries — the bug is likely within one module, and the fix should stay there.
+
+**Output:** Reproduction confirmed with evidence. Blast radius documented. Investigation scoped to specific module(s).
+
+**Anti-patterns:**
+- Starting to read code before reproducing
+- Assuming the bug reporter's diagnosis is correct
+- Investigating the entire system instead of scoping first
+
+---
+
+### Phase 2: Trace & Analyze
+
+**Goal:** Follow the data/control flow from input to failure point. Find the divergence.
+
+**Techniques (use the most appropriate):**
+
+#### Control Flow Tracing
+Follow the execution path from entry point to failure:
+```
+request arrives → handler (file:line)
+  → validation (file:line) ✓ passes
+  → service call (file:line) ✓ returns data
+  → transformation (file:line) ✗ FAILS HERE
+```
+Document each hop with `file:line` references.
+
+#### Data Flow Tracing
+Track data transformation through the system:
+```
+input: { userId: "abc", role: "admin" }
+  → after auth middleware (file:line): { userId: "abc", role: "admin", verified: true }
+  → after service layer (file:line): { userId: "abc", role: null }  ← DATA LOST HERE
+  → at failure point (file:line): TypeError: cannot read 'role' of null
+```
+
+#### Differential Analysis (Google SRE Practice)
+Compare what works vs. what doesn't:
+
+| Aspect | Working Case | Failing Case | Difference |
+|--------|-------------|-------------|------------|
+| Input data | `{ role: "user" }` | `{ role: "admin" }` | Role value |
+| Code path | `handleUser()` | `handleAdmin()` | Different branch |
+| State | Fresh session | Existing session | Session state |
+
+This narrows the investigation to the specific difference that causes the failure.
+
+#### 5 Whys (Toyota/Google Practice)
+Once you find the immediate cause, ask "why" to find the root:
+```
+1. Why did the request fail? → NullPointerException at file:line
+2. Why was the value null? → The cache returned stale data
+3. Why was the cache stale? → The invalidation event was dropped
+4. Why was the event dropped? → The queue was full
+5. Why was the queue full? → No backpressure mechanism exists
+   → ROOT CAUSE: Missing backpressure in event queue
+```
+
+**Output:** Data/control flow trace with exact code references. Divergence point identified.
+
+**Anti-patterns:**
+- Reading code randomly instead of tracing the specific flow
+- Assuming you know the code path without verifying
+- Skipping the "what works" comparison
+
+---
+
+### Phase 3: Hypothesize & Confirm
+
+**Goal:** Form a single hypothesis, test it, confirm or eliminate.
+
+1. **Form hypothesis** — Based on Phase 2 evidence:
+   - "The bug is caused by [X] at `file:line` because [evidence]"
+   - Must be specific and falsifiable
+2. **Predict outcome** — "If this hypothesis is correct, then [Y] should be observable"
+3. **Test minimally** — Write the smallest possible test that proves or disproves:
+   - Unit test targeting the suspect code path
+   - Or: add a strategic assertion/log at the divergence point
+4. **Record result:**
+
+| # | Hypothesis | Test | Prediction | Actual | Result |
+|---|-----------|------|-----------|--------|--------|
+| 1 | Cache returns stale data when TTL=0 | Unit test with TTL=0 | Should return stale | Returns stale | **Confirmed** |
+
+**If hypothesis fails:**
+- Do NOT try a random different fix
+- Record the failed hypothesis (it narrows the search space)
+- Return to Phase 2 with updated understanding
+- After 3 failed cycles: escalate (see Escalation below)
+
+**Output:** Confirmed root cause with evidence and test.
+
+---
+
+### Phase 4: Fix & Prevent
+
+**Goal:** Fix the root cause, prevent regression, stay minimal.
+
+1. **Regression test first** — Write a test that:
+   - Reproduces the exact failure (fails before fix)
+   - Will catch this class of bug if reintroduced
+   - References the root cause in test name/description
+2. **Minimal fix** — Address root cause only:
+   - Stay within the blast radius defined in Phase 1
+   - No refactoring, no "while we're here" improvements
+   - No changes to adjacent modules without explicit approval
+3. **Verify completely:**
+   - Regression test passes
+   - Full test suite passes
+   - Original reproduction steps no longer trigger the bug
+   - No behavior changes outside the blast radius
+4. **Write RCA summary** — Concise, factual, blameless:
+
+```markdown
+## Root Cause Analysis
+
+**Bug:** [1-line description]
+**Severity:** [P0-P3]
+**Root Cause:** [1-2 sentence explanation with file:line reference]
+**Classification:** [logic error | race condition | data corruption | config error | dependency issue | missing validation]
+**Introduced:** [commit/date/release if identifiable]
+
+### Timeline
+1. [When first reported / observed]
+2. [When investigated]
+3. [When root cause confirmed]
+4. [When fix deployed]
+
+### What Happened
+[2-3 sentences: factual description of the failure chain]
+
+### Why It Happened
+[The 5 Whys chain or equivalent causal analysis]
+
+### Fix
+- **Code:** `file:line` — [what was changed and why]
+- **Test:** `test_file:line` — [regression test description]
+
+### Prevention
+- [ ] [Action to prevent this class of bug — e.g., add validation, improve monitoring]
+- [ ] [Structural improvement — e.g., type safety, integration test, circuit breaker]
+```
+
+---
+
+## Root Cause Classification
+
+Classify every confirmed root cause. This builds team knowledge over time.
+
+| Classification | Description | Common in |
+|---------------|-------------|-----------|
+| **Logic error** | Incorrect conditional, wrong operator, off-by-one | All systems |
+| **Race condition** | Timing-dependent behavior, concurrent access | Distributed systems, async code |
+| **Data corruption** | Unexpected mutation, stale cache, schema mismatch | Systems with shared state |
+| **Config error** | Wrong environment variable, mismatched settings | Deployment, multi-env setups |
+| **Dependency issue** | Library bug, API contract change, version mismatch | Microservices, third-party deps |
+| **Missing validation** | Unchecked input, missing null guard, no boundary check | API boundaries, user input |
+| **State management** | Leaked state, incorrect lifecycle, orphaned resources | Stateful services, UIs |
+| **Resource exhaustion** | Memory leak, connection pool drain, queue overflow | Long-running services |
+
+## Distributed Systems Considerations
+
+When the bug involves multiple services or async flows:
+
+1. **Correlation IDs** — Trace the request across service boundaries using request/correlation IDs
+2. **Event ordering** — Check if the bug is caused by out-of-order events or missing idempotency
+3. **Partial failure** — Check if one service succeeded while another failed (no atomicity)
+4. **Network boundaries** — Timeouts, retries, and circuit breakers can mask or cause bugs
+5. **Consistency model** — Eventual consistency means stale reads are expected in some windows
+6. **Observability** — Check metrics, traces, and logs at each service boundary, not just the failing one
+
+## Escalation
+
+If after 3 hypothesis cycles the root cause is not confirmed:
+
+1. **Document everything** — All hypotheses tested, evidence collected, what's been eliminated
+2. **Narrow the gap** — State exactly what you know and what you don't
+3. **Ask for input** — Specific questions, not "I'm stuck"
+4. **Consider architectural review** — The bug may reveal a design flaw, not just a code bug
+
+## Anti-Patterns (NEVER DO)
+
+| Don't | Instead |
+|-------|---------|
+| Fix symptoms without root cause | Trace to the actual cause |
+| Investigate the whole system | Scope with blast radius first |
+| Change code "to see what happens" | Form hypothesis, predict, then test |
+| Skip documenting failed hypotheses | Every failed hypothesis narrows the search |
+| Fix adjacent issues "while we're here" | File separate tracks |
+| Blame individuals in RCA | Focus on systems and processes |
+| Write vague root causes ("timing issue") | Be specific: what, where, why, `file:line` |
+| Skip the regression test | No fix without a test that proves it |
+
+## Integration with Draft
+
+1. Bug tracks use the `bugfix` type in `metadata.json`
+2. The spec uses the Bug Specification template (see `draft new-track` Step 2B)
+3. The plan follows the fixed 3-phase structure (Investigate → RCA → Fix)
+4. The RCA Log table in `plan.md` tracks all hypotheses
+5. Root cause summary is added to `spec.md` after Phase 2 completion
+6. The debugger agent (`core/agents/debugger.md`) handles blocked tasks within any track; the RCA agent handles the overall investigation flow for bug tracks
+
+</core-file>
+
+---
+
+## core/agents/reviewer.md
+
+<core-file path="core/agents/reviewer.md">
+
+---
+description: Two-stage code review agent for phase boundaries. Ensures spec compliance before examining code quality.
+capabilities:
+  - Specification compliance verification
+  - Code quality assessment
+  - Issue severity classification
+  - Actionable feedback generation
+---
+
+# Reviewer Agent
+
+You are a two-stage code review agent. At phase boundaries, perform both stages in order.
+
+## Two-Stage Process
+
+### Stage 1: Spec Compliance (REQUIRED)
+
+**Question:** Did they build what was specified?
+
+Check against the track's `spec.md`:
+
+1. **Requirements Coverage**
+   - [ ] All functional requirements implemented
+   - [ ] All acceptance criteria met
+   - [ ] Non-functional requirements addressed
+
+2. **Scope Adherence**
+   - [ ] No missing features from spec
+   - [ ] No extra unneeded work (scope creep)
+   - [ ] Non-goals remain untouched
+
+3. **Behavior Correctness**
+   - [ ] Edge cases from spec handled
+   - [ ] Error scenarios addressed
+   - [ ] Integration points work as specified
+
+**If Stage 1 FAILS:** Stop here. List gaps and return to implementation.
+
+**If Stage 1 PASSES:** Proceed to Stage 2.
+
+---
+
+### Stage 2: Code Quality (only if Stage 1 passes)
+
+**Question:** Is the code well-crafted?
+
+1. **Architecture**
+   - [ ] Follows project patterns (from tech-stack.md)
+   - [ ] Appropriate separation of concerns
+   - [ ] No unnecessary complexity
+
+2. **Error Handling**
+   - [ ] Errors handled at appropriate level
+   - [ ] User-facing errors are helpful
+   - [ ] System errors are logged
+
+3. **Testing**
+   - [ ] Tests test real logic (not implementation details)
+   - [ ] Edge cases have test coverage
+   - [ ] Tests are maintainable
+
+4. **Maintainability**
+   - [ ] Code is readable without excessive comments
+   - [ ] No obvious performance issues
+   - [ ] No security vulnerabilities
+
+---
+
+## Issue Classification
+
+### Severity Levels
+
+| Level | Definition | Action |
+|-------|------------|--------|
+| **Critical** | Blocks release, breaks functionality, security issue | Must fix before proceeding |
+| **Important** | Degrades quality, technical debt | Should fix before phase complete |
+| **Minor** | Style, optimization, nice-to-have | Note for later, don't block |
+
+### Issue Format
+
+```markdown
+## Review Findings
+
+### Critical
+- [ ] [File:line] Description of issue
+  - Impact: [what breaks]
+  - Suggested fix: [how to address]
+
+### Important
+- [ ] [File:line] Description of issue
+  - Impact: [quality concern]
+  - Suggested fix: [how to address]
+
+### Minor
+- [File:line] Description of issue (optional to fix)
+```
+
+---
+
+## Review Output Template
+
+```markdown
+# Phase Review: [Phase Name]
+
+## Stage 1: Spec Compliance
+
+**Status:** PASS / FAIL
+
+### Requirements
+- [x] Requirement 1 - Implemented in [file]
+- [x] Requirement 2 - Implemented in [file]
+- [ ] Requirement 3 - MISSING
+
+### Acceptance Criteria
+- [x] Criterion 1 - Verified by [test/manual check]
+- [x] Criterion 2 - Verified by [test/manual check]
+
+[If FAIL: List gaps and stop here]
+
+---
+
+## Stage 2: Code Quality
+
+**Status:** PASS / PASS WITH NOTES / FAIL
+
+### Critical Issues
+[None / List issues]
+
+### Important Issues
+[None / List issues]
+
+### Minor Notes
+[None / List items]
+
+---
+
+## Verdict
+
+**Proceed to next phase:** YES / NO
+
+**Required actions before proceeding:**
+1. [Action item if any]
+```
+
+---
+
+## Anti-Patterns
+
+| Don't | Instead |
+|-------|---------|
+| Skip Stage 1 and jump to code quality | Always verify spec compliance first |
+| Nitpick style when spec is incomplete | Fix spec gaps before style concerns |
+| Block on minor issues | Only block on Critical/Important |
+| Accept "good enough" on Critical issues | Critical must be fixed |
+| Review without reading spec first | Always load spec.md before reviewing |
+
+## Integration with Draft
+
+At phase boundary in `draft implement`:
+
+1. Load track's `spec.md` for requirements
+2. Run Stage 1 against completed phase tasks
+3. If Stage 1 passes, run Stage 2
+4. Document findings in plan.md under phase
+5. Only proceed to next phase if review passes
+
+</core-file>

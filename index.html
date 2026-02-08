@@ -1404,17 +1404,31 @@
                     <div class="card-summary">
                         <div class="icon">📝</div>
                         <div class="name">/draft:new-track</div>
-                        <p class="purpose">Create spec + plan for feature or fix</p>
+                        <p class="purpose">Collaborative intake for spec + plan creation</p>
                         <div class="expand-indicator">▼</div>
                     </div>
                     <div class="card-details">
                         <h4>What it does:</h4>
                         <ol>
-                            <li>Generates kebab-case track ID</li>
-                            <li>Creates <code>spec.md</code> through dialogue (scope, acceptance criteria)</li>
-                            <li>Creates phased <code>plan.md</code> from approved spec</li>
-                            <li>Registers track in <code>tracks.md</code></li>
+                            <li>Creates <code>spec-draft.md</code> + <code>plan-draft.md</code> immediately</li>
+                            <li>Conducts <strong>collaborative intake</strong> — one question at a time</li>
+                            <li>AI contributes expertise: patterns, risks, trade-offs, citations</li>
+                            <li>Checkpoints between phases for refinement</li>
+                            <li>On confirmation: promotes drafts to <code>spec.md</code> + <code>plan.md</code></li>
                         </ol>
+                        <h4>Intake Phases:</h4>
+                        <ul>
+                            <li><strong>Problem Space:</strong> What problem? Why now? Who's affected?</li>
+                            <li><strong>Solution Space:</strong> Simplest version? Why this approach?</li>
+                            <li><strong>Risks:</strong> What could go wrong? Dependencies? Assumptions?</li>
+                            <li><strong>Success Criteria:</strong> How do we know it's done?</li>
+                        </ul>
+                        <h4>AI Contributes:</h4>
+                        <ul>
+                            <li>Pattern recognition from DDD, Clean Architecture, DDIA</li>
+                            <li>Risk surfacing from OWASP, distributed systems fallacies</li>
+                            <li>Fact-checking against your <code>architecture.md</code></li>
+                        </ul>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
                             <code>/draft:new-track "Add user authentication"</code>
@@ -1819,7 +1833,7 @@
             <p>Without context, AI reinvents your project from scratch every session. It guesses your tech stack, ignores your conventions, and builds features that don't fit. <strong><code>/draft:init</code></strong> fixes this by creating persistent files that tell the AI who your users are (<code>product.md</code>), what technologies to use (<code>tech-stack.md</code>), and how your team works (<code>workflow.md</code>). For existing codebases, it also generates <code>architecture.md</code> — a deep system map with mermaid diagrams covering directory structure, entry points, data flows, design patterns, existing module dependencies, and external integrations. This means every future track gets immediate, rich context without re-analyzing the codebase. These files live in git, survive across sessions, and load automatically — so the AI always starts with your ground truth instead of assumptions.</p>
 
             <h3>Step 2: Spec & Plan — Why it exists</h3>
-            <p>When you ask AI to "add authentication," it immediately writes code. If the approach is wrong, you discover it during code review — after hours of work. <strong><code>/draft:new-track</code></strong> forces the AI to write a specification and phased plan <em>before touching code</em>. You review the approach in a quick spec PR, not a massive code PR. Disagreements get resolved in a 5-minute document edit instead of a multi-hour rewrite. The plan breaks work into phases with verification steps, so the AI tackles one thing at a time instead of attempting everything at once.</p>
+            <p>When you ask AI to "add authentication," it immediately writes code. If the approach is wrong, you discover it during code review — after hours of work. <strong><code>/draft:new-track</code></strong> conducts a <strong>collaborative intake</strong> — a structured conversation where AI acts as an expert collaborator. It asks one question at a time, contributes expertise (patterns, risks, trade-offs with citations from DDD, Clean Architecture, OWASP), and updates the spec progressively. Checkpoints between phases let you refine before committing. The result: a well-reasoned specification with traceable decisions, not assumptions. Junior engineers get senior-level guidance. Senior engineers can't skip thinking. Both produce consistent quality.</p>
 
             <h3>Step 3: Decompose — Why it exists (optional)</h3>
             <p>For multi-module features, jumping straight to implementation creates tangled code with unclear boundaries. <strong><code>/draft:decompose</code></strong> maps your feature into discrete modules with defined responsibilities, API surfaces, and a dependency graph. This gives you an implementation order (build the database layer before the API layer) and prevents circular dependencies. Each module is small enough to reason about, test independently, and review in isolation.</p>
@@ -1904,6 +1918,73 @@
             <p><strong>Practical impact:</strong> Faster reviews (approve approach, not implementation details). Fewer rewrites (catch design issues before code exists). Knowledge transfer (specs document <em>why</em>, not just <em>what</em>). Onboarding (new team members read specs to understand features).</p>
         </section>
 
+        <!-- Collaborative Intake -->
+        <section id="collaborative-intake">
+            <h2>Collaborative Intake: AI as Expert Partner</h2>
+            <p><strong>This changes how specifications are created.</strong> Instead of dumping requirements at the AI and hoping for the best, <code>/draft:new-track</code> conducts a structured conversation where AI acts as an expert collaborator — asking the right questions, contributing knowledge, and building the spec progressively.</p>
+
+            <h3>How it works</h3>
+            <div class="hierarchy">
+                <div class="hierarchy-level">
+                    <div class="num">1</div>
+                    <div class="file">One question at a time</div>
+                    <div class="desc">AI asks a single focused question, waits for your answer, then contributes expertise before moving to the next. No question dumps. No form-filling.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">2</div>
+                    <div class="file">AI contributes at each step</div>
+                    <div class="desc">Pattern recognition ("This sounds like CQRS..."), risk surfacing ("Watch for N+1 queries here"), trade-off analysis ("Alternative: use Redis, trade-off is..."), fact-checking against your <code>architecture.md</code>.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">3</div>
+                    <div class="file">Grounded in vetted sources</div>
+                    <div class="desc">Citations from Domain-Driven Design, Clean Architecture, DDIA, OWASP, 12-Factor App, GoF patterns. Not "AI thinks" — traceable expertise.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">4</div>
+                    <div class="file">Checkpoints between phases</div>
+                    <div class="desc">"Here's what we've established about the problem: [summary]. Does this capture it, or should we refine?" You control the pace.</div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="num">5</div>
+                    <div class="file">Progressive draft updates</div>
+                    <div class="desc"><code>spec-draft.md</code> updates as conversation evolves. You see the spec take shape in real-time. On confirmation, it becomes the final <code>spec.md</code>.</div>
+                </div>
+            </div>
+
+            <h3>The intake phases</h3>
+            <div class="comparison">
+                <div class="comparison-header">
+                    <div>Phase</div>
+                    <div>What AI asks & contributes</div>
+                </div>
+                <div class="comparison-row">
+                    <div><strong>Problem Space</strong></div>
+                    <div>What problem? Why now? Who's affected? Scope boundaries? — AI: pattern recognition, domain concepts, "why" probes</div>
+                </div>
+                <div class="comparison-row">
+                    <div><strong>Solution Space</strong></div>
+                    <div>Simplest version? Why this approach? What's out of scope? — AI: 2-3 alternatives with trade-offs, architecture fit check</div>
+                </div>
+                <div class="comparison-row">
+                    <div><strong>Risks & Constraints</strong></div>
+                    <div>What could go wrong? Dependencies? Assumptions? Security? — AI: surfaces risks from OWASP, distributed systems fallacies</div>
+                </div>
+                <div class="comparison-row">
+                    <div><strong>Success Criteria</strong></div>
+                    <div>How do we know it's done? Verification strategy? — AI: suggests measurable criteria, testing strategies</div>
+                </div>
+            </div>
+
+            <div class="callout">
+                <div class="callout-title">
+                    <span>💡</span>
+                    Key Insight
+                </div>
+                <p><strong>This levels the playing field.</strong> Junior engineers get senior-level guidance — the AI forces them to think through risks, alternatives, and constraints they might skip. Senior engineers can't shortcut "because obvious" — the structure ensures consistent rigor. Both produce well-documented specs with traceable reasoning. The discipline scales across your entire team.</p>
+            </div>
+        </section>
+
         <!-- Team Workflow -->
         <section id="team-workflow">
             <h2>Team Workflow: Alignment Before Code</h2>
@@ -1919,7 +2000,7 @@
                 <div class="hierarchy-level">
                     <div class="num">2</div>
                     <div class="file">spec.md + plan.md</div>
-                    <div class="desc">Lead runs <code>/draft:new-track</code>. Team reviews requirements, acceptance criteria, phased task breakdown, and dependencies via PR. Disagreements surface as markdown comments — resolved by editing a paragraph, not rewriting a module.</div>
+                    <div class="desc">Lead runs <code>/draft:new-track</code> — a <strong>collaborative intake</strong> where AI asks structured questions one at a time, contributes expertise (patterns, risks, trade-offs), and builds the spec progressively. Team reviews the resulting requirements, acceptance criteria, and phased task breakdown via PR. AI guidance is grounded in vetted sources (DDD, Clean Architecture, OWASP) — traceable, not arbitrary.</div>
                 </div>
                 <div class="hierarchy-level">
                     <div class="num">3</div>

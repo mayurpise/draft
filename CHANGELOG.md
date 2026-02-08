@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `/draft:review` — Standalone code review orchestrator supporting both track-level and project-level review:
+  - **Track-level review:** Reviews specific track implementation against spec.md and plan.md using two-stage process (spec compliance → code quality)
+  - **Project-level review:** Reviews arbitrary changes (uncommitted, specific files, commit ranges) with code quality checks only
+  - **Fuzzy track matching:** Accepts both exact track ID and fuzzy name matching (e.g., `--track "user auth"` finds `add-user-authentication`)
+  - **Smart diff chunking:** Handles small diffs (<300 lines) with full context, large diffs (≥300 lines) with file-by-file iteration to avoid context overflow
+  - **Quality tool integration:** Optional integration with `/draft:validate` and `/draft:bughunt` via `--with-validate`, `--with-bughunt`, or `--full` flags
+  - **Unified reporting:** Aggregates findings from reviewer agent, validate, and bughunt with deduplication and severity ranking (Critical/Important/Minor)
+  - **Review history tracking:** Updates metadata.json with lastReviewed timestamp and reviewCount
+  - Generates reports: `draft/tracks/<id>/review-report.md` (track) or `draft/review-report.md` (project)
+  - Comparison with Conductor: Matches `/conductor:review` functionality while integrating Draft's existing quality tools for more comprehensive analysis
+
 ## [1.1.0] - 2026-02-07
 
 ### Added

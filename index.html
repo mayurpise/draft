@@ -1218,6 +1218,9 @@
 <span class="code-comment"># Hunt for bugs across the codebase</span>
 <span class="code-keyword">/draft:bughunt</span>
 
+<span class="code-comment"># Review track or project code</span>
+<span class="code-keyword">/draft:review --track my-feature --full</span>
+
 <span class="code-comment"># Check progress</span>
 <span class="code-keyword">/draft:status</span></code></pre>
             </div>
@@ -1317,6 +1320,11 @@
                     <div class="icon">🔍</div>
                     <div class="name">/draft:bughunt</div>
                     <p class="purpose">Exhaustive bug hunt across 12 dimensions (correctness, security, performance)</p>
+                </div>
+                <div class="doc-card">
+                    <div class="icon">👁️</div>
+                    <div class="name">/draft:review</div>
+                    <p class="purpose">Code review orchestrator (track/project-level) with quality tool integration</p>
                 </div>
                 <div class="doc-card">
                     <div class="icon">👁️</div>
@@ -1472,7 +1480,7 @@
             <p>Even with a plan, AI can drift: skip tests, claim completion without proof, or make sweeping changes across unrelated files. <strong><code>/draft:implement</code></strong> executes one task at a time from the plan, follows the TDD cycle (write test first, then code, then refactor), runs a verification gate before marking anything complete, and triggers a two-stage review at phase boundaries. The AI can only work on what's specified, in the order specified, with proof required at every step.</p>
 
             <h3>Step 5: Verify Quality — Why it exists</h3>
-            <p>Passing tests doesn't guarantee good code. AI can violate architectural patterns, introduce security vulnerabilities, or create performance bottlenecks — all while every test passes. <strong><code>/draft:coverage</code></strong> measures test completeness (95%+ target) and classifies uncovered lines. <strong><code>/draft:validate</code></strong> runs context-aware compliance checks: architecture conformance (patterns from architecture.md), security scans (hardcoded secrets, SQL injection, XSS), performance anti-patterns (N+1 queries, blocking I/O), and regression risk (blast radius of changes). <strong><code>/draft:bughunt</code></strong> goes deeper — exhaustive bug hunting across 12 dimensions (correctness, reliability, security, performance, concurrency, state management, API contracts, accessibility, and more) using Draft context to find architecture violations, spec non-compliance, and framework-specific issues. All three generate reports with file:line references and actionable fixes.</p>
+            <p>Passing tests doesn't guarantee good code. AI can violate architectural patterns, introduce security vulnerabilities, or create performance bottlenecks — all while every test passes. <strong><code>/draft:coverage</code></strong> measures test completeness (95%+ target) and classifies uncovered lines. <strong><code>/draft:validate</code></strong> runs context-aware compliance checks: architecture conformance (patterns from architecture.md), security scans (hardcoded secrets, SQL injection, XSS), performance anti-patterns (N+1 queries, blocking I/O), and regression risk (blast radius of changes). <strong><code>/draft:bughunt</code></strong> goes deeper — exhaustive bug hunting across 12 dimensions (correctness, reliability, security, performance, concurrency, state management, API contracts, accessibility, and more) using Draft context to find architecture violations, spec non-compliance, and framework-specific issues. <strong><code>/draft:review</code></strong> orchestrates all of these — runs the two-stage reviewer agent (spec compliance + code quality), optionally integrates validate and bughunt with the <code>--full</code> flag, and generates a unified report with deduplication and severity ranking. All tools generate reports with file:line references and actionable fixes.</p>
         </section>
 
         <!-- Constraint Hierarchy -->
@@ -1578,7 +1586,7 @@
                 <div class="hierarchy-level">
                     <div class="num">5</div>
                     <div class="file">Implementation + Verification</div>
-                    <div class="desc">Only after all documents are merged does coding start. Every developer has full context: what to build (<code>spec.md</code>), in what order (<code>plan.md</code>), with what boundaries (<code>architecture.md</code>). After implementation, <code>/draft:coverage</code> verifies tests (95%+ target), <code>/draft:validate</code> checks compliance (architecture conformance, security, performance), and <code>/draft:bughunt</code> finds defects across 12 dimensions. All three generate reports in the track directory for PR review.</div>
+                    <div class="desc">Only after all documents are merged does coding start. Every developer has full context: what to build (<code>spec.md</code>), in what order (<code>plan.md</code>), with what boundaries (<code>architecture.md</code>). After implementation, <code>/draft:coverage</code> verifies tests (95%+ target), <code>/draft:validate</code> checks compliance (architecture conformance, security, performance), <code>/draft:bughunt</code> finds defects across 12 dimensions, and <code>/draft:review</code> orchestrates comprehensive review with optional <code>--full</code> flag to run all quality checks together. All tools generate reports in the track directory for PR review.</div>
                 </div>
             </div>
 

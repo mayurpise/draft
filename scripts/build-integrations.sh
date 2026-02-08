@@ -34,6 +34,7 @@ SKILL_ORDER=(
     coverage
     validate
     bughunt
+    review
     status
     revert
     jira-preview
@@ -51,6 +52,7 @@ get_skill_header() {
         coverage)     echo "Coverage Command" ;;
         validate)     echo "Validate Command" ;;
         bughunt)      echo "Bug Hunt Command" ;;
+        review)       echo "Review Command" ;;
         status)       echo "Status Command" ;;
         revert)       echo "Revert Command" ;;
         jira-preview) echo "Jira Preview Command" ;;
@@ -71,6 +73,7 @@ get_cursor_trigger() {
         coverage)     echo "\"check coverage\" or \"@draft coverage\"" ;;
         validate)     echo "\"validate\" or \"@draft validate [--track <id>]\"" ;;
         bughunt)      echo "\"hunt bugs\" or \"@draft bughunt [--track <id>]\"" ;;
+        review)       echo "\"review code\" or \"@draft review [--track <id>] [--full]\"" ;;
         status)       echo "\"status\" or \"@draft status\"" ;;
         revert)       echo "\"revert\" or \"@draft revert\"" ;;
         jira-preview) echo "\"preview jira\" or \"@draft jira-preview [track-id]\"" ;;
@@ -91,6 +94,7 @@ get_copilot_trigger() {
         coverage)     echo "\"check coverage\" or \"draft coverage\"" ;;
         validate)     echo "\"validate\" or \"draft validate [--track <id>]\"" ;;
         bughunt)      echo "\"hunt bugs\" or \"draft bughunt [--track <id>]\"" ;;
+        review)       echo "\"review code\" or \"draft review [--track <id>] [--full]\"" ;;
         status)       echo "\"status\" or \"draft status\"" ;;
         revert)       echo "\"revert\" or \"draft revert\"" ;;
         jira-preview) echo "\"preview jira\" or \"draft jira-preview [track-id]\"" ;;

@@ -17,7 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Unified reporting:** Aggregates findings from reviewer agent, validate, and bughunt with deduplication and severity ranking (Critical/Important/Minor)
   - **Review history tracking:** Updates metadata.json with lastReviewed timestamp and reviewCount
   - Generates reports: `draft/tracks/<id>/review-report.md` (track) or `draft/review-report.md` (project)
-  - Comparison with Conductor: Matches `/conductor:review` functionality while integrating Draft's existing quality tools for more comprehensive analysis
 
 ## [1.1.0] - 2026-02-07
 

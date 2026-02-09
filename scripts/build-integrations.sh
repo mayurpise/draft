@@ -28,6 +28,7 @@ GEMINI_OUTPUT="$ROOT_DIR/integrations/gemini/GEMINI.md"
 SKILL_ORDER=(
     draft
     init
+    index
     new-track
     decompose
     implement
@@ -46,6 +47,7 @@ get_skill_header() {
     case "$skill" in
         draft)        echo "Draft Overview" ;;
         init)         echo "Init Command" ;;
+        index)        echo "Index Command" ;;
         new-track)    echo "New Track Command" ;;
         decompose)    echo "Decompose Command" ;;
         implement)    echo "Implement Command" ;;
@@ -67,6 +69,7 @@ get_cursor_trigger() {
     case "$skill" in
         draft)        echo "\"help\" or \"@draft\"" ;;
         init)         echo "\"init draft\" or \"@draft init [refresh]\"" ;;
+        index)        echo "\"index services\" or \"@draft index [--init-missing]\"" ;;
         new-track)    echo "\"new feature\" or \"@draft new-track <description>\"" ;;
         decompose)    echo "\"break into modules\" or \"@draft decompose\"" ;;
         implement)    echo "\"implement\" or \"@draft implement\"" ;;
@@ -88,6 +91,7 @@ get_copilot_trigger() {
     case "$skill" in
         draft)        echo "\"help\" or \"draft\"" ;;
         init)         echo "\"init draft\" or \"draft init [refresh]\"" ;;
+        index)        echo "\"index services\" or \"draft index [--init-missing]\"" ;;
         new-track)    echo "\"new feature\" or \"draft new-track <description>\"" ;;
         decompose)    echo "\"break into modules\" or \"draft decompose\"" ;;
         implement)    echo "\"implement\" or \"draft implement\"" ;;
@@ -183,6 +187,13 @@ CORE_FILES=(
     "templates/product-guidelines.md"
     "templates/tech-stack.md"
     "templates/workflow.md"
+    # Index templates (monorepo)
+    "templates/service-index.md"
+    "templates/dependency-graph.md"
+    "templates/tech-matrix.md"
+    "templates/root-product.md"
+    "templates/root-architecture.md"
+    "templates/root-tech-stack.md"
     # Agents
     "agents/architect.md"
     "agents/debugger.md"
@@ -392,6 +403,7 @@ COMMON_HEADER
     # Command table with parameterized prefix
     echo "| \`${command_prefix}\` | Show overview and available commands |"
     echo "| \`${command_prefix} init\` | Initialize project (run once) |"
+    echo "| \`${command_prefix} index [--init-missing]\` | Aggregate monorepo service contexts |"
     echo "| \`${command_prefix} new-track <description>\` | Create feature/bug track |"
     echo "| \`${command_prefix} decompose\` | Module decomposition with dependency mapping |"
     echo "| \`${command_prefix} implement\` | Execute tasks from plan |"
@@ -413,6 +425,7 @@ Recognize these natural language patterns:
 | User Says | Action |
 |-----------|--------|
 | "set up the project" | Run init |
+| "index services", "aggregate context" | Run index |
 | "new feature", "add X" | Create new track |
 | "break into modules", "decompose" | Run decompose |
 | "start implementing" | Execute implement |

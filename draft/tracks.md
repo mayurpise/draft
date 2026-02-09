@@ -22,6 +22,12 @@ Master registry of all tracks (features, bug fixes, refactors).
 
 ## Completed
 
+### fix-bughunt-findings-v2 - Fix Project-Level Bug Hunt Findings
+- **Status:** [x] Completed
+- **Completed:** 2026-02-08
+- **Phases:** 5/5
+- **Path:** `./tracks/fix-bughunt-findings-v2/`
+
 ### complete-index-integration - Complete draft:index Integration
 - **Status:** [x] Completed
 - **Completed:** 2026-02-08

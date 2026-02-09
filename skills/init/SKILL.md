@@ -7,6 +7,19 @@ description: Initialize Draft project context for Context-Driven Development. Ru
 
 You are initializing a Draft project for Context-Driven Development.
 
+## Red Flags - STOP if you're:
+
+- Re-initializing a project that already has `draft/` without using `refresh` mode
+- Skipping brownfield analysis for an existing codebase
+- Rushing through product definition questions without probing for detail
+- Auto-generating tech-stack.md without verifying detected dependencies
+- Not presenting architecture.md for developer review before proceeding
+- Overwriting existing tracks.md (this destroys track history)
+
+**Initialize once, refresh to update. Never overwrite without confirmation.**
+
+---
+
 ## Pre-Check
 
 Check for arguments:

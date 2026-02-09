@@ -27,6 +27,12 @@ Display a comprehensive overview of project progress.
    - `draft/tracks/<id>/plan.md` for task status
    - `draft/tracks/<id>/architecture.md` for module status (if exists)
 3. Check for project-wide `draft/architecture.md` (if exists)
+4. **Detect orphaned tracks:**
+   - Scan `draft/tracks/` for all directories
+   - For each directory, check if it has `metadata.json`
+   - Cross-reference with `draft/tracks.md` entries
+   - If directory has metadata.json but NOT in tracks.md → orphaned track
+   - Collect list of orphaned track IDs for warning section
 
 ## Output Format
 
@@ -63,6 +69,15 @@ Module C         [ ] Not Started
 BLOCKED ITEMS
 ─────────────────────────────────────────────────────────
 - [track-id-1] Task 2.3: [blocked reason]
+
+ORPHANED TRACKS
+─────────────────────────────────────────────────────────
+⚠ The following tracks have metadata.json but are missing from tracks.md:
+- draft/tracks/orphan-track-id/
+
+Recovery options:
+1. Add to tracks.md manually if track is valid
+2. Remove directory if track was abandoned: rm -rf draft/tracks/<id>/
 
 RECENTLY COMPLETED
 ─────────────────────────────────────────────────────────

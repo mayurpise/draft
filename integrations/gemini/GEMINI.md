@@ -559,8 +559,8 @@ ls draft/ 2>/dev/null
 
 ## Step 1: Parse Arguments
 
-Check for flags:
-- `--init-missing`: Also initialize services that don't have `draft/` directories
+Check for optional argument:
+- `init-missing`: Also initialize services that don't have `draft/` directories
 
 ## Step 2: Discover Services (Depth=1 Only)
 
@@ -623,7 +623,7 @@ Uninitialized services:
 
 ## Step 4: Handle Uninitialized Services
 
-**If `--init-missing` flag is present:**
+**If `init-missing` argument is present:**
 1. For each uninitialized service, prompt:
    ```
    Initialize <service-name>/? [y/n/all/skip-rest]
@@ -634,9 +634,9 @@ Uninitialized services:
    - `all`: Initialize all remaining without prompting
    - `skip-rest`: Skip all remaining uninitialized services
 
-**If `--init-missing` flag is NOT present:**
+**If `init-missing` argument is NOT present:**
 - Just report uninitialized services and continue
-- Suggest: "Run `@draft index --init-missing` to initialize these services"
+- Suggest: "Run `@draft index init-missing` to initialize these services"
 
 ## Step 5: Aggregate Context from Initialized Services
 
@@ -725,7 +725,7 @@ The following services have not been initialized with `@draft init`:
 - `services/legacy-reports/`
 - `services/admin-tools/`
 
-Run `@draft index --init-missing` or initialize individually with:
+Run `@draft index init-missing` or initialize individually with:
 ```bash
 cd services/legacy-reports && @draft init
 ```
@@ -1063,7 +1063,7 @@ Next steps:
 4. Run @draft index periodically to refresh
 
 For uninitialized services, run:
-  @draft index --init-missing
+  @draft index init-missing
 ═══════════════════════════════════════════════════════════
 ```
 
@@ -2104,7 +2104,7 @@ When all phases complete:
      ## Validation
      - [x] Auto-validate at track completion
      ```
-   - If enabled, run `@draft validate --track <track_id>`
+   - If enabled, run `@draft validate <track_id>`
    - Check validation results:
      - If block-on-failure enabled AND critical issues found → HALT, require fixes
      - Otherwise, document warnings and continue
@@ -2401,7 +2401,7 @@ You are validating codebase quality using Draft context files to ensure architec
 ## Usage
 
 - `@draft validate` - Validate entire codebase
-- `@draft validate --track <track-id>` - Validate specific track
+- `@draft validate <track-id>` - Validate specific track
 
 ## Pre-Check
 
@@ -2418,11 +2418,11 @@ Extract arguments from the command invocation.
 
 **Validation Modes:**
 - **Project-Level:** No arguments → validate entire codebase
-- **Track-Level:** `--track <track-id>` → validate specific track
+- **Track-Level:** `<track-id>` → validate specific track
 
 ### Track-Level Mode
 
-If `--track <track-id>` specified:
+If `<track-id>` specified:
 
 1. Verify track exists: `ls draft/tracks/<track-id>/spec.md`
 2. If not found, tell user: "Track '<track-id>' not found. Check `draft/tracks.md` for valid track IDs."
@@ -3261,7 +3261,7 @@ Use this context to:
 Ask user to confirm scope:
 - **Entire repo** - Full codebase analysis
 - **Specific paths** - Target directories or files
-- **Track-level** (`--track <id>`) - Focus on files relevant to a specific track
+- **Track-level** (specify `<track-id>`) - Focus on files relevant to a specific track
 
 ### 3. Load Track Context (if track-level)
 
@@ -3636,24 +3636,24 @@ Optionally integrates `@draft validate` and `@draft bughunt` for comprehensive q
 
 Extract and validate command arguments from user input.
 
-### Supported Flags
+### Supported Arguments
 
-**Scope flags (mutually exclusive):**
-- `--track <id|name>` - Review specific track (exact ID or fuzzy name match)
-- `--project` - Review uncommitted changes (`git diff HEAD`)
-- `--files <pattern>` - Review specific file pattern (e.g., `src/**/*.ts`)
-- `--commits <range>` - Review commit range (e.g., `main...HEAD`, `abc123..def456`)
+**Scope specifiers (mutually exclusive):**
+- `track <id|name>` - Review specific track (exact ID or fuzzy name match)
+- `project` - Review uncommitted changes (`git diff HEAD`)
+- `files <pattern>` - Review specific file pattern (e.g., `src/**/*.ts`)
+- `commits <range>` - Review commit range (e.g., `main...HEAD`, `abc123..def456`)
 
-**Quality integration flags:**
-- `--with-validate` - Include `@draft validate` results
-- `--with-bughunt` - Include `@draft bughunt` results
-- `--full` - Include both validate and bughunt (equivalent to `--with-validate --with-bughunt`)
+**Quality integration modifiers:**
+- `with-validate` - Include `@draft validate` results
+- `with-bughunt` - Include `@draft bughunt` results
+- `full` - Include both validate and bughunt (equivalent to `with-validate with-bughunt`)
 
 ### Validation Rules
 
-1. **Scope flag requirement:** At least one scope flag OR no flags (auto-detect track)
-2. **Mutual exclusivity:** Only one of `--track`, `--project`, `--files`, `--commits`
-3. **Flag conflicts:** If `--full` is present, set `--with-validate=true` and `--with-bughunt=true`, then discard any redundant individual flags. No error — silently normalize.
+1. **Scope requirement:** At least one scope specifier OR no arguments (auto-detect track)
+2. **Mutual exclusivity:** Only one of `track`, `project`, `files`, `commits`
+3. **Modifier normalization:** If `full` is present, enable both `with-validate` and `with-bughunt`, discarding redundant individual modifiers. No error — silently normalize.
 
 ### Default Behavior
 
@@ -3671,7 +3671,7 @@ Based on parsed arguments, determine review scope and load appropriate context.
 
 ### Track-Level Review
 
-**Trigger:** `--track <id|name>` flag OR auto-detected track
+**Trigger:** `track <id|name>` argument OR auto-detected track
 
 #### 2.1: Resolve Track
 
@@ -3741,15 +3741,15 @@ Once track is resolved:
 
 ### Project-Level Review
 
-**Trigger:** `--project`, `--files <pattern>`, or `--commits <range>`
+**Trigger:** `project`, `files <pattern>`, or `commits <range>` argument
 
 #### 2.3: Project Scope Detection
 
-1. **--project flag:**
+1. **`project` argument:**
    - Scope: Uncommitted changes
    - Command: `git diff HEAD`
 
-2. **--files <pattern> flag:**
+2. **`files <pattern>` argument:**
    - Scope: Specific files matching glob pattern
    - Command: `git diff HEAD -- <pattern>`
    - Validate pattern matches files:
@@ -3758,7 +3758,7 @@ Once track is resolved:
      ```
      If empty: Error "No files match pattern '<pattern>'"
 
-3. **--commits <range> flag:**
+3. **`commits <range>` argument:**
    - Scope: Commit range
    - Validate range exists:
      ```bash
@@ -3921,15 +3921,15 @@ Classify all findings by severity:
 
 ## Step 5: Run Quality Tools (Optional)
 
-If `--with-validate`, `--with-bughunt`, or `--full` flag set, integrate additional quality checks.
+If `with-validate`, `with-bughunt`, or `full` modifier set, integrate additional quality checks.
 
 ### 5.1: Run Validate
 
-If `--with-validate` or `--full`:
+If `with-validate` or `full`:
 
 **Track-level:**
 ```bash
-@draft validate --track <id>
+@draft validate <id>
 ```
 
 **Project-level:**
@@ -3941,11 +3941,11 @@ Parse output from `draft/tracks/<id>/validation-report.md` or `draft/validation-
 
 ### 5.2: Run Bughunt
 
-If `--with-bughunt` or `--full`:
+If `with-bughunt` or `full`:
 
 **Track-level:**
 ```bash
-@draft bughunt --track <id>
+@draft bughunt <id>
 ```
 
 **Project-level:**
@@ -4024,14 +4024,14 @@ Create unified review report in markdown format.
 
 ## Additional Quality Checks
 
-[If --with-validate or --full]
+[If with-validate or full]
 ### Validation Results
 - **Architecture Conformance:** PASS/FAIL
 - **Security Scan:** N issues found
 - **Performance:** N anti-patterns detected
 - Full report: `./validation-report.md`
 
-[If --with-bughunt or --full]
+[If with-bughunt or full]
 ### Bug Hunt Results
 - **Critical bugs:** N found
 - **High severity:** N found
@@ -4074,9 +4074,9 @@ Create unified review report in markdown format.
 Similar format but:
 - No Stage 1 section (no spec compliance)
 - Header shows scope instead of track ID:
-  - `--project`: "Scope: Uncommitted changes"
-  - `--files <pattern>`: "Scope: Files matching '<pattern>'"
-  - `--commits <range>`: "Scope: Commits <range>"
+  - `project`: "Scope: Uncommitted changes"
+  - `files <pattern>`: "Scope: Files matching '<pattern>'"
+  - `commits <range>`: "Scope: Commits <range>"
 - Each run overwrites the previous report; include "Previous review: <timestamp>" if prior report exists
 
 ### Report Overwrite Behavior
@@ -4134,7 +4134,7 @@ Summary:
 - Stage 2 (Code Quality): PASS WITH NOTES
 - Total issues: 12 (0 Critical, 3 Important, 9 Minor)
 
-[If --full]
+[If full]
 Additional Checks:
 - Validation: 2 warnings
 - Bug Hunt: 5 medium-severity findings
@@ -4229,8 +4229,8 @@ Verify the range exists:
 Cannot determine commit range for review.
 
 Options:
-1. Manually specify range: @draft review --track <id> --commits <range>
-2. Review uncommitted changes: @draft review --project
+1. Manually specify range: @draft review track <id> commits <range>
+2. Review uncommitted changes: @draft review project
 ```
 
 ---
@@ -4256,37 +4256,37 @@ Options:
 
 ### Review specific track by ID
 ```bash
-@draft review --track add-user-auth
+@draft review track add-user-auth
 ```
 
 ### Review specific track by name (fuzzy)
 ```bash
-@draft review --track "user authentication"
+@draft review track "user authentication"
 ```
 
 ### Comprehensive track review
 ```bash
-@draft review --track add-user-auth --full
+@draft review track add-user-auth full
 ```
 
 ### Review uncommitted changes
 ```bash
-@draft review --project
+@draft review project
 ```
 
 ### Review specific files
 ```bash
-@draft review --files "src/**/*.ts"
+@draft review files "src/**/*.ts"
 ```
 
 ### Review commit range
 ```bash
-@draft review --commits main...feature-branch
+@draft review commits main...feature-branch
 ```
 
 ### Review with validation only
 ```bash
-@draft review --track my-feature --with-validate
+@draft review track my-feature with-validate
 ```
 
 ---

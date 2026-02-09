@@ -710,6 +710,7 @@ draft/
 │   ├── coverage/SKILL.md
 │   ├── validate/SKILL.md
 │   ├── bughunt/SKILL.md
+│   ├── review/SKILL.md
 │   ├── jira-preview/SKILL.md
 │   └── jira-create/SKILL.md
 ├── core/

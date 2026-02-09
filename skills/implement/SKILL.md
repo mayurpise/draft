@@ -235,7 +235,7 @@ Before marking ANY task/phase/track complete:
 **Red Flags - STOP if you're thinking:**
 - "Should pass", "probably works"
 - Satisfaction before running verification
-- About to mark `[x]` without evidence THIS MESSAGE
+- About to mark `[x]` without fresh evidence from this session
 - "I already tested earlier"
 - "This is a simple change, no need to verify"
 

@@ -319,7 +319,7 @@ If `--with-validate` or `--full`:
 
 **Project-level:**
 ```bash
-/draft:validate --project
+/draft:validate
 ```
 
 Parse output from `draft/tracks/<id>/validation-report.md` or `draft/validation-report.md`
@@ -335,7 +335,7 @@ If `--with-bughunt` or `--full`:
 
 **Project-level:**
 ```bash
-/draft:bughunt --project
+/draft:bughunt
 ```
 
 Parse output from `draft/tracks/<id>/bughunt-report.md` or `draft/bughunt-report.md`
@@ -477,7 +477,7 @@ If report already exists:
 
 For track-level reviews, update metadata.json with review status.
 
-**Condition:** Only update metadata when verdict is **PASS** or **PASS_WITH_NOTES**. On **FAIL**, generate the review report but skip metadata updates — a failed review should not increment reviewCount or change lastReviewVerdict.
+**Condition:** Always update metadata after generating the review report, regardless of verdict. This ensures review history is tracked for all outcomes (PASS, PASS_WITH_NOTES, or FAIL).
 
 ### 7.1: Read Current Metadata
 

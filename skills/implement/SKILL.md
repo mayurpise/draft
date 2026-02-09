@@ -324,7 +324,17 @@ When all phases complete:
    - Move from Active to Completed section
    - Add completion date
 
-5. Announce:
+5. **Verify completion state consistency (CRITICAL):**
+   - Read back `plan.md` - confirm status `[x] Completed`
+   - Read back `metadata.json` - confirm status `"completed"`
+   - Read back `draft/tracks.md` - confirm track in Completed section with completion date
+   - If ANY file shows inconsistent state:
+     - ERROR: "Track completion partially failed"
+     - Report: "plan.md: <status>, metadata.json: <status>, tracks.md: <section>"
+     - Provide recovery: "Manually complete updates: [list specific edits needed]"
+     - Do NOT announce completion until all three files verified consistent
+
+6. Announce:
 "Track <track_id> completed!
 
 Summary:

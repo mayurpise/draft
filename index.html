@@ -1654,11 +1654,14 @@
                             <li>Reads each service's <code>draft/</code> context</li>
                             <li>Synthesizes root-level documents for system-of-systems view</li>
                             <li>Generates service registry, dependency graph, tech matrix</li>
+                            <li><strong>Bughunt mode:</strong> Runs <code>/draft:bughunt</code> across subdirectories, aggregates results</li>
                         </ol>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
                             <code>/draft:index</code>
                             <code>/draft:index --init-missing</code>
+                            <code>/draft:index bughunt</code>
+                            <code>/draft:index bughunt dir1 dir2</code>
                         </div>
                     </div>
                 </div>

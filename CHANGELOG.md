@@ -7,7 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-02-08
+
 ### Added
+- `/draft:index` — Monorepo federation and service aggregation:
+  - **Service discovery:** Scans immediate child directories for service markers (package.json, go.mod, Cargo.toml, etc.) at depth=1 only
+  - **Context aggregation:** Reads each service's draft/ context (product.md, architecture.md, tech-stack.md) and synthesizes root-level knowledge
+  - **Dependency mapping:** Detects inter-service dependencies and generates topological ordering for implementation planning
+  - **Auto-generated files:** Creates service-index.md (service registry), dependency-graph.md (mermaid topology), tech-matrix.md (technology distribution), root product.md/architecture.md/tech-stack.md (system-of-systems view)
+  - **Monorepo templates:** 6 new templates (service-index, dependency-graph, tech-matrix, root-product, root-architecture, root-tech-stack) in core/templates/
+  - **Uninitialized service handling:** `--init-missing` flag to bootstrap services without draft/ context
+  - **Manifest tracking:** Creates draft/manifest.json per service with metadata (name, tech, dependencies, team, last indexed)
+- `/draft:adr` — Architecture Decision Records for documenting significant technical decisions:
+  - **ADR structure:** Context (forces driving decision) → Decision (active voice proposal) → Alternatives Considered (≥2 with pros/cons) → Consequences (positive/negative/risks)
+  - **Lifecycle:** Proposed → Accepted → Deprecated/Superseded
+  - **Storage:** `draft/adrs/NNNN-title.md` with track linkage in metadata
+  - **Commands:** `draft adr list`, `draft adr supersede <number>`
+  - **Integration:** Suggested during `/draft:new-track` when making architectural choices
 - `/draft:review` — Standalone code review orchestrator supporting both track-level and project-level review:
   - **Track-level review:** Reviews specific track implementation against spec.md and plan.md using two-stage process (spec compliance → code quality)
   - **Project-level review:** Reviews arbitrary changes (uncommitted, specific files, commit ranges) with code quality checks only
@@ -17,6 +33,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Unified reporting:** Aggregates findings from reviewer agent, validate, and bughunt with deduplication and severity ranking (Critical/Important/Minor)
   - **Review history tracking:** Updates metadata.json with lastReviewed timestamp and reviewCount
   - Generates reports: `draft/tracks/<id>/review-report.md` (track) or `draft/review-report.md` (project)
+- **Enterprise Readiness Enhancements:**
+  - **Red Flags sections** added to all 15 skills — proactive warnings to prevent common mistakes (wrong directory, missing context, skipping verification)
+  - **OWASP Top 10 security checks** integrated into `/draft:validate` — detects SQL injection, XSS, broken auth, insecure deserialization, insufficient logging
+  - **Tech Debt Log** section added to `/draft:implement` — tracks shortcuts, TODOs, and deferred improvements per task
+  - **Enterprise spec sections** — Security/Compliance, Performance Requirements, Operational Runbooks added to spec.md template
+- **Methodology Improvements:**
+  - **Table of Contents** added to core/methodology.md (1,070+ lines) — hierarchical navigation for 8 major sections and 14 commands
+  - **Mermaid diagrams** — Workflow visualization (Context → Spec → Plan → Implement → Review) and context hierarchy (Product → Architecture → Tech Stack)
+  - **Validation expanded examples** — Concrete categories (Architecture Conformance, Security Scan, Performance Analysis) with specific patterns to detect
+  - **ISO timestamp flexibility** documented — both `Z` and `.000Z` suffixes valid (second vs millisecond precision)
+
+### Changed
+- `.gitignore` expanded to ignore generated reports (`draft/bughunt-report.md`, `draft/validation-report.md`, `draft/tracks/*/validation-report.md`)
+- Integration files regenerated with all methodology updates (Cursor, Copilot, Gemini)
 
 ## [1.1.0] - 2026-02-07
 

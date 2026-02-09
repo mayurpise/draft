@@ -20,10 +20,15 @@
       "license": "Apache-2.0",
       "keywords": [
         "context-driven-development",
+        "ai-assisted",
         "planning",
         "specifications",
+        "architecture",
+        "code-review",
+        "monorepo",
         "tdd",
-        "workflow"
+        "validation",
+        "enterprise"
       ]
     }
   ]

@@ -4,7 +4,7 @@
 
 Establish a disciplined AI development lifecycle with clear specifications, structured planning, and defined quality gates. Replace ad hoc AI coding with a phased approach where every feature begins with context, progresses through execution stages, and concludes with verification.
 
-[**getdraft**](https://getdraft.dev) · [**Docs**](https://getdraft.dev#commands)
+[**getdraf.devt**](https://getdraft.dev) · [**Docs**](https://getdraft.dev#commands)
 
 ---
 

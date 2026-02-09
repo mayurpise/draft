@@ -6,6 +6,8 @@ Establish a disciplined AI development lifecycle with clear specifications, stru
 
 [**getdraf.dev**](https://getdraft.dev) · [**Docs**](https://getdraft.dev#commands)
 
+🎥 [**Watch: Draft Overview (8 min)**](https://www.youtube.com/watch?v=gBSwFEFVd7Y)
+
 ---
 
 ## Quickstart
@@ -56,7 +58,7 @@ Commands use `@draft` syntax.
 | `/draft:validate` | Architecture + security scan |
 | `/draft:bughunt` | 12-dimension defect discovery |
 
-[See all 14 commands →](https://getdraft.dev#commands)
+[See all 14 commands →](core/methodology.md#command-workflows)
 
 ---
 
@@ -72,7 +74,7 @@ Commands use `@draft` syntax.
 /draft:review  →  Two-stage review (spec + quality)
 ```
 
-[Full workflow →](https://getdraft.dev#workflow)
+[Full workflow →](core/methodology.md#core-workflow)
 
 ---
 
@@ -90,7 +92,7 @@ plan.md         →  "Phase 1: sortable, Phase 2: persist"
 
 Each layer narrows the solution space. By the time AI writes code, decisions are made.
 
-[Read methodology →](https://getdraft.dev#methodology)
+[Read methodology →](core/methodology.md#philosophy)
 
 ---
 

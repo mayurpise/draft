@@ -54,7 +54,7 @@ Use this context to:
 Ask user to confirm scope:
 - **Entire repo** - Full codebase analysis
 - **Specific paths** - Target directories or files
-- **Track-level** (`--track <id>`) - Focus on files relevant to a specific track
+- **Track-level** (specify `<track-id>`) - Focus on files relevant to a specific track
 
 ### 3. Load Track Context (if track-level)
 

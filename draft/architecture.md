@@ -2,7 +2,7 @@
 
 ## System Overview
 
-**Key Takeaway:** Draft is a Claude Code plugin that implements Context-Driven Development methodology, providing a suite of slash commands (`/draft:*`) for structured software development through specifications and plans before implementation. It operationalizes the constraint hierarchy: `product.md` → `tech-stack.md` → `architecture.md` → `spec.md` → `plan.md`, ensuring AI systems work within pre-approved constraints rather than making autonomous decisions.
+**Key Takeaway:** Draft is a Claude Code plugin that implements Context-Driven Development methodology, providing a suite of 15 slash commands (`/draft:*`) for structured software development through specifications and plans before implementation. It operationalizes the constraint hierarchy: `product.md` → `tech-stack.md` → `architecture.md` → `spec.md` → `plan.md`, ensuring AI systems work within pre-approved constraints rather than making autonomous decisions.
 
 ### System Architecture Diagram
 
@@ -38,9 +38,9 @@ graph TD
 | Directory | Responsibility | Key Files |
 |-----------|---------------|-----------|
 | `.claude-plugin/` | Plugin manifest & marketplace config | `plugin.json`, `marketplace.json` |
-| `skills/` | Command implementations (14 skills) | `*/SKILL.md` |
+| `skills/` | Command implementations (15 skills) | `*/SKILL.md` |
 | `core/agents/` | Specialized agents | `architect.md`, `reviewer.md`, `debugger.md`, `planner.md`, `rca.md` |
-| `core/templates/` | Context file templates (13) | `architecture.md`, `product.md`, `tech-stack.md`, `workflow.md`, `intake-questions.md`, `jira.md`, `product-guidelines.md`, `dependency-graph.md`, `root-architecture.md`, `root-product.md`, `root-tech-stack.md`, `service-index.md`, `tech-matrix.md` |
+| `core/templates/` | Context file templates (14) | `architecture.md`, `product.md`, `tech-stack.md`, `workflow.md`, `intake-questions.md`, `jira.md`, `product-guidelines.md`, `dependency-graph.md`, `root-architecture.md`, `root-product.md`, `root-tech-stack.md`, `service-index.md`, `tech-matrix.md`, `spec.md` |
 | `core/` | Methodology documentation | `methodology.md`, `knowledge-base.md` |
 | `integrations/` | Generated integration files | `cursor/.cursorrules`, `copilot/copilot-instructions.md`, `gemini/GEMINI.md` |
 | `scripts/` | Build automation | `build-integrations.sh` |
@@ -76,7 +76,7 @@ graph TD
 | Entry Point | Type | File | Description |
 |-------------|------|------|-------------|
 | Plugin manifest | Claude Code | `.claude-plugin/plugin.json` | Declares plugin name, version, skills directory |
-| Slash commands | User invocation | `skills/*/SKILL.md` | 14 commands: `/draft:init`, `/draft:new-track`, `/draft:implement`, etc. |
+| Slash commands | User invocation | `skills/*/SKILL.md` | 15 commands: `/draft:init`, `/draft:new-track`, `/draft:implement`, `/draft:adr`, etc. |
 | Build script | Developer workflow | `scripts/build-integrations.sh` | Regenerates Cursor/Copilot/Gemini integrations from skills |
 
 ### Request/Response Flow
@@ -202,6 +202,7 @@ graph LR
     Skills --> JiraPreviewSkill["jira-preview"]
     Skills --> JiraCreateSkill["jira-create"]
     Skills --> IndexSkill["index"]
+    Skills --> ADRSkill["adr"]
     Skills --> DraftSkill["draft"]
 
     InitSkill --> UserDraft["draft/ (user context)"]
@@ -229,6 +230,7 @@ graph LR
 | `skills/review` | `agents/reviewer.md`, `validate`, `bughunt` | - | No |
 | `skills/validate` | `knowledge-base.md` | `review` | No |
 | `skills/bughunt` | `agents/rca.md` | `review` | No |
+| `skills/adr` | `methodology.md` | - | No |
 | `scripts/build-integrations.sh` | `skills/` | `integrations/` | No |
 
 ### Modules
@@ -253,7 +255,7 @@ graph LR
 
 #### Module: core/templates/
 - **Responsibility:** Template files for all generated context artifacts
-- **Files:** `core/templates/architecture.md`, `product.md`, `tech-stack.md`, `workflow.md`, `intake-questions.md`, `jira.md`, `product-guidelines.md`, `dependency-graph.md`, `root-architecture.md`, `root-product.md`, `root-tech-stack.md`, `service-index.md`, `tech-matrix.md` (13 files)
+- **Files:** `core/templates/architecture.md`, `product.md`, `tech-stack.md`, `workflow.md`, `spec.md`, `intake-questions.md`, `jira.md`, `product-guidelines.md`, `dependency-graph.md`, `root-architecture.md`, `root-product.md`, `root-tech-stack.md`, `service-index.md`, `tech-matrix.md` (14 files)
 - **API Surface:** Markdown templates with placeholder sections
 - **Dependencies:** None
 - **Complexity:** Low
@@ -395,6 +397,15 @@ graph LR
 - **Story:** Scans child services, aggregates Draft contexts, builds root-level product.md and architecture.md — see [skills/index/SKILL.md:1-400](skills/index/SKILL.md)
 - **Status:** [x] Existing
 
+#### Module: skills/adr
+- **Responsibility:** Architecture Decision Record creation and management
+- **Files:** `skills/adr/SKILL.md`
+- **API Surface:** `/draft:adr [title|list|supersede <number>]` command
+- **Dependencies:** `core/methodology.md`
+- **Complexity:** Low
+- **Story:** Creates and manages ADRs in `draft/adrs/` directory, documenting significant technical decisions with context, alternatives considered, and consequences — see [skills/adr/SKILL.md:1-150](skills/adr/SKILL.md)
+- **Status:** [x] Existing
+
 #### Module: scripts/build-integrations.sh
 - **Responsibility:** Auto-generate Cursor/Copilot/Gemini integration files from skills
 - **Files:** `scripts/build-integrations.sh`
@@ -408,7 +419,7 @@ graph LR
 
 1. `core/methodology.md`, `core/knowledge-base.md`, `core/templates/`, `core/agents/` (foundational)
 2. `skills/draft`, `skills/init` (project setup)
-3. `skills/new-track`, `skills/decompose` (track creation)
+3. `skills/new-track`, `skills/decompose`, `skills/adr` (track creation & decision documentation)
 4. `skills/implement`, `skills/validate`, `skills/bughunt` (execution)
 5. `skills/review` (depends on validate, bughunt)
 6. `skills/status`, `skills/revert`, `skills/coverage`, `skills/jira-preview`, `skills/jira-create`, `skills/index` (auxiliary)

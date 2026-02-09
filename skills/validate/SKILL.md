@@ -22,7 +22,7 @@ You are validating codebase quality using Draft context files to ensure architec
 ## Usage
 
 - `/draft:validate` - Validate entire codebase
-- `/draft:validate --track <track-id>` - Validate specific track
+- `/draft:validate <track-id>` - Validate specific track
 
 ## Pre-Check
 
@@ -39,11 +39,11 @@ Extract arguments from the command invocation.
 
 **Validation Modes:**
 - **Project-Level:** No arguments → validate entire codebase
-- **Track-Level:** `--track <track-id>` → validate specific track
+- **Track-Level:** `<track-id>` → validate specific track
 
 ### Track-Level Mode
 
-If `--track <track-id>` specified:
+If `<track-id>` specified:
 
 1. Verify track exists: `ls draft/tracks/<track-id>/spec.md`
 2. If not found, tell user: "Track '<track-id>' not found. Check `draft/tracks.md` for valid track IDs."

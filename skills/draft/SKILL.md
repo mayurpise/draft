@@ -7,11 +7,24 @@ description: Context-Driven Development methodology overview. Shows available Dr
 
 Draft is a methodology for structured software development: **Context → Spec & Plan → Implement**
 
+## Red Flags - STOP if you're:
+
+- Jumping straight to implementation without reading existing Draft context
+- Suggesting `/draft:implement` before a track has an approved spec and plan
+- Not checking `draft/tracks.md` for existing active tracks before creating new ones
+- Skipping the recommended command and going freeform
+- Ignoring existing product.md, tech-stack.md, or workflow.md context
+
+**Read context first. Follow the workflow.**
+
+---
+
 ## Available Commands
 
 | Command | Purpose |
 |---------|---------|
 | `/draft:init` | Initialize project (run once) |
+| `/draft:index` | Aggregate monorepo service contexts (run at root) |
 | `/draft:new-track` | Create feature/bug track with spec and plan |
 | `/draft:implement` | Execute tasks from plan with TDD |
 | `/draft:status` | Show progress overview |
@@ -65,6 +78,7 @@ You can also use natural language:
 | Say this... | Runs this |
 |-------------|-----------|
 | "set up the project" | `/draft:init` |
+| "index services", "aggregate context" | `/draft:index` |
 | "new feature", "add X" | `/draft:new-track` |
 | "start implementing" | `/draft:implement` |
 | "what's the status" | `/draft:status` |

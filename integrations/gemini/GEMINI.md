@@ -3031,9 +3031,22 @@ Use track context to:
 
 If no Draft context exists, proceed with code-only analysis.
 
+## Dimension Applicability Check
+
+Before analyzing all 12 dimensions, determine which apply to this codebase:
+
+- **Skip explicitly** rather than forcing analysis of N/A dimensions
+- **Mark skipped dimensions** with reason in report summary
+
+**Examples of skipping:**
+- "N/A - no backend code" (skip dimensions 2, 8, 10 for frontend-only repo)
+- "N/A - no UI components" (skip dimensions 5, 9 for CLI tool)
+- "N/A - no database" (skip dimension 2 for in-memory app)
+- "N/A - no external integrations" (skip dimension 8)
+
 ## Analysis Dimensions
 
-Analyze systematically across all dimensions. Do not skip any.
+Analyze systematically across all applicable dimensions. Skip N/A dimensions explicitly (see Dimension Applicability Check above).
 
 ### 1. Correctness
 - Logical errors, invalid assumptions, edge cases
@@ -3137,9 +3150,13 @@ Analyze systematically across all dimensions. Do not skip any.
    - [ ] Check existing tests — Is this behavior already tested and expected?
 
 3. **Framework/Library Verification**
-   - [ ] Verify the framework doesn't already handle this (e.g., React escapes XSS, ORM sanitizes SQL)
-   - [ ] Check library documentation for default behaviors
+   - [ ] Read official docs for the specific method/pattern in question
+   - [ ] Quote relevant doc section proving this is/isn't handled
+   - [ ] Check framework version in tech-stack.md (behavior may vary by version)
    - [ ] Look for middleware, interceptors, or global handlers that may address the issue
+
+**Example Framework Documentation Quote:**
+"React automatically escapes JSX content to prevent XSS (React Docs: Main Concepts > JSX). However, `dangerouslySetInnerHTML` bypasses this protection. Framework version: React 18.2.0 (from tech-stack.md)."
 
 4. **Codebase Pattern Check**
    - [ ] Search for similar patterns elsewhere in codebase
@@ -3152,6 +3169,24 @@ Analyze systematically across all dimensions. Do not skip any.
    - [ ] Is this intentionally disabled (feature flag, config)?
    - [ ] Is there a comment explaining why this appears unsafe but is actually safe?
 
+6. **Pattern Prevalence Check (before reporting)**
+   - [ ] Run Grep to find all occurrences of the pattern
+   - [ ] If found >5x:
+     - Randomly sample 3 instances
+     - Verify they exhibit the same suspected bug
+     - If they work correctly, investigate: what's different about THIS instance?
+   - [ ] If no difference found and other instances work: DO NOT REPORT
+   - [ ] If all instances have the bug: Report with pattern count in "Impact"
+
+**Example Pattern Prevalence Check:**
+```
+1. Grep: `rg 'dangerouslySetInnerHTML' src/` → found 12 occurrences
+2. Sampled 3: src/Blog.tsx:45, src/About.tsx:12, src/FAQ.tsx:30
+3. All 3 sanitize input via `DOMPurify.sanitize()` before rendering
+4. THIS instance (src/Comment.tsx:88) passes raw user input without sanitization
+5. Decision: REPORT — this instance lacks the sanitization all others have
+```
+
 ### Confidence Levels
 
 Only report bugs with HIGH or CONFIRMED confidence:
@@ -3160,8 +3195,11 @@ Only report bugs with HIGH or CONFIRMED confidence:
 |-------|----------|--------|
 | **CONFIRMED** | Verified through code trace, no mitigating factors found | Report as bug |
 | **HIGH** | Strong evidence, checked context, no obvious mitigation | Report as bug |
-| **MEDIUM** | Suspicious but couldn't verify all factors | Report with caveat in "Confidence" field |
+| **MEDIUM** | Suspicious but couldn't verify all factors | Use AskUserQuestion to check with user before reporting |
 | **LOW** | Possible issue but likely handled elsewhere | Do NOT report |
+
+**Example AskUserQuestion for MEDIUM Confidence:**
+"I found a potential race condition in `src/handler.ts:45` where async state updates may overwrite each other. However, I couldn't verify if there's a locking mechanism elsewhere. Should I report this as a bug?"
 
 ### Evidence Requirements
 
@@ -3180,6 +3218,27 @@ Each reported bug MUST include:
 - **Cross-reference ALL Draft context** - Check architecture, tech-stack, product, tests
 - **Check for existing mitigations** - Middleware, wrappers, utilities, global handlers
 - **Search for patterns** - If used elsewhere without issues, investigate why
+
+## Optional: Runtime Verification (if test suite exists)
+
+For suspected bugs that can be tested, write a minimal failing test to confirm:
+
+1. **Write minimal test** — Target the specific bug, not the entire feature
+2. **Run test** — Execute and observe failure
+3. **Confirm bug** — If test fails as predicted, confidence level increases to CONFIRMED
+4. **Only report if**: Test fails OR CONFIRMED confidence from code trace
+
+**Example:**
+```javascript
+// Suspected bug: off-by-one in pagination
+test('should handle last page boundary', () => {
+  const items = Array(100).fill('item');
+  const result = paginate(items, { page: 10, perPage: 10 });
+  expect(result.items.length).toBe(10); // Currently returns 9
+});
+```
+
+If test fails, upgrade confidence to CONFIRMED and include test in bug report.
 
 ## Output Format
 
@@ -3213,6 +3272,19 @@ For each verified bug:
 [Explicit statement: "No sanitization exists because X", "Framework Y doesn't escape Z in this context", etc.]
 
 **Fix:** [Minimal code change or mitigation]
+
+**Regression Test:** [Test case that would fail due to this bug, or "N/A - not testable without [reason]"]
+```
+
+**Example Regression Test Field:**
+```javascript
+**Regression Test:**
+test('should sanitize user input', () => {
+  const malicious = '<script>alert("xss")</script>';
+  const result = processInput(malicious);
+  expect(result).not.toContain('<script>');
+});
+// Expected: Test fails (currently would pass, allowing XSS)
 ```
 
 Severity levels:
@@ -3262,6 +3334,15 @@ Report structure:
 ## Low Issues
 
 [Issues...]
+
+## Dimensions With No Findings
+
+| Dimension | Status |
+|-----------|--------|
+| Correctness | No bugs found |
+| Reliability | N/A — no runtime application |
+| Performance | N/A — static site, no dynamic content |
+| Concurrency | N/A — no async operations |
 ```
 
 ## Final Instructions
@@ -3269,7 +3350,7 @@ Report structure:
 - **No unverified bugs** — Every finding must pass the verification protocol
 - **Evidence required** — Include code snippets and trace for every bug
 - **Explicit false positive elimination** — State why each bug isn't handled elsewhere
-- Do not skip dimensions — analyze all 12
+- Analyze all applicable dimensions — skip N/A dimensions explicitly with reason (see Dimension Applicability Check)
 - Assume the reader is a senior engineer who will verify your findings
 - If Draft context is available, explicitly note which architectural violations or product requirement bugs were found
 - Be precise about file locations and line numbers

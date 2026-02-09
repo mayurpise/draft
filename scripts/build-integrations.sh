@@ -128,7 +128,10 @@ extract_body() {
 
     # Extract and validate frontmatter (use || true to ignore SIGPIPE from head)
     local frontmatter
-    frontmatter=$(awk '/^---$/{flag=!flag;next}flag' "$file" | head -20 || true)
+    frontmatter=$(awk '
+        /^---$/ { if (!seen_first) { seen_first=1; next } else { exit } }
+        seen_first { print }
+    ' "$file" | head -20 || true)
 
     # Validate required fields
     if ! echo "$frontmatter" | grep -q "^name:"; then

@@ -36,6 +36,7 @@ SKILL_ORDER=(
     validate
     bughunt
     review
+    adr
     status
     revert
     jira-preview
@@ -55,6 +56,7 @@ get_skill_header() {
         validate)     echo "Validate Command" ;;
         bughunt)      echo "Bug Hunt Command" ;;
         review)       echo "Review Command" ;;
+        adr)          echo "ADR Command" ;;
         status)       echo "Status Command" ;;
         revert)       echo "Revert Command" ;;
         jira-preview) echo "Jira Preview Command" ;;
@@ -77,6 +79,7 @@ get_cursor_trigger() {
         validate)     echo "\"validate\" or \"@draft validate [--track <id>]\"" ;;
         bughunt)      echo "\"hunt bugs\" or \"@draft bughunt [--track <id>]\"" ;;
         review)       echo "\"review code\" or \"@draft review [--track <id>] [--full]\"" ;;
+        adr)          echo "\"document decision\" or \"@draft adr [title]\"" ;;
         status)       echo "\"status\" or \"@draft status\"" ;;
         revert)       echo "\"revert\" or \"@draft revert\"" ;;
         jira-preview) echo "\"preview jira\" or \"@draft jira-preview [track-id]\"" ;;
@@ -99,6 +102,7 @@ get_copilot_trigger() {
         validate)     echo "\"validate\" or \"draft validate [--track <id>]\"" ;;
         bughunt)      echo "\"hunt bugs\" or \"draft bughunt [--track <id>]\"" ;;
         review)       echo "\"review code\" or \"draft review [--track <id>] [--full]\"" ;;
+        adr)          echo "\"document decision\" or \"draft adr [title]\"" ;;
         status)       echo "\"status\" or \"draft status\"" ;;
         revert)       echo "\"revert\" or \"draft revert\"" ;;
         jira-preview) echo "\"preview jira\" or \"draft jira-preview [track-id]\"" ;;
@@ -187,6 +191,7 @@ CORE_FILES=(
     "templates/product-guidelines.md"
     "templates/tech-stack.md"
     "templates/workflow.md"
+    "templates/spec.md"
     # Index templates (monorepo)
     "templates/service-index.md"
     "templates/dependency-graph.md"
@@ -411,6 +416,7 @@ COMMON_HEADER
     echo "| \`${command_prefix} validate [--track <id>]\` | Codebase quality validation |"
     echo "| \`${command_prefix} bughunt [--track <id>]\` | Systematic bug discovery |"
     echo "| \`${command_prefix} review [--track <id>]\` | Two-stage code review |"
+    echo "| \`${command_prefix} adr [title]\` | Architecture Decision Records |"
     echo "| \`${command_prefix} status\` | Show progress overview |"
     echo "| \`${command_prefix} revert\` | Git-aware rollback |"
     echo "| \`${command_prefix} jira-preview [track-id]\` | Generate jira-export.md for review |"
@@ -437,6 +443,7 @@ Recognize these natural language patterns:
 | "undo", "revert" | Run revert |
 | "preview jira", "export to jira" | Run jira-preview |
 | "create jira", "push to jira" | Run jira-create |
+| "document decision", "create ADR" | Create architecture decision record |
 | "help", "what commands" | Show draft overview |
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |

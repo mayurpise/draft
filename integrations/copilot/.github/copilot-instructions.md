@@ -28,6 +28,7 @@ When `draft/` exists in the project, always consider:
 |---------|---------|
 | `draft` | Show overview and available commands |
 | `draft init` | Initialize project (run once) |
+| `draft index [--init-missing]` | Aggregate monorepo service contexts |
 | `draft new-track <description>` | Create feature/bug track |
 | `draft decompose` | Module decomposition with dependency mapping |
 | `draft implement` | Execute tasks from plan |
@@ -46,6 +47,7 @@ Recognize these natural language patterns:
 | User Says | Action |
 |-----------|--------|
 | "set up the project" | Run init |
+| "index services", "aggregate context" | Run index |
 | "new feature", "add X" | Create new track |
 | "break into modules", "decompose" | Run decompose |
 | "start implementing" | Execute implement |
@@ -494,6 +496,560 @@ Created:
 Next steps:
 1. Review and edit the generated files as needed
 2. Run `draft new-track` to start planning a feature"
+
+---
+
+## Index Command
+
+When user says "index services" or "draft index [--init-missing]":
+
+You are building a federated knowledge index for a monorepo with multiple services.
+
+## Pre-Check
+
+```bash
+ls draft/ 2>/dev/null
+```
+
+**If `draft/` does NOT exist at root:**
+- Announce: "Root draft/ directory not found. Run `draft init` at monorepo root first to create base context, then run `draft index` to aggregate service knowledge."
+- Stop here.
+
+**If `draft/` exists:** Continue to Step 1.
+
+## Step 1: Parse Arguments
+
+Check for flags:
+- `--init-missing`: Also initialize services that don't have `draft/` directories
+
+## Step 2: Discover Services (Depth=1 Only)
+
+Scan immediate child directories for service markers. Do NOT recurse beyond depth=1.
+
+**Service detection markers (any of these):**
+- `package.json` (Node.js)
+- `go.mod` (Go)
+- `Cargo.toml` (Rust)
+- `pom.xml` or `build.gradle` (Java)
+- `pyproject.toml` or `requirements.txt` (Python)
+- `Dockerfile` (containerized service)
+- `src/` directory with code files
+
+**Exclude patterns:**
+- `node_modules/`
+- `vendor/`
+- `.git/`
+- `draft/` (the root draft directory itself)
+- Any directory starting with `.`
+
+```bash
+# Example discovery (adapt to actual structure)
+ls -d */ | head -50
+```
+
+**Output:** List of detected service directories.
+
+## Step 3: Categorize Services
+
+For each detected service directory, check for `draft/` subdirectory:
+
+```bash
+# For each service
+ls <service>/draft/ 2>/dev/null
+```
+
+Categorize into:
+- **Initialized:** Has `draft/` with context files
+- **Uninitialized:** No `draft/` directory
+
+Report:
+```
+Scanning immediate child directories...
+
+Detected X service directories:
+  ✓ Y initialized (draft/ found)
+  ○ Z uninitialized
+
+Initialized services:
+  - services/auth/
+  - services/billing/
+  - ...
+
+Uninitialized services:
+  - services/legacy-reports/
+  - services/admin-tools/
+  - ...
+```
+
+## Step 4: Handle Uninitialized Services
+
+**If `--init-missing` flag is present:**
+1. For each uninitialized service, prompt:
+   ```
+   Initialize <service-name>/? [y/n/all/skip-rest]
+   ```
+2. If user selects:
+   - `y`: Run `draft init` in that directory
+   - `n`: Skip this service
+   - `all`: Initialize all remaining without prompting
+   - `skip-rest`: Skip all remaining uninitialized services
+
+**If `--init-missing` flag is NOT present:**
+- Just report uninitialized services and continue
+- Suggest: "Run `draft index --init-missing` to initialize these services"
+
+## Step 5: Aggregate Context from Initialized Services
+
+For each initialized service, read and extract:
+
+### 5.1 From `<service>/draft/product.md`:
+- Service name
+- First paragraph of Vision (summary)
+- Target users (list)
+- Core features (list)
+
+### 5.2 From `<service>/draft/architecture.md`:
+- Key Takeaway paragraph
+- External dependencies (from mermaid diagram or table)
+- Exposed APIs or entry points
+- Dependencies on other services (look for references to sibling service names)
+
+### 5.3 From `<service>/draft/tech-stack.md`:
+- Primary language/framework
+- Database
+- Key dependencies
+
+### 5.4 Create/Update `<service>/draft/manifest.json`:
+```json
+{
+  "name": "<service-name>",
+  "type": "service",
+  "summary": "<first line of product vision>",
+  "primaryTech": "<main language/framework>",
+  "dependencies": ["<other-service-names>", "<external-deps>"],
+  "dependents": [],
+  "team": "<if found in docs>",
+  "initialized": "<date>",
+  "lastIndexed": "<current-date>"
+}
+```
+
+## Step 6: Detect Inter-Service Dependencies
+
+Analyze extracted data to build dependency graph:
+
+1. Look for service name references in each service's architecture.md
+2. Look for API client imports or service URLs in tech-stack.md
+3. Look for mentions in product.md that reference other services
+
+Build a dependency map:
+```
+auth-service: []  # no dependencies on other services
+billing-service: [auth-service]
+api-gateway: [auth-service, billing-service]
+```
+
+Update each service's `manifest.json` with `dependents` field (reverse lookup).
+
+## Step 7: Generate Root Aggregated Files
+
+### 7.1 Generate `draft/service-index.md`
+
+Use template from `core/templates/service-index.md`:
+
+```markdown
+# Service Index
+
+> Auto-generated by `draft index` on <date>. Do not edit directly.
+> Re-run `draft index` to update.
+
+## Overview
+
+| Metric | Count |
+|--------|-------|
+| Total Services Detected | X |
+| Initialized | Y |
+| Uninitialized | Z |
+
+## Service Registry
+
+| Service | Status | Tech Stack | Dependencies | Team | Details |
+|---------|--------|------------|--------------|------|---------|
+| auth | ✓ | Go, Postgres | - | @auth-team | [→](../services/auth/draft/architecture.md) |
+| billing | ✓ | Node, Stripe | auth | @billing | [→](../services/billing/draft/architecture.md) |
+| legacy-reports | ○ | - | - | - | Not initialized |
+
+## Uninitialized Services
+
+The following services have not been initialized with `draft init`:
+- `services/legacy-reports/`
+- `services/admin-tools/`
+
+Run `draft index --init-missing` or initialize individually with:
+```bash
+cd services/legacy-reports && draft init
+```
+```
+
+### 7.2 Generate `draft/dependency-graph.md`
+
+```markdown
+# Service Dependency Graph
+
+> Auto-generated by `draft index` on <date>. Do not edit directly.
+
+## System Topology
+
+```mermaid
+graph LR
+    subgraph "Core Services"
+        auth[auth-service]
+        billing[billing-service]
+        users[user-service]
+    end
+
+    subgraph "Edge"
+        gateway[api-gateway]
+    end
+
+    subgraph "Background"
+        notifications[notification-service]
+        reports[report-service]
+    end
+
+    gateway --> auth
+    gateway --> billing
+    gateway --> users
+    billing --> auth
+    notifications --> users
+    reports --> billing
+```
+
+## Dependency Matrix
+
+| Service | Depends On | Depended By |
+|---------|-----------|-------------|
+| auth-service | - | billing, gateway, users |
+| billing-service | auth | gateway, reports |
+| user-service | auth | gateway, notifications |
+| api-gateway | auth, billing, users | - |
+
+## Dependency Order (Topological)
+
+1. **auth-service** (foundational - no internal dependencies)
+2. **user-service** (depends on: auth)
+3. **billing-service** (depends on: auth)
+4. **notification-service** (depends on: users)
+5. **report-service** (depends on: billing)
+6. **api-gateway** (depends on: auth, billing, users)
+
+> This ordering helps when planning cross-service changes or understanding impact.
+```
+
+### 7.3 Generate `draft/tech-matrix.md`
+
+```markdown
+# Technology Matrix
+
+> Auto-generated by `draft index` on <date>. Do not edit directly.
+
+## Common Stack (Org Standards)
+
+Technologies used by majority of services:
+
+| Technology | Usage | Services |
+|------------|-------|----------|
+| PostgreSQL | Database | auth, billing, users (85%) |
+| Redis | Caching | auth, gateway, notifications (60%) |
+| Docker | Containerization | all (100%) |
+| GitHub Actions | CI/CD | all (100%) |
+
+## Technology Distribution
+
+### Languages
+
+| Language | Services | Percentage |
+|----------|----------|------------|
+| Go | auth, users, gateway | 45% |
+| TypeScript | billing, notifications, reports | 45% |
+| Python | ml-service, analytics | 10% |
+
+### Databases
+
+| Database | Services |
+|----------|----------|
+| PostgreSQL | auth, billing, users, reports |
+| MongoDB | notifications, analytics |
+| Redis | auth, gateway (cache only) |
+
+## Variance Report
+
+Services deviating from org standards:
+
+| Service | Deviation | Reason |
+|---------|-----------|--------|
+| ml-service | Python instead of Go/TS | ML ecosystem |
+| analytics | MongoDB instead of Postgres | Time-series workload |
+```
+
+### 7.4 Synthesize `draft/product.md` (if not exists or is placeholder)
+
+Read all service product.md files and synthesize:
+
+```markdown
+# Product: [Org/Product Name]
+
+> Synthesized from X service contexts by `draft index` on <date>.
+> Edit this file to refine the overall product vision.
+
+## Vision
+
+[Synthesized from common themes across service visions - one paragraph describing what the overall product/platform does]
+
+## Target Users
+
+<!-- Aggregated from all services, deduplicated -->
+- **End Users**: [common user types across services]
+- **Developers**: [if developer-facing APIs exist]
+- **Operators**: [if ops/admin services exist]
+
+## Service Capabilities
+
+| Capability | Provided By | Description |
+|------------|-------------|-------------|
+| Authentication | auth-service | User identity, JWT, OAuth |
+| Payments | billing-service | Stripe integration, invoicing |
+| API Access | api-gateway | Rate limiting, routing |
+
+## Cross-Cutting Concerns
+
+<!-- Extracted from common patterns across services -->
+- **Authentication**: All services validate via auth-service
+- **Observability**: [common logging/tracing approach]
+- **Data Privacy**: [common compliance patterns]
+```
+
+### 7.5 Synthesize `draft/architecture.md` (if not exists or is placeholder)
+
+```markdown
+# Architecture: [Org/Product Name]
+
+> Synthesized from X service contexts by `draft index` on <date>.
+> This is a system-of-systems view. For service internals, see individual service drafts.
+
+## System Overview
+
+**Key Takeaway:** [One paragraph synthesizing overall system purpose from service summaries]
+
+### System Topology
+
+```mermaid
+graph TD
+    subgraph "External"
+        Users[Users/Clients]
+        ThirdParty[Third-Party Services]
+    end
+
+    subgraph "Edge Layer"
+        Gateway[API Gateway]
+        CDN[CDN/Static]
+    end
+
+    subgraph "Core Services"
+        Auth[Auth Service]
+        Billing[Billing Service]
+        Users2[User Service]
+    end
+
+    subgraph "Background"
+        Notifications[Notifications]
+        Reports[Reports]
+    end
+
+    subgraph "Data Layer"
+        Postgres[(PostgreSQL)]
+        Redis[(Redis)]
+        Queue[Message Queue]
+    end
+
+    Users --> Gateway
+    Gateway --> Auth
+    Gateway --> Billing
+    Gateway --> Users2
+    Billing --> ThirdParty
+    Auth --> Postgres
+    Billing --> Postgres
+    Notifications --> Queue
+    Reports --> Queue
+```
+
+## Service Directory
+
+| Service | Responsibility | Tech | Status | Details |
+|---------|---------------|------|--------|---------|
+| auth-service | Identity & access management | Go, Postgres | ✓ Active | [→ architecture](../services/auth/draft/architecture.md) |
+| billing-service | Payments & invoicing | Node, Stripe | ✓ Active | [→ architecture](../services/billing/draft/architecture.md) |
+
+## Shared Infrastructure
+
+<!-- Extracted from common external dependencies -->
+
+| Component | Purpose | Used By |
+|-----------|---------|---------|
+| PostgreSQL | Primary datastore | auth, billing, users |
+| Redis | Caching, sessions | auth, gateway |
+| RabbitMQ | Async messaging | notifications, reports |
+| Stripe | Payment processing | billing |
+
+## Cross-Service Patterns
+
+<!-- Extracted from common conventions -->
+
+| Pattern | Description | Services |
+|---------|-------------|----------|
+| JWT Auth | All services validate JWT via auth-service | all |
+| Event-Driven | Async events via message queue | notifications, reports |
+
+## Notes
+
+- For detailed service architecture, navigate to individual service drafts
+- This file is regenerable via `draft index`
+- Manual edits to non-synthesized sections will be preserved on re-index
+```
+
+### 7.6 Synthesize `draft/tech-stack.md` (if not exists or is placeholder)
+
+```markdown
+# Tech Stack: [Org/Product Name]
+
+> Synthesized from X service contexts by `draft index` on <date>.
+> This defines org-wide standards. Service-specific additions are in their local tech-stack.md.
+
+## Org Standards
+
+### Languages
+- **Primary**: [most common language] — [X% of services]
+- **Secondary**: [second most common] — [Y% of services]
+
+### Frameworks
+- **API**: [common API framework]
+- **Testing**: [common test framework]
+
+### Infrastructure
+- **Database**: PostgreSQL (standard), MongoDB (approved for specific use cases)
+- **Caching**: Redis
+- **Messaging**: RabbitMQ / SQS
+- **Container**: Docker
+- **Orchestration**: Kubernetes
+
+### CI/CD
+- **Platform**: GitHub Actions
+- **Registry**: [container registry]
+
+## Approved Variances
+
+| Service | Variance | Justification |
+|---------|----------|---------------|
+| ml-service | Python | ML ecosystem requirements |
+| analytics | MongoDB | Time-series workload |
+
+## Shared Libraries
+
+| Library | Purpose | Version | Used By |
+|---------|---------|---------|---------|
+| @org/auth-client | Auth service client | 2.x | billing, gateway, notifications |
+| @org/logging | Structured logging | 1.x | all services |
+```
+
+## Step 8: Create Root Config
+
+Create `draft/config.yaml` if not exists:
+
+```yaml
+# Draft Index Configuration
+
+# Service detection patterns (immediate children only)
+service_patterns:
+  - "package.json"
+  - "go.mod"
+  - "Cargo.toml"
+  - "pom.xml"
+  - "build.gradle"
+  - "pyproject.toml"
+  - "requirements.txt"
+  - "Dockerfile"
+
+# Directories to exclude from scanning
+exclude_patterns:
+  - "node_modules"
+  - "vendor"
+  - ".git"
+  - "draft"
+  - ".*"  # Hidden directories
+
+# Re-index on these events (for CI integration)
+reindex_triggers:
+  - "service added"
+  - "service removed"
+  - "weekly"
+```
+
+## Step 9: Completion Report
+
+```
+═══════════════════════════════════════════════════════════
+                    DRAFT INDEX COMPLETE
+═══════════════════════════════════════════════════════════
+
+Scanned: X service directories (depth=1)
+Indexed: Y services with draft/ context
+Skipped: Z uninitialized services
+
+Generated/Updated:
+  ✓ draft/service-index.md      (service registry)
+  ✓ draft/dependency-graph.md   (inter-service topology)
+  ✓ draft/tech-matrix.md        (technology distribution)
+  ✓ draft/product.md            (synthesized product vision)
+  ✓ draft/architecture.md       (system-of-systems view)
+  ✓ draft/tech-stack.md         (org standards)
+  ✓ draft/config.yaml           (index configuration)
+
+Service manifests updated: Y services
+
+Next steps:
+1. Review synthesized files in draft/
+2. Edit draft/product.md to refine overall vision
+3. Edit draft/architecture.md to add cross-cutting context
+4. Run draft index periodically to refresh
+
+For uninitialized services, run:
+  draft index --init-missing
+═══════════════════════════════════════════════════════════
+```
+
+## Operational Notes
+
+### What This Command Does NOT Do
+
+- **No deep code analysis** — Reads only existing `draft/*.md` files
+- **No source code scanning** — That's `draft init`'s job per service
+- **No recursive scanning** — Depth=1 only, immediate children
+- **No duplication** — Root files link to service files, not copy content
+
+### When to Re-Run
+
+- After running `draft init` on a new service
+- After significant changes to service architectures
+- Weekly/monthly as part of documentation hygiene
+- Before major cross-service planning
+
+### Preserving Manual Edits
+
+When regenerating, the skill:
+1. Reads existing root files
+2. Identifies manually-added sections (not marked as auto-generated)
+3. Preserves those sections while updating auto-generated parts
+4. Sections between `<!-- MANUAL START -->` and `<!-- MANUAL END -->` are never overwritten
 
 ---
 
@@ -6646,6 +7202,520 @@ If task exceeds 5 iterations:
 1. Document current state in plan.md
 2. Note any discoveries or blockers
 3. Suggest resumption approach
+
+</core-file>
+
+---
+
+## core/templates/service-index.md
+
+<core-file path="core/templates/service-index.md">
+
+# Service Index
+
+> Auto-generated by `draft index` on [DATE]. Do not edit directly.
+> Re-run `draft index` to update.
+
+## Overview
+
+| Metric | Count |
+|--------|-------|
+| Total Services Detected | [X] |
+| Initialized | [Y] |
+| Uninitialized | [Z] |
+
+## Service Registry
+
+| Service | Status | Tech Stack | Dependencies | Team | Details |
+|---------|--------|------------|--------------|------|---------|
+| [service-name] | ✓ | [lang, db] | [deps] | [@team] | [→ architecture](../services/[name]/draft/architecture.md) |
+| [service-name] | ○ | - | - | - | Not initialized |
+
+> **Status Legend:** ✓ = initialized, ○ = not initialized
+
+## Uninitialized Services
+
+The following services have not been initialized with `draft init`:
+
+- `[path/to/service]/`
+
+Run `draft index --init-missing` or initialize individually with:
+```bash
+cd [path/to/service] && draft init
+```
+
+<!-- MANUAL START -->
+## Notes
+
+[Add any manual notes about services here - this section is preserved on re-index]
+
+<!-- MANUAL END -->
+
+</core-file>
+
+---
+
+## core/templates/dependency-graph.md
+
+<core-file path="core/templates/dependency-graph.md">
+
+# Service Dependency Graph
+
+> Auto-generated by `draft index` on [DATE]. Do not edit directly.
+> Re-run `draft index` to update.
+
+## System Topology
+
+```mermaid
+graph LR
+    subgraph "Core Services"
+        auth[auth-service]
+        users[user-service]
+    end
+
+    subgraph "Business Services"
+        billing[billing-service]
+        orders[order-service]
+    end
+
+    subgraph "Edge"
+        gateway[api-gateway]
+    end
+
+    subgraph "Background"
+        notifications[notification-service]
+        reports[report-service]
+    end
+
+    gateway --> auth
+    gateway --> users
+    gateway --> billing
+    gateway --> orders
+    billing --> auth
+    orders --> auth
+    orders --> billing
+    notifications --> users
+    reports --> billing
+    reports --> orders
+```
+
+> Services without `draft/` are shown with dashed borders when detected.
+
+## Dependency Matrix
+
+| Service | Depends On | Depended By | Circular? |
+|---------|-----------|-------------|-----------|
+| auth-service | - | billing, orders, gateway | No |
+| user-service | auth | gateway, notifications | No |
+| billing-service | auth | orders, gateway, reports | No |
+| order-service | auth, billing | gateway, reports | No |
+| api-gateway | auth, users, billing, orders | - | No |
+| notification-service | users | - | No |
+| report-service | billing, orders | - | No |
+
+## Dependency Order (Topological)
+
+Build/deploy order for cross-service changes:
+
+1. **auth-service** — foundational, no internal dependencies
+2. **user-service** — depends on: auth
+3. **billing-service** — depends on: auth
+4. **order-service** — depends on: auth, billing
+5. **notification-service** — depends on: users
+6. **report-service** — depends on: billing, orders
+7. **api-gateway** — depends on: auth, users, billing, orders (deploy last)
+
+> This ordering helps when planning cross-service changes, understanding blast radius, or sequencing deployments.
+
+## Impact Analysis
+
+When modifying a service, these services may be affected:
+
+| If You Change... | Check These Services |
+|------------------|---------------------|
+| auth-service | billing, orders, gateway, users |
+| billing-service | orders, gateway, reports |
+| user-service | gateway, notifications |
+
+## External Dependencies
+
+Services depending on external systems:
+
+| External System | Used By | Purpose |
+|----------------|---------|---------|
+| [Stripe] | billing-service | Payment processing |
+| [SendGrid] | notification-service | Email delivery |
+| [AWS S3] | report-service | Report storage |
+
+</core-file>
+
+---
+
+## core/templates/tech-matrix.md
+
+<core-file path="core/templates/tech-matrix.md">
+
+# Technology Matrix
+
+> Auto-generated by `draft index` on [DATE]. Do not edit directly.
+> Re-run `draft index` to update.
+
+## Org Standards
+
+Technologies used by majority of services (>50%):
+
+| Technology | Category | Usage | Services |
+|------------|----------|-------|----------|
+| [PostgreSQL] | Database | [X]% | [list] |
+| [Redis] | Caching | [X]% | [list] |
+| [Docker] | Container | [X]% | [list] |
+| [GitHub Actions] | CI/CD | [X]% | [list] |
+
+## Technology Distribution
+
+### Languages
+
+| Language | Services | Percentage | Notes |
+|----------|----------|------------|-------|
+| [Go] | [auth, users, gateway] | [45%] | Preferred for performance-critical |
+| [TypeScript] | [billing, notifications] | [40%] | Preferred for rapid development |
+| [Python] | [ml-service, analytics] | [15%] | ML/data workloads only |
+
+### Databases
+
+| Database | Services | Use Case |
+|----------|----------|----------|
+| PostgreSQL | [auth, billing, users] | Primary OLTP |
+| MongoDB | [notifications, analytics] | Document store |
+| Redis | [auth, gateway] | Cache, sessions |
+
+### Frameworks
+
+| Framework | Language | Services |
+|-----------|----------|----------|
+| [Gin] | Go | auth, users, gateway |
+| [Express] | TypeScript | billing |
+| [FastAPI] | Python | ml-service |
+
+### Message Queues
+
+| Queue | Services | Pattern |
+|-------|----------|---------|
+| [RabbitMQ] | notifications, reports | Pub/sub |
+| [Kafka] | analytics | Event streaming |
+
+## Variance Report
+
+Services deviating from org standards:
+
+| Service | Deviation | Standard | Justification |
+|---------|-----------|----------|---------------|
+| [ml-service] | Python | Go/TypeScript | ML ecosystem requirements |
+| [analytics] | MongoDB | PostgreSQL | Time-series workload |
+| [legacy-reports] | Java | Go/TypeScript | Legacy, migration planned |
+
+## Shared Libraries
+
+Internal libraries used across services:
+
+| Library | Purpose | Version | Used By | Repo |
+|---------|---------|---------|---------|------|
+| [@org/auth-client] | Auth service client | 2.x | billing, gateway, notifications | [link] |
+| [@org/logging] | Structured logging | 1.x | all services | [link] |
+| [@org/errors] | Error handling | 1.x | auth, billing, users | [link] |
+
+## Version Matrix
+
+Current versions in production:
+
+| Service | Language Version | Framework Version | Last Updated |
+|---------|-----------------|-------------------|--------------|
+| auth-service | Go 1.21 | Gin 1.9 | [date] |
+| billing-service | Node 20 | Express 4.18 | [date] |
+| user-service | Go 1.21 | Gin 1.9 | [date] |
+
+<!-- MANUAL START -->
+## Technology Roadmap
+
+[Add planned technology changes, deprecations, or migrations here — preserved on re-index]
+
+<!-- MANUAL END -->
+
+</core-file>
+
+---
+
+## core/templates/root-product.md
+
+<core-file path="core/templates/root-product.md">
+
+# Product: [Org/Product Name]
+
+> Synthesized from [X] service contexts by `draft index` on [DATE].
+> Edit this file to refine the overall product vision.
+> Re-running `draft index` will update auto-generated sections but preserve manual edits.
+
+## Vision
+
+[Synthesized from common themes across service visions — describe what the overall product/platform does and why it matters]
+
+## Target Users
+
+<!-- Aggregated and deduplicated from all service product.md files -->
+
+- **[User Type 1]**: [Their needs across the platform]
+- **[User Type 2]**: [Their needs across the platform]
+
+## Service Capabilities
+
+| Capability | Provided By | Description |
+|------------|-------------|-------------|
+| [Capability] | [service-name] | [Brief description] |
+
+## Cross-Cutting Concerns
+
+<!-- Extracted from common patterns across services -->
+
+- **Authentication**: [How auth works across services]
+- **Observability**: [Common logging/tracing approach]
+- **Data Privacy**: [Compliance patterns]
+
+<!-- MANUAL START -->
+## Strategic Context
+
+[Add manual strategic context, roadmap notes, or business priorities here — preserved on re-index]
+
+<!-- MANUAL END -->
+
+</core-file>
+
+---
+
+## core/templates/root-architecture.md
+
+<core-file path="core/templates/root-architecture.md">
+
+# Architecture: [Org/Product Name]
+
+> Synthesized from [X] service contexts by `draft index` on [DATE].
+> This is a **system-of-systems** view. For service internals, see individual service drafts.
+> Re-running `draft index` will update auto-generated sections but preserve manual edits.
+
+## System Overview
+
+**Key Takeaway:** [One paragraph synthesizing overall system purpose from service summaries — what this platform does, who it serves, and its primary value proposition]
+
+### System Topology
+
+```mermaid
+graph TD
+    subgraph "External"
+        Users[Users/Clients]
+        ThirdParty[Third-Party Services]
+    end
+
+    subgraph "Edge Layer"
+        Gateway[API Gateway]
+    end
+
+    subgraph "Core Services"
+        ServiceA[Service A]
+        ServiceB[Service B]
+    end
+
+    subgraph "Data Layer"
+        DB[(Database)]
+        Cache[(Cache)]
+    end
+
+    Users --> Gateway
+    Gateway --> ServiceA
+    Gateway --> ServiceB
+    ServiceA --> DB
+    ServiceB --> Cache
+```
+
+> Diagram auto-generated from service dependencies. Edit to add context.
+
+## Service Directory
+
+| Service | Responsibility | Tech | Status | Details |
+|---------|---------------|------|--------|---------|
+| [service-name] | [One-line responsibility] | [Primary tech] | ✓ Active | [→ architecture](../services/[name]/draft/architecture.md) |
+
+> **Status:** ✓ Active = initialized and maintained, ○ Legacy = initialized but deprecated, ? = not initialized
+
+## Shared Infrastructure
+
+<!-- Extracted from common external dependencies across services -->
+
+| Component | Purpose | Used By |
+|-----------|---------|---------|
+| [PostgreSQL] | [Primary datastore] | [service-a, service-b] |
+| [Redis] | [Caching, sessions] | [service-a, service-c] |
+| [RabbitMQ] | [Async messaging] | [service-b, service-d] |
+
+## Cross-Service Patterns
+
+<!-- Extracted from common conventions across service architecture.md files -->
+
+| Pattern | Description | Services |
+|---------|-------------|----------|
+| [JWT Auth] | [All services validate JWT via auth-service] | [all] |
+| [Event-Driven] | [Async events via message queue] | [notifications, reports] |
+
+## Data Flows
+
+### [Primary Flow Name]
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Gateway
+    participant ServiceA
+    participant ServiceB
+    participant DB
+
+    Client->>Gateway: Request
+    Gateway->>ServiceA: Route
+    ServiceA->>ServiceB: Internal call
+    ServiceB->>DB: Query
+    DB-->>ServiceB: Result
+    ServiceB-->>ServiceA: Response
+    ServiceA-->>Gateway: Response
+    Gateway-->>Client: Response
+```
+
+> Add primary cross-service data flows here.
+
+<!-- MANUAL START -->
+## Architectural Decisions
+
+[Document key architectural decisions, trade-offs, and rationale here — preserved on re-index]
+
+### ADR-001: [Decision Title]
+
+**Context:** [Why this decision was needed]
+**Decision:** [What was decided]
+**Consequences:** [Impact of the decision]
+
+<!-- MANUAL END -->
+
+## Notes
+
+- For detailed service architecture, navigate to individual service drafts via the Details column
+- This file is regenerable via `draft index`
+- Manual edits between `<!-- MANUAL START -->` and `<!-- MANUAL END -->` are preserved
+
+</core-file>
+
+---
+
+## core/templates/root-tech-stack.md
+
+<core-file path="core/templates/root-tech-stack.md">
+
+# Tech Stack: [Org/Product Name]
+
+> Synthesized from [X] service contexts by `draft index` on [DATE].
+> This defines **org-wide standards**. Service-specific additions are in their local tech-stack.md.
+> Re-running `draft index` will update auto-generated sections but preserve manual edits.
+
+## Org Standards
+
+### Languages
+
+- **Primary**: [Most common language] — [X]% of services
+- **Secondary**: [Second most common] — [Y]% of services
+- **Specialized**: [Other languages] — approved for specific use cases
+
+### Frameworks
+
+| Purpose | Standard | Alternatives |
+|---------|----------|--------------|
+| HTTP API | [Framework] | [Approved alternatives] |
+| Background Jobs | [Framework] | - |
+| Testing | [Framework] | - |
+
+### Data Storage
+
+| Type | Standard | When to Use |
+|------|----------|-------------|
+| OLTP | PostgreSQL | Default for relational data |
+| Document | MongoDB | Approved for specific use cases |
+| Cache | Redis | Session, cache, rate limiting |
+| Search | Elasticsearch | Full-text search requirements |
+
+### Messaging
+
+| Pattern | Standard |
+|---------|----------|
+| Async Events | RabbitMQ |
+| Event Streaming | Kafka (approved for high-volume) |
+
+### Infrastructure
+
+| Component | Standard |
+|-----------|----------|
+| Container | Docker |
+| Orchestration | Kubernetes |
+| CI/CD | GitHub Actions |
+| Registry | [Container registry] |
+| Secrets | [Secrets manager] |
+
+## Approved Variances
+
+Services may deviate from standards with documented justification:
+
+| Service | Variance | Standard | Justification |
+|---------|----------|----------|---------------|
+| [ml-service] | Python | Go/TypeScript | ML ecosystem requirements |
+| [analytics] | MongoDB | PostgreSQL | Time-series workload |
+
+> Add new variances via PR to this file. Variances without justification will be flagged.
+
+## Shared Libraries
+
+Internal libraries all services should use:
+
+| Library | Purpose | Current Version |
+|---------|---------|-----------------|
+| @org/auth-client | Auth service integration | 2.x |
+| @org/logging | Structured logging | 1.x |
+| @org/errors | Error handling patterns | 1.x |
+| @org/config | Configuration management | 1.x |
+
+## Code Patterns
+
+Org-wide conventions:
+
+| Pattern | Standard | Reference |
+|---------|----------|-----------|
+| Error Handling | [Custom error classes with codes] | @org/errors |
+| Logging | [Structured JSON, correlation IDs] | @org/logging |
+| API Versioning | [URL path: /v1/, /v2/] | API guidelines |
+| Authentication | [JWT validation via auth-service] | Auth spec |
+
+<!-- MANUAL START -->
+## Technology Decisions
+
+[Document org-wide technology decisions and rationale here — preserved on re-index]
+
+### TDR-001: [Decision Title]
+
+**Context:** [Why this decision was needed]
+**Decision:** [What was decided]
+**Services Affected:** [Which services]
+
+<!-- MANUAL END -->
+
+## Compliance
+
+| Requirement | Standard | Enforcement |
+|-------------|----------|-------------|
+| Secrets | Never in code, use secrets manager | CI scan |
+| Dependencies | Weekly vulnerability scan | Dependabot |
+| Containers | Base images from approved list | CI policy |
 
 </core-file>
 

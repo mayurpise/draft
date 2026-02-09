@@ -7,6 +7,18 @@ description: Standalone review orchestrator for track-level and project-level co
 
 You are conducting a code review using Draft's Context-Driven Development methodology.
 
+## Red Flags - STOP if you're:
+
+- Reviewing without reading the track's spec.md and plan.md first
+- Reporting findings without reading the actual code
+- Skipping spec compliance stage and jumping to code quality
+- Making up file locations or line numbers
+- Claiming "no issues" without systematic analysis evidence
+
+**Read before you review. Evidence over opinion.**
+
+---
+
 ## Overview
 
 This command orchestrates code review workflows at two levels:

@@ -410,6 +410,7 @@ COMMON_HEADER
     echo "| \`${command_prefix} coverage\` | Code coverage report (target 95%+) |"
     echo "| \`${command_prefix} validate [--track <id>]\` | Codebase quality validation |"
     echo "| \`${command_prefix} bughunt [--track <id>]\` | Systematic bug discovery |"
+    echo "| \`${command_prefix} review [--track <id>]\` | Two-stage code review |"
     echo "| \`${command_prefix} status\` | Show progress overview |"
     echo "| \`${command_prefix} revert\` | Git-aware rollback |"
     echo "| \`${command_prefix} jira-preview [track-id]\` | Generate jira-export.md for review |"
@@ -469,6 +470,21 @@ COMMON_HEADER2
 
         local skill_file="$SKILLS_DIR/$skill/SKILL.md"
         if [[ -f "$skill_file" ]]; then
+            # Validate body format: line 1 blank, line 2 starts with #, line 3 blank
+            local body_head
+            body_head=$(extract_body "$skill_file" | head -3)
+            local line1 line2 line3
+            line1=$(echo "$body_head" | sed -n '1p')
+            line2=$(echo "$body_head" | sed -n '2p')
+            line3=$(echo "$body_head" | sed -n '3p')
+            if [[ -n "$line1" ]] || [[ "$line2" != \#* ]] || [[ -n "$line3" ]]; then
+                echo "ERROR: Skill '$skill' body format invalid (expected: blank, # Title, blank). Got:" >&2
+                echo "  Line 1: '${line1}'" >&2
+                echo "  Line 2: '${line2}'" >&2
+                echo "  Line 3: '${line3}'" >&2
+                exit 1
+            fi
+
             echo ""
             echo "---"
             echo ""

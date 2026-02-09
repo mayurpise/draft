@@ -472,7 +472,7 @@ COMMON_HEADER2
         if [[ -f "$skill_file" ]]; then
             # Validate body format: line 1 blank, line 2 starts with #, line 3 blank
             local body_head
-            body_head=$(extract_body "$skill_file" | head -3)
+            body_head=$(extract_body "$skill_file" | head -3 || true)
             local line1 line2 line3
             line1=$(echo "$body_head" | sed -n '1p')
             line2=$(echo "$body_head" | sed -n '2p')

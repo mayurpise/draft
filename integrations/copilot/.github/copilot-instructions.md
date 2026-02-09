@@ -35,6 +35,7 @@ When `draft/` exists in the project, always consider:
 | `draft coverage` | Code coverage report (target 95%+) |
 | `draft validate [--track <id>]` | Codebase quality validation |
 | `draft bughunt [--track <id>]` | Systematic bug discovery |
+| `draft review [--track <id>]` | Two-stage code review |
 | `draft status` | Show progress overview |
 | `draft revert` | Git-aware rollback |
 | `draft jira-preview [track-id]` | Generate jira-export.md for review |
@@ -1928,7 +1929,7 @@ Before marking ANY task/phase/track complete:
 **Red Flags - STOP if you're thinking:**
 - "Should pass", "probably works"
 - Satisfaction before running verification
-- About to mark `[x]` without evidence THIS MESSAGE
+- About to mark `[x]` without fresh evidence from this session
 - "I already tested earlier"
 - "This is a simple change, no need to verify"
 
@@ -3594,7 +3595,7 @@ draft validate --track <id>
 
 **Project-level:**
 ```bash
-draft validate --project
+draft validate
 ```
 
 Parse output from `draft/tracks/<id>/validation-report.md` or `draft/validation-report.md`
@@ -3610,7 +3611,7 @@ draft bughunt --track <id>
 
 **Project-level:**
 ```bash
-draft bughunt --project
+draft bughunt
 ```
 
 Parse output from `draft/tracks/<id>/bughunt-report.md` or `draft/bughunt-report.md`
@@ -3752,7 +3753,7 @@ If report already exists:
 
 For track-level reviews, update metadata.json with review status.
 
-**Condition:** Only update metadata when verdict is **PASS** or **PASS_WITH_NOTES**. On **FAIL**, generate the review report but skip metadata updates — a failed review should not increment reviewCount or change lastReviewVerdict.
+**Condition:** Always update metadata after generating the review report, regardless of verdict. This ensures review history is tracked for all outcomes (PASS, PASS_WITH_NOTES, or FAIL).
 
 ### 7.1: Read Current Metadata
 
@@ -5081,7 +5082,7 @@ For critical product development, Draft isn't overhead — it's risk mitigation.
 claude plugin install draft
 
 # Or clone and install locally
-git clone https://github.com/anthropics/draft.git ~/.claude/plugins/draft
+git clone https://github.com/mayurpise/draft.git ~/.claude/plugins/draft
 ```
 
 ### Verify Installation
@@ -5266,6 +5267,34 @@ Re-scans and updates existing context without starting from scratch:
 3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
+
+---
+
+### `draft index` — Monorepo Service Index
+
+Aggregates Draft context from multiple services in a monorepo into unified root-level documents. Designed for organizations with multiple services, each with their own `draft/` context.
+
+#### What It Does
+
+1. **Scans** immediate child directories for services (detects `package.json`, `go.mod`, `Cargo.toml`, etc.)
+2. **Reads** each service's `draft/product.md`, `draft/architecture.md`, `draft/tech-stack.md`
+3. **Synthesizes** root-level documents:
+   - `draft/service-index.md` — Service registry with status, tech, and links
+   - `draft/dependency-graph.md` — Inter-service dependency topology
+   - `draft/tech-matrix.md` — Technology distribution across services
+   - `draft/product.md` — Synthesized product vision (if not exists)
+   - `draft/architecture.md` — System-of-systems architecture view
+   - `draft/tech-stack.md` — Org-wide technology standards
+
+#### Flags
+
+- `--init-missing` — Run `draft init` on services that lack a `draft/` directory
+
+#### When to Use
+
+- After running `draft init` on individual services
+- After adding or removing services from the monorepo
+- Periodically to refresh cross-service context
 
 ---
 
@@ -5707,6 +5736,7 @@ Natural language patterns that map to Draft commands:
 | User Says | Action |
 |-----------|--------|
 | "set up the project" | Initialize Draft |
+| "index services", "aggregate context" | Monorepo service index |
 | "new feature", "add X" | Create new track |
 | "start implementing" | Execute tasks from plan |
 | "what's the status" | Show progress overview |
@@ -5781,7 +5811,7 @@ See `core/agents/reviewer.md` for detailed process.
 
 ## Agents
 
-Draft includes three specialized agent behaviors that activate during specific workflow phases.
+Draft includes five specialized agent behaviors that activate during specific workflow phases.
 
 ### Debugger Agent
 
@@ -5873,6 +5903,23 @@ Activated during `draft decompose` and `draft implement` (when architecture mode
 
 See `core/agents/architect.md` for module rules, API surface examples, and cycle-breaking framework.
 
+### Planner Agent
+
+Activated during `draft new-track` plan creation and `draft decompose`. Provides structured plan generation with phased task breakdown.
+
+**Capabilities:**
+- **Phase decomposition** — Break work into sequential phases with clear goals and verification criteria
+- **Task ordering** — Dependencies between tasks, topological sort for implementation sequence
+- **Integration with Architect Agent** — When architecture.md exists, aligns phases with module boundaries and dependency graph
+
+**Key Principles:**
+- Each phase should be independently verifiable
+- Tasks within a phase should be ordered by dependency
+- Phase boundaries are review checkpoints
+- Plan structure mirrors spec requirements for traceability
+
+See `core/agents/planner.md` for the full planning process and integration workflows.
+
 ---
 
 ## Communication Style
@@ -5956,7 +6003,6 @@ AI guidance during track creation must be grounded in vetted sources. When provi
 
 ### Cloud Native
 - **CNCF Patterns** — Containers, service mesh, observability, declarative configuration
-- **Twelve-Factor App** — Cloud-native application methodology
 - **GitOps Principles** — Declarative, versioned, automated, auditable
 
 ---
@@ -6688,6 +6734,26 @@ graph LR
 ## core/templates/jira.md
 
 <core-file path="core/templates/jira.md">
+
+# Jira Configuration & Story Template
+
+## Project Configuration
+
+Place this section in `draft/jira.md` in your project to configure Jira integration.
+
+```yaml
+# Jira Project Configuration
+project_key: PROJ           # Jira project key (required)
+board_id: 123               # Board ID for sprint assignment (optional)
+epic_link_field: customfield_10014  # Custom field ID for epic link (varies by instance)
+story_points_field: customfield_10028  # Custom field ID for story points (optional)
+default_issue_type: Story   # Default issue type for tasks
+default_priority: Medium    # Default priority level
+labels:                     # Labels to apply to all created issues
+  - draft-generated
+```
+
+---
 
 # Jira Story Template (Minimal)
 
@@ -8150,7 +8216,7 @@ You are a systematic debugging agent. When a task is blocked (`[!]`), follow thi
 2. **Implement minimal fix** - Address root cause, nothing extra
 3. **Run regression test** - Verify it passes
 4. **Run full test suite** - No other breakage
-5. **Document root cause** - Update plan.md with findings
+5. **Document root cause** - Update spec.md with findings
 
 **Output:** Fix committed with regression test.
 
@@ -8595,7 +8661,7 @@ If after 3 hypothesis cycles the root cause is not confirmed:
 ## Integration with Draft
 
 1. Bug tracks use the `bugfix` type in `metadata.json`
-2. The spec uses the Bug Specification template (see `draft new-track` Step 2B)
+2. The spec uses the Bug Specification template (see `draft new-track` Step 3B)
 3. The plan follows the fixed 3-phase structure (Investigate → RCA → Fix)
 4. The RCA Log table in `plan.md` tracks all hypotheses
 5. Root cause summary is added to `spec.md` after Phase 2 completion

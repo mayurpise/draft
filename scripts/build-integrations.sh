@@ -482,8 +482,8 @@ COMMON_HEADER2
             line1=$(echo "$body_head" | sed -n '1p')
             line2=$(echo "$body_head" | sed -n '2p')
             line3=$(echo "$body_head" | sed -n '3p')
-            if [[ -n "$line1" ]] || [[ "$line2" != \#* ]] || [[ -n "$line3" ]]; then
-                echo "ERROR: Skill '$skill' body format invalid (expected: blank, # Title, blank). Got:" >&2
+            if [[ -n "$line1" ]] || [[ ! "$line2" =~ ^#\  ]] || [[ -n "$line3" ]]; then
+                echo "ERROR: Skill '$skill' body format invalid (expected: blank, '# Title', blank). Got:" >&2
                 echo "  Line 1: '${line1}'" >&2
                 echo "  Line 2: '${line2}'" >&2
                 echo "  Line 3: '${line3}'" >&2

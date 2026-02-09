@@ -234,11 +234,25 @@ Run all 5 validators:
 
 #### 3.4 Security Scan
 
-**Goal:** Detect common security vulnerabilities (OWASP Top 10 basics).
+**Goal:** Detect common security vulnerabilities aligned with OWASP Top 10 (2021).
+
+**OWASP Top 10 Coverage:**
+| # | OWASP Category | Check |
+|---|----------------|-------|
+| A01 | Broken Access Control | Auth/authz checks below |
+| A02 | Cryptographic Failures | Weak hashing, hardcoded secrets |
+| A03 | Injection | SQL injection, command injection |
+| A04 | Insecure Design | Missing input validation |
+| A05 | Security Misconfiguration | Cookie flags, CORS, headers |
+| A06 | Vulnerable Components | Dependency audit |
+| A07 | Auth Failures | JWT misuse, session handling |
+| A08 | Data Integrity Failures | Insecure deserialization |
+| A09 | Logging Failures | Missing security event logging |
+| A10 | SSRF | Server-side request forgery patterns |
 
 **Process:**
 
-1. **Hardcoded Secrets Detection:**
+1. **Hardcoded Secrets Detection (A02):**
    ```bash
    # API keys, tokens, passwords in source code
    grep -rE "(api[_-]?key|API[_-]?KEY|secret|SECRET|password|PASSWORD|token|TOKEN)\s*=\s*['\"][^'\"]{8,}" src/ --exclude="*.test.*" --exclude="*.spec.*"
@@ -255,7 +269,7 @@ Run all 5 validators:
    - Exclude: `.env.example`, test fixtures, documentation
    - Severity: ✗ Critical
 
-2. **SQL Injection Patterns:**
+2. **Injection Patterns (A03):**
    ```bash
    # String concatenation in queries (JavaScript/TypeScript)
    grep -rE "(query|execute)\s*\(\s*['\"`].*\$\{|query.*\+\s*[a-zA-Z]" src/ --include="*.ts" --include="*.js"
@@ -268,7 +282,7 @@ Run all 5 validators:
    ```
    - Severity: ✗ Critical
 
-3. **Missing Input Validation:**
+3. **Missing Input Validation (A04):**
    ```bash
    # API routes without validation middleware
    # Check if request parameters used directly without validation
@@ -279,7 +293,7 @@ Run all 5 validators:
    ```
    - Severity: ⚠ Warning (manual review needed)
 
-4. **Insecure Auth/Session Handling:**
+4. **Insecure Auth/Session Handling (A01, A07):**
    ```bash
    # JWT without secret validation
    grep -rE "jwt\.decode\(" src/ --include="*.ts" --include="*.js"  # Should use verify, not decode
@@ -292,7 +306,7 @@ Run all 5 validators:
    ```
    - Severity: ✗ Critical (JWT, weak hashing), ⚠ Warning (cookie flags)
 
-5. **Cross-Site Scripting (XSS):**
+5. **Cross-Site Scripting (A03 — XSS):**
    ```bash
    # Dangerous HTML insertion
    grep -rE "innerHTML\s*=|dangerouslySetInnerHTML" src/ --include="*.tsx" --include="*.jsx"
@@ -301,6 +315,65 @@ Run all 5 validators:
    grep -rE "\{\{.*req\.(body|params|query)" src/
    ```
    - Severity: ✗ Critical
+
+6. **Vulnerable Dependencies (A06):**
+   ```bash
+   # Node.js
+   npm audit --json 2>/dev/null | head -50
+
+   # Python
+   pip audit 2>/dev/null || safety check 2>/dev/null
+
+   # Go
+   govulncheck ./... 2>/dev/null
+   ```
+   - If audit tool unavailable, check for known-vulnerable version patterns
+   - Severity: ✗ Critical (known CVEs), ⚠ Warning (outdated dependencies)
+
+7. **CSRF Protection (A01):**
+   ```bash
+   # State-changing endpoints without CSRF tokens
+   grep -rE "(app\.(post|put|delete|patch))" src/ --include="*.ts" --include="*.js" | grep -v "csrf\|CSRF\|csrfToken"
+
+   # Forms without CSRF tokens
+   grep -rE "<form.*method=['\"]post['\"]" src/ | grep -v "csrf\|_token"
+   ```
+   - Severity: ⚠ Warning (requires manual review of auth mechanism — token-based APIs may not need CSRF)
+
+8. **Insecure Deserialization (A08):**
+   ```bash
+   # Unsafe deserialization (Python)
+   grep -rE "pickle\.loads|yaml\.load\((?!.*Loader)" --include="*.py"
+
+   # Unsafe JSON parsing from untrusted sources (Node.js)
+   grep -rE "eval\(|new Function\(" src/ --include="*.ts" --include="*.js"
+
+   # Java unsafe deserialization
+   grep -rE "ObjectInputStream|readObject\(\)" --include="*.java"
+   ```
+   - Severity: ✗ Critical
+
+9. **Missing Security Logging (A09):**
+   ```bash
+   # Auth endpoints without logging
+   grep -rE "(login|logout|register|password|auth)" src/ --include="*.ts" --include="*.js" -l | while read f; do
+     grep -L "log\.\|logger\.\|console\.log\|winston\.\|pino\." "$f"
+   done
+
+   # Failed auth attempts should be logged
+   grep -rE "(unauthorized|forbidden|401|403)" src/ | grep -v "log\|logger"
+   ```
+   - Severity: ⚠ Warning
+
+10. **Server-Side Request Forgery (A10):**
+    ```bash
+    # URL from user input passed to fetch/request
+    grep -rE "(fetch|axios|request|http\.get)\s*\(\s*(req\.|params\.|query\.|body\.)" src/ --include="*.ts" --include="*.js"
+
+    # Python
+    grep -rE "(requests\.get|urlopen)\s*\(.*request\." --include="*.py"
+    ```
+    - Severity: ✗ Critical
 
 **Output format:**
 ```

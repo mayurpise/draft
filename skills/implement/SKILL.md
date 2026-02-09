@@ -349,6 +349,35 @@ Next: Run `/draft:status` to see project overview."
 - Reference spec.md for requirements
 - Don't proceed with assumptions
 
+## Tech Debt Log
+
+During implementation, track technical debt decisions in the track's plan.md:
+
+When you encounter a shortcut, workaround, or known-imperfect solution during implementation:
+
+1. Add an entry to the `## Tech Debt` section at the bottom of plan.md
+2. Use this format:
+
+```markdown
+## Tech Debt
+
+| ID | Location | Description | Severity | Payback Trigger |
+|----|----------|-------------|----------|-----------------|
+| TD-1 | `src/api/handler.ts:45` | Hardcoded timeout instead of config | Low | When adding config system |
+| TD-2 | `src/auth/session.ts:12` | In-memory session store | Medium | Before horizontal scaling |
+```
+
+**Severity levels:**
+- **Low** — Cosmetic or minor maintainability issue
+- **Medium** — Will cause problems at scale or in specific scenarios
+- **High** — Actively impeding development or risking production issues
+
+**Payback Trigger** — The condition or event that should trigger debt repayment (e.g., "before launch", "when adding feature X", "before scaling past N users").
+
+Only log genuine debt — intentional shortcuts with known consequences. Not everything imperfect is debt.
+
+---
+
 ## Progress Reporting
 
 After each task, report:

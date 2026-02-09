@@ -16,6 +16,45 @@ AI coding assistants are powerful but undirected. Without structure, they:
 
 Draft solves this through **Context-Driven Development**: structured documents that constrain and guide AI behavior. By treating context as a managed artifact alongside code, your repository becomes a single source of truth that drives every agent interaction with deep, persistent project awareness.
 
+---
+
+## Table of Contents
+
+- [Philosophy](#philosophy)
+- [Installation & Getting Started](#installation--getting-started)
+- [Core Workflow](#core-workflow)
+- [Tracks](#tracks)
+- [Project Context Files](#project-context-files)
+- [Status Markers](#status-markers)
+- [Plan Structure](#plan-structure)
+- [Command Workflows](#command-workflows)
+  - [/draft:init](#draftinit--initialize-project)
+  - [/draft:index](#draftindex--monorepo-service-index)
+  - [/draft:new-track](#draftnew-track--create-feature-track)
+  - [/draft:implement](#draftimplement--execute-tasks)
+  - [/draft:status](#draftstatus--show-progress)
+  - [/draft:revert](#draftrevert--git-aware-rollback)
+  - [/draft:decompose](#draftdecompose--module-decomposition)
+  - [/draft:coverage](#draftcoverage--code-coverage-report)
+  - [/draft:jira-preview](#draftjira-preview--preview-jira-issues)
+  - [/draft:jira-create](#draftjira-create--create-jira-issues)
+  - [/draft:adr](#draftadr--architecture-decision-records)
+  - [/draft:validate](#draftvalidate--codebase-quality-validation)
+  - [/draft:bughunt](#draftbughunt--exhaustive-bug-discovery)
+  - [/draft:review](#draftreview--code-review-orchestrator)
+- [Architecture Mode](#architecture-mode)
+- [Coverage](#coverage)
+- [Notes](#notes)
+- [Jira Integration (Optional)](#jira-integration-optional)
+- [TDD Workflow (Optional)](#tdd-workflow-optional)
+- [Intent Mapping](#intent-mapping)
+- [Quality Disciplines](#quality-disciplines)
+- [Agents](#agents)
+- [Communication Style](#communication-style)
+- [Principles](#principles)
+
+---
+
 ### Why Each Document Exists
 
 | Document | Purpose | Prevents |

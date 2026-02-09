@@ -86,6 +86,59 @@ Shows available commands and guides you to the right workflow. Also supports nat
 | "review code", "review track" | `/draft:review` |
 | "preview jira", "export to jira" | `/draft:jira-preview` |
 | "create jira issues" | `/draft:jira-create` |
+| "index services", "aggregate context" | `/draft:index` |
+| "document decision", "create ADR" | `/draft:adr` |
+
+---
+
+### `/draft:index` — Federated Monorepo Index
+
+Aggregates context from multiple service-level `draft/` directories into a unified root-level knowledge base. Designed for enterprise monorepos with 50+ services.
+
+```bash
+/draft:index                 # Aggregate existing drafts
+/draft:index --init-missing  # Also initialize services without draft/
+```
+
+**Key difference from `/draft:init`:**
+- `/draft:init` does **deep code analysis** per service
+- `/draft:index` **synthesizes existing drafts** without reading source code
+
+**What it does:**
+1. Scans immediate child directories (depth=1 only) for service markers
+2. Categorizes services as initialized (has `draft/`) or uninitialized
+3. Reads each service's `product.md`, `architecture.md`, `tech-stack.md`
+4. Synthesizes root-level context files from aggregated service knowledge
+5. Generates inter-service dependency graph from cross-references
+6. Creates service registry with links to individual service drafts
+
+**With `--init-missing` flag:**
+- Prompts for each uninitialized service: `[y/n/all/skip-rest]`
+- Runs `/draft:init` in selected services before aggregating
+
+**Output:**
+```
+draft/
+├── product.md           # Synthesized org-wide vision
+├── architecture.md      # System-of-systems topology
+├── tech-stack.md        # Org standards + variance report
+├── service-index.md     # Service registry table (GENERATED)
+├── dependency-graph.md  # Inter-service dependencies (GENERATED)
+├── tech-matrix.md       # Technology distribution (GENERATED)
+└── config.yaml          # Index configuration
+```
+
+**Design principles:**
+- **Reference, don't duplicate** — Root files link to service files
+- **Fast** — Reads markdown only, no code analysis
+- **Regenerable** — Re-run anytime to refresh
+- **Preserves manual edits** — Sections between `<!-- MANUAL START -->` and `<!-- MANUAL END -->` are never overwritten
+
+**When to use:**
+- First-time setup of monorepo-level context
+- After adding new services
+- Periodic refresh (weekly/monthly)
+- Before cross-service planning
 
 ---
 
@@ -466,7 +519,41 @@ Standalone code review command that orchestrates reviewer agent, validate, and b
 
 ---
 
+### `/draft:adr` — Architecture Decision Records
+
+Create and manage Architecture Decision Records to document significant technical decisions.
+
+```bash
+/draft:adr                          # Interactive — ask about the decision
+/draft:adr "Use PostgreSQL"         # Create ADR with given title
+/draft:adr list                     # List all existing ADRs
+/draft:adr supersede 3              # Mark ADR-003 as superseded
+```
+
+**What it does:**
+1. Loads project context (architecture.md, tech-stack.md) to cross-reference the decision
+2. Determines next ADR number (zero-padded: 001, 002, ...)
+3. Creates `draft/adrs/<number>-<kebab-title>.md` with structured template
+4. Template includes: Context, Decision, Alternatives Considered, Consequences, References
+
+**ADR Status Lifecycle:**
+```
+Proposed → Accepted → [Deprecated | Superseded by ADR-xxx]
+```
+
+**Output:**
+```
+draft/adrs/
+├── 001-use-postgresql.md
+├── 002-adopt-event-driven-architecture.md
+└── 003-replace-rest-with-graphql.md
+```
+
+---
+
 ## Workflow
+
+### Single Project
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -497,6 +584,48 @@ Standalone code review command that orchestrates reviewer agent, validate, and b
 │                                                                  │
 └──────────────────────────────────────────────────────────────────┘
 ```
+
+### Monorepo (50+ Services)
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                    MONOREPO DRAFT WORKFLOW                        │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   Per-Service (in each service directory):                       │
+│   ─────────────────────────────────────────                      │
+│   cd services/auth && /draft:init                                │
+│   cd services/billing && /draft:init                             │
+│   ... (initialize each service individually)                     │
+│                                                                  │
+│   Root-Level (from monorepo root):                               │
+│   ────────────────────────────────                               │
+│   /draft:init              Create root draft/ (minimal)         │
+│        │                                                         │
+│        ▼                                                         │
+│   /draft:index             Aggregate all service contexts        │
+│        │                   ├─ Synthesizes product.md             │
+│        │                   ├─ Synthesizes architecture.md        │
+│        │                   ├─ Generates service-index.md         │
+│        │                   ├─ Generates dependency-graph.md      │
+│        │                   └─ Generates tech-matrix.md           │
+│        │                                                         │
+│        ▼                                                         │
+│   Global Knowledge         System-of-systems view available     │
+│                            for cross-service planning            │
+│                                                                  │
+│   OR use --init-missing:                                         │
+│   ──────────────────────                                         │
+│   /draft:index --init-missing                                    │
+│        │                   (prompts to init uninitialized        │
+│        │                    services, then aggregates)           │
+│        ▼                                                         │
+│   Complete Index           All services initialized + indexed   │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+**Key insight:** `/draft:init` analyzes source code (expensive). `/draft:index` synthesizes existing `draft/*.md` files (fast). Initialize services once, re-index as often as needed.
 
 ## Core Concepts
 
@@ -623,6 +752,8 @@ After implementation, `/draft:coverage` measures test quality:
 
 ## Project Structure (After Setup)
 
+### Single Project
+
 ```
 your-project/
 ├── draft/
@@ -643,6 +774,44 @@ your-project/
 │           ├── validation-report.md # Quality validation results (generated)
 │           └── bughunt-report.md # Bug hunt findings (generated)
 ```
+
+### Monorepo (with /draft:index)
+
+```
+monorepo/
+├── draft/                              # Root-level (aggregated)
+│   ├── product.md                      # Synthesized org-wide vision
+│   ├── architecture.md                 # System-of-systems topology
+│   ├── tech-stack.md                   # Org standards
+│   ├── workflow.md                     # Org conventions
+│   ├── service-index.md                # GENERATED: service registry
+│   ├── dependency-graph.md             # GENERATED: inter-service deps
+│   ├── tech-matrix.md                  # GENERATED: tech distribution
+│   ├── config.yaml                     # Index configuration
+│   └── tracks/                         # Cross-service tracks
+│
+├── services/
+│   ├── auth-service/
+│   │   └── draft/                      # Service-local context
+│   │       ├── product.md              # Service-scoped vision
+│   │       ├── architecture.md         # Internal architecture
+│   │       ├── tech-stack.md           # Service-specific tech
+│   │       ├── manifest.json           # GENERATED: service metadata
+│   │       └── tracks/                 # Service-specific tracks
+│   │
+│   ├── billing-service/
+│   │   └── draft/                      # Service-local context
+│   │       └── ...
+│   │
+│   └── api-gateway/                    # Not yet initialized
+│       └── (no draft/)
+```
+
+**Key points:**
+- Root `draft/` holds synthesized org-wide context
+- Service `draft/` holds deep service-specific analysis
+- GENERATED files are created by `/draft:index` and should not be edited
+- Manual sections (between `<!-- MANUAL START -->` and `<!-- MANUAL END -->`) are preserved
 
 ## Troubleshooting
 
@@ -702,6 +871,7 @@ draft/
 ├── skills/               # Skill definitions (one per command)
 │   ├── draft/SKILL.md
 │   ├── init/SKILL.md
+│   ├── index/SKILL.md        # Monorepo federation
 │   ├── new-track/SKILL.md
 │   ├── implement/SKILL.md
 │   ├── status/SKILL.md
@@ -711,6 +881,7 @@ draft/
 │   ├── validate/SKILL.md
 │   ├── bughunt/SKILL.md
 │   ├── review/SKILL.md
+│   ├── adr/SKILL.md
 │   ├── jira-preview/SKILL.md
 │   └── jira-create/SKILL.md
 ├── core/

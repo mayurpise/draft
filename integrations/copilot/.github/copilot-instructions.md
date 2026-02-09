@@ -1101,6 +1101,19 @@ You are creating a new track (feature, bug fix, or refactor) for Context-Driven 
 
 **Feature Description:** $ARGUMENTS
 
+## Red Flags - STOP if you're:
+
+- Creating a track without reading existing Draft context (product.md, tech-stack.md, architecture.md)
+- Asking questions without contributing expertise or trade-off analysis
+- Rushing through intake without probing deeper with "why"
+- Generating spec/plan without user confirmation at checkpoints
+- Skipping risk identification
+- Not citing sources when giving architectural advice
+
+**Collaborative understanding, not speed.**
+
+---
+
 ## Pre-Check
 
 1. Verify Draft is initialized:
@@ -2371,6 +2384,18 @@ When user says "validate" or "draft validate [--track <id>]":
 
 You are validating codebase quality using Draft context files to ensure architectural conformance, security, and spec compliance.
 
+## Red Flags - STOP if you're:
+
+- Reporting validation results without actually running checks
+- Making up check counts or findings
+- Skipping categories of validation
+- Not generating the actual report file
+- Claiming "no issues" without evidence
+
+**Run the checks. Report the evidence.**
+
+---
+
 ## Usage
 
 - `draft validate` - Validate entire codebase
@@ -3171,14 +3196,6 @@ When called from `draft implement` at track completion:
 3. Generate report
 4. If block-on-failure enabled and critical issues found, halt implementation
 5. Otherwise, warn and continue
-
-## Red Flags - STOP if you're:
-
-- Reporting validation results without actually running checks
-- Making up check counts or findings
-- Skipping categories of validation
-- Not generating the actual report file
-- Claiming "no issues" without evidence
 
 ## Notes
 
@@ -5499,6 +5516,44 @@ plan.md             →  "Phase 1: sortable list, Phase 2: persistence"
 ```
 
 Each layer narrows the solution space. By the time AI writes code, most decisions are already made.
+
+### Draft Command Workflow
+
+```mermaid
+graph TD
+    A["draft init"] -->|"Creates draft/"| B["draft new-track"]
+    B -->|"Creates spec.md + plan.md"| C{Complex?}
+    C -->|Yes| D["draft decompose"]
+    C -->|No| E["draft implement"]
+    D -->|"Creates architecture.md"| E
+    E -->|"TDD cycle per task"| F{Phase done?}
+    F -->|No| E
+    F -->|Yes| G["Two-Stage Review"]
+    G -->|Pass| H{All phases?}
+    G -->|Fail| E
+    H -->|No| E
+    H -->|Yes| I["Track Complete"]
+
+    J["draft status"] -.->|"Check anytime"| E
+    K["draft revert"] -.->|"Undo if needed"| E
+    L["draft coverage"] -.->|"After implementation"| E
+    M["draft validate"] -.->|"At track end"| I
+    N["draft bughunt"] -.->|"Quality check"| E
+    O["draft review"] -.->|"Code review"| G
+    P["draft adr"] -.->|"Document decisions"| B
+    Q["draft jira-preview"] -.->|"Export to Jira"| B
+```
+
+### Context Hierarchy
+
+```mermaid
+graph LR
+    P["product.md<br/><i>What & Why</i>"] --> T["tech-stack.md<br/><i>How (tools)</i>"]
+    T --> A["architecture.md<br/><i>How (structure)</i>"]
+    A --> S["spec.md<br/><i>What (specific)</i>"]
+    S --> PL["plan.md<br/><i>When & Order</i>"]
+    PL --> Code["Implementation"]
+```
 
 ### Keeping AI Constrained
 

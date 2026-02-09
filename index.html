@@ -1348,7 +1348,7 @@
         <!-- Command Reference Section -->
         <section id="commands" aria-labelledby="heading-commands">
             <h2 id="heading-commands">Command Reference</h2>
-            <p>Draft provides 13 slash commands for the full development lifecycle.</p>
+            <p>Draft provides 15 slash commands for the full development lifecycle.</p>
 
             <div class="doc-grid">
                 <!-- /draft -->
@@ -1393,6 +1393,38 @@
                         <div class="usage-examples">
                             <code>/draft:init</code>
                             <code>/draft:init refresh</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- /draft:index -->
+                <div class="doc-card">
+                    <div class="card-summary">
+                        <div class="icon">🗂️</div>
+                        <div class="name">/draft:index</div>
+                        <p class="purpose">Monorepo federation and service aggregation</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ol>
+                            <li>Scans immediate child directories for service markers (depth=1)</li>
+                            <li>Reads each service's <code>draft/</code> context (product, architecture, tech-stack)</li>
+                            <li>Synthesizes root-level documents for system-of-systems view</li>
+                            <li>Generates service registry, dependency graph, tech matrix</li>
+                            <li>Detects inter-service dependencies</li>
+                        </ol>
+                        <h4>Generated files:</h4>
+                        <ul>
+                            <li><code>service-index.md</code> — Service registry table</li>
+                            <li><code>dependency-graph.md</code> — Inter-service topology with mermaid</li>
+                            <li><code>tech-matrix.md</code> — Technology distribution across services</li>
+                            <li><code>root product/architecture/tech-stack.md</code> — Synthesized org views</li>
+                        </ul>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:index</code>
+                            <code>/draft:index --init-missing</code>
                         </div>
                     </div>
                 </div>
@@ -1693,6 +1725,43 @@
                         <h4>Usage:</h4>
                         <div class="usage-examples">
                             <code>/draft:jira-create</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- /draft:adr -->
+                <div class="doc-card">
+                    <div class="card-summary">
+                        <div class="icon">📐</div>
+                        <div class="name">/draft:adr</div>
+                        <p class="purpose">Architecture Decision Records</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ol>
+                            <li>Documents significant technical decisions with context and rationale</li>
+                            <li>Creates structured ADR with: Context, Decision, Alternatives, Consequences</li>
+                            <li>Stores at <code>draft/adrs/NNNN-title.md</code> with status tracking</li>
+                            <li>Supports superseding old decisions</li>
+                        </ol>
+                        <h4>When to use:</h4>
+                        <ul>
+                            <li>Adopting new technology or framework</li>
+                            <li>Changing system architecture or module boundaries</li>
+                            <li>Selecting between viable approaches with trade-offs</li>
+                            <li>Establishing patterns that constrain future work</li>
+                        </ul>
+                        <h4>Status lifecycle:</h4>
+                        <ul>
+                            <li><strong>Proposed</strong> → <strong>Accepted</strong> → <strong>Deprecated/Superseded</strong></li>
+                        </ul>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:adr</code>
+                            <code>/draft:adr "Use PostgreSQL"</code>
+                            <code>/draft:adr list</code>
+                            <code>/draft:adr supersede 3</code>
                         </div>
                     </div>
                 </div>

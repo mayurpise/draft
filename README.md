@@ -888,6 +888,117 @@ Creates `draft/adrs/001-use-bcrypt-for-password-hashing.md` documenting the deci
 
 Runs architecture conformance, security scan (OWASP Top 10), spec compliance, and regression risk analysis. Generates a validation report.
 
+## Specialized Agents
+
+Draft includes five specialized agent behaviors that activate during specific workflow phases to ensure quality and consistency.
+
+### Debugger Agent
+
+Activated when a task is blocked (`[!]`). Enforces root cause investigation before any fix attempts.
+
+**Four-Phase Process:**
+
+| Phase | Goal | Output |
+|-------|------|--------|
+| **1. Investigate** | Understand what's happening (NO fixes) | Failure description and reproduction steps |
+| **2. Analyze** | Find root cause, not symptoms | Root cause hypothesis with evidence |
+| **3. Hypothesize** | Test with minimal change | Confirmed root cause or return to Phase 2 |
+| **4. Implement** | Fix with confidence | Regression test + minimal fix + verification |
+
+**Anti-patterns:** "Quick fixes" without understanding, changing multiple things at once, skipping reproduction, deleting code to "test".
+
+**Escalation:** After 3 failed hypothesis cycles, document findings, list what's been eliminated, and ask for external input.
+
+See `core/agents/debugger.md` for the full process.
+
+### RCA Agent
+
+Activated for bug/RCA tracks created via `/draft:new-track`. Provides structured Root Cause Analysis methodology extending the debugger agent with practices from Google SRE postmortem culture and distributed systems debugging.
+
+**Four-Phase Process:**
+
+| Phase | Goal | Output |
+|-------|------|--------|
+| **1. Reproduce & Scope** | Confirm bug, define blast radius, map to architecture.md modules | Reproduction steps + scoped investigation area |
+| **2. Trace & Analyze** | Follow data/control flow to the divergence point | Flow trace with `file:line` references |
+| **3. Hypothesize & Confirm** | Test one hypothesis at a time, document all results | Confirmed root cause with evidence |
+| **4. Fix & Prevent** | Regression test first, minimal fix, RCA summary | Fix + test + blameless RCA document |
+
+**Key Techniques:**
+- **Differential Analysis** — Compare working vs. failing cases systematically
+- **5 Whys** — Trace from immediate cause to systemic root cause
+- **Blast Radius Scoping** — Define investigation boundaries before diving in
+- **Hypothesis Logging** — Track every hypothesis (failed ones narrow the search)
+- **Code Locality** — Every claim must cite `file:line`
+
+**Root Cause Classification:** logic error, race condition, data corruption, config error, dependency issue, missing validation, state management, resource exhaustion.
+
+**Anti-patterns:** Fixing symptoms without root cause, investigating the entire system, shotgun debugging, skipping failed hypothesis documentation, fixing adjacent issues "while we're here".
+
+See `core/agents/rca.md` for the full process including distributed systems considerations.
+
+### Reviewer Agent
+
+Activated at phase boundaries during `/draft:implement`. Performs a two-stage review before proceeding to the next phase.
+
+**Stage 1: Spec Compliance** — Did they build what was specified?
+- Requirements coverage (all functional requirements implemented)
+- Scope adherence (no missing features, no scope creep)
+- Behavior correctness (edge cases, error scenarios, integration points)
+
+If Stage 1 fails, gaps are listed and implementation resumes. Stage 2 does not run.
+
+**Stage 2: Code Quality** — Is the code well-crafted?
+- Architecture (follows project patterns, separation of concerns)
+- Error handling (appropriate level, helpful user-facing errors)
+- Testing (tests real logic, edge case coverage, maintainability)
+- Maintainability (readable, no performance issues, no security vulnerabilities)
+
+**Issue Classification:**
+
+| Severity | Definition | Action |
+|----------|------------|--------|
+| **Critical** | Blocks release, breaks functionality, security issue | Must fix before proceeding |
+| **Important** | Degrades quality, technical debt | Should fix before phase complete |
+| **Minor** | Style, optimization, nice-to-have | Note for later, don't block |
+
+See `core/agents/reviewer.md` for the output template and full process.
+
+### Architect Agent
+
+Activated during `/draft:decompose` and `/draft:implement` (when architecture mode is enabled). Guides structured pre-implementation design.
+
+**Capabilities:**
+- **Module decomposition** — Single responsibility, 1-3 files per module, clear API boundaries, testable in isolation
+- **Dependency analysis** — Import mapping, cycle detection, topological sort for implementation order
+- **Story writing** — Natural-language algorithm descriptions (Input → Process → Output); 5-15 lines max; describes the algorithm, not the implementation
+- **Execution state design** — Define input/intermediate/output/error state variables before coding
+- **Function skeleton generation** — Complete signatures with types and docstrings, no implementation bodies, ordered by control flow
+
+**Story Lifecycle:**
+1. **Placeholder** — Created during `/draft:decompose` in architecture.md
+2. **Written** — Filled in during `/draft:implement` as code comments; developer approves
+3. **Updated** — Maintained when algorithms change during refactoring
+
+See `core/agents/architect.md` for module rules, API surface examples, and cycle-breaking framework.
+
+### Planner Agent
+
+Activated during `/draft:new-track` plan creation and `/draft:decompose`. Provides structured plan generation with phased task breakdown.
+
+**Capabilities:**
+- **Phase decomposition** — Break work into sequential phases with clear goals and verification criteria
+- **Task ordering** — Dependencies between tasks, topological sort for implementation sequence
+- **Integration with Architect Agent** — When architecture.md exists, aligns phases with module boundaries and dependency graph
+
+**Key Principles:**
+- Each phase should be independently verifiable
+- Tasks within a phase should be ordered by dependency
+- Phase boundaries are review checkpoints
+- Plan structure mirrors spec requirements for traceability
+
+See `core/agents/planner.md` for the full planning process and integration workflows.
+
 ## Troubleshooting
 
 ### "Project already initialized"
@@ -965,6 +1076,8 @@ draft/
 │   └── agents/              # Specialized agent behaviors
 │       ├── architect.md
 │       ├── debugger.md
+│       ├── planner.md
+│       ├── rca.md
 │       └── reviewer.md
 └── integrations/
     ├── cursor/

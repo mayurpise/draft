@@ -22,7 +22,6 @@
     <meta name="twitter:image:alt" content="Draft: Context-Driven Development for AI-Assisted Software Engineering">
     <link rel="canonical" href="https://getdraft.dev">
 
-    <!-- Structured Data for SEO -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -58,7 +57,6 @@
     }
     </script>
 
-    <!-- Google tag (gtag.js) — SRI omitted: gtag scripts change frequently, making integrity hashes impractical -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -105,7 +103,6 @@
             overflow-x: hidden;
         }
 
-        /* Noise texture overlay */
         body::before {
             content: '';
             position: fixed;
@@ -117,10 +114,8 @@
             opacity: 0.03;
             pointer-events: none;
             z-index: 1000;
-            will-change: transform;
         }
 
-        /* Header */
         .hero {
             min-height: 100vh;
             display: flex;
@@ -140,7 +135,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: 
+            background:
                 radial-gradient(ellipse at 30% 20%, var(--glow-cyan) 0%, transparent 50%),
                 radial-gradient(ellipse at 70% 80%, rgba(251, 113, 133, 0.08) 0%, transparent 40%);
             animation: drift 20s ease-in-out infinite;
@@ -154,7 +149,7 @@
         .hero-content {
             position: relative;
             z-index: 1;
-            max-width: 900px;
+            max-width: 1200px;
         }
 
         .badge {
@@ -227,7 +222,6 @@
             }
         }
 
-        /* Scroll indicator */
         .scroll-indicator {
             position: absolute;
             bottom: 3rem;
@@ -270,14 +264,12 @@
             50% { top: 18px; opacity: 0.3; }
         }
 
-        /* Main content */
         main {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 4rem 2rem 8rem;
         }
 
-        /* Section styling */
         section {
             margin-bottom: 6rem;
         }
@@ -320,7 +312,155 @@
             font-weight: 500;
         }
 
-        /* Flow diagram */
+        /* Top-level tabs */
+        .tabs-nav {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+        }
+
+        .tab-button:hover {
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px 4px 0 0;
+        }
+
+        .tab-button.active {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Subtabs for Workflow */
+        .subtabs-nav {
+            display: flex;
+            gap: 0.5rem;
+            margin: 2rem 0;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .subtab-button {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+        }
+
+        .subtab-button:hover {
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px 4px 0 0;
+        }
+
+        .subtab-button.active {
+            color: var(--accent-amber);
+            border-bottom-color: var(--accent-amber);
+        }
+
+        .subtab-content {
+            display: none;
+        }
+
+        .subtab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Collapsible sections */
+        details {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            transition: border-color 0.3s ease;
+        }
+
+        details:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        details[open] {
+            border-color: var(--accent-cyan);
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '▼';
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+        }
+
+        details[open] summary::after {
+            transform: rotate(180deg);
+            color: var(--accent-cyan);
+        }
+
+        details > *:not(summary) {
+            margin-top: 1rem;
+        }
+
         .flow-diagram {
             display: flex;
             align-items: center;
@@ -371,6 +511,12 @@
             color: var(--accent-amber);
         }
 
+        .flow-icon.plan {
+            background: linear-gradient(135deg, rgba(251, 113, 133, 0.2), rgba(251, 113, 133, 0.05));
+            border: 1px solid rgba(251, 113, 133, 0.3);
+            color: var(--accent-rose);
+        }
+
         .flow-icon.implement {
             background: linear-gradient(135deg, rgba(52, 211, 153, 0.2), rgba(52, 211, 153, 0.05));
             border: 1px solid rgba(52, 211, 153, 0.3);
@@ -379,6 +525,7 @@
 
         .flow-step:hover .flow-icon.context { box-shadow: 0 8px 32px rgba(34, 211, 238, 0.2); }
         .flow-step:hover .flow-icon.spec { box-shadow: 0 8px 32px rgba(251, 191, 36, 0.2); }
+        .flow-step:hover .flow-icon.plan { box-shadow: 0 8px 32px rgba(251, 113, 133, 0.2); }
         .flow-step:hover .flow-icon.implement { box-shadow: 0 8px 32px rgba(52, 211, 153, 0.2); }
 
         .flow-label {
@@ -397,7 +544,6 @@
             font-size: 1.5rem;
         }
 
-        /* Problem cards */
         .problem-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -436,106 +582,6 @@
             margin: 0;
         }
 
-        /* Constraint hierarchy */
-        .hierarchy {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            margin: 2rem 0;
-        }
-
-        .hierarchy-level {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .hierarchy-level:last-child {
-            border-bottom: none;
-        }
-
-        .hierarchy-level .num {
-            width: 32px;
-            height: 32px;
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: var(--accent-cyan);
-            flex-shrink: 0;
-        }
-
-        .hierarchy-level .file {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: var(--accent-amber);
-            min-width: 180px;
-        }
-
-        .hierarchy-level .desc {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        /* Comparison tables */
-        .comparison {
-            margin: 2rem 0;
-            overflow: hidden;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-        }
-
-        .comparison-header {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            background: var(--bg-tertiary);
-        }
-
-        .comparison-header > div {
-            padding: 1rem 1.5rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .comparison-header > div:first-child {
-            border-right: 1px solid var(--border);
-            color: var(--accent-rose);
-        }
-
-        .comparison-header > div:last-child {
-            color: var(--accent-emerald);
-        }
-
-        .comparison-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            border-top: 1px solid var(--border);
-        }
-
-        .comparison-row > div {
-            padding: 1rem 1.5rem;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .comparison-row > div:first-child {
-            border-right: 1px solid var(--border);
-            background: rgba(251, 113, 133, 0.03);
-        }
-
-        .comparison-row > div:last-child {
-            background: rgba(52, 211, 153, 0.03);
-        }
-
-        /* Code blocks */
         .code-block {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
@@ -587,12 +633,17 @@
         .code-string { color: var(--accent-emerald); }
         .code-file { color: var(--accent-amber); }
 
-        /* Document cards */
         .doc-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 1.5rem;
             margin: 2rem 0;
+        }
+
+        @media (max-width: 1024px) {
+            .doc-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
@@ -715,13 +766,125 @@
             border: 1px solid var(--border);
         }
 
-        .card-details .usage-examples {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+        .callout {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(52, 211, 153, 0.05));
+            border: 1px solid rgba(34, 211, 238, 0.2);
+            border-radius: 12px;
+            margin: 2rem 0;
         }
 
-        /* Status markers */
+        .callout-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--accent-cyan);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .hierarchy {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .hierarchy-level {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hierarchy-level:last-child {
+            border-bottom: none;
+        }
+
+        .hierarchy-level .num {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+            flex-shrink: 0;
+        }
+
+        .hierarchy-level .file {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-amber);
+            min-width: 180px;
+        }
+
+        .hierarchy-level .desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .comparison {
+            margin: 2rem 0;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .comparison-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: var(--bg-tertiary);
+        }
+
+        .comparison-header > div {
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .comparison-header > div:first-child {
+            border-right: 1px solid var(--border);
+            color: var(--accent-rose);
+        }
+
+        .comparison-header > div:last-child {
+            color: var(--accent-emerald);
+        }
+
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-top: 1px solid var(--border);
+        }
+
+        .comparison-row > div {
+            padding: 1rem 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .comparison-row > div:first-child {
+            border-right: 1px solid var(--border);
+            background: rgba(251, 113, 133, 0.03);
+        }
+
+        .comparison-row > div:last-child {
+            background: rgba(52, 211, 153, 0.03);
+        }
+
         .status-list {
             display: flex;
             flex-wrap: wrap;
@@ -751,385 +914,6 @@
         .status-marker.complete { color: var(--accent-emerald); }
         .status-marker.blocked { color: var(--accent-rose); }
 
-        /* TDD workflow */
-        .tdd-flow {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 2rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            margin: 2rem 0;
-            flex-wrap: wrap;
-        }
-
-        .tdd-step {
-            padding: 0.75rem 1.5rem;
-            border-radius: 100px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: transform 0.3s ease;
-        }
-
-        .tdd-step:hover {
-            transform: scale(1.05);
-        }
-
-        .tdd-step.red {
-            background: rgba(251, 113, 133, 0.15);
-            border: 1px solid var(--accent-rose);
-            color: var(--accent-rose);
-        }
-
-        .tdd-step.green {
-            background: rgba(52, 211, 153, 0.15);
-            border: 1px solid var(--accent-emerald);
-            color: var(--accent-emerald);
-        }
-
-        .tdd-step.refactor {
-            background: rgba(34, 211, 238, 0.15);
-            border: 1px solid var(--accent-cyan);
-            color: var(--accent-cyan);
-        }
-
-        .tdd-step.commit {
-            background: rgba(251, 191, 36, 0.15);
-            border: 1px solid var(--accent-amber);
-            color: var(--accent-amber);
-        }
-
-        .tdd-arrow {
-            color: var(--text-muted);
-            font-size: 1.25rem;
-        }
-
-        /* Jira Integration */
-        .jira-flow {
-            display: flex;
-            gap: 1rem;
-            margin: 2rem 0;
-            flex-wrap: wrap;
-        }
-
-        .jira-step {
-            flex: 1;
-            min-width: 180px;
-            display: flex;
-            gap: 1rem;
-            padding: 1.25rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            transition: border-color 0.3s ease;
-        }
-
-        .jira-step:hover {
-            border-color: #6366f1;
-        }
-
-        .jira-num {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        .jira-content h4 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: var(--text-primary);
-        }
-
-        .jira-content p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin: 0;
-        }
-
-        .jira-content code {
-            background: var(--bg-tertiary);
-            padding: 0.15rem 0.4rem;
-            border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            color: var(--accent-amber);
-        }
-
-        .points-grid {
-            display: flex;
-            gap: 0.75rem;
-            margin: 1rem 0;
-            flex-wrap: wrap;
-        }
-
-        .points-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.6rem 1rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 0.85rem;
-        }
-
-        .points-item .tasks {
-            color: var(--text-muted);
-        }
-
-        .points-item .points {
-            font-weight: 600;
-            color: #6366f1;
-        }
-
-        /* Architecture Mode */
-        .arch-flow {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            padding: 2rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            margin: 2rem 0;
-        }
-
-        .arch-flow-row {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .arch-flow-step {
-            padding: 0.6rem 1.25rem;
-            border-radius: 100px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .arch-flow-step.story {
-            background: rgba(251, 191, 36, 0.15);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-            color: var(--accent-amber);
-        }
-
-        .arch-flow-step.exec-state {
-            background: rgba(251, 113, 133, 0.15);
-            border: 1px solid rgba(251, 113, 133, 0.3);
-            color: var(--accent-rose);
-        }
-
-        .arch-flow-step.skeleton {
-            background: rgba(34, 211, 238, 0.15);
-            border: 1px solid rgba(34, 211, 238, 0.3);
-            color: var(--accent-cyan);
-        }
-
-        .arch-flow-step.tdd-ref {
-            background: rgba(52, 211, 153, 0.15);
-            border: 1px solid rgba(52, 211, 153, 0.3);
-            color: var(--accent-emerald);
-        }
-
-        .arch-flow-step.coverage {
-            background: rgba(139, 92, 246, 0.15);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            color: #a78bfa;
-        }
-
-        .arch-flow-step.validate {
-            background: rgba(34, 211, 238, 0.15);
-            border: 1px solid rgba(34, 211, 238, 0.3);
-            color: var(--accent-cyan);
-        }
-
-        .arch-flow-step.bughunt {
-            background: rgba(251, 113, 133, 0.15);
-            border: 1px solid rgba(251, 113, 133, 0.3);
-            color: var(--accent-rose);
-        }
-
-        .arch-flow-checkpoint {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
-            color: var(--accent-rose);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .arch-flow-arrow {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-
-        .arch-features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-
-        .arch-feature {
-            padding: 1.5rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            transition: border-color 0.3s ease, transform 0.3s ease;
-        }
-
-        .arch-feature:hover {
-            border-color: rgba(139, 92, 246, 0.5);
-            transform: translateY(-2px);
-        }
-
-        .arch-feature .label {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            color: #a78bfa;
-            margin-bottom: 0.5rem;
-        }
-
-        .arch-feature h4 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .arch-feature p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin: 0;
-        }
-
-        /* Principles */
-        .principles {
-            display: grid;
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-
-        .principle {
-            display: flex;
-            gap: 1rem;
-            padding: 1.5rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            transition: border-color 0.3s ease;
-        }
-
-        .principle:hover {
-            border-color: var(--accent-cyan);
-        }
-
-        .principle-num {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-emerald));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--bg-primary);
-            flex-shrink: 0;
-        }
-
-        .principle-content h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: var(--text-primary);
-        }
-
-        .principle-content p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin: 0;
-        }
-
-        /* Callout */
-        .callout {
-            padding: 1.5rem;
-            background: linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(52, 211, 153, 0.05));
-            border: 1px solid rgba(34, 211, 238, 0.2);
-            border-radius: 12px;
-            margin: 2rem 0;
-        }
-
-        .callout-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: var(--accent-cyan);
-        }
-
-        .callout p {
-            margin: 0;
-            font-size: 0.95rem;
-        }
-
-        /* Economics table */
-        .economics {
-            margin: 2rem 0;
-            overflow: hidden;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-        }
-
-        .economics-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .economics-row:last-child {
-            border-bottom: none;
-        }
-
-        .economics-row.header {
-            background: var(--bg-tertiary);
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .economics-row > div {
-            padding: 1rem 1.25rem;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .economics-row > div:not(:last-child) {
-            border-right: 1px solid var(--border);
-        }
-
-        .economics-row.header > div:nth-child(2) {
-            color: var(--accent-rose);
-        }
-
-        .economics-row.header > div:nth-child(3) {
-            color: var(--accent-emerald);
-        }
-
-        /* Footer */
         footer {
             text-align: center;
             padding: 3rem 2rem;
@@ -1219,7 +1003,6 @@
             fill: currentColor;
         }
 
-        /* Responsive */
         @media (max-width: 640px) {
             h1 {
                 font-size: 2.5rem;
@@ -1257,24 +1040,8 @@
                 border-right: none;
                 border-bottom: 1px solid var(--border);
             }
-
-            .tdd-flow {
-                flex-direction: column;
-            }
-
-            .tdd-arrow {
-                transform: rotate(90deg);
-            }
-
-            .arch-flow-row {
-                flex-wrap: wrap;
-            }
-
-            .arch-flow-step {
-                font-size: 0.8rem;
-                padding: 0.5rem 1rem;
-            }
         }
+
         .skip-link {
             position: absolute;
             top: -40px;
@@ -1288,6 +1055,7 @@
             text-decoration: none;
             transition: top 0.2s;
         }
+
         .skip-link:focus {
             top: 0;
         }
@@ -1295,7 +1063,7 @@
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
-    <!-- Hero Section -->
+
     <header class="hero">
         <div class="hero-content">
             <div class="badge">Context-Driven Development</div>
@@ -1309,51 +1077,175 @@
     </header>
 
     <main id="main-content">
-        <!-- Installation Section -->
-        <section id="install" aria-labelledby="heading-install">
-            <h2 id="heading-install">Getting Started</h2>
-            <p>Install Draft as a Claude Code plugin and initialize your project in under a minute. Also available for <strong>Cursor</strong>, <strong>GitHub Copilot</strong>, and <strong>Gemini</strong>.</p>
+        <!-- Top-level navigation -->
+        <nav class="tabs-nav" role="tablist">
+            <button class="tab-button active" data-tab="overview" role="tab" aria-selected="true">Overview</button>
+            <button class="tab-button" data-tab="install" role="tab" aria-selected="false">Install</button>
+            <button class="tab-button" data-tab="workflow" role="tab" aria-selected="false">Workflow</button>
+            <button class="tab-button" data-tab="commands" role="tab" aria-selected="false">Commands</button>
+            <button class="tab-button" data-tab="team" role="tab" aria-selected="false">Team</button>
+            <button class="tab-button" data-tab="reference" role="tab" aria-selected="false">Reference</button>
+        </nav>
 
+        <!-- OVERVIEW TAB -->
+        <div id="tab-overview" class="tab-content active" role="tabpanel">
+            <h2>The Core Problem</h2>
+            <p>AI coding tools ship fast but create chaos. Without structure, they make assumptions, choose arbitrary approaches, and produce code that doesn't fit your architecture. Context window fills up, hallucinations increase, chat history is unsearchable, and every new session starts from zero.</p>
+
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="icon">🎯</div>
+                    <h4>Assumption-Driven</h4>
+                    <p>Guesses at requirements instead of asking clarifying questions</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">🔀</div>
+                    <h4>Arbitrary Choices</h4>
+                    <p>Picks random technical approaches without considering your stack</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">🧩</div>
+                    <h4>Poor Fit</h4>
+                    <p>Produces code that doesn't match existing patterns or conventions</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">⏭️</div>
+                    <h4>No Checkpoints</h4>
+                    <p>Skips verification and claims completion without proof</p>
+                </div>
+            </div>
+
+            <details>
+                <summary>The Solution: Context-Driven Development</summary>
+                <p>Draft treats context as a managed artifact alongside code. File-based persistent memory replaces ephemeral chat. Your repository becomes the single source of truth.</p>
+
+                <div class="comparison">
+                    <div class="comparison-header">
+                        <div>Chat-Driven</div>
+                        <div>Draft Approach</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Context in ephemeral chat</div>
+                        <div>File-based persistent memory</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>No version history</div>
+                        <div>Git-tracked specs with diffs and blame</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Loads entire project every session</div>
+                        <div>Scoped context per track</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Unsearchable conversations</div>
+                        <div>Grep-able specs and plans</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Invisible to teammates</div>
+                        <div>PR-reviewable planning artifacts</div>
+                    </div>
+                </div>
+            </details>
+
+            <h3>When to Use</h3>
+            <details open>
+                <summary>Good Fit</summary>
+                <div class="problem-grid">
+                    <div class="problem-card" style="border-color: rgba(52, 211, 153, 0.3);">
+                        <div class="icon">🏗️</div>
+                        <h4>Design Decisions</h4>
+                        <p>Features requiring architecture choices, API design, or data model decisions</p>
+                    </div>
+                    <div class="problem-card" style="border-color: rgba(52, 211, 153, 0.3);">
+                        <div class="icon">👥</div>
+                        <h4>Team Review</h4>
+                        <p>Work that will be reviewed by others — specs are faster to review than code</p>
+                    </div>
+                    <div class="problem-card" style="border-color: rgba(52, 211, 153, 0.3);">
+                        <div class="icon">📦</div>
+                        <h4>Multi-Step Work</h4>
+                        <p>Complex implementations spanning multiple files, modules, or phases</p>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>5-Step Quickstart</summary>
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="dot red"></div>
+                        <div class="dot yellow"></div>
+                        <div class="dot green"></div>
+                        <span class="filename">quickstart</span>
+                    </div>
+<pre><code><span class="code-comment"># 1. Initialize project context</span>
+<span class="code-keyword">/draft:init</span>
+
+<span class="code-comment"># 2. Create a feature track</span>
+<span class="code-keyword">/draft:new-track</span> <span class="code-string">"Add user authentication"</span>
+
+<span class="code-comment"># 3. Start implementing</span>
+<span class="code-keyword">/draft:implement</span>
+
+<span class="code-comment"># 4. Verify quality</span>
+<span class="code-keyword">/draft:coverage</span>
+<span class="code-keyword">/draft:validate</span></code></pre>
+                </div>
+            </details>
+
+            <details>
+                <summary>Economics: Why Specs Win</summary>
+                <p>Writing specs feels slower. It isn't. Overhead is constant (~20% for simple tasks), but savings scale with complexity, team size, and criticality.</p>
+
+                <div class="comparison">
+                    <div class="comparison-header">
+                        <div>Scenario</div>
+                        <div>Time Comparison</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Simple feature</div>
+                        <div>1h → 1.2h (+20%)</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Feature with ambiguity</div>
+                        <div>3h + rework → 2h (33% savings)</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Feature requiring team input</div>
+                        <div>5h + meetings → 2.5h (50% savings)</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Wrong feature entirely</div>
+                        <div>Days wasted → Caught in review</div>
+                    </div>
+                </div>
+
+                <p><strong>For critical product development, Draft isn't overhead — it's risk mitigation.</strong></p>
+            </details>
+        </div>
+
+        <!-- INSTALL TAB -->
+        <div id="tab-install" class="tab-content" role="tabpanel">
+            <h2>Install</h2>
+            <p>Install Draft as a Claude Code plugin, or use the integrations for Cursor, GitHub Copilot, and Gemini.</p>
+
+            <h3>Claude Code (Marketplace)</h3>
             <div class="code-block">
                 <div class="code-header">
                     <div class="dot red"></div>
                     <div class="dot yellow"></div>
                     <div class="dot green"></div>
-                    <span class="filename">installation</span>
+                    <span class="filename">claude code</span>
                 </div>
-<pre><code><span class="code-comment"># Install the plugin</span>
+<pre><code><span class="code-comment"># Install from marketplace</span>
 <span class="code-keyword">/plugin marketplace add</span> <span class="code-string">mayurpise/draft</span>
-<span class="code-keyword">/plugin install</span> <span class="code-string">draft</span>
-
-<span class="code-comment"># Initialize your project (once)</span>
-<span class="code-keyword">/draft:init</span>
-
-<span class="code-comment"># Create a feature track</span>
-<span class="code-keyword">/draft:new-track</span> <span class="code-string">"Add user authentication"</span>
-
-<span class="code-comment"># Start implementing</span>
-<span class="code-keyword">/draft:implement</span>
-
-<span class="code-comment"># Verify test coverage (95%+ target)</span>
-<span class="code-keyword">/draft:coverage</span>
-
-<span class="code-comment"># Validate quality (architecture, security, performance)</span>
-<span class="code-keyword">/draft:validate</span>
-
-<span class="code-comment"># Hunt for bugs across the codebase</span>
-<span class="code-keyword">/draft:bughunt</span>
-
-<span class="code-comment"># Review track or project code</span>
-<span class="code-keyword">/draft:review --track my-feature --full</span>
-
-<span class="code-comment"># Check progress</span>
-<span class="code-keyword">/draft:status</span></code></pre>
+<span class="code-keyword">/plugin install</span> <span class="code-string">draft</span></code></pre>
             </div>
 
             <p>Prerequisites: <strong>Claude Code CLI</strong>, <strong>Git</strong>, and <strong>Node.js 18+</strong>.</p>
 
-            <h3 style="margin-top: 2rem;">Other Editors</h3>
-            <p><strong>Cursor</strong> — One command, no clone required:</p>
+            <h3>Cursor</h3>
+            <p>Method 1: Direct install (recommended):</p>
             <div class="code-block" style="margin-bottom: 1rem;">
                 <div class="code-header">
                     <div class="dot red"></div>
@@ -1363,7 +1255,9 @@
                 </div>
 <pre><code><span class="code-keyword">curl</span> -o .cursorrules <span class="code-string">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/cursor/.cursorrules</span></code></pre>
             </div>
-            <p><strong>GitHub Copilot</strong> — One command, no clone required:</p>
+            <p>Method 2: Manual copy from repository.</p>
+
+            <h3>GitHub Copilot</h3>
             <div class="code-block">
                 <div class="code-header">
                     <div class="dot red"></div>
@@ -1373,7 +1267,8 @@
                 </div>
 <pre><code><span class="code-keyword">mkdir</span> -p .github && <span class="code-keyword">curl</span> -o .github/copilot-instructions.md <span class="code-string">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md</span></code></pre>
             </div>
-            <p><strong>Gemini</strong> — One command, no clone required:</p>
+
+            <h3>Gemini</h3>
             <div class="code-block">
                 <div class="code-header">
                     <div class="dot red"></div>
@@ -1383,11 +1278,304 @@
                 </div>
 <pre><code><span class="code-keyword">curl</span> -o GEMINI.md <span class="code-string">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/GEMINI.md</span></code></pre>
             </div>
-        </section>
+        </div>
 
-        <!-- Command Reference Section -->
-        <section id="commands" aria-labelledby="heading-commands">
-            <h2 id="heading-commands">Command Reference</h2>
+        <!-- WORKFLOW TAB -->
+        <div id="tab-workflow" class="tab-content" role="tabpanel">
+            <h2>Workflow</h2>
+
+            <!-- Workflow subtabs -->
+            <nav class="subtabs-nav" role="tablist">
+                <button class="subtab-button active" data-subtab="getting-started" role="tab">Getting Started</button>
+                <button class="subtab-button" data-subtab="planning" role="tab">Planning</button>
+                <button class="subtab-button" data-subtab="implementation" role="tab">Implementation</button>
+                <button class="subtab-button" data-subtab="quality" role="tab">Quality</button>
+            </nav>
+
+            <!-- Getting Started subtab -->
+            <div id="subtab-getting-started" class="subtab-content active" role="tabpanel">
+                <h3>The Draft Workflow</h3>
+                <p>By treating context as a managed artifact alongside code, your repository becomes the single source of truth.</p>
+
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <div class="flow-icon context">📋</div>
+                        <div class="flow-label">Context</div>
+                        <div class="flow-sublabel">Define the landscape</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="flow-icon spec">📝</div>
+                        <div class="flow-label">Spec & Plan</div>
+                        <div class="flow-sublabel">Document the approach</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="flow-icon plan">🏗️</div>
+                        <div class="flow-label">Decompose</div>
+                        <div class="flow-sublabel">Module architecture</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="flow-icon implement">⚡</div>
+                        <div class="flow-label">Implement</div>
+                        <div class="flow-sublabel">Execute with confidence</div>
+                    </div>
+                </div>
+
+                <details open>
+                    <summary>Step 1: Context Files</summary>
+                    <p><strong>/draft:init</strong> creates persistent context files that define your project landscape.</p>
+
+                    <div class="hierarchy">
+                        <div class="hierarchy-level">
+                            <div class="num">1</div>
+                            <div class="file">product.md</div>
+                            <div class="desc">Who your users are, what problems you solve, key product goals</div>
+                        </div>
+                        <div class="hierarchy-level">
+                            <div class="num">2</div>
+                            <div class="file">tech-stack.md</div>
+                            <div class="desc">Languages, frameworks, libraries, patterns, conventions</div>
+                        </div>
+                        <div class="hierarchy-level">
+                            <div class="num">3</div>
+                            <div class="file">workflow.md</div>
+                            <div class="desc">TDD preferences, commit strategy, validation config, team processes</div>
+                        </div>
+                        <div class="hierarchy-level">
+                            <div class="num">4</div>
+                            <div class="file">architecture.md</div>
+                            <div class="desc">System map with mermaid diagrams: directory structure, data flows, patterns, module dependencies (brownfield only)</div>
+                        </div>
+                    </div>
+
+                    <p>These files live in <code>draft/</code>, are git-tracked, and load automatically. AI always starts with your ground truth instead of assumptions.</p>
+                </details>
+
+                <details>
+                    <summary>Step 2: Spec & Plan</summary>
+                    <p>When you ask AI to "add authentication," it immediately writes code. <strong>/draft:new-track</strong> conducts a collaborative intake — structured conversation where AI acts as expert collaborator. It asks clarifying questions, contributes expertise (patterns, risks, trade-offs), and updates the spec progressively.</p>
+                </details>
+
+                <details>
+                    <summary>Step 3: Decompose (optional)</summary>
+                    <p>For multi-module features, <strong>/draft:decompose</strong> maps your feature into discrete modules with defined responsibilities, API surfaces, and dependency graph. This prevents tangled code and circular dependencies.</p>
+                </details>
+
+                <details>
+                    <summary>Step 4: Implement</summary>
+                    <p><strong>/draft:implement</strong> executes one task at a time from the plan, follows TDD cycle (test first, then code, then refactor), runs verification gates before marking completion, and triggers two-stage review at phase boundaries.</p>
+                </details>
+
+                <details>
+                    <summary>Step 5: Verify Quality</summary>
+                    <p>Passing tests doesn't guarantee good code. <strong>/draft:coverage</strong> measures test completeness (95%+ target). <strong>/draft:validate</strong> runs context-aware checks: architecture conformance, security scans (hardcoded secrets, SQL injection, XSS), performance anti-patterns. <strong>/draft:bughunt</strong> performs exhaustive bug hunting across 12 dimensions.</p>
+                </details>
+
+                <details>
+                    <summary>The Constraint Hierarchy</summary>
+                    <p>Each document layer narrows the solution space. By the time AI writes code, most decisions are already made.</p>
+
+                    <div class="hierarchy">
+                        <div class="hierarchy-level">
+                            <div class="num">1</div>
+                            <div class="file">product.md</div>
+                            <div class="desc">"Build a task manager for developers"</div>
+                        </div>
+                        <div class="hierarchy-level">
+                            <div class="num">2</div>
+                            <div class="file">tech-stack.md</div>
+                            <div class="desc">"Use React, TypeScript, Tailwind"</div>
+                        </div>
+                        <div class="hierarchy-level">
+                            <div class="num">3</div>
+                            <div class="file">architecture.md</div>
+                            <div class="desc">"Express API → Service layer → Prisma ORM → PostgreSQL"</div>
+                        </div>
+                        <div class="hierarchy-level">
+                            <div class="num">4</div>
+                            <div class="file">spec.md</div>
+                            <div class="desc">"Add drag-and-drop reordering"</div>
+                        </div>
+                        <div class="hierarchy-level">
+                            <div class="num">5</div>
+                            <div class="file">plan.md</div>
+                            <div class="desc">"Phase 1: sortable list, Phase 2: persistence"</div>
+                        </div>
+                    </div>
+
+                    <div class="callout">
+                        <div class="callout-title">Key Insight</div>
+                        <p>The AI becomes an executor of pre-approved work, not an autonomous decision-maker. Explicit specs, phased plans, verification steps, and status markers keep implementation focused and accountable.</p>
+                    </div>
+                </details>
+            </div>
+
+            <!-- Planning subtab -->
+            <div id="subtab-planning" class="subtab-content" role="tabpanel">
+                <h3>Review Before Code</h3>
+                <p><strong>This is Draft's most important feature.</strong> In traditional AI coding, you discover the AI's design decisions during code review — after it's already built the wrong thing. With Draft, the AI writes a spec first. You review the approach in a document, not a diff. Disagreements are resolved by editing a paragraph, not rewriting a module.</p>
+
+                <div class="comparison">
+                    <div class="comparison-header">
+                        <div>Traditional AI Coding</div>
+                        <div>Draft Approach</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>AI writes code immediately</div>
+                        <div>AI writes spec first — you approve the approach</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Review happens on code PR (too late)</div>
+                        <div>Review happens on spec PR (cheap to change)</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Disagreements require rewriting code</div>
+                        <div>Disagreements resolved by editing a document</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>AI decisions are implicit and buried in code</div>
+                        <div>AI decisions are documented and git-tracked</div>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>Collaborative Intake: AI as Expert Partner</summary>
+                    <p>Instead of dumping requirements at the AI and hoping for the best, <code>/draft:new-track</code> conducts a structured conversation where AI acts as an expert collaborator — asking the right questions, contributing knowledge, and building the spec progressively.</p>
+
+                    <div class="hierarchy">
+                        <div class="hierarchy-level">
+                            <div class="num">1</div>
+                            <div class="file">One question at a time</div>
+                            <div class="desc">AI asks a single focused question, waits for your answer, then contributes expertise before moving to the next</div>
+                        </div>
+                        <div class="hierarchy-level">
+                            <div class="num">2</div>
+                            <div class="file">AI contributes at each step</div>
+                            <div class="desc">Pattern recognition, risk surfacing, trade-off analysis, fact-checking against your architecture.md</div>
+                        </div>
+                        <div class="hierarchy-level">
+                            <div class="num">3</div>
+                            <div class="file">Grounded in vetted sources</div>
+                            <div class="desc">Citations from Domain-Driven Design, Clean Architecture, DDIA, OWASP, 12-Factor App, GoF patterns</div>
+                        </div>
+                        <div class="hierarchy-level">
+                            <div class="num">4</div>
+                            <div class="file">Checkpoints between phases</div>
+                            <div class="desc">You control the pace with summaries and refinement opportunities</div>
+                        </div>
+                        <div class="hierarchy-level">
+                            <div class="num">5</div>
+                            <div class="file">Progressive draft updates</div>
+                            <div class="desc">spec-draft.md updates as conversation evolves. You see the spec take shape in real-time</div>
+                        </div>
+                    </div>
+
+                    <div class="callout">
+                        <div class="callout-title">Key Insight</div>
+                        <p><strong>This levels the playing field.</strong> Junior engineers get senior-level guidance. Senior engineers can't shortcut rigor. Both produce well-documented specs with traceable reasoning. The discipline scales across your entire team.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Architecture Mode (Optional)</summary>
+                    <p>Standard Draft gives you specs and plans. Architecture Mode goes deeper — it forces the AI to design before it codes. Every module gets a dependency analysis. Every algorithm gets documented in plain language. Every function signature gets approved before implementation begins.</p>
+
+                    <p><strong>When to use:</strong> Multi-module features, new projects, complex algorithms, teams wanting maximum review granularity.</p>
+                    <p><strong>Overkill for:</strong> Simple features touching 1-2 files, bug fixes with clear scope, configuration changes.</p>
+                </details>
+            </div>
+
+            <!-- Implementation subtab -->
+            <div id="subtab-implementation" class="subtab-content" role="tabpanel">
+                <h3>TDD Workflow</h3>
+                <p>AI-generated code without tests is a liability. When TDD is enabled in <code>workflow.md</code>, Draft forces the AI to prove its code works at every step.</p>
+
+                <div class="hierarchy">
+                    <div class="hierarchy-level">
+                        <div class="num" style="background: rgba(251, 113, 133, 0.2); color: var(--accent-rose);">R</div>
+                        <div class="file" style="color: var(--accent-rose);">Red — Write failing test</div>
+                        <div class="desc">Define what "correct" means before any code exists. Test must fail with assertion error, proving it actually tests the requirement</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num" style="background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald);">G</div>
+                        <div class="file" style="color: var(--accent-emerald);">Green — Minimum code to pass</div>
+                        <div class="desc">Write simplest implementation that makes the test pass. No extras, no "improvements" — every line justified by a failing test</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num" style="background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan);">R</div>
+                        <div class="file" style="color: var(--accent-cyan);">Refactor — Clean with tests green</div>
+                        <div class="desc">Improve code structure while tests stay green. Test suite acts as safety net</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num" style="background: rgba(251, 191, 36, 0.2); color: var(--accent-amber);">C</div>
+                        <div class="file" style="color: var(--accent-amber);">Commit — Following conventions</div>
+                        <div class="desc">One task = one commit. Small, focused commits make reverts surgical and git blame useful</div>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>Architecture Discovery (Brownfield)</summary>
+                    <p>For brownfield projects, <code>/draft:init</code> performs a deep three-phase codebase analysis that generates <code>architecture.md</code>. This document becomes the persistent context every future track references.</p>
+
+                    <p><strong>Phase 1: Orientation</strong> — System map with mermaid diagrams, directory hierarchy, entry points, request/response flow, tech stack inventory</p>
+                    <p><strong>Phase 2: Logic</strong> — Data lifecycle, design patterns, complexity hotspots, conventions, external dependencies</p>
+                    <p><strong>Phase 3: Module Discovery</strong> — Module dependencies, module inventory, dependency order</p>
+
+                    <div class="callout">
+                        <div class="callout-title">Key Insight</div>
+                        <p><strong>Pay the analysis cost once, benefit on every track.</strong> Architecture discovery turns your codebase into a documented system that any AI assistant can understand instantly.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Revert Workflow</summary>
+                    <p>AI makes mistakes. When it does, you need to undo cleanly. Draft's revert understands the logical structure of your work at three granularities: task (single task's commits), phase (all commits in a phase), or track (entire track's commits). Preview, confirm, execute — git revert + Draft state update together.</p>
+                </details>
+            </div>
+
+            <!-- Quality subtab -->
+            <div id="subtab-quality" class="subtab-content" role="tabpanel">
+                <h3>Quality Disciplines</h3>
+                <p>AI's default failure mode is to guess at fixes, skip verification, and claim success. Draft embeds three quality agents directly into the workflow.</p>
+
+                <details open>
+                    <summary>Systematic Debugging</summary>
+                    <p>When a task is blocked (<code>[!]</code>), the Debugger Agent enforces a four-phase process: Investigate → Analyze → Hypothesize → Implement. After 3 failed hypothesis cycles, escalates to you with everything learned and eliminated. Root cause documented in plan.md.</p>
+                </details>
+
+                <details>
+                    <summary>Two-Stage Review</summary>
+                    <p>At every phase boundary, the Reviewer Agent runs two sequential checks:</p>
+                    <p><strong>Stage 1: Spec Compliance</strong> — All functional requirements implemented? Acceptance criteria met? No scope creep or missing features?</p>
+                    <p><strong>Stage 2: Code Quality</strong> — Follows project patterns from tech-stack.md? Appropriate error handling? Tests cover real logic?</p>
+                    <p>Critical issues must be fixed before proceeding. Important issues should be fixed. Minor issues noted but don't block.</p>
+                </details>
+
+                <details>
+                    <summary>Code Coverage (95%+ target)</summary>
+                    <p><code>/draft:coverage</code> runs your project's coverage tool and classifies every uncovered line:</p>
+                    <p><strong>Testable</strong> — Should be covered. Suggests specific tests to write.</p>
+                    <p><strong>Defensive</strong> — Error handlers for impossible states. Acceptable to leave.</p>
+                    <p><strong>Infrastructure</strong> — Framework boilerplate and entry points. Acceptable.</p>
+                </details>
+
+                <details>
+                    <summary>Systematic Validation</summary>
+                    <p><code>/draft:validate</code> uses Draft context (architecture.md, tech-stack.md) to catch quality issues tests miss — architecture violations, hardcoded secrets, N+1 queries, missing input validation. Non-blocking by default. Results in <code>validation-report.md</code>.</p>
+                </details>
+
+                <details>
+                    <summary>Exhaustive Bug Hunt (12 dimensions)</summary>
+                    <p><code>/draft:bughunt</code> performs exhaustive defect discovery: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, tests, maintainability. Findings severity-ranked (Critical/High/Medium/Low) with file:line locations in <code>bughunt-report.md</code>.</p>
+                </details>
+            </div>
+        </div>
+
+        <!-- COMMANDS TAB -->
+        <div id="tab-commands" class="tab-content" role="tabpanel">
+            <h2>Command Reference</h2>
             <p>Draft provides 15 slash commands for the full development lifecycle.</p>
 
             <div class="doc-grid">
@@ -1403,7 +1591,7 @@
                         <h4>What it does:</h4>
                         <ul>
                             <li>Shows available commands and guides you to the right workflow</li>
-                            <li>Maps natural language intent to commands (e.g., "set up project" → <code>/draft:init</code>)</li>
+                            <li>Maps natural language intent to commands</li>
                         </ul>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
@@ -1448,19 +1636,11 @@
                     <div class="card-details">
                         <h4>What it does:</h4>
                         <ol>
-                            <li>Scans immediate child directories for service markers (depth=1)</li>
-                            <li>Reads each service's <code>draft/</code> context (product, architecture, tech-stack)</li>
+                            <li>Scans immediate child directories for service markers</li>
+                            <li>Reads each service's <code>draft/</code> context</li>
                             <li>Synthesizes root-level documents for system-of-systems view</li>
                             <li>Generates service registry, dependency graph, tech matrix</li>
-                            <li>Detects inter-service dependencies</li>
                         </ol>
-                        <h4>Generated files:</h4>
-                        <ul>
-                            <li><code>service-index.md</code> — Service registry table</li>
-                            <li><code>dependency-graph.md</code> — Inter-service topology with mermaid</li>
-                            <li><code>tech-matrix.md</code> — Technology distribution across services</li>
-                            <li><code>root product/architecture/tech-stack.md</code> — Synthesized org views</li>
-                        </ul>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
                             <code>/draft:index</code>
@@ -1486,23 +1666,9 @@
                             <li>Checkpoints between phases for refinement</li>
                             <li>On confirmation: promotes drafts to <code>spec.md</code> + <code>plan.md</code></li>
                         </ol>
-                        <h4>Intake Phases:</h4>
-                        <ul>
-                            <li><strong>Problem Space:</strong> What problem? Why now? Who's affected?</li>
-                            <li><strong>Solution Space:</strong> Simplest version? Why this approach?</li>
-                            <li><strong>Risks:</strong> What could go wrong? Dependencies? Assumptions?</li>
-                            <li><strong>Success Criteria:</strong> How do we know it's done?</li>
-                        </ul>
-                        <h4>AI Contributes:</h4>
-                        <ul>
-                            <li>Pattern recognition from DDD, Clean Architecture, DDIA</li>
-                            <li>Risk surfacing from OWASP, distributed systems fallacies</li>
-                            <li>Fact-checking against your <code>architecture.md</code></li>
-                        </ul>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
                             <code>/draft:new-track "Add user authentication"</code>
-                            <code>/draft:new-track "Fix login redirect bug"</code>
                         </div>
                     </div>
                 </div>
@@ -1522,12 +1688,10 @@
                             <li>Executes TDD cycle: RED → GREEN → REFACTOR</li>
                             <li>Updates plan status markers and metadata</li>
                             <li>At phase boundaries: runs two-stage review</li>
-                            <li>Marks track complete when all phases done</li>
                         </ol>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
                             <code>/draft:implement</code>
-                            <code>/draft:implement add-user-auth</code>
                         </div>
                     </div>
                 </div>
@@ -1546,7 +1710,6 @@
                             <li>Shows all active tracks with completion percentages</li>
                             <li>Displays current phase and task breakdown</li>
                             <li>Highlights blocked items</li>
-                            <li>Quick stats: active tracks, total/completed tasks</li>
                         </ul>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
@@ -1569,8 +1732,7 @@
                             <li>Identifies commits by track pattern</li>
                             <li>Shows preview with affected files and plan changes</li>
                             <li>Requires explicit confirmation</li>
-                            <li>Executes <code>git revert</code> (newest first)</li>
-                            <li>Updates plan markers from <code>[x]</code> back to <code>[ ]</code></li>
+                            <li>Executes <code>git revert</code> + updates plan markers</li>
                         </ol>
                         <h4>Revert levels:</h4>
                         <ul>
@@ -1593,14 +1755,11 @@
                         <h4>What it does:</h4>
                         <ol>
                             <li>Proposes modules with: name, responsibility, files, API, dependencies</li>
-                            <li><strong>CHECKPOINT:</strong> Developer reviews module breakdown</li>
                             <li>Maps dependencies, detects cycles, generates dependency diagram</li>
-                            <li><strong>CHECKPOINT:</strong> Developer reviews implementation order</li>
                             <li>Creates <code>architecture.md</code> with module definitions</li>
                         </ol>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
-                            <code>/draft:decompose project</code>
                             <code>/draft:decompose</code>
                         </div>
                     </div>
@@ -1617,16 +1776,14 @@
                     <div class="card-details">
                         <h4>What it does:</h4>
                         <ol>
-                            <li>Auto-detects coverage tool (jest, vitest, pytest-cov, go test, etc.)</li>
+                            <li>Auto-detects coverage tool (jest, vitest, pytest-cov, go test)</li>
                             <li>Runs coverage and captures output</li>
                             <li>Reports per-file breakdown with uncovered line ranges</li>
                             <li>Classifies gaps: testable, defensive, infrastructure</li>
-                            <li>Records results in plan, architecture, and metadata</li>
                         </ol>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
                             <code>/draft:coverage</code>
-                            <code>/draft:coverage src/auth</code>
                         </div>
                     </div>
                 </div>
@@ -1640,24 +1797,17 @@
                         <div class="expand-indicator">▼</div>
                     </div>
                     <div class="card-details">
-                        <h4>Project-level checks:</h4>
+                        <h4>Checks:</h4>
                         <ul>
                             <li>Architecture conformance</li>
                             <li>Dead code detection</li>
-                            <li>Dependency cycle detection</li>
                             <li>Security scan (secrets, SQL injection, XSS)</li>
                             <li>Performance anti-patterns</li>
-                        </ul>
-                        <h4>Track-level checks:</h4>
-                        <ul>
-                            <li>Spec compliance</li>
-                            <li>Architectural impact</li>
-                            <li>Regression risk analysis</li>
+                            <li>Spec compliance (track-level)</li>
                         </ul>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
                             <code>/draft:validate</code>
-                            <code>/draft:validate --track add-user-auth</code>
                         </div>
                     </div>
                 </div>
@@ -1671,13 +1821,6 @@
                         <div class="expand-indicator">▼</div>
                     </div>
                     <div class="card-details">
-                        <h4>What it does:</h4>
-                        <ol>
-                            <li>Loads Draft context (architecture, tech-stack, product)</li>
-                            <li>For tracks: verifies implementation matches spec</li>
-                            <li>Analyzes code: correctness, security, performance, concurrency, etc.</li>
-                            <li>Generates severity-ranked findings with fix recommendations</li>
-                        </ol>
                         <h4>12 dimensions analyzed:</h4>
                         <ul>
                             <li>Correctness, reliability, security, performance</li>
@@ -1706,15 +1849,11 @@
                             <li><strong>Stage 1:</strong> Spec compliance verification</li>
                             <li><strong>Stage 2:</strong> Code quality checks</li>
                             <li>Optional: Runs <code>/draft:validate</code> and <code>/draft:bughunt</code></li>
-                            <li>Generates unified report with severity classification</li>
                         </ol>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
                             <code>/draft:review</code>
-                            <code>/draft:review --track add-user-auth</code>
                             <code>/draft:review --full</code>
-                            <code>/draft:review --project</code>
-                            <code>/draft:review --files "src/**/*.ts"</code>
                         </div>
                     </div>
                 </div>
@@ -1733,7 +1872,6 @@
                             <li>Generates <code>jira-export.md</code> from track plan</li>
                             <li>Maps: Track → Epic, Phase → Story, Task → Sub-task</li>
                             <li>Auto-calculates story points from task count</li>
-                            <li>File is editable before creating issues</li>
                         </ul>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
@@ -1756,7 +1894,6 @@
                             <li>Creates issues from <code>jira-export.md</code></li>
                             <li>Creates Epic → Stories → Sub-tasks in order</li>
                             <li>Updates plan and export with issue keys</li>
-                            <li>Auto-generates export if missing</li>
                         </ol>
                         <h4>Requirements:</h4>
                         <ul>
@@ -1781,451 +1918,131 @@
                         <h4>What it does:</h4>
                         <ol>
                             <li>Documents significant technical decisions with context and rationale</li>
-                            <li>Creates structured ADR with: Context, Decision, Alternatives, Consequences</li>
-                            <li>Stores at <code>draft/adrs/NNNN-title.md</code> with status tracking</li>
-                            <li>Supports superseding old decisions</li>
+                            <li>Creates structured ADR: Context, Decision, Alternatives, Consequences</li>
+                            <li>Stores at <code>draft/adrs/NNNN-title.md</code></li>
                         </ol>
-                        <h4>When to use:</h4>
-                        <ul>
-                            <li>Adopting new technology or framework</li>
-                            <li>Changing system architecture or module boundaries</li>
-                            <li>Selecting between viable approaches with trade-offs</li>
-                            <li>Establishing patterns that constrain future work</li>
-                        </ul>
-                        <h4>Status lifecycle:</h4>
-                        <ul>
-                            <li><strong>Proposed</strong> → <strong>Accepted</strong> → <strong>Deprecated/Superseded</strong></li>
-                        </ul>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
                             <code>/draft:adr</code>
                             <code>/draft:adr "Use PostgreSQL"</code>
-                            <code>/draft:adr list</code>
-                            <code>/draft:adr supersede 3</code>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- The Problem Section -->
-        <section id="problem" aria-labelledby="heading-problem">
-            <h2 id="heading-problem">The Core Problem</h2>
-            <p>AI coding tools ship fast but create chaos. Without enterprise discipline, they make assumptions, choose arbitrary approaches, and produce code that doesn't fit your architecture.</p>
-            
-            <div class="problem-grid">
-                <div class="problem-card">
-                    <div class="icon">🎯</div>
-                    <h4>Assumption-Driven</h4>
-                    <p>Guesses at requirements instead of asking clarifying questions</p>
-                </div>
-                <div class="problem-card">
-                    <div class="icon">🔀</div>
-                    <h4>Arbitrary Choices</h4>
-                    <p>Picks random technical approaches without considering your stack</p>
-                </div>
-                <div class="problem-card">
-                    <div class="icon">🧩</div>
-                    <h4>Poor Fit</h4>
-                    <p>Produces code that doesn't match existing patterns or conventions</p>
-                </div>
-                <div class="problem-card">
-                    <div class="icon">⏭️</div>
-                    <h4>No Checkpoints</h4>
-                    <p>Skips verification and claims completion without proof</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Chat-Driven Development Problems -->
-        <section id="chat-problems" aria-labelledby="heading-chat-problems">
-            <h2 id="heading-chat-problems">Why Chat-Driven Development Fails at Scale</h2>
-            <p>Traditional AI chat interfaces have fundamental limitations that compound as projects grow.</p>
-
-            <div class="problem-grid">
-                <div class="problem-card">
-                    <div class="icon">🪟</div>
-                    <h4>Context Window Fills Up</h4>
-                    <p>Long chats exhaust token limits; AI loses early context and forgets decisions</p>
-                </div>
-                <div class="problem-card">
-                    <div class="icon">🌀</div>
-                    <h4>Hallucination Increases</h4>
-                    <p>More tokens in context means more confusion and worse decisions</p>
-                </div>
-                <div class="problem-card">
-                    <div class="icon">💨</div>
-                    <h4>No Persistent Memory</h4>
-                    <p>Close the chat, lose the context. Every session starts from zero.</p>
-                </div>
-                <div class="problem-card">
-                    <div class="icon">🔍</div>
-                    <h4>Unsearchable History</h4>
-                    <p>"Where did I work on feature X?" — good luck finding it in chat logs</p>
-                </div>
-                <div class="problem-card">
-                    <div class="icon">👻</div>
-                    <h4>No Team Visibility</h4>
-                    <p>Your chat history is invisible to colleagues. No review, no audit trail.</p>
-                </div>
-                <div class="problem-card">
-                    <div class="icon">🔄</div>
-                    <h4>Repeated Context Loading</h4>
-                    <p>Every new session requires re-explaining the project from scratch</p>
-                </div>
-            </div>
-
-            <h3>How Draft Solves This</h3>
-
-            <div class="comparison">
-                <div class="comparison-header">
-                    <div>Chat-Driven</div>
-                    <div>Draft Approach</div>
-                </div>
-                <div class="comparison-row">
-                    <div>Context in ephemeral chat</div>
-                    <div>File-based persistent memory</div>
-                </div>
-                <div class="comparison-row">
-                    <div>No version history</div>
-                    <div>Git-tracked specs with diffs and blame</div>
-                </div>
-                <div class="comparison-row">
-                    <div>Loads entire project every session</div>
-                    <div>Scoped context per track</div>
-                </div>
-                <div class="comparison-row">
-                    <div>Unsearchable conversations</div>
-                    <div>Grep-able specs and plans</div>
-                </div>
-                <div class="comparison-row">
-                    <div>Invisible to teammates</div>
-                    <div>PR-reviewable planning artifacts</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Core Workflow -->
-        <section id="workflow" aria-labelledby="heading-workflow">
-            <h2 id="heading-workflow">The Draft Workflow</h2>
-            <p>Draft solves this through <strong>Context-Driven Development</strong>: structured documents that constrain and guide AI behavior. By treating context as a managed artifact alongside code, your repository becomes the single source of truth.</p>
-
-            <div class="flow-diagram">
-                <div class="flow-step">
-                    <div class="flow-icon context">📋</div>
-                    <div class="flow-label">Context</div>
-                    <div class="flow-sublabel">Define the landscape</div>
-                </div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">
-                    <div class="flow-icon spec">📝</div>
-                    <div class="flow-label">Spec & Plan</div>
-                    <div class="flow-sublabel">Document the approach</div>
-                </div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">
-                    <div class="flow-icon" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.05)); border: 1px solid rgba(139, 92, 246, 0.3); color: #a78bfa;">🏗️</div>
-                    <div class="flow-label">Decompose</div>
-                    <div class="flow-sublabel">Module architecture</div>
-                </div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">
-                    <div class="flow-icon implement">⚡</div>
-                    <div class="flow-label">Implement</div>
-                    <div class="flow-sublabel">Execute with confidence</div>
-                </div>
-            </div>
-
-            <h3>Step 1: Context — Why it exists</h3>
-            <p>Without context, AI reinvents your project from scratch every session. It guesses your tech stack, ignores your conventions, and builds features that don't fit. <strong><code>/draft:init</code></strong> fixes this by creating persistent files that tell the AI who your users are (<code>product.md</code>), what technologies to use (<code>tech-stack.md</code>), and how your team works (<code>workflow.md</code>). For existing codebases, it also generates <code>architecture.md</code> — a deep system map with mermaid diagrams covering directory structure, entry points, data flows, design patterns, existing module dependencies, and external integrations. This means every future track gets immediate, rich context without re-analyzing the codebase. These files live in git, survive across sessions, and load automatically — so the AI always starts with your ground truth instead of assumptions.</p>
-
-            <h3>Step 2: Spec & Plan — Why it exists</h3>
-            <p>When you ask AI to "add authentication," it immediately writes code. If the approach is wrong, you discover it during code review — after hours of work. <strong><code>/draft:new-track</code></strong> conducts a <strong>collaborative intake</strong> — a structured conversation where AI acts as an expert collaborator. It asks one question at a time, contributes expertise (patterns, risks, trade-offs with citations from DDD, Clean Architecture, OWASP), and updates the spec progressively. Checkpoints between phases let you refine before committing. The result: a well-reasoned specification with traceable decisions, not assumptions. Junior engineers get senior-level guidance. Senior engineers can't skip thinking. Both produce consistent quality.</p>
-
-            <h3>Step 3: Decompose — Why it exists (optional)</h3>
-            <p>For multi-module features, jumping straight to implementation creates tangled code with unclear boundaries. <strong><code>/draft:decompose</code></strong> maps your feature into discrete modules with defined responsibilities, API surfaces, and a dependency graph. This gives you an implementation order (build the database layer before the API layer) and prevents circular dependencies. Each module is small enough to reason about, test independently, and review in isolation.</p>
-
-            <h3>Step 4: Implement — Why it exists</h3>
-            <p>Even with a plan, AI can drift: skip tests, claim completion without proof, or make sweeping changes across unrelated files. <strong><code>/draft:implement</code></strong> executes one task at a time from the plan, follows the TDD cycle (write test first, then code, then refactor), runs a verification gate before marking anything complete, and triggers a two-stage review at phase boundaries. The AI can only work on what's specified, in the order specified, with proof required at every step.</p>
-
-            <h3>Step 5: Verify Quality — Why it exists</h3>
-            <p>Passing tests doesn't guarantee good code. AI can violate architectural patterns, introduce security vulnerabilities, or create performance bottlenecks — all while every test passes. <strong><code>/draft:coverage</code></strong> measures test completeness (95%+ target) and classifies uncovered lines. <strong><code>/draft:validate</code></strong> runs context-aware compliance checks: architecture conformance (patterns from architecture.md), security scans (hardcoded secrets, SQL injection, XSS), performance anti-patterns (N+1 queries, blocking I/O), and regression risk (blast radius of changes). <strong><code>/draft:bughunt</code></strong> goes deeper — exhaustive bug hunting across 12 dimensions (correctness, reliability, security, performance, concurrency, state management, API contracts, accessibility, and more) using Draft context to find architecture violations, spec non-compliance, and framework-specific issues. <strong><code>/draft:review</code></strong> orchestrates all of these — runs the two-stage reviewer agent (spec compliance + code quality), optionally integrates validate and bughunt with the <code>--full</code> flag, and generates a unified report with deduplication and severity ranking. All tools generate reports with file:line references and actionable fixes.</p>
-        </section>
-
-        <!-- Constraint Hierarchy -->
-        <section id="constraints" aria-labelledby="heading-constraints">
-            <h2 id="heading-constraints">The Constraint Hierarchy</h2>
-            <p>Each document layer narrows the solution space. By the time AI writes code, most decisions are already made.</p>
-
-            <div class="hierarchy">
-                <div class="hierarchy-level">
-                    <div class="num">1</div>
-                    <div class="file">product.md</div>
-                    <div class="desc">"Build a task manager for developers"</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">2</div>
-                    <div class="file">tech-stack.md</div>
-                    <div class="desc">"Use React, TypeScript, Tailwind"</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">3</div>
-                    <div class="file">architecture.md</div>
-                    <div class="desc">"Express API &rarr; Service layer &rarr; Prisma ORM &rarr; PostgreSQL"</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">4</div>
-                    <div class="file">spec.md</div>
-                    <div class="desc">"Add drag-and-drop reordering"</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">5</div>
-                    <div class="file">plan.md</div>
-                    <div class="desc">"Phase 1: sortable list, Phase 2: persistence"</div>
-                </div>
-            </div>
-
-            <div class="callout">
-                <div class="callout-title">
-                    <span>💡</span>
-                    Key Insight
-                </div>
-                <p>The AI becomes an executor of pre-approved work, not an autonomous decision-maker. Explicit specs, phased plans, verification steps, and status markers keep implementation focused and accountable.</p>
-            </div>
-        </section>
-
-        <!-- Human Review -->
-        <section id="review" aria-labelledby="heading-review">
-            <h2 id="heading-review">Review Before Code</h2>
-            <p><strong>This is Draft's most important feature.</strong> In traditional AI coding, you discover the AI's design decisions during code review — after it's already built the wrong thing. With Draft, the AI writes a spec first. You review the approach in a document, not a diff. Disagreements are resolved by editing a paragraph, not rewriting a module.</p>
-
-            <div class="comparison">
-                <div class="comparison-header">
-                    <div>Traditional AI Coding</div>
-                    <div>Draft Approach</div>
-                </div>
-                <div class="comparison-row">
-                    <div>AI writes code immediately</div>
-                    <div>AI writes spec first — you approve the approach</div>
-                </div>
-                <div class="comparison-row">
-                    <div>Review happens on code PR (too late)</div>
-                    <div>Review happens on spec PR (cheap to change)</div>
-                </div>
-                <div class="comparison-row">
-                    <div>Disagreements require rewriting code</div>
-                    <div>Disagreements resolved by editing a document</div>
-                </div>
-                <div class="comparison-row">
-                    <div>AI decisions are implicit and buried in code</div>
-                    <div>AI decisions are documented and git-tracked</div>
-                </div>
-            </div>
-
-            <p><strong>Practical impact:</strong> Faster reviews (approve approach, not implementation details). Fewer rewrites (catch design issues before code exists). Knowledge transfer (specs document <em>why</em>, not just <em>what</em>). Onboarding (new team members read specs to understand features).</p>
-        </section>
-
-        <!-- Collaborative Intake -->
-        <section id="collaborative-intake" aria-labelledby="heading-collaborative-intake">
-            <h2 id="heading-collaborative-intake">Collaborative Intake: AI as Expert Partner</h2>
-            <p><strong>This changes how specifications are created.</strong> Instead of dumping requirements at the AI and hoping for the best, <code>/draft:new-track</code> conducts a structured conversation where AI acts as an expert collaborator — asking the right questions, contributing knowledge, and building the spec progressively.</p>
-
-            <h3>How it works</h3>
-            <div class="hierarchy">
-                <div class="hierarchy-level">
-                    <div class="num">1</div>
-                    <div class="file">One question at a time</div>
-                    <div class="desc">AI asks a single focused question, waits for your answer, then contributes expertise before moving to the next. No question dumps. No form-filling.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">2</div>
-                    <div class="file">AI contributes at each step</div>
-                    <div class="desc">Pattern recognition ("This sounds like CQRS..."), risk surfacing ("Watch for N+1 queries here"), trade-off analysis ("Alternative: use Redis, trade-off is..."), fact-checking against your <code>architecture.md</code>.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">3</div>
-                    <div class="file">Grounded in vetted sources</div>
-                    <div class="desc">Citations from Domain-Driven Design, Clean Architecture, DDIA, OWASP, 12-Factor App, GoF patterns. Not "AI thinks" — traceable expertise.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">4</div>
-                    <div class="file">Checkpoints between phases</div>
-                    <div class="desc">"Here's what we've established about the problem: [summary]. Does this capture it, or should we refine?" You control the pace.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">5</div>
-                    <div class="file">Progressive draft updates</div>
-                    <div class="desc"><code>spec-draft.md</code> updates as conversation evolves. You see the spec take shape in real-time. On confirmation, it becomes the final <code>spec.md</code>.</div>
-                </div>
-            </div>
-
-            <h3>The intake phases</h3>
-            <div class="comparison">
-                <div class="comparison-header">
-                    <div>Phase</div>
-                    <div>What AI asks & contributes</div>
-                </div>
-                <div class="comparison-row">
-                    <div><strong>Problem Space</strong></div>
-                    <div>What problem? Why now? Who's affected? Scope boundaries? — AI: pattern recognition, domain concepts, "why" probes</div>
-                </div>
-                <div class="comparison-row">
-                    <div><strong>Solution Space</strong></div>
-                    <div>Simplest version? Why this approach? What's out of scope? — AI: 2-3 alternatives with trade-offs, architecture fit check</div>
-                </div>
-                <div class="comparison-row">
-                    <div><strong>Risks & Constraints</strong></div>
-                    <div>What could go wrong? Dependencies? Assumptions? Security? — AI: surfaces risks from OWASP, distributed systems fallacies</div>
-                </div>
-                <div class="comparison-row">
-                    <div><strong>Success Criteria</strong></div>
-                    <div>How do we know it's done? Verification strategy? — AI: suggests measurable criteria, testing strategies</div>
-                </div>
-            </div>
-
-            <div class="callout">
-                <div class="callout-title">
-                    <span>💡</span>
-                    Key Insight
-                </div>
-                <p><strong>This levels the playing field.</strong> Junior engineers get senior-level guidance — the AI forces them to think through risks, alternatives, and constraints they might skip. Senior engineers can't shortcut "because obvious" — the structure ensures consistent rigor. Both produce well-documented specs with traceable reasoning. The discipline scales across your entire team.</p>
-            </div>
-        </section>
-
-        <!-- Team Workflow -->
-        <section id="team-workflow" aria-labelledby="heading-team-workflow">
-            <h2 id="heading-team-workflow">Team Workflow: Alignment Before Code</h2>
+        <!-- TEAM TAB -->
+        <div id="tab-team" class="tab-content" role="tabpanel">
+            <h2>Team Collaboration</h2>
             <p>Draft's most powerful application is team-wide: <strong>every markdown file goes through commit → review → update → merge before a single line of code is written.</strong> By the time implementation starts, the entire team has already agreed on what to build, how to build it, and in what order.</p>
 
-            <h3>The PR cycle on documents, not code</h3>
-            <div class="hierarchy">
-                <div class="hierarchy-level">
-                    <div class="num">1</div>
-                    <div class="file">product.md + tech-stack.md + architecture.md + workflow.md</div>
-                    <div class="desc">Tech lead runs <code>/draft:init</code>. For brownfield projects, Draft performs deep architecture discovery — generating <code>architecture.md</code> with mermaid diagrams of system structure, data flows, and patterns. Team reviews project vision, technical choices, system architecture, and workflow preferences via PR. Product managers review <code>product.md</code> without reading code. Engineers review <code>architecture.md</code> and <code>tech-stack.md</code> without context-switching into implementation.</div>
+            <details open>
+                <summary>The PR Cycle on Documents, Not Code</summary>
+                <div class="hierarchy">
+                    <div class="hierarchy-level">
+                        <div class="num">1</div>
+                        <div class="file">product.md + tech-stack.md + architecture.md + workflow.md</div>
+                        <div class="desc">Tech lead runs <code>/draft:init</code>. For brownfield projects, Draft performs deep architecture discovery — generating <code>architecture.md</code> with mermaid diagrams of system structure, data flows, and patterns. Team reviews project vision, technical choices, system architecture, and workflow preferences via PR.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">2</div>
+                        <div class="file">spec.md + plan.md</div>
+                        <div class="desc">Lead runs <code>/draft:new-track</code> — a <strong>collaborative intake</strong> where AI asks structured questions one at a time, contributes expertise (patterns, risks, trade-offs), and builds the spec progressively. Team reviews requirements, acceptance criteria, and phased task breakdown via PR.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">3</div>
+                        <div class="file">architecture.md</div>
+                        <div class="desc">Lead runs <code>/draft:decompose</code>. Team reviews module boundaries, API surfaces, dependency graph, and implementation order via PR. Senior engineers validate the architecture without touching the codebase.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">4</div>
+                        <div class="file">jira-export.md → Jira stories</div>
+                        <div class="desc">Lead runs <code>/draft:jira-preview</code> and <code>/draft:jira-create</code>. Epics, stories, and sub-tasks are created from the approved plan. Individual team members pick up Jira stories and implement.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">5</div>
+                        <div class="file">Implementation + Verification</div>
+                        <div class="desc">Only after all documents are merged does coding start. Every developer has full context: what to build (<code>spec.md</code>), in what order (<code>plan.md</code>), with what boundaries (<code>architecture.md</code>). After implementation, quality tools verify completeness.</div>
+                    </div>
                 </div>
-                <div class="hierarchy-level">
-                    <div class="num">2</div>
-                    <div class="file">spec.md + plan.md</div>
-                    <div class="desc">Lead runs <code>/draft:new-track</code> — a <strong>collaborative intake</strong> where AI asks structured questions one at a time, contributes expertise (patterns, risks, trade-offs), and builds the spec progressively. Team reviews the resulting requirements, acceptance criteria, and phased task breakdown via PR. AI guidance is grounded in vetted sources (DDD, Clean Architecture, OWASP) — traceable, not arbitrary.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">3</div>
-                    <div class="file">architecture.md</div>
-                    <div class="desc">Lead runs <code>/draft:decompose</code>. Team reviews module boundaries, API surfaces, dependency graph, and implementation order via PR. Senior engineers validate the architecture without touching the codebase.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">4</div>
-                    <div class="file">jira-export.md → Jira stories</div>
-                    <div class="desc">Lead runs <code>/draft:jira-preview</code> and <code>/draft:jira-create</code>. Epics, stories, and sub-tasks are created from the approved plan. Individual team members pick up Jira stories and implement — with or without Draft's <code>/draft:implement</code>.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">5</div>
-                    <div class="file">Implementation + Verification</div>
-                    <div class="desc">Only after all documents are merged does coding start. Every developer has full context: what to build (<code>spec.md</code>), in what order (<code>plan.md</code>), with what boundaries (<code>architecture.md</code>). After implementation, <code>/draft:coverage</code> verifies tests (95%+ target), <code>/draft:validate</code> checks compliance (architecture conformance, security, performance), <code>/draft:bughunt</code> finds defects across 12 dimensions, and <code>/draft:review</code> orchestrates comprehensive review with optional <code>--full</code> flag to run all quality checks together. All tools generate reports in the track directory for PR review.</div>
-                </div>
-            </div>
+            </details>
 
-            <h3>Why this changes how teams work</h3>
-            <div class="comparison">
-                <div class="comparison-header">
-                    <div>Traditional AI Development</div>
-                    <div>Draft Team Workflow</div>
+            <details>
+                <summary>Why This Changes How Teams Work</summary>
+                <div class="comparison">
+                    <div class="comparison-header">
+                        <div>Traditional AI Development</div>
+                        <div>Draft Team Workflow</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Developer gets a Jira ticket and asks AI to build it</div>
+                        <div>Developer gets a Jira ticket with linked spec, plan, and architecture already reviewed</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Each developer makes independent design decisions</div>
+                        <div>Design decisions are made once in documents, reviewed by the team</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Integration problems surface during code review</div>
+                        <div>Integration problems surface during architecture review — before any code exists</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>New team members read code to understand features</div>
+                        <div>New team members read <code>spec.md</code> and <code>plan.md</code> to understand features</div>
+                    </div>
                 </div>
-                <div class="comparison-row">
-                    <div>Developer gets a Jira ticket and asks AI to build it</div>
-                    <div>Developer gets a Jira ticket with linked spec, plan, and architecture already reviewed</div>
-                </div>
-                <div class="comparison-row">
-                    <div>Each developer makes independent design decisions</div>
-                    <div>Design decisions are made once in documents, reviewed by the team</div>
-                </div>
-                <div class="comparison-row">
-                    <div>Integration problems surface during code review</div>
-                    <div>Integration problems surface during architecture review — before any code exists</div>
-                </div>
-                <div class="comparison-row">
-                    <div>New team members read code to understand features</div>
-                    <div>New team members read <code>spec.md</code> and <code>plan.md</code> to understand features</div>
-                </div>
-            </div>
 
-            <div class="callout">
-                <div class="callout-title">
-                    <span>💡</span>
-                    Key Insight
+                <div class="callout">
+                    <div class="callout-title">Key Insight</div>
+                    <p>The CLI is single-user, but the artifacts it produces are the collaboration layer. Draft handles planning and decomposition. Git handles review. Jira handles distribution. <strong>Changing a sentence in spec.md takes seconds. Changing an architectural decision after 2,000 lines of code takes days.</strong></p>
                 </div>
-                <p>The CLI is single-user, but the artifacts it produces are the collaboration layer. Draft handles planning and decomposition. Git handles review. Jira handles distribution. <strong>Changing a sentence in spec.md takes seconds. Changing an architectural decision after 2,000 lines of code takes days.</strong></p>
-            </div>
-        </section>
+            </details>
 
-        <!-- Project Structure -->
-        <section id="structure" aria-labelledby="heading-structure">
-            <h2 id="heading-structure">Project Structure</h2>
-            <p>Draft uses a set of markdown files to capture project context, specifications, and implementation plans. Each file has a specific purpose.</p>
+            <details>
+                <summary>Jira Integration</summary>
+                <p>Sync tracks to Jira with a two-step workflow. Preview before pushing to catch issues early.</p>
 
-            <div class="doc-grid">
-                <div class="doc-card">
-                    <div class="icon">🎯</div>
-                    <div class="name">product.md</div>
-                    <p class="purpose">Product vision, target users, and success criteria</p>
+                <div class="hierarchy">
+                    <div class="hierarchy-level">
+                        <div class="num">1</div>
+                        <div class="file">Preview</div>
+                        <div class="desc">Generate <code>jira-export.md</code> with epic and stories using <code>/draft:jira-preview</code></div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">2</div>
+                        <div class="file">Review</div>
+                        <div class="desc">Adjust story points, descriptions, acceptance criteria in the export file</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">3</div>
+                        <div class="file">Create</div>
+                        <div class="desc">Push to Jira via MCP server using <code>/draft:jira-create</code></div>
+                    </div>
                 </div>
-                <div class="doc-card">
-                    <div class="icon">🎨</div>
-                    <div class="name">product-guidelines.md</div>
-                    <p class="purpose">Style, branding, and UX standards</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">⚙️</div>
-                    <div class="name">tech-stack.md</div>
-                    <p class="purpose">Languages, frameworks, and patterns</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">🗺️</div>
-                    <div class="name">architecture.md</div>
-                    <p class="purpose">System map, data flows, patterns, mermaid diagrams (brownfield)</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">🔄</div>
-                    <div class="name">workflow.md</div>
-                    <p class="purpose">TDD preferences and commit strategy</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">🎫</div>
-                    <div class="name">jira.md</div>
-                    <p class="purpose">Jira project config for sync (optional)</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">📋</div>
-                    <div class="name">tracks.md</div>
-                    <p class="purpose">Master list of all work tracks</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">📝</div>
-                    <div class="name">spec.md</div>
-                    <p class="purpose">Requirements for a specific track</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">🏗️</div>
-                    <div class="name">track architecture.md</div>
-                    <p class="purpose">Module decomposition and dependencies (optional)</p>
-                </div>
-            </div>
 
-            <div class="code-block">
-                <div class="code-header">
-                    <div class="dot red"></div>
-                    <div class="dot yellow"></div>
-                    <div class="dot green"></div>
-                    <span class="filename">project structure</span>
-                </div>
+                <p><strong>Auto Story Points:</strong> 1-2 tasks = 1pt, 3-4 tasks = 2pts, 5-6 tasks = 3pts, 7+ tasks = 5pts</p>
+            </details>
+        </div>
+
+        <!-- REFERENCE TAB -->
+        <div id="tab-reference" class="tab-content" role="tabpanel">
+            <h2>Reference</h2>
+
+            <details open>
+                <summary>Project Structure</summary>
+                <div class="code-block">
+                    <div class="code-header">
+                        <div class="dot red"></div>
+                        <div class="dot yellow"></div>
+                        <div class="dot green"></div>
+                        <span class="filename">project structure</span>
+                    </div>
 <pre><code><span class="code-file">draft/</span>
 ├── <span class="code-file">product.md</span>          <span class="code-comment"># Product vision and goals</span>
 ├── <span class="code-file">tech-stack.md</span>       <span class="code-comment"># Technical choices</span>
 ├── <span class="code-file">architecture.md</span>     <span class="code-comment"># System map + mermaid diagrams (brownfield)</span>
 ├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD, commit, validation, architecture mode</span>
 ├── <span class="code-file">validation-report.md</span> <span class="code-comment"># Project-level quality checks (generated)</span>
-├── <span class="code-file">bughunt-report.md</span>    <span class="code-comment"># Project-level bug hunt findings (generated)</span>
 ├── <span class="code-file">jira.md</span>             <span class="code-comment"># Jira project config (optional)</span>
 ├── <span class="code-file">tracks.md</span>           <span class="code-comment"># Master track list</span>
 └── <span class="code-file">tracks/</span>
@@ -2235,744 +2052,106 @@
         ├── <span class="code-file">architecture.md</span> <span class="code-comment"># Track modules (optional)</span>
         ├── <span class="code-file">metadata.json</span>
         ├── <span class="code-file">validation-report.md</span> <span class="code-comment"># Quality checks (generated)</span>
-        ├── <span class="code-file">bughunt-report.md</span> <span class="code-comment"># Bug hunt findings (generated)</span>
         └── <span class="code-file">jira-export.md</span> <span class="code-comment"># Jira stories (optional)</span></code></pre>
-            </div>
-        </section>
-
-        <!-- Status Markers -->
-        <section id="status" aria-labelledby="heading-status">
-            <h2 id="heading-status">Status Markers</h2>
-            <p>Simple markers track progress throughout specs and plans. Progress is explicit, not assumed.</p>
-
-            <div class="status-list">
-                <div class="status-item">
-                    <span class="status-marker pending">[ ]</span>
-                    <span>Pending</span>
                 </div>
-                <div class="status-item">
-                    <span class="status-marker progress">[~]</span>
-                    <span>In Progress</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-marker complete">[x]</span>
-                    <span>Completed</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-marker blocked">[!]</span>
-                    <span>Blocked</span>
-                </div>
-            </div>
+            </details>
 
-            <div class="callout">
-                <div class="callout-title">
-                    <span>⚠️</span>
-                    Iron Law
-                </div>
-                <p><strong>Evidence before claims, always.</strong> Never mark [x] without running verification, confirming output shows success, and showing evidence in the response.</p>
-            </div>
-        </section>
+            <details open>
+                <summary>Status Markers</summary>
+                <p>Simple markers track progress throughout specs and plans. Progress is explicit, not assumed.</p>
 
-        <!-- Jira Integration -->
-        <section id="jira" aria-labelledby="heading-jira">
-            <h2 id="heading-jira">Jira Integration</h2>
-            <p>Sync tracks to Jira with a two-step workflow. Preview before pushing to catch issues early.</p>
-
-            <div class="jira-flow">
-                <div class="jira-step">
-                    <div class="jira-num">1</div>
-                    <div class="jira-content">
-                        <h4>Preview</h4>
-                        <p>Generate <code>jira-export.md</code> with epic and stories</p>
+                <div class="status-list">
+                    <div class="status-item">
+                        <span class="status-marker pending">[ ]</span>
+                        <span>Pending</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-marker progress">[~]</span>
+                        <span>In Progress</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-marker complete">[x]</span>
+                        <span>Completed</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-marker blocked">[!]</span>
+                        <span>Blocked</span>
                     </div>
                 </div>
-                <div class="jira-step">
-                    <div class="jira-num">2</div>
-                    <div class="jira-content">
-                        <h4>Review</h4>
-                        <p>Adjust story points, descriptions, acceptance criteria</p>
+
+                <div class="callout">
+                    <div class="callout-title">Iron Law</div>
+                    <p><strong>Evidence before claims, always.</strong> Never mark [x] without running verification, confirming output shows success, and showing evidence in the response.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Core Principles</summary>
+                <div class="hierarchy">
+                    <div class="hierarchy-level">
+                        <div class="num">1</div>
+                        <div class="file">Plan before you build</div>
+                        <div class="desc">Create specs and plans that guide development before writing code</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">2</div>
+                        <div class="file">Maintain context</div>
+                        <div class="desc">Ensure agents follow style guides and product goals consistently</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">3</div>
+                        <div class="file">Iterate safely</div>
+                        <div class="desc">Review plans before code is written, catch issues early</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">4</div>
+                        <div class="file">Work as a team</div>
+                        <div class="desc">Share project context across team members through git-tracked specs</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">5</div>
+                        <div class="file">Verify before claiming</div>
+                        <div class="desc">Evidence before assertions, always — run tests, show proof</div>
                     </div>
                 </div>
-                <div class="jira-step">
-                    <div class="jira-num">3</div>
-                    <div class="jira-content">
-                        <h4>Create</h4>
-                        <p>Push to Jira via MCP server</p>
+            </details>
+
+            <details>
+                <summary>Constraint Mechanisms</summary>
+                <p>How Draft keeps AI focused and accountable:</p>
+
+                <div class="comparison">
+                    <div class="comparison-header">
+                        <div>Mechanism</div>
+                        <div>Effect</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Explicit spec</div>
+                        <div>AI only implements what's documented → Prevents scope creep</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Phased plans</div>
+                        <div>AI works on one phase at a time → Prevents over-engineering</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Verification steps</div>
+                        <div>Each phase requires proof of completion → Prevents false claims</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Status markers</div>
+                        <div>Progress is tracked, not assumed → Prevents lost context</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Two-stage review</div>
+                        <div>Spec compliance before code quality → Prevents quality gaps</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Validation checks</div>
+                        <div>Context-aware quality validation → Prevents pattern violations, vulnerabilities, tech debt</div>
                     </div>
                 </div>
-            </div>
-
-            <h3>Auto Story Points</h3>
-            <p>Story points are calculated from task count:</p>
-            <div class="points-grid">
-                <div class="points-item"><span class="tasks">1-2 tasks</span><span class="points">1 pt</span></div>
-                <div class="points-item"><span class="tasks">3-4 tasks</span><span class="points">2 pts</span></div>
-                <div class="points-item"><span class="tasks">5-6 tasks</span><span class="points">3 pts</span></div>
-                <div class="points-item"><span class="tasks">7+ tasks</span><span class="points">5 pts</span></div>
-            </div>
-        </section>
-
-        <!-- TDD Workflow -->
-        <section id="tdd" aria-labelledby="heading-tdd">
-            <h2 id="heading-tdd">TDD Workflow</h2>
-            <p>AI-generated code without tests is a liability — it works until it doesn't, and you have no safety net. When TDD is enabled in <code>workflow.md</code>, Draft forces the AI to <strong>prove its code works</strong> at every step.</p>
-
-            <div class="tdd-flow">
-                <div class="tdd-step red">🔴 Red</div>
-                <div class="tdd-arrow">→</div>
-                <div class="tdd-step green">🟢 Green</div>
-                <div class="tdd-arrow">→</div>
-                <div class="tdd-step refactor">🔵 Refactor</div>
-                <div class="tdd-arrow">→</div>
-                <div class="tdd-step commit">📦 Commit</div>
-            </div>
-
-            <div class="hierarchy">
-                <div class="hierarchy-level">
-                    <div class="num" style="background: rgba(251, 113, 133, 0.2); color: var(--accent-rose);">R</div>
-                    <div class="file" style="color: var(--accent-rose);">Red — Write failing test</div>
-                    <div class="desc">Define what "correct" means before any code exists. The test must fail with an assertion error (not a syntax error), proving it actually tests the requirement. This prevents the AI from writing tests that pass vacuously.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num" style="background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald);">G</div>
-                    <div class="file" style="color: var(--accent-emerald);">Green — Minimum code to pass</div>
-                    <div class="desc">Write the simplest implementation that makes the test pass. No extras, no "improvements," no abstractions for hypothetical futures. This prevents the AI from over-engineering — every line of code is justified by a failing test.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num" style="background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan);">R</div>
-                    <div class="file" style="color: var(--accent-cyan);">Refactor — Clean with tests green</div>
-                    <div class="desc">Improve code structure while tests stay green. Remove duplication, clarify naming, extract functions. The test suite acts as a safety net — if refactoring breaks anything, you know immediately.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num" style="background: rgba(251, 191, 36, 0.2); color: var(--accent-amber);">C</div>
-                    <div class="file" style="color: var(--accent-amber);">Commit — Following conventions</div>
-                    <div class="desc">One task = one commit. The commit message follows project conventions (<code>feat(track-id): description</code>). Small, focused commits make reverts surgical and git blame useful.</div>
-                </div>
-            </div>
-
-            <p><strong>Why this matters for engineers:</strong> Every completed task has a test proving it works. You can refactor with confidence, onboard new team members who read tests as documentation, and revert individual tasks without collateral damage. The AI can't claim "it should work" — it has to show evidence.</p>
-        </section>
-
-        <!-- Architecture Discovery -->
-        <section id="architecture-discovery" aria-labelledby="heading-architecture-discovery">
-            <h2 id="heading-architecture-discovery">Architecture Discovery</h2>
-            <p>For brownfield projects, <code>/draft:init</code> doesn't just detect your tech stack — it performs a <strong>deep three-phase codebase analysis</strong> that generates <code>architecture.md</code>. This document becomes the persistent context every future track references, so the AI never has to re-analyze your codebase from scratch.</p>
-
-            <h3>Why this exists</h3>
-            <p>Without architecture discovery, every new track starts cold. The AI explores your codebase, builds a mental model, and starts working — then loses that understanding when the session ends. The next track starts the same exploration over again. Architecture discovery pays the analysis cost once during init, then every track, every question, and every implementation gets immediate, rich context about how your system actually works.</p>
-
-            <h3>Phase 1: Orientation (The System Map)</h3>
-            <p>Scans the codebase to produce a high-level system map with mermaid diagrams.</p>
-
-            <div class="arch-features">
-                <div class="arch-feature">
-                    <div class="label">graph TD</div>
-                    <h4>System Architecture</h4>
-                    <p>Layered architecture diagram showing actual components — presentation, business logic, and data layers with real names from the codebase.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">graph TD</div>
-                    <h4>Directory Hierarchy</h4>
-                    <p>Maps every top-level directory to its single responsibility and key files. Generates a tree diagram of the project structure.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">table</div>
-                    <h4>Entry Points</h4>
-                    <p>Identifies all entry points: API routes, main loops, event listeners, CLI commands, serverless handlers. Critical paths through the system.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">sequenceDiagram</div>
-                    <h4>Request/Response Flow</h4>
-                    <p>Traces one representative request through the full stack with actual file and class names — not generic placeholders.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">table</div>
-                    <h4>Tech Stack Inventory</h4>
-                    <p>Cross-references detected dependencies with config files. Records language versions, framework versions, and where each is configured.</p>
-                </div>
-            </div>
-
-            <h3>Phase 2: Logic (The "How" &amp; "Why")</h3>
-            <p>Examines specific files and functions to understand business logic, data flows, and patterns.</p>
-
-            <div class="arch-features">
-                <div class="arch-feature">
-                    <div class="label">flowchart LR</div>
-                    <h4>Data Lifecycle</h4>
-                    <p>Maps how 3-5 primary domain objects enter the system, where they're modified, and where they're persisted. Mermaid flowchart of the data pipeline.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">table</div>
-                    <h4>Design Patterns</h4>
-                    <p>Identifies dominant patterns: Repository, Factory, Middleware, Observer, etc. Documents where each is used and why.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">table</div>
-                    <h4>Complexity Hotspots</h4>
-                    <p>Flags god objects, circular dependencies, and high-complexity areas. Unclear business logic is marked "Unknown/Legacy Context Required" — never guessed.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">table</div>
-                    <h4>Conventions</h4>
-                    <p>Extracts existing conventions: error handling, logging, naming, validation patterns. New code must respect these guardrails.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">graph LR</div>
-                    <h4>External Dependencies</h4>
-                    <p>Maps external service integrations: auth providers, email services, storage, queues, third-party APIs. Mermaid diagram of all connections.</p>
-                </div>
-            </div>
-
-            <h3>Phase 3: Module Discovery (Existing Modules)</h3>
-            <p>Reverse-engineers the existing module structure from import graphs and directory boundaries. This is discovering <strong>what already exists</strong> — not planning new modules (that's <code>/draft:decompose</code>).</p>
-
-            <div class="arch-features">
-                <div class="arch-feature">
-                    <div class="label">graph LR</div>
-                    <h4>Module Dependencies</h4>
-                    <p>Analyzes imports to build a dependency graph of existing modules. Detects circular dependencies. Mermaid diagram with actual module names.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">table</div>
-                    <h4>Module Inventory</h4>
-                    <p>Each module documented with: responsibility, source files, exported API surface, dependencies, complexity rating, and a story summarizing what it does.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">topological sort</div>
-                    <h4>Dependency Order</h4>
-                    <p>Topological ordering from leaf modules (foundational, no dependencies) to the most dependent. Shows which parts of the system are the foundation.</p>
-                </div>
-            </div>
-
-            <div class="callout">
-                <div class="callout-title">
-                    <span>⚙️</span>
-                    Init vs Decompose
-                </div>
-                <p><code>/draft:init</code> discovers and documents <strong>existing</strong> modules (marked <code>[x] Existing</code>). <code>/draft:decompose</code> plans <strong>new</strong> modules for features or refactors. Both write to the same section of <code>architecture.md</code> — init sets the baseline, decompose extends it. Existing modules are never removed by decompose.</p>
-            </div>
-
-            <h3>Refresh Mode</h3>
-            <p><code>/draft:init refresh</code> re-scans the codebase and diffs against the existing <code>architecture.md</code>. It detects new directories, removed components, changed integration points, new domain objects, and new or merged modules — then updates all mermaid diagrams and module documentation to reflect the current state. Changes are presented for review before writing.</p>
-
-            <div class="callout">
-                <div class="callout-title">
-                    <span>💡</span>
-                    Key Insight
-                </div>
-                <p><strong>Pay the analysis cost once, benefit on every track.</strong> Architecture discovery turns your codebase into a documented system that any AI assistant can understand instantly. Every <code>/draft:new-track</code> starts with full context: where things are, how they connect, what patterns to follow, and what to avoid.</p>
-            </div>
-        </section>
-
-        <!-- Architecture Mode -->
-        <section id="architecture" aria-labelledby="heading-architecture">
-            <h2 id="heading-architecture">Architecture Mode</h2>
-            <p>Standard Draft gives you specs and plans. Architecture Mode goes deeper — it forces the AI to <strong>design before it codes</strong>. Every module gets a dependency analysis. Every algorithm gets documented in plain language. Every function signature gets approved before implementation begins. This is how you build complex features without the AI creating a tangled mess.</p>
-
-            <h3>Why Architecture Mode exists</h3>
-            <p>When AI builds a multi-module feature, it makes ad-hoc decisions about module boundaries, function signatures, and data flow. These decisions compound — a bad interface choice in module A cascades through modules B, C, and D. By the time you notice, the entire implementation needs restructuring. Architecture Mode front-loads these decisions into reviewable checkpoints where changes cost minutes instead of hours.</p>
-
-            <div class="arch-features">
-                <div class="arch-feature">
-                    <div class="label">/draft:decompose</div>
-                    <h4>Module Decomposition</h4>
-                    <p><strong>Problem:</strong> AI creates tangled code with unclear boundaries. <strong>Solution:</strong> Break the feature into 1-3 file modules with defined APIs, dependencies, and implementation order. You review the architecture before any code is written.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">Step 2.5</div>
-                    <h4>Algorithm Stories</h4>
-                    <p><strong>Problem:</strong> AI jumps to code without understanding the algorithm. <strong>Solution:</strong> Write a natural-language Input → Process → Output description at the top of each file. You approve the algorithm before the AI writes a single line of implementation.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">Step 3.0a</div>
-                    <h4>Execution State</h4>
-                    <p><strong>Problem:</strong> AI invents random variable names and data structures on the fly. <strong>Solution:</strong> Define all intermediate state variables (input, processing, output, error) before coding. You control the data model.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">Step 3.0b</div>
-                    <h4>Function Skeletons</h4>
-                    <p><strong>Problem:</strong> AI creates functions with unclear signatures and unexpected interfaces. <strong>Solution:</strong> Generate stubs with complete types, parameters, and docstrings — no bodies. You approve function names and contracts before TDD begins.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">~200 lines</div>
-                    <h4>Chunk Reviews</h4>
-                    <p><strong>Problem:</strong> AI dumps 500+ lines in one shot, making review impossible. <strong>Solution:</strong> Implementation is capped at ~200-line chunks with mandatory developer review after each. Every chunk is a reviewable, committable unit.</p>
-                </div>
-                <div class="arch-feature">
-                    <div class="label">/draft:coverage</div>
-                    <h4>Code Coverage</h4>
-                    <p><strong>Problem:</strong> AI writes tests that look good but miss critical paths. <strong>Solution:</strong> Auto-detect your coverage tool, run it, classify every uncovered line (testable / defensive / infrastructure), and suggest specific tests for gaps.</p>
-                </div>
-            </div>
-
-            <h3>How each checkpoint helps engineers</h3>
-
-            <div class="hierarchy">
-                <div class="hierarchy-level">
-                    <div class="num" style="background: rgba(251, 191, 36, 0.2); color: var(--accent-amber);">1</div>
-                    <div class="file" style="color: var(--accent-amber);">Story checkpoint</div>
-                    <div class="desc">The AI writes a plain-language algorithm description: what goes in, what processing happens, what comes out. You review the logic before any code exists. If the approach is wrong, you fix it in English — not in a 200-line diff.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num" style="background: rgba(251, 113, 133, 0.2); color: var(--accent-rose);">2</div>
-                    <div class="file" style="color: var(--accent-rose);">Execution State checkpoint</div>
-                    <div class="desc">The AI defines every intermediate variable: input state, processing state, output state, error state. You see the exact data model before implementation. Bad variable names, missing error states, or wrong data structures get caught here — not during debugging.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num" style="background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan);">3</div>
-                    <div class="file" style="color: var(--accent-cyan);">Skeleton checkpoint</div>
-                    <div class="desc">The AI generates function stubs with full type signatures, parameters, and docstrings — but no implementation bodies. You approve the public API, function names, and contracts. When TDD starts, the structure is locked; only the bodies get filled in.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num" style="background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald);">4</div>
-                    <div class="file" style="color: var(--accent-emerald);">TDD + Chunk review</div>
-                    <div class="desc">Implementation happens inside the pre-approved skeletons using TDD. If the diff exceeds ~200 lines, it stops for review. You never see a 500-line code dump — every chunk is small enough to read, understand, and approve.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num" style="background: rgba(139, 92, 246, 0.2); color: #a78bfa;">5</div>
-                    <div class="file" style="color: #a78bfa;">Coverage checkpoint</div>
-                    <div class="desc">After implementation, <code>/draft:coverage</code> measures test quality. Every uncovered line is classified: testable (needs a test), defensive (acceptable), or infrastructure (acceptable). You decide what matters, not the AI.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num" style="background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan);">6</div>
-                    <div class="file" style="color: var(--accent-cyan);">Validation checkpoint</div>
-                    <div class="desc">After coverage verification, <code>/draft:validate</code> runs systematic quality checks using Draft context. Detects architecture violations (patterns from architecture.md), security issues (hardcoded secrets, SQL injection, XSS), performance anti-patterns (N+1 queries, blocking I/O), and regression risks (blast radius analysis). Generates <code>validation-report.md</code> with actionable fixes. Non-blocking by default — surfaces issues without halting progress.</div>
-                </div>
-            </div>
-
-            <h3>Implementation Flow</h3>
-
-            <div class="arch-flow">
-                <div class="arch-flow-row">
-                    <span class="arch-flow-step story">Story</span>
-                    <span class="arch-flow-arrow">→</span>
-                    <span class="arch-flow-checkpoint">checkpoint</span>
-                    <span class="arch-flow-arrow">→</span>
-                    <span class="arch-flow-step exec-state">Execution State</span>
-                    <span class="arch-flow-arrow">→</span>
-                    <span class="arch-flow-checkpoint">checkpoint</span>
-                </div>
-                <div class="arch-flow-row" style="padding-left: 1rem;">
-                    <span class="arch-flow-arrow">→</span>
-                    <span class="arch-flow-step skeleton">Skeletons</span>
-                    <span class="arch-flow-arrow">→</span>
-                    <span class="arch-flow-checkpoint">checkpoint</span>
-                    <span class="arch-flow-arrow">→</span>
-                    <span class="arch-flow-step tdd-ref">TDD (Red → Green → Refactor)</span>
-                </div>
-                <div class="arch-flow-row" style="padding-left: 1rem;">
-                    <span class="arch-flow-arrow">→</span>
-                    <span class="arch-flow-step coverage">/draft:coverage → 95%+ target</span>
-                    <span class="arch-flow-arrow">→</span>
-                    <span class="arch-flow-step validate">/draft:validate → compliance</span>
-                    <span class="arch-flow-arrow">→</span>
-                    <span class="arch-flow-step bughunt">/draft:bughunt → defect discovery</span>
-                </div>
-            </div>
-
-            <h3>The decomposition process</h3>
-            <p>Before Architecture Mode's checkpoints activate, <code>/draft:decompose</code> maps your feature into modules. Here's what happens concretely:</p>
-
-            <div class="hierarchy">
-                <div class="hierarchy-level">
-                    <div class="num">1</div>
-                    <div class="file">Scan</div>
-                    <div class="desc">Analyze your codebase: directory structure, entry points, existing module boundaries, import patterns. For new projects, work from the spec.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">2</div>
-                    <div class="file">Propose modules</div>
-                    <div class="desc">Each module gets: name, single responsibility, 1-3 files, public API surface with typed signatures, dependencies on other modules, and complexity rating. You review and modify.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">3</div>
-                    <div class="file">Map dependencies</div>
-                    <div class="desc">Generate a dependency graph with ASCII diagram. Detect circular dependencies and propose fixes (extract shared interface, invert dependency, or merge modules). You review the graph.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">4</div>
-                    <div class="file">Order implementation</div>
-                    <div class="desc">Topological sort determines build order: implement leaf modules first (no dependencies), then dependents. Identifies which modules can be built in parallel.</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">5</div>
-                    <div class="file">Generate architecture.md</div>
-                    <div class="desc">All of the above is written to a reviewable markdown file with module definitions, dependency diagram, implementation order, and story placeholders for each module.</div>
-                </div>
-            </div>
-
-            <div class="callout">
-                <div class="callout-title">
-                    <span>⚙️</span>
-                    Opt-In
-                </div>
-                <p>Architecture Mode is optional. Simple features, bug fixes, and config changes use the standard Draft workflow. Enable it when module boundaries, algorithm design, and coverage measurement add value. <strong>Good fit:</strong> multi-module features, new projects, complex algorithms, teams wanting maximum review granularity. <strong>Overkill:</strong> simple features touching 1-2 files, bug fixes with clear scope, configuration changes.</p>
-            </div>
-        </section>
-
-        <!-- Revert Workflow -->
-        <section id="revert" aria-labelledby="heading-revert">
-            <h2 id="heading-revert">Revert Workflow</h2>
-            <p>AI makes mistakes. When it does, you need to undo cleanly — not just <code>git reset --hard</code> and lose everything. Draft's revert understands the logical structure of your work. It knows which commits belong to which task, which tasks belong to which phase, and it updates both git history and Draft's tracking state together. You pick the granularity, review what will change, and confirm before anything happens.</p>
-
-            <div class="flow-diagram">
-                <div class="flow-step">
-                    <div class="flow-icon" style="background: linear-gradient(135deg, rgba(251, 113, 133, 0.2), rgba(251, 113, 133, 0.05)); border: 1px solid rgba(251, 113, 133, 0.3); color: var(--accent-rose);">1</div>
-                    <div class="flow-label">Task</div>
-                    <div class="flow-sublabel">Single task's commits</div>
-                </div>
-                <div class="flow-step">
-                    <div class="flow-icon" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.05)); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--accent-amber);">2</div>
-                    <div class="flow-label">Phase</div>
-                    <div class="flow-sublabel">All commits in a phase</div>
-                </div>
-                <div class="flow-step">
-                    <div class="flow-icon" style="background: linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(34, 211, 238, 0.05)); border: 1px solid rgba(34, 211, 238, 0.3); color: var(--accent-cyan);">3</div>
-                    <div class="flow-label">Track</div>
-                    <div class="flow-sublabel">Entire track's commits</div>
-                </div>
-            </div>
-
-            <div class="hierarchy">
-                <div class="hierarchy-level">
-                    <div class="num">1</div>
-                    <div class="file">Preview</div>
-                    <div class="desc">Show commits, affected files, and plan.md changes before executing</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">2</div>
-                    <div class="file">Confirm</div>
-                    <div class="desc">Explicit user confirmation required — no silent reverts</div>
-                </div>
-                <div class="hierarchy-level">
-                    <div class="num">3</div>
-                    <div class="file">Execute</div>
-                    <div class="desc">Git revert (newest first) + single revert commit + Draft state update</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Quality Disciplines -->
-        <section id="quality" aria-labelledby="heading-quality">
-            <h2 id="heading-quality">Quality Disciplines</h2>
-            <p>AI's default failure mode is to guess at fixes, skip verification, and claim success. Draft embeds three quality agents directly into the workflow — they activate automatically at the right moments and enforce disciplined engineering practices.</p>
-
-            <h3>Systematic Debugging</h3>
-            <p><strong>The problem:</strong> When AI hits an error, it tries random changes hoping something sticks. Each "fix" often introduces new bugs. <strong>The solution:</strong> When a task is blocked (<code>[!]</code>), the Debugger Agent enforces a four-phase process that mirrors how senior engineers actually debug — understand first, then fix.</p>
-
-            <div class="flow-diagram">
-                <div class="flow-step">
-                    <div class="flow-icon" style="background: linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(34, 211, 238, 0.05)); border: 1px solid rgba(34, 211, 238, 0.3); color: var(--accent-cyan);">1</div>
-                    <div class="flow-label">Investigate</div>
-                    <div class="flow-sublabel">Read errors, reproduce</div>
-                </div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">
-                    <div class="flow-icon" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.05)); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--accent-amber);">2</div>
-                    <div class="flow-label">Analyze</div>
-                    <div class="flow-sublabel">Find root cause</div>
-                </div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">
-                    <div class="flow-icon" style="background: linear-gradient(135deg, rgba(251, 113, 133, 0.2), rgba(251, 113, 133, 0.05)); border: 1px solid rgba(251, 113, 133, 0.3); color: var(--accent-rose);">3</div>
-                    <div class="flow-label">Hypothesize</div>
-                    <div class="flow-sublabel">Smallest possible test</div>
-                </div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">
-                    <div class="flow-icon implement">4</div>
-                    <div class="flow-label">Implement</div>
-                    <div class="flow-sublabel">Regression test + fix</div>
-                </div>
-            </div>
-
-            <p><strong>Why this matters:</strong> After 3 failed hypothesis cycles, the agent escalates to you with everything it has learned and eliminated — no more silent spirals of random attempts. Root cause is documented in plan.md, so the team learns from every bug.</p>
-
-            <h3>Two-Stage Review</h3>
-            <p><strong>The problem:</strong> AI happily moves on to the next phase even if it missed requirements or wrote poor code. <strong>The solution:</strong> At every phase boundary, the Reviewer Agent runs two sequential checks. Stage 1 catches what's missing. Stage 2 catches what's messy. Only when both pass does the work proceed.</p>
-
-            <div class="comparison">
-                <div class="comparison-header">
-                    <div>Stage 1: Spec Compliance</div>
-                    <div>Stage 2: Code Quality</div>
-                </div>
-                <div class="comparison-row">
-                    <div>All functional requirements implemented?</div>
-                    <div>Follows project patterns from tech-stack.md?</div>
-                </div>
-                <div class="comparison-row">
-                    <div>Acceptance criteria met?</div>
-                    <div>Appropriate error handling?</div>
-                </div>
-                <div class="comparison-row">
-                    <div>No scope creep or missing features?</div>
-                    <div>Tests cover real logic, not implementation details?</div>
-                </div>
-                <div class="comparison-row">
-                    <div>Edge cases and error scenarios handled?</div>
-                    <div>Issues classified: Critical &gt; Important &gt; Minor</div>
-                </div>
-            </div>
-
-            <p><strong>Why this matters:</strong> Critical issues (broken functionality, security vulnerabilities) must be fixed before proceeding — no exceptions. Important issues should be fixed. Minor issues are noted but don't block. This prevents both perfectionism paralysis and quality erosion.</p>
-
-            <h3>Code Coverage</h3>
-            <p><strong>The problem:</strong> TDD ensures you write tests, but doesn't guarantee those tests are comprehensive. You can have 100% of your tests passing while 40% of your code is untested. <strong>The solution:</strong> <code>/draft:coverage</code> runs your project's coverage tool and classifies every uncovered line, so you know exactly what's tested, what's not, and whether that matters.</p>
-
-            <div class="doc-grid" style="grid-template-columns: repeat(3, 1fr);">
-                <div class="doc-card">
-                    <div class="icon">✅</div>
-                    <div class="name">Testable</div>
-                    <p class="purpose">Should be covered. Suggests specific tests to write.</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">🛡️</div>
-                    <div class="name">Defensive</div>
-                    <p class="purpose">Error handlers for impossible states. Acceptable to leave.</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">⚙️</div>
-                    <div class="name">Infrastructure</div>
-                    <p class="purpose">Framework boilerplate and entry points. Acceptable.</p>
-                </div>
-            </div>
-
-            <h3>Systematic Validation</h3>
-            <p><strong>The problem:</strong> AI can pass all tests while violating architectural patterns, introducing security vulnerabilities, or creating performance bottlenecks. Tests measure "does it work" but not "is it good." <strong>The solution:</strong> <code>/draft:validate</code> uses Draft context (architecture.md, tech-stack.md) to catch quality issues tests miss — architecture violations, hardcoded secrets, N+1 queries, missing input validation, and more.</p>
-
-            <div class="doc-grid" style="grid-template-columns: repeat(4, 1fr);">
-                <div class="doc-card">
-                    <div class="icon">🏗️</div>
-                    <div class="name">Architecture</div>
-                    <p class="purpose">Pattern violations, layer boundaries, dependency rules</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">🔒</div>
-                    <div class="name">Security</div>
-                    <p class="purpose">Hardcoded secrets, SQL injection, XSS, weak hashing</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">⚡</div>
-                    <div class="name">Performance</div>
-                    <p class="purpose">N+1 queries, blocking I/O, missing pagination</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">📋</div>
-                    <div class="name">Regression</div>
-                    <p class="purpose">Blast radius analysis, critical path detection</p>
-                </div>
-            </div>
-
-            <p><strong>Why this matters:</strong> Validation runs automatically at track completion (configurable in workflow.md). Non-blocking by default — issues documented in <code>validation-report.md</code> with file:line references and remediation guidance. Complements coverage (quantitative test metrics) with qualitative codebase health checks.</p>
-
-            <h3>Exhaustive Bug Hunt</h3>
-            <p><strong>The problem:</strong> Validation checks compliance with declared architecture. But real bugs — logic errors, race conditions, security vulnerabilities, accessibility issues — require deeper analysis across multiple dimensions. <strong>The solution:</strong> <code>/draft:bughunt</code> performs exhaustive defect discovery across 12 analysis dimensions, enhanced by Draft context when available.</p>
-
-            <div class="doc-grid" style="grid-template-columns: repeat(4, 1fr);">
-                <div class="doc-card">
-                    <div class="icon">🎯</div>
-                    <div class="name">Correctness</div>
-                    <p class="purpose">Logic errors, edge cases, invalid assumptions, state bugs</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">🔄</div>
-                    <div class="name">Concurrency</div>
-                    <p class="purpose">Race conditions, stale responses, ordering issues</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">🔐</div>
-                    <div class="name">Security</div>
-                    <p class="purpose">XSS, injection, auth bypass, secrets exposure</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">⚡</div>
-                    <div class="name">Performance</div>
-                    <p class="purpose">N+1 queries, blocking I/O, memory leaks, re-renders</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">♿</div>
-                    <div class="name">Accessibility</div>
-                    <p class="purpose">Keyboard nav, focus management, ARIA, screen readers</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">📊</div>
-                    <div class="name">State</div>
-                    <p class="purpose">Source-of-truth violations, derived state bugs, leaks</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">🔌</div>
-                    <div class="name">API Contracts</div>
-                    <p class="purpose">Schema drift, weak typing, missing validation</p>
-                </div>
-                <div class="doc-card">
-                    <div class="icon">🧪</div>
-                    <div class="name">Tests</div>
-                    <p class="purpose">Coverage gaps, snapshot misuse, flaky tests</p>
-                </div>
-            </div>
-
-            <p><strong>Why this matters:</strong> Unlike validate (which checks compliance), bughunt discovers defects. Run it project-wide for full codebase analysis, or use <code>--track &lt;id&gt;</code> to focus on a specific feature. When Draft context exists, bughunt uses architecture.md to flag module boundary violations, tech-stack.md for framework-specific anti-patterns, and spec.md/plan.md to verify implementation matches requirements. Findings are severity-ranked (Critical/High/Medium/Low) with file:line locations and minimal fix recommendations in <code>bughunt-report.md</code>.</p>
-        </section>
-
-        <!-- Economics -->
-        <section id="economics" aria-labelledby="heading-economics">
-            <h2 id="heading-economics">The Economics</h2>
-            <p>Writing specs feels slower. It isn't. The overhead is constant (~20% for simple tasks), but savings scale with complexity, team size, and criticality.</p>
-
-            <div class="economics">
-                <div class="economics-row header">
-                    <div>Scenario</div>
-                    <div>Without Spec</div>
-                    <div>With Spec</div>
-                </div>
-                <div class="economics-row">
-                    <div>Simple feature</div>
-                    <div>1 hour</div>
-                    <div>1.2 hours</div>
-                </div>
-                <div class="economics-row">
-                    <div>Feature with ambiguity</div>
-                    <div>3 hours + rework</div>
-                    <div>2 hours</div>
-                </div>
-                <div class="economics-row">
-                    <div>Feature requiring team input</div>
-                    <div>5 hours + meetings</div>
-                    <div>2.5 hours</div>
-                </div>
-                <div class="economics-row">
-                    <div>Wrong feature entirely</div>
-                    <div>Days wasted</div>
-                    <div>Caught in review</div>
-                </div>
-            </div>
-
-            <p><strong>For critical product development, Draft isn't overhead — it's risk mitigation.</strong></p>
-        </section>
-
-        <!-- Principles -->
-        <section id="principles" aria-labelledby="heading-principles">
-            <h2 id="heading-principles">Core Principles</h2>
-
-            <div class="principles">
-                <div class="principle">
-                    <div class="principle-num">1</div>
-                    <div class="principle-content">
-                        <h4>Plan before you build</h4>
-                        <p>Create specs and plans that guide development before writing code</p>
-                    </div>
-                </div>
-                <div class="principle">
-                    <div class="principle-num">2</div>
-                    <div class="principle-content">
-                        <h4>Maintain context</h4>
-                        <p>Ensure agents follow style guides and product goals consistently</p>
-                    </div>
-                </div>
-                <div class="principle">
-                    <div class="principle-num">3</div>
-                    <div class="principle-content">
-                        <h4>Iterate safely</h4>
-                        <p>Review plans before code is written, catch issues early</p>
-                    </div>
-                </div>
-                <div class="principle">
-                    <div class="principle-num">4</div>
-                    <div class="principle-content">
-                        <h4>Work as a team</h4>
-                        <p>Share project context across team members through git-tracked specs</p>
-                    </div>
-                </div>
-                <div class="principle">
-                    <div class="principle-num">5</div>
-                    <div class="principle-content">
-                        <h4>Verify before claiming</h4>
-                        <p>Evidence before assertions, always — run tests, show proof</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- When to Use -->
-        <section id="when" aria-labelledby="heading-when">
-            <h2 id="heading-when">When to Use Draft</h2>
-
-            <h3>Good fit</h3>
-            <div class="problem-grid">
-                <div class="problem-card" style="border-color: rgba(52, 211, 153, 0.3);">
-                    <div class="icon">🏗️</div>
-                    <h4>Design Decisions</h4>
-                    <p>Features requiring architecture choices, API design, or data model decisions</p>
-                </div>
-                <div class="problem-card" style="border-color: rgba(52, 211, 153, 0.3);">
-                    <div class="icon">👥</div>
-                    <h4>Team Review</h4>
-                    <p>Work that will be reviewed by others — specs are faster to review than code</p>
-                </div>
-                <div class="problem-card" style="border-color: rgba(52, 211, 153, 0.3);">
-                    <div class="icon">📦</div>
-                    <h4>Multi-Step Work</h4>
-                    <p>Complex implementations spanning multiple files, modules, or phases</p>
-                </div>
-                <div class="problem-card" style="border-color: rgba(52, 211, 153, 0.3);">
-                    <div class="icon">🔁</div>
-                    <h4>Repeated Failures</h4>
-                    <p>Anything where "just do it" has resulted in rework or misalignment</p>
-                </div>
-            </div>
-
-            <h3>Overkill</h3>
-            <p>One-line bug fixes, typo corrections, exploratory prototypes you'll throw away, simple config changes.</p>
-
-            <h3>Constraint Mechanisms</h3>
-            <p>How Draft keeps AI focused and accountable:</p>
-
-            <div class="economics">
-                <div class="economics-row header">
-                    <div>Mechanism</div>
-                    <div>Effect</div>
-                    <div>Prevents</div>
-                </div>
-                <div class="economics-row">
-                    <div>Explicit spec</div>
-                    <div>AI only implements what's documented</div>
-                    <div>Scope creep</div>
-                </div>
-                <div class="economics-row">
-                    <div>Phased plans</div>
-                    <div>AI works on one phase at a time</div>
-                    <div>Over-engineering</div>
-                </div>
-                <div class="economics-row">
-                    <div>Verification steps</div>
-                    <div>Each phase requires proof of completion</div>
-                    <div>False claims</div>
-                </div>
-                <div class="economics-row">
-                    <div>Status markers</div>
-                    <div>Progress is tracked, not assumed</div>
-                    <div>Lost context</div>
-                </div>
-                <div class="economics-row">
-                    <div>Two-stage review</div>
-                    <div>Spec compliance before code quality</div>
-                    <div>Quality gaps</div>
-                </div>
-                <div class="economics-row">
-                    <div>Validation checks</div>
-                    <div>Context-aware quality validation (architecture, security, performance)</div>
-                    <div>Pattern violations, vulnerabilities, tech debt</div>
-                </div>
-            </div>
-
-            <div class="callout">
-                <div class="callout-title">
-                    <span>📌</span>
-                    Remember
-                </div>
-                <p>Draft adds structure. Use it when structure has value. The AI becomes an executor of pre-approved work, not an autonomous decision-maker.</p>
-            </div>
-        </section>
+            </details>
+        </div>
     </main>
 
     <footer>
@@ -3004,16 +2183,70 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Only target command-section doc-cards (BUG-M3: scope to #commands only)
-            const cards = document.querySelectorAll('#commands .doc-card');
+            // Top-level tab switching
+            const tabButtons = document.querySelectorAll('.tab-button');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.setAttribute('aria-selected', 'false');
+                    });
+
+                    this.classList.add('active');
+                    this.setAttribute('aria-selected', 'true');
+
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+
+                    const targetContent = document.getElementById('tab-' + targetTab);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                    }
+                });
+            });
+
+            // Sub-tab switching (for Workflow tab)
+            const subtabButtons = document.querySelectorAll('.subtab-button');
+
+            subtabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetSubtab = this.getAttribute('data-subtab');
+
+                    const parentNav = this.closest('.subtabs-nav');
+                    const parentButtons = parentNav.querySelectorAll('.subtab-button');
+
+                    parentButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.setAttribute('aria-selected', 'false');
+                    });
+
+                    this.classList.add('active');
+                    this.setAttribute('aria-selected', 'true');
+
+                    const tabContent = parentNav.parentElement;
+                    tabContent.querySelectorAll('.subtab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+
+                    const targetContent = document.getElementById('subtab-' + targetSubtab);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                    }
+                });
+            });
+
+            // Command card expansion (only for #commands section)
+            const cards = document.querySelectorAll('#tab-commands .doc-card');
             cards.forEach(card => {
-                // BUG-H1: Add keyboard accessibility
                 card.setAttribute('tabindex', '0');
                 card.setAttribute('role', 'button');
                 card.setAttribute('aria-expanded', 'false');
 
                 card.addEventListener('click', function(e) {
-                    // BUG-L3: Account for child elements of links
                     if (e.target.closest('a')) return;
                     toggleCommandCard(this);
                 });
@@ -3026,6 +2259,21 @@
                     }
                 });
             });
+
+            // Handle URL anchors for tabs
+            function handleAnchor() {
+                const hash = window.location.hash.slice(1);
+                if (hash && hash.startsWith('tab-')) {
+                    const tabName = hash.replace('tab-', '');
+                    const button = document.querySelector(`[data-tab="${tabName}"]`);
+                    if (button) {
+                        button.click();
+                    }
+                }
+            }
+
+            handleAnchor();
+            window.addEventListener('hashchange', handleAnchor);
         });
     </script>
 </body>

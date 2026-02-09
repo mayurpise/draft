@@ -91,6 +91,7 @@ Draft is a methodology for structured software development: **Context → Spec &
 | Command | Purpose |
 |---------|---------|
 | `@draft init` | Initialize project (run once) |
+| `@draft index` | Aggregate monorepo service contexts (run at root) |
 | `@draft new-track` | Create feature/bug track with spec and plan |
 | `@draft implement` | Execute tasks from plan with TDD |
 | `@draft status` | Show progress overview |
@@ -144,6 +145,7 @@ You can also use natural language:
 | Say this... | Runs this |
 |-------------|-----------|
 | "set up the project" | `@draft init` |
+| "index services", "aggregate context" | `@draft index` |
 | "new feature", "add X" | `@draft new-track` |
 | "start implementing" | `@draft implement` |
 | "what's the status" | `@draft status` |
@@ -2755,13 +2757,14 @@ Extract and validate command arguments from user input.
 
 1. **Scope flag requirement:** At least one scope flag OR no flags (auto-detect track)
 2. **Mutual exclusivity:** Only one of `--track`, `--project`, `--files`, `--commits`
-3. **Flag conflicts:** If both `--full` and `--with-validate`/`--with-bughunt` are provided, treat as `--full` and ignore the redundant flags
+3. **Flag conflicts:** If `--full` is present, set `--with-validate=true` and `--with-bughunt=true`, then discard any redundant individual flags. No error — silently normalize.
 
 ### Default Behavior
 
 If no arguments provided:
 - Auto-detect active `[~]` In Progress track from `draft/tracks.md`
 - If no `[~]` track, find first `[ ]` Pending track
+- Display: `Auto-detected track: <id> - <name> [<status>]` and proceed
 - If no tracks available, error: "No tracks found. Run `@draft new-track` to create one."
 
 ---
@@ -2795,7 +2798,14 @@ Based on parsed arguments, determine review scope and load appropriate context.
 
 3. **Handle matches:**
    - **Exact match:** Use immediately
-   - **Multiple matches:** Prompt user with numbered list
+   - **Multiple matches:** Display numbered list with format:
+     ```
+     Multiple tracks match '<input>':
+     1. <id> - <name> [<status>]
+     2. <id> - <name> [<status>]
+     Select track (1-N):
+     ```
+     Validate selection is within 1-N range. Re-prompt on invalid input.
    - **No matches:** Error with suggestions (closest 3 by edit distance)
 
 #### 2.2: Load Track Context
@@ -2814,7 +2824,7 @@ Once track is resolved:
 
 3. **Read plan.md:**
    - Load `draft/tracks/<id>/plan.md`
-   - Extract commit SHAs from completed task lines. Match 7+ character hex strings in parentheses after task markers, e.g., `- [x] **Task 1.1:** Description (7a7dc85)`. Collect all unique SHAs in order of appearance.
+   - Extract commit SHAs from completed `[x]` task lines only. Match pattern: 7+ character hex strings in parentheses, regex `\(([a-f0-9]{7,})\)`. Example: `- [x] **Task 1.1:** Description (7a7dc85)`. Collect SHAs in order of appearance; deduplicate keeping first occurrence.
    - Determine commit range:
      - First commit: `git rev-parse <first_SHA>^` (parent of first)
      - Last commit: `<last_SHA>`
@@ -2823,7 +2833,10 @@ Once track is resolved:
 4. **Check for incomplete work:**
    - Parse plan.md task statuses
    - Count `[ ]`, `[~]`, `[x]`, `[!]` tasks
-   - If `[ ]` or `[~]` tasks exist: Warn but proceed
+   - If `[ ]` or `[~]` tasks exist: Display warning and proceed:
+     ```
+     Warning: Track has N incomplete tasks (M in-progress, K pending). Reviewing completed work only.
+     ```
 
 5. **Handle missing files:**
    - Missing spec.md: Error "spec.md not found for track <id>"
@@ -2888,7 +2901,7 @@ Run shortstat to check diff size:
 git diff --shortstat <range>
 ```
 
-Parse output: `N files changed, M insertions(+), K deletions(-)`
+Parse output robustly — handle both singular (`1 file changed`) and plural (`N files changed`) forms. Extract numeric values for files, insertions, and deletions. Use total lines changed (insertions + deletions) for the chunking threshold.
 
 ### 3.2: Smart Chunking Strategy
 
@@ -2900,12 +2913,13 @@ Parse output: `N files changed, M insertions(+), K deletions(-)`
 - Store complete diff for analysis
 
 **Large changes (≥300 lines changed):**
-- Announce: "Large changeset detected. Using file-by-file review mode."
+- Announce: "Large changeset detected (N files). Using file-by-file review mode."
 - Get file list:
   ```bash
   git diff --name-only <range>
   ```
 - For each file:
+  - Display progress: `[N/M] Reviewing <filename>`
   - Run: `git diff <range> -- <file>`
   - Analyze immediately (don't store all)
   - Track findings in temporary structure
@@ -2914,8 +2928,11 @@ Parse output: `N files changed, M insertions(+), K deletions(-)`
 ### 3.3: Filter Files (Optional)
 
 Skip non-source files to focus review:
-- Ignore: `*.lock`, `package-lock.json`, `*.min.js`, `*.map`, binary files
-- Ignore: Generated files (check for `@generated` marker in first 10 lines)
+- Ignore lock/minified: `*.lock`, `package-lock.json`, `yarn.lock`, `*.min.js`, `*.min.css`, `*.map`
+- Ignore build artifacts: `dist/`, `build/`, `target/`, `out/`, `__pycache__/`, `*.pyc`
+- Ignore vendored: `node_modules/`, `vendor/`, `.git/`
+- Ignore binaries: images, fonts, compiled assets
+- Ignore generated files: check first 10 lines for `@generated` marker (case-insensitive, any comment syntax: `/* @generated */`, `// @generated`, `# @generated`)
 
 ---
 
@@ -2950,8 +2967,8 @@ For each criterion in spec.md:
 - [ ] Non-goals remain untouched
 
 **Verdict:**
-- **PASS:** All requirements met → Proceed to Stage 2
-- **FAIL:** List gaps → Report and stop (no Stage 2)
+- **PASS:** All requirements implemented AND all acceptance criteria met → Proceed to Stage 2
+- **FAIL:** ANY requirement missing OR ANY acceptance criterion not met → List gaps, report, and stop (no Stage 2)
 
 ### Stage 2: Code Quality
 
@@ -3050,8 +3067,10 @@ Merge findings from:
 3. Bughunt results (if run)
 
 **Deduplication:**
-- If same `file:line` appears in multiple tools, keep highest severity
-- Merge descriptions: "Found by: reviewer, bughunt"
+- Two findings are duplicates if they reference the **same file and line number**
+- Severity ordering: **Critical > Important > Minor**
+- On duplicate: keep the finding with highest severity; merge tool attribution as "Found by: reviewer, bughunt"
+- If same severity from different tools: merge into single finding, combine descriptions
 
 ---
 
@@ -3068,7 +3087,7 @@ Create unified review report in markdown format.
 
 **Track ID:** <id>
 **Reviewed:** <ISO timestamp>
-**Reviewer:** Claude Sonnet 4.5 (1M context)
+**Reviewer:** [Current model name and context window from runtime]
 **Commit Range:** <first_SHA>^..<last_SHA>
 **Diff Stats:** N files changed, M insertions(+), K deletions(-)
 
@@ -3154,7 +3173,7 @@ Create unified review report in markdown format.
 
 ### Project-Level Report
 
-**Path:** `draft/review-report.md`
+**Path:** `draft/review-report.md` (all project-level scopes write to this same path)
 
 Similar format but:
 - No Stage 1 section (no spec compliance)
@@ -3162,6 +3181,7 @@ Similar format but:
   - `--project`: "Scope: Uncommitted changes"
   - `--files <pattern>`: "Scope: Files matching '<pattern>'"
   - `--commits <range>`: "Scope: Commits <range>"
+- Each run overwrites the previous report; include "Previous review: <timestamp>" if prior report exists
 
 ### Report Overwrite Behavior
 
@@ -3175,6 +3195,8 @@ If report already exists:
 ## Step 7: Update Metadata (Track-Level Only)
 
 For track-level reviews, update metadata.json with review status.
+
+**Condition:** Only update metadata when verdict is **PASS** or **PASS_WITH_NOTES**. On **FAIL**, generate the review report but skip metadata updates — a failed review should not increment reviewCount or change lastReviewVerdict.
 
 ### 7.1: Read Current Metadata
 

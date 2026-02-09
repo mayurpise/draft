@@ -7,6 +7,20 @@ description: Exhaustive bug hunt using Draft context (architecture, tech-stack, 
 
 You are conducting an exhaustive bug hunt on this Git repository, enhanced by Draft context when available.
 
+## Red Flags - STOP if you're:
+
+- Hunting for bugs without reading Draft context first (architecture.md, tech-stack.md, product.md)
+- Reporting a finding without reproducing or tracing the code path
+- Fixing bugs instead of reporting them (bughunt reports, it doesn't fix)
+- Assuming a pattern is buggy without checking if it's used successfully elsewhere
+- Skipping the verification protocol (every bug needs evidence)
+- Making up file locations or line numbers without reading the actual code
+- Reporting framework-handled concerns as bugs without checking the docs
+
+**Verify before you report. Evidence over assumptions.**
+
+---
+
 ## Pre-Check
 
 ### 0. Capture Git Context

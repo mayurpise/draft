@@ -1514,6 +1514,8 @@ Present final plan.md for acknowledgment.
 }
 ```
 
+**Note:** ISO timestamps can use either `Z` or `.000Z` suffix (both valid ISO 8601). No format constraint enforced — both second precision (`2026-02-08T12:00:00Z`) and millisecond precision (`2026-02-08T12:00:00.000Z`) are acceptable.
+
 ### Update `draft/tracks.md`:
 
 Add under Active:
@@ -5489,6 +5491,45 @@ AI coding assistants are powerful but undirected. Without structure, they:
 
 Draft solves this through **Context-Driven Development**: structured documents that constrain and guide AI behavior. By treating context as a managed artifact alongside code, your repository becomes a single source of truth that drives every agent interaction with deep, persistent project awareness.
 
+---
+
+## Table of Contents
+
+- [Philosophy](#philosophy)
+- [Installation & Getting Started](#installation--getting-started)
+- [Core Workflow](#core-workflow)
+- [Tracks](#tracks)
+- [Project Context Files](#project-context-files)
+- [Status Markers](#status-markers)
+- [Plan Structure](#plan-structure)
+- [Command Workflows](#command-workflows)
+  - [draft init](#draftinit--initialize-project)
+  - [draft index](#draftindex--monorepo-service-index)
+  - [draft new-track](#draftnew-track--create-feature-track)
+  - [draft implement](#draftimplement--execute-tasks)
+  - [draft status](#draftstatus--show-progress)
+  - [draft revert](#draftrevert--git-aware-rollback)
+  - [draft decompose](#draftdecompose--module-decomposition)
+  - [draft coverage](#draftcoverage--code-coverage-report)
+  - [draft jira-preview](#draftjira-preview--preview-jira-issues)
+  - [draft jira-create](#draftjira-create--create-jira-issues)
+  - [draft adr](#draftadr--architecture-decision-records)
+  - [draft validate](#draftvalidate--codebase-quality-validation)
+  - [draft bughunt](#draftbughunt--exhaustive-bug-discovery)
+  - [draft review](#draftreview--code-review-orchestrator)
+- [Architecture Mode](#architecture-mode)
+- [Coverage](#coverage)
+- [Notes](#notes)
+- [Jira Integration (Optional)](#jira-integration-optional)
+- [TDD Workflow (Optional)](#tdd-workflow-optional)
+- [Intent Mapping](#intent-mapping)
+- [Quality Disciplines](#quality-disciplines)
+- [Agents](#agents)
+- [Communication Style](#communication-style)
+- [Principles](#principles)
+
+---
+
 ### Why Each Document Exists
 
 | Document | Purpose | Prevents |
@@ -6126,6 +6167,38 @@ Requires MCP-Jira server configuration and `draft/jira.md` with project key.
 
 ---
 
+### `draft adr` — Architecture Decision Records
+
+Documents significant technical decisions with context, alternatives, and consequences. ADRs capture **why** a decision was made, not just what was decided.
+
+#### When to Use
+
+Create an ADR during or after `draft new-track` when making architectural decisions:
+- Adopting a new technology or framework
+- Changing system architecture or module boundaries
+- Selecting between multiple viable approaches with trade-offs
+- Establishing patterns or conventions that constrain future work
+
+Skip ADRs for trivial decisions (variable naming, formatting) or reversible choices.
+
+#### ADR Structure
+
+Each ADR contains:
+- **Context** — The issue or forces driving the decision (technical, business, organizational)
+- **Decision** — What we're proposing/doing, stated in active voice ("We will...")
+- **Alternatives Considered** — At least 2 alternatives with pros/cons and rejection rationale
+- **Consequences** — Positive outcomes, negative trade-offs, and risks with mitigations
+
+#### Storage & Linking
+
+ADRs are stored at `draft/adrs/NNNN-title.md` (e.g., `001-use-postgresql.md`). When created within a track context, the ADR file references the track ID in its metadata for traceability. Use `draft adr list` to see all decisions, `draft adr supersede <number>` to mark an ADR as replaced.
+
+#### Status Lifecycle
+
+`Proposed` (awaiting review) → `Accepted` (approved and in effect) → `Deprecated` (context changed) or `Superseded by ADR-XXX` (replaced by newer decision).
+
+---
+
 ### `draft validate` — Codebase Quality Validation
 
 Validates codebase quality using Draft context (architecture.md, tech-stack.md, product.md). Runs architecture conformance, security scan, and performance analysis.
@@ -6136,6 +6209,37 @@ Validates codebase quality using Draft context (architecture.md, tech-stack.md, 
 - **Project-level:** `--project` — validates entire codebase
 
 Generates report at `draft/tracks/<id>/validation-report.md` (track) or `draft/validation-report.md` (project). Non-blocking by default — reports warnings without halting workflow.
+
+#### Validation Categories
+
+**Architecture Conformance**
+- Module boundary violations (e.g., presentation layer importing database models)
+- Circular dependencies between modules
+- Unauthorized dependencies not listed in tech-stack.md
+- API surface violations (internal modules exposed publicly)
+
+**Security Scan**
+- OWASP Top 10 patterns (SQL injection, XSS, broken authentication, insecure deserialization)
+- Hardcoded secrets or credentials in source code
+- Insecure dependencies with known CVEs
+- Missing input validation at system boundaries
+- Insufficient error handling exposing sensitive information
+
+**Performance Analysis**
+- Bundle size exceeding thresholds defined in product.md
+- N+1 query patterns in database access
+- Algorithmic complexity hotspots (O(n²) or worse in critical paths)
+- Unindexed database queries
+- Memory leaks or resource cleanup issues
+
+#### Report Structure
+
+Each finding includes:
+- **Severity**: Critical (must fix), High (should fix), Medium (consider fixing), Low (informational)
+- **Location**: File path and line number
+- **Evidence**: Code snippet demonstrating the issue
+- **Fix**: Recommended remediation with examples
+- **Draft Context**: How this violates architecture.md or tech-stack.md constraints
 
 ---
 

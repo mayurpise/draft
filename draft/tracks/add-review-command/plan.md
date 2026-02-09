@@ -2,7 +2,7 @@
 
 **Track ID:** add-review-command
 **Spec:** ./spec.md
-**Status:** [~] In Progress
+**Status:** [x] Completed
 
 ## Overview
 
@@ -189,7 +189,7 @@ Implement `/draft:review` as a new skill that orchestrates code review workflows
   - Note comparison with Conductor's review command
   - Depends on: Task 4.3
 
-- [ ] **Task 4.5:** Integration testing
+- [x] **Task 4.5:** Integration testing (cafbaf0)
   - Test: Manual testing across scenarios
   - Test auto-detect active track
   - Test exact track ID match

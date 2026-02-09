@@ -6,12 +6,6 @@ Master registry of all tracks (features, bug fixes, refactors).
 
 ## Active
 
-### add-review-command - Add /draft:review Command
-- **Status:** [~] In Progress
-- **Created:** 2026-02-07
-- **Phases:** 3/4
-- **Path:** `./tracks/add-review-command/`
-
 ### enterprise-readiness - Enterprise Readiness Features
 - **Status:** [ ] Planning
 - **Created:** 2026-02-07
@@ -21,6 +15,18 @@ Master registry of all tracks (features, bug fixes, refactors).
 ---
 
 ## Completed
+
+### review-skill-polish - Polish Review Skill
+- **Status:** [x] Completed
+- **Completed:** 2026-02-08
+- **Phases:** 1/1
+- **Path:** `./tracks/review-skill-polish/`
+
+### add-review-command - Add /draft:review Command
+- **Status:** [x] Completed
+- **Completed:** 2026-02-08
+- **Phases:** 4/4
+- **Path:** `./tracks/add-review-command/`
 
 ### fix-review-findings - Fix Review Command Findings
 - **Status:** [x] Completed

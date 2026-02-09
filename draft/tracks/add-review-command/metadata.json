@@ -2,18 +2,18 @@
   "id": "add-review-command",
   "title": "Add /draft:review Command",
   "type": "feature",
-  "status": "in-progress",
+  "status": "completed",
   "created": "2026-02-07T21:30:00Z",
-  "updated": "2026-02-08T00:00:00Z",
+  "updated": "2026-02-08T12:30:00Z",
   "phases": {
     "total": 4,
-    "completed": 3
+    "completed": 4
   },
   "tasks": {
     "total": 21,
-    "completed": 18
+    "completed": 21
   },
-  "lastReviewed": "2026-02-08T00:00:00Z",
-  "reviewCount": 1,
+  "lastReviewed": "2026-02-08T12:00:00Z",
+  "reviewCount": 2,
   "lastReviewVerdict": "PASS_WITH_NOTES"
 }

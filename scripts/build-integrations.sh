@@ -566,7 +566,7 @@ verify_output() {
     local expect_at_draft="$3"  # "yes" or "no"
 
     local line_count
-    line_count=$(wc -l < "$output_file" | tr -d ' ')
+    line_count=$(wc -l < "$output_file")
     echo "  Lines: $line_count"
 
     # Count skills included

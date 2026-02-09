@@ -7,6 +7,20 @@ description: Execute tasks from the current track's plan using TDD workflow. Imp
 
 You are implementing tasks from the active track's plan following the TDD workflow.
 
+## Red Flags - STOP if you're:
+
+- Implementing without an approved spec and plan
+- Skipping TDD cycle when workflow.md has TDD enabled
+- Marking a task `[x]` without fresh verification evidence
+- Batching multiple tasks into a single commit
+- Proceeding past a phase boundary without running the two-stage review
+- Writing production code before a failing test (when TDD is strict)
+- Assuming a test passes without actually running it
+
+**Verify before you mark complete. One task, one commit.**
+
+---
+
 ## Step 1: Load Context
 
 1. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)

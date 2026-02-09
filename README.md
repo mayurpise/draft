@@ -21,15 +21,9 @@ Establish a disciplined AI development lifecycle with clear specifications, stru
 
 ### Cursor
 
-**Method 1: Built-in (Recommended)**
 Cursor > Settings > Rules, Skills, Subagents > Rules > New > Add from Github:
 ```
 https://github.com/mayurpise/draft.git
-```
-
-**Method 2: Manual**
-```bash
-curl -o .cursorrules https://raw.githubusercontent.com/mayurpise/draft/main/integrations/cursor/.cursorrules
 ```
 
 Then use: `@draft init`, `@draft new-track`, `@draft implement`

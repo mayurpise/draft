@@ -45,6 +45,7 @@ Extract and validate command arguments from user input.
 If no arguments provided:
 - Auto-detect active `[~]` In Progress track from `draft/tracks.md`
 - If no `[~]` track, find first `[ ]` Pending track
+- Display: `Auto-detected track: <id> - <name> [<status>]` and proceed
 - If no tracks available, error: "No tracks found. Run `/draft:new-track` to create one."
 
 ---
@@ -181,7 +182,7 @@ Run shortstat to check diff size:
 git diff --shortstat <range>
 ```
 
-Parse output: `N files changed, M insertions(+), K deletions(-)`
+Parse output robustly — handle both singular (`1 file changed`) and plural (`N files changed`) forms. Extract numeric values for files, insertions, and deletions. Use total lines changed (insertions + deletions) for the chunking threshold.
 
 ### 3.2: Smart Chunking Strategy
 
@@ -193,12 +194,13 @@ Parse output: `N files changed, M insertions(+), K deletions(-)`
 - Store complete diff for analysis
 
 **Large changes (≥300 lines changed):**
-- Announce: "Large changeset detected. Using file-by-file review mode."
+- Announce: "Large changeset detected (N files). Using file-by-file review mode."
 - Get file list:
   ```bash
   git diff --name-only <range>
   ```
 - For each file:
+  - Display progress: `[N/M] Reviewing <filename>`
   - Run: `git diff <range> -- <file>`
   - Analyze immediately (don't store all)
   - Track findings in temporary structure
@@ -207,8 +209,11 @@ Parse output: `N files changed, M insertions(+), K deletions(-)`
 ### 3.3: Filter Files (Optional)
 
 Skip non-source files to focus review:
-- Ignore: `*.lock`, `package-lock.json`, `*.min.js`, `*.map`, binary files
-- Ignore: Generated files (check for `@generated` marker in first 10 lines)
+- Ignore lock/minified: `*.lock`, `package-lock.json`, `yarn.lock`, `*.min.js`, `*.min.css`, `*.map`
+- Ignore build artifacts: `dist/`, `build/`, `target/`, `out/`, `__pycache__/`, `*.pyc`
+- Ignore vendored: `node_modules/`, `vendor/`, `.git/`
+- Ignore binaries: images, fonts, compiled assets
+- Ignore generated files: check first 10 lines for `@generated` marker (case-insensitive, any comment syntax: `/* @generated */`, `// @generated`, `# @generated`)
 
 ---
 
@@ -243,8 +248,8 @@ For each criterion in spec.md:
 - [ ] Non-goals remain untouched
 
 **Verdict:**
-- **PASS:** All requirements met → Proceed to Stage 2
-- **FAIL:** List gaps → Report and stop (no Stage 2)
+- **PASS:** All requirements implemented AND all acceptance criteria met → Proceed to Stage 2
+- **FAIL:** ANY requirement missing OR ANY acceptance criterion not met → List gaps, report, and stop (no Stage 2)
 
 ### Stage 2: Code Quality
 
@@ -363,7 +368,7 @@ Create unified review report in markdown format.
 
 **Track ID:** <id>
 **Reviewed:** <ISO timestamp>
-**Reviewer:** Claude Sonnet 4.5 (1M context)
+**Reviewer:** [Current model name and context window from runtime]
 **Commit Range:** <first_SHA>^..<last_SHA>
 **Diff Stats:** N files changed, M insertions(+), K deletions(-)
 
@@ -449,7 +454,7 @@ Create unified review report in markdown format.
 
 ### Project-Level Report
 
-**Path:** `draft/review-report.md`
+**Path:** `draft/review-report.md` (all project-level scopes write to this same path)
 
 Similar format but:
 - No Stage 1 section (no spec compliance)
@@ -457,6 +462,7 @@ Similar format but:
   - `--project`: "Scope: Uncommitted changes"
   - `--files <pattern>`: "Scope: Files matching '<pattern>'"
   - `--commits <range>`: "Scope: Commits <range>"
+- Each run overwrites the previous report; include "Previous review: <timestamp>" if prior report exists
 
 ### Report Overwrite Behavior
 

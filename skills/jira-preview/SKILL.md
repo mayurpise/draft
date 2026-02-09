@@ -7,6 +7,18 @@ description: Generate Jira export file from track plan for review before creatin
 
 Generate `jira-export.md` from the track's plan for review and editing before creating actual Jira issues.
 
+## Red Flags - STOP if you're:
+
+- Generating a preview without an approved plan.md
+- Assigning story points inconsistent with task count
+- Missing sub-tasks that exist in plan.md
+- Not including quality findings when validation/bughunt reports exist
+- Overwriting a reviewed jira-export.md without warning the user
+
+**Plan first, then preview. Accuracy over speed.**
+
+---
+
 ## Mapping Structure
 
 | Draft Concept | Jira Entity |

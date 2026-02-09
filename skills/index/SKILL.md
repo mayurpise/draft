@@ -33,8 +33,8 @@ ls draft/ 2>/dev/null
 
 ## Step 1: Parse Arguments
 
-Check for flags:
-- `--init-missing`: Also initialize services that don't have `draft/` directories
+Check for optional argument:
+- `init-missing`: Also initialize services that don't have `draft/` directories
 
 ## Step 2: Discover Services (Depth=1 Only)
 
@@ -97,7 +97,7 @@ Uninitialized services:
 
 ## Step 4: Handle Uninitialized Services
 
-**If `--init-missing` flag is present:**
+**If `init-missing` argument is present:**
 1. For each uninitialized service, prompt:
    ```
    Initialize <service-name>/? [y/n/all/skip-rest]
@@ -108,9 +108,9 @@ Uninitialized services:
    - `all`: Initialize all remaining without prompting
    - `skip-rest`: Skip all remaining uninitialized services
 
-**If `--init-missing` flag is NOT present:**
+**If `init-missing` argument is NOT present:**
 - Just report uninitialized services and continue
-- Suggest: "Run `/draft:index --init-missing` to initialize these services"
+- Suggest: "Run `/draft:index init-missing` to initialize these services"
 
 ## Step 5: Aggregate Context from Initialized Services
 
@@ -199,7 +199,7 @@ The following services have not been initialized with `/draft:init`:
 - `services/legacy-reports/`
 - `services/admin-tools/`
 
-Run `/draft:index --init-missing` or initialize individually with:
+Run `/draft:index init-missing` or initialize individually with:
 ```bash
 cd services/legacy-reports && /draft:init
 ```
@@ -537,7 +537,7 @@ Next steps:
 4. Run /draft:index periodically to refresh
 
 For uninitialized services, run:
-  /draft:index --init-missing
+  /draft:index init-missing
 ═══════════════════════════════════════════════════════════
 ```
 

@@ -6,6 +6,12 @@ Master registry of all tracks (features, bug fixes, refactors).
 
 ## Active
 
+### improve-bughunt-verification - Improve Bughunt Verification Protocol
+- **Status:** [ ] Planning
+- **Created:** 2026-02-08
+- **Phases:** 0/4
+- **Path:** `./tracks/improve-bughunt-verification/`
+
 ### enterprise-readiness - Enterprise Readiness Features
 - **Status:** [ ] Planning
 - **Created:** 2026-02-07
@@ -15,6 +21,12 @@ Master registry of all tracks (features, bug fixes, refactors).
 ---
 
 ## Completed
+
+### complete-index-integration - Complete draft:index Integration
+- **Status:** [x] Completed
+- **Completed:** 2026-02-08
+- **Phases:** 3/3
+- **Path:** `./tracks/complete-index-integration/`
 
 ### fix-bughunt-findings - Fix Bug Hunt Findings
 - **Status:** [x] Completed

@@ -38,16 +38,44 @@ If `draft/` exists with context files:
 ### Refresh Mode
 If the user runs `/draft:init refresh`:
 1. **Tech Stack Refresh**: Re-scan `package.json`, `go.mod`, etc. Compare with `draft/tech-stack.md`. Propose updates.
-2. **Architecture Refresh**: If `draft/architecture.md` exists, re-run architecture discovery (Phase 1, 2 & 3 from Step 1.5) and diff against the existing document:
+2. **Architecture Refresh**: If `draft/architecture.md` exists, re-run architecture discovery (Phase 1, 2 & 3 from Step 1.5) with safe backup workflow:
+
+   **a. Create backup:**
+   ```bash
+   cp draft/architecture.md draft/architecture.md.backup
+   ```
+
+   **b. Generate to temporary file:**
+   - Run architecture discovery (Phase 1, 2 & 3 from Step 1.5)
+   - Write output to `draft/architecture.md.new` (NOT the original file)
    - Detect new directories, files, or modules added since last scan
    - Identify removed or renamed components
    - Update mermaid diagrams to reflect structural changes
    - Flag new external dependencies or changed integration points
    - Update data lifecycle if new domain objects were introduced
-   - Discover new modules or detect removed/merged modules; update the Module Dependency Diagram, Dependency Table, and Dependency Order accordingly
-   - Preserve any modules added by `/draft:decompose` (planned modules for new features) — only update `[x] Existing` modules
-   - Present a summary of changes for developer review before writing
+   - Discover new modules or detect removed/merged modules; update Module Dependency Diagram, Dependency Table, Dependency Order
+   - Preserve any modules added by `/draft:decompose` (planned modules) — only update `[x] Existing` modules
+
+   **c. Present diff for review:**
+   ```bash
+   diff draft/architecture.md draft/architecture.md.new
+   ```
+   Show summary of changes to user.
+
+   **d. On user approval:**
+   ```bash
+   mv draft/architecture.md.new draft/architecture.md
+   rm draft/architecture.md.backup
+   ```
+
+   **e. On user rejection:**
+   ```bash
+   rm draft/architecture.md.new
+   ```
+   Original architecture.md preserved unchanged.
+
    - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now using Step 1.5
+
 3. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve**: Do NOT modify `draft/tracks.md` unless explicitly requested.

@@ -167,7 +167,7 @@ transform_cursor_syntax() {
 transform_copilot_syntax() {
     sed -E \
         -e 's|/draft:([a-z-]+)|draft \1|g' \
-        -e 's|@draft |draft |g' \
+        -e 's|@draft\b|draft|g' \
         -e 's|`@draft`|`draft`|g' \
         -e 's|`@draft |`draft |g'
 }

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides slash commands (`/draft:init`, `/draft:new-track`, `/draft:implement`, `/draft:status`, `/draft:revert`, `/draft:jira-preview`, `/draft:jira-create`) for structured software development through specifications and plans before implementation.
+Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides slash commands for structured software development through specifications and plans before implementation. Commands: `/draft:init`, `/draft:new-track`, `/draft:implement`, `/draft:status`, `/draft:revert`, `/draft:decompose`, `/draft:coverage`, `/draft:validate`, `/draft:bughunt`, `/draft:review`, `/draft:jira-preview`, `/draft:jira-create`. Run `/draft` for overview.
 
 ## Build Commands
 
@@ -50,10 +50,12 @@ integrations/gemini/
 name: skill-name
 description: Brief description
 ---
-# Execution instructions below...
+# Skill Title
+
+Execution instructions below...
 ```
 
-The frontmatter configures the command; the body contains step-by-step instructions.
+The frontmatter configures the command; the body contains step-by-step instructions. The body **must** start with a `# Title` heading followed by a blank line — the build script skips the first 3 lines of the body (via `tail -n +4`) when inlining skills into integration files.
 
 ## Maintaining the Plugin
 

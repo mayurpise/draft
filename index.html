@@ -11,11 +11,14 @@
     <meta property="og:description" content="Enterprise discipline for AI-assisted development. Structure your AI workflows with specs, plans, and quality gates.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://getdraft.dev">
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Draft: Ship Fast. Ship Right.">
     <meta name="twitter:description" content="Enterprise discipline for AI-assisted development. Structure your AI workflows with specs, plans, and quality gates.">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <link rel="canonical" href="https://getdraft.dev">
 
-    <!-- Google tag (gtag.js) -->
+    <!-- Google tag (gtag.js) — SRI omitted: gtag scripts change frequently, making integrity hashes impractical -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -26,7 +29,8 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"></noscript>
     <style>
         :root {
             --bg-primary: #0a0a0b;
@@ -73,6 +77,7 @@
             opacity: 0.03;
             pointer-events: none;
             z-index: 1000;
+            will-change: transform;
         }
 
         /* Header */
@@ -436,13 +441,6 @@
         .hierarchy-level .desc {
             color: var(--text-muted);
             font-size: 0.9rem;
-        }
-
-        .hierarchy-level .arrow-down {
-            position: absolute;
-            left: 15px;
-            bottom: -12px;
-            color: var(--text-muted);
         }
 
         /* Comparison tables */
@@ -1244,7 +1242,7 @@
             background: var(--accent-cyan);
             color: var(--bg-primary);
             padding: 8px 16px;
-            z-index: 100;
+            z-index: 1001;
             font-family: 'DM Sans', sans-serif;
             font-weight: 600;
             text-decoration: none;
@@ -1272,8 +1270,8 @@
 
     <main id="main-content">
         <!-- Installation Section -->
-        <section id="install">
-            <h2>Getting Started</h2>
+        <section id="install" aria-labelledby="heading-install">
+            <h2 id="heading-install">Getting Started</h2>
             <p>Install Draft as a Claude Code plugin and initialize your project in under a minute. Also available for <strong>Cursor</strong>, <strong>GitHub Copilot</strong>, and <strong>Gemini</strong>.</p>
 
             <div class="code-block">
@@ -1348,8 +1346,8 @@
         </section>
 
         <!-- Command Reference Section -->
-        <section id="commands">
-            <h2>Command Reference</h2>
+        <section id="commands" aria-labelledby="heading-commands">
+            <h2 id="heading-commands">Command Reference</h2>
             <p>Draft provides 13 slash commands for the full development lifecycle.</p>
 
             <div class="doc-grid">
@@ -1702,8 +1700,8 @@
         </section>
 
         <!-- The Problem Section -->
-        <section id="problem">
-            <h2>The Core Problem</h2>
+        <section id="problem" aria-labelledby="heading-problem">
+            <h2 id="heading-problem">The Core Problem</h2>
             <p>AI coding tools ship fast but create chaos. Without enterprise discipline, they make assumptions, choose arbitrary approaches, and produce code that doesn't fit your architecture.</p>
             
             <div class="problem-grid">
@@ -1731,8 +1729,8 @@
         </section>
 
         <!-- Chat-Driven Development Problems -->
-        <section id="chat-problems">
-            <h2>Why Chat-Driven Development Fails at Scale</h2>
+        <section id="chat-problems" aria-labelledby="heading-chat-problems">
+            <h2 id="heading-chat-problems">Why Chat-Driven Development Fails at Scale</h2>
             <p>Traditional AI chat interfaces have fundamental limitations that compound as projects grow.</p>
 
             <div class="problem-grid">
@@ -1799,8 +1797,8 @@
         </section>
 
         <!-- Core Workflow -->
-        <section id="workflow">
-            <h2>The Draft Workflow</h2>
+        <section id="workflow" aria-labelledby="heading-workflow">
+            <h2 id="heading-workflow">The Draft Workflow</h2>
             <p>Draft solves this through <strong>Context-Driven Development</strong>: structured documents that constrain and guide AI behavior. By treating context as a managed artifact alongside code, your repository becomes the single source of truth.</p>
 
             <div class="flow-diagram">
@@ -1846,8 +1844,8 @@
         </section>
 
         <!-- Constraint Hierarchy -->
-        <section id="constraints">
-            <h2>The Constraint Hierarchy</h2>
+        <section id="constraints" aria-labelledby="heading-constraints">
+            <h2 id="heading-constraints">The Constraint Hierarchy</h2>
             <p>Each document layer narrows the solution space. By the time AI writes code, most decisions are already made.</p>
 
             <div class="hierarchy">
@@ -1888,8 +1886,8 @@
         </section>
 
         <!-- Human Review -->
-        <section id="review">
-            <h2>Review Before Code</h2>
+        <section id="review" aria-labelledby="heading-review">
+            <h2 id="heading-review">Review Before Code</h2>
             <p><strong>This is Draft's most important feature.</strong> In traditional AI coding, you discover the AI's design decisions during code review — after it's already built the wrong thing. With Draft, the AI writes a spec first. You review the approach in a document, not a diff. Disagreements are resolved by editing a paragraph, not rewriting a module.</p>
 
             <div class="comparison">
@@ -1919,8 +1917,8 @@
         </section>
 
         <!-- Collaborative Intake -->
-        <section id="collaborative-intake">
-            <h2>Collaborative Intake: AI as Expert Partner</h2>
+        <section id="collaborative-intake" aria-labelledby="heading-collaborative-intake">
+            <h2 id="heading-collaborative-intake">Collaborative Intake: AI as Expert Partner</h2>
             <p><strong>This changes how specifications are created.</strong> Instead of dumping requirements at the AI and hoping for the best, <code>/draft:new-track</code> conducts a structured conversation where AI acts as an expert collaborator — asking the right questions, contributing knowledge, and building the spec progressively.</p>
 
             <h3>How it works</h3>
@@ -1986,8 +1984,8 @@
         </section>
 
         <!-- Team Workflow -->
-        <section id="team-workflow">
-            <h2>Team Workflow: Alignment Before Code</h2>
+        <section id="team-workflow" aria-labelledby="heading-team-workflow">
+            <h2 id="heading-team-workflow">Team Workflow: Alignment Before Code</h2>
             <p>Draft's most powerful application is team-wide: <strong>every markdown file goes through commit → review → update → merge before a single line of code is written.</strong> By the time implementation starts, the entire team has already agreed on what to build, how to build it, and in what order.</p>
 
             <h3>The PR cycle on documents, not code</h3>
@@ -2053,8 +2051,8 @@
         </section>
 
         <!-- Project Structure -->
-        <section id="structure">
-            <h2>Project Structure</h2>
+        <section id="structure" aria-labelledby="heading-structure">
+            <h2 id="heading-structure">Project Structure</h2>
             <p>Draft uses a set of markdown files to capture project context, specifications, and implementation plans. Each file has a specific purpose.</p>
 
             <div class="doc-grid">
@@ -2134,8 +2132,8 @@
         </section>
 
         <!-- Status Markers -->
-        <section id="status">
-            <h2>Status Markers</h2>
+        <section id="status" aria-labelledby="heading-status">
+            <h2 id="heading-status">Status Markers</h2>
             <p>Simple markers track progress throughout specs and plans. Progress is explicit, not assumed.</p>
 
             <div class="status-list">
@@ -2167,8 +2165,8 @@
         </section>
 
         <!-- Jira Integration -->
-        <section id="jira">
-            <h2>Jira Integration</h2>
+        <section id="jira" aria-labelledby="heading-jira">
+            <h2 id="heading-jira">Jira Integration</h2>
             <p>Sync tracks to Jira with a two-step workflow. Preview before pushing to catch issues early.</p>
 
             <div class="jira-flow">
@@ -2206,8 +2204,8 @@
         </section>
 
         <!-- TDD Workflow -->
-        <section id="tdd">
-            <h2>TDD Workflow</h2>
+        <section id="tdd" aria-labelledby="heading-tdd">
+            <h2 id="heading-tdd">TDD Workflow</h2>
             <p>AI-generated code without tests is a liability — it works until it doesn't, and you have no safety net. When TDD is enabled in <code>workflow.md</code>, Draft forces the AI to <strong>prove its code works</strong> at every step.</p>
 
             <div class="tdd-flow">
@@ -2247,8 +2245,8 @@
         </section>
 
         <!-- Architecture Discovery -->
-        <section id="architecture-discovery">
-            <h2>Architecture Discovery</h2>
+        <section id="architecture-discovery" aria-labelledby="heading-architecture-discovery">
+            <h2 id="heading-architecture-discovery">Architecture Discovery</h2>
             <p>For brownfield projects, <code>/draft:init</code> doesn't just detect your tech stack — it performs a <strong>deep three-phase codebase analysis</strong> that generates <code>architecture.md</code>. This document becomes the persistent context every future track references, so the AI never has to re-analyze your codebase from scratch.</p>
 
             <h3>Why this exists</h3>
@@ -2358,8 +2356,8 @@
         </section>
 
         <!-- Architecture Mode -->
-        <section id="architecture">
-            <h2>Architecture Mode</h2>
+        <section id="architecture" aria-labelledby="heading-architecture">
+            <h2 id="heading-architecture">Architecture Mode</h2>
             <p>Standard Draft gives you specs and plans. Architecture Mode goes deeper — it forces the AI to <strong>design before it codes</strong>. Every module gets a dependency analysis. Every algorithm gets documented in plain language. Every function signature gets approved before implementation begins. This is how you build complex features without the AI creating a tangled mess.</p>
 
             <h3>Why Architecture Mode exists</h3>
@@ -2504,8 +2502,8 @@
         </section>
 
         <!-- Revert Workflow -->
-        <section id="revert">
-            <h2>Revert Workflow</h2>
+        <section id="revert" aria-labelledby="heading-revert">
+            <h2 id="heading-revert">Revert Workflow</h2>
             <p>AI makes mistakes. When it does, you need to undo cleanly — not just <code>git reset --hard</code> and lose everything. Draft's revert understands the logical structure of your work. It knows which commits belong to which task, which tasks belong to which phase, and it updates both git history and Draft's tracking state together. You pick the granularity, review what will change, and confirm before anything happens.</p>
 
             <div class="flow-diagram">
@@ -2546,8 +2544,8 @@
         </section>
 
         <!-- Quality Disciplines -->
-        <section id="quality">
-            <h2>Quality Disciplines</h2>
+        <section id="quality" aria-labelledby="heading-quality">
+            <h2 id="heading-quality">Quality Disciplines</h2>
             <p>AI's default failure mode is to guess at fixes, skip verification, and claim success. Draft embeds three quality agents directly into the workflow — they activate automatically at the right moments and enforce disciplined engineering practices.</p>
 
             <h3>Systematic Debugging</h3>
@@ -2708,8 +2706,8 @@
         </section>
 
         <!-- Economics -->
-        <section id="economics">
-            <h2>The Economics</h2>
+        <section id="economics" aria-labelledby="heading-economics">
+            <h2 id="heading-economics">The Economics</h2>
             <p>Writing specs feels slower. It isn't. The overhead is constant (~20% for simple tasks), but savings scale with complexity, team size, and criticality.</p>
 
             <div class="economics">
@@ -2744,8 +2742,8 @@
         </section>
 
         <!-- Principles -->
-        <section id="principles">
-            <h2>Core Principles</h2>
+        <section id="principles" aria-labelledby="heading-principles">
+            <h2 id="heading-principles">Core Principles</h2>
 
             <div class="principles">
                 <div class="principle">
@@ -2787,8 +2785,8 @@
         </section>
 
         <!-- When to Use -->
-        <section id="when">
-            <h2>When to Use Draft</h2>
+        <section id="when" aria-labelledby="heading-when">
+            <h2 id="heading-when">When to Use Draft</h2>
 
             <h3>Good fit</h3>
             <div class="problem-grid">
@@ -2892,23 +2890,31 @@
 
     <script>
         function toggleCommandCard(card) {
-            card.classList.toggle('expanded');
+            const isExpanded = card.classList.toggle('expanded');
+            card.setAttribute('aria-expanded', isExpanded);
         }
 
-        // Close other cards when opening a new one (optional - remove if you want multiple cards open)
         document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.doc-card');
+            // Only target command-section doc-cards (BUG-M3: scope to #commands only)
+            const cards = document.querySelectorAll('#commands .doc-card');
             cards.forEach(card => {
+                // BUG-H1: Add keyboard accessibility
+                card.setAttribute('tabindex', '0');
+                card.setAttribute('role', 'button');
+                card.setAttribute('aria-expanded', 'false');
+
                 card.addEventListener('click', function(e) {
-                    // Don't close if clicking on a link inside the card
-                    if (e.target.tagName === 'A') return;
-
-                    // Optional: close other cards
-                    // cards.forEach(c => {
-                    //     if (c !== card) c.classList.remove('expanded');
-                    // });
-
+                    // BUG-L3: Account for child elements of links
+                    if (e.target.closest('a')) return;
                     toggleCommandCard(this);
+                });
+
+                card.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        if (e.target.closest('a')) return;
+                        toggleCommandCard(this);
+                    }
                 });
             });
         });

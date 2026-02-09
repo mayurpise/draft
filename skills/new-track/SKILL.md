@@ -9,6 +9,19 @@ You are creating a new track (feature, bug fix, or refactor) for Context-Driven 
 
 **Feature Description:** $ARGUMENTS
 
+## Red Flags - STOP if you're:
+
+- Creating a track without reading existing Draft context (product.md, tech-stack.md, architecture.md)
+- Asking questions without contributing expertise or trade-off analysis
+- Rushing through intake without probing deeper with "why"
+- Generating spec/plan without user confirmation at checkpoints
+- Skipping risk identification
+- Not citing sources when giving architectural advice
+
+**Collaborative understanding, not speed.**
+
+---
+
 ## Pre-Check
 
 1. Verify Draft is initialized:

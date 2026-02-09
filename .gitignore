@@ -16,8 +16,9 @@ Thumbs.db
 # Dependencies
 node_modules/
 
-# Generated / local
-# (none currently)
+# Draft tracks (local dev state)
+/draft/tracks/
+/draft/tracks.md
 
 INDUSTRY_REVIEW.md
 RECOMMENDATIONS.md

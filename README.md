@@ -2,9 +2,9 @@
 
 **Ship fast. Ship right.**
 
-Structure your AI development with specs, plans, and quality gates. No more chaotic AI coding — every feature starts with context, builds through phases, and ends with verification.
+Establish a disciplined AI development lifecycle with clear specifications, structured planning, and defined quality gates. Replace ad hoc AI coding with a phased approach where every feature begins with context, progresses through execution stages, and concludes with verification.
 
-[**Website**](https://getdraft.dev) · [**Docs**](https://getdraft.dev#commands)
+[**getdraft**](https://getdraft.dev) · [**Docs**](https://getdraft.dev#commands)
 
 ---
 

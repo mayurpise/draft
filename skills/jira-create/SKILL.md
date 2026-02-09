@@ -7,6 +7,18 @@ description: Create Jira issues from jira-export.md via MCP. Auto-generates expo
 
 Create Jira epic, stories, and sub-tasks from `jira-export.md` using MCP-Jira. If no export file exists, auto-generates one first.
 
+## Red Flags - STOP if you're:
+
+- Creating Jira issues without reviewing `jira-export.md` first (run `/draft:jira-preview`)
+- Proceeding when MCP-Jira is not configured
+- Creating duplicate issues (check if jira-export.md already has Jira keys)
+- Not verifying the target Jira project before creation
+- Skipping the export file update after issue creation
+
+**Preview before you create. Never create duplicates.**
+
+---
+
 ## Mapping Structure
 
 | Draft Concept | Jira Entity |

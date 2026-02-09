@@ -20,5 +20,10 @@ node_modules/
 /draft/tracks/
 /draft/tracks.md
 
+# Draft reports (generated artifacts)
+/draft/bughunt-report.md
+/draft/validation-report.md
+/draft/tracks/*/validation-report.md
+
 INDUSTRY_REVIEW.md
 RECOMMENDATIONS.md

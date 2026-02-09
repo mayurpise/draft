@@ -422,6 +422,8 @@ Present final plan.md for acknowledgment.
 }
 ```
 
+**Note:** ISO timestamps can use either `Z` or `.000Z` suffix (both valid ISO 8601). No format constraint enforced — both second precision (`2026-02-08T12:00:00Z`) and millisecond precision (`2026-02-08T12:00:00.000Z`) are acceptable.
+
 ### Update `draft/tracks.md`:
 
 Add under Active:

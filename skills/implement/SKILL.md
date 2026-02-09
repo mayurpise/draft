@@ -48,7 +48,13 @@ Scan `plan.md` for the first uncompleted task:
 - `[ ]` = Pending (pick this one)
 - `[~]` = In Progress (resume this one)
 - `[x]` = Completed (skip)
-- `[!]` = Blocked (skip, notify user)
+- `[!]` = Blocked (skip - requires manual intervention)
+
+**IMPORTANT:** If blocked task found, notify user:
+- "Task [task description] is marked `[!]` Blocked"
+- Show the blocked task details and recovery message
+- "Resolve the blockage manually before continuing implementation"
+- Do NOT attempt to implement blocked tasks
 
 If resuming `[~]` task, check for partial work.
 
@@ -218,16 +224,25 @@ After completing each task:
    - Stage only files changed by this task (never `git add .`)
    - `git add <specific files>`
    - `git commit -m "type(<track_id>): task description"`
+   - Get commit SHA: `git rev-parse --short HEAD`
    - Do NOT proceed to the next task without committing
    - Do NOT batch multiple tasks into one commit
 
 2. Update `plan.md`:
    - Change `[ ]` to `[x]` for the completed task
-   - Add the commit SHA next to the task
+   - Add the commit SHA next to the task: `[x] Task description (abc1234)`
 
 3. Update `metadata.json`:
    - Increment `tasks.completed`
    - Update `updated` timestamp
+
+4. **Verify state updates (CRITICAL):**
+   - Read back `plan.md` - confirm task marked `[x]` with SHA
+   - Read back `metadata.json` - confirm `tasks.completed` incremented
+   - If EITHER verification fails:
+     - Mark task as `[!]` Blocked in plan.md
+     - Add recovery message: "State update failed after commit <SHA>. Recovery: manually edit plan.md line X to mark `[x]`, update metadata.json tasks.completed to Y"
+     - HALT - require manual intervention before continuing
 
 4. If `architecture.md` exists for the track:
    - Update module status markers (`[ ]` → `[~]` when first task in module starts, `[~]` → `[x]` when all tasks complete)
@@ -298,7 +313,7 @@ When all phases complete:
      ## Validation
      - [x] Auto-validate at track completion
      ```
-   - If enabled, run `/draft:validate --track <track_id>`
+   - If enabled, run `/draft:validate <track_id>`
    - Check validation results:
      - If block-on-failure enabled AND critical issues found → HALT, require fixes
      - Otherwise, document warnings and continue

@@ -7,6 +7,18 @@ description: Validate codebase quality using Draft context (architecture.md, pro
 
 You are validating codebase quality using Draft context files to ensure architectural conformance, security, and spec compliance.
 
+## Red Flags - STOP if you're:
+
+- Reporting validation results without actually running checks
+- Making up check counts or findings
+- Skipping categories of validation
+- Not generating the actual report file
+- Claiming "no issues" without evidence
+
+**Run the checks. Report the evidence.**
+
+---
+
 ## Usage
 
 - `/draft:validate` - Validate entire codebase
@@ -807,14 +819,6 @@ When called from `/draft:implement` at track completion:
 3. Generate report
 4. If block-on-failure enabled and critical issues found, halt implementation
 5. Otherwise, warn and continue
-
-## Red Flags - STOP if you're:
-
-- Reporting validation results without actually running checks
-- Making up check counts or findings
-- Skipping categories of validation
-- Not generating the actual report file
-- Claiming "no issues" without evidence
 
 ## Notes
 

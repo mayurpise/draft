@@ -1,3 +1,23 @@
+# Jira Configuration & Story Template
+
+## Project Configuration
+
+Place this section in `draft/jira.md` in your project to configure Jira integration.
+
+```yaml
+# Jira Project Configuration
+project_key: PROJ           # Jira project key (required)
+board_id: 123               # Board ID for sprint assignment (optional)
+epic_link_field: customfield_10014  # Custom field ID for epic link (varies by instance)
+story_points_field: customfield_10028  # Custom field ID for story points (optional)
+default_issue_type: Story   # Default issue type for tasks
+default_priority: Medium    # Default priority level
+labels:                     # Labels to apply to all created issues
+  - draft-generated
+```
+
+---
+
 # Jira Story Template (Minimal)
 
 ## Summary

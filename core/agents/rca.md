@@ -246,7 +246,7 @@ If after 3 hypothesis cycles the root cause is not confirmed:
 ## Integration with Draft
 
 1. Bug tracks use the `bugfix` type in `metadata.json`
-2. The spec uses the Bug Specification template (see `/draft:new-track` Step 2B)
+2. The spec uses the Bug Specification template (see `/draft:new-track` Step 3B)
 3. The plan follows the fixed 3-phase structure (Investigate → RCA → Fix)
 4. The RCA Log table in `plan.md` tracks all hypotheses
 5. Root cause summary is added to `spec.md` after Phase 2 completion

@@ -172,7 +172,7 @@ For critical product development, Draft isn't overhead — it's risk mitigation.
 claude plugin install draft
 
 # Or clone and install locally
-git clone https://github.com/anthropics/draft.git ~/.claude/plugins/draft
+git clone https://github.com/mayurpise/draft.git ~/.claude/plugins/draft
 ```
 
 ### Verify Installation
@@ -357,6 +357,34 @@ Re-scans and updates existing context without starting from scratch:
 3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
+
+---
+
+### `/draft:index` — Monorepo Service Index
+
+Aggregates Draft context from multiple services in a monorepo into unified root-level documents. Designed for organizations with multiple services, each with their own `draft/` context.
+
+#### What It Does
+
+1. **Scans** immediate child directories for services (detects `package.json`, `go.mod`, `Cargo.toml`, etc.)
+2. **Reads** each service's `draft/product.md`, `draft/architecture.md`, `draft/tech-stack.md`
+3. **Synthesizes** root-level documents:
+   - `draft/service-index.md` — Service registry with status, tech, and links
+   - `draft/dependency-graph.md` — Inter-service dependency topology
+   - `draft/tech-matrix.md` — Technology distribution across services
+   - `draft/product.md` — Synthesized product vision (if not exists)
+   - `draft/architecture.md` — System-of-systems architecture view
+   - `draft/tech-stack.md` — Org-wide technology standards
+
+#### Flags
+
+- `--init-missing` — Run `/draft:init` on services that lack a `draft/` directory
+
+#### When to Use
+
+- After running `/draft:init` on individual services
+- After adding or removing services from the monorepo
+- Periodically to refresh cross-service context
 
 ---
 
@@ -798,6 +826,7 @@ Natural language patterns that map to Draft commands:
 | User Says | Action |
 |-----------|--------|
 | "set up the project" | Initialize Draft |
+| "index services", "aggregate context" | Monorepo service index |
 | "new feature", "add X" | Create new track |
 | "start implementing" | Execute tasks from plan |
 | "what's the status" | Show progress overview |
@@ -872,7 +901,7 @@ See `core/agents/reviewer.md` for detailed process.
 
 ## Agents
 
-Draft includes three specialized agent behaviors that activate during specific workflow phases.
+Draft includes five specialized agent behaviors that activate during specific workflow phases.
 
 ### Debugger Agent
 
@@ -963,6 +992,23 @@ Activated during `/draft:decompose` and `/draft:implement` (when architecture mo
 3. **Updated** — Maintained when algorithms change during refactoring
 
 See `core/agents/architect.md` for module rules, API surface examples, and cycle-breaking framework.
+
+### Planner Agent
+
+Activated during `/draft:new-track` plan creation and `/draft:decompose`. Provides structured plan generation with phased task breakdown.
+
+**Capabilities:**
+- **Phase decomposition** — Break work into sequential phases with clear goals and verification criteria
+- **Task ordering** — Dependencies between tasks, topological sort for implementation sequence
+- **Integration with Architect Agent** — When architecture.md exists, aligns phases with module boundaries and dependency graph
+
+**Key Principles:**
+- Each phase should be independently verifiable
+- Tasks within a phase should be ordered by dependency
+- Phase boundaries are review checkpoints
+- Plan structure mirrors spec requirements for traceability
+
+See `core/agents/planner.md` for the full planning process and integration workflows.
 
 ---
 

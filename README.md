@@ -813,6 +813,81 @@ monorepo/
 - GENERATED files are created by `/draft:index` and should not be edited
 - Manual sections (between `<!-- MANUAL START -->` and `<!-- MANUAL END -->`) are preserved
 
+## Example Walkthrough
+
+A real-world example: adding user authentication to a task manager app.
+
+### 1. Initialize
+
+```bash
+/draft:init
+```
+
+Draft detects your existing codebase (Express + TypeScript + PostgreSQL), generates `architecture.md` with module dependency diagrams, and creates `product.md`, `tech-stack.md`, `workflow.md`.
+
+### 2. Create Track
+
+```bash
+/draft:new-track "Add user authentication with JWT"
+```
+
+Through collaborative intake, Draft generates:
+
+**spec.md** (excerpt):
+```markdown
+## Requirements
+### Functional
+1. Users can register with email and password
+2. Users can login and receive JWT access + refresh tokens
+3. Protected routes require valid JWT
+4. Tokens refresh automatically before expiry
+
+## Acceptance Criteria
+- [ ] POST /auth/register creates user with hashed password
+- [ ] POST /auth/login returns { accessToken, refreshToken }
+- [ ] GET /api/protected returns 401 without valid token
+- [ ] POST /auth/refresh returns new access token
+```
+
+**plan.md** (excerpt):
+```markdown
+## Phase 1: User Model & Registration
+- [ ] Task 1.1: Create User model with email, passwordHash fields
+- [ ] Task 1.2: Add bcrypt password hashing utility
+- [ ] Task 1.3: Implement POST /auth/register endpoint
+- [ ] Task 1.4: Add input validation (email format, password strength)
+
+## Phase 2: JWT Authentication
+- [ ] Task 2.1: Implement JWT signing/verification service
+- [ ] Task 2.2: Implement POST /auth/login endpoint
+- [ ] Task 2.3: Create auth middleware for protected routes
+- [ ] Task 2.4: Implement POST /auth/refresh endpoint
+```
+
+### 3. Implement
+
+```bash
+/draft:implement
+```
+
+Draft picks up Task 1.1, runs the TDD cycle (write test, implement, refactor), commits, and moves to the next task. At phase boundaries, it runs a two-stage review (spec compliance + code quality).
+
+### 4. Document Decisions
+
+```bash
+/draft:adr "Use bcrypt over argon2 for password hashing"
+```
+
+Creates `draft/adrs/001-use-bcrypt-for-password-hashing.md` documenting the decision context, alternatives considered, and consequences.
+
+### 5. Validate
+
+```bash
+/draft:validate --track add-user-auth
+```
+
+Runs architecture conformance, security scan (OWASP Top 10), spec compliance, and regression risk analysis. Generates a validation report.
+
 ## Troubleshooting
 
 ### "Project already initialized"

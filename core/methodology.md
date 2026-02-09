@@ -44,6 +44,44 @@ plan.md             →  "Phase 1: sortable list, Phase 2: persistence"
 
 Each layer narrows the solution space. By the time AI writes code, most decisions are already made.
 
+### Draft Command Workflow
+
+```mermaid
+graph TD
+    A["/draft:init"] -->|"Creates draft/"| B["/draft:new-track"]
+    B -->|"Creates spec.md + plan.md"| C{Complex?}
+    C -->|Yes| D["/draft:decompose"]
+    C -->|No| E["/draft:implement"]
+    D -->|"Creates architecture.md"| E
+    E -->|"TDD cycle per task"| F{Phase done?}
+    F -->|No| E
+    F -->|Yes| G["Two-Stage Review"]
+    G -->|Pass| H{All phases?}
+    G -->|Fail| E
+    H -->|No| E
+    H -->|Yes| I["Track Complete"]
+
+    J["/draft:status"] -.->|"Check anytime"| E
+    K["/draft:revert"] -.->|"Undo if needed"| E
+    L["/draft:coverage"] -.->|"After implementation"| E
+    M["/draft:validate"] -.->|"At track end"| I
+    N["/draft:bughunt"] -.->|"Quality check"| E
+    O["/draft:review"] -.->|"Code review"| G
+    P["/draft:adr"] -.->|"Document decisions"| B
+    Q["/draft:jira-preview"] -.->|"Export to Jira"| B
+```
+
+### Context Hierarchy
+
+```mermaid
+graph LR
+    P["product.md<br/><i>What & Why</i>"] --> T["tech-stack.md<br/><i>How (tools)</i>"]
+    T --> A["architecture.md<br/><i>How (structure)</i>"]
+    A --> S["spec.md<br/><i>What (specific)</i>"]
+    S --> PL["plan.md<br/><i>When & Order</i>"]
+    PL --> Code["Implementation"]
+```
+
 ### Keeping AI Constrained
 
 Without constraints, AI will:

@@ -78,7 +78,7 @@ You are a systematic debugging agent. When a task is blocked (`[!]`), follow thi
 2. **Implement minimal fix** - Address root cause, nothing extra
 3. **Run regression test** - Verify it passes
 4. **Run full test suite** - No other breakage
-5. **Document root cause** - Update plan.md with findings
+5. **Document root cause** - Update spec.md with findings
 
 **Output:** Fix committed with regression test.
 

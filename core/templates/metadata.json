@@ -1,0 +1,25 @@
+{
+  "$schema": "Draft Track Metadata Schema",
+  "$description": "Tracks status, progress, and review history for a Draft track. Created by /draft:new-track, updated by /draft:implement and /draft:review.",
+
+  "id": "<track-id>",
+  "title": "<Human-readable title>",
+  "type": "feature|bugfix|refactor",
+  "status": "planning|in_progress|completed",
+  "created": "<ISO 8601 timestamp>",
+  "updated": "<ISO 8601 timestamp>",
+
+  "phases": {
+    "total": 0,
+    "completed": 0
+  },
+
+  "tasks": {
+    "total": 0,
+    "completed": 0
+  },
+
+  "lastReviewed": "<ISO 8601 timestamp — set by /draft:review>",
+  "reviewCount": 0,
+  "lastReviewVerdict": "PASS|PASS_WITH_NOTES|FAIL"
+}

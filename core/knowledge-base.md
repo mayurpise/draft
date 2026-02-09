@@ -53,7 +53,6 @@ AI guidance during track creation must be grounded in vetted sources. When provi
 
 ### Cloud Native
 - **CNCF Patterns** — Containers, service mesh, observability, declarative configuration
-- **Twelve-Factor App** — Cloud-native application methodology
 - **GitOps Principles** — Declarative, versioned, automated, auditable
 
 ---

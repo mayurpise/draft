@@ -223,11 +223,6 @@ emit_core_files() {
     for core_file in "${CORE_FILES[@]}"; do
         local full_path="$CORE_DIR/$core_file"
         if [[ -f "$full_path" ]]; then
-            local file_name
-            file_name=$(basename "$core_file")
-            local dir_name
-            dir_name=$(dirname "$core_file")
-
             echo ""
             echo "---"
             echo ""

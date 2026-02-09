@@ -653,6 +653,38 @@ Requires MCP-Jira server configuration and `draft/jira.md` with project key.
 
 ---
 
+### `/draft:adr` — Architecture Decision Records
+
+Documents significant technical decisions with context, alternatives, and consequences. ADRs capture **why** a decision was made, not just what was decided.
+
+#### When to Use
+
+Create an ADR during or after `/draft:new-track` when making architectural decisions:
+- Adopting a new technology or framework
+- Changing system architecture or module boundaries
+- Selecting between multiple viable approaches with trade-offs
+- Establishing patterns or conventions that constrain future work
+
+Skip ADRs for trivial decisions (variable naming, formatting) or reversible choices.
+
+#### ADR Structure
+
+Each ADR contains:
+- **Context** — The issue or forces driving the decision (technical, business, organizational)
+- **Decision** — What we're proposing/doing, stated in active voice ("We will...")
+- **Alternatives Considered** — At least 2 alternatives with pros/cons and rejection rationale
+- **Consequences** — Positive outcomes, negative trade-offs, and risks with mitigations
+
+#### Storage & Linking
+
+ADRs are stored at `draft/adrs/NNNN-title.md` (e.g., `001-use-postgresql.md`). When created within a track context, the ADR file references the track ID in its metadata for traceability. Use `/draft:adr list` to see all decisions, `/draft:adr supersede <number>` to mark an ADR as replaced.
+
+#### Status Lifecycle
+
+`Proposed` (awaiting review) → `Accepted` (approved and in effect) → `Deprecated` (context changed) or `Superseded by ADR-XXX` (replaced by newer decision).
+
+---
+
 ### `/draft:validate` — Codebase Quality Validation
 
 Validates codebase quality using Draft context (architecture.md, tech-stack.md, product.md). Runs architecture conformance, security scan, and performance analysis.

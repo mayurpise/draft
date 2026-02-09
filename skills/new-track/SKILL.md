@@ -401,6 +401,19 @@ Present final plan.md for acknowledgment.
 
 ## Step 8: Create Metadata & Update Tracks
 
+### Pre-Validation
+
+Before creating metadata, verify final files exist:
+
+```bash
+ls draft/tracks/<track_id>/spec.md draft/tracks/<track_id>/plan.md 2>/dev/null
+```
+
+If either missing:
+- ERROR: "Track creation incomplete. Missing files: [list missing]"
+- "Expected: spec.md and plan.md in draft/tracks/<track_id>/"
+- Halt - do not create metadata.json or update tracks.md
+
 ### Create `draft/tracks/<track_id>/metadata.json`:
 
 ```json
@@ -438,11 +451,29 @@ Add under Active:
 - **Path:** `./tracks/<track_id>/`
 ```
 
-### Cleanup
+### Cleanup (Defensive)
 
-Remove draft files if they still exist:
-- Delete `spec-draft.md` (now `spec.md`)
-- Delete `plan-draft.md` (now `plan.md`)
+Remove draft files if they still exist (defensive cleanup for failed renames):
+
+```bash
+rm -f draft/tracks/<track_id>/spec-draft.md
+rm -f draft/tracks/<track_id>/plan-draft.md
+```
+
+The `-f` flag ensures idempotent cleanup whether files exist or not.
+
+### Post-Validation
+
+Verify tracks.md was updated successfully:
+
+```bash
+grep "<track_id>" draft/tracks.md
+```
+
+If not found:
+- ERROR: "Failed to update tracks.md with new track entry"
+- "Expected track_id '<track_id>' in draft/tracks.md Active section"
+- Provide recovery: "Manually add track entry to draft/tracks.md or remove draft/tracks/<track_id>/ and retry"
 
 ---
 

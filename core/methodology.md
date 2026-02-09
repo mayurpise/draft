@@ -587,6 +587,64 @@ Requires MCP-Jira server configuration and `draft/jira.md` with project key.
 
 ---
 
+### `/draft:validate` — Codebase Quality Validation
+
+Validates codebase quality using Draft context (architecture.md, tech-stack.md, product.md). Runs architecture conformance, security scan, and performance analysis.
+
+#### Scope
+
+- **Track-level:** `--track <id>` — validates files touched by a specific track
+- **Project-level:** `--project` — validates entire codebase
+
+Generates report at `draft/tracks/<id>/validation-report.md` (track) or `draft/validation-report.md` (project). Non-blocking by default — reports warnings without halting workflow.
+
+---
+
+### `/draft:bughunt` — Exhaustive Bug Discovery
+
+Systematic bug hunt across 12 dimensions: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, tests, and maintainability.
+
+#### Process
+
+1. Load Draft context (architecture, tech-stack, product)
+2. For tracks: verify implementation matches spec requirements
+3. Analyze code across all 12 dimensions
+4. Verify each finding (trace code paths, check for mitigations, eliminate false positives)
+5. Generate severity-ranked report with fix recommendations
+
+Generates report at `draft/bughunt-report.md` or `draft/tracks/<id>/bughunt-report.md`.
+
+---
+
+### `/draft:review` — Code Review Orchestrator
+
+Standalone review command that orchestrates two-stage code review with optional quality tool integration.
+
+#### Track-Level Review
+
+Reviews a track's implementation against its spec.md and plan.md:
+- **Stage 1:** Spec Compliance — verifies all requirements and acceptance criteria are met
+- **Stage 2:** Code Quality — architecture, error handling, testing, maintainability (only if Stage 1 passes)
+
+Extracts commit SHAs from plan.md to determine diff range. Supports fuzzy track matching.
+
+#### Project-Level Review
+
+Reviews arbitrary changes (code quality only, no spec compliance):
+- `--project` — uncommitted changes
+- `--files <pattern>` — specific file patterns
+- `--commits <range>` — commit range
+
+#### Quality Integration
+
+- `--with-validate` — include `/draft:validate` results
+- `--with-bughunt` — include `/draft:bughunt` findings
+- `--full` — run both validate and bughunt
+
+Generates unified report with deduplication across tools.
+
+---
+
 ## Architecture Mode
 
 Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `architecture.md` exists** - no manual configuration needed.

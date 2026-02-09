@@ -7,7 +7,7 @@ Master registry of all tracks (features, bug fixes, refactors).
 ## Active
 
 ### enterprise-readiness - Enterprise Readiness Features
-- **Status:** [ ] Planning
+- **Status:** [~] In Progress
 - **Created:** 2026-02-07
 - **Phases:** 0/4
 - **Path:** `./tracks/enterprise-readiness/`

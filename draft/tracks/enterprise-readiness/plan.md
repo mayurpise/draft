@@ -2,7 +2,7 @@
 
 **Track ID:** enterprise-readiness
 **Spec:** ./spec.md
-**Status:** [ ] Not Started
+**Status:** [~] In Progress
 
 ## Overview
 
@@ -15,29 +15,33 @@ Implement 11 enterprise features from RECOMMENDATIONS.md to achieve Fortune 500 
 **Verification:** All SKILL.md files contain "## Red Flags - STOP if you're:" section
 
 ### Tasks
-- [ ] **Task 1.1:** Add Red Flags section to skills/bughunt/SKILL.md
+- [x] **Task 1.1:** Add Red Flags section to skills/bughunt/SKILL.md `8358984`
   - Files: `skills/bughunt/SKILL.md`
   - Red flags: hunting without context, reporting without reproduction, fixing without understanding root cause
 
-- [ ] **Task 1.2:** Add Red Flags section to skills/draft/SKILL.md
+- [x] **Task 1.2:** Add Red Flags section to skills/draft/SKILL.md `ba4f8f6`
   - Files: `skills/draft/SKILL.md`
   - Red flags: jumping to implementation, not reading existing context, skipping command guidance
 
-- [ ] **Task 1.3:** Add Red Flags section to skills/implement/SKILL.md
+- [x] **Task 1.3:** Add Red Flags section to skills/implement/SKILL.md `a4e27af`
   - Files: `skills/implement/SKILL.md`
   - Red flags: implementing without approved plan, skipping TDD when enabled, marking complete without verification
 
-- [ ] **Task 1.4:** Add Red Flags section to skills/init/SKILL.md
+- [x] **Task 1.4:** Add Red Flags section to skills/init/SKILL.md `dc3ddaa`
   - Files: `skills/init/SKILL.md`
   - Red flags: re-initializing without confirmation, skipping brownfield analysis, rushing through product questions
 
-- [ ] **Task 1.5:** Add Red Flags section to skills/jira-create/SKILL.md
+- [x] **Task 1.5:** Add Red Flags section to skills/jira-create/SKILL.md `9994453`
   - Files: `skills/jira-create/SKILL.md`
   - Red flags: creating without preview review, no MCP configured, creating duplicates
 
-- [ ] **Task 1.6:** Add Red Flags section to skills/jira-preview/SKILL.md
+- [x] **Task 1.6:** Add Red Flags section to skills/jira-preview/SKILL.md `5a3f302`
   - Files: `skills/jira-preview/SKILL.md`
   - Red flags: generating without approved plan, inconsistent story points, missing sub-tasks
+
+- [x] **Task 1.7:** Add Red Flags section to skills/index/SKILL.md `c03719d` (bonus)
+
+- [x] **Task 1.8:** Add Red Flags section to skills/review/SKILL.md `2b96e58` (bonus)
 
 ---
 

@@ -735,6 +735,37 @@ Validates codebase quality using Draft context (architecture.md, tech-stack.md, 
 
 Generates report at `draft/tracks/<id>/validation-report.md` (track) or `draft/validation-report.md` (project). Non-blocking by default — reports warnings without halting workflow.
 
+#### Validation Categories
+
+**Architecture Conformance**
+- Module boundary violations (e.g., presentation layer importing database models)
+- Circular dependencies between modules
+- Unauthorized dependencies not listed in tech-stack.md
+- API surface violations (internal modules exposed publicly)
+
+**Security Scan**
+- OWASP Top 10 patterns (SQL injection, XSS, broken authentication, insecure deserialization)
+- Hardcoded secrets or credentials in source code
+- Insecure dependencies with known CVEs
+- Missing input validation at system boundaries
+- Insufficient error handling exposing sensitive information
+
+**Performance Analysis**
+- Bundle size exceeding thresholds defined in product.md
+- N+1 query patterns in database access
+- Algorithmic complexity hotspots (O(n²) or worse in critical paths)
+- Unindexed database queries
+- Memory leaks or resource cleanup issues
+
+#### Report Structure
+
+Each finding includes:
+- **Severity**: Critical (must fix), High (should fix), Medium (consider fixing), Low (informational)
+- **Location**: File path and line number
+- **Evidence**: Code snippet demonstrating the issue
+- **Fix**: Recommended remediation with examples
+- **Draft Context**: How this violates architecture.md or tech-stack.md constraints
+
 ---
 
 ### `/draft:bughunt` — Exhaustive Bug Discovery

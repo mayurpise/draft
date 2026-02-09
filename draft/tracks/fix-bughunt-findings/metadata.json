@@ -1,0 +1,16 @@
+{
+  "id": "fix-bughunt-findings",
+  "title": "Fix Bug Hunt Findings",
+  "type": "bugfix",
+  "status": "completed",
+  "created": "2026-02-08T13:00:00Z",
+  "updated": "2026-02-08T13:30:00Z",
+  "phases": {
+    "total": 1,
+    "completed": 1
+  },
+  "tasks": {
+    "total": 5,
+    "completed": 5
+  }
+}

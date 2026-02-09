@@ -16,6 +16,12 @@ Master registry of all tracks (features, bug fixes, refactors).
 
 ## Completed
 
+### fix-bughunt-findings - Fix Bug Hunt Findings
+- **Status:** [x] Completed
+- **Completed:** 2026-02-08
+- **Phases:** 1/1
+- **Path:** `./tracks/fix-bughunt-findings/`
+
 ### review-skill-polish - Polish Review Skill
 - **Status:** [x] Completed
 - **Completed:** 2026-02-08

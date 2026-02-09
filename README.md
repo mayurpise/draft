@@ -84,7 +84,7 @@ Commands use `@draft` syntax.
 
 ## Why Draft?
 
-AI tools are fast but chaotic. Draft constrains them with **Context-Driven Development**:
+AI tools are fast but unstructured. Draft applies Context-Driven Development to impose clear boundaries: explicit context, phased execution, and built-in verification, ensuring outputs remain aligned, predictable, and production-ready.
 
 ```
 product.md      →  "Build a task manager"

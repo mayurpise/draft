@@ -36,6 +36,7 @@ When `draft/` exists in the project, always consider:
 | `draft validate [--track <id>]` | Codebase quality validation |
 | `draft bughunt [--track <id>]` | Systematic bug discovery |
 | `draft review [--track <id>]` | Two-stage code review |
+| `draft adr [title]` | Architecture Decision Records |
 | `draft status` | Show progress overview |
 | `draft revert` | Git-aware rollback |
 | `draft jira-preview [track-id]` | Generate jira-export.md for review |
@@ -59,6 +60,7 @@ Recognize these natural language patterns:
 | "undo", "revert" | Run revert |
 | "preview jira", "export to jira" | Run jira-preview |
 | "create jira", "push to jira" | Run jira-create |
+| "document decision", "create ADR" | Create architecture decision record |
 | "help", "what commands" | Show draft overview |
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |
@@ -88,6 +90,18 @@ Recognize and use these throughout plan.md:
 When user says "help" or "draft":
 
 Draft is a methodology for structured software development: **Context → Spec & Plan → Implement**
+
+## Red Flags - STOP if you're:
+
+- Jumping straight to implementation without reading existing Draft context
+- Suggesting `draft implement` before a track has an approved spec and plan
+- Not checking `draft/tracks.md` for existing active tracks before creating new ones
+- Skipping the recommended command and going freeform
+- Ignoring existing product.md, tech-stack.md, or workflow.md context
+
+**Read context first. Follow the workflow.**
+
+---
 
 ## Available Commands
 
@@ -175,6 +189,19 @@ You can also use natural language:
 When user says "init draft" or "draft init [refresh]":
 
 You are initializing a Draft project for Context-Driven Development.
+
+## Red Flags - STOP if you're:
+
+- Re-initializing a project that already has `draft/` without using `refresh` mode
+- Skipping brownfield analysis for an existing codebase
+- Rushing through product definition questions without probing for detail
+- Auto-generating tech-stack.md without verifying detected dependencies
+- Not presenting architecture.md for developer review before proceeding
+- Overwriting existing tracks.md (this destroys track history)
+
+**Initialize once, refresh to update. Never overwrite without confirmation.**
+
+---
 
 ## Pre-Check
 
@@ -505,6 +532,18 @@ Next steps:
 When user says "index services" or "draft index [--init-missing]":
 
 You are building a federated knowledge index for a monorepo with multiple services.
+
+## Red Flags - STOP if you're:
+
+- Running at a non-root directory in a monorepo
+- Indexing services that haven't been initialized with `draft init`
+- Overwriting root-level context without confirming with the user
+- Aggregating without verifying each service's draft/ directory exists
+- Skipping dependency mapping between services
+
+**Aggregate from initialized services only. Verify before overwriting.**
+
+---
 
 ## Pre-Check
 
@@ -1132,6 +1171,64 @@ Create the track directory and draft files immediately with skeleton structure:
 ## Technical Approach
 [To be developed through intake conversation]
 
+## Success Metrics
+<!-- Remove metrics that don't apply -->
+
+| Category | Metric | Target | Measurement |
+|----------|--------|--------|-------------|
+| Performance | [e.g., API response time] | [e.g., <200ms p95] | [e.g., APM dashboard] |
+| Quality | [e.g., Test coverage] | [e.g., >90%] | [e.g., CI coverage report] |
+| Business | [e.g., User adoption rate] | [e.g., 50% in 30 days] | [e.g., Analytics] |
+| UX | [e.g., Task completion rate] | [e.g., >95%] | [e.g., User testing] |
+
+## Stakeholders & Approvals
+<!-- Add roles relevant to your organization -->
+
+| Role | Name | Approval Required | Status |
+|------|------|-------------------|--------|
+| Product Owner | [name] | Spec sign-off | [ ] |
+| Tech Lead | [name] | Architecture review | [ ] |
+| Security | [name] | Security review (if applicable) | [ ] |
+| QA | [name] | Test plan review | [ ] |
+
+### Approval Gates
+- [ ] Spec approved by Product Owner
+- [ ] Architecture reviewed by Tech Lead
+- [ ] Security review completed (if touching auth, data, or external APIs)
+- [ ] Test plan reviewed by QA
+
+## Risk Assessment
+<!-- Score: Probability (1-5) × Impact (1-5). Risks scoring ≥9 require mitigation plans. -->
+
+| Risk | Probability | Impact | Score | Mitigation |
+|------|-------------|--------|-------|------------|
+| [e.g., Third-party API instability] | 3 | 4 | 12 | [e.g., Circuit breaker + fallback cache] |
+| [e.g., Data migration failure] | 2 | 5 | 10 | [e.g., Dry-run migration + rollback script] |
+| [e.g., Scope creep] | 3 | 3 | 9 | [e.g., Strict non-goals enforcement] |
+
+## Deployment Strategy
+<!-- Define rollout approach for production delivery -->
+
+### Rollout Phases
+1. **Canary** (1-5% traffic) — Validate core flows, monitor error rates
+2. **Limited GA** (25%) — Expand to subset, watch performance metrics
+3. **Full GA** (100%) — Complete rollout
+
+### Feature Flags
+- Flag name: `[feature_flag_name]`
+- Default: `off`
+- Kill switch: [yes/no]
+
+### Rollback Plan
+- Trigger: [e.g., error rate >1%, latency >500ms p95]
+- Process: [e.g., disable feature flag, revert deployment]
+- Data rollback: [e.g., migration revert script, N/A]
+
+### Monitoring
+- Dashboard: [link or name]
+- Alerts: [e.g., PagerDuty rule for error rate spike]
+- Key metrics: [e.g., error rate, latency, throughput]
+
 ## Open Questions
 [Tracked during conversation]
 
@@ -1701,6 +1798,20 @@ When user says "implement" or "draft implement":
 
 You are implementing tasks from the active track's plan following the TDD workflow.
 
+## Red Flags - STOP if you're:
+
+- Implementing without an approved spec and plan
+- Skipping TDD cycle when workflow.md has TDD enabled
+- Marking a task `[x]` without fresh verification evidence
+- Batching multiple tasks into a single commit
+- Proceeding past a phase boundary without running the two-stage review
+- Writing production code before a failing test (when TDD is strict)
+- Assuming a test passes without actually running it
+
+**Verify before you mark complete. One task, one commit.**
+
+---
+
 ## Step 1: Load Context
 
 1. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)
@@ -2028,6 +2139,35 @@ Next: Run `draft status` to see project overview."
 - Ask clarifying questions
 - Reference spec.md for requirements
 - Don't proceed with assumptions
+
+## Tech Debt Log
+
+During implementation, track technical debt decisions in the track's plan.md:
+
+When you encounter a shortcut, workaround, or known-imperfect solution during implementation:
+
+1. Add an entry to the `## Tech Debt` section at the bottom of plan.md
+2. Use this format:
+
+```markdown
+## Tech Debt
+
+| ID | Location | Description | Severity | Payback Trigger |
+|----|----------|-------------|----------|-----------------|
+| TD-1 | `src/api/handler.ts:45` | Hardcoded timeout instead of config | Low | When adding config system |
+| TD-2 | `src/auth/session.ts:12` | In-memory session store | Medium | Before horizontal scaling |
+```
+
+**Severity levels:**
+- **Low** — Cosmetic or minor maintainability issue
+- **Medium** — Will cause problems at scale or in specific scenarios
+- **High** — Actively impeding development or risking production issues
+
+**Payback Trigger** — The condition or event that should trigger debt repayment (e.g., "before launch", "when adding feature X", "before scaling past N users").
+
+Only log genuine debt — intentional shortcuts with known consequences. Not everything imperfect is debt.
+
+---
 
 ## Progress Reporting
 
@@ -2458,11 +2598,25 @@ Run all 5 validators:
 
 #### 3.4 Security Scan
 
-**Goal:** Detect common security vulnerabilities (OWASP Top 10 basics).
+**Goal:** Detect common security vulnerabilities aligned with OWASP Top 10 (2021).
+
+**OWASP Top 10 Coverage:**
+| # | OWASP Category | Check |
+|---|----------------|-------|
+| A01 | Broken Access Control | Auth/authz checks below |
+| A02 | Cryptographic Failures | Weak hashing, hardcoded secrets |
+| A03 | Injection | SQL injection, command injection |
+| A04 | Insecure Design | Missing input validation |
+| A05 | Security Misconfiguration | Cookie flags, CORS, headers |
+| A06 | Vulnerable Components | Dependency audit |
+| A07 | Auth Failures | JWT misuse, session handling |
+| A08 | Data Integrity Failures | Insecure deserialization |
+| A09 | Logging Failures | Missing security event logging |
+| A10 | SSRF | Server-side request forgery patterns |
 
 **Process:**
 
-1. **Hardcoded Secrets Detection:**
+1. **Hardcoded Secrets Detection (A02):**
    ```bash
    # API keys, tokens, passwords in source code
    grep -rE "(api[_-]?key|API[_-]?KEY|secret|SECRET|password|PASSWORD|token|TOKEN)\s*=\s*['\"][^'\"]{8,}" src/ --exclude="*.test.*" --exclude="*.spec.*"
@@ -2479,7 +2633,7 @@ Run all 5 validators:
    - Exclude: `.env.example`, test fixtures, documentation
    - Severity: ✗ Critical
 
-2. **SQL Injection Patterns:**
+2. **Injection Patterns (A03):**
    ```bash
    # String concatenation in queries (JavaScript/TypeScript)
    grep -rE "(query|execute)\s*\(\s*['\"`].*\$\{|query.*\+\s*[a-zA-Z]" src/ --include="*.ts" --include="*.js"
@@ -2492,7 +2646,7 @@ Run all 5 validators:
    ```
    - Severity: ✗ Critical
 
-3. **Missing Input Validation:**
+3. **Missing Input Validation (A04):**
    ```bash
    # API routes without validation middleware
    # Check if request parameters used directly without validation
@@ -2503,7 +2657,7 @@ Run all 5 validators:
    ```
    - Severity: ⚠ Warning (manual review needed)
 
-4. **Insecure Auth/Session Handling:**
+4. **Insecure Auth/Session Handling (A01, A07):**
    ```bash
    # JWT without secret validation
    grep -rE "jwt\.decode\(" src/ --include="*.ts" --include="*.js"  # Should use verify, not decode
@@ -2516,7 +2670,7 @@ Run all 5 validators:
    ```
    - Severity: ✗ Critical (JWT, weak hashing), ⚠ Warning (cookie flags)
 
-5. **Cross-Site Scripting (XSS):**
+5. **Cross-Site Scripting (A03 — XSS):**
    ```bash
    # Dangerous HTML insertion
    grep -rE "innerHTML\s*=|dangerouslySetInnerHTML" src/ --include="*.tsx" --include="*.jsx"
@@ -2525,6 +2679,65 @@ Run all 5 validators:
    grep -rE "\{\{.*req\.(body|params|query)" src/
    ```
    - Severity: ✗ Critical
+
+6. **Vulnerable Dependencies (A06):**
+   ```bash
+   # Node.js
+   npm audit --json 2>/dev/null | head -50
+
+   # Python
+   pip audit 2>/dev/null || safety check 2>/dev/null
+
+   # Go
+   govulncheck ./... 2>/dev/null
+   ```
+   - If audit tool unavailable, check for known-vulnerable version patterns
+   - Severity: ✗ Critical (known CVEs), ⚠ Warning (outdated dependencies)
+
+7. **CSRF Protection (A01):**
+   ```bash
+   # State-changing endpoints without CSRF tokens
+   grep -rE "(app\.(post|put|delete|patch))" src/ --include="*.ts" --include="*.js" | grep -v "csrf\|CSRF\|csrfToken"
+
+   # Forms without CSRF tokens
+   grep -rE "<form.*method=['\"]post['\"]" src/ | grep -v "csrf\|_token"
+   ```
+   - Severity: ⚠ Warning (requires manual review of auth mechanism — token-based APIs may not need CSRF)
+
+8. **Insecure Deserialization (A08):**
+   ```bash
+   # Unsafe deserialization (Python)
+   grep -rE "pickle\.loads|yaml\.load\((?!.*Loader)" --include="*.py"
+
+   # Unsafe JSON parsing from untrusted sources (Node.js)
+   grep -rE "eval\(|new Function\(" src/ --include="*.ts" --include="*.js"
+
+   # Java unsafe deserialization
+   grep -rE "ObjectInputStream|readObject\(\)" --include="*.java"
+   ```
+   - Severity: ✗ Critical
+
+9. **Missing Security Logging (A09):**
+   ```bash
+   # Auth endpoints without logging
+   grep -rE "(login|logout|register|password|auth)" src/ --include="*.ts" --include="*.js" -l | while read f; do
+     grep -L "log\.\|logger\.\|console\.log\|winston\.\|pino\." "$f"
+   done
+
+   # Failed auth attempts should be logged
+   grep -rE "(unauthorized|forbidden|401|403)" src/ | grep -v "log\|logger"
+   ```
+   - Severity: ⚠ Warning
+
+10. **Server-Side Request Forgery (A10):**
+    ```bash
+    # URL from user input passed to fetch/request
+    grep -rE "(fetch|axios|request|http\.get)\s*\(\s*(req\.|params\.|query\.|body\.)" src/ --include="*.ts" --include="*.js"
+
+    # Python
+    grep -rE "(requests\.get|urlopen)\s*\(.*request\." --include="*.py"
+    ```
+    - Severity: ✗ Critical
 
 **Output format:**
 ```
@@ -2982,6 +3195,20 @@ When user says "hunt bugs" or "draft bughunt [--track <id>]":
 
 You are conducting an exhaustive bug hunt on this Git repository, enhanced by Draft context when available.
 
+## Red Flags - STOP if you're:
+
+- Hunting for bugs without reading Draft context first (architecture.md, tech-stack.md, product.md)
+- Reporting a finding without reproducing or tracing the code path
+- Fixing bugs instead of reporting them (bughunt reports, it doesn't fix)
+- Assuming a pattern is buggy without checking if it's used successfully elsewhere
+- Skipping the verification protocol (every bug needs evidence)
+- Making up file locations or line numbers without reading the actual code
+- Reporting framework-handled concerns as bugs without checking the docs
+
+**Verify before you report. Evidence over assumptions.**
+
+---
+
 ## Pre-Check
 
 ### 0. Capture Git Context
@@ -3363,6 +3590,18 @@ Report structure:
 When user says "review code" or "draft review [--track <id>] [--full]":
 
 You are conducting a code review using Draft's Context-Driven Development methodology.
+
+## Red Flags - STOP if you're:
+
+- Reviewing without reading the track's spec.md and plan.md first
+- Reporting findings without reading the actual code
+- Skipping spec compliance stage and jumping to code quality
+- Making up file locations or line numbers
+- Claiming "no issues" without systematic analysis evidence
+
+**Read before you review. Evidence over opinion.**
+
+---
 
 ## Overview
 
@@ -4033,6 +4272,208 @@ draft review --track my-feature --with-validate
 
 ---
 
+## ADR Command
+
+When user says "document decision" or "draft adr [title]":
+
+You are creating or managing Architecture Decision Records (ADRs) for this project.
+
+## Red Flags - STOP if you're:
+
+- Creating an ADR without understanding the decision context
+- Documenting trivial decisions that don't warrant an ADR (e.g., variable naming)
+- Writing an ADR after the fact without capturing the original reasoning
+- Listing alternatives without genuine pros/cons analysis
+- Skipping the "Consequences" section (the most valuable part)
+- Not checking existing ADRs for conflicts or superseded decisions
+
+**ADRs capture WHY, not just WHAT. Every decision needs alternatives considered.**
+
+---
+
+## Pre-Check
+
+1. Verify Draft is initialized:
+```bash
+ls draft/ 2>/dev/null
+```
+
+If `draft/` doesn't exist:
+- Tell user: "Project not initialized. Run `draft init` first."
+- Stop here.
+
+2. Check for existing ADR directory:
+```bash
+ls draft/adrs/ 2>/dev/null
+```
+
+If `draft/adrs/` doesn't exist, create it:
+```bash
+mkdir -p draft/adrs
+```
+
+## Step 1: Parse Arguments
+
+Check for arguments:
+- `draft adr` — Interactive mode: ask about the decision
+- `draft adr "decision title"` — Create ADR with given title
+- `draft adr list` — List all existing ADRs
+- `draft adr supersede <number>` — Mark an ADR as superseded
+
+### List Mode
+
+If argument is `list`:
+1. Read all files in `draft/adrs/`
+2. Display summary table:
+
+```
+Architecture Decision Records
+
+| # | Title | Status | Date |
+|---|-------|--------|------|
+| 001 | Use PostgreSQL for primary storage | Accepted | 2026-01-15 |
+| 002 | Adopt event-driven architecture | Proposed | 2026-02-01 |
+| 003 | Replace REST with GraphQL | Superseded by #005 | 2026-02-03 |
+```
+
+Stop here after listing.
+
+### Supersede Mode
+
+If argument is `supersede <number>`:
+1. Read the ADR file `draft/adrs/<number>-*.md`
+2. Change status from `Accepted` to `Superseded by ADR-<new_number>`
+3. Ask what new ADR supersedes it, or create the new one
+4. Stop here after updating.
+
+## Step 2: Gather Decision Context
+
+If in interactive mode (no title provided), ask:
+
+1. "What technical decision needs to be documented?"
+2. "What's the context? What forces are driving this decision?"
+3. "What alternatives did you consider?"
+
+If title provided, proceed directly with the title.
+
+## Step 3: Load Project Context
+
+Read relevant Draft context:
+- `draft/architecture.md` — Current architecture patterns and constraints
+- `draft/tech-stack.md` — Current technology choices
+- `draft/product.md` — Product requirements that influence the decision
+
+Cross-reference the decision against existing context:
+- Does it align with documented architecture patterns?
+- Does it introduce a new technology not in tech-stack.md?
+- Does it affect product requirements?
+
+## Step 4: Determine ADR Number
+
+```bash
+# Count existing ADRs and increment
+ls draft/adrs/*.md 2>/dev/null | wc -l
+```
+
+Next number = existing count + 1, zero-padded to 3 digits (001, 002, ...).
+
+## Step 5: Create ADR File
+
+Create `draft/adrs/<number>-<kebab-case-title>.md`:
+
+```markdown
+# ADR-<number>: <Title>
+
+**Date:** <ISO date>
+**Status:** Proposed
+**Deciders:** [names or roles]
+
+## Context
+
+[What is the issue that we're seeing that is motivating this decision or change?]
+[What forces are at play (technical, business, organizational)?]
+
+## Decision
+
+[What is the change that we're proposing and/or doing?]
+[State the decision in active voice: "We will..."]
+
+## Alternatives Considered
+
+### Alternative 1: <name>
+- **Pros:** [advantages]
+- **Cons:** [disadvantages]
+- **Why rejected:** [specific reason]
+
+### Alternative 2: <name>
+- **Pros:** [advantages]
+- **Cons:** [disadvantages]
+- **Why rejected:** [specific reason]
+
+## Consequences
+
+### Positive
+- [Benefit 1]
+- [Benefit 2]
+
+### Negative
+- [Trade-off 1]
+- [Trade-off 2]
+
+### Risks
+- [Risk and mitigation]
+
+## References
+
+- [Link to relevant discussion, RFC, or documentation]
+- [Related ADRs: ADR-xxx]
+```
+
+## Step 6: Present for Review
+
+Present the ADR to the user for review:
+
+```
+ADR-<number> created: <title>
+File: draft/adrs/<number>-<kebab-case-title>.md
+Status: Proposed
+
+Review the ADR and update status to "Accepted" when approved.
+```
+
+## Step 7: Update References (if applicable)
+
+If the decision affects existing Draft context:
+
+1. **tech-stack.md** — If introducing or removing technology, note: "Consider updating draft/tech-stack.md to reflect this decision."
+2. **architecture.md** — If changing architectural patterns, note: "Consider updating draft/architecture.md to reflect this decision."
+3. **Superseded ADRs** — If this decision replaces a previous one, update the old ADR's status.
+
+## ADR Status Lifecycle
+
+```
+Proposed → Accepted → [Deprecated | Superseded by ADR-xxx]
+```
+
+- **Proposed** — Decision documented, awaiting review
+- **Accepted** — Decision approved and in effect
+- **Deprecated** — Decision no longer relevant (context changed)
+- **Superseded** — Replaced by a newer decision (link to replacement)
+
+## Error Handling
+
+**If no draft/ directory:**
+- Tell user to run `draft init` first
+
+**If ADR number conflict:**
+- Increment to next available number
+- Warn: "ADR-<number> already exists. Using ADR-<next>."
+
+**If superseding non-existent ADR:**
+- Warn: "ADR-<number> not found. Check `draft/adrs/` for valid ADR numbers."
+
+---
+
 ## Status Command
 
 When user says "status" or "draft status":
@@ -4303,6 +4744,18 @@ Draft state NOT updated (pending revert completion).
 When user says "preview jira" or "draft jira-preview [track-id]":
 
 Generate `jira-export.md` from the track's plan for review and editing before creating actual Jira issues.
+
+## Red Flags - STOP if you're:
+
+- Generating a preview without an approved plan.md
+- Assigning story points inconsistent with task count
+- Missing sub-tasks that exist in plan.md
+- Not including quality findings when validation/bughunt reports exist
+- Overwriting a reviewed jira-export.md without warning the user
+
+**Plan first, then preview. Accuracy over speed.**
+
+---
 
 ## Mapping Structure
 
@@ -4604,6 +5057,18 @@ Next steps:
 When user says "create jira" or "draft jira-create [track-id]":
 
 Create Jira epic, stories, and sub-tasks from `jira-export.md` using MCP-Jira. If no export file exists, auto-generates one first.
+
+## Red Flags - STOP if you're:
+
+- Creating Jira issues without reviewing `jira-export.md` first (run `draft jira-preview`)
+- Proceeding when MCP-Jira is not configured
+- Creating duplicate issues (check if jira-export.md already has Jira keys)
+- Not verifying the target Jira project before creation
+- Skipping the export file update after issue creation
+
+**Preview before you create. Never create duplicates.**
+
+---
 
 ## Mapping Structure
 
@@ -7349,6 +7814,115 @@ If task exceeds 5 iterations:
 1. Document current state in plan.md
 2. Note any discoveries or blockers
 3. Suggest resumption approach
+
+</core-file>
+
+---
+
+## core/templates/spec.md
+
+<core-file path="core/templates/spec.md">
+
+# Specification: [Title]
+
+**Track ID:** <track_id>
+**Created:** [ISO date]
+**Status:** [ ] Drafting
+
+> This is a working draft. Content will evolve through conversation.
+
+## Context References
+- **Product:** `draft/product.md` — [pending]
+- **Tech Stack:** `draft/tech-stack.md` — [pending]
+- **Architecture:** `draft/architecture.md` — [pending]
+
+## Problem Statement
+[To be developed through intake conversation]
+
+## Background & Why Now
+[To be developed through intake conversation]
+
+## Requirements
+### Functional
+[To be developed through intake conversation]
+
+### Non-Functional
+[To be developed through intake conversation]
+
+## Acceptance Criteria
+[To be developed through intake conversation]
+
+## Non-Goals
+[To be developed through intake conversation]
+
+## Technical Approach
+[To be developed through intake conversation]
+
+## Success Metrics
+<!-- Remove metrics that don't apply -->
+
+| Category | Metric | Target | Measurement |
+|----------|--------|--------|-------------|
+| Performance | [e.g., API response time] | [e.g., <200ms p95] | [e.g., APM dashboard] |
+| Quality | [e.g., Test coverage] | [e.g., >90%] | [e.g., CI coverage report] |
+| Business | [e.g., User adoption rate] | [e.g., 50% in 30 days] | [e.g., Analytics] |
+| UX | [e.g., Task completion rate] | [e.g., >95%] | [e.g., User testing] |
+
+## Stakeholders & Approvals
+<!-- Add roles relevant to your organization -->
+
+| Role | Name | Approval Required | Status |
+|------|------|-------------------|--------|
+| Product Owner | [name] | Spec sign-off | [ ] |
+| Tech Lead | [name] | Architecture review | [ ] |
+| Security | [name] | Security review (if applicable) | [ ] |
+| QA | [name] | Test plan review | [ ] |
+
+### Approval Gates
+- [ ] Spec approved by Product Owner
+- [ ] Architecture reviewed by Tech Lead
+- [ ] Security review completed (if touching auth, data, or external APIs)
+- [ ] Test plan reviewed by QA
+
+## Risk Assessment
+<!-- Score: Probability (1-5) x Impact (1-5). Risks scoring >=9 require mitigation plans. -->
+
+| Risk | Probability | Impact | Score | Mitigation |
+|------|-------------|--------|-------|------------|
+| [e.g., Third-party API instability] | 3 | 4 | 12 | [e.g., Circuit breaker + fallback cache] |
+| [e.g., Data migration failure] | 2 | 5 | 10 | [e.g., Dry-run migration + rollback script] |
+| [e.g., Scope creep] | 3 | 3 | 9 | [e.g., Strict non-goals enforcement] |
+
+## Deployment Strategy
+<!-- Define rollout approach for production delivery -->
+
+### Rollout Phases
+1. **Canary** (1-5% traffic) — Validate core flows, monitor error rates
+2. **Limited GA** (25%) — Expand to subset, watch performance metrics
+3. **Full GA** (100%) — Complete rollout
+
+### Feature Flags
+- Flag name: `[feature_flag_name]`
+- Default: `off`
+- Kill switch: [yes/no]
+
+### Rollback Plan
+- Trigger: [e.g., error rate >1%, latency >500ms p95]
+- Process: [e.g., disable feature flag, revert deployment]
+- Data rollback: [e.g., migration revert script, N/A]
+
+### Monitoring
+- Dashboard: [link or name]
+- Alerts: [e.g., PagerDuty rule for error rate spike]
+- Key metrics: [e.g., error rate, latency, throughput]
+
+## Open Questions
+[Tracked during conversation]
+
+## Conversation Log
+> Key decisions and reasoning captured during intake.
+
+[Conversation summary will be added here]
 
 </core-file>
 

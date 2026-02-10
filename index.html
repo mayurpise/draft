@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Draft: Ship Fast. Ship Right.</title>
-    <meta name="description" content="Enterprise discipline for AI-assisted development. Draft brings structure — specs, plans, tracks, validation — so AI acceleration doesn't mean technical debt.">
+    <meta name="description"
+        content="Enterprise discipline for AI-assisted development. Draft brings structure — specs, plans, tracks, validation — so AI acceleration doesn't mean technical debt.">
     <meta name="author" content="mayurpise">
     <meta name="theme-color" content="#0a0a0b">
-    <meta name="keywords" content="context-driven development, ai-assisted development, code review automation, monorepo tools, tdd workflow, architecture validation, enterprise software, claude code plugin, software planning, quality gates">
+    <meta name="keywords"
+        content="context-driven development, ai-assisted development, code review automation, monorepo tools, tdd workflow, architecture validation, enterprise software, claude code plugin, software planning, quality gates">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="Draft: Ship Fast. Ship Right.">
-    <meta property="og:description" content="Enterprise discipline for AI-assisted development. Structure your AI workflows with specs, plans, and quality gates.">
+    <meta property="og:description"
+        content="Enterprise discipline for AI-assisted development. Structure your AI workflows with specs, plans, and quality gates.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://getdraft.dev">
     <meta property="og:image" content="https://getdraft.dev/social-preview.png">
     <meta property="og:image:alt" content="Draft: Context-Driven Development for AI-Assisted Software Engineering">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Draft: Ship Fast. Ship Right.">
-    <meta name="twitter:description" content="Enterprise discipline for AI-assisted development. Structure your AI workflows with specs, plans, and quality gates.">
+    <meta name="twitter:description"
+        content="Enterprise discipline for AI-assisted development. Structure your AI workflows with specs, plans, and quality gates.">
     <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
     <meta name="twitter:image:alt" content="Draft: Context-Driven Development for AI-Assisted Software Engineering">
     <link rel="canonical" href="https://getdraft.dev">
@@ -59,16 +64,22 @@
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-F6X062B4B7');
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
     </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"></noscript>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link
+            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap"
+            rel="stylesheet">
+    </noscript>
     <style>
         :root {
             --bg-primary: #0a0a0b;
@@ -142,8 +153,15 @@
         }
 
         @keyframes drift {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(-2%, 2%) rotate(1deg); }
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            50% {
+                transform: translate(-2%, 2%) rotate(1deg);
+            }
         }
 
         .hero-content {
@@ -176,8 +194,17 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(0.8);
+            }
         }
 
         h1 {
@@ -216,9 +243,22 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUpCentered {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
             }
         }
 
@@ -235,7 +275,7 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            animation: fadeInUp 0.8s ease-out 0.5s both;
+            animation: fadeInUpCentered 0.8s ease-out 0.5s both;
         }
 
         .scroll-indicator .arrow {
@@ -260,8 +300,17 @@
         }
 
         @keyframes scrollBounce {
-            0%, 100% { top: 8px; opacity: 1; }
-            50% { top: 18px; opacity: 0.3; }
+
+            0%,
+            100% {
+                top: 8px;
+                opacity: 1;
+            }
+
+            50% {
+                top: 18px;
+                opacity: 0.3;
+            }
         }
 
         main {
@@ -362,6 +411,7 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -457,7 +507,7 @@
             color: var(--accent-cyan);
         }
 
-        details > *:not(summary) {
+        details>*:not(summary) {
             margin-top: 1rem;
         }
 
@@ -523,10 +573,21 @@
             color: var(--accent-emerald);
         }
 
-        .flow-step:hover .flow-icon.context { box-shadow: 0 8px 32px rgba(34, 211, 238, 0.2); }
-        .flow-step:hover .flow-icon.spec { box-shadow: 0 8px 32px rgba(251, 191, 36, 0.2); }
-        .flow-step:hover .flow-icon.plan { box-shadow: 0 8px 32px rgba(251, 113, 133, 0.2); }
-        .flow-step:hover .flow-icon.implement { box-shadow: 0 8px 32px rgba(52, 211, 153, 0.2); }
+        .flow-step:hover .flow-icon.context {
+            box-shadow: 0 8px 32px rgba(34, 211, 238, 0.2);
+        }
+
+        .flow-step:hover .flow-icon.spec {
+            box-shadow: 0 8px 32px rgba(251, 191, 36, 0.2);
+        }
+
+        .flow-step:hover .flow-icon.plan {
+            box-shadow: 0 8px 32px rgba(251, 113, 133, 0.2);
+        }
+
+        .flow-step:hover .flow-icon.implement {
+            box-shadow: 0 8px 32px rgba(52, 211, 153, 0.2);
+        }
 
         .flow-label {
             font-size: 0.9rem;
@@ -605,9 +666,17 @@
             border-radius: 50%;
         }
 
-        .code-header .dot.red { background: #ef4444; }
-        .code-header .dot.yellow { background: #eab308; }
-        .code-header .dot.green { background: #22c55e; }
+        .code-header .dot.red {
+            background: #ef4444;
+        }
+
+        .code-header .dot.yellow {
+            background: #eab308;
+        }
+
+        .code-header .dot.green {
+            background: #22c55e;
+        }
 
         .code-header .filename {
             margin-left: auto;
@@ -628,10 +697,21 @@
             color: var(--text-secondary);
         }
 
-        .code-comment { color: var(--text-muted); }
-        .code-keyword { color: var(--accent-rose); }
-        .code-string { color: var(--accent-emerald); }
-        .code-file { color: var(--accent-amber); }
+        .code-comment {
+            color: var(--text-muted);
+        }
+
+        .code-keyword {
+            color: var(--accent-rose);
+        }
+
+        .code-string {
+            color: var(--accent-emerald);
+        }
+
+        .code-file {
+            color: var(--accent-amber);
+        }
 
         .doc-grid {
             display: grid;
@@ -847,7 +927,7 @@
             background: var(--bg-tertiary);
         }
 
-        .comparison-header > div {
+        .comparison-header>div {
             padding: 1rem 1.5rem;
             font-weight: 600;
             font-size: 0.9rem;
@@ -855,12 +935,12 @@
             letter-spacing: 0.05em;
         }
 
-        .comparison-header > div:first-child {
+        .comparison-header>div:first-child {
             border-right: 1px solid var(--border);
             color: var(--accent-rose);
         }
 
-        .comparison-header > div:last-child {
+        .comparison-header>div:last-child {
             color: var(--accent-emerald);
         }
 
@@ -870,18 +950,18 @@
             border-top: 1px solid var(--border);
         }
 
-        .comparison-row > div {
+        .comparison-row>div {
             padding: 1rem 1.5rem;
             font-size: 0.9rem;
             color: var(--text-secondary);
         }
 
-        .comparison-row > div:first-child {
+        .comparison-row>div:first-child {
             border-right: 1px solid var(--border);
             background: rgba(251, 113, 133, 0.03);
         }
 
-        .comparison-row > div:last-child {
+        .comparison-row>div:last-child {
             background: rgba(52, 211, 153, 0.03);
         }
 
@@ -909,10 +989,21 @@
             font-weight: 600;
         }
 
-        .status-marker.pending { color: var(--text-muted); }
-        .status-marker.progress { color: var(--accent-amber); }
-        .status-marker.complete { color: var(--accent-emerald); }
-        .status-marker.blocked { color: var(--accent-rose); }
+        .status-marker.pending {
+            color: var(--text-muted);
+        }
+
+        .status-marker.progress {
+            color: var(--accent-amber);
+        }
+
+        .status-marker.complete {
+            color: var(--accent-emerald);
+        }
+
+        .status-marker.blocked {
+            color: var(--accent-rose);
+        }
 
         footer {
             text-align: center;
@@ -992,10 +1083,25 @@
             text-decoration: none;
         }
 
-        .share-btn.whatsapp:hover { border-color: #25D366; color: #25D366; }
-        .share-btn.linkedin:hover { border-color: #0A66C2; color: #0A66C2; }
-        .share-btn.reddit:hover { border-color: #FF4500; color: #FF4500; }
-        .share-btn.x:hover { border-color: var(--text-primary); color: var(--text-primary); }
+        .share-btn.whatsapp:hover {
+            border-color: #25D366;
+            color: #25D366;
+        }
+
+        .share-btn.linkedin:hover {
+            border-color: #0A66C2;
+            color: #0A66C2;
+        }
+
+        .share-btn.reddit:hover {
+            border-color: #FF4500;
+            color: #FF4500;
+        }
+
+        .share-btn.x:hover {
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+        }
 
         .share-btn svg {
             width: 18px;
@@ -1035,8 +1141,8 @@
                 grid-template-columns: 1fr;
             }
 
-            .comparison-header > div:first-child,
-            .comparison-row > div:first-child {
+            .comparison-header>div:first-child,
+            .comparison-row>div:first-child {
                 border-right: none;
                 border-bottom: 1px solid var(--border);
             }
@@ -1059,8 +1165,51 @@
         .skip-link:focus {
             top: 0;
         }
+
+        /* Industry Table */
+        .industry-table-container {
+            overflow-x: auto;
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+        }
+
+        .industry-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 600px;
+        }
+
+        .industry-table th {
+            text-align: left;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            color: var(--accent-cyan);
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+        }
+
+        .industry-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            vertical-align: top;
+            line-height: 1.6;
+        }
+
+        .industry-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .industry-table strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
     </style>
 </head>
+
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
@@ -1068,18 +1217,25 @@
         <div class="hero-content">
             <div class="badge">Context-Driven Development</div>
             <h1>Ship fast. <span>Ship right.</span></h1>
-            <p class="tagline">AI coding tools are fast, but often lack structure. Draft introduces <strong>enterprise-grade discipline</strong>—clear specifications, execution plans, tracked phases, and validation—so speed never comes at the cost of correctness or long-term quality.</p>
+            <p class="tagline">AI coding tools are fast, but often lack structure. Draft introduces
+                <strong>enterprise-grade discipline</strong>—clear specifications, execution plans, tracked phases, and
+                validation—so speed never comes at the cost of correctness or long-term quality.
+            </p>
 
             <div style="margin-top: 2rem; max-width: 800px; margin-left: auto; margin-right: auto;">
-                <a href="https://youtu.be/gBSwFEFVd7Y" target="_blank" style="display: block; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 8px 32px rgba(34, 211, 238, 0.2); text-decoration: none; transition: transform 0.3s ease, box-shadow 0.3s ease;"
-                   onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 12px 48px rgba(34, 211, 238, 0.3)';"
-                   onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 32px rgba(34, 211, 238, 0.2)';">
-                    <img src="https://i.ytimg.com/vi/gBSwFEFVd7Y/maxresdefault.jpg"
-                         alt="Draft Demo Video"
-                         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
-                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); display: flex; align-items: center; justify-content: center;">
-                        <div style="width: 80px; height: 80px; background: var(--accent-cyan); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 24px rgba(34, 211, 238, 0.6);">
-                            <div style="width: 0; height: 0; border-left: 25px solid var(--bg-primary); border-top: 15px solid transparent; border-bottom: 15px solid transparent; margin-left: 6px;"></div>
+                <a href="https://youtu.be/gBSwFEFVd7Y" target="_blank"
+                    style="display: block; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 8px 32px rgba(34, 211, 238, 0.2); text-decoration: none; transition: transform 0.3s ease, box-shadow 0.3s ease;"
+                    onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 12px 48px rgba(34, 211, 238, 0.3)';"
+                    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 32px rgba(34, 211, 238, 0.2)';">
+                    <img src="https://i.ytimg.com/vi/gBSwFEFVd7Y/maxresdefault.jpg" alt="Draft Demo Video"
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+                    <div
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); display: flex; align-items: center; justify-content: center;">
+                        <div
+                            style="width: 80px; height: 80px; background: var(--accent-cyan); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 24px rgba(34, 211, 238, 0.6);">
+                            <div
+                                style="width: 0; height: 0; border-left: 25px solid var(--bg-primary); border-top: 15px solid transparent; border-bottom: 15px solid transparent; margin-left: 6px;">
+                            </div>
                         </div>
                     </div>
                 </a>
@@ -1100,12 +1256,15 @@
             <button class="tab-button" data-tab="commands" role="tab" aria-selected="false">Commands</button>
             <button class="tab-button" data-tab="team" role="tab" aria-selected="false">Team</button>
             <button class="tab-button" data-tab="reference" role="tab" aria-selected="false">Reference</button>
+            <button class="tab-button" data-tab="industry" role="tab" aria-selected="false">Industry Standards</button>
         </nav>
 
         <!-- OVERVIEW TAB -->
         <div id="tab-overview" class="tab-content active" role="tabpanel">
             <h2>The Core Problem</h2>
-            <p>AI coding tools ship fast but create chaos. Without structure, they make assumptions, choose arbitrary approaches, and produce code that doesn't fit your architecture. Context window fills up, hallucinations increase, chat history is unsearchable, and every new session starts from zero.</p>
+            <p>AI coding tools ship fast but create chaos. Without structure, they make assumptions, choose arbitrary
+                approaches, and produce code that doesn't fit your architecture. Context window fills up, hallucinations
+                increase, chat history is unsearchable, and every new session starts from zero.</p>
 
             <div class="problem-grid">
                 <div class="problem-card">
@@ -1132,7 +1291,8 @@
 
             <details>
                 <summary>The Solution: Context-Driven Development</summary>
-                <p>Draft treats context as a managed artifact alongside code. File-based persistent memory replaces ephemeral chat. Your repository becomes the single source of truth.</p>
+                <p>Draft treats context as a managed artifact alongside code. File-based persistent memory replaces
+                    ephemeral chat. Your repository becomes the single source of truth.</p>
 
                 <div class="comparison">
                     <div class="comparison-header">
@@ -1193,7 +1353,7 @@
                         <div class="dot green"></div>
                         <span class="filename">quickstart</span>
                     </div>
-<pre><code><span class="code-comment"># 1. Initialize project context</span>
+                    <pre><code><span class="code-comment"># 1. Initialize project context</span>
 <span class="code-keyword">/draft:init</span>
 
 <span class="code-comment"># 2. Create a feature track</span>
@@ -1210,7 +1370,8 @@
 
             <details>
                 <summary>Economics: Why Specs Win</summary>
-                <p>Writing specs feels slower. It isn't. Overhead is constant (~20% for simple tasks), but savings scale with complexity, team size, and criticality.</p>
+                <p>Writing specs feels slower. It isn't. Overhead is constant (~20% for simple tasks), but savings scale
+                    with complexity, team size, and criticality.</p>
 
                 <div class="comparison">
                     <div class="comparison-header">
@@ -1242,7 +1403,8 @@
         <!-- INSTALL TAB -->
         <div id="tab-install" class="tab-content" role="tabpanel">
             <h2>Install</h2>
-            <p>Install Draft as a Claude Code plugin, or use the integrations for Cursor, GitHub Copilot, and Gemini.</p>
+            <p>Install Draft as a Claude Code plugin, or use the integrations for Cursor, GitHub Copilot, and Gemini.
+            </p>
 
             <h3>Claude Code (Marketplace)</h3>
             <div class="code-block">
@@ -1252,12 +1414,13 @@
                     <div class="dot green"></div>
                     <span class="filename">claude code</span>
                 </div>
-<pre><code><span class="code-comment"># Install from marketplace</span>
+                <pre><code><span class="code-comment"># Install from marketplace</span>
 <span class="code-keyword">/plugin marketplace add</span> <span class="code-string">mayurpise/draft</span>
 <span class="code-keyword">/plugin install</span> <span class="code-string">draft</span></code></pre>
             </div>
 
-            <p>Prerequisites: <strong>Claude Code CLI</strong>, <strong>Git</strong>, and <strong>Node.js 18+</strong>.</p>
+            <p>Prerequisites: <strong>Claude Code CLI</strong>, <strong>Git</strong>, and <strong>Node.js 18+</strong>.
+            </p>
 
             <h3>Cursor</h3>
             <p>Cursor > Settings > Rules, Skills, Subagents > Rules > New > Add from Github:</p>
@@ -1268,7 +1431,7 @@
                     <div class="dot green"></div>
                     <span class="filename">cursor setup</span>
                 </div>
-<pre><code><span class="code-string">https://github.com/mayurpise/draft.git</span></code></pre>
+                <pre><code><span class="code-string">https://github.com/mayurpise/draft.git</span></code></pre>
             </div>
 
             <h3>GitHub Copilot</h3>
@@ -1279,7 +1442,7 @@
                     <div class="dot green"></div>
                     <span class="filename">copilot setup</span>
                 </div>
-<pre><code><span class="code-keyword">mkdir</span> -p .github && <span class="code-keyword">curl</span> -o .github/copilot-instructions.md <span class="code-string">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md</span></code></pre>
+                <pre><code><span class="code-keyword">mkdir</span> -p .github && <span class="code-keyword">curl</span> -o .github/copilot-instructions.md <span class="code-string">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md</span></code></pre>
             </div>
 
             <h3>Gemini</h3>
@@ -1290,7 +1453,7 @@
                     <div class="dot green"></div>
                     <span class="filename">gemini setup</span>
                 </div>
-<pre><code><span class="code-keyword">curl</span> -o GEMINI.md <span class="code-string">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/GEMINI.md</span></code></pre>
+                <pre><code><span class="code-keyword">curl</span> -o GEMINI.md <span class="code-string">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/GEMINI.md</span></code></pre>
             </div>
         </div>
 
@@ -1309,7 +1472,8 @@
             <!-- Getting Started subtab -->
             <div id="subtab-getting-started" class="subtab-content active" role="tabpanel">
                 <h3>The Draft Workflow</h3>
-                <p>By treating context as a managed artifact alongside code, your repository becomes the single source of truth.</p>
+                <p>By treating context as a managed artifact alongside code, your repository becomes the single source
+                    of truth.</p>
 
                 <div class="flow-diagram">
                     <div class="flow-step">
@@ -1339,7 +1503,8 @@
 
                 <details open>
                     <summary>Step 1: Context Files</summary>
-                    <p><strong>/draft:init</strong> creates persistent context files that define your project landscape.</p>
+                    <p><strong>/draft:init</strong> creates persistent context files that define your project landscape.
+                    </p>
 
                     <div class="hierarchy">
                         <div class="hierarchy-level">
@@ -1360,36 +1525,51 @@
                         <div class="hierarchy-level">
                             <div class="num">4</div>
                             <div class="file">architecture.md</div>
-                            <div class="desc">System map with mermaid diagrams: directory structure, data flows, patterns, module dependencies (brownfield only)</div>
+                            <div class="desc">System map with mermaid diagrams: directory structure, data flows,
+                                patterns, module dependencies (brownfield only)</div>
                         </div>
                     </div>
 
-                    <p>These files live in <code>draft/</code>, are git-tracked, and load automatically. AI always starts with your ground truth instead of assumptions.</p>
+                    <p>These files live in <code>draft/</code>, are git-tracked, and load automatically. AI always
+                        starts with your ground truth instead of assumptions.</p>
                 </details>
 
                 <details>
                     <summary>Step 2: Spec & Plan</summary>
-                    <p>When you ask AI to "add authentication," it immediately writes code. <strong>/draft:new-track</strong> conducts a collaborative intake — structured conversation where AI acts as expert collaborator. It asks clarifying questions, contributes expertise (patterns, risks, trade-offs), and updates the spec progressively.</p>
+                    <p>When you ask AI to "add authentication," it immediately writes code.
+                        <strong>/draft:new-track</strong> conducts a collaborative intake — structured conversation
+                        where AI acts as expert collaborator. It asks clarifying questions, contributes expertise
+                        (patterns, risks, trade-offs), and updates the spec progressively.
+                    </p>
                 </details>
 
                 <details>
                     <summary>Step 3: Decompose (optional)</summary>
-                    <p>For multi-module features, <strong>/draft:decompose</strong> maps your feature into discrete modules with defined responsibilities, API surfaces, and dependency graph. This prevents tangled code and circular dependencies.</p>
+                    <p>For multi-module features, <strong>/draft:decompose</strong> maps your feature into discrete
+                        modules with defined responsibilities, API surfaces, and dependency graph. This prevents tangled
+                        code and circular dependencies.</p>
                 </details>
 
                 <details>
                     <summary>Step 4: Implement</summary>
-                    <p><strong>/draft:implement</strong> executes one task at a time from the plan, follows TDD cycle (test first, then code, then refactor), runs verification gates before marking completion, and triggers two-stage review at phase boundaries.</p>
+                    <p><strong>/draft:implement</strong> executes one task at a time from the plan, follows TDD cycle
+                        (test first, then code, then refactor), runs verification gates before marking completion, and
+                        triggers two-stage review at phase boundaries.</p>
                 </details>
 
                 <details>
                     <summary>Step 5: Verify Quality</summary>
-                    <p>Passing tests doesn't guarantee good code. <strong>/draft:coverage</strong> measures test completeness (95%+ target). <strong>/draft:validate</strong> runs context-aware checks: architecture conformance, security scans (hardcoded secrets, SQL injection, XSS), performance anti-patterns. <strong>/draft:bughunt</strong> performs exhaustive bug hunting across 12 dimensions.</p>
+                    <p>Passing tests doesn't guarantee good code. <strong>/draft:coverage</strong> measures test
+                        completeness (95%+ target). <strong>/draft:validate</strong> runs context-aware checks:
+                        architecture conformance, security scans (hardcoded secrets, SQL injection, XSS), performance
+                        anti-patterns. <strong>/draft:bughunt</strong> performs exhaustive bug hunting across 12
+                        dimensions.</p>
                 </details>
 
                 <details>
                     <summary>The Constraint Hierarchy</summary>
-                    <p>Each document layer narrows the solution space. By the time AI writes code, most decisions are already made.</p>
+                    <p>Each document layer narrows the solution space. By the time AI writes code, most decisions are
+                        already made.</p>
 
                     <div class="hierarchy">
                         <div class="hierarchy-level">
@@ -1421,7 +1601,9 @@
 
                     <div class="callout">
                         <div class="callout-title">Key Insight</div>
-                        <p>The AI becomes an executor of pre-approved work, not an autonomous decision-maker. Explicit specs, phased plans, verification steps, and status markers keep implementation focused and accountable.</p>
+                        <p>The AI becomes an executor of pre-approved work, not an autonomous decision-maker. Explicit
+                            specs, phased plans, verification steps, and status markers keep implementation focused and
+                            accountable.</p>
                     </div>
                 </details>
             </div>
@@ -1429,7 +1611,10 @@
             <!-- Planning subtab -->
             <div id="subtab-planning" class="subtab-content" role="tabpanel">
                 <h3>Review Before Code</h3>
-                <p><strong>This is Draft's most important feature.</strong> In traditional AI coding, you discover the AI's design decisions during code review — after it's already built the wrong thing. With Draft, the AI writes a spec first. You review the approach in a document, not a diff. Disagreements are resolved by editing a paragraph, not rewriting a module.</p>
+                <p><strong>This is Draft's most important feature.</strong> In traditional AI coding, you discover the
+                    AI's design decisions during code review — after it's already built the wrong thing. With Draft, the
+                    AI writes a spec first. You review the approach in a document, not a diff. Disagreements are
+                    resolved by editing a paragraph, not rewriting a module.</p>
 
                 <div class="comparison">
                     <div class="comparison-header">
@@ -1456,23 +1641,28 @@
 
                 <details>
                     <summary>Collaborative Intake: AI as Expert Partner</summary>
-                    <p>Instead of dumping requirements at the AI and hoping for the best, <code>/draft:new-track</code> conducts a structured conversation where AI acts as an expert collaborator — asking the right questions, contributing knowledge, and building the spec progressively.</p>
+                    <p>Instead of dumping requirements at the AI and hoping for the best, <code>/draft:new-track</code>
+                        conducts a structured conversation where AI acts as an expert collaborator — asking the right
+                        questions, contributing knowledge, and building the spec progressively.</p>
 
                     <div class="hierarchy">
                         <div class="hierarchy-level">
                             <div class="num">1</div>
                             <div class="file">One question at a time</div>
-                            <div class="desc">AI asks a single focused question, waits for your answer, then contributes expertise before moving to the next</div>
+                            <div class="desc">AI asks a single focused question, waits for your answer, then contributes
+                                expertise before moving to the next</div>
                         </div>
                         <div class="hierarchy-level">
                             <div class="num">2</div>
                             <div class="file">AI contributes at each step</div>
-                            <div class="desc">Pattern recognition, risk surfacing, trade-off analysis, fact-checking against your architecture.md</div>
+                            <div class="desc">Pattern recognition, risk surfacing, trade-off analysis, fact-checking
+                                against your architecture.md</div>
                         </div>
                         <div class="hierarchy-level">
                             <div class="num">3</div>
                             <div class="file">Grounded in vetted sources</div>
-                            <div class="desc">Citations from Domain-Driven Design, Clean Architecture, DDIA, OWASP, 12-Factor App, GoF patterns</div>
+                            <div class="desc">Citations from Domain-Driven Design, Clean Architecture, DDIA, OWASP,
+                                12-Factor App, GoF patterns</div>
                         </div>
                         <div class="hierarchy-level">
                             <div class="num">4</div>
@@ -1482,94 +1672,126 @@
                         <div class="hierarchy-level">
                             <div class="num">5</div>
                             <div class="file">Progressive draft updates</div>
-                            <div class="desc">spec-draft.md updates as conversation evolves. You see the spec take shape in real-time</div>
+                            <div class="desc">spec-draft.md updates as conversation evolves. You see the spec take shape
+                                in real-time</div>
                         </div>
                     </div>
 
                     <div class="callout">
                         <div class="callout-title">Key Insight</div>
-                        <p><strong>This levels the playing field.</strong> Junior engineers get senior-level guidance. Senior engineers can't shortcut rigor. Both produce well-documented specs with traceable reasoning. The discipline scales across your entire team.</p>
+                        <p><strong>This levels the playing field.</strong> Junior engineers get senior-level guidance.
+                            Senior engineers can't shortcut rigor. Both produce well-documented specs with traceable
+                            reasoning. The discipline scales across your entire team.</p>
                     </div>
                 </details>
 
                 <details>
                     <summary>Architecture Mode (Optional)</summary>
-                    <p>Standard Draft gives you specs and plans. Architecture Mode goes deeper — it forces the AI to design before it codes. Every module gets a dependency analysis. Every algorithm gets documented in plain language. Every function signature gets approved before implementation begins.</p>
+                    <p>Standard Draft gives you specs and plans. Architecture Mode goes deeper — it forces the AI to
+                        design before it codes. Every module gets a dependency analysis. Every algorithm gets documented
+                        in plain language. Every function signature gets approved before implementation begins.</p>
 
-                    <p><strong>When to use:</strong> Multi-module features, new projects, complex algorithms, teams wanting maximum review granularity.</p>
-                    <p><strong>Overkill for:</strong> Simple features touching 1-2 files, bug fixes with clear scope, configuration changes.</p>
+                    <p><strong>When to use:</strong> Multi-module features, new projects, complex algorithms, teams
+                        wanting maximum review granularity.</p>
+                    <p><strong>Overkill for:</strong> Simple features touching 1-2 files, bug fixes with clear scope,
+                        configuration changes.</p>
                 </details>
             </div>
 
             <!-- Implementation subtab -->
             <div id="subtab-implementation" class="subtab-content" role="tabpanel">
                 <h3>TDD Workflow</h3>
-                <p>AI-generated code without tests is a liability. When TDD is enabled in <code>workflow.md</code>, Draft forces the AI to prove its code works at every step.</p>
+                <p>AI-generated code without tests is a liability. When TDD is enabled in <code>workflow.md</code>,
+                    Draft forces the AI to prove its code works at every step.</p>
 
                 <div class="hierarchy">
                     <div class="hierarchy-level">
-                        <div class="num" style="background: rgba(251, 113, 133, 0.2); color: var(--accent-rose);">R</div>
+                        <div class="num" style="background: rgba(251, 113, 133, 0.2); color: var(--accent-rose);">R
+                        </div>
                         <div class="file" style="color: var(--accent-rose);">Red — Write failing test</div>
-                        <div class="desc">Define what "correct" means before any code exists. Test must fail with assertion error, proving it actually tests the requirement</div>
+                        <div class="desc">Define what "correct" means before any code exists. Test must fail with
+                            assertion error, proving it actually tests the requirement</div>
                     </div>
                     <div class="hierarchy-level">
-                        <div class="num" style="background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald);">G</div>
+                        <div class="num" style="background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald);">G
+                        </div>
                         <div class="file" style="color: var(--accent-emerald);">Green — Minimum code to pass</div>
-                        <div class="desc">Write simplest implementation that makes the test pass. No extras, no "improvements" — every line justified by a failing test</div>
+                        <div class="desc">Write simplest implementation that makes the test pass. No extras, no
+                            "improvements" — every line justified by a failing test</div>
                     </div>
                     <div class="hierarchy-level">
                         <div class="num" style="background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan);">R</div>
                         <div class="file" style="color: var(--accent-cyan);">Refactor — Clean with tests green</div>
-                        <div class="desc">Improve code structure while tests stay green. Test suite acts as safety net</div>
+                        <div class="desc">Improve code structure while tests stay green. Test suite acts as safety net
+                        </div>
                     </div>
                     <div class="hierarchy-level">
-                        <div class="num" style="background: rgba(251, 191, 36, 0.2); color: var(--accent-amber);">C</div>
+                        <div class="num" style="background: rgba(251, 191, 36, 0.2); color: var(--accent-amber);">C
+                        </div>
                         <div class="file" style="color: var(--accent-amber);">Commit — Following conventions</div>
-                        <div class="desc">One task = one commit. Small, focused commits make reverts surgical and git blame useful</div>
+                        <div class="desc">One task = one commit. Small, focused commits make reverts surgical and git
+                            blame useful</div>
                     </div>
                 </div>
 
                 <details>
                     <summary>Architecture Discovery (Brownfield)</summary>
-                    <p>For brownfield projects, <code>/draft:init</code> performs a deep three-phase codebase analysis that generates <code>architecture.md</code>. This document becomes the persistent context every future track references.</p>
+                    <p>For brownfield projects, <code>/draft:init</code> performs a deep three-phase codebase analysis
+                        that generates <code>architecture.md</code>. This document becomes the persistent context every
+                        future track references.</p>
 
-                    <p><strong>Phase 1: Orientation</strong> — System map with mermaid diagrams, directory hierarchy, entry points, request/response flow, tech stack inventory</p>
-                    <p><strong>Phase 2: Logic</strong> — Data lifecycle, design patterns, complexity hotspots, conventions, external dependencies</p>
-                    <p><strong>Phase 3: Module Discovery</strong> — Module dependencies, module inventory, dependency order</p>
+                    <p><strong>Phase 1: Orientation</strong> — System map with mermaid diagrams, directory hierarchy,
+                        entry points, request/response flow, tech stack inventory</p>
+                    <p><strong>Phase 2: Logic</strong> — Data lifecycle, design patterns, complexity hotspots,
+                        conventions, external dependencies</p>
+                    <p><strong>Phase 3: Module Discovery</strong> — Module dependencies, module inventory, dependency
+                        order</p>
 
                     <div class="callout">
                         <div class="callout-title">Key Insight</div>
-                        <p><strong>Pay the analysis cost once, benefit on every track.</strong> Architecture discovery turns your codebase into a documented system that any AI assistant can understand instantly.</p>
+                        <p><strong>Pay the analysis cost once, benefit on every track.</strong> Architecture discovery
+                            turns your codebase into a documented system that any AI assistant can understand instantly.
+                        </p>
                     </div>
                 </details>
 
                 <details>
                     <summary>Revert Workflow</summary>
-                    <p>AI makes mistakes. When it does, you need to undo cleanly. Draft's revert understands the logical structure of your work at three granularities: task (single task's commits), phase (all commits in a phase), or track (entire track's commits). Preview, confirm, execute — git revert + Draft state update together.</p>
+                    <p>AI makes mistakes. When it does, you need to undo cleanly. Draft's revert understands the logical
+                        structure of your work at three granularities: task (single task's commits), phase (all commits
+                        in a phase), or track (entire track's commits). Preview, confirm, execute — git revert + Draft
+                        state update together.</p>
                 </details>
             </div>
 
             <!-- Quality subtab -->
             <div id="subtab-quality" class="subtab-content" role="tabpanel">
                 <h3>Quality Disciplines</h3>
-                <p>AI's default failure mode is to guess at fixes, skip verification, and claim success. Draft embeds three quality agents directly into the workflow.</p>
+                <p>AI's default failure mode is to guess at fixes, skip verification, and claim success. Draft embeds
+                    three quality agents directly into the workflow.</p>
 
                 <details open>
                     <summary>Systematic Debugging</summary>
-                    <p>When a task is blocked (<code>[!]</code>), the Debugger Agent enforces a four-phase process: Investigate → Analyze → Hypothesize → Implement. After 3 failed hypothesis cycles, escalates to you with everything learned and eliminated. Root cause documented in plan.md.</p>
+                    <p>When a task is blocked (<code>[!]</code>), the Debugger Agent enforces a four-phase process:
+                        Investigate → Analyze → Hypothesize → Implement. After 3 failed hypothesis cycles, escalates to
+                        you with everything learned and eliminated. Root cause documented in plan.md.</p>
                 </details>
 
                 <details>
                     <summary>Two-Stage Review</summary>
                     <p>At every phase boundary, the Reviewer Agent runs two sequential checks:</p>
-                    <p><strong>Stage 1: Spec Compliance</strong> — All functional requirements implemented? Acceptance criteria met? No scope creep or missing features?</p>
-                    <p><strong>Stage 2: Code Quality</strong> — Follows project patterns from tech-stack.md? Appropriate error handling? Tests cover real logic?</p>
-                    <p>Critical issues must be fixed before proceeding. Important issues should be fixed. Minor issues noted but don't block.</p>
+                    <p><strong>Stage 1: Spec Compliance</strong> — All functional requirements implemented? Acceptance
+                        criteria met? No scope creep or missing features?</p>
+                    <p><strong>Stage 2: Code Quality</strong> — Follows project patterns from tech-stack.md? Appropriate
+                        error handling? Tests cover real logic?</p>
+                    <p>Critical issues must be fixed before proceeding. Important issues should be fixed. Minor issues
+                        noted but don't block.</p>
                 </details>
 
                 <details>
                     <summary>Code Coverage (95%+ target)</summary>
-                    <p><code>/draft:coverage</code> runs your project's coverage tool and classifies every uncovered line:</p>
+                    <p><code>/draft:coverage</code> runs your project's coverage tool and classifies every uncovered
+                        line:</p>
                     <p><strong>Testable</strong> — Should be covered. Suggests specific tests to write.</p>
                     <p><strong>Defensive</strong> — Error handlers for impossible states. Acceptable to leave.</p>
                     <p><strong>Infrastructure</strong> — Framework boilerplate and entry points. Acceptable.</p>
@@ -1577,12 +1799,17 @@
 
                 <details>
                     <summary>Systematic Validation</summary>
-                    <p><code>/draft:validate</code> uses Draft context (architecture.md, tech-stack.md) to catch quality issues tests miss — architecture violations, hardcoded secrets, N+1 queries, missing input validation. Non-blocking by default. Results in <code>validation-report.md</code>.</p>
+                    <p><code>/draft:validate</code> uses Draft context (architecture.md, tech-stack.md) to catch quality
+                        issues tests miss — architecture violations, hardcoded secrets, N+1 queries, missing input
+                        validation. Non-blocking by default. Results in <code>validation-report.md</code>.</p>
                 </details>
 
                 <details>
                     <summary>Exhaustive Bug Hunt (12 dimensions)</summary>
-                    <p><code>/draft:bughunt</code> performs exhaustive defect discovery: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, tests, maintainability. Findings severity-ranked (Critical/High/Medium/Low) with file:line locations in <code>bughunt-report.md</code>.</p>
+                    <p><code>/draft:bughunt</code> performs exhaustive defect discovery: correctness, reliability,
+                        security, performance, UI responsiveness, concurrency, state management, API contracts,
+                        accessibility, configuration, tests, maintainability. Findings severity-ranked
+                        (Critical/High/Medium/Low) with file:line locations in <code>bughunt-report.md</code>.</p>
                 </details>
             </div>
         </div>
@@ -1626,8 +1853,10 @@
                         <h4>What it does:</h4>
                         <ol>
                             <li>Detects brownfield (existing) vs greenfield (new) project</li>
-                            <li><strong>Architecture discovery</strong> (brownfield): 3-phase analysis with mermaid diagrams</li>
-                            <li>Creates <code>product.md</code>, <code>tech-stack.md</code>, <code>workflow.md</code></li>
+                            <li><strong>Architecture discovery</strong> (brownfield): 3-phase analysis with mermaid
+                                diagrams</li>
+                            <li>Creates <code>product.md</code>, <code>tech-stack.md</code>, <code>workflow.md</code>
+                            </li>
                             <li>Optionally enables Architecture Mode for module decomposition</li>
                             <li>Creates <code>tracks.md</code> master registry</li>
                         </ol>
@@ -1654,7 +1883,8 @@
                             <li>Reads each service's <code>draft/</code> context</li>
                             <li>Synthesizes root-level documents for system-of-systems view</li>
                             <li>Generates service registry, dependency graph, tech matrix</li>
-                            <li><strong>Bughunt mode:</strong> Runs <code>/draft:bughunt</code> across subdirectories, aggregates results</li>
+                            <li><strong>Bughunt mode:</strong> Runs <code>/draft:bughunt</code> across subdirectories,
+                                aggregates results</li>
                         </ol>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
@@ -1951,7 +2181,9 @@
         <!-- TEAM TAB -->
         <div id="tab-team" class="tab-content" role="tabpanel">
             <h2>Team Collaboration</h2>
-            <p>Draft's most powerful application is team-wide: <strong>every markdown file goes through commit → review → update → merge before a single line of code is written.</strong> By the time implementation starts, the entire team has already agreed on what to build, how to build it, and in what order.</p>
+            <p>Draft's most powerful application is team-wide: <strong>every markdown file goes through commit → review
+                    → update → merge before a single line of code is written.</strong> By the time implementation
+                starts, the entire team has already agreed on what to build, how to build it, and in what order.</p>
 
             <details open>
                 <summary>The PR Cycle on Documents, Not Code</summary>
@@ -1959,27 +2191,41 @@
                     <div class="hierarchy-level">
                         <div class="num">1</div>
                         <div class="file">product.md + tech-stack.md + architecture.md + workflow.md</div>
-                        <div class="desc">Tech lead runs <code>/draft:init</code>. For brownfield projects, Draft performs deep architecture discovery — generating <code>architecture.md</code> with mermaid diagrams of system structure, data flows, and patterns. Team reviews project vision, technical choices, system architecture, and workflow preferences via PR.</div>
+                        <div class="desc">Tech lead runs <code>/draft:init</code>. For brownfield projects, Draft
+                            performs deep architecture discovery — generating <code>architecture.md</code> with mermaid
+                            diagrams of system structure, data flows, and patterns. Team reviews project vision,
+                            technical choices, system architecture, and workflow preferences via PR.</div>
                     </div>
                     <div class="hierarchy-level">
                         <div class="num">2</div>
                         <div class="file">spec.md + plan.md</div>
-                        <div class="desc">Lead runs <code>/draft:new-track</code> — a <strong>collaborative intake</strong> where AI asks structured questions one at a time, contributes expertise (patterns, risks, trade-offs), and builds the spec progressively. Team reviews requirements, acceptance criteria, and phased task breakdown via PR.</div>
+                        <div class="desc">Lead runs <code>/draft:new-track</code> — a <strong>collaborative
+                                intake</strong> where AI asks structured questions one at a time, contributes expertise
+                            (patterns, risks, trade-offs), and builds the spec progressively. Team reviews requirements,
+                            acceptance criteria, and phased task breakdown via PR.</div>
                     </div>
                     <div class="hierarchy-level">
                         <div class="num">3</div>
                         <div class="file">architecture.md</div>
-                        <div class="desc">Lead runs <code>/draft:decompose</code>. Team reviews module boundaries, API surfaces, dependency graph, and implementation order via PR. Senior engineers validate the architecture without touching the codebase.</div>
+                        <div class="desc">Lead runs <code>/draft:decompose</code>. Team reviews module boundaries, API
+                            surfaces, dependency graph, and implementation order via PR. Senior engineers validate the
+                            architecture without touching the codebase.</div>
                     </div>
                     <div class="hierarchy-level">
                         <div class="num">4</div>
                         <div class="file">jira-export.md → Jira stories</div>
-                        <div class="desc">Lead runs <code>/draft:jira-preview</code> and <code>/draft:jira-create</code>. Epics, stories, and sub-tasks are created from the approved plan. Individual team members pick up Jira stories and implement.</div>
+                        <div class="desc">Lead runs <code>/draft:jira-preview</code> and
+                            <code>/draft:jira-create</code>. Epics, stories, and sub-tasks are created from the approved
+                            plan. Individual team members pick up Jira stories and implement.
+                        </div>
                     </div>
                     <div class="hierarchy-level">
                         <div class="num">5</div>
                         <div class="file">Implementation + Verification</div>
-                        <div class="desc">Only after all documents are merged does coding start. Every developer has full context: what to build (<code>spec.md</code>), in what order (<code>plan.md</code>), with what boundaries (<code>architecture.md</code>). After implementation, quality tools verify completeness.</div>
+                        <div class="desc">Only after all documents are merged does coding start. Every developer has
+                            full context: what to build (<code>spec.md</code>), in what order (<code>plan.md</code>),
+                            with what boundaries (<code>architecture.md</code>). After implementation, quality tools
+                            verify completeness.</div>
                     </div>
                 </div>
             </details>
@@ -1993,7 +2239,8 @@
                     </div>
                     <div class="comparison-row">
                         <div>Developer gets a Jira ticket and asks AI to build it</div>
-                        <div>Developer gets a Jira ticket with linked spec, plan, and architecture already reviewed</div>
+                        <div>Developer gets a Jira ticket with linked spec, plan, and architecture already reviewed
+                        </div>
                     </div>
                     <div class="comparison-row">
                         <div>Each developer makes independent design decisions</div>
@@ -2005,13 +2252,17 @@
                     </div>
                     <div class="comparison-row">
                         <div>New team members read code to understand features</div>
-                        <div>New team members read <code>spec.md</code> and <code>plan.md</code> to understand features</div>
+                        <div>New team members read <code>spec.md</code> and <code>plan.md</code> to understand features
+                        </div>
                     </div>
                 </div>
 
                 <div class="callout">
                     <div class="callout-title">Key Insight</div>
-                    <p>The CLI is single-user, but the artifacts it produces are the collaboration layer. Draft handles planning and decomposition. Git handles review. Jira handles distribution. <strong>Changing a sentence in spec.md takes seconds. Changing an architectural decision after 2,000 lines of code takes days.</strong></p>
+                    <p>The CLI is single-user, but the artifacts it produces are the collaboration layer. Draft handles
+                        planning and decomposition. Git handles review. Jira handles distribution. <strong>Changing a
+                            sentence in spec.md takes seconds. Changing an architectural decision after 2,000 lines of
+                            code takes days.</strong></p>
                 </div>
             </details>
 
@@ -2023,12 +2274,15 @@
                     <div class="hierarchy-level">
                         <div class="num">1</div>
                         <div class="file">Preview</div>
-                        <div class="desc">Generate <code>jira-export.md</code> with epic and stories using <code>/draft:jira-preview</code></div>
+                        <div class="desc">Generate <code>jira-export.md</code> with epic and stories using
+                            <code>/draft:jira-preview</code>
+                        </div>
                     </div>
                     <div class="hierarchy-level">
                         <div class="num">2</div>
                         <div class="file">Review</div>
-                        <div class="desc">Adjust story points, descriptions, acceptance criteria in the export file</div>
+                        <div class="desc">Adjust story points, descriptions, acceptance criteria in the export file
+                        </div>
                     </div>
                     <div class="hierarchy-level">
                         <div class="num">3</div>
@@ -2037,7 +2291,8 @@
                     </div>
                 </div>
 
-                <p><strong>Auto Story Points:</strong> 1-2 tasks = 1pt, 3-4 tasks = 2pts, 5-6 tasks = 3pts, 7+ tasks = 5pts</p>
+                <p><strong>Auto Story Points:</strong> 1-2 tasks = 1pt, 3-4 tasks = 2pts, 5-6 tasks = 3pts, 7+ tasks =
+                    5pts</p>
             </details>
         </div>
 
@@ -2054,7 +2309,7 @@
                         <div class="dot green"></div>
                         <span class="filename">project structure</span>
                     </div>
-<pre><code><span class="code-file">draft/</span>
+                    <pre><code><span class="code-file">draft/</span>
 ├── <span class="code-file">product.md</span>          <span class="code-comment"># Product vision and goals</span>
 ├── <span class="code-file">tech-stack.md</span>       <span class="code-comment"># Technical choices</span>
 ├── <span class="code-file">architecture.md</span>     <span class="code-comment"># System map + mermaid diagrams (brownfield)</span>
@@ -2098,7 +2353,8 @@
 
                 <div class="callout">
                     <div class="callout-title">Iron Law</div>
-                    <p><strong>Evidence before claims, always.</strong> Never mark [x] without running verification, confirming output shows success, and showing evidence in the response.</p>
+                    <p><strong>Evidence before claims, always.</strong> Never mark [x] without running verification,
+                        confirming output shows success, and showing evidence in the response.</p>
                 </div>
             </details>
 
@@ -2164,30 +2420,185 @@
                     </div>
                     <div class="comparison-row">
                         <div>Validation checks</div>
-                        <div>Context-aware quality validation → Prevents pattern violations, vulnerabilities, tech debt</div>
+                        <div>Context-aware quality validation → Prevents pattern violations, vulnerabilities, tech debt
+                        </div>
                     </div>
                 </div>
             </details>
         </div>
+
+        <!-- INDUSTRY STANDARDS TAB -->
+        <div id="tab-industry" class="tab-content" role="tabpanel">
+            <h2>Industry Standards</h2>
+            <p>Draft codifies the engineering culture of "Big Tech" (Google, Amazon, Stripe) into an AI-assisted
+                workflow. The goal is to shift effort "left"—solving problems in writing before writing code.</p>
+
+            <h3>Industry Practice Ranking</h3>
+            <p>How Draft methods map to industry standards, ranked by impact on engineering quality (1 = Critical, 5 =
+                Optimization).</p>
+
+            <div class="industry-table-container">
+                <table class="industry-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">Rank</th>
+                            <th>Practice</th>
+                            <th>Draft Implementation</th>
+                            <th>Industry Equivalent</th>
+                            <th>Companies</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1</strong></td>
+                            <td><strong>Design-First Engineering</strong></td>
+                            <td><strong>spec.md & plan.md</strong><br>Writing a detailed spec and implementation plan
+                                before coding.</td>
+                            <td><strong>Design Docs / RFCs</strong><br>Amazon "PR/FAQ", Google Design Docs.</td>
+                            <td>Google, Amazon, Stripe, Uber</td>
+                        </tr>
+                        <tr>
+                            <td><strong>1</strong></td>
+                            <td><strong>Monorepo / Shared Context</strong></td>
+                            <td><strong>@draft index</strong><br>Federated knowledge index and system maps.</td>
+                            <td><strong>Unified Codebase</strong><br>Single source of truth, automated dependency
+                                graphing.</td>
+                            <td>Google, Meta, Twitter</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2</strong></td>
+                            <td><strong>Test-Driven Development</strong></td>
+                            <td><strong>@draft implement</strong><br>Enforced "Red-Green-Refactor" workflow.</td>
+                            <td><strong>TDD / CI Gates</strong><br>Tests written as part of the feature.</td>
+                            <td>Netflix, Pivotal</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3</strong></td>
+                            <td><strong>Structured Code Review</strong></td>
+                            <td><strong>@draft review</strong><br>Two-stage review: 1) Spec compliance, 2) Code quality.
+                            </td>
+                            <td><strong>Readability / Owners</strong><br>Google's "Critique" system.</td>
+                            <td>Google, Meta</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3</strong></td>
+                            <td><strong>Arch. Decision Records</strong></td>
+                            <td><strong>architecture.md</strong><br>Documenting <em>why</em> the system is built this
+                                way.</td>
+                            <td><strong>ADRs</strong><br>Immutable records of architectural choices.</td>
+                            <td>Spotify, AWS, GitHub</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4</strong></td>
+                            <td><strong>Bug Bashes</strong></td>
+                            <td><strong>@draft bughunt</strong><br>Systematic, categorized search for edge cases.</td>
+                            <td><strong>Bug Bashes</strong><br>Scheduled team-wide testing sessions.</td>
+                            <td>Microsoft, Game Studios</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5</strong></td>
+                            <td><strong>Service Catalog</strong></td>
+                            <td><strong>product.md</strong><br>Standardized metadata for every project.</td>
+                            <td><strong>IDP (Internal Dev Platform)</strong><br>Portals to manage service metadata.</td>
+                            <td>Spotify, Lyft</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <details open>
+                <summary>Detailed Comparison</summary>
+
+                <div class="comparison">
+                    <div class="comparison-header">
+                        <div>Draft Approach</div>
+                        <div>Google/Amazon Approach</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>
+                            <strong>spec.md & plan.md</strong><br>
+                            You cannot run <code>@draft implement</code> without a spec. This forces the AI to "think"
+                            before "acting," preventing the generation of code that works but solves the wrong problem.
+                        </div>
+                        <div>
+                            <strong>Design Docs & PR/FAQ</strong><br>
+                            Google engineers write 5-20 page docs before coding ("Code is expensive, docs are cheap").
+                            Amazon works backwards from the Press Release (PR/FAQ) to ensure customer value.
+                        </div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>
+                            <strong>@draft index</strong><br>
+                            Aggregates context from multiple services (`draft/` folders) into a federated knowledge
+                            base, solving the "context window" problem for AI.
+                        </div>
+                        <div>
+                            <strong>Monorepo Strategy</strong><br>
+                            Google/Meta store code in one giant repo with massive tooling (Blaze/Buck) to manage
+                            dependencies and allow atomic refactors.
+                        </div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>
+                            <strong>@draft review</strong><br>
+                            Splits review into Verification (Spec compliance) and Validation (Quality). Automates the
+                            "Readability" aspect via <code>@draft validate</code>.
+                        </div>
+                        <div>
+                            <strong>Critique & Readability</strong><br>
+                            Google requires 3 approvals: LGTM (Peer), Owners (gatekeeper), and Readability (Language
+                            Expert) to ensure code health.
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <div class="callout">
+                <div class="callout-title">Maturity Assessment</div>
+                <p>Adopting Draft places your workflow at <strong>Maturity Level 4/5 (High)</strong>. You are operating
+                    with the "Staff Engineer" model of a FAANG company: proposing <em>Implementations</em> of
+                    <em>Specs</em>, performing <em>Systematic Bughunts</em>, and maintaining <em>Architectural
+                        Documents</em>.
+                </p>
+            </div>
+        </div>
     </main>
 
     <footer>
-        <p>Draft Methodology — <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer">View on GitHub</a></p>
+        <p>Draft Methodology — <a href="https://github.com/mayurpise/draft" target="_blank"
+                rel="noopener noreferrer">View on GitHub</a></p>
         <div class="footer-actions">
-            <a href="https://buymeacoffee.com/mayurpise" target="_blank" rel="noopener noreferrer" class="bmc-btn">☕ Buy Me a Coffee</a>
+            <a href="https://buymeacoffee.com/mayurpise" target="_blank" rel="noopener noreferrer" class="bmc-btn">☕ Buy
+                Me a Coffee</a>
             <div class="share-row">
                 <span class="share-label">Share</span>
-                <a href="https://api.whatsapp.com/send?text=Draft%20%E2%80%93%20Ship%20fast.%20Ship%20right.%20Enterprise%20discipline%20for%20AI-assisted%20development%20https%3A%2F%2Fgetdraft.dev" target="_blank" rel="noopener noreferrer" class="share-btn whatsapp" title="Share on WhatsApp">
-                    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                <a href="https://api.whatsapp.com/send?text=If%20you%20want%20to%20adapt%20development%20like%20Google%2C%20Meta%20and%20others%20you%20can%20use%20Draft%20https%3A%2F%2Fgetdraft.dev%23tab-industry"
+                    target="_blank" rel="noopener noreferrer" class="share-btn whatsapp" title="Share on WhatsApp">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                    </svg>
                 </a>
-                <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fgetdraft.dev" target="_blank" rel="noopener noreferrer" class="share-btn linkedin" title="Share on LinkedIn">
-                    <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fgetdraft.dev%23tab-industry"
+                    target="_blank" rel="noopener noreferrer" class="share-btn linkedin" title="Share on LinkedIn">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                    </svg>
                 </a>
-                <a href="https://reddit.com/submit?url=https%3A%2F%2Fgetdraft.dev&title=Draft%20%E2%80%93%20Ship%20fast.%20Ship%20right.%20Enterprise%20AI%20development" target="_blank" rel="noopener noreferrer" class="share-btn reddit" title="Share on Reddit">
-                    <svg viewBox="0 0 24 24"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+                <a href="https://reddit.com/submit?url=https%3A%2F%2Fgetdraft.dev%23tab-industry&title=Adopting%20Big%20Tech%20Dev%20with%20Draft"
+                    target="_blank" rel="noopener noreferrer" class="share-btn reddit" title="Share on Reddit">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z" />
+                    </svg>
                 </a>
-                <a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fgetdraft.dev&text=Draft%20%E2%80%93%20Ship%20fast.%20Ship%20right.%20Enterprise%20discipline%20for%20AI-assisted%20development" target="_blank" rel="noopener noreferrer" class="share-btn x" title="Share on X">
-                    <svg viewBox="0 0 24 24"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
+                <a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fgetdraft.dev%23tab-industry&text=If%20you%20want%20to%20adapt%20development%20like%20Google%2C%20Meta%20and%20others%20you%20can%20use%20Draft"
+                    target="_blank" rel="noopener noreferrer" class="share-btn x" title="Share on X">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
+                    </svg>
                 </a>
             </div>
         </div>
@@ -2199,12 +2610,12 @@
             card.setAttribute('aria-expanded', isExpanded);
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Top-level tab switching
             const tabButtons = document.querySelectorAll('.tab-button');
 
             tabButtons.forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     const targetTab = this.getAttribute('data-tab');
 
                     tabButtons.forEach(btn => {
@@ -2230,7 +2641,7 @@
             const subtabButtons = document.querySelectorAll('.subtab-button');
 
             subtabButtons.forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     const targetSubtab = this.getAttribute('data-subtab');
 
                     const parentNav = this.closest('.subtabs-nav');
@@ -2263,12 +2674,12 @@
                 card.setAttribute('role', 'button');
                 card.setAttribute('aria-expanded', 'false');
 
-                card.addEventListener('click', function(e) {
+                card.addEventListener('click', function (e) {
                     if (e.target.closest('a')) return;
                     toggleCommandCard(this);
                 });
 
-                card.addEventListener('keydown', function(e) {
+                card.addEventListener('keydown', function (e) {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         if (e.target.closest('a')) return;
@@ -2294,4 +2705,5 @@
         });
     </script>
 </body>
+
 </html>

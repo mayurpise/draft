@@ -279,17 +279,14 @@ You should see the list of available Draft commands. If not, check that the plug
 
 ### Cursor Integration (Optional)
 
-Draft also works as a Cursor rules file:
+Cursor natively supports the `.claude/` plugin structure. Add via:
 
-```bash
-# Download directly (no clone required)
-curl -o .cursorrules https://raw.githubusercontent.com/mayurpise/draft/main/integrations/cursor/.cursorrules
-
-# Or copy from a local clone
-cp ~/.claude/plugins/draft/integrations/cursor/.cursorrules /your-project/.cursorrules
+Cursor > Settings > Rules, Skills, Subagents > Rules > New > Add from Github:
+```
+https://github.com/mayurpise/draft.git
 ```
 
-This gives Cursor the same methodology awareness, though without slash commands.
+Then use: `@draft init`, `@draft new-track`, `@draft implement`
 
 ### GitHub Copilot Integration (Optional)
 
@@ -400,21 +397,66 @@ Good tasks are:
 
 Initializes a Draft project by creating the `draft/` directory and context files. Run once per project.
 
+#### Analysis Depth
+
+Control how deeply Draft analyzes the codebase with `--depth`:
+
+```bash
+/draft:init                    # default: standard
+/draft:init --depth quick      # fast scan for large codebases
+/draft:init --depth standard   # full structural analysis
+/draft:init --depth deep       # comprehensive with read/write paths
+```
+
+| Depth | Time | Best For |
+|-------|------|----------|
+| `quick` | ~2 min | Large monorepos, CI/CD, initial exploration |
+| `standard` | ~5-10 min | Most projects — full Phase 1-3 analysis |
+| `deep` | ~15-30 min | Critical projects, onboarding, unfamiliar codebases |
+
+**Feature availability by depth:**
+
+| Feature | Quick | Standard | Deep |
+|---------|:-----:|:--------:|:----:|
+| Directory structure, tech stack, entry points | ✓ | ✓ | ✓ |
+| Module discovery, dependency graphs | — | ✓ | ✓ |
+| Design patterns, anti-patterns, mermaid diagrams | — | ✓ | ✓ |
+| Read/write path tracing with `file:line` refs | — | — | ✓ |
+| Proto/OpenAPI/GraphQL schema analysis | — | — | ✓ |
+| Test file mapping, config/env discovery | — | — | ✓ |
+
+**Auto-suggestion:** Based on file count, Draft suggests appropriate depth:
+- <50 files → `deep`
+- 50-500 files → `standard`
+- 500+ files → `quick` (with option for `standard`)
+
 #### Project Discovery
 
 Draft auto-classifies the project:
 
 - **Brownfield (existing codebase):** Detected by the presence of `package.json`, `requirements.txt`, `go.mod`, `Cargo.toml`, `src/`, or git history with commits. Draft scans the existing stack and pre-fills `tech-stack.md`.
 - **Greenfield (new project):** Empty or near-empty directory. Developer provides all context through dialogue.
+- **Monorepo:** Detected by `lerna.json`, `pnpm-workspace.yaml`, `nx.json`, `turbo.json`, or multiple package manifests in child directories. Suggests `/draft:index` instead.
 
 #### Initialization Sequence
 
-1. **Project discovery** — Classify as brownfield (existing) or greenfield (new)
-2. **Architecture discovery (brownfield only)** — Three-phase deep analysis of the existing codebase → `draft/architecture.md`:
-   - **Phase 1: Orientation** — Directory structure, entry points, critical paths, request/response flows, tech stack inventory. Generates mermaid diagrams: system architecture (`graph TD`), directory hierarchy (`graph TD`), request flow (`sequenceDiagram`).
-   - **Phase 2: Logic** — Data lifecycle mapping, primary domain objects, design pattern recognition, anti-pattern/complexity hotspot flagging, convention extraction, external dependency mapping. Generates mermaid diagrams: data flow (`flowchart LR`), external integrations (`graph LR`).
-   - **Phase 3: Module Discovery** — Reverse-engineers existing modules from import graph and directory boundaries. Documents each module's responsibility, files, API surface, dependencies, and complexity. Generates module dependency diagram (`graph LR`), dependency table, and topological dependency order. `/draft:decompose` later extends (not replaces) these modules when planning new features.
-   - This document becomes persistent context — every future track references it instead of re-analyzing the codebase.
+1. **Project discovery** — Classify as brownfield, greenfield, or monorepo
+2. **Architecture discovery (brownfield only)** — Analysis depth determines which phases run:
+
+   **Phase 1: Orientation (all depths)** — Directory structure, entry points, tech stack inventory. Generates system architecture diagram.
+
+   **Phase 2: Logic (standard, deep)** — Data lifecycle mapping, primary domain objects, design pattern recognition, anti-pattern/complexity hotspot flagging, convention extraction, external dependency mapping. Generates mermaid diagrams.
+
+   **Phase 3: Module Discovery (standard, deep)** — Reverse-engineers existing modules from import graph and directory boundaries. Documents each module's responsibility, files, API surface, dependencies, and complexity. Generates module dependency diagram, dependency table, and topological dependency order.
+
+   **Phase 4: Critical Path Tracing (deep only)** — End-to-end read/write path tracing with `file:line` references. Identifies 2-3 critical operations and traces them through the full stack. Documents cross-cutting concerns.
+
+   **Phase 5: Schema & Contract Discovery (deep only)** — Analyzes Protobuf, OpenAPI, GraphQL, and database schemas. Maps inter-service dependencies. Documents contract validation tools.
+
+   **Phase 6: Test & Config Mapping (deep only)** — Maps test files to modules. Documents configuration files, environment variables, feature flags, and secret sources.
+
+   This document becomes persistent context — every future track references it instead of re-analyzing the codebase.
+
 3. **Product definition** — Dialogue to define product vision, users, goals, constraints → `draft/product.md`
 4. **Product guidelines (optional)** — Writing style, visual identity, UX principles → `draft/product-guidelines.md`
 5. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield → `draft/tech-stack.md`
@@ -427,10 +469,15 @@ If `draft/` already exists with context files, init reports "already initialized
 
 #### Refresh Mode (`/draft:init refresh`)
 
-Re-scans and updates existing context without starting from scratch:
+Re-scans and updates existing context without starting from scratch. Supports `--depth` flag.
+
+```bash
+/draft:init refresh              # refresh at current depth
+/draft:init refresh --depth deep # upgrade to deep analysis
+```
 
 1. **Tech Stack Refresh** — Re-scans `package.json`, `go.mod`, etc. Compares with existing `draft/tech-stack.md`. Proposes updates.
-2. **Architecture Refresh** — Re-runs architecture discovery (Phase 1, 2 & 3) and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `/draft:decompose`. Presents changes for review before writing.
+2. **Architecture Refresh** — Re-runs architecture discovery at specified depth and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `/draft:decompose`. Presents changes for review before writing.
 3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.

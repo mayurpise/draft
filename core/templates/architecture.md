@@ -231,7 +231,148 @@ graph LR
 
 ---
 
+## Phase 4: Critical Paths (Deep Depth Only)
+
+> This section is generated with `--depth deep`. It traces end-to-end read/write paths with `file:line` references.
+
+### Write Paths
+
+#### Write Path: [Operation Name]
+
+| Step | Location | Description |
+|------|----------|-------------|
+| 1. Entry | `routes/users.ts:42` | POST /users handler |
+| 2. Middleware | `middleware/auth.ts:15` | Authentication check |
+| 3. Validation | `middleware/validate.ts:28` | Request schema validation |
+| 4. Service | `services/user.ts:88` | Business logic, password hashing |
+| 5. Repository | `repos/user.ts:23` | Database insert |
+| 6. Events | `events/user.ts:12` | Emit UserCreated event |
+| 7. Response | `serializers/user.ts:5` | Format response |
+
+> Trace each write operation from entry to persistence and response.
+
+### Read Paths
+
+#### Read Path: [Operation Name]
+
+| Step | Location | Description |
+|------|----------|-------------|
+| 1. Entry | `routes/users.ts:67` | GET /users/:id handler |
+| 2. Middleware | `middleware/auth.ts:15` | Authentication |
+| 3. Service | `services/user.ts:45` | Permission check |
+| 4. Cache | `cache/user.ts:8` | Check cache, return if hit |
+| 5. Repository | `repos/user.ts:12` | Database query |
+| 6. Cache | `cache/user.ts:15` | Populate cache |
+| 7. Response | `serializers/user.ts:5` | Format response |
+
+> Trace each read operation from entry through cache/DB to response.
+
+### Cross-Cutting Concerns
+
+| Concern | Implementation | Applied To |
+|---------|---------------|------------|
+| Logging | `middleware/logger.ts` | All routes |
+| Error handling | `middleware/error.ts` | All routes |
+| Metrics | `middleware/metrics.ts` | All routes |
+| Tracing | `middleware/tracing.ts` | All routes |
+
+> Middleware, interceptors, or aspects that apply across multiple paths.
+
+---
+
+## Phase 5: Schemas & Contracts (Deep Depth Only)
+
+> This section is generated with `--depth deep`. It analyzes API schemas and service contracts.
+
+### API Schemas & Contracts
+
+| Type | Location | Services/Endpoints |
+|------|----------|-------------------|
+| Protobuf | `proto/*.proto` | [List services and methods] |
+| OpenAPI | `openapi.yaml` | [List endpoints] |
+| GraphQL | `schema.graphql` | [List queries and mutations] |
+| Database | `prisma/schema.prisma` | [List models] |
+
+### Service Definitions
+
+#### [ServiceName] (from `proto/service.proto`)
+
+| Method | Request | Response | Description |
+|--------|---------|----------|-------------|
+| Create | CreateRequest | CreateResponse | Creates a new resource |
+| Get | GetRequest | GetResponse | Retrieves a resource by ID |
+| Update | UpdateRequest | UpdateResponse | Updates an existing resource |
+| Delete | DeleteRequest | Empty | Deletes a resource |
+
+### Inter-Service Dependencies
+
+```mermaid
+graph LR
+    OrderService --> UserService
+    OrderService --> PaymentService
+    NotificationService --> UserService
+    NotificationService --> OrderService
+```
+
+| Caller | Callee | Purpose |
+|--------|--------|---------|
+| OrderService | UserService | Get user details for order |
+| OrderService | PaymentService | Process payment |
+| NotificationService | UserService | Get notification targets |
+
+### Contract Validation
+
+| Schema Type | Validation Tool | CI Integration |
+|-------------|----------------|----------------|
+| Protobuf | `buf lint` | Yes |
+| OpenAPI | `spectral` | Yes |
+| GraphQL | `graphql-inspector` | No |
+
+---
+
+## Phase 6: Tests & Config (Deep Depth Only)
+
+> This section is generated with `--depth deep`. It maps test coverage and configuration.
+
+### Test Coverage Map
+
+| Module | Test Files | Test Type | Coverage |
+|--------|-----------|-----------|----------|
+| `src/auth/` | `tests/auth/*.test.ts` | Unit + Integration | [%] |
+| `src/orders/` | `tests/orders/*.test.ts`, `e2e/orders.spec.ts` | Unit + E2E | [%] |
+| `src/utils/` | — | No tests | 0% |
+
+> Cross-reference with modules from Phase 3. Flag modules without tests.
+
+### Configuration
+
+| File | Purpose | Environment Variables |
+|------|---------|----------------------|
+| `.env.example` | Environment template | DATABASE_URL, API_KEY, ... |
+| `config/default.ts` | Default config | — |
+| `config/production.ts` | Production overrides | — |
+
+### Feature Flags
+
+| Flag | Purpose | Default |
+|------|---------|---------|
+| `ENABLE_NEW_CHECKOUT` | Gates new checkout flow | false |
+| `BETA_FEATURES` | Enables beta feature set | false |
+
+### Secrets & Sensitive Config
+
+| Secret | Source | Required For |
+|--------|--------|-------------|
+| DATABASE_URL | Environment | Database connection |
+| API_KEY | Environment | Third-party API |
+| JWT_SECRET | AWS Secrets Manager | Token signing |
+
+> Identify where secrets are expected (NOT their values). Flag missing `.env.example` entries.
+
+---
+
 ## Notes
 
 - [Architecture decisions, trade-offs, or constraints worth documenting]
 - [Areas flagged as "Unknown/Legacy Context Required" need team input]
+- **Analysis Depth:** [quick / standard / deep] — run `/draft:init refresh --depth deep` for additional phases

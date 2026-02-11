@@ -206,10 +206,48 @@ You are initializing a Draft project for Context-Driven Development.
 ## Pre-Check
 
 Check for arguments:
-- If argument is `refresh`: Proceed to **Refresh Mode**.
-- If no argument: Check if already initialized.
+- `--depth quick|standard|deep`: Set analysis depth (default: `standard`)
+- `refresh`: Update existing context without full re-init
+- `refresh --depth <level>`: Refresh with specific depth
+
+### Analysis Depth Levels
+
+| Depth | Time | Best For | Description |
+|-------|------|----------|-------------|
+| `quick` | ~2 min | Large monorepos, CI/CD, initial exploration | Directory scan, package detection, entry points. No deep analysis. |
+| `standard` | ~5-10 min | Most projects | Full Phase 1-3 analysis. Module discovery, dependency graphs, mermaid diagrams. |
+| `deep` | ~15-30 min | Critical projects, onboarding, unfamiliar codebases | Standard + read/write path tracing, schema analysis, test mapping, config discovery. |
+
+#### Feature Matrix
+
+| Feature | Quick | Standard | Deep |
+|---------|:-----:|:--------:|:----:|
+| Directory structure | ✓ | ✓ | ✓ |
+| Tech stack detection | ✓ | ✓ | ✓ |
+| Entry points | ✓ | ✓ | ✓ |
+| System overview diagram | ✓ | ✓ | ✓ |
+| Module discovery | — | ✓ | ✓ |
+| Dependency graph | — | ✓ | ✓ |
+| Design patterns | — | ✓ | ✓ |
+| Anti-patterns/hotspots | — | ✓ | ✓ |
+| Mermaid diagrams (full) | — | ✓ | ✓ |
+| Proto/OpenAPI/GraphQL schemas | — | — | ✓ |
+| Read/write path tracing | — | — | ✓ |
+| Test file mapping | — | — | ✓ |
+| Config/env discovery | — | — | ✓ |
+| External service contracts | — | — | ✓ |
+
+#### Auto-Suggest Depth
+
+Based on codebase size, suggest appropriate depth:
+- **<50 files**: Suggest `deep` — small enough for thorough analysis
+- **50-500 files**: Suggest `standard` — balanced coverage
+- **500+ files**: Suggest `quick` — avoid timeout, offer `standard` with warning
+
+Present the suggestion but let the user override.
 
 ### Standard Init Check
+
 ```bash
 ls draft/ 2>/dev/null
 ```
@@ -218,10 +256,24 @@ If `draft/` exists with context files:
 - Announce: "Project already initialized. Use `draft init refresh` to update context or `draft new-track` to create a feature."
 - Stop here.
 
+### Monorepo Detection
+
+Check for monorepo indicators:
+- Multiple `package.json` / `go.mod` / `Cargo.toml` in child directories
+- `lerna.json`, `pnpm-workspace.yaml`, `nx.json`, or `turbo.json` at root
+- `packages/`, `apps/`, `services/` directories with independent manifests
+
+If monorepo detected:
+- Announce: "Detected monorepo structure. Consider using `draft index` at root level to aggregate service context, or run `draft init` within individual service directories."
+- Ask user to confirm: initialize here (single service) or abort (use draft index instead)
+
 ### Refresh Mode
-If the user runs `draft init refresh`:
+
+If the user runs `draft init refresh` (optionally with `--depth`):
+
 1. **Tech Stack Refresh**: Re-scan `package.json`, `go.mod`, etc. Compare with `draft/tech-stack.md`. Propose updates.
-2. **Architecture Refresh**: If `draft/architecture.md` exists, re-run architecture discovery (Phase 1, 2 & 3 from Step 1.5) with safe backup workflow:
+
+2. **Architecture Refresh**: If `draft/architecture.md` exists, re-run architecture discovery at the specified depth with safe backup workflow:
 
    **a. Create backup:**
    ```bash
@@ -229,7 +281,7 @@ If the user runs `draft init refresh`:
    ```
 
    **b. Generate to temporary file:**
-   - Run architecture discovery (Phase 1, 2 & 3 from Step 1.5)
+   - Run architecture discovery at specified depth
    - Write output to `draft/architecture.md.new` (NOT the original file)
    - Detect new directories, files, or modules added since last scan
    - Identify removed or renamed components
@@ -257,7 +309,7 @@ If the user runs `draft init refresh`:
    ```
    Original architecture.md preserved unchanged.
 
-   - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now using Step 1.5
+   - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now
 
 3. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
@@ -280,16 +332,54 @@ Analyze the current directory to classify the project:
 
 Respect `.gitignore` and `.claudeignore` when scanning.
 
+**Count files** to determine suggested depth:
+```bash
+find . -type f -name "*.ts" -o -name "*.js" -o -name "*.py" -o -name "*.go" -o -name "*.rs" | wc -l
+```
+
+Announce: "Found ~X source files. Suggested depth: [quick|standard|deep]. Proceed with this depth? (or specify --depth)"
+
 If **Brownfield**: proceed to Step 1.5 (Architecture Discovery).
 If **Greenfield**: skip to Step 2 (Product Definition).
 
 ## Step 1.5: Architecture Discovery (Brownfield Only)
 
-For existing codebases, perform a two-phase deep analysis to generate `draft/architecture.md`. This document becomes the persistent context that every future track references — pay the analysis cost once, benefit on every track.
+For existing codebases, analyze based on the selected depth level. This document becomes persistent context that every future track references.
 
 Use the template from `core/templates/architecture.md`.
 
-### Phase 1: Orientation (The System Map)
+---
+
+### Quick Depth
+
+Minimal analysis for large codebases or initial exploration.
+
+#### Phase 1 Only: Orientation (Surface Scan)
+
+1. **System Overview**: Write a "Key Takeaway" paragraph. Generate a basic mermaid `graph TD` showing primary layers.
+
+2. **Directory Structure**: Scan top-level directories only. Generate:
+   - A table mapping directory → responsibility → key files
+   - Skip deep directory tree diagram
+
+3. **Entry Points**: Identify main entry points:
+   - Application startup (main/index files)
+   - API routes or HTTP handlers
+   - Skip detailed flow tracing
+
+4. **Tech Stack Inventory**: Cross-reference detected dependencies with config files.
+
+**Skip**: Module discovery, dependency graphs, design patterns, anti-patterns, read/write paths.
+
+**Output**: Minimal `draft/architecture.md` with System Overview, Directory Structure, Entry Points, Tech Stack.
+
+---
+
+### Standard Depth (Default)
+
+Full structural analysis — current behavior.
+
+#### Phase 1: Orientation (The System Map)
 
 Analyze the codebase to produce the **Orientation** sections of `architecture.md`:
 
@@ -310,7 +400,7 @@ Analyze the codebase to produce the **Orientation** sections of `architecture.md
 
 5. **Tech Stack Inventory**: Cross-reference detected dependencies with config files. Record language versions, framework versions, and the config file that defines each. This feeds into the more detailed `draft/tech-stack.md`.
 
-### Phase 2: Logic (The "How" & "Why")
+#### Phase 2: Logic (The "How" & "Why")
 
 Examine specific files and functions to produce the **Logic** sections of `architecture.md`:
 
@@ -340,7 +430,7 @@ Examine specific files and functions to produce the **Logic** sections of `archi
 
 5. **External Dependencies**: Map external service integrations. Generate a mermaid `graph LR` showing the application's connections to auth providers, email services, storage, queues, third-party APIs, etc.
 
-### Phase 3: Module Discovery (Existing Modules)
+#### Phase 3: Module Discovery (Existing Modules)
 
 Analyze the codebase's import graph and directory boundaries to discover and document the **existing** module structure. This is reverse-engineering what already exists — not planning new modules (that's what `draft decompose` does for new features).
 
@@ -362,72 +452,147 @@ Analyze the codebase's import graph and directory boundaries to discover and doc
 - Set **Status** to `[x] Existing` — these modules already exist in the codebase
 - `draft decompose` may later add **new** planned modules alongside these existing ones when planning a feature or refactor. Existing modules discovered here should not be removed or overwritten by decompose — they serve as the baseline.
 
+---
+
+### Deep Depth
+
+Full analysis plus read/write paths, schemas, tests, and config.
+
+**Includes all of Standard Depth, plus:**
+
+#### Phase 4: Critical Path Tracing
+
+Trace end-to-end read and write paths through the codebase with `file:line` references.
+
+1. **Identify Critical Operations**: Ask the developer to name 2-3 critical operations (e.g., "user registration", "order checkout", "payment processing"). If not provided, infer from entry points.
+
+2. **Write Path Tracing**: For each write operation, trace the full path:
+   ```markdown
+   ### Write Path: [Operation Name]
+   1. Entry: `routes/users.ts:42` — POST /users handler
+   2. Middleware: `middleware/auth.ts:15` — authentication check
+   3. Validation: `middleware/validate.ts:28` — request schema validation
+   4. Service: `services/user.ts:88` — business logic, password hashing
+   5. Repository: `repos/user.ts:23` — database insert
+   6. Events: `events/user.ts:12` — emit UserCreated event
+   7. Response: `serializers/user.ts:5` — format response
+   ```
+
+3. **Read Path Tracing**: For each read operation, trace the full path:
+   ```markdown
+   ### Read Path: [Operation Name]
+   1. Entry: `routes/users.ts:67` — GET /users/:id handler
+   2. Middleware: `middleware/auth.ts:15` — authentication
+   3. Service: `services/user.ts:45` — permission check
+   4. Cache: `cache/user.ts:8` — check cache, return if hit
+   5. Repository: `repos/user.ts:12` — database query
+   6. Cache: `cache/user.ts:15` — populate cache
+   7. Response: `serializers/user.ts:5` — format response
+   ```
+
+4. **Cross-Cutting Concerns**: Identify middleware, interceptors, or aspects that apply to multiple paths (logging, error handling, metrics, tracing).
+
+#### Phase 5: Schema & Contract Discovery
+
+Analyze API schemas and service contracts.
+
+1. **Schema File Detection**: Scan for:
+   - Protobuf: `*.proto` files
+   - OpenAPI: `openapi.yaml`, `swagger.json`, `*.openapi.yaml`
+   - GraphQL: `*.graphql`, `schema.graphql`
+   - JSON Schema: `*.schema.json`
+   - Database schemas: `prisma/schema.prisma`, `migrations/`, `*.sql`
+
+2. **Service Definitions**: Extract from proto/schema files:
+   ```markdown
+   ### API Schemas & Contracts
+
+   | Type | Location | Services/Endpoints |
+   |------|----------|-------------------|
+   | Protobuf | `proto/user.proto` | UserService: Create, Get, Update, Delete |
+   | OpenAPI | `openapi.yaml` | REST: /users, /orders, /products |
+   | GraphQL | `schema.graphql` | Query: user, orders; Mutation: createUser |
+   ```
+
+3. **Inter-Service Dependencies**: For microservices, map which services call which:
+   ```markdown
+   ### Service Dependencies
+   - `OrderService` → `UserService` (get user details)
+   - `OrderService` → `PaymentService` (process payment)
+   - `NotificationService` → `UserService`, `OrderService` (get notification targets)
+   ```
+
+4. **Contract Validation**: Note if contracts have validation (e.g., protobuf compilation, OpenAPI validation, GraphQL type checking).
+
+#### Phase 6: Test & Config Mapping
+
+Map test coverage and configuration structure.
+
+1. **Test File Mapping**: For each module discovered in Phase 3, identify corresponding test files:
+   ```markdown
+   ### Test Coverage Map
+
+   | Module | Test Files | Test Type |
+   |--------|-----------|-----------|
+   | `src/auth/` | `tests/auth/*.test.ts` | Unit + Integration |
+   | `src/orders/` | `tests/orders/*.test.ts`, `e2e/orders.spec.ts` | Unit + E2E |
+   | `src/utils/` | — | No tests |
+   ```
+
+2. **Config & Environment Discovery**:
+   ```markdown
+   ### Configuration
+
+   | File | Purpose | Environment Variables |
+   |------|---------|----------------------|
+   | `.env.example` | Environment template | DATABASE_URL, API_KEY, ... |
+   | `config/default.ts` | Default config | — |
+   | `config/production.ts` | Production overrides | — |
+
+   ### Feature Flags
+   - `ENABLE_NEW_CHECKOUT` — gates new checkout flow
+   - `BETA_FEATURES` — enables beta feature set
+   ```
+
+3. **Secrets & Sensitive Config**: Identify where secrets are expected (but NOT their values):
+   - Environment variables for API keys, database credentials
+   - Secret managers referenced (AWS Secrets Manager, Vault, etc.)
+
+---
+
 ### Architecture Discovery Output
 
-Write all Phase 1, Phase 2, and Phase 3 sections to `draft/architecture.md`.
+Write all completed phases to `draft/architecture.md`.
 
 Present the architecture document for developer review before proceeding to Step 2.
 
 ### Operational Constraints for Architecture Discovery
+
 - **Bottom-Line First**: Start with the Key Takeaway summary
 - **Code-to-Context Ratio**: Explain intent, not syntax
 - **No Hallucinations**: If a dependency or business reason is unclear, flag it as "Unknown/Legacy Context Required"
 - **Mermaid Diagrams**: Use actual component/file names from the codebase, not generic placeholders
 - **Respect Boundaries**: Only analyze code in the repository; do not make assumptions about external services
+- **Progress Updates**: For standard/deep depth, announce progress: "Phase 1 complete... analyzing Phase 2..."
 
 ## Step 2: Product Definition
 
-Create `draft/product.md` through dialogue:
+Create `draft/product.md` using the template from `core/templates/product.md`.
 
-1. Ask about the product's purpose and target users
-2. Ask about key features and goals
-3. Ask about constraints or requirements
+Engage in structured dialogue:
 
-Template:
-```markdown
-# Product: [Name]
-
-## Vision
-[One paragraph describing what this product does and why it matters]
-
-## Target Users
-- [User type 1]: [Their needs]
-- [User type 2]: [Their needs]
-
-## Core Features
-1. [Feature 1]
-2. [Feature 2]
-3. [Feature 3]
-
-## Success Criteria
-- [Measurable goal 1]
-- [Measurable goal 2]
-
-## Constraints
-- [Technical/business constraint]
-```
+1. **Vision**: "What does this product do and why does it matter?"
+2. **Users**: "Who uses this? What are their primary needs?"
+3. **Core Features**: "What are the must-have (P0), should-have (P1), and nice-to-have (P2) features?"
+4. **Success Criteria**: "How will you measure if this product is successful?"
+5. **Constraints**: "What technical, business, or timeline constraints exist?"
+6. **Non-Goals**: "What is explicitly out of scope?"
 
 Present for approval, iterate if needed, then write to `draft/product.md`.
 
 ## Step 3: Product Guidelines (Optional)
 
-Ask if they want to define product guidelines. If yes, create `draft/product-guidelines.md`:
-
-```markdown
-# Product Guidelines
-
-## Writing Style
-- Tone: [professional/casual/technical]
-- Voice: [first person/third person]
-
-## Visual Identity
-- Primary colors: [if applicable]
-- Typography preferences: [if applicable]
-
-## UX Principles
-- [Principle 1]
-- [Principle 2]
-```
+Ask if they want to define product guidelines. If yes, create `draft/product-guidelines.md` using `core/templates/product-guidelines.md`.
 
 ## Step 4: Tech Stack
 
@@ -437,65 +602,18 @@ For Brownfield projects, auto-detect from:
 - `go.mod` → Go
 - `Cargo.toml` → Rust
 
-Create `draft/tech-stack.md`:
+Create `draft/tech-stack.md` using the template from `core/templates/tech-stack.md`.
 
-```markdown
-# Tech Stack
-
-## Languages
-- Primary: [Language] [Version]
-- Secondary: [if applicable]
-
-## Frameworks
-- [Framework 1]: [Purpose]
-- [Framework 2]: [Purpose]
-
-## Database
-- [Database]: [Purpose]
-
-## Testing
-- Unit: [Framework]
-- Integration: [Framework]
-- E2E: [Framework if applicable]
-
-## Build & Deploy
-- Build: [Tool]
-- CI/CD: [Platform]
-- Deploy: [Target]
-
-## Code Patterns
-- Architecture: [e.g., Clean Architecture, MVC]
-- State Management: [if applicable]
-- Error Handling: [pattern]
-```
+Present detected stack for verification before writing.
 
 ## Step 5: Workflow Configuration
 
-Create `draft/workflow.md` based on team preferences:
+Create `draft/workflow.md` using the template from `core/templates/workflow.md`.
 
-```markdown
-# Development Workflow
-
-## Test-Driven Development
-- [ ] Write failing test first
-- [ ] Implement minimum code to pass
-- [ ] Refactor with passing tests
-
-## Commit Strategy
-- Format: `type(scope): description`
-- Types: feat, fix, docs, style, refactor, test, chore
-- Commit after each completed task
-
-## Code Review
-- Self-review before marking complete
-- Run linter and tests before commit
-
-## Phase Verification
-- Manual verification required at phase boundaries
-- Document verification steps in plan.md
-```
-
-Ask about their TDD preference (strict/flexible/none) and commit style.
+Ask about:
+- TDD preference (strict/flexible/none)
+- Commit style and frequency
+- Validation settings (auto-validate, blocking behavior)
 
 **Note on Architecture Mode:**
 Architecture features (Story, Execution State, Skeletons, Chunk Reviews) are automatically enabled when you run `draft decompose` on a track. No opt-in needed - the presence of `architecture.md` activates these features.
@@ -525,7 +643,22 @@ mkdir -p draft/tracks
 
 ## Completion
 
-For **Brownfield** projects, announce:
+For **Brownfield** projects with **deep** depth, announce:
+"Draft initialized successfully with deep analysis!
+
+Created:
+- draft/architecture.md (system map, read/write paths, schemas, test mapping)
+- draft/product.md
+- draft/tech-stack.md
+- draft/workflow.md
+- draft/tracks.md
+
+Next steps:
+1. Review draft/architecture.md — verify paths and schemas match your understanding
+2. Review and edit the other generated files as needed
+3. Run `draft new-track` to start planning a feature"
+
+For **Brownfield** projects with **standard** depth, announce:
 "Draft initialized successfully!
 
 Created:
@@ -537,8 +670,22 @@ Created:
 
 Next steps:
 1. Review draft/architecture.md — verify the system map matches your understanding
-2. Review and edit the other generated files as needed
+2. Run `draft init refresh --depth deep` later for read/write path tracing
 3. Run `draft new-track` to start planning a feature"
+
+For **Brownfield** projects with **quick** depth, announce:
+"Draft initialized successfully (quick scan)!
+
+Created:
+- draft/architecture.md (basic structure only)
+- draft/product.md
+- draft/tech-stack.md
+- draft/workflow.md
+- draft/tracks.md
+
+Next steps:
+1. Run `draft init refresh --depth standard` for full module discovery
+2. Run `draft new-track` to start planning a feature"
 
 For **Greenfield** projects, announce:
 "Draft initialized successfully!
@@ -6020,17 +6167,14 @@ draft status
 
 ### Cursor Integration (Optional)
 
-Draft also works as a Cursor rules file:
+Cursor natively supports the `.claude/` plugin structure. Add via:
 
-```bash
-# Download directly (no clone required)
-curl -o .cursorrules https://raw.githubusercontent.com/mayurpise/draft/main/integrations/cursor/.cursorrules
-
-# Or copy from a local clone
-cp ~/.claude/plugins/draft/integrations/cursor/.cursorrules /your-project/.cursorrules
+Cursor > Settings > Rules, Skills, Subagents > Rules > New > Add from Github:
+```
+https://github.com/mayurpise/draft.git
 ```
 
-This gives Cursor the same methodology awareness, though without slash commands.
+Then use: `draft init`, `draft new-track`, `draft implement`
 
 ### GitHub Copilot Integration (Optional)
 
@@ -6141,21 +6285,66 @@ Good tasks are:
 
 Initializes a Draft project by creating the `draft/` directory and context files. Run once per project.
 
+#### Analysis Depth
+
+Control how deeply Draft analyzes the codebase with `--depth`:
+
+```bash
+draft init                    # default: standard
+draft init --depth quick      # fast scan for large codebases
+draft init --depth standard   # full structural analysis
+draft init --depth deep       # comprehensive with read/write paths
+```
+
+| Depth | Time | Best For |
+|-------|------|----------|
+| `quick` | ~2 min | Large monorepos, CI/CD, initial exploration |
+| `standard` | ~5-10 min | Most projects — full Phase 1-3 analysis |
+| `deep` | ~15-30 min | Critical projects, onboarding, unfamiliar codebases |
+
+**Feature availability by depth:**
+
+| Feature | Quick | Standard | Deep |
+|---------|:-----:|:--------:|:----:|
+| Directory structure, tech stack, entry points | ✓ | ✓ | ✓ |
+| Module discovery, dependency graphs | — | ✓ | ✓ |
+| Design patterns, anti-patterns, mermaid diagrams | — | ✓ | ✓ |
+| Read/write path tracing with `file:line` refs | — | — | ✓ |
+| Proto/OpenAPI/GraphQL schema analysis | — | — | ✓ |
+| Test file mapping, config/env discovery | — | — | ✓ |
+
+**Auto-suggestion:** Based on file count, Draft suggests appropriate depth:
+- <50 files → `deep`
+- 50-500 files → `standard`
+- 500+ files → `quick` (with option for `standard`)
+
 #### Project Discovery
 
 Draft auto-classifies the project:
 
 - **Brownfield (existing codebase):** Detected by the presence of `package.json`, `requirements.txt`, `go.mod`, `Cargo.toml`, `src/`, or git history with commits. Draft scans the existing stack and pre-fills `tech-stack.md`.
 - **Greenfield (new project):** Empty or near-empty directory. Developer provides all context through dialogue.
+- **Monorepo:** Detected by `lerna.json`, `pnpm-workspace.yaml`, `nx.json`, `turbo.json`, or multiple package manifests in child directories. Suggests `draft index` instead.
 
 #### Initialization Sequence
 
-1. **Project discovery** — Classify as brownfield (existing) or greenfield (new)
-2. **Architecture discovery (brownfield only)** — Three-phase deep analysis of the existing codebase → `draft/architecture.md`:
-   - **Phase 1: Orientation** — Directory structure, entry points, critical paths, request/response flows, tech stack inventory. Generates mermaid diagrams: system architecture (`graph TD`), directory hierarchy (`graph TD`), request flow (`sequenceDiagram`).
-   - **Phase 2: Logic** — Data lifecycle mapping, primary domain objects, design pattern recognition, anti-pattern/complexity hotspot flagging, convention extraction, external dependency mapping. Generates mermaid diagrams: data flow (`flowchart LR`), external integrations (`graph LR`).
-   - **Phase 3: Module Discovery** — Reverse-engineers existing modules from import graph and directory boundaries. Documents each module's responsibility, files, API surface, dependencies, and complexity. Generates module dependency diagram (`graph LR`), dependency table, and topological dependency order. `draft decompose` later extends (not replaces) these modules when planning new features.
-   - This document becomes persistent context — every future track references it instead of re-analyzing the codebase.
+1. **Project discovery** — Classify as brownfield, greenfield, or monorepo
+2. **Architecture discovery (brownfield only)** — Analysis depth determines which phases run:
+
+   **Phase 1: Orientation (all depths)** — Directory structure, entry points, tech stack inventory. Generates system architecture diagram.
+
+   **Phase 2: Logic (standard, deep)** — Data lifecycle mapping, primary domain objects, design pattern recognition, anti-pattern/complexity hotspot flagging, convention extraction, external dependency mapping. Generates mermaid diagrams.
+
+   **Phase 3: Module Discovery (standard, deep)** — Reverse-engineers existing modules from import graph and directory boundaries. Documents each module's responsibility, files, API surface, dependencies, and complexity. Generates module dependency diagram, dependency table, and topological dependency order.
+
+   **Phase 4: Critical Path Tracing (deep only)** — End-to-end read/write path tracing with `file:line` references. Identifies 2-3 critical operations and traces them through the full stack. Documents cross-cutting concerns.
+
+   **Phase 5: Schema & Contract Discovery (deep only)** — Analyzes Protobuf, OpenAPI, GraphQL, and database schemas. Maps inter-service dependencies. Documents contract validation tools.
+
+   **Phase 6: Test & Config Mapping (deep only)** — Maps test files to modules. Documents configuration files, environment variables, feature flags, and secret sources.
+
+   This document becomes persistent context — every future track references it instead of re-analyzing the codebase.
+
 3. **Product definition** — Dialogue to define product vision, users, goals, constraints → `draft/product.md`
 4. **Product guidelines (optional)** — Writing style, visual identity, UX principles → `draft/product-guidelines.md`
 5. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield → `draft/tech-stack.md`
@@ -6168,10 +6357,15 @@ If `draft/` already exists with context files, init reports "already initialized
 
 #### Refresh Mode (`draft init refresh`)
 
-Re-scans and updates existing context without starting from scratch:
+Re-scans and updates existing context without starting from scratch. Supports `--depth` flag.
+
+```bash
+draft init refresh              # refresh at current depth
+draft init refresh --depth deep # upgrade to deep analysis
+```
 
 1. **Tech Stack Refresh** — Re-scans `package.json`, `go.mod`, etc. Compares with existing `draft/tech-stack.md`. Proposes updates.
-2. **Architecture Refresh** — Re-runs architecture discovery (Phase 1, 2 & 3) and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `draft decompose`. Presents changes for review before writing.
+2. **Architecture Refresh** — Re-runs architecture discovery at specified depth and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `draft decompose`. Presents changes for review before writing.
 3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
@@ -7693,10 +7887,151 @@ graph LR
 
 ---
 
+## Phase 4: Critical Paths (Deep Depth Only)
+
+> This section is generated with `--depth deep`. It traces end-to-end read/write paths with `file:line` references.
+
+### Write Paths
+
+#### Write Path: [Operation Name]
+
+| Step | Location | Description |
+|------|----------|-------------|
+| 1. Entry | `routes/users.ts:42` | POST /users handler |
+| 2. Middleware | `middleware/auth.ts:15` | Authentication check |
+| 3. Validation | `middleware/validate.ts:28` | Request schema validation |
+| 4. Service | `services/user.ts:88` | Business logic, password hashing |
+| 5. Repository | `repos/user.ts:23` | Database insert |
+| 6. Events | `events/user.ts:12` | Emit UserCreated event |
+| 7. Response | `serializers/user.ts:5` | Format response |
+
+> Trace each write operation from entry to persistence and response.
+
+### Read Paths
+
+#### Read Path: [Operation Name]
+
+| Step | Location | Description |
+|------|----------|-------------|
+| 1. Entry | `routes/users.ts:67` | GET /users/:id handler |
+| 2. Middleware | `middleware/auth.ts:15` | Authentication |
+| 3. Service | `services/user.ts:45` | Permission check |
+| 4. Cache | `cache/user.ts:8` | Check cache, return if hit |
+| 5. Repository | `repos/user.ts:12` | Database query |
+| 6. Cache | `cache/user.ts:15` | Populate cache |
+| 7. Response | `serializers/user.ts:5` | Format response |
+
+> Trace each read operation from entry through cache/DB to response.
+
+### Cross-Cutting Concerns
+
+| Concern | Implementation | Applied To |
+|---------|---------------|------------|
+| Logging | `middleware/logger.ts` | All routes |
+| Error handling | `middleware/error.ts` | All routes |
+| Metrics | `middleware/metrics.ts` | All routes |
+| Tracing | `middleware/tracing.ts` | All routes |
+
+> Middleware, interceptors, or aspects that apply across multiple paths.
+
+---
+
+## Phase 5: Schemas & Contracts (Deep Depth Only)
+
+> This section is generated with `--depth deep`. It analyzes API schemas and service contracts.
+
+### API Schemas & Contracts
+
+| Type | Location | Services/Endpoints |
+|------|----------|-------------------|
+| Protobuf | `proto/*.proto` | [List services and methods] |
+| OpenAPI | `openapi.yaml` | [List endpoints] |
+| GraphQL | `schema.graphql` | [List queries and mutations] |
+| Database | `prisma/schema.prisma` | [List models] |
+
+### Service Definitions
+
+#### [ServiceName] (from `proto/service.proto`)
+
+| Method | Request | Response | Description |
+|--------|---------|----------|-------------|
+| Create | CreateRequest | CreateResponse | Creates a new resource |
+| Get | GetRequest | GetResponse | Retrieves a resource by ID |
+| Update | UpdateRequest | UpdateResponse | Updates an existing resource |
+| Delete | DeleteRequest | Empty | Deletes a resource |
+
+### Inter-Service Dependencies
+
+```mermaid
+graph LR
+    OrderService --> UserService
+    OrderService --> PaymentService
+    NotificationService --> UserService
+    NotificationService --> OrderService
+```
+
+| Caller | Callee | Purpose |
+|--------|--------|---------|
+| OrderService | UserService | Get user details for order |
+| OrderService | PaymentService | Process payment |
+| NotificationService | UserService | Get notification targets |
+
+### Contract Validation
+
+| Schema Type | Validation Tool | CI Integration |
+|-------------|----------------|----------------|
+| Protobuf | `buf lint` | Yes |
+| OpenAPI | `spectral` | Yes |
+| GraphQL | `graphql-inspector` | No |
+
+---
+
+## Phase 6: Tests & Config (Deep Depth Only)
+
+> This section is generated with `--depth deep`. It maps test coverage and configuration.
+
+### Test Coverage Map
+
+| Module | Test Files | Test Type | Coverage |
+|--------|-----------|-----------|----------|
+| `src/auth/` | `tests/auth/*.test.ts` | Unit + Integration | [%] |
+| `src/orders/` | `tests/orders/*.test.ts`, `e2e/orders.spec.ts` | Unit + E2E | [%] |
+| `src/utils/` | — | No tests | 0% |
+
+> Cross-reference with modules from Phase 3. Flag modules without tests.
+
+### Configuration
+
+| File | Purpose | Environment Variables |
+|------|---------|----------------------|
+| `.env.example` | Environment template | DATABASE_URL, API_KEY, ... |
+| `config/default.ts` | Default config | — |
+| `config/production.ts` | Production overrides | — |
+
+### Feature Flags
+
+| Flag | Purpose | Default |
+|------|---------|---------|
+| `ENABLE_NEW_CHECKOUT` | Gates new checkout flow | false |
+| `BETA_FEATURES` | Enables beta feature set | false |
+
+### Secrets & Sensitive Config
+
+| Secret | Source | Required For |
+|--------|--------|-------------|
+| DATABASE_URL | Environment | Database connection |
+| API_KEY | Environment | Third-party API |
+| JWT_SECRET | AWS Secrets Manager | Token signing |
+
+> Identify where secrets are expected (NOT their values). Flag missing `.env.example` entries.
+
+---
+
 ## Notes
 
 - [Architecture decisions, trade-offs, or constraints worth documenting]
 - [Areas flagged as "Unknown/Legacy Context Required" need team input]
+- **Analysis Depth:** [quick / standard / deep] — run `draft init refresh --depth deep` for additional phases
 
 </core-file>
 

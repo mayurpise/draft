@@ -23,6 +23,8 @@ Establish a disciplined AI development lifecycle with clear specifications, stru
 
 ### Cursor
 
+Cursor natively supports the `.claude/` plugin structure. Add via:
+
 Cursor > Settings > Rules, Skills, Subagents > Rules > New > Add from Github:
 ```
 https://github.com/mayurpise/draft.git

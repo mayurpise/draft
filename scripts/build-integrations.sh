@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 #
 # Build integration files from skill sources
-# Generates: Cursor .cursorrules + GitHub Copilot copilot-instructions.md
+# Generates: GitHub Copilot copilot-instructions.md + Gemini GEMINI.md
+#
+# Note: Cursor integration removed - Cursor now supports .claude/ plugin structure natively.
+# Use: Cursor > Settings > Rules, Skills, Subagents > Rules > New > Add from Github
 #
 # Skills are the single source of truth for all integrations.
 #
@@ -17,7 +20,6 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 SKILLS_DIR="$ROOT_DIR/skills"
-CURSOR_OUTPUT="$ROOT_DIR/integrations/cursor/.cursorrules"
 COPILOT_OUTPUT="$ROOT_DIR/integrations/copilot/.github/copilot-instructions.md"
 GEMINI_OUTPUT="$ROOT_DIR/integrations/gemini/GEMINI.md"
 
@@ -65,8 +67,8 @@ get_skill_header() {
     esac
 }
 
-# Cursor uses @draft syntax
-get_cursor_trigger() {
+# Gemini uses @draft syntax
+get_gemini_trigger() {
     local skill="$1"
     case "$skill" in
         draft)        echo "\"help\" or \"@draft\"" ;;
@@ -160,8 +162,8 @@ extract_body() {
     ' "$file"
 }
 
-# Base transform: /draft: → @draft
-transform_cursor_syntax() {
+# Gemini transform: /draft: → @draft
+transform_gemini_syntax() {
     sed -E \
         -e 's|/draft:([a-z-]+)|@draft \1|g'
 }
@@ -535,14 +537,6 @@ COMMON_HEADER2
 }
 
 # ─────────────────────────────────────────────────────────
-# Cursor: build .cursorrules
-# ─────────────────────────────────────────────────────────
-
-build_cursorrules() {
-    build_integration "@draft" "get_cursor_trigger" "transform_cursor_syntax" "@draft"
-}
-
-# ─────────────────────────────────────────────────────────
 # Copilot: build copilot-instructions.md
 # ─────────────────────────────────────────────────────────
 
@@ -555,8 +549,7 @@ build_copilot() {
 # ─────────────────────────────────────────────────────────
 
 build_gemini() {
-    # Gemini uses @draft syntax like Cursor
-    build_integration "@draft" "get_cursor_trigger" "transform_cursor_syntax" "@draft"
+    build_integration "@draft" "get_gemini_trigger" "transform_gemini_syntax" "@draft"
 }
 
 # ─────────────────────────────────────────────────────────
@@ -620,18 +613,12 @@ verify_output() {
 main() {
     echo "Building integrations from skills..."
     echo ""
+    echo "Note: Cursor integration removed - Cursor now supports .claude/ plugin structure natively."
+    echo ""
 
     # Ensure output directories exist
-    mkdir -p "$(dirname "$CURSOR_OUTPUT")"
     mkdir -p "$(dirname "$COPILOT_OUTPUT")"
     mkdir -p "$(dirname "$GEMINI_OUTPUT")"
-
-    # Generate Cursor integration
-    echo "── Cursor ──────────────────────────────────────"
-    build_cursorrules > "$CURSOR_OUTPUT"
-    echo "  Generated: $CURSOR_OUTPUT"
-    verify_output "Cursor" "$CURSOR_OUTPUT" "yes" || exit 1
-    echo ""
 
     # Generate Copilot integration
     echo "── Copilot ─────────────────────────────────────"

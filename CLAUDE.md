@@ -13,7 +13,9 @@ Draft is a Claude Code plugin that implements Context-Driven Development methodo
 ./scripts/build-integrations.sh
 ```
 
-Integration files (`.cursorrules`, `copilot-instructions.md`, `GEMINI.md`) are auto-generated from skills - do not edit directly.
+Integration files (`copilot-instructions.md`, `GEMINI.md`) are auto-generated from skills - do not edit directly.
+
+Note: Cursor integration removed - Cursor now supports `.claude/` plugin structure natively.
 
 ## Architecture
 
@@ -21,9 +23,8 @@ Integration files (`.cursorrules`, `copilot-instructions.md`, `GEMINI.md`) are a
 
 1. **`core/methodology.md`** - Master methodology documentation
 2. **`skills/<name>/SKILL.md`** - Skill implementations (derive from methodology)
-3. **`integrations/cursor/.cursorrules`** - Generated from skills via build script
-4. **`integrations/copilot/.github/copilot-instructions.md`** - Generated from skills via build script
-5. **`integrations/gemini/GEMINI.md`** - Generated from skills via build script
+3. **`integrations/copilot/.github/copilot-instructions.md`** - Generated from skills via build script
+4. **`integrations/gemini/GEMINI.md`** - Generated from skills via build script
 
 ### Plugin Structure
 
@@ -35,8 +36,6 @@ core/
   ├── methodology.md        # Master methodology (update first)
   ├── templates/            # Templates used by /draft:init
   └── agents/               # Specialized agent behaviors (debugger, reviewer, planner)
-integrations/cursor/
-  └── .cursorrules          # GENERATED - do not edit directly
 integrations/copilot/.github/
   └── copilot-instructions.md  # GENERATED - do not edit directly
 integrations/gemini/
@@ -63,7 +62,7 @@ The frontmatter configures the command; the body contains step-by-step instructi
 
 1. Update `core/methodology.md` first
 2. Apply changes to relevant `skills/` SKILL.md files
-3. Run `./scripts/build-integrations.sh` to regenerate all integrations (Cursor + Copilot + Gemini)
+3. Run `./scripts/build-integrations.sh` to regenerate integrations (Copilot + Gemini)
 4. Update this CLAUDE.md only if core concepts change
 
 ### Adding a New Skill

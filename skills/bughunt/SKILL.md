@@ -281,17 +281,94 @@ If test fails, upgrade confidence to CONFIRMED and include test in bug report.
 
 ## GTest Case Generation
 
-For each verified bug, generate a Google Test (GTest) case that would expose the bug as a failing test. This section applies to **all codebases** — adapt the test to the bug's language/context using GTest conventions.
+For each verified bug, generate a Google Test (GTest) case that would expose the bug as a failing test. **Before writing any new test**, first discover whether existing tests already cover (or partially cover) the bug scenario.
 
-### When to Generate GTest Cases
+### Step 1: Existing Test Discovery (REQUIRED per bug)
+
+For each verified bug, search the codebase for existing tests before generating new ones:
+
+1. **Locate test files for the buggy module**
+   - Search for test files matching the source file: `Grep` for the buggy function/class name in `*test*`, `*spec*`, `*_test.*`, `*_spec.*`, `test_*.*` files
+   - Check standard test directories: `test/`, `tests/`, `__tests__/`, `spec/`, matching the source path structure
+   - Check for GTest-specific patterns: `TEST(`, `TEST_F(`, `TEST_P(` referencing the buggy component
+
+2. **Analyze existing test coverage**
+   - Read each related test file found
+   - Check if any test exercises the **exact code path** that triggers the bug
+   - Check if any test covers the **same function/method** but misses the specific edge case
+   - Check if a test exists but has a **wrong assertion** (asserts buggy behavior as correct)
+
+3. **Classify the coverage status** — one of:
+
+   | Status | Meaning | Action |
+   |--------|---------|--------|
+   | **COVERED** | Existing test already catches this bug (test fails on buggy code) | Report the existing test — no new GTest needed |
+   | **PARTIAL** | Test exists for the function but misses this specific scenario | Propose modification to the existing test — add the missing case |
+   | **WRONG_ASSERTION** | Test exists but asserts the buggy behavior as correct | Propose fixing the assertion in the existing test |
+   | **NO_COVERAGE** | No test exists for this code path | Generate a new GTest case |
+   | **N/A** | Bug is in non-testable code (config, markdown, LLM workflow) | Write `N/A — [reason]` |
+
+4. **Document discovery results** in the bug report's GTest Case field
+
+**Example Existing Test Discovery:**
+```
+1. Bug location: src/parser.cpp:145 — off-by-one in tokenize()
+2. Grep: `rg 'tokenize' tests/` → found tests/parser_test.cpp
+3. Read tests/parser_test.cpp:
+   - TEST(Parser, TokenizeSimpleInput) — tests basic input ✓
+   - TEST(Parser, TokenizeEmptyString) — tests empty string ✓
+   - No test for boundary input length (the bug trigger)
+4. Status: PARTIAL — parser_test.cpp covers tokenize() but misses boundary case
+5. Action: Add new TEST case to existing tests/parser_test.cpp
+```
+
+### Step 2: Generate or Modify GTest Cases
+
+Based on discovery results:
+
+#### When status is COVERED
+```
+**GTest Case:**
+**Status:** COVERED — existing test already catches this bug
+**Existing Test:** `tests/parser_test.cpp:45` — `TEST(Parser, TokenizeBoundary)`
+No new test needed.
+```
+
+#### When status is PARTIAL — modify existing test
+```cpp
+**GTest Case:**
+**Status:** PARTIAL — existing test covers function, missing this scenario
+**Existing Test File:** `tests/parser_test.cpp`
+**Modification:** Add the following test case to the existing file:
+
+TEST(Parser, TokenizeBoundaryOffByOne) {
+    // Bug: [HIGH] Correctness: Off-by-one in tokenize boundary
+    // This scenario is missing from the existing test suite
+    std::string input(MAX_TOKEN_LEN, 'a');  // Exact boundary
+    auto tokens = tokenize(input);
+    EXPECT_EQ(tokens.size(), 1) << "Boundary-length input should produce exactly one token";
+}
+```
+
+#### When status is WRONG_ASSERTION — fix existing test
+```cpp
+**GTest Case:**
+**Status:** WRONG_ASSERTION — existing test asserts buggy behavior
+**Existing Test:** `tests/parser_test.cpp:67` — `TEST(Parser, TokenizeMaxLength)`
+**Current (wrong):**
+    EXPECT_EQ(tokens.size(), 0);  // Asserts bug: drops boundary token
+**Should be:**
+    EXPECT_EQ(tokens.size(), 1);  // Correct: boundary token should be kept
+```
+
+#### When status is NO_COVERAGE — generate new test
 
 - **C/C++ codebases:** Generate directly compilable GTest cases using the project's actual types, functions, and headers.
 - **Non-C/C++ codebases:** Generate a GTest-style test that demonstrates the bug's logic. Use pseudocode or C++ equivalents to model the behavior. Mark with a comment: `// Adapted from [language] — models the bug logic in GTest form`.
-- **If the bug is purely procedural/configuration** (e.g., build script, markdown format): Write `N/A — [reason]` in the GTest Case field.
 
-### GTest Case Requirements
+### GTest Case Requirements (for new tests)
 
-Each GTest case MUST:
+Each new GTest case MUST:
 
 1. **Target exactly one bug** — One test per finding, named after the bug category and title
 2. **Use descriptive test names** — `TEST(Category, BriefBugTitle)` format
@@ -299,8 +376,9 @@ Each GTest case MUST:
 4. **Assert the expected (correct) behavior** — The test should FAIL against the current buggy code
 5. **Comment the expected vs actual** — Explain what the test expects and what currently happens
 6. **Be self-contained** — Include necessary includes, minimal fixtures, no external dependencies beyond GTest and project headers
+7. **Specify target file** — State whether this goes in an existing test file or a new one
 
-### GTest Case Template
+### GTest Case Template (new tests only)
 
 ```cpp
 #include <gtest/gtest.h>
@@ -309,6 +387,7 @@ Each GTest case MUST:
 // Bug: [SEVERITY] Category: Brief Title
 // Location: path/to/file.ext:line
 // This test FAILS against current code, PASSES after fix
+// Target: [existing test file path | new file path]
 
 TEST(BugCategory, BriefBugTitle) {
     // Setup: reproduce the preconditions
@@ -324,7 +403,7 @@ TEST(BugCategory, BriefBugTitle) {
 
 ### Consolidated GTest File
 
-After all bugs are documented, collect all GTest cases into a single consolidated section in the report (see Report Generation). This allows the user to copy the entire test suite into a single file for compilation.
+After all bugs are documented, collect all GTest cases into a single consolidated section in the report (see Report Generation). Group by discovery status so the reader knows which tests are new vs modifications to existing tests.
 
 ## Output Format
 
@@ -362,33 +441,55 @@ For each verified bug:
 **Regression Test:** [Test case that would fail due to this bug, or "N/A - not testable without [reason]"]
 
 **GTest Case:**
+**Status:** [COVERED | PARTIAL | WRONG_ASSERTION | NO_COVERAGE | N/A]
+**Existing Test:** [`path/to/test_file:line` — `TEST(Suite, Name)` | None found]
+[Action: existing test reference, proposed modification, or new test case]
 ```cpp
-// Google Test case targeting this specific bug
-// "N/A" if not applicable to C/C++ codebases
+// New or modified GTest case (omit if COVERED)
 ```
 ```
 
-**Example Regression Test Field:**
-```javascript
-**Regression Test:**
-test('should sanitize user input', () => {
-  const malicious = '<script>alert("xss")</script>';
-  const result = processInput(malicious);
-  expect(result).not.toContain('<script>');
-});
-// Expected: Test fails (currently would pass, allowing XSS)
-```
-
-**Example GTest Case Field:**
-```cpp
+**Example GTest Case — COVERED (no new test needed):**
+```markdown
 **GTest Case:**
+**Status:** COVERED — existing test already catches this bug
+**Existing Test:** `tests/validator_test.cpp:89` — `TEST(Validator, RejectsScriptTags)`
+No new test needed. Existing test fails when XSS sanitization is removed.
+```
+
+**Example GTest Case — PARTIAL (modify existing test):**
+```markdown
+**GTest Case:**
+**Status:** PARTIAL — tests exist for processInput() but miss unsanitized HTML path
+**Existing Test File:** `tests/input_test.cpp`
+**Modification:** Add to existing file:
+```cpp
 TEST(InputSanitization, RejectsMaliciousScript) {
   std::string malicious = "<script>alert('xss')</script>";
   std::string result = processInput(malicious);
   EXPECT_EQ(result.find("<script>"), std::string::npos)
       << "Input should be sanitized to remove script tags";
 }
-// Expected: Test fails (currently would pass, allowing XSS)
+```
+```
+
+**Example GTest Case — NO_COVERAGE (new test):**
+```markdown
+**GTest Case:**
+**Status:** NO_COVERAGE — no tests found for processInput()
+**Target File:** `tests/input_test.cpp` (new file)
+```cpp
+#include <gtest/gtest.h>
+#include "input/processor.h"
+
+TEST(InputSanitization, RejectsMaliciousScript) {
+  std::string malicious = "<script>alert('xss')</script>";
+  std::string result = processInput(malicious);
+  EXPECT_EQ(result.find("<script>"), std::string::npos)
+      << "Input should be sanitized to remove script tags";
+}
+// Expected: FAILS against current code (passes XSS through), PASSES after fix
+```
 ```
 
 Severity levels:
@@ -450,29 +551,44 @@ Report structure:
 
 ## GTest Regression Suite
 
-Consolidated Google Test cases for all bugs found in this report.
-Copy this section into a single `.cpp` file to compile and run against the codebase.
+### Test Discovery Summary
+
+| # | Bug Title | Severity | Status | Existing Test | Action |
+|---|-----------|----------|--------|---------------|--------|
+| 1 | [Brief title] | [SEV] | COVERED | `path:line` | None needed |
+| 2 | [Brief title] | [SEV] | PARTIAL | `path:line` | Add case to existing file |
+| 3 | [Brief title] | [SEV] | WRONG_ASSERTION | `path:line` | Fix assertion |
+| 4 | [Brief title] | [SEV] | NO_COVERAGE | — | New test |
+| 5 | [Brief title] | [SEV] | N/A | — | Not testable |
+
+### New Tests (NO_COVERAGE)
+
+New GTest cases for bugs with no existing test coverage.
+Copy into the indicated target files.
 
 ```cpp
 #include <gtest/gtest.h>
 // Project-specific includes as needed
 
-// === CRITICAL Issues ===
-
-// [GTest cases for critical bugs, or "No critical issues found"]
-
-// === HIGH Issues ===
-
-// [GTest cases for high-severity bugs]
-
-// === MEDIUM Issues ===
-
-// [GTest cases for medium-severity bugs]
-
-// === LOW Issues ===
-
-// [GTest cases for low-severity bugs, or "No low issues found"]
+// [New GTest cases grouped by target file]
 ```
+
+### Modifications to Existing Tests (PARTIAL / WRONG_ASSERTION)
+
+Changes to apply to existing test files.
+
+| File | Bug # | Change |
+|------|-------|--------|
+| `tests/foo_test.cpp` | 2 | Add `TEST(Suite, MissingCase)` |
+| `tests/bar_test.cpp:67` | 3 | Change `EXPECT_EQ(x, 0)` → `EXPECT_EQ(x, 1)` |
+
+### Already Covered (COVERED)
+
+Bugs already caught by existing tests — no action needed.
+
+| Bug # | Bug Title | Existing Test |
+|-------|-----------|---------------|
+| 1 | [Brief title] | `tests/foo_test.cpp:45` — `TEST(Suite, Name)` |
 ```
 
 ## Final Instructions

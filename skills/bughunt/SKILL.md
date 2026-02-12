@@ -279,6 +279,53 @@ test('should handle last page boundary', () => {
 
 If test fails, upgrade confidence to CONFIRMED and include test in bug report.
 
+## GTest Case Generation
+
+For each verified bug, generate a Google Test (GTest) case that would expose the bug as a failing test. This section applies to **all codebases** — adapt the test to the bug's language/context using GTest conventions.
+
+### When to Generate GTest Cases
+
+- **C/C++ codebases:** Generate directly compilable GTest cases using the project's actual types, functions, and headers.
+- **Non-C/C++ codebases:** Generate a GTest-style test that demonstrates the bug's logic. Use pseudocode or C++ equivalents to model the behavior. Mark with a comment: `// Adapted from [language] — models the bug logic in GTest form`.
+- **If the bug is purely procedural/configuration** (e.g., build script, markdown format): Write `N/A — [reason]` in the GTest Case field.
+
+### GTest Case Requirements
+
+Each GTest case MUST:
+
+1. **Target exactly one bug** — One test per finding, named after the bug category and title
+2. **Use descriptive test names** — `TEST(Category, BriefBugTitle)` format
+3. **Include the bug setup** — Reproduce the preconditions that trigger the bug
+4. **Assert the expected (correct) behavior** — The test should FAIL against the current buggy code
+5. **Comment the expected vs actual** — Explain what the test expects and what currently happens
+6. **Be self-contained** — Include necessary includes, minimal fixtures, no external dependencies beyond GTest and project headers
+
+### GTest Case Template
+
+```cpp
+#include <gtest/gtest.h>
+// #include "relevant/project/header.h"
+
+// Bug: [SEVERITY] Category: Brief Title
+// Location: path/to/file.ext:line
+// This test FAILS against current code, PASSES after fix
+
+TEST(BugCategory, BriefBugTitle) {
+    // Setup: reproduce the preconditions
+    // ...
+
+    // Act: trigger the buggy code path
+    // ...
+
+    // Assert: expected correct behavior
+    EXPECT_EQ(actual, expected) << "Description of what should happen";
+}
+```
+
+### Consolidated GTest File
+
+After all bugs are documented, collect all GTest cases into a single consolidated section in the report (see Report Generation). This allows the user to copy the entire test suite into a single file for compilation.
+
 ## Output Format
 
 For each verified bug:
@@ -313,6 +360,12 @@ For each verified bug:
 **Fix:** [Minimal code change or mitigation]
 
 **Regression Test:** [Test case that would fail due to this bug, or "N/A - not testable without [reason]"]
+
+**GTest Case:**
+```cpp
+// Google Test case targeting this specific bug
+// "N/A" if not applicable to C/C++ codebases
+```
 ```
 
 **Example Regression Test Field:**
@@ -323,6 +376,18 @@ test('should sanitize user input', () => {
   const result = processInput(malicious);
   expect(result).not.toContain('<script>');
 });
+// Expected: Test fails (currently would pass, allowing XSS)
+```
+
+**Example GTest Case Field:**
+```cpp
+**GTest Case:**
+TEST(InputSanitization, RejectsMaliciousScript) {
+  std::string malicious = "<script>alert('xss')</script>";
+  std::string result = processInput(malicious);
+  EXPECT_EQ(result.find("<script>"), std::string::npos)
+      << "Input should be sanitized to remove script tags";
+}
 // Expected: Test fails (currently would pass, allowing XSS)
 ```
 
@@ -382,6 +447,32 @@ Report structure:
 | Reliability | N/A — no runtime application |
 | Performance | N/A — static site, no dynamic content |
 | Concurrency | N/A — no async operations |
+
+## GTest Regression Suite
+
+Consolidated Google Test cases for all bugs found in this report.
+Copy this section into a single `.cpp` file to compile and run against the codebase.
+
+```cpp
+#include <gtest/gtest.h>
+// Project-specific includes as needed
+
+// === CRITICAL Issues ===
+
+// [GTest cases for critical bugs, or "No critical issues found"]
+
+// === HIGH Issues ===
+
+// [GTest cases for high-severity bugs]
+
+// === MEDIUM Issues ===
+
+// [GTest cases for medium-severity bugs]
+
+// === LOW Issues ===
+
+// [GTest cases for low-severity bugs, or "No low issues found"]
+```
 ```
 
 ## Final Instructions

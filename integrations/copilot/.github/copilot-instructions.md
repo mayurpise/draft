@@ -5252,8 +5252,32 @@ Count tasks per phase and assign points to the **story**:
 
 If `validation-report.md` or `bughunt-report.md` exists in the track directory:
 
+### From `bughunt-report.md`
+
 1. Parse findings by severity (Critical, High, Medium, Low)
-2. Extract: severity, category, file location, issue description, fix recommendation
+2. Extract **all sections** for each bug:
+   - **Location** — file path and line number
+   - **Confidence** — CONFIRMED, HIGH, or MEDIUM
+   - **Code Evidence** — the actual problematic code snippet
+   - **Data Flow Trace** — how data reaches the bug location
+   - **Issue** — precise technical description
+   - **Impact** — user-visible effect or system failure mode
+   - **Verification Done** — checklist of verification steps completed
+   - **Why Not a False Positive** — explicit reasoning
+   - **Fix** — minimal code change or mitigation
+   - **Regression Test** — test case that would catch this bug
+3. Group by severity for the export
+
+### From `validation-report.md`
+
+1. Parse findings from each validation category (Architecture Conformance, Dead Code, Dependency Cycles, Security, Performance, Spec Compliance, Architectural Impact, Regression Risk)
+2. Extract for each finding:
+   - **Severity** — Critical (✗) or Warning (⚠)
+   - **Category** — which validator produced it
+   - **Location** — file path and line number
+   - **Issue** — description of the violation
+   - **Risk/Impact** — what could go wrong
+   - **Fix** — recommended remediation
 3. Group by severity for the export
 
 **Critical/High findings** should be highlighted — consider suggesting additional stories or tasks to address them before the track is complete.
@@ -5354,12 +5378,14 @@ h3. Verification
 ## Quality Reports
 
 ### Validation Findings (informational)
-| Severity | Category | File | Issue |
-|----------|----------|------|-------|
-| High | Security | src/auth.ts:45 | Hardcoded API key |
-| Medium | Architecture | src/utils.ts:12 | Layer boundary violation |
 
-> Validation findings are compliance issues. Include in Epic description for awareness.
+| Severity | Category | Location | Issue | Risk/Impact | Fix |
+|----------|----------|----------|-------|-------------|-----|
+| Critical | Security | src/auth.ts:45 | Hardcoded API key | Secret exposed in version control | Move to environment variable |
+| Warning | Architecture | src/utils.ts:12 | Layer boundary violation | UI importing from database layer | Use API service layer instead |
+
+> Validation findings are compliance issues from `draft validate`. Include in Epic description for awareness.
+> Critical validation findings should also be created as Bug issues (same as bughunt bugs) to ensure they are tracked and resolved.
 
 ---
 
@@ -5379,8 +5405,16 @@ Each bug from `bughunt-report.md` becomes a separate **Bug** issue linked to the
 h3. Location
 src/calc.ts:78
 
-h3. Category
-Correctness
+h3. Confidence
+CONFIRMED
+
+h3. Code Evidence
+{code}
+// The actual problematic code from bughunt-report.md
+{code}
+
+h3. Data Flow Trace
+[How data reaches this point: caller → caller → this function]
 
 h3. Issue
 [Full description from bughunt-report.md]
@@ -5388,8 +5422,21 @@ h3. Issue
 h3. Impact
 [User-visible or system failure mode]
 
-h3. Recommended Fix
-[Fix recommendation from report]
+h3. Verification Done
+[Checklist of verification steps completed, e.g.:]
+- Traced code path from entry point
+- Checked architecture.md — not intentional
+- Verified framework doesn't handle this
+- No upstream guards found
+
+h3. Why Not a False Positive
+[Explicit reasoning from bughunt-report.md]
+
+h3. Fix
+[Minimal code change or mitigation from report]
+
+h3. Regression Test
+[Test case from bughunt-report.md, or "N/A" with reason]
 
 ---
 🤖 Generated with Draft (Bug Hunt)
@@ -5410,8 +5457,16 @@ Branch: [branch-name] | Commit: [short-hash]
 h3. Location
 src/api.ts:92
 
-h3. Category
-Concurrency
+h3. Confidence
+HIGH
+
+h3. Code Evidence
+{code}
+// The actual problematic code from bughunt-report.md
+{code}
+
+h3. Data Flow Trace
+[How data reaches this point: caller → caller → this function]
 
 h3. Issue
 [Full description from bughunt-report.md]
@@ -5419,8 +5474,17 @@ h3. Issue
 h3. Impact
 [User-visible or system failure mode]
 
-h3. Recommended Fix
+h3. Verification Done
+[Checklist of verification steps completed]
+
+h3. Why Not a False Positive
+[Explicit reasoning from bughunt-report.md]
+
+h3. Fix
 [Fix recommendation from report]
+
+h3. Regression Test
+[Test case from bughunt-report.md, or "N/A" with reason]
 
 ---
 🤖 Generated with Draft (Bug Hunt)
@@ -5575,9 +5639,9 @@ For each row in `### Sub-tasks` table:
 
 ### Quality Findings (if present)
 If export contains `## Quality Reports` section:
-- Parse validation findings table
-- Parse bughunt findings table
-- Extract severity, category, file, issue for each
+- Parse validation findings table (severity, category, location, issue, risk/impact, fix)
+- Parse bughunt bug issues with all sections (location, confidence, code evidence, data flow trace, issue, impact, verification done, why not a false positive, fix, regression test)
+- Extract all fields for each finding to populate Jira issue descriptions
 
 ## Step 5: Create Issues via MCP
 
@@ -5632,8 +5696,16 @@ MCP call: create_issue
   h3. Location
   [file:line]
 
-  h3. Category
-  [Bug category from report]
+  h3. Confidence
+  [CONFIRMED | HIGH | MEDIUM]
+
+  h3. Code Evidence
+  {code}
+  [The actual problematic code snippet from bughunt-report.md]
+  {code}
+
+  h3. Data Flow Trace
+  [How data reaches this point: caller → caller → this function]
 
   h3. Issue
   [Full issue description]
@@ -5641,8 +5713,21 @@ MCP call: create_issue
   h3. Impact
   [User-visible or system failure mode]
 
-  h3. Recommended Fix
-  [Fix recommendation from report]
+  h3. Verification Done
+  [Checklist of verification steps completed, e.g.:]
+  - Traced code path from entry point
+  - Checked architecture.md — not intentional
+  - Verified framework doesn't handle this
+  - No upstream guards found
+
+  h3. Why Not a False Positive
+  [Explicit reasoning from bughunt-report.md]
+
+  h3. Fix
+  [Minimal code change or mitigation from report]
+
+  h3. Regression Test
+  [Test case from bughunt-report.md, or "N/A" with reason]
 
   ---
   🤖 Generated with Draft (Bug Hunt)

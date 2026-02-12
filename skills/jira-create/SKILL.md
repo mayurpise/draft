@@ -92,9 +92,9 @@ For each row in `### Sub-tasks` table:
 
 ### Quality Findings (if present)
 If export contains `## Quality Reports` section:
-- Parse validation findings table
-- Parse bughunt findings table
-- Extract severity, category, file, issue for each
+- Parse validation findings table (severity, category, location, issue, risk/impact, fix)
+- Parse bughunt bug issues with all sections (location, confidence, code evidence, data flow trace, issue, impact, verification done, why not a false positive, fix, regression test)
+- Extract all fields for each finding to populate Jira issue descriptions
 
 ## Step 5: Create Issues via MCP
 
@@ -149,8 +149,16 @@ MCP call: create_issue
   h3. Location
   [file:line]
 
-  h3. Category
-  [Bug category from report]
+  h3. Confidence
+  [CONFIRMED | HIGH | MEDIUM]
+
+  h3. Code Evidence
+  {code}
+  [The actual problematic code snippet from bughunt-report.md]
+  {code}
+
+  h3. Data Flow Trace
+  [How data reaches this point: caller → caller → this function]
 
   h3. Issue
   [Full issue description]
@@ -158,8 +166,21 @@ MCP call: create_issue
   h3. Impact
   [User-visible or system failure mode]
 
-  h3. Recommended Fix
-  [Fix recommendation from report]
+  h3. Verification Done
+  [Checklist of verification steps completed, e.g.:]
+  - Traced code path from entry point
+  - Checked architecture.md — not intentional
+  - Verified framework doesn't handle this
+  - No upstream guards found
+
+  h3. Why Not a False Positive
+  [Explicit reasoning from bughunt-report.md]
+
+  h3. Fix
+  [Minimal code change or mitigation from report]
+
+  h3. Regression Test
+  [Test case from bughunt-report.md, or "N/A" with reason]
 
   ---
   🤖 Generated with Draft (Bug Hunt)

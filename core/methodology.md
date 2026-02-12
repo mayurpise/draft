@@ -826,8 +826,13 @@ Systematic bug hunt across 12 dimensions: correctness, reliability, security, pe
 3. Analyze code across all 12 dimensions
 4. Verify each finding (trace code paths, check for mitigations, eliminate false positives)
 5. Generate severity-ranked report with fix recommendations
+6. Detect language and test framework (GTest, pytest, go test, Jest/Vitest, cargo test, JUnit)
+7. Discover test infrastructure (build system, test directories, naming conventions, dependencies)
+8. Write regression tests in the project's native framework (new files for NO_COVERAGE, modifications for PARTIAL/WRONG_ASSERTION)
+9. Validate tests compile/parse via language-appropriate command (up to 2 retries; never run tests — they are expected to fail against buggy code)
 
 Generates report at `draft/bughunt-report.md` or `draft/tracks/<id>/bughunt-report.md`.
+Test files are written directly to the project using native test conventions.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: bughunt
-description: Exhaustive bug hunt using Draft context (architecture, tech-stack, product). Generates severity-ranked report with fixes.
+description: Exhaustive bug hunt using Draft context (architecture, tech-stack, product). Generates severity-ranked report with fixes and writes GTest regression tests validated via Bazel.
 ---
 
 # Bug Hunt
@@ -11,7 +11,7 @@ You are conducting an exhaustive bug hunt on this Git repository, enhanced by Dr
 
 - Hunting for bugs without reading Draft context first (architecture.md, tech-stack.md, product.md)
 - Reporting a finding without reproducing or tracing the code path
-- Fixing bugs instead of reporting them (bughunt reports, it doesn't fix)
+- Fixing production code instead of reporting bugs (bughunt reports bugs and writes regression tests — it doesn't fix source code)
 - Assuming a pattern is buggy without checking if it's used successfully elsewhere
 - Skipping the verification protocol (every bug needs evidence)
 - Making up file locations or line numbers without reading the actual code
@@ -405,6 +405,124 @@ TEST(BugCategory, BriefBugTitle) {
 
 After all bugs are documented, collect all GTest cases into a single consolidated section in the report (see Report Generation). Group by discovery status so the reader knows which tests are new vs modifications to existing tests.
 
+### Step 3: Test Infrastructure Discovery
+
+Before writing any test files, discover the project's build system and test conventions:
+
+1. **Detect Bazel Workspace**
+   - Search for `WORKSPACE`, `WORKSPACE.bazel`, or `MODULE.bazel` at repository root
+   - If found → Bazel project, proceed with full write-and-build flow
+   - If not found → skip Steps 4-5, keep report-only GTest output, and inform user:
+     `"No Bazel workspace detected. GTest cases are included in the report only. To enable automatic test writing and compilation, set up a Bazel workspace with GTest."`
+
+2. **Map Source Files to Test Locations**
+   For each buggy source file, determine where its tests live (or should live):
+
+   ```
+   Bug in src/auth/login_handler.cpp → search for:
+     src/auth/login_handler_test.cpp      (co-located)
+     tests/auth/login_handler_test.cpp    (separate tests/ tree)
+     test/auth/login_handler_test.cpp     (alternate naming)
+   ```
+
+   - Check BUILD/BUILD.bazel files for existing `cc_test` targets that reference the source
+   - If tests exist: record the directory, naming convention, and BUILD target
+   - If no tests exist: adopt the project's dominant convention (co-located vs separate `tests/` dir)
+   - If no convention exists (no tests anywhere): default to a `tests/` directory mirroring the source tree
+
+3. **Identify GTest Dependency Label**
+   - Grep BUILD files for existing `cc_test` rules to find the GTest dependency:
+     ```
+     @com_google_googletest//:gtest_main
+     @com_google_googletest//:gtest
+     //third_party/gtest:gtest_main
+     ```
+   - Use the same label for all new test targets (consistency)
+   - If no existing `cc_test` found, default to `@com_google_googletest//:gtest_main`
+
+4. **Identify Source Library Targets**
+   - For each buggy source file, find its `cc_library` target in the BUILD file
+   - This becomes a `deps` entry in the test's `cc_test` rule
+   - Record the full label: e.g., `//src/auth:login_handler`
+
+### Step 4: Write Test Files
+
+For each bug requiring action (NO_COVERAGE, PARTIAL, WRONG_ASSERTION), write the actual test files:
+
+#### NO_COVERAGE — Create new test file + BUILD target
+
+1. **Create directory** if it doesn't exist:
+   ```bash
+   mkdir -p tests/<component>/
+   ```
+
+2. **Write the test file** (e.g., `tests/auth/login_handler_test.cpp`):
+   - Include proper project headers using the paths from the source code
+   - Include `<gtest/gtest.h>`
+   - Write the generated `TEST()` case(s) for this bug
+   - Add a file-level comment linking back to the bughunt report
+
+3. **Create or update BUILD file** with a `cc_test` target:
+   ```python
+   cc_test(
+       name = "<source_filename>_test",
+       srcs = ["<source_filename>_test.cpp"],
+       deps = [
+           "//src/<component>:<library_target>",  # From Step 3.4
+           "<gtest_dep_label>",                    # From Step 3.3
+       ],
+   )
+   ```
+
+4. If multiple bugs affect different files in the same component, create one test file per source file (not one per bug). Group related bug tests into the same file.
+
+#### PARTIAL — Add test case to existing file
+
+1. Read the existing test file
+2. Append the new `TEST()` case at the end (before any closing namespace brace)
+3. No BUILD changes needed — the existing `cc_test` target already compiles this file
+
+#### WRONG_ASSERTION — Fix assertion in existing file
+
+1. Read the existing test file
+2. Locate the wrong assertion (use the line number from discovery)
+3. Replace with the corrected assertion
+4. No BUILD changes needed
+
+**Constraints:**
+- **Never modify production source code** — only test files and their BUILD targets
+- Each test file must compile independently with its BUILD target
+- Use the project's actual header paths and namespace conventions
+- If the project uses test fixtures (`TEST_F`), follow the existing pattern
+
+### Step 5: Bazel Build Validation
+
+After writing all test files, compile them to verify they are syntactically correct and properly linked.
+
+1. **Build each new/modified test target:**
+   ```bash
+   bazel build //tests/<component>:<target>_test
+   ```
+
+2. **Handle build results:**
+
+   | Result | Action |
+   |--------|--------|
+   | **Build succeeds** | Mark as `BUILD_OK` in report |
+   | **Build fails — missing include** | Fix the `#include` path, rebuild (up to 2 retries) |
+   | **Build fails — missing dep** | Add the missing `deps` entry to BUILD, rebuild (up to 2 retries) |
+   | **Build fails — type/API mismatch** | Fix the test to match actual API signatures, rebuild (up to 2 retries) |
+   | **Persistent failure (3 attempts)** | Mark as `BUILD_FAILED` with the error message in report |
+
+3. **Do NOT run the tests** with `bazel test`. The tests are designed to **FAIL** against the current buggy code — that's the point. Building them verifies they are syntactically correct and properly linked. Running them would produce expected failures that aren't useful here.
+
+4. **Build summary** — Record results for the report:
+   ```
+   BUILD_OK:     3 targets
+   BUILD_FAILED: 1 target (tests/config:loader_test — missing header config/loader.h)
+   SKIPPED:      1 target (N/A — race condition not GTest-testable)
+   ```
+
 ## Output Format
 
 For each verified bug:
@@ -556,31 +674,48 @@ Report structure:
 | # | Bug Title | Severity | Status | Existing Test | Action |
 |---|-----------|----------|--------|---------------|--------|
 | 1 | [Brief title] | [SEV] | COVERED | `path:line` | None needed |
-| 2 | [Brief title] | [SEV] | PARTIAL | `path:line` | Add case to existing file |
-| 3 | [Brief title] | [SEV] | WRONG_ASSERTION | `path:line` | Fix assertion |
-| 4 | [Brief title] | [SEV] | NO_COVERAGE | — | New test |
+| 2 | [Brief title] | [SEV] | PARTIAL | `path:line` | Added case to existing file |
+| 3 | [Brief title] | [SEV] | WRONG_ASSERTION | `path:line` | Fixed assertion |
+| 4 | [Brief title] | [SEV] | NO_COVERAGE | — | Created new test |
 | 5 | [Brief title] | [SEV] | N/A | — | Not testable |
 
-### New Tests (NO_COVERAGE)
+### Bazel Build Status
 
-New GTest cases for bugs with no existing test coverage.
-Copy into the indicated target files.
+| # | Bug Title | Test Target | Build Status |
+|---|-----------|-------------|--------------|
+| 2 | [Brief title] | `//tests/foo:foo_test` | BUILD_OK (modified) |
+| 3 | [Brief title] | `//tests/bar:bar_test` | BUILD_OK (modified) |
+| 4 | [Brief title] | `//tests/baz:baz_test` | BUILD_OK (new) |
+| 5 | [Brief title] | — | SKIPPED (N/A) |
+
+```
+Build Summary: 3 BUILD_OK, 0 BUILD_FAILED, 1 SKIPPED
+```
+
+### New Tests Written (NO_COVERAGE)
+
+New GTest files created for bugs with no existing test coverage.
+
+| Bug # | File Created | BUILD Target |
+|-------|-------------|--------------|
+| 4 | `tests/baz/baz_test.cpp` | `//tests/baz:baz_test` |
 
 ```cpp
+// Contents of tests/baz/baz_test.cpp
 #include <gtest/gtest.h>
 // Project-specific includes as needed
 
-// [New GTest cases grouped by target file]
+// [GTest cases for this file]
 ```
 
-### Modifications to Existing Tests (PARTIAL / WRONG_ASSERTION)
+### Modifications Applied (PARTIAL / WRONG_ASSERTION)
 
-Changes to apply to existing test files.
+Changes applied to existing test files.
 
-| File | Bug # | Change |
-|------|-------|--------|
-| `tests/foo_test.cpp` | 2 | Add `TEST(Suite, MissingCase)` |
-| `tests/bar_test.cpp:67` | 3 | Change `EXPECT_EQ(x, 0)` → `EXPECT_EQ(x, 1)` |
+| File | Bug # | Change Applied |
+|------|-------|----------------|
+| `tests/foo_test.cpp` | 2 | Added `TEST(Suite, MissingCase)` |
+| `tests/bar_test.cpp:67` | 3 | Changed `EXPECT_EQ(x, 0)` → `EXPECT_EQ(x, 1)` |
 
 ### Already Covered (COVERED)
 
@@ -601,3 +736,7 @@ Bugs already caught by existing tests — no action needed.
 - If Draft context is available, explicitly note which architectural violations or product requirement bugs were found
 - Be precise about file locations and line numbers
 - Include git branch and commit in report header
+- **Write regression tests** — For Bazel projects, actually write test files and BUILD targets (Steps 3-5), don't just report them
+- **Never modify production code** — Only create/modify test files and their BUILD targets
+- **Build before reporting** — Every written test must pass `bazel build` before the report is finalized; include build status in the report
+- **Respect project conventions** — Match existing test directory structure, naming patterns, namespaces, and GTest dependency labels

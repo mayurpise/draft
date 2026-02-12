@@ -826,8 +826,12 @@ Systematic bug hunt across 12 dimensions: correctness, reliability, security, pe
 3. Analyze code across all 12 dimensions
 4. Verify each finding (trace code paths, check for mitigations, eliminate false positives)
 5. Generate severity-ranked report with fix recommendations
+6. Discover test infrastructure (Bazel workspace, existing test conventions, GTest dependency labels)
+7. Write GTest regression tests for each bug (new files for NO_COVERAGE, modifications for PARTIAL/WRONG_ASSERTION)
+8. Validate tests compile via `bazel build` (up to 2 retries on failure, never `bazel test` — tests are expected to fail against buggy code)
 
 Generates report at `draft/bughunt-report.md` or `draft/tracks/<id>/bughunt-report.md`.
+Test files and BUILD targets are written directly to the project (Bazel projects only).
 
 ---
 

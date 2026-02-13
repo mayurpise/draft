@@ -175,7 +175,11 @@ For project-level reviews (no track context):
 
 2. **Load Draft context (if available):**
    - Read `draft/architecture.md` (system architecture)
-   - Read `draft/tech-stack.md` (technical constraints)
+   - Read `draft/tech-stack.md` (technical constraints, **Accepted Patterns**)
+   - Read `draft/workflow.md` (**Guardrails** section)
+
+   **Honor Accepted Patterns** - Don't flag patterns documented in `tech-stack.md` `## Accepted Patterns`
+   **Enforce Guardrails** - Flag violations of checked guardrails in `workflow.md` `## Guardrails`
 
 3. **Note limitations:**
    - No spec.md → Skip Stage 1 (spec compliance)

@@ -77,14 +77,19 @@ When users use Draft, it creates a `draft/` directory in their project:
 
 | File | Purpose |
 |------|---------|
-| `product.md` | Product vision, users, goals |
-| `product-guidelines.md` | Style, branding, UX standards (optional) |
-| `tech-stack.md` | Languages, frameworks, patterns |
+| `product.md` | Product vision, users, goals, guidelines (optional section) |
+| `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
 | `architecture.md` | System map, data flows, patterns, mermaid diagrams (brownfield) |
-| `workflow.md` | TDD preferences, commit strategy, validation config |
+| `workflow.md` | TDD preferences, commit strategy, validation config, guardrails |
 | `tracks.md` | Master list of all tracks |
 | `tracks/<id>/` | Individual tracks with `spec.md`, `plan.md`, `metadata.json`, `validation-report.md` |
 | `validation-report.md` | Project-level validation results (architecture, security, performance) |
+
+### Key Sections
+
+- **`product.md` `## Guidelines`** - UX standards, writing style, branding (optional)
+- **`tech-stack.md` `## Accepted Patterns`** - Intentional design decisions that bughunt/validate/review should honor
+- **`workflow.md` `## Guardrails`** - Hard constraints enforced by validation commands
 
 ### Status Markers
 

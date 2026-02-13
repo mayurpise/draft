@@ -6943,9 +6943,9 @@ Draft auto-classifies the project:
 3. **Product definition** — Dialogue to define product vision, users, goals, constraints, guidelines (optional) → `draft/product.md`
 4. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield. Includes accepted patterns section → `draft/tech-stack.md`
 5. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process, guardrails → `draft/workflow.md`
-7. **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `draft decompose` on a track. File-based activation - no opt-in needed.
-8. **Tracks registry** — Empty tracks list → `draft/tracks.md`
-9. **Directory structure** — Creates `draft/tracks/` directory
+6. **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `draft decompose` on a track. File-based activation - no opt-in needed.
+7. **Tracks registry** — Empty tracks list → `draft/tracks.md`
+8. **Directory structure** — Creates `draft/tracks/` directory
 
 If `draft/` already exists with context files, init reports "already initialized" and suggests using `draft init refresh` or `draft new-track`.
 
@@ -6997,11 +6997,10 @@ Creates a new track (feature, bug fix, or refactor) with a specification and pha
 #### Context Loading
 
 Every new track loads the full project context before spec creation:
-- `draft/product.md` — product vision, users, goals
-- `draft/tech-stack.md` — languages, frameworks, patterns
+- `draft/product.md` — product vision, users, goals, guidelines
+- `draft/tech-stack.md` — languages, frameworks, patterns, accepted patterns
 - `draft/architecture.md` — system map, modules, data flows (if exists)
-- `draft/product-guidelines.md` — UX standards, style (if exists)
-- `draft/workflow.md` — TDD preference, commit conventions
+- `draft/workflow.md` — TDD preference, commit conventions, guardrails
 - `draft/tracks.md` — existing tracks (check for overlap/dependencies)
 
 Every spec includes a **Context References** section that explicitly links back to these documents with a one-line description of how each is relevant to this track. This ensures every track is grounded in the big picture.

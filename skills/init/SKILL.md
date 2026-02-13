@@ -407,11 +407,7 @@ Engage in structured dialogue:
 
 Present for approval, iterate if needed, then write to `draft/product.md`.
 
-## Step 3: Product Guidelines (Optional)
-
-Ask if they want to define product guidelines. If yes, create `draft/product-guidelines.md` using `core/templates/product-guidelines.md`.
-
-## Step 4: Tech Stack
+## Step 3: Tech Stack
 
 For Brownfield projects, auto-detect from:
 - `package.json` → Node.js/TypeScript
@@ -423,7 +419,7 @@ Create `draft/tech-stack.md` using the template from `core/templates/tech-stack.
 
 Present detected stack for verification before writing.
 
-## Step 5: Workflow Configuration
+## Step 4: Workflow Configuration
 
 Create `draft/workflow.md` using the template from `core/templates/workflow.md`.
 
@@ -435,7 +431,7 @@ Ask about:
 **Note on Architecture Mode:**
 Architecture features (Story, Execution State, Skeletons, Chunk Reviews) are automatically enabled when you run `/draft:decompose` on a track. No opt-in needed - the presence of `architecture.md` activates these features.
 
-## Step 6: Initialize Tracks
+## Step 5: Initialize Tracks
 
 Create empty `draft/tracks.md`:
 
@@ -452,7 +448,7 @@ Create empty `draft/tracks.md`:
 <!-- No archived tracks -->
 ```
 
-## Step 7: Create Directory Structure
+## Step 6: Create Directory Structure
 
 ```bash
 mkdir -p draft/tracks

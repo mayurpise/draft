@@ -70,3 +70,25 @@ Things explicitly out of scope for this product:
 
 - [ ] [Question that needs resolution]
 - [ ] [Another question]
+
+---
+
+## Guidelines (Optional)
+
+### Writing Style
+- **Tone:** [professional / casual / technical]
+- **Voice:** [first person "we" / third person "the system" / second person "you"]
+- **Terminology:** [domain-specific terms and definitions]
+
+### UX Principles
+1. [e.g., "Convention over configuration" — minimize required decisions]
+2. [e.g., "Accessible by default" — WCAG AA compliance minimum]
+3. [e.g., "Progressive disclosure" — show complexity only when needed]
+
+### Error Handling
+- **Error message tone:** [helpful / technical / minimal]
+- **User feedback patterns:** [toasts / modals / inline / status bar]
+
+### Content Standards
+- **Date format:** [ISO 8601 / localized / relative]
+- **Internationalization:** [i18n required / English-only / planned]

@@ -59,11 +59,10 @@ Draft solves this through **Context-Driven Development**: structured documents t
 
 | Document | Purpose | Prevents |
 |----------|---------|----------|
-| `product.md` | Defines users, goals, success criteria | AI building features nobody asked for |
-| `product-guidelines.md` | Style, branding, UX patterns | Inconsistent UI/UX decisions |
-| `tech-stack.md` | Languages, frameworks, patterns | AI introducing random dependencies |
+| `product.md` | Defines users, goals, success criteria, guidelines | AI building features nobody asked for |
+| `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
 | `architecture.md` | System map, data flows, patterns, mermaid diagrams | AI re-analyzing codebase every session |
-| `workflow.md` | TDD preference, commit style, review process | AI skipping tests or making giant commits |
+| `workflow.md` | TDD preference, commit style, review process, guardrails | AI skipping tests or making giant commits |
 | `spec.md` | Acceptance criteria for a specific track | Scope creep, gold-plating |
 | `plan.md` | Ordered phases with verification steps | AI attempting everything at once |
 
@@ -355,13 +354,18 @@ Located in `draft/` of the target project:
 
 | File | Purpose |
 |------|---------|
-| `product.md` | Product vision, users, goals |
-| `product-guidelines.md` | Style, branding, UX standards (optional) |
-| `tech-stack.md` | Languages, frameworks, patterns |
+| `product.md` | Product vision, users, goals, guidelines (optional section) |
+| `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
 | `architecture.md` | System map, data flows, patterns, mermaid diagrams (brownfield) |
-| `workflow.md` | TDD preferences, commit strategy |
+| `workflow.md` | TDD preferences, commit strategy, guardrails |
 | `jira.md` | Jira project configuration (optional) |
 | `tracks.md` | Master list of all tracks |
+
+### Key Sections
+
+- **`product.md` `## Guidelines`** — UX standards, writing style, branding (optional)
+- **`tech-stack.md` `## Accepted Patterns`** — Intentional design decisions honored by bughunt/validate/review
+- **`workflow.md` `## Guardrails`** — Hard constraints enforced by validation commands
 
 ## Status Markers
 
@@ -418,13 +422,12 @@ Draft auto-classifies the project:
 
    This document becomes persistent context — every future track references it instead of re-analyzing the codebase.
 
-3. **Product definition** — Dialogue to define product vision, users, goals, constraints → `draft/product.md`
-4. **Product guidelines (optional)** — Writing style, visual identity, UX principles → `draft/product-guidelines.md`
-5. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield → `draft/tech-stack.md`
-6. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
-7. **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `/draft:decompose` on a track. File-based activation - no opt-in needed.
-8. **Tracks registry** — Empty tracks list → `draft/tracks.md`
-9. **Directory structure** — Creates `draft/tracks/` directory
+3. **Product definition** — Dialogue to define product vision, users, goals, constraints, guidelines (optional) → `draft/product.md`
+4. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield. Includes accepted patterns section → `draft/tech-stack.md`
+5. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process, guardrails → `draft/workflow.md`
+6. **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `/draft:decompose` on a track. File-based activation - no opt-in needed.
+7. **Tracks registry** — Empty tracks list → `draft/tracks.md`
+8. **Directory structure** — Creates `draft/tracks/` directory
 
 If `draft/` already exists with context files, init reports "already initialized" and suggests using `/draft:init refresh` or `/draft:new-track`.
 
@@ -476,11 +479,10 @@ Creates a new track (feature, bug fix, or refactor) with a specification and pha
 #### Context Loading
 
 Every new track loads the full project context before spec creation:
-- `draft/product.md` — product vision, users, goals
-- `draft/tech-stack.md` — languages, frameworks, patterns
+- `draft/product.md` — product vision, users, goals, guidelines
+- `draft/tech-stack.md` — languages, frameworks, patterns, accepted patterns
 - `draft/architecture.md` — system map, modules, data flows (if exists)
-- `draft/product-guidelines.md` — UX standards, style (if exists)
-- `draft/workflow.md` — TDD preference, commit conventions
+- `draft/workflow.md` — TDD preference, commit conventions, guardrails
 - `draft/tracks.md` — existing tracks (check for overlap/dependencies)
 
 Every spec includes a **Context References** section that explicitly links back to these documents with a one-line description of how each is relevant to this track. This ensures every track is grounded in the big picture.

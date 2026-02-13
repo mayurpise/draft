@@ -136,3 +136,18 @@ graph TD
 - **Functions**: [camelCase]
 - **Classes**: [PascalCase]
 - **Constants**: [SCREAMING_SNAKE_CASE]
+
+---
+
+## Accepted Patterns
+
+<!-- Intentional design decisions that may appear unusual but are correct -->
+<!-- bughunt, validate, and review commands will honor these exceptions -->
+
+| Pattern | Location | Rationale |
+|---------|----------|-----------|
+| [e.g., Empty catch blocks] | [src/resilient-loader.ts] | [Intentional silent failure for optional plugins] |
+| [e.g., Circular import] | [moduleA ↔ moduleB] | [Lazy resolution pattern, not a bug] |
+| [e.g., `any` type usage] | [src/legacy-adapter.ts] | [Bridging untyped legacy API] |
+
+> Add patterns here that static analysis might flag but are intentional. Include enough context for reviewers to understand the decision.

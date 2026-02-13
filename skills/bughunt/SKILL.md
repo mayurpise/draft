@@ -39,15 +39,17 @@ Store this for the report header. All bugs found are relative to this specific b
 If `draft/` directory exists, read and internalize:
 
 - [ ] `draft/architecture.md` - Module boundaries, dependencies, intended patterns
-- [ ] `draft/tech-stack.md` - Frameworks, libraries, known constraints
-- [ ] `draft/product.md` - Product intent, user flows, requirements
-- [ ] `draft/workflow.md` - Team conventions, testing preferences
+- [ ] `draft/tech-stack.md` - Frameworks, libraries, known constraints, **Accepted Patterns**
+- [ ] `draft/product.md` - Product intent, user flows, requirements, guidelines
+- [ ] `draft/workflow.md` - Team conventions, testing preferences, **Guardrails**
 
 Use this context to:
 - Flag violations of intended architecture as bugs (coupling, boundary violations)
 - Apply framework-specific checks from tech-stack (React anti-patterns, Node gotchas, etc.)
 - Catch bugs that violate product requirements or user flows
 - Prioritize areas relevant to active tracks
+- **Honor Accepted Patterns** - Skip flagging patterns documented in tech-stack.md `## Accepted Patterns`
+- **Enforce Guardrails** - Flag violations of checked guardrails in workflow.md `## Guardrails`
 
 ### 2. Confirm Scope
 
@@ -185,6 +187,7 @@ Analyze systematically across all applicable dimensions. Skip N/A dimensions exp
 2. **Context Cross-Reference**
    - [ ] Check `architecture.md` — Is this behavior intentional by design?
    - [ ] Check `tech-stack.md` — Does the framework handle this case?
+   - [ ] Check `tech-stack.md` `## Accepted Patterns` — Is this pattern explicitly documented as intentional?
    - [ ] Check `product.md` — Is this actually a requirement violation?
    - [ ] Check existing tests — Is this behavior already tested and expected?
 
@@ -308,15 +311,17 @@ Identify the project's language(s) and test framework by examining the codebase:
 
 If the project is **polyglot** (multiple languages), detect per-component and generate tests in the matching language for each bug.
 
+**If no test framework is detected:** Mark all bugs with `Regression Test Status: N/A — no test framework detected` and proceed with bug reporting. **Do not skip bugs because tests cannot be written.** The regression test section is supplementary — the primary deliverable is the bug report.
+
 Record the detected configuration:
 ```
-Language: [detected]
-Test Framework: [detected]
-Build System: [detected]
-Test Command: [detected]
+Language: [detected | none]
+Test Framework: [detected | none]
+Build System: [detected | none]
+Test Command: [detected | N/A]
 ```
 
-### Step 2: Existing Test Discovery (REQUIRED per bug)
+### Step 2: Existing Test Discovery (REQUIRED per bug, skip if no test framework)
 
 For each verified bug, search the codebase for existing tests before generating new ones:
 
@@ -916,6 +921,8 @@ Bugs that cannot have automated regression tests (config issues, documentation, 
 
 **CRITICAL: All verified bugs appear in the main report body.** The Regression Test Suite section organizes test artifacts, but every bug — regardless of whether a test can be written — MUST be documented in the severity sections (Critical/High/Medium/Low Issues) above. Bugs with `N/A` regression test status are still valid bugs that need reporting.
 
+**CRITICAL: Regression tests are supplementary, not a filter.** If no test framework is detected, or if a bug cannot have a test written (config, docs, LLM workflows), mark it as `N/A` and **still include the bug in the report**. Never skip a verified bug because you cannot write a test for it.
+
 - **No unverified bugs** — Every finding must pass the verification protocol
 - **Evidence required** — Include code snippets and trace for every bug
 - **Explicit false positive elimination** — State why each bug isn't handled elsewhere
@@ -924,8 +931,8 @@ Bugs that cannot have automated regression tests (config issues, documentation, 
 - If Draft context is available, explicitly note which architectural violations or product requirement bugs were found
 - Be precise about file locations and line numbers
 - Include git branch and commit in report header
-- **Write regression tests** — Actually write test files using the project's native test framework (Steps 4-6), don't just report them
+- **Write regression tests when possible** — If a test framework is detected, write test files using the project's native framework (Steps 4-6). If no framework exists, skip Steps 2-6 and mark all bugs as `N/A` for regression tests
 - **Never modify production code** — Only create/modify test files and their build configs
-- **Validate before reporting** — Every written test must pass syntax/compilation validation before the report is finalized; include validation status in the report
+- **Validate before reporting** — If tests were written, validate syntax/compilation before finalizing; include validation status in the report
 - **Respect project conventions** — Match existing test directory structure, naming patterns, import conventions, and framework idioms
 - **Use native frameworks** — pytest for Python, `go test` for Go, GTest for C++, Jest/Vitest for JS/TS, `cargo test` for Rust, JUnit for Java — never force a foreign test framework

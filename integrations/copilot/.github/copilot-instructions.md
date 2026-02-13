@@ -590,11 +590,7 @@ Engage in structured dialogue:
 
 Present for approval, iterate if needed, then write to `draft/product.md`.
 
-## Step 3: Product Guidelines (Optional)
-
-Ask if they want to define product guidelines. If yes, create `draft/product-guidelines.md` using `core/templates/product-guidelines.md`.
-
-## Step 4: Tech Stack
+## Step 3: Tech Stack
 
 For Brownfield projects, auto-detect from:
 - `package.json` → Node.js/TypeScript
@@ -606,7 +602,7 @@ Create `draft/tech-stack.md` using the template from `core/templates/tech-stack.
 
 Present detected stack for verification before writing.
 
-## Step 5: Workflow Configuration
+## Step 4: Workflow Configuration
 
 Create `draft/workflow.md` using the template from `core/templates/workflow.md`.
 
@@ -618,7 +614,7 @@ Ask about:
 **Note on Architecture Mode:**
 Architecture features (Story, Execution State, Skeletons, Chunk Reviews) are automatically enabled when you run `draft decompose` on a track. No opt-in needed - the presence of `architecture.md` activates these features.
 
-## Step 6: Initialize Tracks
+## Step 5: Initialize Tracks
 
 Create empty `draft/tracks.md`:
 
@@ -635,7 +631,7 @@ Create empty `draft/tracks.md`:
 <!-- No archived tracks -->
 ```
 
-## Step 7: Create Directory Structure
+## Step 6: Create Directory Structure
 
 ```bash
 mkdir -p draft/tracks
@@ -1466,11 +1462,10 @@ ls draft/product.md draft/tech-stack.md draft/workflow.md draft/tracks.md 2>/dev
 If missing, tell user: "Project not initialized. Run `draft init` first."
 
 2. Load full project context (these documents ARE the big picture — every track must be grounded in them):
-- Read `draft/product.md` — product vision, users, goals, constraints
-- Read `draft/tech-stack.md` — languages, frameworks, patterns, code style
+- Read `draft/product.md` — product vision, users, goals, constraints, guidelines (optional section)
+- Read `draft/tech-stack.md` — languages, frameworks, patterns, code style, accepted patterns
 - Read `draft/architecture.md` (if exists) — system map, modules, data flows, integration points
-- Read `draft/product-guidelines.md` (if exists) — UX standards, writing style, branding
-- Read `draft/workflow.md` — TDD preference, commit conventions, review process
+- Read `draft/workflow.md` — TDD preference, commit conventions, review process, guardrails
 - Read `draft/tracks.md` — existing tracks to check for overlap or dependencies
 
 3. Load guidance references:
@@ -2831,10 +2826,14 @@ If `<track-id>` specified:
 
 Read the following context files:
 
-1. `draft/workflow.md` - Check validation configuration
-2. `draft/tech-stack.md` - Technology constraints, dependency list
-3. `draft/product.md` - Product context (optional, for understanding)
+1. `draft/workflow.md` - Check validation configuration, **Guardrails** section
+2. `draft/tech-stack.md` - Technology constraints, dependency list, **Accepted Patterns** section
+3. `draft/product.md` - Product context, guidelines (optional)
 4. `draft/architecture.md` - Architectural patterns (if exists)
+
+**Important context sections:**
+- `tech-stack.md` `## Accepted Patterns` - Skip flagging these as issues (intentional design decisions)
+- `workflow.md` `## Guardrails` - Enforce checked guardrails as validation rules
 
 Extract validation configuration from `workflow.md`:
 ```markdown
@@ -3644,15 +3643,17 @@ Store this for the report header. All bugs found are relative to this specific b
 If `draft/` directory exists, read and internalize:
 
 - [ ] `draft/architecture.md` - Module boundaries, dependencies, intended patterns
-- [ ] `draft/tech-stack.md` - Frameworks, libraries, known constraints
-- [ ] `draft/product.md` - Product intent, user flows, requirements
-- [ ] `draft/workflow.md` - Team conventions, testing preferences
+- [ ] `draft/tech-stack.md` - Frameworks, libraries, known constraints, **Accepted Patterns**
+- [ ] `draft/product.md` - Product intent, user flows, requirements, guidelines
+- [ ] `draft/workflow.md` - Team conventions, testing preferences, **Guardrails**
 
 Use this context to:
 - Flag violations of intended architecture as bugs (coupling, boundary violations)
 - Apply framework-specific checks from tech-stack (React anti-patterns, Node gotchas, etc.)
 - Catch bugs that violate product requirements or user flows
 - Prioritize areas relevant to active tracks
+- **Honor Accepted Patterns** - Skip flagging patterns documented in tech-stack.md `## Accepted Patterns`
+- **Enforce Guardrails** - Flag violations of checked guardrails in workflow.md `## Guardrails`
 
 ### 2. Confirm Scope
 
@@ -3790,6 +3791,7 @@ Analyze systematically across all applicable dimensions. Skip N/A dimensions exp
 2. **Context Cross-Reference**
    - [ ] Check `architecture.md` — Is this behavior intentional by design?
    - [ ] Check `tech-stack.md` — Does the framework handle this case?
+   - [ ] Check `tech-stack.md` `## Accepted Patterns` — Is this pattern explicitly documented as intentional?
    - [ ] Check `product.md` — Is this actually a requirement violation?
    - [ ] Check existing tests — Is this behavior already tested and expected?
 
@@ -3913,15 +3915,17 @@ Identify the project's language(s) and test framework by examining the codebase:
 
 If the project is **polyglot** (multiple languages), detect per-component and generate tests in the matching language for each bug.
 
+**If no test framework is detected:** Mark all bugs with `Regression Test Status: N/A — no test framework detected` and proceed with bug reporting. **Do not skip bugs because tests cannot be written.** The regression test section is supplementary — the primary deliverable is the bug report.
+
 Record the detected configuration:
 ```
-Language: [detected]
-Test Framework: [detected]
-Build System: [detected]
-Test Command: [detected]
+Language: [detected | none]
+Test Framework: [detected | none]
+Build System: [detected | none]
+Test Command: [detected | N/A]
 ```
 
-### Step 2: Existing Test Discovery (REQUIRED per bug)
+### Step 2: Existing Test Discovery (REQUIRED per bug, skip if no test framework)
 
 For each verified bug, search the codebase for existing tests before generating new ones:
 
@@ -4521,6 +4525,8 @@ Bugs that cannot have automated regression tests (config issues, documentation, 
 
 **CRITICAL: All verified bugs appear in the main report body.** The Regression Test Suite section organizes test artifacts, but every bug — regardless of whether a test can be written — MUST be documented in the severity sections (Critical/High/Medium/Low Issues) above. Bugs with `N/A` regression test status are still valid bugs that need reporting.
 
+**CRITICAL: Regression tests are supplementary, not a filter.** If no test framework is detected, or if a bug cannot have a test written (config, docs, LLM workflows), mark it as `N/A` and **still include the bug in the report**. Never skip a verified bug because you cannot write a test for it.
+
 - **No unverified bugs** — Every finding must pass the verification protocol
 - **Evidence required** — Include code snippets and trace for every bug
 - **Explicit false positive elimination** — State why each bug isn't handled elsewhere
@@ -4529,9 +4535,9 @@ Bugs that cannot have automated regression tests (config issues, documentation, 
 - If Draft context is available, explicitly note which architectural violations or product requirement bugs were found
 - Be precise about file locations and line numbers
 - Include git branch and commit in report header
-- **Write regression tests** — Actually write test files using the project's native test framework (Steps 4-6), don't just report them
+- **Write regression tests when possible** — If a test framework is detected, write test files using the project's native framework (Steps 4-6). If no framework exists, skip Steps 2-6 and mark all bugs as `N/A` for regression tests
 - **Never modify production code** — Only create/modify test files and their build configs
-- **Validate before reporting** — Every written test must pass syntax/compilation validation before the report is finalized; include validation status in the report
+- **Validate before reporting** — If tests were written, validate syntax/compilation before finalizing; include validation status in the report
 - **Respect project conventions** — Match existing test directory structure, naming patterns, import conventions, and framework idioms
 - **Use native frameworks** — pytest for Python, `go test` for Go, GTest for C++, Jest/Vitest for JS/TS, `cargo test` for Rust, JUnit for Java — never force a foreign test framework
 
@@ -4711,7 +4717,11 @@ For project-level reviews (no track context):
 
 2. **Load Draft context (if available):**
    - Read `draft/architecture.md` (system architecture)
-   - Read `draft/tech-stack.md` (technical constraints)
+   - Read `draft/tech-stack.md` (technical constraints, **Accepted Patterns**)
+   - Read `draft/workflow.md` (**Guardrails** section)
+
+   **Honor Accepted Patterns** - Don't flag patterns documented in `tech-stack.md` `## Accepted Patterns`
+   **Enforce Guardrails** - Flag violations of checked guardrails in `workflow.md` `## Guardrails`
 
 3. **Note limitations:**
    - No spec.md → Skip Stage 1 (spec compliance)
@@ -6567,11 +6577,10 @@ Draft solves this through **Context-Driven Development**: structured documents t
 
 | Document | Purpose | Prevents |
 |----------|---------|----------|
-| `product.md` | Defines users, goals, success criteria | AI building features nobody asked for |
-| `product-guidelines.md` | Style, branding, UX patterns | Inconsistent UI/UX decisions |
-| `tech-stack.md` | Languages, frameworks, patterns | AI introducing random dependencies |
+| `product.md` | Defines users, goals, success criteria, guidelines | AI building features nobody asked for |
+| `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
 | `architecture.md` | System map, data flows, patterns, mermaid diagrams | AI re-analyzing codebase every session |
-| `workflow.md` | TDD preference, commit style, review process | AI skipping tests or making giant commits |
+| `workflow.md` | TDD preference, commit style, review process, guardrails | AI skipping tests or making giant commits |
 | `spec.md` | Acceptance criteria for a specific track | Scope creep, gold-plating |
 | `plan.md` | Ordered phases with verification steps | AI attempting everything at once |
 
@@ -6863,13 +6872,18 @@ Located in `draft/` of the target project:
 
 | File | Purpose |
 |------|---------|
-| `product.md` | Product vision, users, goals |
-| `product-guidelines.md` | Style, branding, UX standards (optional) |
-| `tech-stack.md` | Languages, frameworks, patterns |
+| `product.md` | Product vision, users, goals, guidelines (optional section) |
+| `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
 | `architecture.md` | System map, data flows, patterns, mermaid diagrams (brownfield) |
-| `workflow.md` | TDD preferences, commit strategy |
+| `workflow.md` | TDD preferences, commit strategy, guardrails |
 | `jira.md` | Jira project configuration (optional) |
 | `tracks.md` | Master list of all tracks |
+
+### Key Sections
+
+- **`product.md` `## Guidelines`** — UX standards, writing style, branding (optional)
+- **`tech-stack.md` `## Accepted Patterns`** — Intentional design decisions honored by bughunt/validate/review
+- **`workflow.md` `## Guardrails`** — Hard constraints enforced by validation commands
 
 ## Status Markers
 
@@ -6926,10 +6940,9 @@ Draft auto-classifies the project:
 
    This document becomes persistent context — every future track references it instead of re-analyzing the codebase.
 
-3. **Product definition** — Dialogue to define product vision, users, goals, constraints → `draft/product.md`
-4. **Product guidelines (optional)** — Writing style, visual identity, UX principles → `draft/product-guidelines.md`
-5. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield → `draft/tech-stack.md`
-6. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
+3. **Product definition** — Dialogue to define product vision, users, goals, constraints, guidelines (optional) → `draft/product.md`
+4. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield. Includes accepted patterns section → `draft/tech-stack.md`
+5. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process, guardrails → `draft/workflow.md`
 7. **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `draft decompose` on a track. File-based activation - no opt-in needed.
 8. **Tracks registry** — Empty tracks list → `draft/tracks.md`
 9. **Directory structure** — Creates `draft/tracks/` directory
@@ -8829,48 +8842,27 @@ Things explicitly out of scope for this product:
 - [ ] [Question that needs resolution]
 - [ ] [Another question]
 
-</core-file>
-
 ---
 
-## core/templates/product-guidelines.md
+## Guidelines (Optional)
 
-<core-file path="core/templates/product-guidelines.md">
-
-# Product Guidelines
-
-## Writing Style
-- **Tone:** [professional / casual / technical — pick one and be consistent]
+### Writing Style
+- **Tone:** [professional / casual / technical]
 - **Voice:** [first person "we" / third person "the system" / second person "you"]
-- **Terminology:** List domain-specific terms and their definitions
-  - Example: "Track" means a unit of work (feature, bug, refactor)
-  - Example: "Phase" means a group of related tasks within a track
+- **Terminology:** [domain-specific terms and definitions]
 
-## Visual Identity
-- **Primary colors:** [hex values for main brand colors, if applicable]
-- **Secondary colors:** [hex values for accents, if applicable]
-- **Typography:** [font families for headings, body, code, if applicable]
-- **Logo usage:** [placement rules, minimum size, if applicable]
-
-## UX Principles
-
-Rank these by priority for your product:
-
+### UX Principles
 1. [e.g., "Convention over configuration" — minimize required decisions]
 2. [e.g., "Accessible by default" — WCAG AA compliance minimum]
 3. [e.g., "Progressive disclosure" — show complexity only when needed]
-4. [e.g., "Filesystem as UI" — use files and directories users already understand]
 
-## Error Handling
-- **Error message tone:** [helpful with fix suggestions / technical with codes / minimal]
-- **User feedback patterns:** [toasts / modals / inline messages / status bar]
-- **Error recovery:** [auto-retry / manual retry / graceful degradation]
+### Error Handling
+- **Error message tone:** [helpful / technical / minimal]
+- **User feedback patterns:** [toasts / modals / inline / status bar]
 
-## Content Standards
-- **Date format:** [ISO 8601 `YYYY-MM-DD` / localized / relative "2 hours ago"]
-- **Number format:** [locale-specific rules, decimal separator, thousands grouping]
-- **Required disclaimers:** [legal, regulatory, or attribution requirements]
-- **Internationalization:** [i18n required / English-only / planned for future]
+### Content Standards
+- **Date format:** [ISO 8601 / localized / relative]
+- **Internationalization:** [i18n required / English-only / planned]
 
 </core-file>
 
@@ -9018,6 +9010,21 @@ graph TD
 - **Functions**: [camelCase]
 - **Classes**: [PascalCase]
 - **Constants**: [SCREAMING_SNAKE_CASE]
+
+---
+
+## Accepted Patterns
+
+<!-- Intentional design decisions that may appear unusual but are correct -->
+<!-- bughunt, validate, and review commands will honor these exceptions -->
+
+| Pattern | Location | Rationale |
+|---------|----------|-----------|
+| [e.g., Empty catch blocks] | [src/resilient-loader.ts] | [Intentional silent failure for optional plugins] |
+| [e.g., Circular import] | [moduleA ↔ moduleB] | [Lazy resolution pattern, not a bug] |
+| [e.g., `any` type usage] | [src/legacy-adapter.ts] | [Bridging untyped legacy API] |
+
+> Add patterns here that static analysis might flag but are intentional. Include enough context for reviewers to understand the decision.
 
 </core-file>
 
@@ -9168,6 +9175,34 @@ If task exceeds 5 iterations:
 1. Document current state in plan.md
 2. Note any discoveries or blockers
 3. Suggest resumption approach
+
+---
+
+## Guardrails
+
+<!-- Hard constraints that must never be violated -->
+
+### Git & Version Control
+- [ ] No direct commits to main/master
+- [ ] No force push to shared branches
+- [ ] PR required for all changes
+
+### Code Quality
+- [ ] No console.log/print statements in production code
+- [ ] No commented-out code blocks
+- [ ] No TODO comments without linked issue
+
+### Security
+- [ ] No secrets/credentials in code
+- [ ] No disabled security checks without documented exception
+- [ ] Dependencies must pass security audit
+
+### Testing
+- [ ] Tests required before merge
+- [ ] No skipped tests without documented reason
+- [ ] Coverage must not decrease
+
+> Check the guardrails that apply to this project. Unchecked items are not enforced. Commands like bughunt, validate, and review will flag violations of checked guardrails.
 
 </core-file>
 

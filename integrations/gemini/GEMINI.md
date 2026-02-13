@@ -3611,6 +3611,10 @@ When user says "hunt bugs" or "@draft bughunt [--track <id>]":
 
 You are conducting an exhaustive bug hunt on this Git repository, enhanced by Draft context when available.
 
+## Primary Deliverable
+
+**The bug report is the primary deliverable.** Every verified bug MUST appear in the final report regardless of whether a regression test can be written. Regression tests are a supplementary output — helpful when possible, but never a filter for bug inclusion.
+
 ## Red Flags - STOP if you're:
 
 - Hunting for bugs without reading Draft context first (architecture.md, tech-stack.md, product.md)
@@ -3620,6 +3624,7 @@ You are conducting an exhaustive bug hunt on this Git repository, enhanced by Dr
 - Skipping the verification protocol (every bug needs evidence)
 - Making up file locations or line numbers without reading the actual code
 - Reporting framework-handled concerns as bugs without checking the docs
+- **Skipping bugs because you can't write a test for them** — mark as N/A and still report
 
 **Verify before you report. Evidence over assumptions.**
 
@@ -4176,9 +4181,11 @@ Before writing any test files, discover the project's test infrastructure and co
    | Rust | No extra deps for unit tests; `dev-dependencies` for integration test crates |
    | Java | JUnit version in `pom.xml` / `build.gradle` dependencies |
 
-### Step 5: Write Test Files
+### Step 5: Write Test Files (only for testable bugs)
 
-For each bug requiring action (NO_COVERAGE, PARTIAL, WRONG_ASSERTION), write the actual test files:
+**Skip this step entirely if no test framework was detected in Step 1.**
+
+For bugs with status NO_COVERAGE, PARTIAL, or WRONG_ASSERTION, write the actual test files. Bugs with COVERED or N/A status do not need action here — they are still included in the final report:
 
 #### NO_COVERAGE — Create new test file
 

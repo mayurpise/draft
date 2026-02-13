@@ -708,14 +708,12 @@ For each verified bug:
 
 **Fix:** [Minimal code change or mitigation]
 
-**Regression Test:** [Test case that would fail due to this bug, or "N/A - not testable without [reason]"]
-
 **Regression Test:**
 **Status:** [COVERED | PARTIAL | WRONG_ASSERTION | NO_COVERAGE | N/A]
 **Existing Test:** [`path/to/test_file:line` — test name | None found]
 [Action: existing test reference, proposed modification, or new test case]
 ```[language]
-// New or modified test case (omit if COVERED)
+// New or modified test case (omit if COVERED or N/A)
 ```
 ```
 
@@ -780,6 +778,13 @@ func TestProcessInputRejectsMaliciousScript(t *testing.T) {
 }
 // Expected: FAILS against current code (passes XSS through), PASSES after fix
 ```
+```
+
+**Example — N/A (not testable, but still report the bug):**
+```markdown
+**Regression Test:**
+**Status:** N/A — environment config, no executable code path
+**Reason:** Bug is in `config/production.yaml` which sets incorrect timeout value. Config files are not unit-testable; fix requires changing the YAML value directly.
 ```
 
 Severity levels:
@@ -897,9 +902,19 @@ Bugs already caught by existing tests — no action needed.
 | Bug # | Bug Title | Existing Test |
 |-------|-----------|---------------|
 | 1 | [Brief title] | `tests/test_foo.py:45` — `test_sanitize_input()` |
+
+### Not Testable (N/A)
+
+Bugs that cannot have automated regression tests (config issues, documentation, LLM workflows, etc.).
+
+| Bug # | Bug Title | Reason |
+|-------|-----------|--------|
+| 6 | [Brief title] | Config file — no executable code |
 ```
 
 ## Final Instructions
+
+**CRITICAL: All verified bugs appear in the main report body.** The Regression Test Suite section organizes test artifacts, but every bug — regardless of whether a test can be written — MUST be documented in the severity sections (Critical/High/Medium/Low Issues) above. Bugs with `N/A` regression test status are still valid bugs that need reporting.
 
 - **No unverified bugs** — Every finding must pass the verification protocol
 - **Evidence required** — Include code snippets and trace for every bug

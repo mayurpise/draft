@@ -4313,14 +4313,12 @@ For each verified bug:
 
 **Fix:** [Minimal code change or mitigation]
 
-**Regression Test:** [Test case that would fail due to this bug, or "N/A - not testable without [reason]"]
-
 **Regression Test:**
 **Status:** [COVERED | PARTIAL | WRONG_ASSERTION | NO_COVERAGE | N/A]
 **Existing Test:** [`path/to/test_file:line` — test name | None found]
 [Action: existing test reference, proposed modification, or new test case]
 ```[language]
-// New or modified test case (omit if COVERED)
+// New or modified test case (omit if COVERED or N/A)
 ```
 ```
 
@@ -4385,6 +4383,13 @@ func TestProcessInputRejectsMaliciousScript(t *testing.T) {
 }
 // Expected: FAILS against current code (passes XSS through), PASSES after fix
 ```
+```
+
+**Example — N/A (not testable, but still report the bug):**
+```markdown
+**Regression Test:**
+**Status:** N/A — environment config, no executable code path
+**Reason:** Bug is in `config/production.yaml` which sets incorrect timeout value. Config files are not unit-testable; fix requires changing the YAML value directly.
 ```
 
 Severity levels:
@@ -4502,9 +4507,19 @@ Bugs already caught by existing tests — no action needed.
 | Bug # | Bug Title | Existing Test |
 |-------|-----------|---------------|
 | 1 | [Brief title] | `tests/test_foo.py:45` — `test_sanitize_input()` |
+
+### Not Testable (N/A)
+
+Bugs that cannot have automated regression tests (config issues, documentation, LLM workflows, etc.).
+
+| Bug # | Bug Title | Reason |
+|-------|-----------|--------|
+| 6 | [Brief title] | Config file — no executable code |
 ```
 
 ## Final Instructions
+
+**CRITICAL: All verified bugs appear in the main report body.** The Regression Test Suite section organizes test artifacts, but every bug — regardless of whether a test can be written — MUST be documented in the severity sections (Critical/High/Medium/Low Issues) above. Bugs with `N/A` regression test status are still valid bugs that need reporting.
 
 - **No unverified bugs** — Every finding must pass the verification protocol
 - **Evidence required** — Include code snippets and trace for every bug
@@ -6890,39 +6905,6 @@ Good tasks are:
 
 Initializes a Draft project by creating the `draft/` directory and context files. Run once per project.
 
-#### Analysis Depth
-
-Control how deeply Draft analyzes the codebase with `--depth`:
-
-```bash
-draft init                    # default: standard
-draft init --depth quick      # fast scan for large codebases
-draft init --depth standard   # full structural analysis
-draft init --depth deep       # comprehensive with read/write paths
-```
-
-| Depth | Time | Best For |
-|-------|------|----------|
-| `quick` | ~2 min | Large monorepos, CI/CD, initial exploration |
-| `standard` | ~5-10 min | Most projects — full Phase 1-3 analysis |
-| `deep` | ~15-30 min | Critical projects, onboarding, unfamiliar codebases |
-
-**Feature availability by depth:**
-
-| Feature | Quick | Standard | Deep |
-|---------|:-----:|:--------:|:----:|
-| Directory structure, tech stack, entry points | ✓ | ✓ | ✓ |
-| Module discovery, dependency graphs | — | ✓ | ✓ |
-| Design patterns, anti-patterns, mermaid diagrams | — | ✓ | ✓ |
-| Read/write path tracing with `file:line` refs | — | — | ✓ |
-| Proto/OpenAPI/GraphQL schema analysis | — | — | ✓ |
-| Test file mapping, config/env discovery | — | — | ✓ |
-
-**Auto-suggestion:** Based on file count, Draft suggests appropriate depth:
-- <50 files → `deep`
-- 50-500 files → `standard`
-- 500+ files → `quick` (with option for `standard`)
-
 #### Project Discovery
 
 Draft auto-classifies the project:
@@ -6934,19 +6916,13 @@ Draft auto-classifies the project:
 #### Initialization Sequence
 
 1. **Project discovery** — Classify as brownfield, greenfield, or monorepo
-2. **Architecture discovery (brownfield only)** — Analysis depth determines which phases run:
+2. **Architecture discovery (brownfield only)** — Three-phase analysis:
 
-   **Phase 1: Orientation (all depths)** — Directory structure, entry points, tech stack inventory. Generates system architecture diagram.
+   **Phase 1: Orientation** — Directory structure, entry points, tech stack inventory. Generates system architecture diagram.
 
-   **Phase 2: Logic (standard, deep)** — Data lifecycle mapping, primary domain objects, design pattern recognition, anti-pattern/complexity hotspot flagging, convention extraction, external dependency mapping. Generates mermaid diagrams.
+   **Phase 2: Logic** — Data lifecycle mapping, primary domain objects, design pattern recognition, anti-pattern/complexity hotspot flagging, convention extraction, external dependency mapping. Generates mermaid diagrams.
 
-   **Phase 3: Module Discovery (standard, deep)** — Reverse-engineers existing modules from import graph and directory boundaries. Documents each module's responsibility, files, API surface, dependencies, and complexity. Generates module dependency diagram, dependency table, and topological dependency order.
-
-   **Phase 4: Critical Path Tracing (deep only)** — End-to-end read/write path tracing with `file:line` references. Identifies 2-3 critical operations and traces them through the full stack. Documents cross-cutting concerns.
-
-   **Phase 5: Schema & Contract Discovery (deep only)** — Analyzes Protobuf, OpenAPI, GraphQL, and database schemas. Maps inter-service dependencies. Documents contract validation tools.
-
-   **Phase 6: Test & Config Mapping (deep only)** — Maps test files to modules. Documents configuration files, environment variables, feature flags, and secret sources.
+   **Phase 3: Module Discovery** — Reverse-engineers existing modules from import graph and directory boundaries. Documents each module's responsibility, files, API surface, dependencies, and complexity. Generates module dependency diagram, dependency table, and topological dependency order.
 
    This document becomes persistent context — every future track references it instead of re-analyzing the codebase.
 
@@ -6962,15 +6938,10 @@ If `draft/` already exists with context files, init reports "already initialized
 
 #### Refresh Mode (`draft init refresh`)
 
-Re-scans and updates existing context without starting from scratch. Supports `--depth` flag.
-
-```bash
-draft init refresh              # refresh at current depth
-draft init refresh --depth deep # upgrade to deep analysis
-```
+Re-scans and updates existing context without starting from scratch.
 
 1. **Tech Stack Refresh** — Re-scans `package.json`, `go.mod`, etc. Compares with existing `draft/tech-stack.md`. Proposes updates.
-2. **Architecture Refresh** — Re-runs architecture discovery at specified depth and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `draft decompose`. Presents changes for review before writing.
+2. **Architecture Refresh** — Re-runs architecture discovery and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `draft decompose`. Presents changes for review before writing.
 3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
@@ -6993,9 +6964,10 @@ Aggregates Draft context from multiple services in a monorepo into unified root-
    - `draft/architecture.md` — System-of-systems architecture view
    - `draft/tech-stack.md` — Org-wide technology standards
 
-#### Flags
+#### Arguments
 
-- `--init-missing` — Run `draft init` on services that lack a `draft/` directory
+- `init-missing` — Run `draft init` on services that lack a `draft/` directory
+- `bughunt [dir1 dir2 ...]` — Run `draft bughunt` across subdirectories with `draft/` folders. If no directories specified, auto-discovers all subdirectories with `draft/`. Generates summary report at `draft-index-bughunt-summary.md`.
 
 #### When to Use
 
@@ -7138,7 +7110,7 @@ Displays a comprehensive overview of project progress:
 
 ### `draft revert` — Git-Aware Rollback
 
-Safely undo work at three levels:
+Safely undo work at three levels. The command prompts interactively for the revert level and target.
 
 | Level | What It Reverts |
 |-------|----------------|
@@ -7148,11 +7120,12 @@ Safely undo work at three levels:
 
 #### Revert Process
 
-1. **Identify commits** — Finds commits matching the track's commit pattern (`feat(<track_id>): ...`)
-2. **Preview** — Shows commits, affected files, and plan.md status changes before executing
-3. **Confirm** — Requires explicit user confirmation
-4. **Execute** — Runs `git revert --no-commit` for each commit (newest first), then creates a single revert commit
-5. **Update Draft state** — Reverts task markers from `[x]` to `[ ]`, decrements metadata counters
+1. **Select level** — Prompts user to choose: Task, Phase, or Track
+2. **Identify commits** — Reads commit SHAs from `plan.md` or searches git log by track pattern (`feat(<track_id>): ...`)
+3. **Preview** — Shows commits, affected files, and plan.md status changes before executing
+4. **Confirm** — Requires explicit user confirmation
+5. **Execute** — Runs `git revert --no-commit` for each commit (newest first), then creates a single revert commit
+6. **Update Draft state** — Reverts task markers from `[x]` to `[ ]`, decrements metadata counters
 
 If a revert produces merge conflicts, Draft reports the conflicted files and halts. The user resolves conflicts manually, then runs `git revert --continue`.
 
@@ -7270,8 +7243,8 @@ Validates codebase quality using Draft context (architecture.md, tech-stack.md, 
 
 #### Scope
 
-- **Track-level:** `--track <id>` — validates files touched by a specific track
-- **Project-level:** `--project` — validates entire codebase
+- **Track-level:** `draft validate <track-id>` — validates files touched by a specific track
+- **Project-level:** `draft validate` (no arguments) — validates entire codebase
 
 Generates report at `draft/tracks/<id>/validation-report.md` (track) or `draft/validation-report.md` (project). Non-blocking by default — reports warnings without halting workflow.
 
@@ -7344,17 +7317,28 @@ Extracts commit SHAs from plan.md to determine diff range. Supports fuzzy track 
 #### Project-Level Review
 
 Reviews arbitrary changes (code quality only, no spec compliance):
-- `--project` — uncommitted changes
-- `--files <pattern>` — specific file patterns
-- `--commits <range>` — commit range
+- `project` — uncommitted changes
+- `files <pattern>` — specific file patterns
+- `commits <range>` — commit range
 
 #### Quality Integration
 
-- `--with-validate` — include `draft validate` results
-- `--with-bughunt` — include `draft bughunt` findings
-- `--full` — run both validate and bughunt
+- `with-validate` — include `draft validate` results
+- `with-bughunt` — include `draft bughunt` findings
+- `full` — run both validate and bughunt
 
 Generates unified report with deduplication across tools.
+
+#### Examples
+
+```bash
+draft review                              # auto-detect active track
+draft review track add-user-auth          # review specific track
+draft review project                      # review uncommitted changes
+draft review files "src/**/*.ts"          # review specific files
+draft review commits main...HEAD          # review commit range
+draft review track my-feature full        # comprehensive review with validate and bughunt
+```
 
 ---
 

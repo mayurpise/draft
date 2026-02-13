@@ -32,11 +32,10 @@ ls draft/product.md draft/tech-stack.md draft/workflow.md draft/tracks.md 2>/dev
 If missing, tell user: "Project not initialized. Run `/draft:init` first."
 
 2. Load full project context (these documents ARE the big picture — every track must be grounded in them):
-- Read `draft/product.md` — product vision, users, goals, constraints
-- Read `draft/tech-stack.md` — languages, frameworks, patterns, code style
+- Read `draft/product.md` — product vision, users, goals, constraints, guidelines (optional section)
+- Read `draft/tech-stack.md` — languages, frameworks, patterns, code style, accepted patterns
 - Read `draft/architecture.md` (if exists) — system map, modules, data flows, integration points
-- Read `draft/product-guidelines.md` (if exists) — UX standards, writing style, branding
-- Read `draft/workflow.md` — TDD preference, commit conventions, review process
+- Read `draft/workflow.md` — TDD preference, commit conventions, review process, guardrails
 - Read `draft/tracks.md` — existing tracks to check for overlap or dependencies
 
 3. Load guidance references:

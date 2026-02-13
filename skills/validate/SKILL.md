@@ -54,10 +54,14 @@ If `<track-id>` specified:
 
 Read the following context files:
 
-1. `draft/workflow.md` - Check validation configuration
-2. `draft/tech-stack.md` - Technology constraints, dependency list
-3. `draft/product.md` - Product context (optional, for understanding)
+1. `draft/workflow.md` - Check validation configuration, **Guardrails** section
+2. `draft/tech-stack.md` - Technology constraints, dependency list, **Accepted Patterns** section
+3. `draft/product.md` - Product context, guidelines (optional)
 4. `draft/architecture.md` - Architectural patterns (if exists)
+
+**Important context sections:**
+- `tech-stack.md` `## Accepted Patterns` - Skip flagging these as issues (intentional design decisions)
+- `workflow.md` `## Guardrails` - Enforce checked guardrails as validation rules
 
 Extract validation configuration from `workflow.md`:
 ```markdown

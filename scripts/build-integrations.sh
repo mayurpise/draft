@@ -193,7 +193,6 @@ CORE_FILES=(
     "templates/architecture.md"
     "templates/jira.md"
     "templates/product.md"
-    "templates/product-guidelines.md"
     "templates/tech-stack.md"
     "templates/workflow.md"
     "templates/spec.md"

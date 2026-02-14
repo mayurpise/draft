@@ -4,7 +4,7 @@
 **Commit:** `8ec06d6`
 **Date:** 2026-02-09 00:52
 **Scope:** Entire repository
-**Draft Context:** Loaded (architecture.md, product.md, tech-stack.md, workflow.md)
+**Draft Context:** Loaded (.ai-context.md, product.md, tech-stack.md, workflow.md)
 
 ## Summary
 
@@ -359,10 +359,11 @@ SHA=$(git rev-parse HEAD)
 
 ## Medium Issues
 
-### [MEDIUM] Reliability: Architecture Refresh Overwrites Without Backup
+### [MEDIUM] ~~Reliability: Architecture Refresh Overwrites Without Backup~~ (FIXED)
 
 **Location:** `skills/init/SKILL.md:41-49`
 **Confidence:** CONFIRMED
+**Resolution:** Fixed — init skill now includes backup/diff/approval workflow (lines 62-99).
 
 **Code Evidence:**
 ```markdown
@@ -502,7 +503,7 @@ echo '{"status":"completed",...}' > draft/tracks/test/metadata.json
 
 ## Notes
 
-- All bugs verified against Draft context (architecture.md, product.md, tech-stack.md)
+- All bugs verified against Draft context (.ai-context.md, product.md, tech-stack.md)
 - Focus areas: build script correctness, file operation ordering, state consistency
 - Skipped N/A dimensions per Dimension Applicability Check (no backend, no UI, no external APIs)
 - Framework: Bash 5.x for build script, Claude LLM interprets markdown skills (no runtime code)

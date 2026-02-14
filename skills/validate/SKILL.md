@@ -1,6 +1,6 @@
 ---
 name: validate
-description: Validate codebase quality using Draft context (architecture.md, product.md, tech-stack.md). Runs project-level or track-level validation with configurable automatic execution.
+description: Validate codebase quality using Draft context (.ai-context.md, product.md, tech-stack.md). Runs project-level or track-level validation with configurable automatic execution.
 ---
 
 # Validate Codebase
@@ -57,7 +57,7 @@ Read the following context files:
 1. `draft/workflow.md` - Check validation configuration, **Guardrails** section
 2. `draft/tech-stack.md` - Technology constraints, dependency list, **Accepted Patterns** section
 3. `draft/product.md` - Product context, guidelines (optional)
-4. `draft/architecture.md` - Architectural patterns (if exists)
+4. `draft/.ai-context.md` - Architectural patterns, critical invariants, security architecture (if exists). Falls back to `draft/architecture.md` for legacy projects.
 
 **Important context sections:**
 - `tech-stack.md` `## Accepted Patterns` - Skip flagging these as issues (intentional design decisions)
@@ -88,14 +88,16 @@ Run all 5 validators:
 
 **Process:**
 
-1. **Check for architecture.md:**
+1. **Check for architecture context:**
    ```bash
-   ls draft/architecture.md 2>/dev/null
+   ls draft/.ai-context.md draft/architecture.md 2>/dev/null
    ```
-   If missing, skip this check with message: "No architecture.md found - skipping pattern validation"
+   If neither found, skip this check with message: "No .ai-context.md or architecture.md found - skipping pattern validation"
 
 2. **Parse architectural patterns:**
-   - Read `draft/architecture.md`
+   - Read `draft/.ai-context.md` (preferred) or `draft/architecture.md` (legacy fallback)
+   - Also read **Critical Invariants** and **Security Architecture** sections from `.ai-context.md` for richer validation
+   - Read **Data Lifecycle** (state machines, storage topology) and **Critical Paths** (consistency boundaries, failure recovery matrix) for data integrity validation
    - Search for sections: "Patterns", "Standards", "Conventions", "Code Organization"
    - Extract documented rules (look for bullets, numbered lists, bolded statements)
    - Common pattern types:

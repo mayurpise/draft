@@ -169,7 +169,7 @@ MCP call: create_issue
   h3. Verification Done
   [Checklist of verification steps completed, e.g.:]
   - Traced code path from entry point
-  - Checked architecture.md — not intentional
+  - Checked .ai-context.md — not intentional
   - Verified framework doesn't handle this
   - No upstream guards found
 

@@ -15,7 +15,7 @@
 
 | Service | Status | Tech Stack | Dependencies | Team | Details |
 |---------|--------|------------|--------------|------|---------|
-| [service-name] | ✓ | [lang, db] | [deps] | [@team] | [→ architecture](../services/[name]/draft/architecture.md) |
+| [service-name] | ✓ | [lang, db] | [deps] | [@team] | [→ architecture](../services/[name]/draft/.ai-context.md) |
 | [service-name] | ○ | - | - | - | Not initialized |
 
 > **Status Legend:** ✓ = initialized, ○ = not initialized

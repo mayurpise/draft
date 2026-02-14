@@ -32,7 +32,7 @@ For each module, define:
 - **Dependencies** - Which other modules it imports from
 - **Complexity** - Low / Medium / High
 
-Output format: Use the template at `core/templates/architecture.md` when generating architecture documents.
+Output format: Use the template at `core/templates/ai-context.md` for project-wide context documents, or `core/templates/architecture.md` for track-scoped and human-readable documents.
 
 ### API Surface Examples by Language
 
@@ -175,16 +175,16 @@ A Story is a natural-language algorithm description placed at the top of a code 
 
 Stories flow through three stages:
 
-1. **Placeholder** — During `/draft:decompose`, each module in `architecture.md` gets a Story field set to `[placeholder - filled during /draft:implement]`. This signals that the module exists but its algorithm hasn't been documented yet.
+1. **Placeholder** — During `/draft:decompose`, each module in `.ai-context.md` (or track-level `architecture.md`) gets a Story field set to `[placeholder - filled during /draft:implement]`. This signals that the module exists but its algorithm hasn't been documented yet.
 
-2. **Written** — During `/draft:implement` (with architecture mode), before coding each module's first file, write the Story as a code comment at the top of the file. Present it to the developer for approval. Once approved, update the module's Story field in `architecture.md` with a one-line summary referencing the file:
+2. **Written** — During `/draft:implement` (with architecture mode), before coding each module's first file, write the Story as a code comment at the top of the file. Present it to the developer for approval. Once approved, update the module's Story field in `.ai-context.md` (or `architecture.md`) with a one-line summary referencing the file:
    ```markdown
    - **Story:** Documented in `src/auth.ts:1-12` — validates token, resolves user, checks permissions
    ```
 
-3. **Updated** — If the algorithm changes during refactoring, update both the code comment and the `architecture.md` summary. The code comment is the source of truth; the `architecture.md` entry is a pointer.
+3. **Updated** — If the algorithm changes during refactoring, update both the code comment and the `.ai-context.md` summary. The code comment is the source of truth; the `.ai-context.md` entry is a pointer.
 
-**Key rule:** The `architecture.md` Story field is never the full story — it's a summary + file reference. The complete story lives as a comment in the source code.
+**Key rule:** The `.ai-context.md` Story field is never the full story — it's a summary + file reference. The complete story lives as a comment in the source code.
 
 ### Story Format
 
@@ -325,7 +325,7 @@ function validateEntries(
 
 1. **Before coding a file** - Write Story, present for approval
 2. **Before TDD cycle** - Design execution state, generate skeletons, present each for approval
-3. **After task completion** - Update module status in `architecture.md` if it exists
+3. **After task completion** - Update module status in `.ai-context.md` (or `architecture.md`) if it exists. For project-level `.ai-context.md` updates, also trigger the Derivation Subroutine from `/draft:init` to regenerate `architecture.md`.
 
 ### Escalation
 

@@ -29,7 +29,7 @@ Before investigating, load and reference the project's big picture documents:
 
 | Document | Use During RCA |
 |----------|---------------|
-| `draft/architecture.md` | Identify affected module, trace cross-module data flows, respect module boundaries |
+| `draft/.ai-context.md` | Identify affected module, trace cross-module data flows, data state machines, consistency boundaries, failure recovery paths. Falls back to `draft/architecture.md` for legacy projects. |
 | `draft/tech-stack.md` | Check framework version constraints, known library issues, runtime behavior |
 | `draft/product.md` | Understand the affected user flow and its business criticality |
 | `draft/workflow.md` | Follow the project's test and commit conventions during the fix phase |
@@ -50,7 +50,7 @@ Before investigating, load and reference the project's big picture documents:
    - What's broken: [specific flows, endpoints, data paths]
    - What's NOT broken: [adjacent functionality that still works]
    - Boundary: [the module/layer/service where the failure lives]
-4. **Map against architecture.md** — Identify which module(s) are involved. Note module boundaries — the bug is likely within one module, and the fix should stay there.
+4. **Map against .ai-context.md** — Identify which module(s) are involved. Check data state machines for invalid transitions. Check consistency boundaries for eventual-consistency bugs. Note module boundaries — the bug is likely within one module, and the fix should stay there.
 
 **Output:** Reproduction confirmed with evidence. Blast radius documented. Investigation scoped to specific module(s).
 

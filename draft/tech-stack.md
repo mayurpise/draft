@@ -44,7 +44,7 @@ N/A — Draft is a methodology plugin with no persistent data storage. All state
 
 ### Build
 - **Tool**: `scripts/build-integrations.sh` (Bash)
-- **Output**: `integrations/cursor/.cursorrules`, `integrations/copilot/.github/copilot-instructions.md`, `integrations/gemini/GEMINI.md`
+- **Output**: `integrations/copilot/.github/copilot-instructions.md`, `integrations/gemini/GEMINI.md`
 - **Process**: Extracts frontmatter + body from `skills/*/SKILL.md`, inlines into platform-specific formats
 
 ### CI/CD

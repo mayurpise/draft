@@ -1,6 +1,6 @@
 ---
 name: init
-description: Initialize Draft project context for Context-Driven Development. Run once per project to create product.md, tech-stack.md, workflow.md, tracks.md, and architecture.md (brownfield). Supports --depth flag (quick/standard/deep) for analysis intensity.
+description: Initialize Draft project context for Context-Driven Development. Run once per project to create product.md, tech-stack.md, workflow.md, tracks.md, .ai-context.md (brownfield), and architecture.md (derived). Always performs deep analysis.
 ---
 
 # Draft Init
@@ -13,7 +13,7 @@ You are initializing a Draft project for Context-Driven Development.
 - Skipping brownfield analysis for an existing codebase
 - Rushing through product definition questions without probing for detail
 - Auto-generating tech-stack.md without verifying detected dependencies
-- Not presenting architecture.md for developer review before proceeding
+- Not presenting .ai-context.md for developer review before proceeding
 - Overwriting existing tracks.md (this destroys track history)
 
 **Initialize once, refresh to update. Never overwrite without confirmation.**
@@ -23,45 +23,7 @@ You are initializing a Draft project for Context-Driven Development.
 ## Pre-Check
 
 Check for arguments:
-- `--depth quick|standard|deep`: Set analysis depth (default: `standard`)
 - `refresh`: Update existing context without full re-init
-- `refresh --depth <level>`: Refresh with specific depth
-
-### Analysis Depth Levels
-
-| Depth | Time | Best For | Description |
-|-------|------|----------|-------------|
-| `quick` | ~2 min | Large monorepos, CI/CD, initial exploration | Directory scan, package detection, entry points. No deep analysis. |
-| `standard` | ~5-10 min | Most projects | Full Phase 1-3 analysis. Module discovery, dependency graphs, mermaid diagrams. |
-| `deep` | ~15-30 min | Critical projects, onboarding, unfamiliar codebases | Standard + read/write path tracing, schema analysis, test mapping, config discovery. |
-
-#### Feature Matrix
-
-| Feature | Quick | Standard | Deep |
-|---------|:-----:|:--------:|:----:|
-| Directory structure | ✓ | ✓ | ✓ |
-| Tech stack detection | ✓ | ✓ | ✓ |
-| Entry points | ✓ | ✓ | ✓ |
-| System overview diagram | ✓ | ✓ | ✓ |
-| Module discovery | — | ✓ | ✓ |
-| Dependency graph | — | ✓ | ✓ |
-| Design patterns | — | ✓ | ✓ |
-| Anti-patterns/hotspots | — | ✓ | ✓ |
-| Mermaid diagrams (full) | — | ✓ | ✓ |
-| Proto/OpenAPI/GraphQL schemas | — | — | ✓ |
-| Read/write path tracing | — | — | ✓ |
-| Test file mapping | — | — | ✓ |
-| Config/env discovery | — | — | ✓ |
-| External service contracts | — | — | ✓ |
-
-#### Auto-Suggest Depth
-
-Based on codebase size, suggest appropriate depth:
-- **<50 files**: Suggest `deep` — small enough for thorough analysis
-- **50-500 files**: Suggest `standard` — balanced coverage
-- **500+ files**: Suggest `quick` — avoid timeout, offer `standard` with warning
-
-Present the suggestion but let the user override.
 
 ### Standard Init Check
 
@@ -84,49 +46,59 @@ If monorepo detected:
 - Announce: "Detected monorepo structure. Consider using `/draft:index` at root level to aggregate service context, or run `/draft:init` within individual service directories."
 - Ask user to confirm: initialize here (single service) or abort (use /draft:index instead)
 
+### Migration Detection
+
+If `draft/architecture.md` exists WITHOUT `draft/.ai-context.md`:
+- Announce: "Detected legacy architecture.md without .ai-context.md. Would you like to migrate? This will generate .ai-context.md as the new source of truth and regenerate architecture.md from it."
+- If user accepts: Run refresh mode targeting `.ai-context.md` generation
+- If user declines: Continue with legacy format
+
 ### Refresh Mode
 
-If the user runs `/draft:init refresh` (optionally with `--depth`):
+If the user runs `/draft:init refresh`:
 
 1. **Tech Stack Refresh**: Re-scan `package.json`, `go.mod`, etc. Compare with `draft/tech-stack.md`. Propose updates.
 
-2. **Architecture Refresh**: If `draft/architecture.md` exists, re-run architecture discovery at the specified depth with safe backup workflow:
+2. **Architecture Refresh**: If `draft/.ai-context.md` exists, re-run architecture discovery with safe backup workflow:
 
    **a. Create backup:**
    ```bash
-   cp draft/architecture.md draft/architecture.md.backup
+   cp draft/.ai-context.md draft/.ai-context.md.backup
    ```
 
    **b. Generate to temporary file:**
-   - Run architecture discovery at specified depth
-   - Write output to `draft/architecture.md.new` (NOT the original file)
+   - Run full architecture discovery (all 6 phases)
+   - Write output to `draft/.ai-context.md.new` (NOT the original file)
    - Detect new directories, files, or modules added since last scan
    - Identify removed or renamed components
    - Update mermaid diagrams to reflect structural changes
    - Flag new external dependencies or changed integration points
-   - Update data lifecycle if new domain objects were introduced
-   - Discover new modules or detect removed/merged modules; update Module Dependency Diagram, Dependency Table, Dependency Order
+   - Update data lifecycle: new domain objects, changed state machines, new storage tiers, new transformation boundaries
+   - Update critical paths: new async/event paths, changed consistency boundaries, updated failure recovery matrix
+   - Discover new modules or detect removed/merged modules
+   - Update YAML frontmatter `git.commit` and `git.message` to current HEAD
    - Preserve any modules added by `/draft:decompose` (planned modules) — only update `[x] Existing` modules
 
    **c. Present diff for review:**
    ```bash
-   diff draft/architecture.md draft/architecture.md.new
+   diff draft/.ai-context.md draft/.ai-context.md.new
    ```
    Show summary of changes to user.
 
    **d. On user approval:**
    ```bash
-   mv draft/architecture.md.new draft/architecture.md
-   rm draft/architecture.md.backup
+   mv draft/.ai-context.md.new draft/.ai-context.md
+   rm draft/.ai-context.md.backup
    ```
+   Then regenerate `draft/architecture.md` from `.ai-context.md` using the Derivation Subroutine below.
 
    **e. On user rejection:**
    ```bash
-   rm draft/architecture.md.new
+   rm draft/.ai-context.md.new
    ```
-   Original architecture.md preserved unchanged.
+   Original .ai-context.md preserved unchanged.
 
-   - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now
+   - If `draft/.ai-context.md` does NOT exist and the project is brownfield, offer to generate it now
 
 3. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
@@ -149,62 +121,37 @@ Analyze the current directory to classify the project:
 
 Respect `.gitignore` and `.claudeignore` when scanning.
 
-**Count files** to determine suggested depth:
-```bash
-find . -type f -name "*.ts" -o -name "*.js" -o -name "*.py" -o -name "*.go" -o -name "*.rs" | wc -l
-```
-
-Announce: "Found ~X source files. Suggested depth: [quick|standard|deep]. Proceed with this depth? (or specify --depth)"
-
 If **Brownfield**: proceed to Step 1.5 (Architecture Discovery).
 If **Greenfield**: skip to Step 2 (Product Definition).
 
 ## Step 1.5: Architecture Discovery (Brownfield Only)
 
-For existing codebases, analyze based on the selected depth level. This document becomes persistent context that every future track references.
+For existing codebases, perform full deep analysis across all 6 phases. This generates `draft/.ai-context.md` as the source of truth and derives `draft/architecture.md` for human consumption.
 
-Use the template from `core/templates/architecture.md`.
+Use the template from `core/templates/ai-context.md`.
 
----
+### Language-Specific Exploration Guide
 
-### Quick Depth
+Use this guide to know WHERE to look based on detected language:
 
-Minimal analysis for large codebases or initial exploration.
-
-#### Phase 1 Only: Orientation (Surface Scan)
-
-1. **System Overview**: Write a "Key Takeaway" paragraph. Generate a basic mermaid `graph TD` showing primary layers.
-
-2. **Directory Structure**: Scan top-level directories only. Generate:
-   - A table mapping directory → responsibility → key files
-   - Skip deep directory tree diagram
-
-3. **Entry Points**: Identify main entry points:
-   - Application startup (main/index files)
-   - API routes or HTTP handlers
-   - Skip detailed flow tracing
-
-4. **Tech Stack Inventory**: Cross-reference detected dependencies with config files.
-
-**Skip**: Module discovery, dependency graphs, design patterns, anti-patterns, read/write paths.
-
-**Output**: Minimal `draft/architecture.md` with System Overview, Directory Structure, Entry Points, Tech Stack.
+| Language | Build/Deps | Entry Point | Interfaces | Config | Tests |
+|----------|-----------|-------------|------------|--------|-------|
+| C/C++ | `BUILD`, `CMakeLists.txt`, `Makefile` | `main()` in `*_main.cc` | `.h` headers, virtual methods | `DEFINE_*` macros | `*_test.cc` |
+| Go | `go.mod`, `go.sum` | `func main()` in `main.go` or `cmd/*/main.go` | `type Interface interface` | `flag.*`, Viper, env vars | `*_test.go` |
+| Python | `pyproject.toml`, `requirements.txt`, `setup.py` | `__main__`, `app.py`, `main.py` | ABC, Protocol classes | `settings.py`, `.env`, argparse | `test_*.py` |
+| TypeScript | `package.json`, `tsconfig.json` | `"main"` in package.json, `index.ts` | `interface`/`type` in `*.ts` | `.env`, `config.ts` | `*.test.ts` |
+| Java | `pom.xml`, `build.gradle` | `@SpringBootApplication`, `main()` | `interface` declarations | `application.yml` | `*Test.java` |
+| Rust | `Cargo.toml` | `fn main()` in `src/main.rs` | `trait` definitions | `clap`, `config.toml` | `#[test]` |
 
 ---
 
-### Standard Depth (Default)
+### Phase 1: Orientation (The System Map)
 
-Full structural analysis — current behavior.
-
-#### Phase 1: Orientation (The System Map)
-
-Analyze the codebase to produce the **Orientation** sections of `architecture.md`:
+Analyze the codebase to produce the **Orientation** sections of `.ai-context.md`:
 
 1. **System Overview**: Write a "Key Takeaway" paragraph summarizing the system's primary purpose and function. Generate a mermaid `graph TD` diagram showing the system's layered architecture (presentation, logic, data layers with actual component names).
 
-2. **Directory Structure**: Scan top-level directories. For each, identify its single responsibility and key files. Generate:
-   - A table mapping directory → responsibility → key files
-   - A mermaid `graph TD` tree diagram of the directory hierarchy
+2. **Directory Structure**: Scan top-level directories. For each, identify its single responsibility and key files. Generate a table mapping directory → responsibility → key files.
 
 3. **Entry Points & Critical Paths**: Identify all entry points into the system:
    - Application startup (main/index files)
@@ -213,184 +160,183 @@ Analyze the codebase to produce the **Orientation** sections of `architecture.md
    - CLI commands
    - Event listeners or serverless handlers
 
-4. **Request/Response Flow**: Trace one representative request through the full stack. Generate a mermaid `sequenceDiagram` showing the actual participants (not generic placeholders — use real file/class names from the codebase).
+4. **Request/Response Flow**: Trace one representative request through the full stack. Generate a mermaid `sequenceDiagram` showing the actual participants (use real file/class names from the codebase).
 
-5. **Tech Stack Inventory**: Cross-reference detected dependencies with config files. Record language versions, framework versions, and the config file that defines each. This feeds into the more detailed `draft/tech-stack.md`.
+5. **Tech Stack Inventory**: Cross-reference detected dependencies with config files. Record language versions, framework versions, and the config file that defines each. This feeds into `draft/tech-stack.md`.
 
 #### Phase 2: Logic (The "How" & "Why")
 
-Examine specific files and functions to produce the **Logic** sections of `architecture.md`:
+Examine specific files and functions to produce the **Logic** sections:
 
-1. **Data Lifecycle**: Identify the 3-5 primary domain objects (e.g., User, Order, Transaction). For each, map:
-   - Where it enters the system (creation point)
-   - Where it is modified (transformation points)
-   - Where it is persisted (storage)
-   - Generate a mermaid `flowchart LR` showing the data pipeline
+1. **Data Lifecycle**: Identify the 3-5 primary domain objects. For each:
+   - **Domain Objects**: Map where it enters, is modified, persisted, and exits the system.
+   - **State Machines**: Trace valid states and transitions. Look for enum fields, status columns, state pattern implementations, guard clauses that check current state before allowing operations. Each transition should have: trigger, invariant (what must be true), and enforcement location (`file:line`). Generate a mermaid `stateDiagram-v2`.
+   - **Storage Topology**: Map where data lives at each tier (in-memory cache → primary DB → event log → archive). For each tier: technology, durability guarantee, TTL/eviction policy, recovery strategy. For single-DB apps, state "Single DB — no caching tier, no event log."
+   - **Data Transformation Chain**: Trace how data shape changes across boundaries (API payload → DTO → domain model → persistence model → event payload). Mark lossy transformations where fields are dropped. Each boundary is a potential data corruption point. For simple apps with one shape throughout, state "Single shape — no transformation boundaries."
 
-2. **Design Patterns**: Identify dominant patterns in the codebase:
-   - Repository, Factory, Singleton, Middleware, Observer, Strategy, etc.
-   - Document where each pattern is used and why
+2. **Design Patterns**: Identify dominant patterns — Repository, Factory, Singleton, Middleware, Observer, Strategy, etc. Document where each is used and why.
 
-3. **Anti-Patterns & Complexity Hotspots**: Flag problem areas:
-   - God objects or functions (500+ lines)
-   - Circular dependencies between modules
-   - High cyclomatic complexity
-   - Code deviating from dominant patterns
-   - Mark unclear business logic as "Unknown/Legacy Context Required" — never guess
+3. **Anti-Patterns & Complexity Hotspots**: Flag god objects (500+ lines), circular dependencies, high cyclomatic complexity, deviations from dominant patterns. Mark unclear logic as "Unknown/Legacy Context Required".
 
-4. **Conventions & Guardrails**: Extract existing conventions:
-   - Error handling patterns
-   - Logging approach
-   - Naming conventions (files, functions, classes)
-   - Validation patterns
-   - New code must respect these
+4. **Conventions & Guardrails**: Extract error handling patterns, logging approach, naming conventions, validation patterns.
 
-5. **External Dependencies**: Map external service integrations. Generate a mermaid `graph LR` showing the application's connections to auth providers, email services, storage, queues, third-party APIs, etc.
+5. **External Dependencies**: Map external service integrations. Generate a mermaid `graph LR`.
+
+6. **Critical Invariants**: Scan for assertions, validation logic, auth checks, version checks, lock acquisitions, transaction boundaries. Group by category:
+   - Data safety (prevent data loss / corruption)
+   - Security (auth, authz, input validation, secrets handling)
+   - Concurrency (lock ordering, thread affinity)
+   - Ordering / sequencing (must-happen-before relationships)
+   - Idempotency (safe to retry?)
+   - Backward compatibility (schema evolution, API versioning)
+
+7. **Security Architecture**: Trace auth middleware, authz decorators, input validation boundaries, secrets loading, TLS config. Document:
+   - Authentication & initialization
+   - Authorization enforcement
+   - Data sanitization boundaries
+   - Secrets management
+   - Network security
+
+8. **Concurrency Model**: Find thread pools, async executors, goroutines, worker processes. Map lock/mutex usage. For single-threaded modules, state "Single-threaded — N/A". Document:
+   - Execution model
+   - Thread/worker pools
+   - Async patterns
+   - Locking strategy
+   - Common pitfalls
+
+9. **Error Handling**: Identify error propagation pattern (return codes, exceptions, Result monads). Find retry logic, map failure modes from catch/error handlers. Document:
+   - Propagation model
+   - Retry policy table
+   - Failure modes table
+   - Graceful degradation
+
+10. **Observability**: Find logging framework, trace instrumentation, metrics definitions, health endpoints. Document:
+    - Logging strategy
+    - Distributed tracing
+    - Metrics inventory
+    - Health checks
 
 #### Phase 3: Module Discovery (Existing Modules)
 
-Analyze the codebase's import graph and directory boundaries to discover and document the **existing** module structure. This is reverse-engineering what already exists — not planning new modules (that's what `/draft:decompose` does for new features).
+Analyze the codebase's import graph and directory boundaries to discover existing modules:
 
 1. **Module Identification**: Identify logical modules from directory structure, namespace boundaries, and import clusters. Each module should have:
-   - A clear single responsibility derived from the code it contains
-   - A list of actual source files (not planned files)
-   - Key exported functions, classes, or interfaces (the detected API surface)
-   - Dependencies on other discovered modules (from import/require analysis)
-   - Complexity rating (Low / Medium / High) based on file count, cyclomatic complexity, and coupling
+   - A clear single responsibility
+   - A list of actual source files
+   - Key exported functions, classes, or interfaces
+   - Dependencies on other discovered modules
+   - Complexity rating (Low / Medium / High)
 
-2. **Module Dependency Diagram**: Generate a mermaid `graph LR` diagram showing how discovered modules depend on each other. Use actual module/directory names from the codebase.
+2. **Module Dependency Diagram**: Generate a mermaid `graph LR` diagram.
 
-3. **Dependency Table**: Create a table mapping each module to what it depends on and what depends on it. Flag any circular dependencies detected.
+3. **Dependency Table**: Map each module to what it depends on and what depends on it. Flag circular dependencies.
 
-4. **Dependency Order**: Produce a topological ordering of existing modules — from leaf modules (no dependencies) to the most dependent. This helps engineers understand which parts of the system are foundational vs. which are built on top.
+4. **Dependency Order**: Topological ordering from leaf modules to most dependent.
 
 **Important distinctions:**
-- For each module, set **Story** to a brief summary of what the module currently does (not a placeholder). Reference key files, e.g.: "Handles user authentication via JWT — see `src/auth/index.ts:1-45`"
-- Set **Status** to `[x] Existing` — these modules already exist in the codebase
-- `/draft:decompose` may later add **new** planned modules alongside these existing ones when planning a feature or refactor. Existing modules discovered here should not be removed or overwritten by decompose — they serve as the baseline.
-
----
-
-### Deep Depth
-
-Full analysis plus read/write paths, schemas, tests, and config.
-
-**Includes all of Standard Depth, plus:**
+- Set **Story** to a brief summary of what each module currently does. Reference key files.
+- Set **Status** to `[x] Existing`
+- `/draft:decompose` may later add new planned modules alongside these.
 
 #### Phase 4: Critical Path Tracing
 
-Trace end-to-end read and write paths through the codebase with `file:line` references.
+Trace end-to-end read and write paths through the codebase with `file:line` references. **Data is the primary organizing principle** — the code exists to serve the data paths.
 
-1. **Identify Critical Operations**: Ask the developer to name 2-3 critical operations (e.g., "user registration", "order checkout", "payment processing"). If not provided, infer from entry points.
+1. **Identify Critical Operations**: Ask the developer to name 2-3 critical operations. If not provided, infer from entry points.
 
-2. **Write Path Tracing**: For each write operation, trace the full path:
-   ```markdown
-   ### Write Path: [Operation Name]
-   1. Entry: `routes/users.ts:42` — POST /users handler
-   2. Middleware: `middleware/auth.ts:15` — authentication check
-   3. Validation: `middleware/validate.ts:28` — request schema validation
-   4. Service: `services/user.ts:88` — business logic, password hashing
-   5. Repository: `repos/user.ts:23` — database insert
-   6. Events: `events/user.ts:12` — emit UserCreated event
-   7. Response: `serializers/user.ts:5` — format response
-   ```
+2. **Synchronous Write Path Tracing**: For each write operation, trace from entry to persistence. At each step, document:
+   - Location (`file:line`)
+   - Consistency level (strong/eventual)
+   - Failure mode (what happens if this step fails)
+   - **Mark the commit point** — the step where data becomes durable. Everything before is retriable; failures after require reconciliation.
 
-3. **Read Path Tracing**: For each read operation, trace the full path:
-   ```markdown
-   ### Read Path: [Operation Name]
-   1. Entry: `routes/users.ts:67` — GET /users/:id handler
-   2. Middleware: `middleware/auth.ts:15` — authentication
-   3. Service: `services/user.ts:45` — permission check
-   4. Cache: `cache/user.ts:8` — check cache, return if hit
-   5. Repository: `repos/user.ts:12` — database query
-   6. Cache: `cache/user.ts:15` — populate cache
-   7. Response: `serializers/user.ts:5` — format response
-   ```
+3. **Synchronous Read Path Tracing**: For each read operation, trace from entry through cache/DB to response. Document staleness guarantees and cache invalidation strategy per step.
 
-4. **Cross-Cutting Concerns**: Identify middleware, interceptors, or aspects that apply to multiple paths (logging, error handling, metrics, tracing).
+4. **Asynchronous / Event Paths**: Identify queues, event buses, CDC streams, scheduled jobs, background workers. For each:
+   - Trigger, source, channel (topic/queue), consumer
+   - Ordering guarantee (FIFO, partition-key, unordered)
+   - Delivery guarantee (at-most-once, at-least-once, exactly-once)
+   - Dead letter handling
+   - For apps with no async paths: "No async data paths — all operations are synchronous request/response."
+
+5. **Consistency Boundaries**: Map where strong consistency ends and eventual consistency begins. For each boundary: strong side, eventual side, expected lag, reconciliation mechanism. For single-DB apps: "Single database — all reads and writes are strongly consistent."
+
+6. **Failure & Recovery Matrix**: For each critical path, document what happens to in-flight data at each stage when failure occurs. Map: failure point → data state → impact → recovery mechanism → idempotency guarantee. For simple apps: "Single request-response cycle. Failure = transaction rollback. No partial states possible."
+
+7. **Cross-Cutting Concerns**: Identify middleware, interceptors, or aspects that apply across multiple paths.
 
 #### Phase 5: Schema & Contract Discovery
 
-Analyze API schemas and service contracts.
+1. **Schema File Detection**: Scan for Protobuf (`*.proto`), OpenAPI (`openapi.yaml`), GraphQL (`*.graphql`), JSON Schema (`*.schema.json`), Database schemas (`prisma/schema.prisma`, `migrations/`, `*.sql`).
 
-1. **Schema File Detection**: Scan for:
-   - Protobuf: `*.proto` files
-   - OpenAPI: `openapi.yaml`, `swagger.json`, `*.openapi.yaml`
-   - GraphQL: `*.graphql`, `schema.graphql`
-   - JSON Schema: `*.schema.json`
-   - Database schemas: `prisma/schema.prisma`, `migrations/`, `*.sql`
+2. **Service Definitions**: Extract services and methods from schema files.
 
-2. **Service Definitions**: Extract from proto/schema files:
-   ```markdown
-   ### API Schemas & Contracts
+3. **Inter-Service Dependencies**: Map which services call which.
 
-   | Type | Location | Services/Endpoints |
-   |------|----------|-------------------|
-   | Protobuf | `proto/user.proto` | UserService: Create, Get, Update, Delete |
-   | OpenAPI | `openapi.yaml` | REST: /users, /orders, /products |
-   | GraphQL | `schema.graphql` | Query: user, orders; Mutation: createUser |
-   ```
+#### Phase 6: Test, Config & Extension Points
 
-3. **Inter-Service Dependencies**: For microservices, map which services call which:
-   ```markdown
-   ### Service Dependencies
-   - `OrderService` → `UserService` (get user details)
-   - `OrderService` → `PaymentService` (process payment)
-   - `NotificationService` → `UserService`, `OrderService` (get notification targets)
-   ```
+1. **Test File Mapping**: For each module, identify corresponding test files and test types.
 
-4. **Contract Validation**: Note if contracts have validation (e.g., protobuf compilation, OpenAPI validation, GraphQL type checking).
+2. **Config & Environment Discovery**: Map configuration files, environment variables, feature flags.
 
-#### Phase 6: Test & Config Mapping
-
-Map test coverage and configuration structure.
-
-1. **Test File Mapping**: For each module discovered in Phase 3, identify corresponding test files:
-   ```markdown
-   ### Test Coverage Map
-
-   | Module | Test Files | Test Type |
-   |--------|-----------|-----------|
-   | `src/auth/` | `tests/auth/*.test.ts` | Unit + Integration |
-   | `src/orders/` | `tests/orders/*.test.ts`, `e2e/orders.spec.ts` | Unit + E2E |
-   | `src/utils/` | — | No tests |
-   ```
-
-2. **Config & Environment Discovery**:
-   ```markdown
-   ### Configuration
-
-   | File | Purpose | Environment Variables |
-   |------|---------|----------------------|
-   | `.env.example` | Environment template | DATABASE_URL, API_KEY, ... |
-   | `config/default.ts` | Default config | — |
-   | `config/production.ts` | Production overrides | — |
-
-   ### Feature Flags
-   - `ENABLE_NEW_CHECKOUT` — gates new checkout flow
-   - `BETA_FEATURES` — enables beta feature set
-   ```
-
-3. **Secrets & Sensitive Config**: Identify where secrets are expected (but NOT their values):
-   - Environment variables for API keys, database credentials
-   - Secret managers referenced (AWS Secrets Manager, Vault, etc.)
+3. **Extension Cookbooks**: After module discovery, generate step-by-step guides for each identified extension point (adding endpoints, models, integrations, etc.). Each cookbook should be a numbered, file-by-file guide an AI agent can follow mechanically.
 
 ---
 
 ### Architecture Discovery Output
 
-Write all completed phases to `draft/architecture.md`.
+Write all completed phases to `draft/.ai-context.md`, populating the YAML frontmatter with current git state:
 
-Present the architecture document for developer review before proceeding to Step 2.
+```bash
+git branch --show-current
+git rev-parse --short HEAD
+git log -1 --format="%s"
+```
+
+Then derive `draft/architecture.md` using the **Derivation Subroutine** below.
+
+Present both documents for developer review before proceeding to Step 2.
 
 ### Operational Constraints for Architecture Discovery
 
 - **Bottom-Line First**: Start with the Key Takeaway summary
 - **Code-to-Context Ratio**: Explain intent, not syntax
 - **No Hallucinations**: If a dependency or business reason is unclear, flag it as "Unknown/Legacy Context Required"
-- **Mermaid Diagrams**: Use actual component/file names from the codebase, not generic placeholders
-- **Respect Boundaries**: Only analyze code in the repository; do not make assumptions about external services
-- **Progress Updates**: For standard/deep depth, announce progress: "Phase 1 complete... analyzing Phase 2..."
+- **Mermaid Diagrams**: Use actual component/file names from the codebase
+- **Respect Boundaries**: Only analyze code in the repository
+- **Progress Updates**: Announce progress: "Phase 1 complete... analyzing Phase 2..."
+
+---
+
+## Derivation Subroutine: Generate architecture.md from .ai-context.md
+
+This subroutine converts the dense, machine-optimized `.ai-context.md` into a human-readable `architecture.md`. It is called by:
+- **Init** — after initial generation
+- **Implement** — after module status updates
+- **Decompose** — after adding new modules
+
+### Process
+
+1. Read `draft/.ai-context.md`
+2. Generate `draft/architecture.md` with the following transformations:
+   - **Expand tables into prose paragraphs** — Add context and explanation
+   - **Annotate mermaid diagrams** — Add descriptive labels, expand abbreviated nodes
+   - **Add "Getting Started" framing** — Orient human readers with onboarding context
+   - **Strip mutation-oriented fields** — Remove status markers (`[ ]`, `[~]`, `[x]`, `[!]`), story placeholders
+   - **Remove YAML frontmatter** — Not needed for human consumption
+   - **Omit Extension Cookbooks** — These are agent-only; humans read the source code
+   - **Simplify module section** — Show module names, responsibilities, and dependencies without status/story fields
+   - **Preserve all mermaid diagrams** — These are valuable for both audiences
+   - **Add section introductions** — Brief paragraph before each section explaining what it covers
+
+3. Use the template from `core/templates/architecture.md` as the structural guide for the human-readable output.
+
+### Reference from Other Skills
+
+Other skills that mutate `.ai-context.md` should trigger this subroutine with:
+> "After updating `.ai-context.md`, regenerate `draft/architecture.md` using the Derivation Subroutine defined in `/draft:init`."
+
+---
 
 ## Step 2: Product Definition
 
@@ -429,7 +375,7 @@ Ask about:
 - Validation settings (auto-validate, blocking behavior)
 
 **Note on Architecture Mode:**
-Architecture features (Story, Execution State, Skeletons, Chunk Reviews) are automatically enabled when you run `/draft:decompose` on a track. No opt-in needed - the presence of `architecture.md` activates these features.
+Architecture features (Story, Execution State, Skeletons, Chunk Reviews) are automatically enabled when you run `/draft:decompose` on a track. No opt-in needed — the presence of `.ai-context.md` activates these features.
 
 ## Step 5: Initialize Tracks
 
@@ -456,49 +402,22 @@ mkdir -p draft/tracks
 
 ## Completion
 
-For **Brownfield** projects with **deep** depth, announce:
+For **Brownfield** projects, announce:
 "Draft initialized successfully with deep analysis!
 
 Created:
-- draft/architecture.md (system map, read/write paths, schemas, test mapping)
+- draft/.ai-context.md (source of truth — dense codebase understanding for AI agents)
+- draft/architecture.md (human-readable engineering guide, derived from .ai-context.md)
 - draft/product.md
 - draft/tech-stack.md
 - draft/workflow.md
 - draft/tracks.md
 
 Next steps:
-1. Review draft/architecture.md — verify paths and schemas match your understanding
-2. Review and edit the other generated files as needed
-3. Run `/draft:new-track` to start planning a feature"
-
-For **Brownfield** projects with **standard** depth, announce:
-"Draft initialized successfully!
-
-Created:
-- draft/architecture.md (system map with mermaid diagrams)
-- draft/product.md
-- draft/tech-stack.md
-- draft/workflow.md
-- draft/tracks.md
-
-Next steps:
-1. Review draft/architecture.md — verify the system map matches your understanding
-2. Run `/draft:init refresh --depth deep` later for read/write path tracing
-3. Run `/draft:new-track` to start planning a feature"
-
-For **Brownfield** projects with **quick** depth, announce:
-"Draft initialized successfully (quick scan)!
-
-Created:
-- draft/architecture.md (basic structure only)
-- draft/product.md
-- draft/tech-stack.md
-- draft/workflow.md
-- draft/tracks.md
-
-Next steps:
-1. Run `/draft:init refresh --depth standard` for full module discovery
-2. Run `/draft:new-track` to start planning a feature"
+1. Review draft/.ai-context.md — verify the analysis matches your understanding
+2. Review draft/architecture.md — human-friendly version for team onboarding
+3. Review and edit the other generated files as needed
+4. Run `/draft:new-track` to start planning a feature"
 
 For **Greenfield** projects, announce:
 "Draft initialized successfully!

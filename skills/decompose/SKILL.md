@@ -1,6 +1,6 @@
 ---
 name: decompose
-description: Decompose project or track into modules with dependency mapping. Creates architecture.md with module definitions, dependency diagram, and implementation order.
+description: Decompose project or track into modules with dependency mapping. Creates .ai-context.md (source of truth) and derives architecture.md (human-readable) with module definitions, dependency diagram, and implementation order.
 ---
 
 # Decompose
@@ -20,7 +20,7 @@ You are decomposing a project or track into modules with clear responsibilities,
 ## Step 1: Determine Scope
 
 Check for an argument:
-- `project` or no argument with no active track → **Project-wide** decomposition → `draft/architecture.md`
+- `project` or no argument with no active track → **Project-wide** decomposition → `draft/.ai-context.md`
 - Track ID or active track exists → **Track-scoped** decomposition → `draft/tracks/<id>/architecture.md`
 
 ## Step 2: Load Context
@@ -159,12 +159,12 @@ Parallel opportunities: config and database can start after logging.
 
 **Wait for developer approval.**
 
-## Step 5: Generate architecture.md
+## Step 5: Generate Architecture Context
 
-Write the architecture document using the template from `core/templates/architecture.md`:
+Write the architecture document using the template from `core/templates/ai-context.md` (project-wide) or `core/templates/architecture.md` (track-scoped):
 
 **Location:**
-- Project-wide: `draft/architecture.md`
+- Project-wide: `draft/.ai-context.md` (then derive `draft/architecture.md` using the Derivation Subroutine from `/draft:init`)
 - Track-scoped: `draft/tracks/<id>/architecture.md`
 
 **Contents:**
@@ -241,10 +241,27 @@ Next steps:
 - Run /draft:coverage after implementation to verify test quality
 ```
 
-## Updating architecture.md
+## Mutation Protocol for .ai-context.md (Project-Wide)
 
-When revisiting decomposition (running `/draft:decompose` on an existing architecture.md):
-1. Read the existing architecture.md
+When adding new modules to project-wide `.ai-context.md`:
+
+1. Append `### Module: <name>` block after existing modules in `## Modules`
+2. Set Status to `[ ] Not Started`
+3. Update `## Dependency Table`, `## Dependency Order`, `## Module Dependency Diagram`
+4. Do NOT remove/modify `[x] Existing` modules
+5. Update YAML frontmatter `git.commit` and `git.message` to current HEAD
+6. After update, regenerate `draft/architecture.md` using the Derivation Subroutine defined in `/draft:init`
+
+**Safe write pattern:**
+1. Backup `.ai-context.md` → `.ai-context.md.backup`
+2. Write changes to `.ai-context.md.new`
+3. Present diff for review
+4. On approval: replace; on rejection: discard
+
+## Updating architecture context
+
+When revisiting decomposition (running `/draft:decompose` on an existing `.ai-context.md` or `architecture.md`):
+1. Read the existing context file
 2. Ask developer what changed (new modules, removed modules, restructured boundaries)
 3. Follow the same checkpoint process for changes
 4. Update the document, preserving completed module statuses and stories

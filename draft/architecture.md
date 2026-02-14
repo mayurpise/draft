@@ -40,9 +40,9 @@ graph TD
 | `.claude-plugin/` | Plugin manifest & marketplace config | `plugin.json`, `marketplace.json` |
 | `skills/` | Command implementations (15 skills) | `*/SKILL.md` |
 | `core/agents/` | Specialized agents | `architect.md`, `reviewer.md`, `debugger.md`, `planner.md`, `rca.md` |
-| `core/templates/` | Context file templates (14) | `architecture.md`, `product.md`, `tech-stack.md`, `workflow.md`, `intake-questions.md`, `jira.md`, `product-guidelines.md`, `dependency-graph.md`, `root-architecture.md`, `root-product.md`, `root-tech-stack.md`, `service-index.md`, `tech-matrix.md`, `spec.md` |
+| `core/templates/` | Context file templates (15) | `ai-context.md`, `architecture.md`, `product.md`, `tech-stack.md`, `workflow.md`, `intake-questions.md`, `jira.md`, `dependency-graph.md`, `root-architecture.md`, `root-product.md`, `root-tech-stack.md`, `service-index.md`, `tech-matrix.md`, `spec.md`, `metadata.json` |
 | `core/` | Methodology documentation | `methodology.md`, `knowledge-base.md` |
-| `integrations/` | Generated integration files | `cursor/.cursorrules`, `copilot/copilot-instructions.md`, `gemini/GEMINI.md` |
+| `integrations/` | Generated integration files | `copilot/.github/copilot-instructions.md`, `gemini/GEMINI.md` |
 | `scripts/` | Build automation | `build-integrations.sh` |
 | `draft/` | User project context (generated) | `product.md`, `tech-stack.md`, `tracks.md`, `tracks/` |
 
@@ -255,7 +255,7 @@ graph LR
 
 #### Module: core/templates/
 - **Responsibility:** Template files for all generated context artifacts
-- **Files:** `core/templates/architecture.md`, `product.md`, `tech-stack.md`, `workflow.md`, `spec.md`, `intake-questions.md`, `jira.md`, `product-guidelines.md`, `dependency-graph.md`, `root-architecture.md`, `root-product.md`, `root-tech-stack.md`, `service-index.md`, `tech-matrix.md` (14 files)
+- **Files:** `core/templates/ai-context.md`, `architecture.md`, `product.md`, `tech-stack.md`, `workflow.md`, `spec.md`, `intake-questions.md`, `jira.md`, `dependency-graph.md`, `root-architecture.md`, `root-product.md`, `root-tech-stack.md`, `service-index.md`, `tech-matrix.md`, `metadata.json` (15 files)
 - **API Surface:** Markdown templates with placeholder sections
 - **Dependencies:** None
 - **Complexity:** Low

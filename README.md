@@ -4,7 +4,7 @@
 
 Establish a disciplined AI development lifecycle with clear specifications, structured planning, and defined quality gates. Replace ad hoc AI coding with a phased approach where every feature begins with context, progresses through execution stages, and concludes with verification.
 
-[**getdraf.dev**](https://getdraft.dev) · [**Docs**](https://getdraft.dev#commands)
+[**getdraft.dev**](https://getdraft.dev) · [**Docs**](https://getdraft.dev#commands)
 
 🎥 [**Watch: Draft Overview (8 min)**](https://www.youtube.com/watch?v=gBSwFEFVd7Y)
 
@@ -67,7 +67,7 @@ Commands use `@draft` syntax.
 ## How It Works
 
 ```
-/draft:init  →  Creates product.md, tech-stack.md, architecture.md
+/draft:init  →  Creates product.md, tech-stack.md, .ai-context.md + architecture.md
      ↓
 /draft:new-track  →  AI-guided spec.md + phased plan.md
      ↓
@@ -85,11 +85,12 @@ Commands use `@draft` syntax.
 AI tools are fast but unstructured. Draft applies Context-Driven Development to impose clear boundaries: explicit context, phased execution, and built-in verification, ensuring outputs remain aligned, predictable, and production-ready.
 
 ```
-product.md      →  "Build a task manager"
-tech-stack.md   →  "React, TypeScript, Tailwind"
-architecture.md →  "Express → Service → Prisma → PostgreSQL"
-spec.md         →  "Add drag-and-drop reordering"
-plan.md         →  "Phase 1: sortable, Phase 2: persist"
+product.md       →  "Build a task manager"
+tech-stack.md    →  "React, TypeScript, Tailwind"
+.ai-context.md   →  Data paths, state machines, modules, invariants (AI source of truth)
+architecture.md  →  Human-readable guide derived from .ai-context.md
+spec.md          →  "Add drag-and-drop reordering"
+plan.md          →  "Phase 1: sortable, Phase 2: persist"
 ```
 
 Each layer narrows the solution space. By the time AI writes code, decisions are made.

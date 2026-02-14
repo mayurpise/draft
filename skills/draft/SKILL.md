@@ -13,7 +13,7 @@ Draft is a methodology for structured software development: **Context → Spec &
 - Suggesting `/draft:implement` before a track has an approved spec and plan
 - Not checking `draft/tracks.md` for existing active tracks before creating new ones
 - Skipping the recommended command and going freeform
-- Ignoring existing product.md, tech-stack.md, or workflow.md context
+- Ignoring existing .ai-context.md, product.md, tech-stack.md, or workflow.md context
 
 **Read context first. Follow the workflow.**
 
@@ -55,6 +55,8 @@ Every feature follows this lifecycle:
 ## Context Files
 
 When `draft/` exists, these files guide development:
+- `draft/.ai-context.md` - Source of truth for AI agents (dense codebase understanding)
+- `draft/architecture.md` - Human-readable engineering guide (derived from .ai-context.md)
 - `draft/product.md` - Product vision and goals
 - `draft/tech-stack.md` - Technical constraints
 - `draft/workflow.md` - TDD and commit preferences

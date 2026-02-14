@@ -2,7 +2,7 @@
 
 ## Vision
 
-Draft is a Claude Code plugin that implements Context-Driven Development — a methodology where structured documents (product.md, tech-stack.md, architecture.md, spec.md, plan.md) constrain and guide AI behavior during software development. It ensures AI acceleration doesn't mean technical debt by making every decision explicit and reviewable before code is written.
+Draft is a Claude Code plugin that implements Context-Driven Development — a methodology where structured documents (product.md, tech-stack.md, .ai-context.md, architecture.md, spec.md, plan.md) constrain and guide AI behavior during software development. It ensures AI acceleration doesn't mean technical debt by making every decision explicit and reviewable before code is written.
 
 ---
 
@@ -14,14 +14,14 @@ Draft is a Claude Code plugin that implements Context-Driven Development — a m
 
 ### Secondary Users
 - **Product Managers**: Review product vision and feature specs without reading code
-- **New Team Members**: Use Draft artifacts (spec.md, plan.md, architecture.md) to onboard and understand features
+- **New Team Members**: Use Draft artifacts (spec.md, plan.md, .ai-context.md, architecture.md) to onboard and understand features
 
 ---
 
 ## Core Features
 
 ### Must Have (P0)
-1. **Project Initialization** (`/draft:init`): Scan codebase, detect tech stack, generate context files (product.md, tech-stack.md, architecture.md with mermaid diagrams)
+1. **Project Initialization** (`/draft:init`): Scan codebase, detect tech stack, generate context files (product.md, tech-stack.md, .ai-context.md with data state machines/invariants, architecture.md derived for humans)
 2. **Track Creation** (`/draft:new-track`): Collaborative intake process producing spec.md and plan.md with phased task breakdown
 3. **TDD Implementation** (`/draft:implement`): Execute tasks from plan.md using RED → GREEN → REFACTOR workflow with progress tracking
 4. **Code Review** (`/draft:review`): Two-stage review (spec compliance + code quality) with bughunt and validation integration
@@ -36,6 +36,7 @@ Draft is a Claude Code plugin that implements Context-Driven Development — a m
 1. **Jira Integration** (`/draft:jira-preview`, `/draft:jira-create`): Export tracks to Jira epics/stories/subtasks via MCP
 2. **Coverage** (`/draft:coverage`): Code coverage analysis targeting 95%+ with gap justification
 3. **Monorepo Index** (`/draft:index`): Federated knowledge aggregation across multiple services
+4. **Architecture Decision Records** (`/draft:adr`): Document significant technical decisions with context, alternatives, and consequences
 
 ---
 
@@ -44,7 +45,7 @@ Draft is a Claude Code plugin that implements Context-Driven Development — a m
 - [x] Users can initialize a project with full architecture discovery in a single command
 - [x] Spec and plan documents are reviewable before any code is written
 - [x] AI behavior is constrained by the document hierarchy (product → tech-stack → architecture → spec → plan)
-- [x] Works across Cursor, GitHub Copilot, and Gemini via generated integration files
+- [x] Works across Cursor (native .claude/ support), GitHub Copilot, and Gemini (via generated integration files)
 
 ---
 
@@ -71,4 +72,4 @@ Draft is a Claude Code plugin that implements Context-Driven Development — a m
 
 ## Open Questions
 
-- [x] All core commands implemented and stable
+None — all core commands implemented and stable.

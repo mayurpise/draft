@@ -540,6 +540,8 @@ Before finalizing, verify:
 - [ ] No section says "See Section X" or "See architecture.md"
 - [ ] Total length is 200-400 lines
 
+**After completing analysis: Write this content to `draft/.ai-context.md` using the Write tool.**
+
 ---
 
 ## architecture.md Specification
@@ -674,6 +676,22 @@ Generate `draft/architecture.md` — a comprehensive human-readable engineering 
 - Code snippets must be actual code from the codebase
 - Include ALL instances — do not sample or abbreviate
 - When a section does not apply, state explicitly that it is skipped and why
+
+**After generating: Derive this from `.ai-context.md` and write to `draft/architecture.md` using the Write tool.**
+
+---
+
+## Architecture Discovery Output (End of Step 1.5)
+
+After completing the 5-phase analysis:
+
+1. **Write `draft/.ai-context.md`**: Using the template from `core/templates/ai-context.md`, populate all 15+ sections based on your analysis. This is the primary output — token-optimized, self-contained.
+
+2. **Derive `draft/architecture.md`**: Using the Derivation Subroutine below, expand `.ai-context.md` into the 30-45 page human-readable reference.
+
+3. **Present for review**: Show the user a summary of what was discovered before proceeding to Step 2.
+
+**CRITICAL**: Do NOT skip this step. Both files MUST be written before continuing.
 
 ---
 

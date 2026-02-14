@@ -1,8 +1,23 @@
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:init"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Architecture: {PROJECT_NAME}
 
 > Human-readable engineering reference. 30-45 pages.
-> Derived from `draft/.ai-context.md` by `/draft:init`.
-> For AI-optimized context, see `draft/.ai-context.md`.
+> For token-optimized AI context, see `draft/.ai-context.md`.
 
 ---
 

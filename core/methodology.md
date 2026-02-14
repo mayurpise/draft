@@ -61,8 +61,8 @@ Draft solves this through **Context-Driven Development**: structured documents t
 |----------|---------|----------|
 | `product.md` | Defines users, goals, success criteria, guidelines | AI building features nobody asked for |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
-| `.ai-context.md` | **Source of truth.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary | AI re-analyzing codebase every session |
-| `architecture.md` | **Derived from .ai-context.md.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets | Engineers needing onboarding documentation |
+| `architecture.md` | **Source of truth.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
+| `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary. Auto-refreshed on mutations. | AI re-analyzing codebase every session |
 | `workflow.md` | TDD preference, commit style, review process, guardrails | AI skipping tests or making giant commits |
 | `spec.md` | Acceptance criteria for a specific track | Scope creep, gold-plating |
 | `plan.md` | Ordered phases with verification steps | AI attempting everything at once |
@@ -74,8 +74,8 @@ product.md          →  "Build a task manager for developers"
   ↓
 tech-stack.md       →  "Use React, TypeScript, Tailwind"
   ↓
-.ai-context.md      →  "Express API → Service layer → Prisma ORM → PostgreSQL"
-  ↓                     (architecture.md derived for human consumption)
+architecture.md     →  "Express API → Service layer → Prisma ORM → PostgreSQL"
+  ↓                     (.ai-context.md condensed for AI consumption)
 spec.md             →  "Add drag-and-drop reordering"
   ↓
 plan.md             →  "Phase 1: sortable list, Phase 2: persistence"
@@ -357,8 +357,8 @@ Located in `draft/` of the target project:
 |------|---------|
 | `product.md` | Product vision, users, goals, guidelines (optional section) |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
-| `.ai-context.md` | **Source of truth.** 200-400 lines, token-optimized, self-contained AI context with 15+ mandatory sections. Consumed by all Draft commands and external AI tools. |
-| `architecture.md` | **Derived from .ai-context.md.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices. Auto-refreshed on mutations. |
+| `architecture.md` | **Source of truth.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices. Generated from 5-phase codebase analysis. |
+| `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context with 15+ mandatory sections. Consumed by all Draft commands and external AI tools. Auto-refreshed on mutations. |
 | `workflow.md` | TDD preferences, commit strategy, guardrails |
 | `jira.md` | Jira project configuration (optional) |
 | `tracks.md` | Master list of all tracks |
@@ -438,7 +438,7 @@ If `draft/` already exists with context files, init reports "already initialized
 Re-scans and updates existing context without starting from scratch.
 
 1. **Tech Stack Refresh** — Re-scans `package.json`, `go.mod`, etc. Compares with existing `draft/tech-stack.md`. Proposes updates.
-2. **Architecture Refresh** — Re-runs architecture discovery and diffs against existing `draft/.ai-context.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `/draft:decompose`. Presents changes for review before writing. After updating `.ai-context.md`, derives `draft/architecture.md` using the Derivation Subroutine.
+2. **Architecture Refresh** — Re-runs architecture discovery and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `/draft:decompose`. Presents changes for review before writing. After updating `architecture.md`, derives `draft/.ai-context.md` using the Condensation Subroutine.
 3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
@@ -633,8 +633,8 @@ Breaks a project or track into modules with clear responsibilities, dependencies
 
 #### Scope
 
-- **Project-wide** (`/draft:decompose project`) → `draft/.ai-context.md` (derives `draft/architecture.md`)
-- **Track-scoped** (`/draft:decompose` with active track) → `draft/tracks/<id>/.ai-context.md` (derives `draft/tracks/<id>/architecture.md`)
+- **Project-wide** (`/draft:decompose project`) → `draft/architecture.md` (derives `draft/.ai-context.md`)
+- **Track-scoped** (`/draft:decompose` with active track) → `draft/tracks/<id>/architecture.md` (derives `draft/tracks/<id>/.ai-context.md`)
 
 #### Process
 
@@ -643,7 +643,7 @@ Breaks a project or track into modules with clear responsibilities, dependencies
 3. **CHECKPOINT** — Developer reviews and modifies module breakdown
 4. **Dependency mapping** — Map inter-module imports, detect cycles, generate ASCII dependency diagram, determine implementation order via topological sort
 5. **CHECKPOINT** — Developer reviews dependency diagram and implementation order
-6. **Generate `.ai-context.md`** — Module definitions, dependency diagram/table, implementation order, story placeholders. Derive `architecture.md` for human consumption.
+6. **Generate `architecture.md`** — Module definitions, dependency diagram/table, implementation order, story placeholders. Derive `.ai-context.md` for AI consumption.
 7. **Update plan.md (track-scoped only)** — Restructure phases to align with module boundaries, preserving completed/in-progress task states
 
 #### Cycle Breaking
@@ -856,11 +856,11 @@ Generates unified report with deduplication across tools.
 
 ## Architecture Mode
 
-Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `.ai-context.md` exists** - no manual configuration needed.
+Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `architecture.md` exists** - no manual configuration needed.
 
 **How it works:**
-1. Run `/draft:decompose` on a track → Creates `draft/tracks/<id>/.ai-context.md` (and derived `architecture.md`)
-2. Run `/draft:implement` → Automatically detects `.ai-context.md` and enables architecture features
+1. Run `/draft:decompose` on a track → Creates `draft/tracks/<id>/architecture.md` (and derived `.ai-context.md`)
+2. Run `/draft:implement` → Automatically detects `architecture.md` and enables architecture features
 3. Features: Story writing, Execution State design, Function Skeletons, ~200-line chunk reviews
 
 See `core/agents/architect.md` for detailed decomposition rules, story writing, and skeleton generation.
@@ -869,14 +869,14 @@ See `core/agents/architect.md` for detailed decomposition rules, story writing, 
 
 Use `/draft:decompose` to break a project or track into modules:
 
-- **Project-wide:** `draft/.ai-context.md` — overall codebase module structure (derives `draft/architecture.md`)
-- **Per-track:** `draft/tracks/<id>/.ai-context.md` — module breakdown for a specific feature (derives `draft/tracks/<id>/architecture.md`)
+- **Project-wide:** `draft/architecture.md` — overall codebase module structure (derives `draft/.ai-context.md`)
+- **Per-track:** `draft/tracks/<id>/architecture.md` — module breakdown for a specific feature (derives `draft/tracks/<id>/.ai-context.md`)
 
 Each module defines: responsibility, files, API surface, dependencies, complexity. Modules are ordered by dependency graph (topological sort) to determine implementation sequence.
 
 ### Pre-Implementation Design
 
-When `.ai-context.md` exists for a track, `/draft:implement` automatically enables three additional checkpoints before the TDD cycle:
+When `architecture.md` exists for a track, `/draft:implement` automatically enables three additional checkpoints before the TDD cycle:
 
 1. **Story** — Natural-language algorithm description (Input → Process → Output) written as a comment at the top of the code file. Captures the "how" before coding. Mandatory checkpoint for developer approval.
 
@@ -952,13 +952,13 @@ Coverage complements TDD — TDD is the process (write test, implement, refactor
 
 ```
 /draft:init
-     │ (creates draft/.ai-context.md + draft/architecture.md for brownfield)
+     │ (creates draft/architecture.md + draft/.ai-context.md for brownfield)
      │
 /draft:new-track "feature"
      │ (creates draft/tracks/feature/spec.md + plan.md)
      │
 /draft:decompose
-     │ (creates draft/tracks/feature/.ai-context.md + architecture.md)
+     │ (creates draft/tracks/feature/architecture.md + .ai-context.md)
      │ → Architecture mode AUTO-ENABLED
      │
 /draft:implement

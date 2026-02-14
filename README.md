@@ -67,7 +67,7 @@ Commands use `@draft` syntax.
 ## How It Works
 
 ```
-/draft:init  →  Creates product.md, tech-stack.md, .ai-context.md + architecture.md
+/draft:init  →  Creates product.md, tech-stack.md, architecture.md + .ai-context.md
      ↓
 /draft:new-track  →  AI-guided spec.md + phased plan.md
      ↓
@@ -87,8 +87,8 @@ AI tools are fast but unstructured. Draft applies Context-Driven Development to 
 ```
 product.md       →  "Build a task manager"
 tech-stack.md    →  "React, TypeScript, Tailwind"
-.ai-context.md   →  200-400 lines: invariants, interfaces, data flows, cookbooks (AI source of truth)
-architecture.md  →  30-45 pages: 25 sections + appendices, Mermaid diagrams (human reference)
+architecture.md  →  30-45 pages: 25 sections + appendices, Mermaid diagrams (source of truth)
+.ai-context.md   →  200-400 lines: condensed from architecture.md (token-optimized AI context)
 spec.md          →  "Add drag-and-drop reordering"
 plan.md          →  "Phase 1: sortable, Phase 2: persist"
 ```

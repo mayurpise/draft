@@ -67,16 +67,13 @@ If the user runs `/draft:init refresh`:
    ```
 
    **b. Generate to temporary file:**
-   - Run full architecture discovery (all 6 phases)
+   - Run full architecture discovery (all 5 phases)
    - Write output to `draft/.ai-context.md.new` (NOT the original file)
    - Detect new directories, files, or modules added since last scan
    - Identify removed or renamed components
-   - Update mermaid diagrams to reflect structural changes
+   - Update critical invariants and safety rules
    - Flag new external dependencies or changed integration points
-   - Update data lifecycle: new domain objects, changed state machines, new storage tiers, new transformation boundaries
-   - Update critical paths: new async/event paths, changed consistency boundaries, updated failure recovery matrix
-   - Discover new modules or detect removed/merged modules
-   - Update YAML frontmatter `git.commit` and `git.message` to current HEAD
+   - Update extension cookbooks with new patterns
    - Preserve any modules added by `/draft:decompose` (planned modules) — only update `[x] Existing` modules
 
    **c. Present diff for review:**
@@ -124,15 +121,35 @@ Respect `.gitignore` and `.claudeignore` when scanning.
 If **Brownfield**: proceed to Step 1.5 (Architecture Discovery).
 If **Greenfield**: skip to Step 2 (Product Definition).
 
+---
+
 ## Step 1.5: Architecture Discovery (Brownfield Only)
 
-For existing codebases, perform full deep analysis across all 6 phases. This generates `draft/.ai-context.md` as the source of truth and derives `draft/architecture.md` for human consumption.
+For existing codebases, perform exhaustive analysis to generate:
+- `draft/.ai-context.md` — Token-optimized, 200-400 lines, self-contained AI context
+- `draft/architecture.md` — Human-readable, 30-45 page engineering reference
 
-Use the template from `core/templates/ai-context.md`.
+---
+
+### Adaptive Sections
+
+Not every codebase has every concept. Apply these rules:
+
+| If the codebase... | Then... |
+|---------------------|---------|
+| Has no plugin / algorithm / handler system | Skip Framework & Extension Points catalog |
+| Has no V1/V2 generational split | Skip V1 ↔ V2 Migration section |
+| Has no RPC / proto / API definitions | Adapt API section to cover REST / GraphQL / OpenAPI |
+| Is a library (no binary / process) | Adapt Process Lifecycle to "Usage Lifecycle" — how consumers integrate it |
+| Is a frontend / UI module | Add: Component hierarchy, route map, state management, styling system |
+| Uses a database directly | Add: schema definitions, migration system, ORM models |
+| Is containerized / has infra config | Add: Dockerfile, Kubernetes manifests, Helm charts, CI/CD pipeline |
+| Is a single-threaded / simple module | Simplify Concurrency section to note "single-threaded" |
+| Has no configuration flags | Adapt Config section to cover whatever mechanism exists |
+
+---
 
 ### Language-Specific Exploration Guide
-
-Use this guide to know WHERE to look based on detected language:
 
 | Language | Build/Deps | Entry Point | Interfaces | Config | Tests |
 |----------|-----------|-------------|------------|--------|-------|
@@ -145,172 +162,337 @@ Use this guide to know WHERE to look based on detected language:
 
 ---
 
-### Phase 1: Orientation (The System Map)
+### Phase 1: Discovery (Broad Scan)
 
-Analyze the codebase to produce the **Orientation** sections of `.ai-context.md`:
+1. **Map the directory tree**: Recursively list the project to understand file layout. Note subdirectory groupings.
 
-1. **System Overview**: Write a "Key Takeaway" paragraph summarizing the system's primary purpose and function. Generate a mermaid `graph TD` diagram showing the system's layered architecture (presentation, logic, data layers with actual component names).
+2. **Read build / dependency files**: These reveal module structure, dependencies, and targets.
 
-2. **Directory Structure**: Scan top-level directories. For each, identify its single responsibility and key files. Generate a table mapping directory → responsibility → key files.
+3. **Read API definition files**: `.proto`, OpenAPI specs, GraphQL schemas, route definitions. These define the module's data model and service interfaces.
 
-3. **Entry Points & Critical Paths**: Identify all entry points into the system:
-   - Application startup (main/index files)
-   - API routes or HTTP handlers
-   - Background jobs, workers, or scheduled tasks
-   - CLI commands
-   - Event listeners or serverless handlers
+4. **Read interface / type definition files**: Class declarations, interface definitions, type annotations reveal the public API and design intent.
 
-4. **Request/Response Flow**: Trace one representative request through the full stack. Generate a mermaid `sequenceDiagram` showing the actual participants (use real file/class names from the codebase).
+### Phase 2: Wiring (Trace the Graph)
 
-5. **Tech Stack Inventory**: Cross-reference detected dependencies with config files. Record language versions, framework versions, and the config file that defines each. This feeds into `draft/tech-stack.md`.
+5. **Find the entry point**: Trace the initialization sequence from main/bootstrap.
 
-#### Phase 2: Logic (The "How" & "Why")
+6. **Follow the orchestrator**: From the top-level controller / app / server, trace how it creates, initializes, and wires all owned components.
 
-Examine specific files and functions to produce the **Logic** sections:
+7. **Find the registry / registration code**: Look for files that register handlers, plugins, routes, middleware, algorithms. This reveals the full implementation catalog.
 
-1. **Data Lifecycle**: Identify the 3-5 primary domain objects. For each:
-   - **Domain Objects**: Map where it enters, is modified, persisted, and exits the system.
-   - **State Machines**: Trace valid states and transitions. Look for enum fields, status columns, state pattern implementations, guard clauses that check current state before allowing operations. Each transition should have: trigger, invariant (what must be true), and enforcement location (`file:line`). Generate a mermaid `stateDiagram-v2`.
-   - **Storage Topology**: Map where data lives at each tier (in-memory cache → primary DB → event log → archive). For each tier: technology, durability guarantee, TTL/eviction policy, recovery strategy. For single-DB apps, state "Single DB — no caching tier, no event log."
-   - **Data Transformation Chain**: Trace how data shape changes across boundaries (API payload → DTO → domain model → persistence model → event payload). Mark lossy transformations where fields are dropped. Each boundary is a potential data corruption point. For simple apps with one shape throughout, state "Single shape — no transformation boundaries."
+8. **Map the dependency wiring**: Find the DI container, context struct, module system, or import graph that connects components. Document injection tokens / getter categories.
 
-2. **Design Patterns**: Identify dominant patterns — Repository, Factory, Singleton, Middleware, Observer, Strategy, etc. Document where each is used and why.
+### Phase 3: Depth (Trace the Flows)
 
-3. **Anti-Patterns & Complexity Hotspots**: Flag god objects (500+ lines), circular dependencies, high cyclomatic complexity, deviations from dominant patterns. Mark unclear logic as "Unknown/Legacy Context Required".
+9. **Trace data flows end-to-end**: For each major flow, start at the data source / entry point and follow the code through processing stages to the output.
 
-4. **Conventions & Guardrails**: Extract error handling patterns, logging approach, naming conventions, validation patterns.
+10. **Read implementation files**: For core modules, read the implementation to understand algorithms, error handling, retry logic, and state management.
 
-5. **External Dependencies**: Map external service integrations. Generate a mermaid `graph LR`.
+11. **Identify concurrency model**: Find where thread pools, async executors, goroutines, or worker processes are created and what work is dispatched to each.
 
-6. **Critical Invariants**: Scan for assertions, validation logic, auth checks, version checks, lock acquisitions, transaction boundaries. Group by category:
-   - Data safety (prevent data loss / corruption)
-   - Security (auth, authz, input validation, secrets handling)
-   - Concurrency (lock ordering, thread affinity)
-   - Ordering / sequencing (must-happen-before relationships)
-   - Idempotency (safe to retry?)
-   - Backward compatibility (schema evolution, API versioning)
+12. **Find safety checks**: Look for invariant assertions, validation logic, auth checks, version checks, lock acquisitions, and transaction boundaries.
 
-7. **Security Architecture**: Trace auth middleware, authz decorators, input validation boundaries, secrets loading, TLS config. Document:
-   - Authentication & initialization
-   - Authorization enforcement
-   - Data sanitization boundaries
-   - Secrets management
-   - Network security
+### Phase 4: Periphery
 
-8. **Concurrency Model**: Find thread pools, async executors, goroutines, worker processes. Map lock/mutex usage. For single-threaded modules, state "Single-threaded — N/A". Document:
-   - Execution model
-   - Thread/worker pools
-   - Async patterns
-   - Locking strategy
-   - Common pitfalls
+13. **Catalog external dependencies**: Check build/dependency files and import statements to map all external library and service dependencies.
 
-9. **Error Handling**: Identify error propagation pattern (return codes, exceptions, Result monads). Find retry logic, map failure modes from catch/error handlers. Document:
-   - Propagation model
-   - Retry policy table
-   - Failure modes table
-   - Graceful degradation
+14. **Examine test infrastructure**: Read test files and test utilities to understand the testing approach, mock patterns, and test harness.
 
-10. **Observability**: Find logging framework, trace instrumentation, metrics definitions, health endpoints. Document:
-    - Logging strategy
-    - Distributed tracing
-    - Metrics inventory
-    - Health checks
+15. **Scan for configuration**: Find all configuration mechanisms (flags, env vars, config files, feature gates, constants).
 
-#### Phase 3: Module Discovery (Existing Modules)
+16. **Look for documentation**: Check for existing README, docs/, ADRs, or inline comments that provide architectural context.
 
-Analyze the codebase's import graph and directory boundaries to discover existing modules:
+### Phase 5: Synthesis
 
-1. **Module Identification**: Identify logical modules from directory structure, namespace boundaries, and import clusters. Each module should have:
-   - A clear single responsibility
-   - A list of actual source files
-   - Key exported functions, classes, or interfaces
-   - Dependencies on other discovered modules
-   - Complexity rating (Low / Medium / High)
+17. **Cross-reference**: Ensure every component mentioned in one section appears in all relevant sections.
 
-2. **Module Dependency Diagram**: Generate a mermaid `graph LR` diagram.
+18. **Validate completeness**: Confirm ALL handlers / endpoints / plugins / schemas / dependencies are listed. Do not sample — enumerate exhaustively.
 
-3. **Dependency Table**: Map each module to what it depends on and what depends on it. Flag circular dependencies.
+19. **Identify patterns**: Look for recurring design patterns and document them.
 
-4. **Dependency Order**: Topological ordering from leaf modules to most dependent.
-
-**Important distinctions:**
-- Set **Story** to a brief summary of what each module currently does. Reference key files.
-- Set **Status** to `[x] Existing`
-- `/draft:decompose` may later add new planned modules alongside these.
-
-#### Phase 4: Critical Path Tracing
-
-Trace end-to-end read and write paths through the codebase with `file:line` references. **Data is the primary organizing principle** — the code exists to serve the data paths.
-
-1. **Identify Critical Operations**: Ask the developer to name 2-3 critical operations. If not provided, infer from entry points.
-
-2. **Synchronous Write Path Tracing**: For each write operation, trace from entry to persistence. At each step, document:
-   - Location (`file:line`)
-   - Consistency level (strong/eventual)
-   - Failure mode (what happens if this step fails)
-   - **Mark the commit point** — the step where data becomes durable. Everything before is retriable; failures after require reconciliation.
-
-3. **Synchronous Read Path Tracing**: For each read operation, trace from entry through cache/DB to response. Document staleness guarantees and cache invalidation strategy per step.
-
-4. **Asynchronous / Event Paths**: Identify queues, event buses, CDC streams, scheduled jobs, background workers. For each:
-   - Trigger, source, channel (topic/queue), consumer
-   - Ordering guarantee (FIFO, partition-key, unordered)
-   - Delivery guarantee (at-most-once, at-least-once, exactly-once)
-   - Dead letter handling
-   - For apps with no async paths: "No async data paths — all operations are synchronous request/response."
-
-5. **Consistency Boundaries**: Map where strong consistency ends and eventual consistency begins. For each boundary: strong side, eventual side, expected lag, reconciliation mechanism. For single-DB apps: "Single database — all reads and writes are strongly consistent."
-
-6. **Failure & Recovery Matrix**: For each critical path, document what happens to in-flight data at each stage when failure occurs. Map: failure point → data state → impact → recovery mechanism → idempotency guarantee. For simple apps: "Single request-response cycle. Failure = transaction rollback. No partial states possible."
-
-7. **Cross-Cutting Concerns**: Identify middleware, interceptors, or aspects that apply across multiple paths.
-
-#### Phase 5: Schema & Contract Discovery
-
-1. **Schema File Detection**: Scan for Protobuf (`*.proto`), OpenAPI (`openapi.yaml`), GraphQL (`*.graphql`), JSON Schema (`*.schema.json`), Database schemas (`prisma/schema.prisma`, `migrations/`, `*.sql`).
-
-2. **Service Definitions**: Extract services and methods from schema files.
-
-3. **Inter-Service Dependencies**: Map which services call which.
-
-#### Phase 6: Test, Config & Extension Points
-
-1. **Test File Mapping**: For each module, identify corresponding test files and test types.
-
-2. **Config & Environment Discovery**: Map configuration files, environment variables, feature flags.
-
-3. **Extension Cookbooks**: After module discovery, generate step-by-step guides for each identified extension point (adding endpoints, models, integrations, etc.). Each cookbook should be a numbered, file-by-file guide an AI agent can follow mechanically.
+20. **Generate output**: Create `.ai-context.md` and derive `architecture.md` AFTER understanding the full picture.
 
 ---
 
-### Architecture Discovery Output
+## .ai-context.md Specification
 
-Write all completed phases to `draft/.ai-context.md`, populating the YAML frontmatter with current git state:
+Generate `draft/.ai-context.md` — a self-contained, token-optimized AI context file (200-400 lines).
 
-```bash
-git branch --show-current
-git rev-parse --short HEAD
-git log -1 --format="%s"
+### Crucial Rules
+
+1. **Do NOT refer back to architecture.md** (e.g., "See Section 4.1"). Duplicate all critical facts.
+2. **This file must stand alone** as the sole context source for an AI agent making code changes.
+3. **Optimize for token efficiency** — use tables, bullet lists, compact notation instead of prose.
+4. **Include everything for SAFE changes** — invariants, thread safety rules, error handling patterns.
+5. **Include everything for CORRECT changes** — data flow knowledge, component relationships, interface contracts.
+
+### Required Sections (all mandatory)
+
+```markdown
+# {PROJECT_NAME} Context Map
+
+## Architecture
+- **Type**: (e.g., gRPC Microservice, CLI tool, library, distributed daemon)
+- **Language**: (e.g., Go 1.21, TypeScript 5.3, Python 3.12)
+- **Pattern**: (e.g., Hexagonal, Master/Worker, Pipeline, Event-driven)
+- **Build**: (exact build command)
+- **Test**: (exact test command)
+- **Entry**: (file → function/class)
+- **Config**: (mechanism + location)
+- **Generational**: (V1/V2 split if any, or "single generation")
+
+## Component Graph
+(ASCII tree showing full component hierarchy. Each node gets 5-10 word annotation.
+Include sub-components 2-3 levels deep.)
+
+## Dependency Injection / Wiring
+(One paragraph or bullet list explaining how components find each other.
+Name the DI mechanism: constructor injection, context struct, module imports, etc.
+List the 5-10 most important injection tokens / getter names.)
+
+## Critical Invariants (DO NOT BREAK)
+(ALL invariants condensed to one line each.
+Format: `- [Category] **Name**: one-sentence rule + where enforced`
+Categories: Data, Security, Concurrency, Ordering, Compatibility, Idempotency
+Aim for 8-15 invariants. MOST IMPORTANT section for agent safety.)
+
+## Interface Contracts (TypeScript-like IDL)
+(TypeScript-style interface declarations for ALL major extension points.
+Include method signatures with param types and return types.
+Mark optional methods with `?`. Add one-line comments for non-obvious methods.)
+
+## Dependency Graph
+(Arrow notation: `[ComponentA] -> (protocol) -> [ComponentB]`
+Cover ALL external service dependencies and their protocols.)
+
+## Key Data Sources
+(Table or bullet list mapping each data source to which components read it.
+Include: database tables, message queues, API endpoints, config files.)
+
+## Data Flow Summary
+(Prose description — NOT Mermaid — of each major data-flow path.
+One paragraph per flow. Include: source → processing stages → output.
+Cover: primary pipeline, variant flows, safety mechanisms.)
+
+## Error Handling & Failure Recovery
+(Bullet list of failure scenarios and their recovery mechanisms.
+Include: failover, retries, backpressure, hung detection, graceful degradation.)
+
+## Concurrency Safety Rules
+(Bullet list of thread-safety rules specific to this codebase.
+Format: `- **ComponentName**: rule + consequence of violation`
+Include: which components are single-threaded, which locks protect what.)
+
+## Implementation Catalog
+(Complete list of ALL handlers / plugins / algorithms / endpoints / pipelines.
+Use tables: ID/Name | Type/Class | Brief Description
+Group by category. Include V1 AND V2 if both exist.)
+
+## V1 ↔ V2 Migration Status
+(Skip if no generational split. Table mapping V1 → V2 equivalents.
+Include one-line rule: "When adding new X, prefer V1/V2 because Y.")
+
+## Thread Pools / Execution Model
+(Table: Pool Name | Thread Count | What Runs On It)
+
+## Key Configuration
+(Table of 10-20 most important config parameters.
+Columns: Flag/Param | Default | Critical?
+Mark "Critical" for flags that cause data loss or crashes if misconfigured.)
+
+## Extension Points — Step-by-Step Cookbooks
+(For EACH major extension point, a numbered recipe:
+1. File to create (path + naming convention)
+2. Interface to implement (required + optional methods)
+3. Where to register (file + function + mechanism)
+4. Build dependencies to add
+5. Tests required
+MOST IMPORTANT section for agent productivity.)
+
+## Testing Strategy
+- Unit: (exact command)
+- Integration: (framework + location)
+- Key test hooks: (injection points, completion notifiers, overrides)
+
+## File Layout Quick Reference
+(Bullet list mapping logical concepts to file paths.
+Format: `- ConceptName: path/to/file.ext`
+Cover: entry point, controller, registry, algorithms, config, tests, build.)
+
+## Glossary (Critical Terms Only)
+(Table of 10-20 domain terms that appear in code identifiers.
+Columns: Term | Definition (one sentence)
+Only include terms that would confuse an agent reading the code.)
+
+## Draft Integration
+(Cross-references to other Draft files:
+- See `draft/tech-stack.md` for accepted patterns and technology decisions
+- See `draft/workflow.md` for TDD preferences and guardrails
+- See `draft/product.md` for product context and guidelines)
 ```
 
-Then derive `draft/architecture.md` using the **Derivation Subroutine** below.
+### What to EXCLUDE from .ai-context.md
 
-Present both documents for developer review before proceeding to Step 2.
+- Mermaid diagrams (use prose or ASCII instead)
+- Full code snippets (use TypeScript-like IDL instead)
+- Detailed per-module deep dives
+- Security architecture details (unless directly relevant to code changes)
+- Observability/telemetry details (unless agents need to add logging/metrics)
+- Reusable modules assessment (engineer-facing only)
+- Performance characteristics (engineer-facing only)
 
-### Operational Constraints for Architecture Discovery
+### Quality Checklist
 
-- **Bottom-Line First**: Start with the Key Takeaway summary
-- **Code-to-Context Ratio**: Explain intent, not syntax
-- **No Hallucinations**: If a dependency or business reason is unclear, flag it as "Unknown/Legacy Context Required"
-- **Mermaid Diagrams**: Use actual component/file names from the codebase
-- **Respect Boundaries**: Only analyze code in the repository
-- **Progress Updates**: Announce progress: "Phase 1 complete... analyzing Phase 2..."
+Before finalizing, verify:
+- [ ] An agent can implement a new plugin/handler using ONLY this file
+- [ ] An agent knows which thread pool to use for any new async work
+- [ ] An agent knows what invariants to check before emitting side effects
+- [ ] An agent knows the correct error handling pattern for this codebase
+- [ ] An agent can find the right file to modify for any given task
+- [ ] An agent knows what tests to write and how to run them
+- [ ] No section says "See Section X" or "See architecture.md"
+- [ ] Total length is 200-400 lines
+
+---
+
+## architecture.md Specification
+
+Generate `draft/architecture.md` — a comprehensive human-readable engineering reference (30-45 pages).
+
+### Report Structure — Follow This Section Ordering
+
+#### 1. Executive Summary
+- One paragraph: What the module IS, what it DOES, its role in the larger system
+- Key Facts bullet list: language, entry point, architecture style, component count, data sources, action targets
+
+#### 2. System Identity & Purpose
+- What {PROJECT} Does — numbered list of core responsibilities
+- Why {PROJECT} Exists — business/system problem it solves
+
+#### 3. Architecture Overview
+- High-Level Topology — Mermaid `flowchart TD` with nested subgraphs
+- Process Lifecycle — numbered steps from startup to steady state
+
+#### 4. Component Map & Interactions
+- Top-Level Orchestrator — role, owned components table, initialization stages
+- Dependency Injection Pattern — how components reference each other
+- Interaction Matrix — table showing which components communicate
+
+#### 5. Data Flow — End to End
+- Separate Mermaid flowcharts for each major data-flow path
+- Primary processing pipeline, variant flows, safety mechanisms
+- Annotate arrows with data that moves between stages
+
+#### 6. Core Modules Deep Dive
+- For each major module (5-8): role, responsibilities, key operations table
+- State machines (Mermaid `stateDiagram-v2`) where applicable
+- Notable mechanisms: backpressure, retry, caching, rate limiting
+
+#### 7. Concurrency Model & Thread Safety
+- Execution model, thread pool map, affinity rules
+- Locking strategy, async patterns, common pitfalls
+- (For simple modules: "single-threaded — N/A")
+
+#### 8. Framework & Extension Points
+- Plugin/Handler types table
+- Registry mechanism
+- Core interface code blocks with actual signatures
+
+#### 9. Full Catalog of Implementations
+- Exhaustive enumeration of ALL handlers/plugins/algorithms
+- Group by category, include V1 and V2 if both exist
+
+#### 10. API & Interface Definitions
+- RPC/REST/GraphQL endpoints table
+- Key data models/messages/schemas table
+- Reference to actual definition files
+
+#### 11. External Dependencies
+- Service dependencies table
+- Infrastructure/utility libraries table
+
+#### 12. Cross-Module Integration Points
+- Contracts, failure isolation, version coupling
+- Mermaid sequence diagrams for 2-3 important cross-module flows
+
+#### 13. Critical Invariants & Safety Rules
+- For each invariant (8-15): What, Why, Where Enforced, Common Violation Pattern
+- Group by: Data safety, Security, Concurrency, Ordering, Idempotency, Backward-compatibility
+
+#### 14. Security Architecture
+- Authentication & initialization
+- Authorization enforcement
+- Data sanitization, secrets management, network security
+
+#### 15. Observability & Telemetry
+- Logging strategy, distributed tracing, metrics, health checks
+
+#### 16. Error Handling & Failure Modes
+- Error propagation model with code example
+- Retry semantics table, common failure modes table
+- Alerting/monitoring, graceful degradation
+
+#### 17. State Management & Persistence
+- State inventory table: state, storage, durability, recovery
+- Persistence formats, recovery sequences, schema migration
+
+#### 18. Key Design Patterns
+- For each pattern (4-8): description, actual code snippet, where used
+
+#### 19. Configuration & Tuning
+- Key configuration parameters table (10-20 most important)
+- Scheduling/periodic configuration
+- Config-related code blocks
+
+#### 20. Performance Characteristics & Hot Paths
+- Hot paths with file references
+- Scaling dimensions table, memory profile, I/O patterns
+
+#### 21. How to Extend — Step-by-Step Cookbooks
+- Numbered, file-by-file cookbook for each extension point
+- Include minimal working example for each
+
+#### 22. Build System & Development Workflow
+- Build system, key targets table
+- How to build, test, run locally
+- Common build issues, code style conventions, CI/CD
+
+#### 23. Testing Infrastructure
+- Test framework, test patterns, test-to-feature mapping
+- Test coverage expectations
+
+#### 24. Known Technical Debt & Limitations
+- Deprecated code, known workarounds, scaling limitations
+- Complexity hotspots, design compromises, migration status
+
+#### 25. Glossary
+- Table of ALL domain-specific terms (15-30 terms)
+
+#### Appendix A: File Structure Summary
+- Full directory tree with inline annotations
+
+#### Appendix B: Data Source → Implementation Mapping
+- Table: Data Source | Implementations Reading It
+
+#### Appendix C: Output Flow — Implementation to Target
+- Table: Implementation | Output Type | Target API/System
+
+#### Appendix D: Mermaid Sequence Diagrams — Critical Flows
+- 2-3 sequence diagrams for complex cross-component flows
+
+### Quality Requirements
+
+- Every claim must be traceable to a specific source file
+- Mermaid diagrams must be syntactically valid
+- Code snippets must be actual code from the codebase
+- Include ALL instances — do not sample or abbreviate
+- When a section does not apply, state explicitly that it is skipped and why
 
 ---
 
 ## Derivation Subroutine: Generate architecture.md from .ai-context.md
 
-This subroutine converts the dense, machine-optimized `.ai-context.md` into a human-readable `architecture.md`. It is called by:
+This subroutine converts the dense `.ai-context.md` into human-readable `architecture.md`. Called by:
 - **Init** — after initial generation
 - **Implement** — after module status updates
 - **Decompose** — after adding new modules
@@ -318,18 +500,18 @@ This subroutine converts the dense, machine-optimized `.ai-context.md` into a hu
 ### Process
 
 1. Read `draft/.ai-context.md`
-2. Generate `draft/architecture.md` with the following transformations:
+2. Generate `draft/architecture.md` with these transformations:
    - **Expand tables into prose paragraphs** — Add context and explanation
-   - **Annotate mermaid diagrams** — Add descriptive labels, expand abbreviated nodes
+   - **Add Mermaid diagrams** — Visual representations of component relationships
    - **Add "Getting Started" framing** — Orient human readers with onboarding context
-   - **Strip mutation-oriented fields** — Remove status markers (`[ ]`, `[~]`, `[x]`, `[!]`), story placeholders
-   - **Remove YAML frontmatter** — Not needed for human consumption
-   - **Omit Extension Cookbooks** — These are agent-only; humans read the source code
-   - **Simplify module section** — Show module names, responsibilities, and dependencies without status/story fields
-   - **Preserve all mermaid diagrams** — These are valuable for both audiences
-   - **Add section introductions** — Brief paragraph before each section explaining what it covers
+   - **Add section introductions** — Brief paragraph before each section
+   - **Include full code snippets** — Actual code examples with inline comments
+   - **Add detailed per-module deep dives** — Full analysis of each core module
+   - **Strip mutation-oriented fields** — Remove status markers
+   - **Remove Draft Integration section** — Not needed for human consumption
 
-3. Use the template from `core/templates/architecture.md` as the structural guide for the human-readable output.
+3. End the document with:
+   `"End of analysis. For AI-optimized context, see draft/.ai-context.md"`
 
 ### Reference from Other Skills
 
@@ -374,9 +556,6 @@ Ask about:
 - Commit style and frequency
 - Validation settings (auto-validate, blocking behavior)
 
-**Note on Architecture Mode:**
-Architecture features (Story, Execution State, Skeletons, Chunk Reviews) are automatically enabled when you run `/draft:decompose` on a track. No opt-in needed — the presence of `.ai-context.md` activates these features.
-
 ## Step 5: Initialize Tracks
 
 Create empty `draft/tracks.md`:
@@ -403,18 +582,18 @@ mkdir -p draft/tracks
 ## Completion
 
 For **Brownfield** projects, announce:
-"Draft initialized successfully with deep analysis!
+"Draft initialized successfully with comprehensive analysis!
 
 Created:
-- draft/.ai-context.md (source of truth — dense codebase understanding for AI agents)
-- draft/architecture.md (human-readable engineering guide, derived from .ai-context.md)
+- draft/.ai-context.md (200-400 lines — token-optimized AI context, self-contained)
+- draft/architecture.md (30-45 pages — human-readable engineering reference)
 - draft/product.md
 - draft/tech-stack.md
 - draft/workflow.md
 - draft/tracks.md
 
 Next steps:
-1. Review draft/.ai-context.md — verify the analysis matches your understanding
+1. Review draft/.ai-context.md — verify the AI context is complete and accurate
 2. Review draft/architecture.md — human-friendly version for team onboarding
 3. Review and edit the other generated files as needed
 4. Run `/draft:new-track` to start planning a feature"

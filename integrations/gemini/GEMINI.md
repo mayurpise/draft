@@ -236,9 +236,9 @@ If monorepo detected:
 ### Migration Detection
 
 If `draft/architecture.md` exists WITHOUT `draft/.ai-context.md`:
-- Announce: "Detected legacy architecture.md without .ai-context.md. Would you like to migrate? This will generate .ai-context.md as the new source of truth and regenerate architecture.md from it."
-- If user accepts: Run refresh mode targeting `.ai-context.md` generation
-- If user declines: Continue with legacy format
+- Announce: "Detected architecture.md without .ai-context.md. Would you like to generate .ai-context.md? This will condense your existing architecture.md into a token-optimized AI context file."
+- If user accepts: Run the Condensation Subroutine to derive `.ai-context.md` from existing `architecture.md`
+- If user declines: Continue without .ai-context.md
 
 ### Refresh Mode
 
@@ -246,16 +246,16 @@ If the user runs `@draft init refresh`:
 
 1. **Tech Stack Refresh**: Re-scan `package.json`, `go.mod`, etc. Compare with `draft/tech-stack.md`. Propose updates.
 
-2. **Architecture Refresh**: If `draft/.ai-context.md` exists, re-run architecture discovery with safe backup workflow:
+2. **Architecture Refresh**: If `draft/architecture.md` exists, re-run architecture discovery with safe backup workflow:
 
    **a. Create backup:**
    ```bash
-   cp draft/.ai-context.md draft/.ai-context.md.backup
+   cp draft/architecture.md draft/architecture.md.backup
    ```
 
    **b. Generate to temporary file:**
    - Run full architecture discovery (all 5 phases)
-   - Write output to `draft/.ai-context.md.new` (NOT the original file)
+   - Write output to `draft/architecture.md.new` (NOT the original file)
    - Detect new directories, files, or modules added since last scan
    - Identify removed or renamed components
    - Update critical invariants and safety rules
@@ -265,24 +265,24 @@ If the user runs `@draft init refresh`:
 
    **c. Present diff for review:**
    ```bash
-   diff draft/.ai-context.md draft/.ai-context.md.new
+   diff draft/architecture.md draft/architecture.md.new
    ```
    Show summary of changes to user.
 
    **d. On user approval:**
    ```bash
-   mv draft/.ai-context.md.new draft/.ai-context.md
-   rm draft/.ai-context.md.backup
+   mv draft/architecture.md.new draft/architecture.md
+   rm draft/architecture.md.backup
    ```
-   Then regenerate `draft/architecture.md` from `.ai-context.md` using the Derivation Subroutine below.
+   Then regenerate `draft/.ai-context.md` from `architecture.md` using the Condensation Subroutine below.
 
    **e. On user rejection:**
    ```bash
-   rm draft/.ai-context.md.new
+   rm draft/architecture.md.new
    ```
-   Original .ai-context.md preserved unchanged.
+   Original architecture.md preserved unchanged.
 
-   - If `draft/.ai-context.md` does NOT exist and the project is brownfield, offer to generate it now
+   - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now
 
 3. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
@@ -313,8 +313,8 @@ If **Greenfield**: skip to Step 2 (Product Definition).
 ## Step 1.5: Architecture Discovery (Brownfield Only)
 
 For existing codebases, perform exhaustive analysis to generate:
-- `draft/.ai-context.md` — Token-optimized, 200-400 lines, self-contained AI context
-- `draft/architecture.md` — Human-readable, 30-45 page engineering reference
+- `draft/architecture.md` — Human-readable, 30-45 page engineering reference (PRIMARY)
+- `draft/.ai-context.md` — Token-optimized, 200-400 lines, condensed from architecture.md (DERIVED)
 
 ---
 
@@ -540,7 +540,7 @@ Before finalizing, verify:
 - [ ] No section says "See Section X" or "See architecture.md"
 - [ ] Total length is 200-400 lines
 
-**After completing analysis: Write this content to `draft/.ai-context.md` using the Write tool.**
+**NOTE**: This specification defines the content structure. The actual .ai-context.md is DERIVED from architecture.md using the Condensation Subroutine.
 
 ---
 
@@ -677,7 +677,7 @@ Generate `draft/architecture.md` — a comprehensive human-readable engineering 
 - Include ALL instances — do not sample or abbreviate
 - When a section does not apply, state explicitly that it is skipped and why
 
-**After generating: Derive this from `.ai-context.md` and write to `draft/architecture.md` using the Write tool.**
+**After completing analysis: Write this content to `draft/architecture.md` using the Write tool. This is the PRIMARY output. Then run the Condensation Subroutine to derive .ai-context.md.**
 
 ---
 
@@ -685,43 +685,46 @@ Generate `draft/architecture.md` — a comprehensive human-readable engineering 
 
 After completing the 5-phase analysis:
 
-1. **Write `draft/.ai-context.md`**: Using the template from `core/templates/ai-context.md`, populate all 15+ sections based on your analysis. This is the primary output — token-optimized, self-contained.
+1. **Write `draft/architecture.md`**: Using the architecture.md Specification above, generate the comprehensive 30-45 page engineering reference. This is the PRIMARY output.
 
-2. **Derive `draft/architecture.md`**: Using the Derivation Subroutine below, expand `.ai-context.md` into the 30-45 page human-readable reference.
+2. **Derive `draft/.ai-context.md`**: Using the Condensation Subroutine below, condense `architecture.md` into the 200-400 line token-optimized AI context.
 
 3. **Present for review**: Show the user a summary of what was discovered before proceeding to Step 2.
 
-**CRITICAL**: Do NOT skip this step. Both files MUST be written before continuing.
+**CRITICAL**: Do NOT skip this step. Both files MUST be written before continuing. Generate architecture.md FIRST, then derive .ai-context.md from it.
 
 ---
 
-## Derivation Subroutine: Generate architecture.md from .ai-context.md
+## Condensation Subroutine: Generate .ai-context.md from architecture.md
 
-This subroutine converts the dense `.ai-context.md` into human-readable `architecture.md`. Called by:
-- **Init** — after initial generation
+This subroutine condenses the comprehensive `architecture.md` into token-optimized `.ai-context.md`. Called by:
+- **Init** — after generating architecture.md
 - **Implement** — after module status updates
 - **Decompose** — after adding new modules
+- **Refresh** — when updating architecture.md
 
 ### Process
 
-1. Read `draft/.ai-context.md`
-2. Generate `draft/architecture.md` with these transformations:
-   - **Expand tables into prose paragraphs** — Add context and explanation
-   - **Add Mermaid diagrams** — Visual representations of component relationships
-   - **Add "Getting Started" framing** — Orient human readers with onboarding context
-   - **Add section introductions** — Brief paragraph before each section
-   - **Include full code snippets** — Actual code examples with inline comments
-   - **Add detailed per-module deep dives** — Full analysis of each core module
-   - **Strip mutation-oriented fields** — Remove status markers
-   - **Remove Draft Integration section** — Not needed for human consumption
+1. Read `draft/architecture.md`
+2. Generate `draft/.ai-context.md` with these transformations:
+   - **Condense prose into tables/bullets** — Remove explanatory text, keep facts
+   - **Replace Mermaid diagrams with ASCII/prose** — Token-efficient representation
+   - **Strip section introductions** — Keep only actionable content
+   - **Convert code snippets to TypeScript-like IDL** — Interface signatures only
+   - **Merge related sections** — Combine into the 15+ required sections
+   - **Add Draft Integration section** — Cross-references to other Draft files
+   - **Enforce 200-400 line limit** — Prioritize: invariants > interfaces > cookbooks > catalogs
 
-3. End the document with:
-   `"End of analysis. For AI-optimized context, see draft/.ai-context.md"`
+3. Quality check before writing:
+   - [ ] Self-contained — no references to architecture.md
+   - [ ] All critical invariants preserved
+   - [ ] Extension cookbooks complete
+   - [ ] Within 200-400 lines
 
 ### Reference from Other Skills
 
-Other skills that mutate `.ai-context.md` should trigger this subroutine with:
-> "After updating `.ai-context.md`, regenerate `draft/architecture.md` using the Derivation Subroutine defined in `@draft init`."
+Other skills that mutate `architecture.md` should trigger this subroutine with:
+> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` using the Condensation Subroutine defined in `@draft init`."
 
 ---
 
@@ -6740,8 +6743,8 @@ Draft solves this through **Context-Driven Development**: structured documents t
 |----------|---------|----------|
 | `product.md` | Defines users, goals, success criteria, guidelines | AI building features nobody asked for |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
-| `.ai-context.md` | **Source of truth.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary | AI re-analyzing codebase every session |
-| `architecture.md` | **Derived from .ai-context.md.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets | Engineers needing onboarding documentation |
+| `architecture.md` | **Source of truth.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
+| `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary. Auto-refreshed on mutations. | AI re-analyzing codebase every session |
 | `workflow.md` | TDD preference, commit style, review process, guardrails | AI skipping tests or making giant commits |
 | `spec.md` | Acceptance criteria for a specific track | Scope creep, gold-plating |
 | `plan.md` | Ordered phases with verification steps | AI attempting everything at once |
@@ -6753,8 +6756,8 @@ product.md          →  "Build a task manager for developers"
   ↓
 tech-stack.md       →  "Use React, TypeScript, Tailwind"
   ↓
-.ai-context.md      →  "Express API → Service layer → Prisma ORM → PostgreSQL"
-  ↓                     (architecture.md derived for human consumption)
+architecture.md     →  "Express API → Service layer → Prisma ORM → PostgreSQL"
+  ↓                     (.ai-context.md condensed for AI consumption)
 spec.md             →  "Add drag-and-drop reordering"
   ↓
 plan.md             →  "Phase 1: sortable list, Phase 2: persistence"
@@ -7036,8 +7039,8 @@ Located in `draft/` of the target project:
 |------|---------|
 | `product.md` | Product vision, users, goals, guidelines (optional section) |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
-| `.ai-context.md` | **Source of truth.** 200-400 lines, token-optimized, self-contained AI context with 15+ mandatory sections. Consumed by all Draft commands and external AI tools. |
-| `architecture.md` | **Derived from .ai-context.md.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices. Auto-refreshed on mutations. |
+| `architecture.md` | **Source of truth.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices. Generated from 5-phase codebase analysis. |
+| `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context with 15+ mandatory sections. Consumed by all Draft commands and external AI tools. Auto-refreshed on mutations. |
 | `workflow.md` | TDD preferences, commit strategy, guardrails |
 | `jira.md` | Jira project configuration (optional) |
 | `tracks.md` | Master list of all tracks |
@@ -7117,7 +7120,7 @@ If `draft/` already exists with context files, init reports "already initialized
 Re-scans and updates existing context without starting from scratch.
 
 1. **Tech Stack Refresh** — Re-scans `package.json`, `go.mod`, etc. Compares with existing `draft/tech-stack.md`. Proposes updates.
-2. **Architecture Refresh** — Re-runs architecture discovery and diffs against existing `draft/.ai-context.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `@draft decompose`. Presents changes for review before writing. After updating `.ai-context.md`, derives `draft/architecture.md` using the Derivation Subroutine.
+2. **Architecture Refresh** — Re-runs architecture discovery and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `@draft decompose`. Presents changes for review before writing. After updating `architecture.md`, derives `draft/.ai-context.md` using the Condensation Subroutine.
 3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
@@ -7312,8 +7315,8 @@ Breaks a project or track into modules with clear responsibilities, dependencies
 
 #### Scope
 
-- **Project-wide** (`@draft decompose project`) → `draft/.ai-context.md` (derives `draft/architecture.md`)
-- **Track-scoped** (`@draft decompose` with active track) → `draft/tracks/<id>/.ai-context.md` (derives `draft/tracks/<id>/architecture.md`)
+- **Project-wide** (`@draft decompose project`) → `draft/architecture.md` (derives `draft/.ai-context.md`)
+- **Track-scoped** (`@draft decompose` with active track) → `draft/tracks/<id>/architecture.md` (derives `draft/tracks/<id>/.ai-context.md`)
 
 #### Process
 
@@ -7322,7 +7325,7 @@ Breaks a project or track into modules with clear responsibilities, dependencies
 3. **CHECKPOINT** — Developer reviews and modifies module breakdown
 4. **Dependency mapping** — Map inter-module imports, detect cycles, generate ASCII dependency diagram, determine implementation order via topological sort
 5. **CHECKPOINT** — Developer reviews dependency diagram and implementation order
-6. **Generate `.ai-context.md`** — Module definitions, dependency diagram/table, implementation order, story placeholders. Derive `architecture.md` for human consumption.
+6. **Generate `architecture.md`** — Module definitions, dependency diagram/table, implementation order, story placeholders. Derive `.ai-context.md` for AI consumption.
 7. **Update plan.md (track-scoped only)** — Restructure phases to align with module boundaries, preserving completed/in-progress task states
 
 #### Cycle Breaking
@@ -7535,11 +7538,11 @@ Generates unified report with deduplication across tools.
 
 ## Architecture Mode
 
-Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `.ai-context.md` exists** - no manual configuration needed.
+Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `architecture.md` exists** - no manual configuration needed.
 
 **How it works:**
-1. Run `@draft decompose` on a track → Creates `draft/tracks/<id>/.ai-context.md` (and derived `architecture.md`)
-2. Run `@draft implement` → Automatically detects `.ai-context.md` and enables architecture features
+1. Run `@draft decompose` on a track → Creates `draft/tracks/<id>/architecture.md` (and derived `.ai-context.md`)
+2. Run `@draft implement` → Automatically detects `architecture.md` and enables architecture features
 3. Features: Story writing, Execution State design, Function Skeletons, ~200-line chunk reviews
 
 See `core/agents/architect.md` for detailed decomposition rules, story writing, and skeleton generation.
@@ -7548,14 +7551,14 @@ See `core/agents/architect.md` for detailed decomposition rules, story writing, 
 
 Use `@draft decompose` to break a project or track into modules:
 
-- **Project-wide:** `draft/.ai-context.md` — overall codebase module structure (derives `draft/architecture.md`)
-- **Per-track:** `draft/tracks/<id>/.ai-context.md` — module breakdown for a specific feature (derives `draft/tracks/<id>/architecture.md`)
+- **Project-wide:** `draft/architecture.md` — overall codebase module structure (derives `draft/.ai-context.md`)
+- **Per-track:** `draft/tracks/<id>/architecture.md` — module breakdown for a specific feature (derives `draft/tracks/<id>/.ai-context.md`)
 
 Each module defines: responsibility, files, API surface, dependencies, complexity. Modules are ordered by dependency graph (topological sort) to determine implementation sequence.
 
 ### Pre-Implementation Design
 
-When `.ai-context.md` exists for a track, `@draft implement` automatically enables three additional checkpoints before the TDD cycle:
+When `architecture.md` exists for a track, `@draft implement` automatically enables three additional checkpoints before the TDD cycle:
 
 1. **Story** — Natural-language algorithm description (Input → Process → Output) written as a comment at the top of the code file. Captures the "how" before coding. Mandatory checkpoint for developer approval.
 
@@ -7631,13 +7634,13 @@ Coverage complements TDD — TDD is the process (write test, implement, refactor
 
 ```
 @draft init
-     │ (creates draft/.ai-context.md + draft/architecture.md for brownfield)
+     │ (creates draft/architecture.md + draft/.ai-context.md for brownfield)
      │
 @draft new-track "feature"
      │ (creates draft/tracks/feature/spec.md + plan.md)
      │
 @draft decompose
-     │ (creates draft/tracks/feature/.ai-context.md + architecture.md)
+     │ (creates draft/tracks/feature/architecture.md + .ai-context.md)
      │ → Architecture mode AUTO-ENABLED
      │
 @draft implement

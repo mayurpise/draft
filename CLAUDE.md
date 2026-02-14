@@ -79,8 +79,8 @@ When users use Draft, it creates a `draft/` directory in their project:
 |------|---------|
 | `product.md` | Product vision, users, goals, guidelines (optional section) |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
-| `.ai-context.md` | **Source of truth.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections covering architecture, invariants, interfaces, data flows, concurrency, error handling, catalogs, cookbooks, testing, glossary. Consumed by all Draft commands and external AI tools. |
-| `architecture.md` | **Derived from .ai-context.md.** 30-45 page human-readable engineering reference with 25 sections + appendices, Mermaid diagrams, and code snippets. Auto-refreshed on mutations. |
+| `architecture.md` | **Source of truth.** 30-45 page human-readable engineering reference with 25 sections + appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. |
+| `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ sections covering architecture, invariants, interfaces, data flows, concurrency, error handling, catalogs, cookbooks, testing, glossary. Consumed by all Draft commands and external AI tools. Auto-refreshed on mutations. |
 | `workflow.md` | TDD preferences, commit strategy, validation config, guardrails |
 | `tracks.md` | Master list of all tracks |
 | `tracks/<id>/` | Individual tracks with `spec.md`, `plan.md`, `metadata.json`, `validation-report.md` |

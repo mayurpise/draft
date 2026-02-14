@@ -1531,7 +1531,7 @@
                         <div class="hierarchy-level">
                             <div class="num">5</div>
                             <div class="file">architecture.md</div>
-                            <div class="desc">30-45 page human-readable engineering reference derived from .ai-context.md. 25 sections + 4 appendices with Mermaid diagrams, code snippets, and prose explanations. Auto-refreshed on mutations.</div>
+                            <div class="desc">30-45 page human-readable engineering reference (source of truth). 25 sections + 4 appendices with Mermaid diagrams, code snippets, and prose explanations. Generated from 5-phase codebase analysis.</div>
                         </div>
                     </div>
 
@@ -1742,8 +1742,8 @@
                 <details>
                     <summary>Architecture Discovery (Brownfield)</summary>
                     <p>For brownfield projects, <code>/draft:init</code> performs a deep six-phase codebase analysis
-                        that generates <code>.ai-context.md</code> (machine-optimized source of truth) and derives
-                        <code>architecture.md</code> (human-readable guide). These documents become the persistent
+                        that generates <code>architecture.md</code> (comprehensive engineering reference) and derives
+                        <code>.ai-context.md</code> (token-optimized AI context). These documents become the persistent
                         context every future track references.</p>
 
                     <p><strong>Phase 1: Orientation</strong> — System map with mermaid diagrams, directory hierarchy,
@@ -2017,7 +2017,7 @@
                         <ol>
                             <li>Proposes modules with: name, responsibility, files, API, dependencies</li>
                             <li>Maps dependencies, detects cycles, generates dependency diagram</li>
-                            <li>Creates <code>.ai-context.md</code> with module definitions (derives <code>architecture.md</code>)</li>
+                            <li>Creates <code>architecture.md</code> with module definitions (derives <code>.ai-context.md</code>)</li>
                         </ol>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
@@ -2206,8 +2206,8 @@
                         <div class="num">1</div>
                         <div class="file">product.md + tech-stack.md + .ai-context.md + architecture.md + workflow.md</div>
                         <div class="desc">Tech lead runs <code>/draft:init</code>. For brownfield projects, Draft
-                            performs deep 5-phase architecture discovery — generating <code>.ai-context.md</code> (200-400 lines, 15+ sections: invariants, interface contracts, data flows, cookbooks) and
-                            <code>architecture.md</code> (30-45 pages, 25 sections + appendices with Mermaid diagrams). Team reviews project vision,
+                            performs deep 5-phase architecture discovery — generating <code>architecture.md</code> (30-45 pages, 25 sections + appendices with Mermaid diagrams) and deriving
+                            <code>.ai-context.md</code> (200-400 lines, 15+ sections: invariants, interface contracts, data flows, cookbooks). Team reviews project vision,
                             technical choices, system architecture, and workflow preferences via PR.</div>
                     </div>
                     <div class="hierarchy-level">
@@ -2222,7 +2222,7 @@
                         <div class="num">3</div>
                         <div class="file">.ai-context.md + architecture.md</div>
                         <div class="desc">Lead runs <code>/draft:decompose</code>. Team reviews module boundaries, API
-                            surfaces, dependency graph, and implementation order via PR. <code>.ai-context.md</code> is the token-optimized AI source of truth; <code>architecture.md</code> is the 30-45 page human reference. Senior engineers validate the
+                            surfaces, dependency graph, and implementation order via PR. <code>architecture.md</code> is the 30-45 page source of truth; <code>.ai-context.md</code> is the token-optimized AI context derived from it. Senior engineers validate the
                             architecture without touching the codebase.</div>
                     </div>
                     <div class="hierarchy-level">
@@ -2314,7 +2314,7 @@
         <div id="tab-research" class="tab-content" role="tabpanel">
             <h2>Codebase Research</h2>
             <p>Every AI interaction starts with understanding. <code>/draft:init</code> performs a deep 6-phase analysis
-                of your codebase and produces <strong>.ai-context.md</strong> — a dense, machine-optimized document that
+                of your codebase and produces <strong>architecture.md</strong> — a comprehensive engineering reference that derives <strong>.ai-context.md</strong>,
                 captures how your system actually works. Not how it was designed. How it works today.</p>
 
             <details open>
@@ -2404,8 +2404,8 @@
 
                 <div class="comparison">
                     <div class="comparison-header">
-                        <div>.ai-context.md (Machine)</div>
-                        <div>architecture.md (Human)</div>
+                        <div>architecture.md (Source)</div>
+                        <div>.ai-context.md (Derived)</div>
                     </div>
                     <div class="comparison-row">
                         <div>Dense tables, YAML frontmatter, flat H2 sections</div>
@@ -2417,7 +2417,7 @@
                     </div>
                     <div class="comparison-row">
                         <div>Source of truth — all mutations happen here</div>
-                        <div>Derived — auto-refreshed when .ai-context.md changes</div>
+                        <div>Condensed from architecture.md — auto-refreshed on mutations</div>
                     </div>
                     <div class="comparison-row">
                         <div>Consumed by: /draft:implement, /draft:validate, /draft:bughunt, /draft:review, any
@@ -2525,13 +2525,13 @@
                         <div class="file">Mutated by Commands</div>
                         <div class="desc"><code>/draft:implement</code> updates module status after completing tasks.
                             <code>/draft:decompose</code> adds new modules with dependency graphs. Each mutation
-                            auto-refreshes the derived architecture.md. The document evolves with the code.</div>
+                            auto-refreshes the derived .ai-context.md. The documents evolve with the code.</div>
                     </div>
                     <div class="hierarchy-level">
                         <div class="num"
                             style="background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald);">G</div>
                         <div class="file">Git-Tracked & Reviewable</div>
-                        <div class="desc">Every change to .ai-context.md goes through the same PR review process as
+                        <div class="desc">Every change to architecture.md goes through the same PR review process as
                             code. Architecture decisions become visible, diffable, and blameable. History is
                             preserved.</div>
                     </div>
@@ -2540,7 +2540,7 @@
                             style="background: rgba(251, 113, 133, 0.2); color: var(--accent-rose);">P</div>
                         <div class="file">Tool-Agnostic</div>
                         <div class="desc">Not locked to any AI vendor. Claude Code, Cursor, GitHub Copilot, Gemini,
-                            or any future tool can consume .ai-context.md. Your codebase understanding is an asset you
+                            or any future tool can consume .ai-context.md (or architecture.md). Your codebase understanding is an asset you
                             own, not a feature of a subscription.</div>
                     </div>
                 </div>
@@ -2571,8 +2571,8 @@
                     <pre><code><span class="code-file">draft/</span>
 ├── <span class="code-file">product.md</span>          <span class="code-comment"># Product vision, goals, guidelines</span>
 ├── <span class="code-file">tech-stack.md</span>       <span class="code-comment"># Technical choices, accepted patterns</span>
-├── <span class="code-file">.ai-context.md</span>      <span class="code-comment"># AI source of truth: data paths, state machines, modules, invariants</span>
-├── <span class="code-file">architecture.md</span>     <span class="code-comment"># Human-readable guide derived from .ai-context.md</span>
+├── <span class="code-file">architecture.md</span>     <span class="code-comment"># Source of truth: 30-45 pages, Mermaid diagrams, code snippets</span>
+├── <span class="code-file">.ai-context.md</span>      <span class="code-comment"># Derived: 200-400 lines, token-optimized AI context</span>
 ├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD, commit, validation, guardrails</span>
 ├── <span class="code-file">validation-report.md</span> <span class="code-comment"># Project-level quality checks (generated)</span>
 ├── <span class="code-file">jira.md</span>             <span class="code-comment"># Jira project config (optional)</span>
@@ -2581,8 +2581,8 @@
     └── <span class="code-file">&lt;track-id&gt;/</span>
         ├── <span class="code-file">spec.md</span>      <span class="code-comment"># Requirements</span>
         ├── <span class="code-file">plan.md</span>      <span class="code-comment"># Phased task breakdown</span>
-        ├── <span class="code-file">.ai-context.md</span>   <span class="code-comment"># Track modules, data paths (optional)</span>
-        ├── <span class="code-file">architecture.md</span> <span class="code-comment"># Human-readable, derived (optional)</span>
+        ├── <span class="code-file">architecture.md</span> <span class="code-comment"># Track modules, data paths (optional)</span>
+        ├── <span class="code-file">.ai-context.md</span>   <span class="code-comment"># Token-optimized, derived (optional)</span>
         ├── <span class="code-file">metadata.json</span>
         ├── <span class="code-file">validation-report.md</span> <span class="code-comment"># Quality checks (generated)</span>
         └── <span class="code-file">jira-export.md</span> <span class="code-comment"># Jira stories (optional)</span></code></pre>

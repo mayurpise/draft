@@ -1526,14 +1526,12 @@
                         <div class="hierarchy-level">
                             <div class="num">4</div>
                             <div class="file">.ai-context.md</div>
-                            <div class="desc">Dense codebase understanding: data state machines, storage topology,
-                                consistency boundaries, modules, invariants, security architecture (brownfield only). Source of truth for all AI agents.</div>
+                            <div class="desc">200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary (brownfield only). Source of truth for all AI agents.</div>
                         </div>
                         <div class="hierarchy-level">
                             <div class="num">5</div>
                             <div class="file">architecture.md</div>
-                            <div class="desc">Human-readable engineering guide derived from .ai-context.md. Prose,
-                                mermaid diagrams, onboarding framing. Auto-refreshed on mutations.</div>
+                            <div class="desc">30-45 page human-readable engineering reference derived from .ai-context.md. 25 sections + 4 appendices with Mermaid diagrams, code snippets, and prose explanations. Auto-refreshed on mutations.</div>
                         </div>
                     </div>
 
@@ -2208,8 +2206,8 @@
                         <div class="num">1</div>
                         <div class="file">product.md + tech-stack.md + .ai-context.md + architecture.md + workflow.md</div>
                         <div class="desc">Tech lead runs <code>/draft:init</code>. For brownfield projects, Draft
-                            performs deep 6-phase architecture discovery — generating <code>.ai-context.md</code> (machine-optimized source of truth with data state machines, consistency boundaries, invariants) and
-                            <code>architecture.md</code> (human-readable derived guide with mermaid diagrams). Team reviews project vision,
+                            performs deep 5-phase architecture discovery — generating <code>.ai-context.md</code> (200-400 lines, 15+ sections: invariants, interface contracts, data flows, cookbooks) and
+                            <code>architecture.md</code> (30-45 pages, 25 sections + appendices with Mermaid diagrams). Team reviews project vision,
                             technical choices, system architecture, and workflow preferences via PR.</div>
                     </div>
                     <div class="hierarchy-level">
@@ -2224,7 +2222,7 @@
                         <div class="num">3</div>
                         <div class="file">.ai-context.md + architecture.md</div>
                         <div class="desc">Lead runs <code>/draft:decompose</code>. Team reviews module boundaries, API
-                            surfaces, dependency graph, and implementation order via PR. <code>.ai-context.md</code> is the machine source of truth; <code>architecture.md</code> is the human-readable guide. Senior engineers validate the
+                            surfaces, dependency graph, and implementation order via PR. <code>.ai-context.md</code> is the token-optimized AI source of truth; <code>architecture.md</code> is the 30-45 page human reference. Senior engineers validate the
                             architecture without touching the codebase.</div>
                     </div>
                     <div class="hierarchy-level">

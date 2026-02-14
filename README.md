@@ -87,8 +87,8 @@ AI tools are fast but unstructured. Draft applies Context-Driven Development to 
 ```
 product.md       →  "Build a task manager"
 tech-stack.md    →  "React, TypeScript, Tailwind"
-.ai-context.md   →  Data paths, state machines, modules, invariants (AI source of truth)
-architecture.md  →  Human-readable guide derived from .ai-context.md
+.ai-context.md   →  200-400 lines: invariants, interfaces, data flows, cookbooks (AI source of truth)
+architecture.md  →  30-45 pages: 25 sections + appendices, Mermaid diagrams (human reference)
 spec.md          →  "Add drag-and-drop reordering"
 plan.md          →  "Phase 1: sortable, Phase 2: persist"
 ```

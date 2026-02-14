@@ -61,8 +61,8 @@ Draft solves this through **Context-Driven Development**: structured documents t
 |----------|---------|----------|
 | `product.md` | Defines users, goals, success criteria, guidelines | AI building features nobody asked for |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
-| `.ai-context.md` | **Source of truth.** Dense codebase understanding for AI agents — system map, modules, invariants, security, concurrency, error handling, extension cookbooks | AI re-analyzing codebase every session |
-| `architecture.md` | **Derived from .ai-context.md.** Human-readable engineering guide with prose and diagrams | Engineers needing onboarding documentation |
+| `.ai-context.md` | **Source of truth.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary | AI re-analyzing codebase every session |
+| `architecture.md` | **Derived from .ai-context.md.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets | Engineers needing onboarding documentation |
 | `workflow.md` | TDD preference, commit style, review process, guardrails | AI skipping tests or making giant commits |
 | `spec.md` | Acceptance criteria for a specific track | Scope creep, gold-plating |
 | `plan.md` | Ordered phases with verification steps | AI attempting everything at once |
@@ -357,8 +357,8 @@ Located in `draft/` of the target project:
 |------|---------|
 | `product.md` | Product vision, users, goals, guidelines (optional section) |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
-| `.ai-context.md` | **Source of truth.** Dense codebase understanding for AI agents. Consumed by all Draft commands and external AI tools. |
-| `architecture.md` | **Derived from .ai-context.md.** Human-readable engineering guide with prose and diagrams. Auto-refreshed on mutations. |
+| `.ai-context.md` | **Source of truth.** 200-400 lines, token-optimized, self-contained AI context with 15+ mandatory sections. Consumed by all Draft commands and external AI tools. |
+| `architecture.md` | **Derived from .ai-context.md.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices. Auto-refreshed on mutations. |
 | `workflow.md` | TDD preferences, commit strategy, guardrails |
 | `jira.md` | Jira project configuration (optional) |
 | `tracks.md` | Master list of all tracks |

@@ -59,41 +59,56 @@ If the user runs `/draft:init refresh`:
 
 1. **Tech Stack Refresh**: Re-scan `package.json`, `go.mod`, etc. Compare with `draft/tech-stack.md`. Propose updates.
 
-2. **Architecture Refresh**: If `draft/architecture.md` exists, re-run architecture discovery with safe backup workflow:
+2. **Architecture Refresh**: If `draft/architecture.md` exists, use git-based incremental analysis:
 
-   **a. Create backup:**
+   **a. Find last architecture commit:**
    ```bash
-   cp draft/architecture.md draft/architecture.md.backup
+   git log -1 --format="%H" -- draft/architecture.md
    ```
+   This returns the commit SHA when architecture.md was last modified.
 
-   **b. Generate to temporary file:**
-   - Run full architecture discovery (all 5 phases)
-   - Write output to `draft/architecture.md.new` (NOT the original file)
-   - Detect new directories, files, or modules added since last scan
-   - Identify removed or renamed components
-   - Update critical invariants and safety rules
-   - Flag new external dependencies or changed integration points
-   - Update extension cookbooks with new patterns
-   - Preserve any modules added by `/draft:decompose` (planned modules) — only update `[x] Existing` modules
-
-   **c. Present diff for review:**
+   **b. Get changed files since that commit:**
    ```bash
-   diff draft/architecture.md draft/architecture.md.new
+   git diff --name-only <SHA> HEAD -- . ':!draft/'
    ```
-   Show summary of changes to user.
+   This lists all source files changed since the last architecture update, excluding the draft/ directory itself.
 
-   **d. On user approval:**
-   ```bash
-   mv draft/architecture.md.new draft/architecture.md
-   rm draft/architecture.md.backup
-   ```
-   Then regenerate `draft/.ai-context.md` from `architecture.md` using the Condensation Subroutine below.
+   **c. Categorize changes:**
+   - **Added files**: New modules, components, or features to document
+   - **Modified files**: Existing sections that may need updates
+   - **Deleted files**: Components to remove from documentation
+   - **Renamed files**: Update file references
 
-   **e. On user rejection:**
+   **d. Targeted analysis (only changed files):**
+   - Read each changed file to understand modifications
+   - Identify which architecture.md sections are affected:
+     - New files → Component Map, Implementation Catalog, File Structure
+     - Modified interfaces → API Definitions, Interface Contracts
+     - Changed dependencies → External Dependencies, Dependency Graph
+     - New tests → Testing Infrastructure
+     - Config changes → Configuration & Tuning
+   - Preserve unchanged sections exactly as-is
+   - Preserve modules added by `/draft:decompose` (planned modules)
+
+   **e. Present incremental diff:**
+   Show user:
+   - Files analyzed: `N changed files since <date>`
+   - Sections updated: list of affected sections
+   - Summary of changes per section
+
+   **f. On user approval:**
+   - Update only the affected sections in `draft/architecture.md`
+   - Regenerate `draft/.ai-context.md` using the Condensation Subroutine
+
+   **g. On user rejection:**
+   - No changes made
+
+   **h. Fallback to full refresh:**
+   If git history is unavailable or architecture.md has never been committed:
    ```bash
-   rm draft/architecture.md.new
+   git log -1 -- draft/architecture.md
    ```
-   Original architecture.md preserved unchanged.
+   If this returns empty, run full 5-phase architecture discovery instead.
 
    - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now
 

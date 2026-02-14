@@ -76,7 +76,7 @@ head -5 skills/bughunt/SKILL.md
 # ✅ ---
 
 # 3. Appears in integrations
-grep "@draft bughunt" integrations/cursor/.cursorrules
+grep "@draft bughunt" integrations/gemini/GEMINI.md
 # ✅ | `@draft bughunt [--track <id>]` | Systematic bug discovery |
 # ✅ When user says "hunt bugs" or "@draft bughunt [--track <id>]":
 
@@ -138,8 +138,8 @@ To add a new skill to the Draft plugin:
        esac
    }
 
-   # Add to get_cursor_trigger() and get_copilot_trigger():
-   get_cursor_trigger() {
+   # Add to get_gemini_trigger() and get_copilot_trigger():
+   get_gemini_trigger() {
        case "$skill" in
            ...
            my-skill) echo "\"my skill\" or \"@draft my-skill\"" ;;

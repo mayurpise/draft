@@ -61,7 +61,8 @@ Draft solves this through **Context-Driven Development**: structured documents t
 |----------|---------|----------|
 | `product.md` | Defines users, goals, success criteria, guidelines | AI building features nobody asked for |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
-| `architecture.md` | System map, data flows, patterns, mermaid diagrams | AI re-analyzing codebase every session |
+| `.ai-context.md` | **Source of truth.** Dense codebase understanding for AI agents — system map, modules, invariants, security, concurrency, error handling, extension cookbooks | AI re-analyzing codebase every session |
+| `architecture.md` | **Derived from .ai-context.md.** Human-readable engineering guide with prose and diagrams | Engineers needing onboarding documentation |
 | `workflow.md` | TDD preference, commit style, review process, guardrails | AI skipping tests or making giant commits |
 | `spec.md` | Acceptance criteria for a specific track | Scope creep, gold-plating |
 | `plan.md` | Ordered phases with verification steps | AI attempting everything at once |
@@ -73,8 +74,8 @@ product.md          →  "Build a task manager for developers"
   ↓
 tech-stack.md       →  "Use React, TypeScript, Tailwind"
   ↓
-architecture.md     →  "Express API → Service layer → Prisma ORM → PostgreSQL"
-  ↓
+.ai-context.md      →  "Express API → Service layer → Prisma ORM → PostgreSQL"
+  ↓                     (architecture.md derived for human consumption)
 spec.md             →  "Add drag-and-drop reordering"
   ↓
 plan.md             →  "Phase 1: sortable list, Phase 2: persistence"
@@ -114,7 +115,7 @@ graph TD
 ```mermaid
 graph LR
     P["product.md<br/><i>What & Why</i>"] --> T["tech-stack.md<br/><i>How (tools)</i>"]
-    T --> A["architecture.md<br/><i>How (structure)</i>"]
+    T --> A[".ai-context.md<br/><i>How (structure)</i>"]
     A --> S["spec.md<br/><i>What (specific)</i>"]
     S --> PL["plan.md<br/><i>When & Order</i>"]
     PL --> Code["Implementation"]
@@ -170,9 +171,9 @@ Draft's artifacts are designed for team collaboration through standard git workf
 
 1. **Project context** — Tech lead runs `/draft:init`. Team reviews `product.md`, `tech-stack.md`, and `workflow.md` via PR. Product managers review vision without reading code. Engineers review technical choices without context-switching into implementation.
 2. **Spec & plan** — Lead runs `/draft:new-track`. Team reviews `spec.md` (requirements, acceptance criteria) and `plan.md` (phased task breakdown, dependencies) via PR. Disagreements surface as markdown comments — resolved by editing a paragraph, not rewriting a module.
-3. **Architecture** — Lead runs `/draft:decompose`. Team reviews `architecture.md` (module boundaries, API surfaces, dependency graph, implementation order) via PR. Senior engineers validate architecture without touching the codebase.
+3. **Architecture** — Lead runs `/draft:decompose`. Team reviews `architecture.md` (derived human-readable guide with module boundaries, API surfaces, dependency graph, implementation order) via PR. Senior engineers validate architecture without touching the codebase. The machine-optimized `.ai-context.md` is the source of truth.
 4. **Work distribution** — Lead runs `/draft:jira-preview` and `/draft:jira-create`. Epics, stories, and sub-tasks are created from the approved plan. Individual team members pick up Jira stories and implement — with or without `/draft:implement`.
-5. **Implementation** — Only after all documents are merged does coding start. Every developer has full context: what to build (`spec.md`), in what order (`plan.md`), with what boundaries (`architecture.md`).
+5. **Implementation** — Only after all documents are merged does coding start. Every developer has full context: what to build (`spec.md`), in what order (`plan.md`), with what boundaries (`.ai-context.md` / `architecture.md`).
 
 **Why this works:** The CLI is single-user, but the artifacts it produces are the collaboration layer. Draft handles planning and decomposition. Git handles review. Jira handles distribution. Changing a sentence in `spec.md` takes seconds. Changing an architectural decision after 2,000 lines of code takes days.
 
@@ -356,7 +357,8 @@ Located in `draft/` of the target project:
 |------|---------|
 | `product.md` | Product vision, users, goals, guidelines (optional section) |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
-| `architecture.md` | System map, data flows, patterns, mermaid diagrams (brownfield) |
+| `.ai-context.md` | **Source of truth.** Dense codebase understanding for AI agents. Consumed by all Draft commands and external AI tools. |
+| `architecture.md` | **Derived from .ai-context.md.** Human-readable engineering guide with prose and diagrams. Auto-refreshed on mutations. |
 | `workflow.md` | TDD preferences, commit strategy, guardrails |
 | `jira.md` | Jira project configuration (optional) |
 | `tracks.md` | Master list of all tracks |
@@ -436,7 +438,7 @@ If `draft/` already exists with context files, init reports "already initialized
 Re-scans and updates existing context without starting from scratch.
 
 1. **Tech Stack Refresh** — Re-scans `package.json`, `go.mod`, etc. Compares with existing `draft/tech-stack.md`. Proposes updates.
-2. **Architecture Refresh** — Re-runs architecture discovery and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `/draft:decompose`. Presents changes for review before writing.
+2. **Architecture Refresh** — Re-runs architecture discovery and diffs against existing `draft/.ai-context.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `/draft:decompose`. Presents changes for review before writing. After updating `.ai-context.md`, derives `draft/architecture.md` using the Derivation Subroutine.
 3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
@@ -450,13 +452,13 @@ Aggregates Draft context from multiple services in a monorepo into unified root-
 #### What It Does
 
 1. **Scans** immediate child directories for services (detects `package.json`, `go.mod`, `Cargo.toml`, etc.)
-2. **Reads** each service's `draft/product.md`, `draft/architecture.md`, `draft/tech-stack.md`
+2. **Reads** each service's `draft/product.md`, `draft/.ai-context.md` (or legacy `draft/architecture.md`), `draft/tech-stack.md`
 3. **Synthesizes** root-level documents:
    - `draft/service-index.md` — Service registry with status, tech, and links
    - `draft/dependency-graph.md` — Inter-service dependency topology
    - `draft/tech-matrix.md` — Technology distribution across services
    - `draft/product.md` — Synthesized product vision (if not exists)
-   - `draft/architecture.md` — System-of-systems architecture view
+   - `draft/.ai-context.md` — System-of-systems architecture view
    - `draft/tech-stack.md` — Org-wide technology standards
 
 #### Arguments
@@ -481,7 +483,7 @@ Creates a new track (feature, bug fix, or refactor) with a specification and pha
 Every new track loads the full project context before spec creation:
 - `draft/product.md` — product vision, users, goals, guidelines
 - `draft/tech-stack.md` — languages, frameworks, patterns, accepted patterns
-- `draft/architecture.md` — system map, modules, data flows (if exists)
+- `draft/.ai-context.md` — system map, modules, data flows, invariants, security architecture (if exists). Falls back to `draft/architecture.md` for legacy projects.
 - `draft/workflow.md` — TDD preference, commit conventions, guardrails
 - `draft/tracks.md` — existing tracks (check for overlap/dependencies)
 
@@ -503,7 +505,7 @@ Engages in dialogue to understand scope before generating `spec.md`:
 - **Why** — Business/user value
 - **Acceptance criteria** — How we know it's done
 - **Non-goals** — What's explicitly out of scope
-- **Technical approach** — High-level approach based on tech-stack.md and architecture.md
+- **Technical approach** — High-level approach based on tech-stack.md and .ai-context.md
 
 #### Specification Creation (Bug / RCA)
 
@@ -534,7 +536,7 @@ Auto-generated kebab-case from the description:
 - Spaces replaced with hyphens
 - Special characters removed
 - Examples:
-  - "Add user authentication" → `add-user-authentication`
+  - "Add user authentication" → `add-user-auth`
   - "Fix: login bug" → `fix-login-bug`
   - "Update project docs" → `update-project-docs`
 
@@ -560,9 +562,9 @@ Scans `plan.md` for the first uncompleted task:
 
 Red flags that stop the cycle: writing code before a test exists, test passes immediately, running tests mentally instead of executing.
 
-#### Architecture Mode Checkpoints (when architecture.md exists)
+#### Architecture Mode Checkpoints (when .ai-context.md exists)
 
-**Activation:** Automatically enabled when track has `draft/tracks/<id>/architecture.md` (created by `/draft:decompose`).
+**Activation:** Automatically enabled when track has `draft/tracks/<id>/.ai-context.md` (created by `/draft:decompose`). Falls back to `draft/tracks/<id>/architecture.md` for legacy projects.
 
 Before the TDD cycle, three additional mandatory checkpoints:
 
@@ -595,7 +597,7 @@ When all phases complete: update `plan.md`, `metadata.json`, and `draft/tracks.m
 Displays a comprehensive overview of project progress:
 - All active tracks with phase and task counts
 - Current task indicator
-- Module status (if `architecture.md` exists) with coverage percentages
+- Module status (if `.ai-context.md` exists) with coverage percentages
 - Blocked items with reasons
 - Recently completed tracks
 - Quick stats summary
@@ -631,8 +633,8 @@ Breaks a project or track into modules with clear responsibilities, dependencies
 
 #### Scope
 
-- **Project-wide** (`/draft:decompose project`) → `draft/architecture.md`
-- **Track-scoped** (`/draft:decompose` with active track) → `draft/tracks/<id>/architecture.md`
+- **Project-wide** (`/draft:decompose project`) → `draft/.ai-context.md` (derives `draft/architecture.md`)
+- **Track-scoped** (`/draft:decompose` with active track) → `draft/tracks/<id>/.ai-context.md` (derives `draft/tracks/<id>/architecture.md`)
 
 #### Process
 
@@ -641,7 +643,7 @@ Breaks a project or track into modules with clear responsibilities, dependencies
 3. **CHECKPOINT** — Developer reviews and modifies module breakdown
 4. **Dependency mapping** — Map inter-module imports, detect cycles, generate ASCII dependency diagram, determine implementation order via topological sort
 5. **CHECKPOINT** — Developer reviews dependency diagram and implementation order
-6. **Generate `architecture.md`** — Module definitions, dependency diagram/table, implementation order, story placeholders
+6. **Generate `.ai-context.md`** — Module definitions, dependency diagram/table, implementation order, story placeholders. Derive `architecture.md` for human consumption.
 7. **Update plan.md (track-scoped only)** — Restructure phases to align with module boundaries, preserving completed/in-progress task states
 
 #### Cycle Breaking
@@ -665,7 +667,7 @@ Measures test coverage quality after implementation. Complements TDD — TDD is 
    - **Defensive** — Error handlers for impossible states; acceptable to leave uncovered
    - **Infrastructure** — Framework boilerplate; acceptable
 6. **CHECKPOINT** — Developer reviews and approves
-7. **Record results** — Update plan.md with coverage section, architecture.md module status, and metadata.json
+7. **Record results** — Update plan.md with coverage section, `.ai-context.md` module status, and metadata.json
 
 Target: 95%+ line coverage (configurable in `workflow.md`).
 
@@ -733,7 +735,7 @@ ADRs are stored at `draft/adrs/NNNN-title.md` (e.g., `001-use-postgresql.md`). W
 
 ### `/draft:validate` — Codebase Quality Validation
 
-Validates codebase quality using Draft context (architecture.md, tech-stack.md, product.md). Runs architecture conformance, security scan, and performance analysis.
+Validates codebase quality using Draft context (`.ai-context.md`, tech-stack.md, product.md). Runs architecture conformance, security scan, and performance analysis. Leverages Critical Invariants and Security Architecture sections from `.ai-context.md` for richer validation.
 
 #### Scope
 
@@ -744,11 +746,19 @@ Generates report at `draft/tracks/<id>/validation-report.md` (track) or `draft/v
 
 #### Validation Categories
 
+**Project-Level (5 categories):**
+
 **Architecture Conformance**
 - Module boundary violations (e.g., presentation layer importing database models)
 - Circular dependencies between modules
 - Unauthorized dependencies not listed in tech-stack.md
 - API surface violations (internal modules exposed publicly)
+
+**Dead Code Detection**
+- Unreachable code paths, unused exports, orphaned files
+
+**Dependency Cycle Detection**
+- Circular import chains across modules
 
 **Security Scan**
 - OWASP Top 10 patterns (SQL injection, XSS, broken authentication, insecure deserialization)
@@ -757,12 +767,20 @@ Generates report at `draft/tracks/<id>/validation-report.md` (track) or `draft/v
 - Missing input validation at system boundaries
 - Insufficient error handling exposing sensitive information
 
-**Performance Analysis**
+**Performance Anti-Patterns**
 - Bundle size exceeding thresholds defined in product.md
 - N+1 query patterns in database access
 - Algorithmic complexity hotspots (O(n²) or worse in critical paths)
 - Unindexed database queries
 - Memory leaks or resource cleanup issues
+
+**Track-Level (adds 3 categories):**
+
+**Spec Compliance** — Implementation matches spec requirements
+
+**Architectural Impact** — Changes respect module boundaries and dependency rules
+
+**Regression Risk** — Changes don't break existing functionality
 
 #### Report Structure
 
@@ -771,7 +789,7 @@ Each finding includes:
 - **Location**: File path and line number
 - **Evidence**: Code snippet demonstrating the issue
 - **Fix**: Recommended remediation with examples
-- **Draft Context**: How this violates architecture.md or tech-stack.md constraints
+- **Draft Context**: How this violates `.ai-context.md` or tech-stack.md constraints
 
 ---
 
@@ -838,11 +856,11 @@ Generates unified report with deduplication across tools.
 
 ## Architecture Mode
 
-Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `architecture.md` exists** - no manual configuration needed.
+Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `.ai-context.md` exists** - no manual configuration needed.
 
 **How it works:**
-1. Run `/draft:decompose` on a track → Creates `draft/tracks/<id>/architecture.md`
-2. Run `/draft:implement` → Automatically detects architecture.md and enables architecture features
+1. Run `/draft:decompose` on a track → Creates `draft/tracks/<id>/.ai-context.md` (and derived `architecture.md`)
+2. Run `/draft:implement` → Automatically detects `.ai-context.md` and enables architecture features
 3. Features: Story writing, Execution State design, Function Skeletons, ~200-line chunk reviews
 
 See `core/agents/architect.md` for detailed decomposition rules, story writing, and skeleton generation.
@@ -851,14 +869,14 @@ See `core/agents/architect.md` for detailed decomposition rules, story writing, 
 
 Use `/draft:decompose` to break a project or track into modules:
 
-- **Project-wide:** `draft/architecture.md` — overall codebase module structure
-- **Per-track:** `draft/tracks/<id>/architecture.md` — module breakdown for a specific feature
+- **Project-wide:** `draft/.ai-context.md` — overall codebase module structure (derives `draft/architecture.md`)
+- **Per-track:** `draft/tracks/<id>/.ai-context.md` — module breakdown for a specific feature (derives `draft/tracks/<id>/architecture.md`)
 
 Each module defines: responsibility, files, API surface, dependencies, complexity. Modules are ordered by dependency graph (topological sort) to determine implementation sequence.
 
 ### Pre-Implementation Design
 
-When `architecture.md` exists for a track, `/draft:implement` automatically enables three additional checkpoints before the TDD cycle:
+When `.ai-context.md` exists for a track, `/draft:implement` automatically enables three additional checkpoints before the TDD cycle:
 
 1. **Story** — Natural-language algorithm description (Input → Process → Output) written as a comment at the top of the code file. Captures the "how" before coding. Mandatory checkpoint for developer approval.
 
@@ -876,7 +894,7 @@ Use `/draft:coverage` after implementation to measure test quality:
 - Targets 95%+ line coverage (configurable in `workflow.md`)
 - Reports per-file breakdown and identifies uncovered lines
 - Classifies gaps: testable (should add tests), defensive (acceptable), infrastructure (acceptable)
-- Results recorded in `plan.md` and `architecture.md` using the following format:
+- Results recorded in `plan.md` and `.ai-context.md` using the following format:
 
 #### Coverage Results Format (plan.md)
 
@@ -899,7 +917,7 @@ Add a `## Coverage` section at the end of the relevant phase:
 - **Infrastructure:** `auth.ts:112,119` — logging statements (acceptable)
 ```
 
-#### Coverage Results Format (architecture.md)
+#### Coverage Results Format (.ai-context.md)
 
 Update each module's status line to include coverage:
 
@@ -934,13 +952,13 @@ Coverage complements TDD — TDD is the process (write test, implement, refactor
 
 ```
 /draft:init
-     │ (creates draft/architecture.md for brownfield)
+     │ (creates draft/.ai-context.md + draft/architecture.md for brownfield)
      │
 /draft:new-track "feature"
      │ (creates draft/tracks/feature/spec.md + plan.md)
      │
 /draft:decompose
-     │ (creates draft/tracks/feature/architecture.md)
+     │ (creates draft/tracks/feature/.ai-context.md + architecture.md)
      │ → Architecture mode AUTO-ENABLED
      │
 /draft:implement
@@ -1038,7 +1056,7 @@ See `core/agents/debugger.md` for detailed process.
 **Iron Law:** No fix without a confirmed root cause. No investigation without scope boundaries.
 
 For bug tracks (from Jira incidents, production bugs, regressions):
-1. **Reproduce & Scope** - Confirm bug, define blast radius, map to architecture.md modules
+1. **Reproduce & Scope** - Confirm bug, define blast radius, map to `.ai-context.md` modules
 2. **Trace & Analyze** - Follow data/control flow with `file:line` references, differential analysis
 3. **Hypothesize & Confirm** - One hypothesis at a time, log all results (including failures)
 4. **Fix & Prevent** - Regression test first, minimal fix within blast radius, blameless RCA summary
@@ -1093,7 +1111,7 @@ Activated for bug/RCA tracks created via `/draft:new-track`. Provides structured
 
 | Phase | Goal | Output |
 |-------|------|--------|
-| **1. Reproduce & Scope** | Confirm bug, define blast radius, map to architecture.md modules | Reproduction steps + scoped investigation area |
+| **1. Reproduce & Scope** | Confirm bug, define blast radius, map to `.ai-context.md` modules | Reproduction steps + scoped investigation area |
 | **2. Trace & Analyze** | Follow data/control flow to the divergence point | Flow trace with `file:line` references |
 | **3. Hypothesize & Confirm** | Test one hypothesis at a time, document all results | Confirmed root cause with evidence |
 | **4. Fix & Prevent** | Regression test first, minimal fix, RCA summary | Fix + test + blameless RCA document |
@@ -1150,7 +1168,7 @@ Activated during `/draft:decompose` and `/draft:implement` (when architecture mo
 - **Function skeleton generation** — Complete signatures with types and docstrings, no implementation bodies, ordered by control flow
 
 **Story Lifecycle:**
-1. **Placeholder** — Created during `/draft:decompose` in architecture.md
+1. **Placeholder** — Created during `/draft:decompose` in `.ai-context.md`
 2. **Written** — Filled in during `/draft:implement` as code comments; developer approves
 3. **Updated** — Maintained when algorithms change during refactoring
 
@@ -1163,7 +1181,7 @@ Activated during `/draft:new-track` plan creation and `/draft:decompose`. Provid
 **Capabilities:**
 - **Phase decomposition** — Break work into sequential phases with clear goals and verification criteria
 - **Task ordering** — Dependencies between tasks, topological sort for implementation sequence
-- **Integration with Architect Agent** — When architecture.md exists, aligns phases with module boundaries and dependency graph
+- **Integration with Architect Agent** — When `.ai-context.md` exists, aligns phases with module boundaries and dependency graph
 
 **Key Principles:**
 - Each phase should be independently verifiable

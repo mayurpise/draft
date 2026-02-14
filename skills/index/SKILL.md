@@ -289,11 +289,12 @@ For each initialized service, read and extract:
 - Target users (list)
 - Core features (list)
 
-### 5.2 From `<service>/draft/architecture.md`:
-- Key Takeaway paragraph
-- External dependencies (from mermaid diagram or table)
-- Exposed APIs or entry points
+### 5.2 From `<service>/draft/.ai-context.md` (or legacy `<service>/draft/architecture.md`):
+- Key Takeaway paragraph (from `## System Overview`)
+- External dependencies (from `## External Dependencies`)
+- Exposed APIs or entry points (from `## Entry Points`)
 - Dependencies on other services (look for references to sibling service names)
+- Critical invariants summary (from `## Critical Invariants`, if available)
 
 ### 5.3 From `<service>/draft/tech-stack.md`:
 - Primary language/framework
@@ -356,8 +357,8 @@ Use template from `core/templates/service-index.md`:
 
 | Service | Status | Tech Stack | Dependencies | Team | Details |
 |---------|--------|------------|--------------|------|---------|
-| auth | ✓ | Go, Postgres | - | @auth-team | [→](../services/auth/draft/architecture.md) |
-| billing | ✓ | Node, Stripe | auth | @billing | [→](../services/billing/draft/architecture.md) |
+| auth | ✓ | Go, Postgres | - | @auth-team | [→](../services/auth/draft/.ai-context.md) |
+| billing | ✓ | Node, Stripe | auth | @billing | [→](../services/billing/draft/.ai-context.md) |
 | legacy-reports | ○ | - | - | - | Not initialized |
 
 ## Uninitialized Services
@@ -568,8 +569,8 @@ graph TD
 
 | Service | Responsibility | Tech | Status | Details |
 |---------|---------------|------|--------|---------|
-| auth-service | Identity & access management | Go, Postgres | ✓ Active | [→ architecture](../services/auth/draft/architecture.md) |
-| billing-service | Payments & invoicing | Node, Stripe | ✓ Active | [→ architecture](../services/billing/draft/architecture.md) |
+| auth-service | Identity & access management | Go, Postgres | ✓ Active | [→ context](../services/auth/draft/.ai-context.md) |
+| billing-service | Payments & invoicing | Node, Stripe | ✓ Active | [→ context](../services/billing/draft/.ai-context.md) |
 
 ## Shared Infrastructure
 

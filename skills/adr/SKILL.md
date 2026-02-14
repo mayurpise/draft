@@ -88,7 +88,7 @@ If title provided, proceed directly with the title.
 ## Step 3: Load Project Context
 
 Read relevant Draft context:
-- `draft/architecture.md` — Current architecture patterns and constraints
+- `draft/.ai-context.md` — Current architecture patterns, invariants, data paths, and constraints. Falls back to `draft/architecture.md` for legacy projects.
 - `draft/tech-stack.md` — Current technology choices
 - `draft/product.md` — Product requirements that influence the decision
 
@@ -175,7 +175,7 @@ Review the ADR and update status to "Accepted" when approved.
 If the decision affects existing Draft context:
 
 1. **tech-stack.md** — If introducing or removing technology, note: "Consider updating draft/tech-stack.md to reflect this decision."
-2. **architecture.md** — If changing architectural patterns, note: "Consider updating draft/architecture.md to reflect this decision."
+2. **.ai-context.md** — If changing architectural patterns, note: "Consider updating draft/.ai-context.md to reflect this decision (architecture.md will be auto-derived)."
 3. **Superseded ADRs** — If this decision replaces a previous one, update the old ADR's status.
 
 ## ADR Status Lifecycle

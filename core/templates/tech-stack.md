@@ -107,7 +107,7 @@ graph TD
     BL --> Queue
 ```
 
-> Replace with actual components and their relationships from the codebase. For detailed architecture analysis see `draft/architecture.md`.
+> Replace with actual components and their relationships from the codebase. For detailed architecture analysis see `draft/.ai-context.md`.
 
 ---
 

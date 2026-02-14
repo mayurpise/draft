@@ -190,6 +190,7 @@ CORE_FILES=(
     "knowledge-base.md"
     # Templates
     "templates/intake-questions.md"
+    "templates/ai-context.md"
     "templates/architecture.md"
     "templates/jira.md"
     "templates/product.md"
@@ -393,6 +394,8 @@ Every feature follows this lifecycle:
 ## Project Context Files
 
 When `draft/` exists in the project, always consider:
+- `draft/.ai-context.md` - Source of truth for AI agents (dense codebase understanding)
+- `draft/architecture.md` - Human-readable engineering guide (derived from .ai-context.md)
 - `draft/product.md` - Product vision and goals
 - `draft/tech-stack.md` - Technical constraints
 - `draft/workflow.md` - TDD and commit preferences

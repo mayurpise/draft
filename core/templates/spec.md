@@ -9,7 +9,7 @@
 ## Context References
 - **Product:** `draft/product.md` — [pending]
 - **Tech Stack:** `draft/tech-stack.md` — [pending]
-- **Architecture:** `draft/architecture.md` — [pending]
+- **Architecture:** `draft/.ai-context.md` — [pending]
 
 ## Problem Statement
 [To be developed through intake conversation]

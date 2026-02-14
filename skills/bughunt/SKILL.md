@@ -43,7 +43,7 @@ Store this for the report header. All bugs found are relative to this specific b
 
 If `draft/` directory exists, read and internalize:
 
-- [ ] `draft/architecture.md` - Module boundaries, dependencies, intended patterns
+- [ ] `draft/.ai-context.md` - Module boundaries, dependencies, intended patterns, **Critical Invariants**, **Concurrency Model**, **Error Handling**. Falls back to `draft/architecture.md` for legacy projects.
 - [ ] `draft/tech-stack.md` - Frameworks, libraries, known constraints, **Accepted Patterns**
 - [ ] `draft/product.md` - Product intent, user flows, requirements, guidelines
 - [ ] `draft/workflow.md` - Team conventions, testing preferences, **Guardrails**
@@ -53,6 +53,13 @@ Use this context to:
 - Apply framework-specific checks from tech-stack (React anti-patterns, Node gotchas, etc.)
 - Catch bugs that violate product requirements or user flows
 - Prioritize areas relevant to active tracks
+- **Leverage Critical Invariants** — Check for invariant violations across data safety, security, concurrency, ordering, idempotency categories
+- **Leverage Concurrency Model** — Use thread/async model info for race condition and deadlock analysis
+- **Leverage Error Handling** — Use failure modes and retry policies for reliability bug detection
+- **Leverage Data State Machines** — Check for invalid state transitions, missing guard clauses, states with no exit path
+- **Leverage Storage Topology** — Identify data loss risks at each tier (cache eviction without writeback, event log gaps, missing archive)
+- **Leverage Consistency Boundaries** — Find bugs at eventual consistency seams (stale reads, lost events, missing reconciliation)
+- **Leverage Failure Recovery Matrix** — Verify idempotency claims, check for partial failure states without recovery paths
 - **Honor Accepted Patterns** - Skip flagging patterns documented in tech-stack.md `## Accepted Patterns`
 - **Enforce Guardrails** - Flag violations of checked guardrails in workflow.md `## Guardrails`
 
@@ -190,7 +197,7 @@ Analyze systematically across all applicable dimensions. Skip N/A dimensions exp
    - [ ] Verify the code path is actually reachable in production
 
 2. **Context Cross-Reference**
-   - [ ] Check `architecture.md` — Is this behavior intentional by design?
+   - [ ] Check `.ai-context.md` (or `architecture.md`) — Is this behavior intentional by design?
    - [ ] Check `tech-stack.md` — Does the framework handle this case?
    - [ ] Check `tech-stack.md` `## Accepted Patterns` — Is this pattern explicitly documented as intentional?
    - [ ] Check `product.md` — Is this actually a requirement violation?

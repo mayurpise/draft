@@ -35,7 +35,7 @@ skills/                     # Slash command implementations
 core/
   ├── methodology.md        # Master methodology (update first)
   ├── templates/            # Templates used by /draft:init
-  └── agents/               # Specialized agent behaviors (debugger, reviewer, planner)
+  └── agents/               # Specialized agent behaviors (architect, debugger, planner, rca, reviewer)
 integrations/copilot/.github/
   └── copilot-instructions.md  # GENERATED - do not edit directly
 integrations/gemini/
@@ -79,7 +79,8 @@ When users use Draft, it creates a `draft/` directory in their project:
 |------|---------|
 | `product.md` | Product vision, users, goals, guidelines (optional section) |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
-| `architecture.md` | System map, data flows, patterns, mermaid diagrams (brownfield) |
+| `.ai-context.md` | **Source of truth.** Dense codebase understanding for AI agents. Consumed by all Draft commands and external AI tools. |
+| `architecture.md` | **Derived from .ai-context.md.** Human-readable engineering guide with prose and diagrams. Auto-refreshed on mutations. |
 | `workflow.md` | TDD preferences, commit strategy, validation config, guardrails |
 | `tracks.md` | Master list of all tracks |
 | `tracks/<id>/` | Individual tracks with `spec.md`, `plan.md`, `metadata.json`, `validation-report.md` |
@@ -115,7 +116,7 @@ At phase boundaries: (1) Spec Compliance, (2) Code Quality.
 See `core/agents/reviewer.md`.
 
 ### Validation (when enabled)
-At track completion: Systematic quality checks using Draft context (architecture.md, tech-stack.md). Non-blocking by default. Reports in `draft/tracks/<id>/validation-report.md`.
+At track completion: Systematic quality checks using Draft context (`.ai-context.md`, tech-stack.md). Non-blocking by default. Reports in `draft/tracks/<id>/validation-report.md`.
 
 ## Communication Style
 

@@ -21,7 +21,7 @@ You are computing and reporting code coverage for the active track or a specific
 
 1. Read `draft/tech-stack.md` for test framework and language info
 2. Find active track from `draft/tracks.md`
-3. If track has `architecture.md`, identify current module for scoping
+3. If track has `architecture.md` (track-level) or project has `.ai-context.md`, identify current module for scoping
 4. Read `draft/workflow.md` for coverage target (default: 95%)
 
 If no active track and no argument provided:
@@ -51,7 +51,7 @@ Auto-detect from tech stack:
 
 **Priority order:**
 1. If argument provided (path or module name): use as scope filter
-2. If track has `architecture.md` with an in-progress module: scope to that module's files
+2. If track has `architecture.md` (or project has `.ai-context.md`) with an in-progress module: scope to that module's files
 3. If active track exists: scope to files changed in the track (use `git diff` against base branch)
 4. Fallback: run coverage for entire project
 
@@ -142,7 +142,7 @@ After developer approves:
    - Uncovered: defensive null checks in jwt.ts (justified)
    ```
 
-2. **Update architecture.md** (if exists) - Add coverage to module status:
+2. **Update architecture context** (track-level `architecture.md` or project-level `.ai-context.md`, if exists) - Add coverage to module status:
    ```markdown
    - **Status:** [x] Complete (Coverage: 96.2%)
    ```
@@ -171,7 +171,7 @@ Gaps documented: [count testable] testable, [count justified] justified
 
 Results recorded in:
 - plan.md (phase notes)
-- architecture.md (module status) [if applicable]
+- .ai-context.md (module status) [if applicable]
 - metadata.json (coverage data)
 ```
 

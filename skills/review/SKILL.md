@@ -174,7 +174,7 @@ For project-level reviews (no track context):
    - Load `core/agents/reviewer.md` (review criteria)
 
 2. **Load Draft context (if available):**
-   - Read `draft/architecture.md` (system architecture)
+   - Read `draft/.ai-context.md` (system architecture, critical invariants, security architecture). Falls back to `draft/architecture.md` for legacy projects.
    - Read `draft/tech-stack.md` (technical constraints, **Accepted Patterns**)
    - Read `draft/workflow.md` (**Guardrails** section)
 
@@ -278,7 +278,11 @@ Analyze code quality across four dimensions:
 - [ ] Follows project patterns (from tech-stack.md or CLAUDE.md)
 - [ ] Appropriate separation of concerns
 - [ ] No unnecessary complexity
-- [ ] Module boundaries respected (if architecture.md exists)
+- [ ] Module boundaries respected (if `.ai-context.md` or `architecture.md` exists)
+- [ ] Critical invariants honored (if `.ai-context.md` exists — check ## Critical Invariants section)
+- [ ] Data state transitions are valid (if `.ai-context.md` exists — check ## Data Lifecycle state machines)
+- [ ] Consistency boundaries respected — no strong-consistency assumptions across eventual-consistency seams
+- [ ] Failure recovery paths exist for each write path stage (check ## Critical Paths failure recovery matrix)
 
 #### 4.5: Error Handling
 

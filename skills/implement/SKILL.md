@@ -28,9 +28,9 @@ You are implementing tasks from the active track's plan following the TDD workfl
 3. Read the track's `plan.md` for task list
 4. Read `draft/workflow.md` for TDD and commit preferences
 5. Read `draft/tech-stack.md` for technical context
-6. **Check for architecture.md:**
+6. **Check for architecture context:**
    - Track-level: `draft/tracks/<id>/architecture.md`
-   - Project-level: `draft/architecture.md`
+   - Project-level: `draft/.ai-context.md` (or legacy `draft/architecture.md`)
    - If either exists → **Enable architecture mode** (Story, Execution State, Skeletons)
    - If neither exists → Standard TDD workflow
 
@@ -38,9 +38,9 @@ If no active track found:
 - Tell user: "No active track found. Run `/draft:new-track` to create one."
 
 **Architecture Mode Activation:**
-- Automatically enabled when `architecture.md` exists (file-based, no flag needed)
+- Automatically enabled when `.ai-context.md` or `architecture.md` exists (file-based, no flag needed)
 - Track-level architecture.md created by `/draft:decompose`
-- Project-level architecture.md created by `/draft:init` (brownfield only)
+- Project-level `.ai-context.md` created by `/draft:init` (brownfield only)
 
 ## Step 2: Find Next Task
 
@@ -60,7 +60,7 @@ If resuming `[~]` task, check for partial work.
 
 ## Step 2.5: Write Story (Architecture Mode Only)
 
-**Activation:** Only runs when `architecture.md` exists (track-level or project-level).
+**Activation:** Only runs when `.ai-context.md` or `architecture.md` exists (track-level or project-level).
 
 When the next task involves creating or substantially modifying a code file:
 
@@ -102,7 +102,7 @@ See `core/agents/architect.md` for story writing guidelines.
 
 ### Step 3.0: Design Before Code (Architecture Mode Only)
 
-**Activation:** Only runs when `architecture.md` exists (track-level or project-level).
+**Activation:** Only runs when `.ai-context.md` or `architecture.md` exists (track-level or project-level).
 **Skip for trivial tasks** - Config updates, type-only changes, single-function tasks where the design is obvious.
 
 #### 3.0a. Execution State Design
@@ -111,7 +111,9 @@ Study the control flow for the task and propose intermediate state variables:
 
 1. Read the Story (from Step 2.5) to understand the Input -> Output path
 2. Study similar patterns in the existing codebase
-3. Propose execution state: input state, intermediate state, output state, error state
+3. **Check `.ai-context.md` Data Lifecycle** — Align execution state with documented state machines (valid states/transitions), storage topology (which tier data targets), and data transformation chain (shape changes at boundaries)
+4. **Check `.ai-context.md` Critical Paths** — Identify where this task sits in documented write/read/async paths. Note consistency boundaries and failure recovery expectations.
+5. Propose execution state: input state, intermediate state, output state, error state
 
 Present in this format:
 ```
@@ -199,7 +201,7 @@ For each task, follow this workflow based on `workflow.md`. If skeletons were ge
 
 ### Implementation Chunk Limit (Architecture Mode Only)
 
-**Activation:** Only when `architecture.md` exists (track-level or project-level).
+**Activation:** Only when `.ai-context.md` or `architecture.md` exists (track-level or project-level).
 
 If the implementation diff for a task exceeds **~200 lines**:
 
@@ -244,9 +246,10 @@ After completing each task:
      - Add recovery message: "State update failed after commit <SHA>. Recovery: manually edit plan.md line X to mark `[x]`, update metadata.json tasks.completed to Y"
      - HALT - require manual intervention before continuing
 
-4. If `architecture.md` exists for the track:
+5. If `.ai-context.md` or `architecture.md` exists for the track:
    - Update module status markers (`[ ]` → `[~]` when first task in module starts, `[~]` → `[x]` when all tasks complete)
    - Fill in Story placeholders with the approved story from Step 2.5
+   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.message` to current HEAD, then regenerate `draft/architecture.md` using the Derivation Subroutine defined in `/draft:init`
 
 ## Verification Gate (REQUIRED)
 

@@ -11,7 +11,7 @@ You are creating a new track (feature, bug fix, or refactor) for Context-Driven 
 
 ## Red Flags - STOP if you're:
 
-- Creating a track without reading existing Draft context (product.md, tech-stack.md, architecture.md)
+- Creating a track without reading existing Draft context (product.md, tech-stack.md, .ai-context.md)
 - Asking questions without contributing expertise or trade-off analysis
 - Rushing through intake without probing deeper with "why"
 - Generating spec/plan without user confirmation at checkpoints
@@ -34,7 +34,7 @@ If missing, tell user: "Project not initialized. Run `/draft:init` first."
 2. Load full project context (these documents ARE the big picture — every track must be grounded in them):
 - Read `draft/product.md` — product vision, users, goals, constraints, guidelines (optional section)
 - Read `draft/tech-stack.md` — languages, frameworks, patterns, code style, accepted patterns
-- Read `draft/architecture.md` (if exists) — system map, modules, data flows, integration points
+- Read `draft/.ai-context.md` (if exists) — system map, modules, data flows, invariants, security architecture. Falls back to `draft/architecture.md` for legacy projects.
 - Read `draft/workflow.md` — TDD preference, commit conventions, review process, guardrails
 - Read `draft/tracks.md` — existing tracks to check for overlap or dependencies
 
@@ -67,7 +67,7 @@ Create the track directory and draft files immediately with skeleton structure:
 ## Context References
 - **Product:** `draft/product.md` — [pending]
 - **Tech Stack:** `draft/tech-stack.md` — [pending]
-- **Architecture:** `draft/architecture.md` — [pending]
+- **Architecture:** `draft/.ai-context.md` — [pending]
 
 ## Problem Statement
 [To be developed through intake conversation]
@@ -196,7 +196,7 @@ For each question:
    - Pattern recognition from industry experience
    - Trade-off analysis with citations from knowledge-base.md
    - Risk identification the user may not see
-   - Fact-checking against project context (architecture.md, tech-stack.md)
+   - Fact-checking against project context (.ai-context.md, tech-stack.md)
    - Alternative approaches with pros/cons
 4. **Update** spec-draft.md with what's been established
 5. **Summarize** periodically: "Here's what we have so far..."
@@ -217,7 +217,7 @@ Ground advice in vetted sources:
 - Skipping risk identification
 - Not updating drafts as conversation progresses
 - Rushing toward generation instead of understanding
-- Not referencing product.md, tech-stack.md, architecture.md
+- Not referencing product.md, tech-stack.md, .ai-context.md
 
 **The goal is collaborative understanding, not speed.**
 
@@ -253,7 +253,7 @@ Walk through solution questions:
 
 After each answer:
 - Present 2-3 alternative approaches with trade-offs
-- Cross-reference architecture.md for integration points
+- Cross-reference .ai-context.md (or architecture.md) for integration points
 - Suggest tech-stack.md patterns to leverage
 - Update spec-draft.md Technical Approach and Non-Goals sections
 
@@ -345,7 +345,7 @@ When user confirms spec is ready:
 
 1. Update spec-draft.md status to `[x] Complete`
 2. Rename `spec-draft.md` → `spec.md`
-3. Update Context References with specific connections to product.md, tech-stack.md, architecture.md
+3. Update Context References with specific connections to product.md, tech-stack.md, .ai-context.md
 4. Add Conversation Log summary with key decisions and reasoning
 
 Present final spec.md for acknowledgment.
@@ -371,7 +371,7 @@ AI contribution:
 - Suggest task ordering based on dependencies
 - Reference tech-stack.md for implementation patterns
 - Identify testing requirements per task
-- Flag integration points with architecture.md modules
+- Flag integration points with .ai-context.md modules
 
 ### For Bug & RCA:
 Use fixed 3-phase structure:

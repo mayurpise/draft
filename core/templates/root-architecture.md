@@ -44,7 +44,7 @@ graph TD
 
 | Service | Responsibility | Tech | Status | Details |
 |---------|---------------|------|--------|---------|
-| [service-name] | [One-line responsibility] | [Primary tech] | ✓ Active | [→ architecture](../services/[name]/draft/architecture.md) |
+| [service-name] | [One-line responsibility] | [Primary tech] | ✓ Active | [→ architecture](../services/[name]/draft/.ai-context.md) |
 
 > **Status:** ✓ Active = initialized and maintained, ○ Legacy = initialized but deprecated, ? = not initialized
 
@@ -60,7 +60,7 @@ graph TD
 
 ## Cross-Service Patterns
 
-<!-- Extracted from common conventions across service architecture.md files -->
+<!-- Extracted from common conventions across service .ai-context.md (or architecture.md) files -->
 
 | Pattern | Description | Services |
 |---------|-------------|----------|

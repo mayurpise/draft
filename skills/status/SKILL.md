@@ -26,7 +26,7 @@ Display a comprehensive overview of project progress.
    - `draft/tracks/<id>/metadata.json` for stats
    - `draft/tracks/<id>/plan.md` for task status
    - `draft/tracks/<id>/architecture.md` for module status (if exists)
-3. Check for project-wide `draft/architecture.md` (if exists)
+3. Check for project-wide `draft/.ai-context.md` (or legacy `draft/architecture.md`) for module status
 4. **Detect orphaned tracks:**
    - Scan `draft/tracks/` for all directories
    - For each directory, check if it has `metadata.json`
@@ -94,16 +94,16 @@ Blocked:          1
 
 ## Module Reporting
 
-When `architecture.md` exists for a track (track-level or project-level):
+When `.ai-context.md` or `architecture.md` exists for a track (track-level or project-level):
 
-1. Read the architecture.md module definitions
+1. Read the `.ai-context.md` (or `architecture.md`) module definitions from `## Modules` section
 2. For each module, determine status from its status marker:
    - `[ ]` Not Started
    - `[~]` In Progress — count completed vs total tasks mapped to this module
    - `[x]` Complete — include coverage percentage if recorded
    - `[!]` Blocked — include reason
 3. Display in the MODULES section of the track report
-4. If project-wide `draft/architecture.md` exists, show a project-level module summary after QUICK STATS
+4. If project-wide `draft/.ai-context.md` (or legacy `draft/architecture.md`) exists, show a project-level module summary after QUICK STATS
 
 ---
 

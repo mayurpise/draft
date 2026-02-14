@@ -1255,6 +1255,7 @@
             <button class="tab-button" data-tab="workflow" role="tab" aria-selected="false">Workflow</button>
             <button class="tab-button" data-tab="commands" role="tab" aria-selected="false">Commands</button>
             <button class="tab-button" data-tab="team" role="tab" aria-selected="false">Team</button>
+            <button class="tab-button" data-tab="research" role="tab" aria-selected="false">Codebase Research</button>
             <button class="tab-button" data-tab="reference" role="tab" aria-selected="false">Reference</button>
             <button class="tab-button" data-tab="industry" role="tab" aria-selected="false">Industry Standards</button>
         </nav>
@@ -1524,9 +1525,15 @@
                         </div>
                         <div class="hierarchy-level">
                             <div class="num">4</div>
+                            <div class="file">.ai-context.md</div>
+                            <div class="desc">Dense codebase understanding: data state machines, storage topology,
+                                consistency boundaries, modules, invariants, security architecture (brownfield only). Source of truth for all AI agents.</div>
+                        </div>
+                        <div class="hierarchy-level">
+                            <div class="num">5</div>
                             <div class="file">architecture.md</div>
-                            <div class="desc">System map with mermaid diagrams: directory structure, data flows,
-                                patterns, module dependencies (brownfield only)</div>
+                            <div class="desc">Human-readable engineering guide derived from .ai-context.md. Prose,
+                                mermaid diagrams, onboarding framing. Auto-refreshed on mutations.</div>
                         </div>
                     </div>
 
@@ -1584,8 +1591,8 @@
                         </div>
                         <div class="hierarchy-level">
                             <div class="num">3</div>
-                            <div class="file">architecture.md</div>
-                            <div class="desc">"Express API → Service layer → Prisma ORM → PostgreSQL"</div>
+                            <div class="file">.ai-context.md</div>
+                            <div class="desc">"Express API → Service layer → Prisma ORM → PostgreSQL" + data state machines, consistency boundaries</div>
                         </div>
                         <div class="hierarchy-level">
                             <div class="num">4</div>
@@ -1656,7 +1663,7 @@
                             <div class="num">2</div>
                             <div class="file">AI contributes at each step</div>
                             <div class="desc">Pattern recognition, risk surfacing, trade-off analysis, fact-checking
-                                against your architecture.md</div>
+                                against your .ai-context.md</div>
                         </div>
                         <div class="hierarchy-level">
                             <div class="num">3</div>
@@ -1736,16 +1743,24 @@
 
                 <details>
                     <summary>Architecture Discovery (Brownfield)</summary>
-                    <p>For brownfield projects, <code>/draft:init</code> performs a deep three-phase codebase analysis
-                        that generates <code>architecture.md</code>. This document becomes the persistent context every
-                        future track references.</p>
+                    <p>For brownfield projects, <code>/draft:init</code> performs a deep six-phase codebase analysis
+                        that generates <code>.ai-context.md</code> (machine-optimized source of truth) and derives
+                        <code>architecture.md</code> (human-readable guide). These documents become the persistent
+                        context every future track references.</p>
 
                     <p><strong>Phase 1: Orientation</strong> — System map with mermaid diagrams, directory hierarchy,
                         entry points, request/response flow, tech stack inventory</p>
-                    <p><strong>Phase 2: Logic</strong> — Data lifecycle, design patterns, complexity hotspots,
-                        conventions, external dependencies</p>
+                    <p><strong>Phase 2: Logic</strong> — Data lifecycle (state machines, storage topology, transformation
+                        chains), design patterns, complexity hotspots, conventions, external dependencies, critical
+                        invariants, security architecture, concurrency model, error handling, observability</p>
                     <p><strong>Phase 3: Module Discovery</strong> — Module dependencies, module inventory, dependency
                         order</p>
+                    <p><strong>Phase 4: Critical Path Tracing</strong> — End-to-end write/read/async paths with
+                        consistency boundaries, failure recovery matrix, commit points</p>
+                    <p><strong>Phase 5: Schema & Contract Discovery</strong> — Protobuf, OpenAPI, GraphQL, database
+                        schemas, inter-service dependencies</p>
+                    <p><strong>Phase 6: Test, Config & Extension Points</strong> — Test mapping, config discovery,
+                        extension cookbooks</p>
 
                     <div class="callout">
                         <div class="callout-title">Key Insight</div>
@@ -1799,9 +1814,10 @@
 
                 <details>
                     <summary>Systematic Validation</summary>
-                    <p><code>/draft:validate</code> uses Draft context (architecture.md, tech-stack.md) to catch quality
-                        issues tests miss — architecture violations, hardcoded secrets, N+1 queries, missing input
-                        validation. Non-blocking by default. Results in <code>validation-report.md</code>.</p>
+                    <p><code>/draft:validate</code> uses Draft context (.ai-context.md, tech-stack.md) to catch quality
+                        issues tests miss — architecture violations, data state machine violations, consistency boundary
+                        breaches, hardcoded secrets, N+1 queries, missing input validation, critical invariant violations.
+                        Non-blocking by default. Results in <code>validation-report.md</code>.</p>
                 </details>
 
                 <details>
@@ -1853,10 +1869,10 @@
                         <h4>What it does:</h4>
                         <ol>
                             <li>Detects brownfield (existing) vs greenfield (new) project</li>
-                            <li><strong>Architecture discovery</strong> (brownfield): 3-phase analysis with mermaid
-                                diagrams</li>
-                            <li>Creates <code>product.md</code>, <code>tech-stack.md</code>, <code>workflow.md</code>
-                            </li>
+                            <li><strong>Architecture discovery</strong> (brownfield): 6-phase deep analysis with mermaid
+                                diagrams, data state machines, consistency boundaries</li>
+                            <li>Creates <code>product.md</code>, <code>tech-stack.md</code>, <code>workflow.md</code>,
+                                <code>.ai-context.md</code>, <code>architecture.md</code></li>
                             <li>Optionally enables Architecture Mode for module decomposition</li>
                             <li>Creates <code>tracks.md</code> master registry</li>
                         </ol>
@@ -2003,7 +2019,7 @@
                         <ol>
                             <li>Proposes modules with: name, responsibility, files, API, dependencies</li>
                             <li>Maps dependencies, detects cycles, generates dependency diagram</li>
-                            <li>Creates <code>architecture.md</code> with module definitions</li>
+                            <li>Creates <code>.ai-context.md</code> with module definitions (derives <code>architecture.md</code>)</li>
                         </ol>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
@@ -2190,10 +2206,10 @@
                 <div class="hierarchy">
                     <div class="hierarchy-level">
                         <div class="num">1</div>
-                        <div class="file">product.md + tech-stack.md + architecture.md + workflow.md</div>
+                        <div class="file">product.md + tech-stack.md + .ai-context.md + architecture.md + workflow.md</div>
                         <div class="desc">Tech lead runs <code>/draft:init</code>. For brownfield projects, Draft
-                            performs deep architecture discovery — generating <code>architecture.md</code> with mermaid
-                            diagrams of system structure, data flows, and patterns. Team reviews project vision,
+                            performs deep 6-phase architecture discovery — generating <code>.ai-context.md</code> (machine-optimized source of truth with data state machines, consistency boundaries, invariants) and
+                            <code>architecture.md</code> (human-readable derived guide with mermaid diagrams). Team reviews project vision,
                             technical choices, system architecture, and workflow preferences via PR.</div>
                     </div>
                     <div class="hierarchy-level">
@@ -2206,9 +2222,9 @@
                     </div>
                     <div class="hierarchy-level">
                         <div class="num">3</div>
-                        <div class="file">architecture.md</div>
+                        <div class="file">.ai-context.md + architecture.md</div>
                         <div class="desc">Lead runs <code>/draft:decompose</code>. Team reviews module boundaries, API
-                            surfaces, dependency graph, and implementation order via PR. Senior engineers validate the
+                            surfaces, dependency graph, and implementation order via PR. <code>.ai-context.md</code> is the machine source of truth; <code>architecture.md</code> is the human-readable guide. Senior engineers validate the
                             architecture without touching the codebase.</div>
                     </div>
                     <div class="hierarchy-level">
@@ -2224,7 +2240,7 @@
                         <div class="file">Implementation + Verification</div>
                         <div class="desc">Only after all documents are merged does coding start. Every developer has
                             full context: what to build (<code>spec.md</code>), in what order (<code>plan.md</code>),
-                            with what boundaries (<code>architecture.md</code>). After implementation, quality tools
+                            with what boundaries (<code>.ai-context.md</code> / <code>architecture.md</code>). After implementation, quality tools
                             verify completeness.</div>
                     </div>
                 </div>
@@ -2296,6 +2312,251 @@
             </details>
         </div>
 
+        <!-- CODEBASE RESEARCH TAB -->
+        <div id="tab-research" class="tab-content" role="tabpanel">
+            <h2>Codebase Research</h2>
+            <p>Every AI interaction starts with understanding. <code>/draft:init</code> performs a deep 6-phase analysis
+                of your codebase and produces <strong>.ai-context.md</strong> — a dense, machine-optimized document that
+                captures how your system actually works. Not how it was designed. How it works today.</p>
+
+            <details open>
+                <summary>Why This Exists</summary>
+                <p>AI coding assistants face a fundamental problem: they don't know your system. Every session, they
+                    re-discover your architecture by reading files, guessing at patterns, and inferring relationships.
+                    This costs tokens, wastes time, and produces hallucinations when the AI fills knowledge gaps with
+                    assumptions.</p>
+
+                <div class="comparison">
+                    <div class="comparison-header">
+                        <div>Without Codebase Research</div>
+                        <div>With .ai-context.md</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>AI reads 50+ files to understand structure</div>
+                        <div>One file provides complete system understanding</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Guesses at data flow and state transitions</div>
+                        <div>State machines, consistency boundaries, and failure paths documented</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Misses security invariants and concurrency constraints</div>
+                        <div>Critical invariants catalogued with enforcement locations</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Each session starts from scratch</div>
+                        <div>Persistent, git-tracked, always current</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Different AI tools build different mental models</div>
+                        <div>Single source of truth consumed by any AI tool</div>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>What It Captures</summary>
+                <p>.ai-context.md is organized around the question every engineer and AI agent needs answered:
+                    <strong>"Where is my data right now, what state is it in, and what happens if something fails
+                        here?"</strong>
+                </p>
+
+                <div class="hierarchy">
+                    <div class="hierarchy-level">
+                        <div class="num">1</div>
+                        <div class="file">System Map</div>
+                        <div class="desc">Directory structure, entry points, request/response flows with actual
+                            file:line references. Not a diagram of intent — a map of reality.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">2</div>
+                        <div class="file">Data Lifecycle</div>
+                        <div class="desc">State machines per domain object (valid transitions, invariants, enforcement
+                            locations). Storage topology across tiers (cache, DB, event log, archive). Data
+                            transformation chains across boundaries (API payload to persistence model to event).</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">3</div>
+                        <div class="file">Critical Paths</div>
+                        <div class="desc">End-to-end write and read paths with consistency boundaries (where strong
+                            consistency ends and eventual consistency begins). Async/event paths with delivery
+                            guarantees. Failure recovery matrix — what happens to in-flight data when each stage
+                            fails.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">4</div>
+                        <div class="file">System Constraints</div>
+                        <div class="desc">Critical invariants (data safety, security, concurrency, ordering,
+                            idempotency). Security architecture. Concurrency model. Error handling and retry
+                            policies.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">5</div>
+                        <div class="file">Extension Cookbooks</div>
+                        <div class="desc">Step-by-step guides for common changes: "Add a new endpoint", "Add a new
+                            model", "Add a new integration". File-by-file instructions an AI agent can follow
+                            mechanically.</div>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Dual Output: Machine + Human</summary>
+                <p>One analysis, two outputs. Each optimized for its audience.</p>
+
+                <div class="comparison">
+                    <div class="comparison-header">
+                        <div>.ai-context.md (Machine)</div>
+                        <div>architecture.md (Human)</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Dense tables, YAML frontmatter, flat H2 sections</div>
+                        <div>Prose paragraphs, annotated diagrams, onboarding framing</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Token-efficient — minimal prose, maximum signal</div>
+                        <div>Readable — explains the "why" behind decisions</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Source of truth — all mutations happen here</div>
+                        <div>Derived — auto-refreshed when .ai-context.md changes</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div>Consumed by: /draft:implement, /draft:validate, /draft:bughunt, /draft:review, any
+                            external AI tool</div>
+                        <div>Consumed by: engineers, team leads, new hires, PR reviewers</div>
+                    </div>
+                </div>
+
+                <div class="callout">
+                    <div class="callout-title">Key Insight</div>
+                    <p>The same analysis serves both audiences without compromise. AI agents get token-efficient tables
+                        they can parse reliably. Engineers get prose they can read over coffee. Neither format
+                        sacrifices for the other because they're generated from the same source.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>How It Helps AI Assistants</summary>
+
+                <div class="hierarchy">
+                    <div class="hierarchy-level">
+                        <div class="num" style="background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan);">$</div>
+                        <div class="file" style="color: var(--accent-cyan);">Reduces Token Cost</div>
+                        <div class="desc">Instead of reading dozens of files to understand context, the AI reads one
+                            structured document. Fewer input tokens per session, compounding across every interaction.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num"
+                            style="background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald);">H</div>
+                        <div class="file" style="color: var(--accent-emerald);">Eliminates Hallucinations</div>
+                        <div class="desc">When the AI doesn't know your architecture, it invents one. .ai-context.md
+                            fills the knowledge gap with facts — actual file paths, real state machines, documented
+                            invariants — leaving nothing to guess.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num"
+                            style="background: rgba(251, 191, 36, 0.2); color: var(--accent-amber);">A</div>
+                        <div class="file" style="color: var(--accent-amber);">Improves Accuracy</div>
+                        <div class="desc">Code generation respects existing patterns, module boundaries, naming
+                            conventions, and data contracts. The AI writes code that fits your system because it knows
+                            your system.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num"
+                            style="background: rgba(251, 113, 133, 0.2); color: var(--accent-rose);">B</div>
+                        <div class="file" style="color: var(--accent-rose);">Catches More Bugs</div>
+                        <div class="desc">Bug hunting with data state machines finds invalid transitions. Consistency
+                            boundaries reveal eventual-consistency bugs. Failure recovery matrices expose missing
+                            recovery paths. Without this context, these bugs are invisible.</div>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>How It Helps Engineers</summary>
+
+                <div class="hierarchy">
+                    <div class="hierarchy-level">
+                        <div class="num">1</div>
+                        <div class="file">New Engineer Onboarding</div>
+                        <div class="desc">Day-one understanding of how the system works. architecture.md provides the
+                            human-readable guide: system overview, getting started, how data flows end-to-end. No
+                            more "read the code and figure it out."</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">2</div>
+                        <div class="file">Senior Engineer Reference</div>
+                        <div class="desc">Experienced engineers need different things — invariant tables, dependency
+                            graphs, concurrency models, failure matrices. .ai-context.md surfaces system constraints
+                            that even veterans forget or never documented.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">3</div>
+                        <div class="file">Architecture Review</div>
+                        <div class="desc">PR reviewers can check changes against documented module boundaries, data
+                            state machines, and critical invariants. Review becomes "does this change violate any
+                            documented contract?" rather than relying on tribal knowledge.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num">4</div>
+                        <div class="file">Incident Response</div>
+                        <div class="desc">When production breaks at 2am, the failure recovery matrix tells you exactly
+                            what data state each component is in and how to recover. The consistency boundary map shows
+                            where eventual-consistency lags could explain the symptoms.</div>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Living Document, Not a Snapshot</summary>
+                <p>Architecture documentation rots. .ai-context.md doesn't — because it's maintained by the same
+                    workflow that changes the code.</p>
+
+                <div class="hierarchy">
+                    <div class="hierarchy-level">
+                        <div class="num" style="background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan);">S</div>
+                        <div class="file">Synced with Code</div>
+                        <div class="desc">YAML frontmatter tracks the exact git commit the analysis was run against.
+                            Compare current HEAD vs frontmatter commit to detect staleness. <code>/draft:init
+                                refresh</code> updates the document when the codebase evolves.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num"
+                            style="background: rgba(251, 191, 36, 0.2); color: var(--accent-amber);">M</div>
+                        <div class="file">Mutated by Commands</div>
+                        <div class="desc"><code>/draft:implement</code> updates module status after completing tasks.
+                            <code>/draft:decompose</code> adds new modules with dependency graphs. Each mutation
+                            auto-refreshes the derived architecture.md. The document evolves with the code.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num"
+                            style="background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald);">G</div>
+                        <div class="file">Git-Tracked & Reviewable</div>
+                        <div class="desc">Every change to .ai-context.md goes through the same PR review process as
+                            code. Architecture decisions become visible, diffable, and blameable. History is
+                            preserved.</div>
+                    </div>
+                    <div class="hierarchy-level">
+                        <div class="num"
+                            style="background: rgba(251, 113, 133, 0.2); color: var(--accent-rose);">P</div>
+                        <div class="file">Tool-Agnostic</div>
+                        <div class="desc">Not locked to any AI vendor. Claude Code, Cursor, GitHub Copilot, Gemini,
+                            or any future tool can consume .ai-context.md. Your codebase understanding is an asset you
+                            own, not a feature of a subscription.</div>
+                    </div>
+                </div>
+
+                <div class="callout">
+                    <div class="callout-title">Key Insight</div>
+                    <p><strong>Pay the analysis cost once, benefit on every interaction.</strong> The 10-minute init
+                        analysis saves hours of repeated context-building across every AI session, every code review,
+                        every new engineer onboarding, and every incident response. The ROI compounds with every
+                        use.</p>
+                </div>
+            </details>
+        </div>
+
         <!-- REFERENCE TAB -->
         <div id="tab-reference" class="tab-content" role="tabpanel">
             <h2>Reference</h2>
@@ -2312,7 +2573,8 @@
                     <pre><code><span class="code-file">draft/</span>
 ├── <span class="code-file">product.md</span>          <span class="code-comment"># Product vision, goals, guidelines</span>
 ├── <span class="code-file">tech-stack.md</span>       <span class="code-comment"># Technical choices, accepted patterns</span>
-├── <span class="code-file">architecture.md</span>     <span class="code-comment"># System map + mermaid diagrams (brownfield)</span>
+├── <span class="code-file">.ai-context.md</span>      <span class="code-comment"># AI source of truth: data paths, state machines, modules, invariants</span>
+├── <span class="code-file">architecture.md</span>     <span class="code-comment"># Human-readable guide derived from .ai-context.md</span>
 ├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD, commit, validation, guardrails</span>
 ├── <span class="code-file">validation-report.md</span> <span class="code-comment"># Project-level quality checks (generated)</span>
 ├── <span class="code-file">jira.md</span>             <span class="code-comment"># Jira project config (optional)</span>
@@ -2321,7 +2583,8 @@
     └── <span class="code-file">&lt;track-id&gt;/</span>
         ├── <span class="code-file">spec.md</span>      <span class="code-comment"># Requirements</span>
         ├── <span class="code-file">plan.md</span>      <span class="code-comment"># Phased task breakdown</span>
-        ├── <span class="code-file">architecture.md</span> <span class="code-comment"># Track modules (optional)</span>
+        ├── <span class="code-file">.ai-context.md</span>   <span class="code-comment"># Track modules, data paths (optional)</span>
+        ├── <span class="code-file">architecture.md</span> <span class="code-comment"># Human-readable, derived (optional)</span>
         ├── <span class="code-file">metadata.json</span>
         ├── <span class="code-file">validation-report.md</span> <span class="code-comment"># Quality checks (generated)</span>
         └── <span class="code-file">jira-export.md</span> <span class="code-comment"># Jira stories (optional)</span></code></pre>
@@ -2460,7 +2723,7 @@
                         <tr>
                             <td><strong>1</strong></td>
                             <td><strong>Monorepo / Shared Context</strong></td>
-                            <td><strong>@draft index</strong><br>Federated knowledge index and system maps.</td>
+                            <td><strong>/draft:index</strong><br>Federated knowledge index and system maps.</td>
                             <td><strong>Unified Codebase</strong><br>Single source of truth, automated dependency
                                 graphing.</td>
                             <td>Google, Meta, Twitter</td>
@@ -2468,14 +2731,14 @@
                         <tr>
                             <td><strong>2</strong></td>
                             <td><strong>Test-Driven Development</strong></td>
-                            <td><strong>@draft implement</strong><br>Enforced "Red-Green-Refactor" workflow.</td>
+                            <td><strong>/draft:implement</strong><br>Enforced "Red-Green-Refactor" workflow.</td>
                             <td><strong>TDD / CI Gates</strong><br>Tests written as part of the feature.</td>
                             <td>Netflix, Pivotal</td>
                         </tr>
                         <tr>
                             <td><strong>3</strong></td>
                             <td><strong>Structured Code Review</strong></td>
-                            <td><strong>@draft review</strong><br>Two-stage review: 1) Spec compliance, 2) Code quality.
+                            <td><strong>/draft:review</strong><br>Two-stage review: 1) Spec compliance, 2) Code quality.
                             </td>
                             <td><strong>Readability / Owners</strong><br>Google's "Critique" system.</td>
                             <td>Google, Meta</td>
@@ -2483,15 +2746,15 @@
                         <tr>
                             <td><strong>3</strong></td>
                             <td><strong>Arch. Decision Records</strong></td>
-                            <td><strong>architecture.md</strong><br>Documenting <em>why</em> the system is built this
-                                way.</td>
+                            <td><strong>.ai-context.md + architecture.md</strong><br>Documenting <em>why</em> the system is built this
+                                way. Machine-optimized + human-readable dual output.</td>
                             <td><strong>ADRs</strong><br>Immutable records of architectural choices.</td>
                             <td>Spotify, AWS, GitHub</td>
                         </tr>
                         <tr>
                             <td><strong>4</strong></td>
                             <td><strong>Bug Bashes</strong></td>
-                            <td><strong>@draft bughunt</strong><br>Systematic, categorized search for edge cases.</td>
+                            <td><strong>/draft:bughunt</strong><br>Systematic, categorized search for edge cases.</td>
                             <td><strong>Bug Bashes</strong><br>Scheduled team-wide testing sessions.</td>
                             <td>Microsoft, Game Studios</td>
                         </tr>
@@ -2517,7 +2780,7 @@
                     <div class="comparison-row">
                         <div>
                             <strong>spec.md & plan.md</strong><br>
-                            You cannot run <code>@draft implement</code> without a spec. This forces the AI to "think"
+                            You cannot run <code>/draft:implement</code> without a spec. This forces the AI to "think"
                             before "acting," preventing the generation of code that works but solves the wrong problem.
                         </div>
                         <div>
@@ -2528,7 +2791,7 @@
                     </div>
                     <div class="comparison-row">
                         <div>
-                            <strong>@draft index</strong><br>
+                            <strong>/draft:index</strong><br>
                             Aggregates context from multiple services (`draft/` folders) into a federated knowledge
                             base, solving the "context window" problem for AI.
                         </div>
@@ -2540,9 +2803,9 @@
                     </div>
                     <div class="comparison-row">
                         <div>
-                            <strong>@draft review</strong><br>
+                            <strong>/draft:review</strong><br>
                             Splits review into Verification (Spec compliance) and Validation (Quality). Automates the
-                            "Readability" aspect via <code>@draft validate</code>.
+                            "Readability" aspect via <code>/draft:validate</code>.
                         </div>
                         <div>
                             <strong>Critique & Readability</strong><br>

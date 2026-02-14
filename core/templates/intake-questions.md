@@ -154,7 +154,7 @@ Structured questions for track creation. **Ask ONE question at a time.** Wait fo
 > "How does this fit with the current architecture?"
 
 **After response, contribute:**
-- Cross-reference architecture.md for integration points
+- Cross-reference .ai-context.md (or architecture.md) for integration points
 - Identify affected modules/components
 - Reference: Clean Architecture boundaries, module coupling
 - Flag: "This will touch [modules]. Consider [integration pattern]..."
@@ -230,7 +230,7 @@ Structured questions for track creation. **Ask ONE question at a time.** Wait fo
 
 **After response, contribute:**
 - List implicit assumptions explicitly
-- Fact-check against tech-stack.md and architecture.md
+- Fact-check against tech-stack.md and .ai-context.md
 - Reference: Pre-mortem technique
 - "I'm assuming [X]. If that's wrong, [consequence]..."
 
@@ -385,12 +385,12 @@ Structured questions for track creation. **Ask ONE question at a time.** Wait fo
 
 **STOP if you're doing any of these:**
 
-- ❌ Asking multiple questions at once
-- ❌ Moving to next question before user responds
-- ❌ Accepting answers without contributing expertise
-- ❌ Not citing sources when giving advice
-- ❌ Skipping checkpoints between phases
-- ❌ Not updating drafts after each answer
-- ❌ Rushing to finalization without thorough exploration
+- Asking multiple questions at once
+- Moving to next question before user responds
+- Accepting answers without contributing expertise
+- Not citing sources when giving advice
+- Skipping checkpoints between phases
+- Not updating drafts after each answer
+- Rushing to finalization without thorough exploration
 
 **The goal is collaborative understanding, not speed.**

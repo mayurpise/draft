@@ -3,9 +3,9 @@
 #
 # What this tests:
 # - Build script exists and is executable
-# - Output files are generated (Cursor, Copilot, Gemini)
+# - Output files are generated (Copilot, Gemini)
 # - Output files have expected structure (> 100 lines)
-# - Syntax transformations are correct (/draft: → @draft for Cursor/Gemini, → draft for Copilot)
+# - Syntax transformations are correct (/draft: → @draft for Gemini, → draft for Copilot)
 # - No @draft references in Copilot output
 # - Idempotency (rebuilds produce identical output)
 #
@@ -25,10 +25,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 BUILD_SCRIPT="$ROOT_DIR/scripts/build-integrations.sh"
-CURSOR_OUTPUT="$ROOT_DIR/integrations/cursor/.cursorrules"
 COPILOT_OUTPUT="$ROOT_DIR/integrations/copilot/.github/copilot-instructions.md"
 GEMINI_OUTPUT="$ROOT_DIR/integrations/gemini/GEMINI.md"
-BASELINE="/tmp/cursorrules-baseline"
+BASELINE="/tmp/copilot-baseline"
 
 PASS=0
 FAIL=0
@@ -64,39 +63,7 @@ if [[ -f "$BUILD_SCRIPT" && -x "$BUILD_SCRIPT" ]]; then
     echo ""
 fi
 
-# --- Cursor output tests ---
-echo "## Cursor output"
-assert "Cursor .cursorrules generated" \
-    "$([[ -f "$CURSOR_OUTPUT" ]] && echo true || echo false)"
-
-if [[ -f "$CURSOR_OUTPUT" ]]; then
-    LINES=$(wc -l < "$CURSOR_OUTPUT" | tr -d ' ')
-    assert "Cursor output has content (>100 lines)" \
-        "$([[ "$LINES" -gt 100 ]] && echo true || echo false)"
-    DRAFT_COLON=$(grep -c '/draft:' "$CURSOR_OUTPUT" 2>/dev/null || true)
-    assert "Cursor output contains no /draft: references" \
-        "$([[ "${DRAFT_COLON:-0}" -eq 0 ]] && echo true || echo false)"
-    AT_DRAFT=$(grep -c '@draft' "$CURSOR_OUTPUT" 2>/dev/null || true)
-    assert "Cursor output contains @draft references" \
-        "$([[ "${AT_DRAFT:-0}" -gt 0 ]] && echo true || echo false)"
-    # Agent references are now preserved (not stripped) as of bugfix
-    echo "  SKIP: Agent references now preserved (not checking)"
-fi
-
-# --- Idempotency test ---
-echo ""
-echo "## Idempotency"
-if [[ -f "$CURSOR_OUTPUT" ]]; then
-    cp "$CURSOR_OUTPUT" "$BASELINE"
-    "$BUILD_SCRIPT" > /dev/null 2>&1 || true
-    assert "Cursor output is idempotent (rebuild produces same result)" \
-        "$(diff -q "$BASELINE" "$CURSOR_OUTPUT" > /dev/null 2>&1 && echo true || echo false)"
-else
-    assert "Cursor output is idempotent (rebuild produces same result)" "false"
-fi
-
 # --- Copilot output tests ---
-echo ""
 echo "## Copilot output"
 assert "Copilot copilot-instructions.md generated" \
     "$([[ -f "$COPILOT_OUTPUT" ]] && echo true || echo false)"
@@ -111,12 +78,22 @@ if [[ -f "$COPILOT_OUTPUT" ]]; then
     DRAFT_COLON=$(grep -c '/draft:' "$COPILOT_OUTPUT" 2>/dev/null || true)
     assert "Copilot output contains no /draft: references" \
         "$([[ "${DRAFT_COLON:-0}" -eq 0 ]] && echo true || echo false)"
-    # Agent references are now preserved (not stripped) as of bugfix
-    echo "  SKIP: Agent references now preserved (not checking)"
     assert "Copilot output contains Draft methodology header" \
         "$(grep -q '# Draft - Context-Driven Development' "$COPILOT_OUTPUT" && echo true || echo false)"
     assert "Copilot output uses 'draft <cmd>' syntax (not @draft)" \
         "$(grep -q 'draft init' "$COPILOT_OUTPUT" && echo true || echo false)"
+fi
+
+# --- Idempotency test ---
+echo ""
+echo "## Idempotency"
+if [[ -f "$COPILOT_OUTPUT" ]]; then
+    cp "$COPILOT_OUTPUT" "$BASELINE"
+    "$BUILD_SCRIPT" > /dev/null 2>&1 || true
+    assert "Copilot output is idempotent (rebuild produces same result)" \
+        "$(diff -q "$BASELINE" "$COPILOT_OUTPUT" > /dev/null 2>&1 && echo true || echo false)"
+else
+    assert "Copilot output is idempotent (rebuild produces same result)" "false"
 fi
 
 # --- Gemini output tests ---
@@ -135,8 +112,6 @@ if [[ -f "$GEMINI_OUTPUT" ]]; then
     AT_DRAFT=$(grep -c '@draft' "$GEMINI_OUTPUT" 2>/dev/null || true)
     assert "Gemini output contains @draft references" \
         "$([[ "${AT_DRAFT:-0}" -gt 0 ]] && echo true || echo false)"
-    # Agent references are now preserved (not stripped) as of bugfix
-    echo "  SKIP: Agent references now preserved (not checking)"
 fi
 
 # --- Summary ---

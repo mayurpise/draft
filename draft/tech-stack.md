@@ -2,28 +2,36 @@
 project: "draft"
 module: "root"
 generated_by: "draft:init"
-generated_at: "2026-02-15T00:45:00Z"
+generated_at: "2026-02-15T09:15:00Z"
 git:
   branch: "main"
   remote: "origin/main"
-  commit: "1195da8278db7a518434910765076d358dbcf420"
-  commit_short: "1195da8"
-  commit_date: "2026-02-14 17:43:01 -0800"
-  commit_message: "feat(skills): add YAML frontmatter to decompose, index, jira-preview"
+  commit: "8b120fb6de234d14c78e637bc90c0238308f2321"
+  commit_short: "8b120fb"
+  commit_date: "2026-02-15 01:06:48 -0800"
+  commit_message: "fix(landing): update social share links to point to research tab"
   dirty: true
-synced_to_commit: "1195da8278db7a518434910765076d358dbcf420"
+synced_to_commit: "8b120fb6de234d14c78e637bc90c0238308f2321"
 ---
 
 # Tech Stack
+
+| Field | Value |
+|-------|-------|
+| **Branch** | `main` → `origin/main` |
+| **Commit** | `8b120fb` — fix(landing): update social share links to point to research tab |
+| **Generated** | 2026-02-15T09:15:00Z |
+| **Synced To** | `8b120fb6de234d14c78e637bc90c0238308f2321` |
+
+---
 
 ## Languages
 
 | Language | Version | Purpose |
 |----------|---------|---------|
-| Markdown | - | All skill definitions, methodology, templates, user-facing artifacts |
-| YAML | - | Skill frontmatter (name, description metadata) |
-| Bash | 5.x | Build script for integration file generation |
-| Mermaid | - | Architecture diagrams (graph, sequence, flowchart) |
+| Markdown | N/A | Primary — all skill definitions, methodology, templates, agents (~12,000 lines) |
+| Bash | 5.x | Build system, test harness (~762 lines) |
+| HTML/CSS/JS | ES6+ | Landing page (index.html) |
 
 ---
 
@@ -32,18 +40,21 @@ synced_to_commit: "1195da8278db7a518434910765076d358dbcf420"
 ### Core
 | Name | Version | Purpose |
 |------|---------|---------|
-| Claude Code Plugin API | v1.3.0 | Plugin manifest, skill registration, slash command routing |
+| Claude Code Plugin System | 1.x | Plugin discovery via `.claude-plugin/plugin.json` |
+| YAML Frontmatter | N/A | Skill metadata (name, description) and file tracking (git state) |
 
 ### Development
 | Name | Version | Purpose |
 |------|---------|---------|
-| Git | 2.x | Version control, track history, revert workflows |
+| GNU Make | 4.x | Build orchestration (`make build`, `make test`, `make clean`) |
+| GNU sed | 4.x | Platform-specific syntax transforms in build script |
+| Bash (set -euo pipefail) | 5.x | Strict error handling in scripts |
 
 ---
 
 ## Database
 
-N/A — Draft is a methodology plugin with no persistent data storage. All state lives in markdown files within the `draft/` directory.
+No database. Draft is a document-driven plugin with no persistent state beyond files in the user's `draft/` directory.
 
 ---
 
@@ -51,40 +62,47 @@ N/A — Draft is a methodology plugin with no persistent data storage. All state
 
 | Level | Framework | Coverage Target |
 |-------|-----------|-----------------|
-| Integration | `tests/test-build.sh` | Build script output validation |
-| Manual | Slash command invocation | All 15 commands functional |
+| Build Verification | `tests/test-build-integrations.sh` | 13 tests across 4 categories |
+| Existence | assert() helper | Verify generated files exist |
+| Content | grep-based assertions | Verify output correctness (no `/draft:` syntax, correct triggers) |
+| Idempotency | diff-based | Same input produces same output |
 
 ---
 
 ## Build & Deploy
 
 ### Build
-- **Tool**: `scripts/build-integrations.sh` (Bash)
+- **Tool**: `scripts/build-integrations.sh` (642 lines Bash)
 - **Output**: `integrations/copilot/.github/copilot-instructions.md`, `integrations/gemini/GEMINI.md`
-- **Process**: Extracts frontmatter + body from `skills/*/SKILL.md`, inlines into platform-specific formats
+- **Command**: `make build` or `./scripts/build-integrations.sh`
 
 ### CI/CD
-- **Platform**: Manual (run `./scripts/build-integrations.sh` after skill changes)
+- **Platform**: None configured (manual build + test)
+- **Verification**: `make test` runs 13 build verification tests
 
 ### Deployment
-- **Target**: Claude Code Plugin Marketplace (`/plugin marketplace add mayurpise/draft`)
-- **Distribution**: Git repository clone, marketplace install
+- **Target**: GitHub repository (plugin installed via Claude Code)
+- **Landing page**: `index.html` served at getdraft.dev (via CNAME)
 
 ---
 
 ## Code Patterns
 
 ### Architecture
-- **Pattern**: Document-driven methodology (skills as markdown instructions interpreted by LLM)
-- **Rationale**: No runtime code needed — Claude LLM executes markdown instructions directly
+- **Pattern**: Convention-over-configuration plugin system
+- **Rationale**: Claude Code auto-discovers skills from `skills/*/SKILL.md` via plugin manifest — no registration code needed
+
+### State Management
+- **Approach**: File-based state in user's `draft/` directory
+- **Rationale**: No runtime process; all state persists as Markdown/JSON files
 
 ### Error Handling
-- **Strategy**: Skills include verification steps and rollback instructions within their markdown bodies
-- **Logging**: Status markers (`[ ]`, `[~]`, `[x]`, `[!]`) tracked in plan.md and tracks.md
+- **Strategy**: `set -euo pipefail` in all Bash scripts; build script validates frontmatter, body format, skill names, and output syntax
+- **Logging**: stderr for warnings, stdout for normal output
 
 ### API Design
-- **Style**: Slash command interface (`/draft:<command> [args]`)
-- **Conventions**: kebab-case command names, structured markdown output
+- **Style**: Slash commands (`/draft:<name>`) — no REST/GraphQL/gRPC
+- **Conventions**: Skill names are kebab-case `[a-z0-9-]+`, enforced by build script regex
 
 ---
 
@@ -92,30 +110,33 @@ N/A — Draft is a methodology plugin with no persistent data storage. All state
 
 ```mermaid
 graph TD
-    subgraph Plugin["Plugin Layer"]
-        Manifest["plugin.json"]
-        Skills["15 SKILL.md files"]
+    subgraph PluginSystem["Claude Code Plugin"]
+        Manifest[".claude-plugin/plugin.json"]
+        Skills["skills/*/SKILL.md"]
     end
-    subgraph Core["Core Layer"]
-        Methodology["methodology.md"]
-        Agents["5 Agent behaviors"]
-        Templates["14 Templates"]
-        Knowledge["knowledge-base.md"]
+    subgraph Core["Core Reference"]
+        Methodology["core/methodology.md"]
+        Agents["core/agents/*.md"]
+        Templates["core/templates/*.md"]
     end
-    subgraph Output["Generated Output"]
-        Cursor[".cursorrules"]
-        Copilot["copilot-instructions.md"]
-        Gemini["GEMINI.md"]
-        UserDraft["draft/ directory"]
+    subgraph Build["Build Pipeline"]
+        Script["scripts/build-integrations.sh"]
+        Tests["tests/test-build-integrations.sh"]
     end
+    subgraph Output["Generated Integrations"]
+        Copilot["integrations/copilot/"]
+        Gemini["integrations/gemini/"]
+    end
+    Manifest --> Skills
     Skills --> Methodology
     Skills --> Agents
     Skills --> Templates
-    Skills --> Knowledge
-    Skills --> UserDraft
-    Skills --> Cursor
-    Skills --> Copilot
-    Skills --> Gemini
+    Script --> Skills
+    Script --> Core
+    Script --> Copilot
+    Script --> Gemini
+    Tests --> Copilot
+    Tests --> Gemini
 ```
 
 ---
@@ -124,21 +145,33 @@ graph TD
 
 | Service | Purpose | Credentials Location |
 |---------|---------|---------------------|
-| MCP-Jira (optional) | Jira issue creation from tracks | MCP server config |
-| Claude LLM | Instruction interpretation and execution | Claude Code CLI auth |
+| GitHub | Repository hosting, plugin distribution | SSH keys / PAT |
+| getdraft.dev | Landing page (CNAME to GitHub Pages) | DNS configuration |
 
 ---
 
 ## Code Style
 
 ### Formatting
-- **Indentation**: 2 spaces (markdown, YAML, Bash)
-- **Line Length**: No hard limit (markdown prose)
+- **Indentation**: 2 spaces (enforced by `.editorconfig`)
+- **Line Length**: 120 max
+- **End of Line**: LF
+- **Final Newline**: Required
 
 ### Naming Conventions
-- **Files**: kebab-case (`new-track`, `jira-create`)
-- **Skills**: `skills/<name>/SKILL.md`
-- **Templates**: `core/templates/<name>.md`
-- **Agents**: `core/agents/<name>.md`
-- **Status markers**: `[ ]` Pending, `[~]` In Progress, `[x]` Completed, `[!]` Blocked
-- **Commit messages**: `type(scope): description`
+- **Skill directories**: kebab-case (`new-track`, `jira-create`)
+- **Skill files**: `SKILL.md` (uppercase, always)
+- **Agent files**: lowercase kebab (`debugger.md`, `rca.md`)
+- **Template files**: lowercase kebab (`tech-stack.md`, `intake-questions.md`)
+- **Build scripts**: lowercase kebab (`build-integrations.sh`)
+
+---
+
+## Accepted Patterns
+
+| Pattern | Location | Rationale |
+|---------|----------|-----------|
+| Massive single files (1000+ lines) | `skills/init/SKILL.md` (1971 lines) | Skills are self-contained instruction sets — splitting would break plugin discovery |
+| `tail -n +4` to skip body header | `build-integrations.sh:extract_body()` | Convention: SKILL.md body starts with `# Title` + blank line; build strips these 3 lines |
+| Duplicated git metadata in every file | All `draft/*.md` files | Enables incremental refresh via `synced_to_commit` without external state |
+| Generated files checked into git | `integrations/copilot/`, `integrations/gemini/` | Users clone the repo to use integrations; build-from-source is optional |

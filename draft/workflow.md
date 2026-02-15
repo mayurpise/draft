@@ -1,4 +1,29 @@
+---
+project: "draft"
+module: "root"
+generated_by: "draft:init"
+generated_at: "2026-02-15T09:15:00Z"
+git:
+  branch: "main"
+  remote: "origin/main"
+  commit: "8b120fb6de234d14c78e637bc90c0238308f2321"
+  commit_short: "8b120fb"
+  commit_date: "2026-02-15 01:06:48 -0800"
+  commit_message: "fix(landing): update social share links to point to research tab"
+  dirty: true
+synced_to_commit: "8b120fb6de234d14c78e637bc90c0238308f2321"
+---
+
 # Development Workflow
+
+| Field | Value |
+|-------|-------|
+| **Branch** | `main` → `origin/main` |
+| **Commit** | `8b120fb` — fix(landing): update social share links to point to research tab |
+| **Generated** | 2026-02-15T09:15:00Z |
+| **Synced To** | `8b120fb6de234d14c78e637bc90c0238308f2321` |
+
+---
 
 ## Test-Driven Development
 
@@ -9,8 +34,6 @@
 - [x] All code must have tests before marking complete
 - [x] Refactoring encouraged
 
-> Draft is primarily a markdown methodology project. TDD applies to the build script and any future code additions, not to markdown skill files.
-
 ---
 
 ## Commit Strategy
@@ -20,7 +43,7 @@
 ### Types
 | Type | Use For |
 |------|---------|
-| `feat` | New skill or feature |
+| `feat` | New feature (new skill, new agent, new template) |
 | `fix` | Bug fix |
 | `docs` | Documentation only |
 | `style` | Formatting, whitespace |
@@ -29,8 +52,8 @@
 | `chore` | Build, tooling, dependencies |
 
 ### Scope
-- Use track ID for Draft work: `feat(add-auth): ...`
-- Use component name otherwise: `fix(build): ...`
+- Use skill name for skill changes: `feat(init): ...`
+- Use component name otherwise: `fix(build): ...`, `docs(readme): ...`
 
 ### Commit Frequency
 - [x] After each task completion
@@ -42,15 +65,16 @@
 ## Code Review
 
 ### Self-Review Checklist
-- [x] Skill follows frontmatter + body format
-- [x] Build script runs without errors after skill changes
-- [x] Integration files regenerated (`./scripts/build-integrations.sh`)
-- [x] No placeholder text left in templates
+- [x] Skill follows frontmatter format (name + description in YAML)
+- [x] Skill body starts with blank line + `# Title` + blank line
+- [x] Build passes (`make build`)
+- [x] Tests pass (`make test`)
+- [x] No `/draft:` syntax in generated integration files
 
 ### Before Marking Task Complete
-- [x] Run build script
+- [x] Run `make build && make test`
 - [x] Review diff
-- [x] Test affected slash commands manually
+- [x] Verify integration files regenerated correctly
 
 ---
 
@@ -58,8 +82,8 @@
 
 At the end of each phase:
 
-1. **Run build script** — verify integrations regenerate cleanly
-2. **Test affected commands** — invoke slash commands and verify behavior
+1. **Run full test suite** (`make test`)
+2. **Verify build output** (`make build`)
 3. **Review against phase goals** in plan.md
 4. **Document any issues** found
 
@@ -98,3 +122,27 @@ Do not proceed to next phase until verification passes.
 1. Commit any pending changes
 2. Update plan.md with progress
 3. Add notes for next session if mid-task
+
+### Context Handoff
+If task exceeds 5 iterations:
+1. Document current state in plan.md
+2. Note any discoveries or blockers
+3. Suggest resumption approach
+
+---
+
+## Guardrails
+
+### Git & Version Control
+- [x] No force push to shared branches
+
+### Code Quality
+- [x] No commented-out code blocks
+- [x] No TODO comments without linked issue
+
+### Security
+- [x] No secrets/credentials in code
+
+### Testing
+- [x] Tests required before merge
+- [x] No skipped tests without documented reason

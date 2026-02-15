@@ -108,9 +108,38 @@ Next number = existing count + 1, zero-padded to 3 digits (001, 002, ...).
 
 ## Step 5: Create ADR File
 
+**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
+
+```bash
+git branch --show-current                    # LOCAL_BRANCH
+git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
+git rev-parse HEAD                           # FULL_SHA
+git rev-parse --short HEAD                   # SHORT_SHA
+git log -1 --format=%ci HEAD                 # COMMIT_DATE
+git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
+git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
+```
+
 Create `draft/adrs/<number>-<kebab-case-title>.md`:
 
 ```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+adr_number: <number>
+generated_by: "draft:adr"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+
 # ADR-<number>: <Title>
 
 **Date:** <ISO date>

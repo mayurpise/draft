@@ -1,438 +1,947 @@
+---
+project: "draft"
+module: "root"
+generated_by: "draft:init"
+generated_at: "2026-02-15T00:45:00Z"
+git:
+  branch: "main"
+  remote: "origin/main"
+  commit: "1195da8278db7a518434910765076d358dbcf420"
+  commit_short: "1195da8"
+  commit_date: "2026-02-14 17:43:01 -0800"
+  commit_message: "feat(skills): add YAML frontmatter to decompose, index, jira-preview"
+  dirty: true
+synced_to_commit: "1195da8278db7a518434910765076d358dbcf420"
+---
+
 # Architecture: Draft Plugin
 
-## System Overview
+> Human-readable engineering reference. 30-45 pages.
+> For token-optimized AI context, see `draft/.ai-context.md`.
 
-**Key Takeaway:** Draft is a Claude Code plugin that implements Context-Driven Development methodology, providing a suite of 15 slash commands (`/draft:*`) for structured software development through specifications and plans before implementation. It operationalizes the constraint hierarchy: `product.md` → `tech-stack.md` → `architecture.md` → `spec.md` → `plan.md`, ensuring AI systems work within pre-approved constraints rather than making autonomous decisions.
+---
 
-### System Architecture Diagram
+## Table of Contents
+
+1. [Executive Summary](#1-executive-summary)
+2. [AI Agent Quick Reference](#2-ai-agent-quick-reference)
+3. [System Identity & Purpose](#3-system-identity--purpose)
+4. [Architecture Overview](#4-architecture-overview)
+5. [Component Map & Interactions](#5-component-map--interactions)
+6. [Data Flow — End to End](#6-data-flow--end-to-end)
+7. [Core Modules Deep Dive](#7-core-modules-deep-dive)
+8. [Concurrency Model & Thread Safety](#8-concurrency-model--thread-safety)
+9. [Framework & Extension Points](#9-framework--extension-points)
+10. [Full Catalog of Implementations](#10-full-catalog-of-implementations)
+11. [API & Interface Definitions](#11-api--interface-definitions)
+12. [External Dependencies](#12-external-dependencies)
+13. [Cross-Module Integration Points](#13-cross-module-integration-points)
+14. [Critical Invariants & Safety Rules](#14-critical-invariants--safety-rules)
+15. [Security Architecture](#15-security-architecture)
+16. [Error Handling & Failure Modes](#16-error-handling--failure-modes)
+17. [State Management & Persistence](#17-state-management--persistence)
+18. [Key Design Patterns](#18-key-design-patterns)
+19. [Configuration & Tuning](#19-configuration--tuning)
+20. [How to Extend — Step-by-Step Cookbooks](#20-how-to-extend--step-by-step-cookbooks)
+21. [Build System & Development Workflow](#21-build-system--development-workflow)
+22. [Testing Infrastructure](#22-testing-infrastructure)
+23. [Known Technical Debt & Limitations](#23-known-technical-debt--limitations)
+24. [Glossary](#24-glossary)
+25. [Appendix A: File Structure Summary](#appendix-a-file-structure-summary)
+26. [Appendix B: Data Source → Implementation Mapping](#appendix-b-data-source--implementation-mapping)
+
+---
+
+## 1. Executive Summary
+
+Draft is a Claude Code plugin implementing Context-Driven Development methodology. It provides 15 slash commands (`/draft:*`) for structured software development through specifications and plans before implementation. The plugin operationalizes a constraint hierarchy: `product.md` → `tech-stack.md` → `architecture.md` → `spec.md` → `plan.md`, ensuring AI systems work within pre-approved constraints.
+
+**Key Facts:**
+- **Primary language**: Markdown (skills as LLM-interpreted instructions)
+- **Entry point**: `.claude-plugin/plugin.json` manifest
+- **Architecture style**: Document-driven methodology (no runtime code)
+- **Version**: 1.3.0
+- **Components**: 15 skills, 5 agents, 14 templates
+- **Primary data sources**: User's codebase, `draft/` context files
+- **Primary action targets**: File system (`draft/` directory), Git
+
+---
+
+## 2. AI Agent Quick Reference
+
+```
+**Module**           : draft
+**Root Path**        : ./
+**Language**         : Markdown + YAML frontmatter + Bash
+**Build**            : ./scripts/build-integrations.sh
+**Test**             : Manual slash command invocation
+**Entry Point**      : .claude-plugin/plugin.json → skills/*/SKILL.md
+**Config System**    : YAML frontmatter in SKILL.md files
+**Extension Point**  : Create skills/<name>/SKILL.md with frontmatter
+**API Definition**   : Slash commands (/draft:<name>)
+**Key Config Prefix**: N/A (no runtime config)
+
+**Before Making Changes, Always:**
+1. Check core/methodology.md for workflow constraints
+2. Verify skill frontmatter format (name, description required)
+3. Run ./scripts/build-integrations.sh after skill changes
+4. Test command via Claude Code CLI
+
+**Never:**
+- Edit integration files directly (copilot-instructions.md, GEMINI.md)
+- Modify skill body structure without updating build script
+- Skip frontmatter metadata in new skills
+```
+
+---
+
+## 3. System Identity & Purpose
+
+### What Draft Does
+
+1. **Initializes project context** — `/draft:init` scans codebase, generates product.md, tech-stack.md, architecture.md
+2. **Manages feature tracks** — `/draft:new-track` creates spec.md + plan.md for features/bugs
+3. **Executes implementation** — `/draft:implement` follows TDD workflow (RED→GREEN→REFACTOR)
+4. **Validates quality** — `/draft:validate`, `/draft:bughunt`, `/draft:review` check code quality
+5. **Integrates with tools** — `/draft:jira-preview`, `/draft:jira-create` for Jira export
+6. **Supports monorepos** — `/draft:index` aggregates service contexts
+
+### Why Draft Exists
+
+Without Draft, AI-assisted development suffers from:
+- **Context loss** — AI lacks product vision, tech constraints, prior decisions
+- **Specification drift** — Implementation diverges from requirements
+- **Quality inconsistency** — No systematic validation or review process
+- **Collaboration friction** — No shared structure for feature planning
+
+---
+
+## 4. Architecture Overview
+
+### 4.1 High-Level Topology
 
 ```mermaid
-graph TD
-    subgraph Presentation["Plugin Interface"]
-        Manifest[plugin.json]
-        Skills[14 Slash Commands]
+flowchart TD
+    subgraph Plugin["Draft Plugin"]
+        Manifest[".claude-plugin/plugin.json"]
+        subgraph Skills["skills/ (15 commands)"]
+            Init["init"]
+            NewTrack["new-track"]
+            Implement["implement"]
+            Review["review"]
+            Validate["validate"]
+            BugHunt["bughunt"]
+            Others["...10 more"]
+        end
+        subgraph Core["core/"]
+            Methodology["methodology.md"]
+            Agents["agents/ (5)"]
+            Templates["templates/ (14)"]
+            KnowledgeBase["knowledge-base.md"]
+        end
     end
-    subgraph Logic["Execution Layer"]
-        Agents[Core Agents]
-        Templates[13 Templates]
-        Knowledge[Knowledge Base]
-    end
-    subgraph Data["User Context"]
-        DraftFiles[draft/ directory]
-        TrackFiles[tracks/<id>/]
+    subgraph External["External"]
+        Claude["Claude LLM"]
+        FSys["File System"]
+        Git["Git"]
+        MCP["MCP-Jira (optional)"]
     end
     Manifest --> Skills
-    Skills --> Agents
-    Skills --> Templates
-    Skills --> Knowledge
-    Skills --> DraftFiles
-    Skills --> TrackFiles
+    Skills --> Core
+    Skills --> Claude
+    Skills --> FSys
+    Skills --> Git
+    Review --> Validate
+    Review --> BugHunt
 ```
+
+### 4.2 Process Lifecycle
+
+1. **Plugin Load**: Claude Code reads `.claude-plugin/plugin.json`
+2. **Command Parse**: User invokes `/draft:<command> [args]`
+3. **Skill Load**: Plugin loads `skills/<command>/SKILL.md`
+4. **Frontmatter Parse**: Extract `name`, `description` metadata
+5. **Instruction Execute**: Claude LLM interprets markdown body
+6. **File Operations**: Skill reads/writes to `draft/` directory
+7. **Status Report**: Completion message to user
 
 ---
 
-## Phase 1: Orientation
+## 5. Component Map & Interactions
 
-### Directory Structure
+### 5.1 Top-Level Orchestrator
 
-| Directory | Responsibility | Key Files |
-|-----------|---------------|-----------|
-| `.claude-plugin/` | Plugin manifest & marketplace config | `plugin.json`, `marketplace.json` |
-| `skills/` | Command implementations (15 skills) | `*/SKILL.md` |
-| `core/agents/` | Specialized agents | `architect.md`, `reviewer.md`, `debugger.md`, `planner.md`, `rca.md` |
-| `core/templates/` | Context file templates (15) | `ai-context.md`, `architecture.md`, `product.md`, `tech-stack.md`, `workflow.md`, `intake-questions.md`, `jira.md`, `dependency-graph.md`, `root-architecture.md`, `root-product.md`, `root-tech-stack.md`, `service-index.md`, `tech-matrix.md`, `spec.md`, `metadata.json` |
-| `core/` | Methodology documentation | `methodology.md`, `knowledge-base.md` |
-| `integrations/` | Generated integration files | `copilot/.github/copilot-instructions.md`, `gemini/GEMINI.md` |
-| `scripts/` | Build automation | `build-integrations.sh` |
-| `draft/` | User project context (generated) | `product.md`, `tech-stack.md`, `tracks.md`, `tracks/` |
+The plugin manifest (`.claude-plugin/plugin.json`) declares the skill directory. Claude Code routes commands to corresponding `SKILL.md` files.
 
-```mermaid
-graph TD
-    Root["draft/"] --> Plugin[".claude-plugin/"]
-    Root --> Skills["skills/"]
-    Root --> Core["core/"]
-    Root --> Integrations["integrations/"]
-    Root --> Scripts["scripts/"]
-    Root --> UserDraft["draft/ (user)"]
+**Owned Components:**
 
-    Skills --> Draft["draft/"]
-    Skills --> Init["init/"]
-    Skills --> NewTrack["new-track/"]
-    Skills --> Implement["implement/"]
-    Skills --> Review["review/"]
+| Component | Type | Purpose |
+|-----------|------|---------|
+| `skills/` | Directory | 15 slash command implementations |
+| `core/agents/` | Directory | 5 specialized agent behaviors |
+| `core/templates/` | Directory | 14 file templates |
+| `core/methodology.md` | File | Master methodology specification |
+| `core/knowledge-base.md` | File | Architectural guidance sources |
+| `scripts/build-integrations.sh` | Script | Integration file generator |
 
-    Core --> Agents["agents/"]
-    Core --> Templates["templates/"]
-    Core --> Methodology["methodology.md"]
-    Core --> KnowledgeBase["knowledge-base.md"]
+### 5.2 Dependency Injection / Wiring Pattern
 
-    Integrations --> Cursor["cursor/"]
-    Integrations --> Copilot["copilot/"]
-    Integrations --> Gemini["gemini/"]
-```
+Skills reference other components via markdown include-style instructions:
+- "Use the template from `core/templates/product.md`"
+- "Follow the reviewer agent behavior in `core/agents/reviewer.md`"
 
-### Entry Points & Critical Paths
+No runtime DI — all wiring is declarative in skill bodies.
 
-| Entry Point | Type | File | Description |
-|-------------|------|------|-------------|
-| Plugin manifest | Claude Code | `.claude-plugin/plugin.json` | Declares plugin name, version, skills directory |
-| Slash commands | User invocation | `skills/*/SKILL.md` | 15 commands: `/draft:init`, `/draft:new-track`, `/draft:implement`, `/draft:adr`, etc. |
-| Build script | Developer workflow | `scripts/build-integrations.sh` | Regenerates Cursor/Copilot/Gemini integrations from skills |
+### 5.3 Interaction Matrix
 
-### Request/Response Flow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Claude[Claude Code CLI]
-    participant Plugin[Draft Plugin]
-    participant Skill[SKILL.md]
-    participant FSys[File System]
-    participant LLM[Claude LLM]
-
-    User->>Claude: /draft:init
-    Claude->>Plugin: Load plugin.json
-    Plugin->>Skill: Execute skills/init/SKILL.md
-    Skill->>FSys: Scan package.json, src/
-    Skill->>LLM: Analyze codebase structure
-    LLM-->>Skill: Architecture insights
-    Skill->>FSys: Write draft/product.md, tech-stack.md, architecture.md
-    Skill-->>Claude: Completion message
-    Claude-->>User: Display result
-```
-
-### Tech Stack Inventory
-
-| Category | Technology | Version | Config File |
-|----------|-----------|---------|-------------|
-| Plugin Framework | Claude Code Plugin API | v1.2.0 | `.claude-plugin/plugin.json` |
-| Skill Format | Markdown + YAML frontmatter | - | `skills/*/SKILL.md` |
-| Build Tool | Bash | 5.x | `scripts/build-integrations.sh` |
-| Version Control | Git | 2.x | `.git/` |
-| Documentation | Markdown, Mermaid | - | `*.md` |
-| Integration Targets | Cursor, GitHub Copilot, Gemini | - | `integrations/*/` |
+| | init | new-track | implement | review | validate | bughunt |
+|---|---|---|---|---|---|---|
+| init | — | provides context | provides context | — | — | — |
+| new-track | reads draft/ | — | provides plan.md | — | — | — |
+| implement | — | reads plan.md | — | — | — | — |
+| review | — | reads spec.md | — | — | calls | calls |
+| validate | reads tech-stack | — | — | called by | — | — |
+| bughunt | reads architecture | — | — | called by | — | — |
 
 ---
 
-## Phase 2: Logic
+## 6. Data Flow — End to End
 
-### Data Lifecycle
+### 6.1 Project Initialization Flow
 
 ```mermaid
 flowchart LR
-    Input["User Command\n(/draft:init)"] --> Parse["Skill Frontmatter\nParsing"]
-    Parse --> Execute["Markdown Instructions\nInterpretation (LLM)"]
-    Execute --> Generate["Context File\nGeneration"]
-    Generate --> Persist["Write to draft/\nDirectory"]
-    Persist --> Output["Status Message\nto User"]
+    User["User: /draft:init"] --> Scan["Scan Codebase"]
+    Scan --> Detect["Detect Tech Stack"]
+    Detect --> Analyze["5-Phase Analysis"]
+    Analyze --> GenArch["Generate architecture.md"]
+    GenArch --> GenAI["Derive .ai-context.md"]
+    GenAI --> GenProd["Generate product.md"]
+    GenProd --> GenTech["Generate tech-stack.md"]
+    GenTech --> GenWork["Generate workflow.md"]
+    GenWork --> GenTrack["Generate tracks.md"]
+    GenTrack --> Done["Initialization Complete"]
 ```
 
-### Primary Data Objects
+### 6.2 Track Creation Flow
 
-| Object | Created At | Modified At | Persisted In | Key Fields |
-|--------|-----------|-------------|--------------|------------|
-| Project Context | `skills/init/SKILL.md` | `/draft:init refresh` | `draft/product.md`, `draft/tech-stack.md`, `draft/architecture.md` | Vision, stack, modules |
-| Track | `skills/new-track/SKILL.md` | `/draft:implement`, `/draft:review` | `draft/tracks/<id>/` | spec.md, plan.md, metadata.json |
-| Module Definition | `skills/decompose/SKILL.md` | Manual edits | `draft/tracks/<id>/architecture.md` | Modules, dependencies, API surface |
-| Validation Report | `skills/validate/SKILL.md` | Re-run validation | `draft/validation-report.md`, `draft/tracks/<id>/validation-report.md` | Findings, severity |
+```mermaid
+flowchart LR
+    User["User: /draft:new-track"] --> Intake["Intake Questions"]
+    Intake --> Vision["Load product.md"]
+    Vision --> Stack["Load tech-stack.md"]
+    Stack --> Arch["Load architecture.md"]
+    Arch --> GenSpec["Generate spec.md"]
+    GenSpec --> GenPlan["Generate plan.md"]
+    GenPlan --> GenMeta["Generate metadata.json"]
+    GenMeta --> UpdateTracks["Update tracks.md"]
+```
 
-### Design Patterns
+### 6.3 Implementation Flow
 
-| Pattern | Where Used | Purpose |
+```mermaid
+flowchart LR
+    User["User: /draft:implement"] --> LoadPlan["Load plan.md"]
+    LoadPlan --> NextTask["Get Next Task"]
+    NextTask --> WriteTest["RED: Write Failing Test"]
+    WriteTest --> WriteCode["GREEN: Implement"]
+    WriteCode --> Refactor["REFACTOR: Clean Up"]
+    Refactor --> UpdatePlan["Mark Task Complete"]
+    UpdatePlan --> NextTask
+```
+
+### 6.4 Review Flow
+
+```mermaid
+flowchart LR
+    User["User: /draft:review"] --> LoadSpec["Load spec.md"]
+    LoadSpec --> SpecCheck["Stage 1: Spec Compliance"]
+    SpecCheck --> CodeQuality["Stage 2: Code Quality"]
+    CodeQuality --> Validate["Run /draft:validate"]
+    Validate --> BugHunt["Run /draft:bughunt"]
+    BugHunt --> Report["Generate Review Report"]
+```
+
+---
+
+## 7. Core Modules Deep Dive
+
+### 7.1 core/methodology.md
+
+**Role**: Master specification for Context-Driven Development philosophy.
+
+**Source Files**:
+- `core/methodology.md` — 10,000+ lines
+
+**Responsibilities**:
+1. Define constraint hierarchy (product → tech-stack → architecture → spec → plan)
+2. Specify workflow phases (intake, planning, implementation, review)
+3. Document all 15 commands with usage patterns
+4. Establish quality disciplines (TDD, two-stage review, validation)
+
+**Notable Mechanisms**:
+- Status markers: `[ ]` Pending, `[~]` In Progress, `[x]` Completed, `[!]` Blocked
+- Track lifecycle: Draft → Active → Review → Completed/Archived
+
+---
+
+### 7.2 skills/init
+
+**Role**: Project discovery and initial context file generation.
+
+**Source Files**:
+- `skills/init/SKILL.md` — 1970 lines
+
+**Responsibilities**:
+1. Detect brownfield vs greenfield projects
+2. Scan and detect tech stack from manifests
+3. Execute 5-phase architecture discovery
+4. Generate architecture.md (30-45 pages)
+5. Derive .ai-context.md (200-400 lines, token-optimized)
+6. Generate product.md, tech-stack.md, workflow.md, tracks.md
+
+**Key Operations**:
+
+| Operation | Purpose |
+|-----------|---------|
+| Pre-Check | Detect existing draft/, monorepo, migration scenarios |
+| Refresh Mode | Incremental update using synced_to_commit metadata |
+| Architecture Discovery | 5-phase exhaustive codebase analysis |
+| Condensation Subroutine | Transform architecture.md → .ai-context.md |
+
+---
+
+### 7.3 skills/new-track
+
+**Role**: Collaborative intake process for creating feature/bugfix tracks.
+
+**Source Files**:
+- `skills/new-track/SKILL.md`
+
+**Responsibilities**:
+1. Guide user through structured intake questions
+2. Load and apply context from product.md, tech-stack.md, architecture.md
+3. Generate spec.md with problem statement, scope, success criteria
+4. Generate plan.md with phases and tasks
+5. Create metadata.json for track state
+6. Update tracks.md with new track entry
+
+---
+
+### 7.4 skills/implement
+
+**Role**: TDD-driven task execution.
+
+**Source Files**:
+- `skills/implement/SKILL.md`
+
+**Responsibilities**:
+1. Load current task from plan.md
+2. Execute RED → GREEN → REFACTOR cycle
+3. Update task status markers
+4. Track progress in metadata.json
+5. Invoke debugger agent on failures
+
+---
+
+### 7.5 core/agents/reviewer.md
+
+**Role**: Two-stage code review process.
+
+**Source Files**:
+- `core/agents/reviewer.md`
+
+**Responsibilities**:
+1. Stage 1: Spec compliance check (does code match spec.md?)
+2. Stage 2: Code quality check (patterns, security, performance)
+3. Generate actionable feedback with file:line references
+4. Integrate with validate and bughunt outputs
+
+---
+
+## 8. Concurrency Model & Thread Safety
+
+**Execution Model**: Single-threaded (LLM instruction interpretation).
+
+Draft skills are markdown instructions executed sequentially by Claude LLM. No concurrent execution, no shared state beyond file system.
+
+**File System Considerations**:
+- Multiple `/draft:implement` sessions on same track could cause conflicts
+- Recommendation: One active implementation session per track
+
+---
+
+## 9. Framework & Extension Points
+
+### 9.1 Skill Types
+
+| Type | Interface | Description |
+|------|-----------|-------------|
+| Skill | `skills/<name>/SKILL.md` | Slash command implementation |
+| Agent | `core/agents/<name>.md` | Specialized behavior (reviewer, debugger, etc.) |
+| Template | `core/templates/<name>.md` | File generation template |
+
+### 9.2 Registration Mechanism
+
+Skills are auto-discovered by Claude Code from the `skills/` directory. No explicit registration required.
+
+**Requirements**:
+- Directory: `skills/<command-name>/`
+- File: `SKILL.md` with YAML frontmatter
+
+### 9.3 Frontmatter Schema
+
+```yaml
+---
+name: skill-name        # Required: slash command name
+description: Brief text  # Required: shown in /help
+---
+```
+
+---
+
+## 10. Full Catalog of Implementations
+
+### 10.1 Skills (15)
+
+| # | Skill | Command | Purpose |
+|---|-------|---------|---------|
+| 1 | draft | `/draft:draft` | Methodology overview, command routing |
+| 2 | init | `/draft:init` | Project discovery, context generation |
+| 3 | new-track | `/draft:new-track` | Create feature/bug track |
+| 4 | implement | `/draft:implement` | TDD task execution |
+| 5 | review | `/draft:review` | Two-stage code review |
+| 6 | validate | `/draft:validate` | Quality validation |
+| 7 | bughunt | `/draft:bughunt` | Exhaustive bug hunting |
+| 8 | status | `/draft:status` | Progress reporting |
+| 9 | revert | `/draft:revert` | Git-aware rollback |
+| 10 | coverage | `/draft:coverage` | Code coverage analysis |
+| 11 | decompose | `/draft:decompose` | Module decomposition |
+| 12 | adr | `/draft:adr` | Architecture Decision Records |
+| 13 | index | `/draft:index` | Monorepo service aggregation |
+| 14 | jira-preview | `/draft:jira-preview` | Generate Jira export preview |
+| 15 | jira-create | `/draft:jira-create` | Create Jira issues via MCP |
+
+### 10.2 Agents (5)
+
+| Agent | File | Purpose |
+|-------|------|---------|
+| architect | `core/agents/architect.md` | Module design, dependency analysis |
+| reviewer | `core/agents/reviewer.md` | Two-stage code review |
+| debugger | `core/agents/debugger.md` | Systematic debugging |
+| planner | `core/agents/planner.md` | Task breakdown, phase planning |
+| rca | `core/agents/rca.md` | Root cause analysis |
+
+### 10.3 Templates (14)
+
+| Template | File | Used By |
+|----------|------|---------|
+| ai-context | `core/templates/ai-context.md` | init |
+| architecture | `core/templates/architecture.md` | init, decompose |
+| product | `core/templates/product.md` | init |
+| tech-stack | `core/templates/tech-stack.md` | init |
+| workflow | `core/templates/workflow.md` | init |
+| spec | `core/templates/spec.md` | new-track |
+| intake-questions | `core/templates/intake-questions.md` | new-track |
+| jira | `core/templates/jira.md` | jira-preview |
+| dependency-graph | `core/templates/dependency-graph.md` | decompose |
+| root-architecture | `core/templates/root-architecture.md` | index |
+| root-product | `core/templates/root-product.md` | index |
+| root-tech-stack | `core/templates/root-tech-stack.md` | index |
+| service-index | `core/templates/service-index.md` | index |
+| tech-matrix | `core/templates/tech-matrix.md` | index |
+
+---
+
+## 11. API & Interface Definitions
+
+### 11.1 Slash Commands
+
+| Command | Arguments | Purpose |
 |---------|-----------|---------|
-| **Frontmatter + Body** | `skills/*/SKILL.md` | Metadata (name, description) + execution instructions |
-| **Template-Driven Generation** | `core/templates/*.md` | Consistent structure for product.md, spec.md, plan.md |
-| **Constraint Hierarchy** | All skills | product.md → tech-stack.md → architecture.md → spec.md → plan.md |
-| **Two-Stage Review** | `skills/review/SKILL.md`, `core/agents/reviewer.md` | Spec compliance first, code quality second |
-| **Agent Delegation** | `skills/` referencing `core/agents/` | Specialized logic (architect, reviewer, debugger) |
+| `/draft:draft` | — | Show methodology overview |
+| `/draft:init` | `[refresh]` | Initialize or refresh context |
+| `/draft:new-track` | `<description>` | Create new feature/bug track |
+| `/draft:implement` | — | Execute next task from plan |
+| `/draft:review` | `[--track <id>]` | Run two-stage review |
+| `/draft:validate` | `[--track <id>]` | Run quality validation |
+| `/draft:bughunt` | `[--track <id>]` | Run bug hunting |
+| `/draft:status` | — | Show track progress |
+| `/draft:revert` | `<track-id> <scope>` | Rollback work |
+| `/draft:coverage` | `[--track <id>]` | Analyze coverage |
+| `/draft:decompose` | — | Decompose into modules |
+| `/draft:adr` | `[title\|list\|supersede <n>]` | Manage ADRs |
+| `/draft:index` | — | Aggregate monorepo services |
+| `/draft:jira-preview` | `<track-id>` | Generate Jira export |
+| `/draft:jira-create` | `<track-id>` | Create Jira issues |
 
-### Anti-Patterns & Complexity Hotspots
+### 11.2 Generated Files
 
-| Location | Issue | Severity | Notes |
-|----------|-------|----------|-------|
-| `scripts/build-integrations.sh:466` | Hard-coded `tail -n +4` assumes 3-line preamble | Medium | Fragile if skill format changes |
-| `index.html` | 3000+ lines of HTML/CSS/JS in single file | Medium | Marketing site, not critical |
+| File | Created By | Purpose |
+|------|-----------|---------|
+| `draft/product.md` | init | Product vision, users, goals |
+| `draft/tech-stack.md` | init | Languages, frameworks, patterns |
+| `draft/architecture.md` | init | 30-45 page engineering reference |
+| `draft/.ai-context.md` | init | Token-optimized AI context |
+| `draft/workflow.md` | init | TDD preferences, commit strategy |
+| `draft/tracks.md` | init | Master track list |
+| `draft/tracks/<id>/spec.md` | new-track | Feature specification |
+| `draft/tracks/<id>/plan.md` | new-track | Implementation plan |
+| `draft/tracks/<id>/metadata.json` | new-track | Track state |
 
-### Conventions & Guardrails
+---
 
-| Convention | Pattern | Example |
-|-----------|---------|---------|
-| Status markers | `[ ]`, `[~]`, `[x]`, `[!]` | `[ ] Pending`, `[x] Completed` |
-| Track IDs | kebab-case | `add-user-auth`, `fix-login-bug` |
-| Skill naming | Lowercase, hyphenated | `new-track`, `jira-create` |
-| File structure | Markdown with specific headings | `## Problem Statement`, `## Phases` |
-| Commit messages | `type(scope): description` | `feat(review): add bughunt integration` |
+## 12. External Dependencies
 
-### External Dependencies & Integrations
+### 12.1 Service Dependencies
 
+| Service | Usage |
+|---------|-------|
+| Claude LLM | Interprets skill instructions, generates content |
+| File System | Reads codebase, writes draft/ files |
+| Git | Version control, commit history for revert |
+| MCP-Jira (optional) | Creates Jira issues from export |
+
+### 12.2 Infrastructure
+
+| Tool | Usage |
+|------|-------|
+| Claude Code CLI | Plugin host, command routing |
+| Bash | Build script execution |
+
+---
+
+## 13. Cross-Module Integration Points
+
+### 13.1 init → new-track
+
+**Contract**: new-track expects `draft/product.md`, `draft/tech-stack.md`, `draft/architecture.md` to exist.
+
+**Sequence**:
 ```mermaid
-graph LR
-    Plugin["Draft Plugin"] --> Git["Git\n(version control)"]
-    Plugin --> FSys["File System\n(draft/ directory)"]
-    Plugin --> LLM["Claude LLM\n(instruction interpreter)"]
-    Plugin --> MCP["MCP-Jira\n(optional)"]
-    Plugin --> Cursor["Cursor\n(.cursorrules)"]
-    Plugin --> Copilot["GitHub Copilot\n(instructions.md)"]
-    Plugin --> Gemini["Gemini\n(GEMINI.md)"]
+sequenceDiagram
+    participant User
+    participant NewTrack["new-track"]
+    participant FSys["File System"]
+
+    User->>NewTrack: /draft:new-track "Add login"
+    NewTrack->>FSys: Read draft/product.md
+    FSys-->>NewTrack: Product context
+    NewTrack->>FSys: Read draft/tech-stack.md
+    FSys-->>NewTrack: Tech constraints
+    NewTrack->>FSys: Read draft/architecture.md
+    FSys-->>NewTrack: System structure
+    NewTrack->>FSys: Write draft/tracks/<id>/spec.md
+    NewTrack->>FSys: Write draft/tracks/<id>/plan.md
+```
+
+### 13.2 review → validate + bughunt
+
+**Contract**: review orchestrates validate and bughunt, aggregates results.
+
+**Sequence**:
+```mermaid
+sequenceDiagram
+    participant User
+    participant Review["review"]
+    participant Validate["validate"]
+    participant BugHunt["bughunt"]
+    participant FSys["File System"]
+
+    User->>Review: /draft:review --track auth
+    Review->>FSys: Read spec.md
+    Review->>Review: Stage 1: Spec Compliance
+    Review->>Review: Stage 2: Code Quality
+    Review->>Validate: Execute validation
+    Validate-->>Review: Validation findings
+    Review->>BugHunt: Execute bug hunt
+    BugHunt-->>Review: Bug findings
+    Review->>FSys: Write review report
 ```
 
 ---
 
-## Phase 3: Module Discovery
+## 14. Critical Invariants & Safety Rules
 
-### Module Dependency Diagram
+### [DATA] Constraint Hierarchy
 
-```mermaid
-graph LR
-    Methodology["core/methodology.md"] --> Skills["skills/"]
-    KnowledgeBase["core/knowledge-base.md"] --> Skills
-    Templates["core/templates/"] --> Skills
-    Agents["core/agents/"] --> Skills
+**What**: product.md → tech-stack.md → architecture.md → spec.md → plan.md must be respected.
 
-    Skills --> InitSkill["init"]
-    Skills --> NewTrackSkill["new-track"]
-    Skills --> DecomposeSkill["decompose"]
-    Skills --> ImplementSkill["implement"]
-    Skills --> ReviewSkill["review"]
-    Skills --> ValidateSkill["validate"]
-    Skills --> BugHuntSkill["bughunt"]
-    Skills --> StatusSkill["status"]
-    Skills --> RevertSkill["revert"]
-    Skills --> CoverageSkill["coverage"]
-    Skills --> JiraPreviewSkill["jira-preview"]
-    Skills --> JiraCreateSkill["jira-create"]
-    Skills --> IndexSkill["index"]
-    Skills --> ADRSkill["adr"]
-    Skills --> DraftSkill["draft"]
+**Why**: Violating hierarchy causes specification drift. Implementation diverges from product vision.
 
-    InitSkill --> UserDraft["draft/ (user context)"]
-    NewTrackSkill --> UserDraft
-    DecomposeSkill --> UserDraft
-    ImplementSkill --> UserDraft
+**Where Enforced**: All skills read upstream files before generating downstream files.
 
-    BuildScript["scripts/build-integrations.sh"] --> Integrations["integrations/"]
-    Skills --> BuildScript
-```
-
-### Dependency Table
-
-| Module | Depends On | Depended By | Circular? |
-|--------|-----------|-------------|-----------|
-| `core/methodology.md` | - | All skills | No |
-| `core/knowledge-base.md` | - | `new-track`, `review`, `validate` | No |
-| `core/templates/` | - | `init`, `new-track`, `decompose`, `index` | No |
-| `core/agents/` | - | `decompose`, `implement`, `review`, `bughunt` | No |
-| `skills/draft` | `methodology.md` | User entry point | No |
-| `skills/init` | `methodology.md`, `templates/` | `new-track` | No |
-| `skills/new-track` | `methodology.md`, `templates/`, `knowledge-base.md` | `implement` | No |
-| `skills/decompose` | `agents/architect.md`, `templates/` | `implement` | No |
-| `skills/implement` | `agents/architect.md`, `agents/debugger.md` | `review` | No |
-| `skills/review` | `agents/reviewer.md`, `validate`, `bughunt` | - | No |
-| `skills/validate` | `knowledge-base.md` | `review` | No |
-| `skills/bughunt` | `agents/rca.md` | `review` | No |
-| `skills/adr` | `methodology.md` | - | No |
-| `scripts/build-integrations.sh` | `skills/` | `integrations/` | No |
-
-### Modules
-
-#### Module: core/methodology.md
-- **Responsibility:** Master specification for Context-Driven Development philosophy, constraint hierarchy, workflow
-- **Files:** `core/methodology.md`
-- **API Surface:** Markdown documentation referenced by all skills
-- **Dependencies:** None (foundational)
-- **Complexity:** High (10,000+ lines)
-- **Story:** Defines the entire Draft methodology including problem statement, solution approach, constraint hierarchy, command reference, and workflow — see [core/methodology.md:1-10000](core/methodology.md)
-- **Status:** [x] Existing
-
-#### Module: core/knowledge-base.md
-- **Responsibility:** Vetted sources for architectural guidance (books, patterns, standards)
-- **Files:** `core/knowledge-base.md`
-- **API Surface:** Citation format for guidance: `"Consider CQRS (DDIA, Ch. 11)"`
-- **Dependencies:** None
-- **Complexity:** Medium
-- **Story:** Provides grounded, citation-backed architectural advice during track creation and review — see [core/knowledge-base.md:1-500](core/knowledge-base.md)
-- **Status:** [x] Existing
-
-#### Module: core/templates/
-- **Responsibility:** Template files for all generated context artifacts
-- **Files:** `core/templates/ai-context.md`, `architecture.md`, `product.md`, `tech-stack.md`, `workflow.md`, `spec.md`, `intake-questions.md`, `jira.md`, `dependency-graph.md`, `root-architecture.md`, `root-product.md`, `root-tech-stack.md`, `service-index.md`, `tech-matrix.md`, `metadata.json` (15 files)
-- **API Surface:** Markdown templates with placeholder sections
-- **Dependencies:** None
-- **Complexity:** Low
-- **Story:** Ensures consistent structure for all user-facing Draft files. Includes monorepo templates (`root-*`, `service-index`, `tech-matrix`) added for `/draft:index` support — see [core/templates/](core/templates/)
-- **Status:** [x] Existing
-
-#### Module: core/agents/
-- **Responsibility:** Specialized agent behaviors for architecture design, review, debugging, planning
-- **Files:** `architect.md`, `reviewer.md`, `debugger.md`, `planner.md`, `rca.md`
-- **API Surface:** Markdown instructions for specific agent roles
-- **Dependencies:** None
-- **Complexity:** Medium
-- **Story:** Provides expert-level processes for complex tasks like two-stage review, module decomposition, systematic debugging — see [core/agents/](core/agents/)
-- **Status:** [x] Existing
-
-#### Module: skills/draft
-- **Responsibility:** Overview of Draft methodology and command routing
-- **Files:** `skills/draft/SKILL.md`
-- **API Surface:** `/draft:draft` command
-- **Dependencies:** `core/methodology.md`
-- **Complexity:** Low
-- **Story:** Entry point explaining Draft philosophy and available commands — see [skills/draft/SKILL.md:1-50](skills/draft/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: skills/init
-- **Responsibility:** Project discovery and initial context file generation (brownfield and greenfield)
-- **Files:** `skills/init/SKILL.md`
-- **API Surface:** `/draft:init`, `/draft:init refresh` command
-- **Dependencies:** `core/templates/`, `core/methodology.md`
-- **Complexity:** High
-- **Story:** Scans codebase, detects tech stack, generates product.md, tech-stack.md, architecture.md (brownfield only) — see [skills/init/SKILL.md:1-300](skills/init/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: skills/new-track
-- **Responsibility:** Collaborative intake process for creating feature/bugfix tracks
-- **Files:** `skills/new-track/SKILL.md`
-- **API Surface:** `/draft:new-track <description>` command
-- **Dependencies:** `core/templates/intake-questions.md`, `core/knowledge-base.md`, `core/methodology.md`
-- **Complexity:** High
-- **Story:** Guides user through structured questions, generates spec.md and plan.md with AI collaboration — see [skills/new-track/SKILL.md:1-400](skills/new-track/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: skills/decompose
-- **Responsibility:** Module decomposition and dependency analysis for tracks
-- **Files:** `skills/decompose/SKILL.md`
-- **API Surface:** `/draft:decompose` command
-- **Dependencies:** `core/agents/architect.md`, `core/templates/architecture.md`, `core/templates/dependency-graph.md`
-- **Complexity:** High
-- **Story:** Creates track-level architecture.md with module definitions, mermaid diagrams, dependency order — see [skills/decompose/SKILL.md:1-250](skills/decompose/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: skills/implement
-- **Responsibility:** TDD-driven task execution with optional Story writing (architecture mode)
-- **Files:** `skills/implement/SKILL.md`
-- **API Surface:** `/draft:implement` command
-- **Dependencies:** `core/agents/architect.md`, `core/agents/debugger.md`, `core/methodology.md`
-- **Complexity:** High
-- **Story:** Executes tasks from plan.md using RED → GREEN → REFACTOR workflow — see [skills/implement/SKILL.md:1-500](skills/implement/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: skills/review
-- **Responsibility:** Orchestrates two-stage code review (spec compliance + code quality)
-- **Files:** `skills/review/SKILL.md`
-- **API Surface:** `/draft:review --track <id>` command
-- **Dependencies:** `core/agents/reviewer.md`, `skills/validate`, `skills/bughunt`, `core/knowledge-base.md`
-- **Complexity:** High
-- **Story:** Runs spec compliance check first, then code quality; integrates validate and bughunt — see [skills/review/SKILL.md:1-300](skills/review/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: skills/validate
-- **Responsibility:** Codebase quality validation (architecture, security, performance)
-- **Files:** `skills/validate/SKILL.md`
-- **API Surface:** `/draft:validate --track <id>` command
-- **Dependencies:** `core/knowledge-base.md`, `core/methodology.md`
-- **Complexity:** Medium
-- **Story:** Checks architecture conformance, OWASP security patterns, performance anti-patterns — see [skills/validate/SKILL.md:1-200](skills/validate/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: skills/bughunt
-- **Responsibility:** Exhaustive bug hunting using Draft context
-- **Files:** `skills/bughunt/SKILL.md`
-- **API Surface:** `/draft:bughunt --track <id>` command
-- **Dependencies:** `core/agents/rca.md`, `core/methodology.md`
-- **Complexity:** High
-- **Story:** Analyzes code across 12 dimensions, produces severity-ranked bug report with verification protocol — see [skills/bughunt/SKILL.md:1-300](skills/bughunt/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: skills/status
-- **Responsibility:** Progress reporting for active tracks
-- **Files:** `skills/status/SKILL.md`
-- **API Surface:** `/draft:status` command
-- **Dependencies:** None (read-only)
-- **Complexity:** Low
-- **Story:** Parses metadata.json, plan.md, tracks.md to display completion percentages and blockers — see [skills/status/SKILL.md:1-100](skills/status/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: skills/revert
-- **Responsibility:** Git-aware rollback of track work (task, phase, or full track)
-- **Files:** `skills/revert/SKILL.md`
-- **API Surface:** `/draft:revert <track-id> <scope>` command
-- **Dependencies:** Git history
-- **Complexity:** Medium
-- **Story:** Reverts commits while preserving Draft context (spec.md, plan.md) — see [skills/revert/SKILL.md:1-150](skills/revert/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: skills/coverage
-- **Responsibility:** Code coverage analysis targeting 95%+
-- **Files:** `skills/coverage/SKILL.md`
-- **API Surface:** `/draft:coverage --track <id>` command
-- **Dependencies:** Coverage tools (Jest, pytest, etc.)
-- **Complexity:** Medium
-- **Story:** Computes coverage, reports gaps, justifies uncovered lines — see [skills/coverage/SKILL.md:1-100](skills/coverage/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: skills/jira-preview
-- **Responsibility:** Generate Jira export preview from track plan
-- **Files:** `skills/jira-preview/SKILL.md`
-- **API Surface:** `/draft:jira-preview <track-id>` command
-- **Dependencies:** `core/templates/jira.md`
-- **Complexity:** Low
-- **Story:** Maps track → epic, phase → story, task → sub-task; outputs jira-export.md — see [skills/jira-preview/SKILL.md:1-100](skills/jira-preview/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: skills/jira-create
-- **Responsibility:** Create Jira issues via MCP-Jira integration
-- **Files:** `skills/jira-create/SKILL.md`
-- **API Surface:** `/draft:jira-create <track-id>` command
-- **Dependencies:** MCP-Jira server, `skills/jira-preview`
-- **Complexity:** Medium
-- **Story:** Reads jira-export.md, calls MCP API to create epics/stories/subtasks — see [skills/jira-create/SKILL.md:1-100](skills/jira-create/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: skills/index
-- **Responsibility:** Monorepo service aggregation and federated knowledge index
-- **Files:** `skills/index/SKILL.md`
-- **API Surface:** `/draft:index` command
-- **Dependencies:** `core/templates/root-architecture.md`, `core/templates/service-index.md`, `core/templates/tech-matrix.md`
-- **Complexity:** High
-- **Story:** Scans child services, aggregates Draft contexts, builds root-level product.md and architecture.md — see [skills/index/SKILL.md:1-400](skills/index/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: skills/adr
-- **Responsibility:** Architecture Decision Record creation and management
-- **Files:** `skills/adr/SKILL.md`
-- **API Surface:** `/draft:adr [title|list|supersede <number>]` command
-- **Dependencies:** `core/methodology.md`
-- **Complexity:** Low
-- **Story:** Creates and manages ADRs in `draft/adrs/` directory, documenting significant technical decisions with context, alternatives considered, and consequences — see [skills/adr/SKILL.md:1-150](skills/adr/SKILL.md)
-- **Status:** [x] Existing
-
-#### Module: scripts/build-integrations.sh
-- **Responsibility:** Auto-generate Cursor/Copilot/Gemini integration files from skills
-- **Files:** `scripts/build-integrations.sh`
-- **API Surface:** Bash script (run manually or via CI)
-- **Dependencies:** `skills/*/SKILL.md`
-- **Complexity:** Medium
-- **Story:** Extracts frontmatter + body from all SKILL.md files, generates `.cursorrules`, `copilot-instructions.md`, `GEMINI.md` — see [scripts/build-integrations.sh:1-500](scripts/build-integrations.sh)
-- **Status:** [x] Existing
-
-### Dependency Order
-
-1. `core/methodology.md`, `core/knowledge-base.md`, `core/templates/`, `core/agents/` (foundational)
-2. `skills/draft`, `skills/init` (project setup)
-3. `skills/new-track`, `skills/decompose`, `skills/adr` (track creation & decision documentation)
-4. `skills/implement`, `skills/validate`, `skills/bughunt` (execution)
-5. `skills/review` (depends on validate, bughunt)
-6. `skills/status`, `skills/revert`, `skills/coverage`, `skills/jira-preview`, `skills/jira-create`, `skills/index` (auxiliary)
-7. `scripts/build-integrations.sh`, `integrations/` (deployment)
+**Common Violation Patterns**:
+1. Editing plan.md directly without updating spec.md
+2. Implementing features not in product.md scope
+3. Using technologies not approved in tech-stack.md
 
 ---
 
-## Notes
+### [DATA] YAML Frontmatter Required
 
-- Draft is a **methodology project**, not a runtime application — skills are markdown instructions interpreted by Claude LLM
-- **Source of truth hierarchy:** `core/methodology.md` → `skills/` → `integrations/` (generated)
-- Integration files (`.cursorrules`, `copilot-instructions.md`, `GEMINI.md`) are auto-generated — never edit directly
-- After editing skills, run `./scripts/build-integrations.sh` to regenerate integrations
-- User-facing Draft files (`draft/product.md`, `draft/tracks.md`, etc.) are created by `/draft:init` and `/draft:new-track`
-- Architecture mode is automatically enabled when `architecture.md` exists (project-level or track-level)
-- For detailed command workflows, see individual `skills/*/SKILL.md` files
+**What**: All SKILL.md files must have YAML frontmatter with `name` and `description`.
+
+**Why**: Claude Code uses frontmatter for command registration and help text.
+
+**Where Enforced**: Build script parses frontmatter; fails silently on malformed files.
+
+**Common Violation Patterns**:
+1. Missing `---` delimiters
+2. Typos in `name` field (command won't register)
+
+---
+
+### [DATA] Synced Commit Tracking
+
+**What**: `synced_to_commit` in architecture.md metadata tracks last analyzed commit.
+
+**Why**: Enables incremental refresh without full re-analysis.
+
+**Where Enforced**: `skills/init/SKILL.md` refresh mode.
+
+---
+
+### [ORD] Build After Skill Changes
+
+**What**: Run `./scripts/build-integrations.sh` after any skill modification.
+
+**Why**: Integration files (copilot-instructions.md, GEMINI.md) are generated from skills.
+
+**Where Enforced**: Manual discipline, documented in CLAUDE.md.
+
+---
+
+### [COMPAT] Skill Body Format
+
+**What**: Skill body must start with `# Title` heading followed by blank line.
+
+**Why**: Build script uses `tail -n +4` to skip first 3 lines (frontmatter + blank + title).
+
+**Where Enforced**: `scripts/build-integrations.sh:466`
+
+---
+
+## 15. Security Architecture
+
+**Authentication**: N/A (plugin runs locally in Claude Code CLI).
+
+**Authorization**: File system permissions govern write access.
+
+**Secrets Management**: MCP-Jira credentials managed by MCP server config, not Draft.
+
+**Data Handling**: Draft reads but does not transmit code externally (except to Claude LLM for analysis).
+
+---
+
+## 16. Error Handling & Failure Modes
+
+### Error Propagation
+
+Skills provide inline error guidance:
+- "If X fails, try Y"
+- "If validation fails, do not proceed"
+
+No structured error types — errors are natural language in skill output.
+
+### Common Failure Modes
+
+| Scenario | Symptoms | Recovery |
+|----------|----------|----------|
+| Missing draft/ | "Project not initialized" | Run /draft:init |
+| Missing track | "Track not found" | Check tracks.md, verify track ID |
+| Build script fails | No integration file output | Check SKILL.md frontmatter format |
+| Git not initialized | Revert commands fail | Initialize git repository |
+
+---
+
+## 17. State Management & Persistence
+
+### State Inventory
+
+| State | Storage | Durability |
+|-------|---------|------------|
+| Project context | `draft/*.md` | Persistent (file system) |
+| Track state | `draft/tracks/<id>/*` | Persistent (file system) |
+| Task progress | `plan.md` markers, `metadata.json` | Persistent (file system) |
+
+### Recovery
+
+All state in markdown files. Recovery = read files. No complex reconstruction.
+
+---
+
+## 18. Key Design Patterns
+
+### 18.1 Frontmatter + Body Pattern
+
+**Description**: YAML metadata header followed by markdown instructions. Separates registration data from execution logic.
+
+**Where Used**:
+- `skills/*/SKILL.md` — all 15 skills
+
+**Implementation**:
+```yaml
+---
+name: init
+description: Initialize Draft project context
+---
+
+# Draft Init
+
+You are initializing a Draft project...
+```
+
+---
+
+### 18.2 Template-Driven Generation
+
+**Description**: Skills reference templates in `core/templates/` for consistent file structure.
+
+**Where Used**:
+- `skills/init` → `core/templates/product.md`, `core/templates/tech-stack.md`
+- `skills/new-track` → `core/templates/spec.md`
+
+---
+
+### 18.3 Agent Delegation
+
+**Description**: Complex behaviors extracted to `core/agents/` for reuse across skills.
+
+**Where Used**:
+- `skills/review` → `core/agents/reviewer.md`
+- `skills/implement` → `core/agents/debugger.md`
+- `skills/decompose` → `core/agents/architect.md`
+
+---
+
+### 18.4 Status Markers
+
+**Description**: Standard markers for tracking progress in markdown.
+
+**Pattern**:
+- `[ ]` — Pending
+- `[~]` — In Progress
+- `[x]` — Completed
+- `[!]` — Blocked
+
+**Where Used**: `plan.md`, `tracks.md`, `spec.md`
+
+---
+
+## 19. Configuration & Tuning
+
+### 19.1 Plugin Configuration
+
+| Parameter | Location | Default | Purpose |
+|-----------|----------|---------|---------|
+| `name` | plugin.json | `draft` | Plugin identifier |
+| `version` | plugin.json | `1.3.0` | Semantic version |
+| `skills` | Directory | `skills/` | Skill discovery path |
+
+### 19.2 Workflow Configuration
+
+| Parameter | Location | Options | Purpose |
+|-----------|----------|---------|---------|
+| TDD mode | workflow.md | strict/flexible/none | Test-first discipline |
+| Auto-validate | workflow.md | true/false | Run validation on completion |
+| Commit strategy | workflow.md | atomic/batch | Commit frequency |
+
+---
+
+## 20. How to Extend — Step-by-Step Cookbooks
+
+### 20.1 How to Add a New Skill
+
+1. **Create directory**: `skills/<skill-name>/`
+2. **Create SKILL.md** with frontmatter:
+   ```yaml
+   ---
+   name: skill-name
+   description: Brief description for /help
+   ---
+
+   # Skill Title
+
+   Execution instructions...
+   ```
+3. **Reference core resources** as needed:
+   - Templates: `core/templates/<name>.md`
+   - Agents: `core/agents/<name>.md`
+   - Methodology: `core/methodology.md`
+4. **Rebuild integrations**: `./scripts/build-integrations.sh`
+5. **Test**: Invoke `/draft:<skill-name>` in Claude Code
+
+### 20.2 How to Add a New Template
+
+1. **Create file**: `core/templates/<name>.md`
+2. **Define structure** with placeholder sections
+3. **Reference from skills** that need it
+
+### 20.3 How to Add a New Agent
+
+1. **Create file**: `core/agents/<name>.md`
+2. **Define specialized behavior** in markdown
+3. **Reference from skills**: "Follow the <agent> behavior in `core/agents/<name>.md`"
+
+---
+
+## 21. Build System & Development Workflow
+
+### Build System
+
+- **Tool**: Bash
+- **Script**: `scripts/build-integrations.sh`
+
+### Key Build Targets
+
+| Command | Output |
+|---------|--------|
+| `./scripts/build-integrations.sh` | Regenerates `copilot-instructions.md`, `GEMINI.md` |
+
+### Development Workflow
+
+1. Edit skills in `skills/*/SKILL.md`
+2. Run `./scripts/build-integrations.sh`
+3. Test command via Claude Code CLI
+4. Commit changes
+
+---
+
+## 22. Testing Infrastructure
+
+### Test Framework
+
+Manual testing via Claude Code CLI command invocation.
+
+### Test Patterns
+
+- Invoke each command with various arguments
+- Verify expected files created/modified
+- Check output messages for correctness
+
+### Build Script Test
+
+`tests/test-build.sh` validates build script output structure.
+
+---
+
+## 23. Known Technical Debt & Limitations
+
+### Build Script Fragility
+
+**Location**: `scripts/build-integrations.sh:466`
+**Issue**: Hard-coded `tail -n +4` assumes 3-line preamble (frontmatter + blank + title)
+**Impact**: If skill format changes, build breaks silently
+**Mitigation**: Document format requirement in CLAUDE.md
+
+### index.html Complexity
+
+**Location**: `index.html`
+**Issue**: 3000+ lines of HTML/CSS/JS in single file
+**Impact**: Marketing site maintenance difficulty
+**Mitigation**: Not critical — separate from plugin functionality
+
+---
+
+## 24. Glossary
+
+| Term | Definition |
+|------|------------|
+| **Brownfield** | Existing codebase with established structure |
+| **Constraint hierarchy** | product.md → tech-stack.md → architecture.md → spec.md → plan.md |
+| **Draft** | The plugin and methodology name |
+| **Greenfield** | New project with minimal existing code |
+| **Intake** | Structured question process for track creation |
+| **Monorepo** | Repository containing multiple services/packages |
+| **Skill** | A slash command implementation in `skills/*/SKILL.md` |
+| **Spec** | Specification document (`spec.md`) defining feature requirements |
+| **Track** | A feature or bug work unit with spec.md, plan.md, metadata.json |
+| **TDD** | Test-Driven Development (RED → GREEN → REFACTOR) |
+| **Two-stage review** | Spec compliance check, then code quality check |
+
+---
+
+## Appendix A: File Structure Summary
+
+```
+draft/
+├── .claude-plugin/
+│   └── plugin.json              ← Plugin manifest
+├── skills/                      ← 15 slash command implementations
+│   ├── draft/SKILL.md
+│   ├── init/SKILL.md
+│   ├── new-track/SKILL.md
+│   ├── implement/SKILL.md
+│   ├── review/SKILL.md
+│   ├── validate/SKILL.md
+│   ├── bughunt/SKILL.md
+│   ├── status/SKILL.md
+│   ├── revert/SKILL.md
+│   ├── coverage/SKILL.md
+│   ├── decompose/SKILL.md
+│   ├── adr/SKILL.md
+│   ├── index/SKILL.md
+│   ├── jira-preview/SKILL.md
+│   └── jira-create/SKILL.md
+├── core/
+│   ├── methodology.md           ← Master methodology spec
+│   ├── knowledge-base.md        ← Architectural guidance sources
+│   ├── agents/                  ← 5 specialized agents
+│   │   ├── architect.md
+│   │   ├── reviewer.md
+│   │   ├── debugger.md
+│   │   ├── planner.md
+│   │   └── rca.md
+│   └── templates/               ← 14 file templates
+│       ├── ai-context.md
+│       ├── architecture.md
+│       ├── product.md
+│       ├── tech-stack.md
+│       ├── workflow.md
+│       ├── spec.md
+│       ├── intake-questions.md
+│       ├── jira.md
+│       ├── dependency-graph.md
+│       ├── root-architecture.md
+│       ├── root-product.md
+│       ├── root-tech-stack.md
+│       ├── service-index.md
+│       └── tech-matrix.md
+├── integrations/                ← GENERATED files
+│   ├── copilot/.github/
+│   │   └── copilot-instructions.md
+│   └── gemini/
+│       └── GEMINI.md
+├── scripts/
+│   └── build-integrations.sh    ← Regenerates integrations
+└── draft/                       ← User context (this project's own)
+    ├── product.md
+    ├── tech-stack.md
+    ├── architecture.md
+    ├── .ai-context.md
+    ├── workflow.md
+    ├── tracks.md
+    └── tracks/
+```
+
+---
+
+## Appendix B: Data Source → Implementation Mapping
+
+| Data Source | Skills Reading It |
+|-------------|-------------------|
+| `draft/product.md` | new-track, implement, review, validate |
+| `draft/tech-stack.md` | new-track, implement, validate, bughunt |
+| `draft/architecture.md` | new-track, implement, decompose, bughunt |
+| `draft/.ai-context.md` | All skills (primary context source) |
+| `draft/tracks.md` | status, new-track |
+| `draft/tracks/<id>/spec.md` | implement, review |
+| `draft/tracks/<id>/plan.md` | implement, status, review |
+| `draft/tracks/<id>/metadata.json` | status, implement |
+| `core/methodology.md` | All skills (foundational reference) |
+| `core/knowledge-base.md` | new-track, review, validate |
+
+---
+
+End of analysis. Queries should reference the .ai-context.md file for token efficiency.

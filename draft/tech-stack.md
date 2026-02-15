@@ -1,3 +1,19 @@
+---
+project: "draft"
+module: "root"
+generated_by: "draft:init"
+generated_at: "2026-02-15T00:45:00Z"
+git:
+  branch: "main"
+  remote: "origin/main"
+  commit: "1195da8278db7a518434910765076d358dbcf420"
+  commit_short: "1195da8"
+  commit_date: "2026-02-14 17:43:01 -0800"
+  commit_message: "feat(skills): add YAML frontmatter to decompose, index, jira-preview"
+  dirty: true
+synced_to_commit: "1195da8278db7a518434910765076d358dbcf420"
+---
+
 # Tech Stack
 
 ## Languages
@@ -16,7 +32,7 @@
 ### Core
 | Name | Version | Purpose |
 |------|---------|---------|
-| Claude Code Plugin API | v1.2.0 | Plugin manifest, skill registration, slash command routing |
+| Claude Code Plugin API | v1.3.0 | Plugin manifest, skill registration, slash command routing |
 
 ### Development
 | Name | Version | Purpose |
@@ -36,7 +52,7 @@ N/A — Draft is a methodology plugin with no persistent data storage. All state
 | Level | Framework | Coverage Target |
 |-------|-----------|-----------------|
 | Integration | `tests/test-build.sh` | Build script output validation |
-| Manual | Slash command invocation | All 14 commands functional |
+| Manual | Slash command invocation | All 15 commands functional |
 
 ---
 
@@ -78,12 +94,12 @@ N/A — Draft is a methodology plugin with no persistent data storage. All state
 graph TD
     subgraph Plugin["Plugin Layer"]
         Manifest["plugin.json"]
-        Skills["14 SKILL.md files"]
+        Skills["15 SKILL.md files"]
     end
     subgraph Core["Core Layer"]
         Methodology["methodology.md"]
         Agents["5 Agent behaviors"]
-        Templates["13 Templates"]
+        Templates["14 Templates"]
         Knowledge["knowledge-base.md"]
     end
     subgraph Output["Generated Output"]

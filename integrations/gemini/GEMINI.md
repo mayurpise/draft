@@ -3449,6 +3449,18 @@ If either missing:
 
 **Note:** ISO timestamps can use either `Z` or `.000Z` suffix (both valid ISO 8601). No format constraint enforced — both second precision (`2026-02-08T12:00:00Z`) and millisecond precision (`2026-02-08T12:00:00.000Z`) are acceptable.
 
+### Verify metadata.json
+
+Before updating tracks.md, verify metadata.json was written successfully:
+
+```bash
+cat draft/tracks/<track_id>/metadata.json | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null || echo "INVALID"
+```
+
+If invalid or missing:
+- ERROR: "Failed to write valid metadata.json for track <track_id>"
+- Halt - do not update tracks.md (prevents orphaned track entries)
+
 ### Update `draft/tracks.md`:
 
 Add under Active:

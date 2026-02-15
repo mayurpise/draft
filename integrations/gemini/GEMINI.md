@@ -442,13 +442,48 @@ If **Greenfield**: skip to Step 2 (Product Definition).
 
 ## Step 1.5: Architecture Discovery (Brownfield Only)
 
-For existing codebases, perform exhaustive analysis to generate:
-- `draft/architecture.md` — Human-readable, 30-45 page engineering reference (PRIMARY)
+Perform a **one-time, exhaustive analysis** of the existing codebase. This is NOT a summary — it is a comprehensive reference document that enables future AI agents and engineers to work without re-reading source files.
+
+**Outputs**:
+- `draft/architecture.md` — Human-readable, **30-45 page** engineering reference (PRIMARY)
 - `draft/.ai-context.md` — Token-optimized, 200-400 lines, condensed from architecture.md (DERIVED)
 
 **Target output**: A single self-contained reference document designed for **dual consumption**:
 1. **LLM / AI-agent context** — enabling future code changes, Q&A, and onboarding without re-reading source files.
 2. **Engineer reference** — enabling debugging, extension, and operational understanding.
+
+### Exhaustive Analysis Mandate
+
+**CRITICAL**: This analysis must be EXHAUSTIVE, not representative. Specifically:
+- **Read ALL relevant source files** — do not sample or skim
+- **Enumerate ALL implementations** — no "and others", "etc.", or "similar patterns"
+- **Generate REAL Mermaid diagrams** — every section calling for a diagram MUST have one
+- **Include ACTUAL code snippets** — from the codebase, not pseudocode
+- **Populate ALL tables** — with real data, not placeholders or examples
+- **Target 30-45 pages** — shorter output indicates incomplete analysis
+
+If the codebase is large (200+ files), focus on the module boundaries but still enumerate exhaustively within each module.
+
+### Execution Strategy for Depth
+
+**Mindset**: You are creating a PERMANENT reference document. Future AI agents and engineers will use this instead of reading source code. Incomplete analysis means they'll make mistakes.
+
+**File Reading Strategy**:
+1. **Read broadly first** (Phase 1-2): Map the entire codebase structure
+2. **Read deeply second** (Phase 3-4): For each major module, read the FULL implementation
+3. **Cross-reference** (Phase 5): Verify every component appears in all relevant sections
+
+**Diagram Generation Strategy**:
+1. **Generate diagrams AFTER understanding** — not during exploration
+2. **Use proper Mermaid syntax** — validate mentally before writing
+3. **One diagram per concept** — don't combine unrelated flows
+4. **Annotate arrows** — show what data moves between nodes
+
+**Iteration Guidance**:
+- After initial generation, review each HIGH-priority section
+- If any section is thin (< 1 page for HIGH priority), expand it
+- If any required diagram is missing, add it
+- If tables have < 5 rows, verify you've enumerated exhaustively
 
 ---
 
@@ -606,6 +641,46 @@ Generate `draft/architecture.md` — a comprehensive human-readable engineering 
 - Include a **Table of Contents** with numbered sections
 - End the document with: `"End of analysis. Queries should reference the .ai-context.md file for token efficiency."`
 
+### MANDATORY Header Format
+
+**CRITICAL**: Every architecture.md file MUST start with this exact structure. Gather git metadata first, then fill in placeholders.
+
+```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:init"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+
+# Architecture: {PROJECT_NAME}
+
+> Human-readable engineering reference. 30-45 pages.
+> For token-optimized AI context, see `draft/.ai-context.md`.
+
+---
+
+## Table of Contents
+
+1. [Executive Summary](#1-executive-summary)
+2. [AI Agent Quick Reference](#2-ai-agent-quick-reference)
+3. [System Identity & Purpose](#3-system-identity--purpose)
+... (continue with all 28 sections + appendices)
+```
+
+**Do NOT skip the YAML frontmatter. It enables incremental refresh tracking.**
+
+---
+
 ### Report Structure — Follow This Exact Section Ordering
 
 _(Skip or adapt sections per the Adaptive Sections table above.)_
@@ -678,12 +753,29 @@ A compact block optimized for fast AI-agent context loading. Fill in every field
 
 ### 4. Architecture Overview
 
+**Expected length: 2-3 pages with diagrams**
+
 #### 4.1 High-Level Topology
 
-Mermaid `flowchart TD` diagram showing:
+**MANDATORY: Generate a Mermaid `flowchart TD` diagram** showing:
 - The main process / service and its internal components (as nested subgraphs)
 - External services and dependencies (as a separate subgraph)
 - Directional arrows showing primary data / control flow
+
+Example structure (adapt to actual codebase):
+```mermaid
+flowchart TD
+    subgraph Service["MyService"]
+        A[API Layer] --> B[Business Logic]
+        B --> C[Data Access]
+    end
+    subgraph External["External Dependencies"]
+        D[(Database)]
+        E[Cache]
+    end
+    C --> D
+    B --> E
+```
 
 #### 4.2 Process Lifecycle (or Usage Lifecycle for libraries)
 
@@ -692,6 +784,8 @@ Numbered steps from startup to steady state. Reference the entry-point source fi
 For services/daemons: binary start → config load → dependency init → server listen → event loop.
 For libraries: import → configure → initialize → use → teardown.
 For CLI tools: parse args → validate → execute → output → exit.
+
+**Include 5-10 numbered steps with file:line references.**
 
 ---
 
@@ -734,32 +828,94 @@ Use ✓ for direct calls, ✓(RPC) for remote procedure calls, ✓(HTTP) for RES
 
 ### 6. Data Flow — End to End
 
-Create **separate Mermaid flowcharts** for each major data-flow path:
+**Expected length: 3-5 pages with 3-5 diagrams**
 
-- **Primary processing pipeline** (e.g., request handling, job lifecycle, data ingestion). Show: source → processing stages → output / sink.
-- **Simplified variant flows** (e.g., sync vs async path, read vs write path).
-- **Multi-phase processing** (if applicable — e.g., map → reduce, extract → transform → load).
-- **Output delivery pipeline** (from internal processing to external targets).
-- **Safety / consistency mechanisms** (e.g., transactions, idempotency guards, version checks, distributed locks).
+**MANDATORY: Create SEPARATE Mermaid flowcharts** for each major data-flow path. Do NOT combine flows into one diagram.
 
-Annotate arrows with the data that moves between stages.
+#### 6.1 Primary Processing Pipeline
+**DIAGRAM REQUIRED**: Show the main request/job flow from entry to completion.
+```mermaid
+flowchart LR
+    A[Request Entry] --> B[Validation]
+    B --> C[Processing]
+    C --> D[Persistence]
+    D --> E[Response]
+```
+Annotate each arrow with the data type that moves between stages.
+
+#### 6.2 Variant Flows
+**DIAGRAM REQUIRED for each variant**: (e.g., sync vs async path, read vs write path, happy path vs error path).
+
+#### 6.3 Multi-Phase Processing
+**DIAGRAM REQUIRED if applicable**: (e.g., map → reduce, extract → transform → load, request → queue → worker → result).
+
+#### 6.4 Output Delivery Pipeline
+**DIAGRAM REQUIRED**: Show how processed data reaches external targets (APIs, databases, files, queues).
+
+#### 6.5 Safety / Consistency Mechanisms
+Document with diagram or prose: transactions, idempotency guards, version checks, distributed locks, retry boundaries.
+
+**Annotate ALL arrows with the data/message type that moves between stages.**
 
 ---
 
 ### 7. Core Modules Deep Dive
 
-For each major internal module (typically 5–8), provide:
+**Expected length: 8-15 pages (1-2 pages per module)**
 
-- **Role** — one-line description.
-- **Responsibilities** — bullet list of what it does.
-- **Key Operations / Methods** — table:
+For each major internal module (typically 5–8), provide a COMPLETE deep dive:
 
-  | Op / Method | Description |
-  |-------------|-------------|
+#### Per-Module Template
 
-- **State Machine** (if applicable) — Mermaid `stateDiagram-v2`.
-- **Internal Architecture** (if complex) — Mermaid flowchart of subcomponents.
-- **Notable Mechanisms** — backpressure, retry logic, caching, connection pooling, rate limiting, circuit breaking, persistence, etc.
+```markdown
+#### 7.X {ModuleName}
+
+**Role**: One-line description of what this module does.
+
+**Source Files**:
+- `path/to/main.file` — primary implementation
+- `path/to/types.file` — type definitions
+- `path/to/utils.file` — helpers
+
+**Responsibilities**:
+1. First responsibility with detail
+2. Second responsibility with detail
+3. (list ALL, not just top 3)
+
+**Key Operations / Methods**:
+
+| Op / Method | Signature | Description |
+|-------------|-----------|-------------|
+| `methodName` | `(input: Type) → ReturnType` | What it does |
+| (enumerate ALL public methods) | | |
+
+**State Machine** (if stateful):
+[Mermaid stateDiagram-v2 here]
+
+**Internal Architecture** (if complex):
+[Mermaid flowchart of subcomponents here]
+
+**Notable Mechanisms**:
+- Caching: how and what is cached
+- Retry logic: policy and backoff
+- Connection pooling: pool size and management
+- (document ALL mechanisms, not just existence)
+
+**Error Handling**: How this module handles and propagates errors.
+
+**Thread Safety**: Single-threaded / thread-safe / requires external synchronization.
+```
+
+**MANDATORY for stateful modules**: Include a `stateDiagram-v2` showing state transitions:
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Processing: start()
+    Processing --> Completed: success
+    Processing --> Failed: error
+    Failed --> Idle: retry()
+    Completed --> [*]
+```
 
 ---
 
@@ -916,6 +1072,8 @@ Table:
 
 ### 14. Cross-Module Integration Points
 
+**Expected length: 2-4 pages with 2-3 sequence diagrams**
+
 For each external service this module interacts with:
 
 - **Contract** — what this module expects (API version, response format, latency SLA).
@@ -924,26 +1082,95 @@ For each external service this module interacts with:
 - **Shared Schemas** — which definition files are shared and who owns them.
 - **Integration Test Coverage** — how the integration is tested.
 
-Include a **Mermaid sequence diagram** for the 2–3 most important cross-module flows, showing the full call chain with request/response payloads.
+**MANDATORY: Include 2-3 Mermaid sequence diagrams** for the most important cross-module flows:
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Service
+    participant Database
+
+    Client->>API: POST /resource {payload}
+    API->>Service: validate(payload)
+    Service->>Database: INSERT
+    Database-->>Service: id
+    Service-->>API: ResourceCreated
+    API-->>Client: 201 {id, resource}
+```
+
+Each sequence diagram MUST show:
+- All participant lifelines (components / services)
+- Request → response arrows with payload descriptions
+- Conditional branches (alt/opt blocks) where logic diverges
+- Loop blocks for retry or iteration logic
+- Error paths (not just happy path)
 
 ---
 
 ### 15. Critical Invariants & Safety Rules
 
-For each invariant (aim for 8–15):
+**Expected length: 2-3 pages (8-15 invariants)**
 
-- **What**: The invariant statement.
-- **Why**: What breaks if violated (data loss, corruption, crash, security breach, split-brain, inconsistency, etc.).
-- **Where Enforced**: File and function where the check lives.
-- **Common Violation Pattern**: How someone might accidentally break this.
+**CRITICAL SECTION**: This section prevents AI agents from making dangerous changes. Be EXHAUSTIVE.
 
-Group by category:
-- Data safety invariants (prevent data loss / corruption)
-- Security invariants (auth, authz, input validation, secrets handling)
-- Concurrency invariants (lock ordering, thread affinity)
-- Ordering / sequencing invariants (must-happen-before relationships)
-- Idempotency requirements (safe to retry?)
-- Backward-compatibility rules (schema evolution, API versioning, config defaults)
+For each invariant, provide COMPLETE documentation:
+
+#### Invariant Template
+
+```markdown
+#### [Category] Invariant Name
+
+**What**: Clear statement of the invariant (what must always be true).
+
+**Why**: What breaks if violated:
+- Specific failure mode (data loss, corruption, crash, security breach, etc.)
+- Blast radius (single user, all users, entire system)
+- Recovery difficulty (automatic, manual intervention, unrecoverable)
+
+**Where Enforced**:
+- `path/to/file.ext:linenum` — `functionName()` — how it checks
+- `path/to/another.ext:linenum` — secondary enforcement
+
+**Common Violation Patterns**:
+1. How someone might accidentally break this
+2. Another way it could be violated
+3. Edge case that's easy to miss
+
+**Safe Modification Guide**: If you need to change code near this invariant, do X not Y.
+```
+
+#### Required Categories (enumerate ALL that apply)
+
+1. **Data Safety Invariants** (prevent data loss / corruption)
+   - Transaction boundaries
+   - Foreign key relationships
+   - Data validation rules
+
+2. **Security Invariants** (auth, authz, input validation)
+   - Authentication requirements
+   - Authorization checks
+   - Input sanitization boundaries
+
+3. **Concurrency Invariants** (lock ordering, thread affinity)
+   - Lock acquisition order
+   - Thread-confined objects
+   - Atomic operation requirements
+
+4. **Ordering / Sequencing Invariants** (must-happen-before)
+   - Initialization order dependencies
+   - Event ordering requirements
+   - State machine transitions
+
+5. **Idempotency Requirements** (safe to retry?)
+   - Which operations are idempotent
+   - Which require deduplication
+   - Retry safety rules
+
+6. **Backward-Compatibility Rules** (schema evolution, API versioning)
+   - Field addition/removal rules
+   - Version negotiation requirements
+   - Migration requirements
 
 ---
 
@@ -1041,11 +1268,38 @@ Table:
 
 ### 21. Key Design Patterns
 
-For each significant pattern (typically 4–8):
-- Pattern name as subsection header.
-- 2–4 sentence description of the pattern and how it is applied.
-- **Code snippet** showing the pattern (actual code, not pseudocode). Especially valuable: anti-pattern → pattern comparisons.
-- Where it is used in the codebase.
+**Expected length: 2-4 pages with code snippets**
+
+For each significant pattern (typically 4–8), provide a COMPLETE writeup:
+
+#### Per-Pattern Template
+
+```markdown
+#### 21.X {PatternName} Pattern
+
+**Description**: 2-4 sentences explaining the pattern and why it's used here.
+
+**Where Used**:
+- `path/to/file1.ext:linenum` — context
+- `path/to/file2.ext:linenum` — context
+
+**Implementation** (actual code from codebase):
+```{language}
+// Actual code snippet showing the pattern
+// Include 10-30 lines, not just 2-3
+// Add inline comments explaining key parts
+```
+
+**Anti-Pattern to Avoid**:
+```{language}
+// Show what NOT to do
+// This helps AI agents avoid common mistakes
+```
+
+**When to Apply**: Guidance on when new code should use this pattern.
+```
+
+**MANDATORY**: Code snippets must be ACTUAL CODE from the codebase, not pseudocode or simplified examples. Include enough context (10-30 lines) to understand the pattern.
 
 ---
 
@@ -1237,11 +1491,68 @@ Map every implementation to its outputs and the external APIs / systems it calls
 
 ### Appendix D: Mermaid Sequence Diagrams — Critical Flows
 
-Provide 2–3 **Mermaid sequence diagrams** for the most complex cross-component or cross-module flows. These should show:
-- Participant lifelines (components / services)
-- Request → response arrows with payload descriptions
-- Conditional branches (alt/opt blocks)
-- Loop blocks where relevant
+**MANDATORY: Provide 2-3 detailed Mermaid sequence diagrams** for the most complex flows.
+
+Each diagram MUST include:
+- **All participant lifelines** (every component/service involved)
+- **Request → response arrows** with actual payload descriptions (not just "data")
+- **Conditional branches** using `alt`/`opt` blocks for different paths
+- **Loop blocks** for retry logic or iteration
+- **Notes** explaining non-obvious steps
+
+Example of REQUIRED detail level:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant API
+    participant AuthService
+    participant UserDB
+    participant Cache
+
+    User->>API: POST /login {email, password}
+    API->>AuthService: authenticate(email, password)
+
+    AuthService->>Cache: get(email)
+    alt Cache Hit
+        Cache-->>AuthService: cachedUser
+    else Cache Miss
+        AuthService->>UserDB: SELECT * FROM users WHERE email=?
+        UserDB-->>AuthService: userRecord
+        AuthService->>Cache: set(email, userRecord, TTL=300)
+    end
+
+    AuthService->>AuthService: verifyPassword(password, hash)
+
+    alt Password Valid
+        AuthService->>AuthService: generateJWT(userId, roles)
+        AuthService-->>API: {token, expiresAt}
+        API-->>User: 200 {token, user}
+    else Password Invalid
+        AuthService-->>API: AuthenticationError
+        API-->>User: 401 {error: "Invalid credentials"}
+    end
+```
+
+**Do NOT provide simplified diagrams. Each diagram should be 20-40 lines of Mermaid code.**
+
+---
+
+### Expected Output Summary
+
+Before writing architecture.md, verify your output matches these expectations:
+
+| Metric | Minimum | Target |
+|--------|---------|--------|
+| **Total pages** | 25 pages | 30-45 pages |
+| **Mermaid diagrams** | 5 diagrams | 8-12 diagrams |
+| **Tables with data** | 15 tables | 20-30 tables |
+| **Code snippets** | 5 snippets | 10-15 snippets |
+| **File references** | 50 refs | 100+ refs |
+| **Invariants documented** | 8 | 10-15 |
+| **Modules deep-dived** | 5 | 5-8 |
+
+**If your output is under 25 pages, you have NOT completed exhaustive analysis. Go back and expand HIGH-priority sections.**
 
 ---
 
@@ -1256,153 +1567,330 @@ Provide 2–3 **Mermaid sequence diagrams** for the most complex cross-component
 - Include ALL instances (handlers, endpoints, schemas, dependencies) — do not sample or abbreviate.
 - When a section does not apply (per the Adaptive Sections table), state explicitly that it is skipped and why, rather than silently omitting it.
 
+---
+
+### Section Priority Guide
+
+This table identifies which sections require the MOST depth and WHY. High-priority sections should never be abbreviated.
+
+| # | Section | Depth | Diagram Required | Why This Matters |
+|---|---------|-------|------------------|------------------|
+| 1 | Executive Summary | Medium | No | Quick orientation — keep concise |
+| 2 | AI Agent Quick Reference | High | No | **Fast context priming** — fill ALL fields |
+| 3 | System Identity & Purpose | Medium | No | The "why" — 2-3 paragraphs sufficient |
+| 4 | Architecture Overview | **HIGH** | **YES: flowchart TD** | Visual mental model — diagram is mandatory |
+| 5 | Component Map & Interactions | **HIGH** | **YES: flowchart + matrix** | Know what talks to what |
+| 6 | Data Flow — End to End | **HIGH** | **YES: multiple flowcharts** | Trace any request — separate diagram per major flow |
+| 7 | Core Modules Deep Dive | **HIGH** | **YES: stateDiagram per module** | 5-8 modules × full deep-dive each |
+| 8 | Concurrency Model | High | Optional | **Prevents race conditions** in generated code |
+| 9 | Framework & Extension Points | High | No | Understand the plugin architecture |
+| 10 | Full Catalog | **HIGH** | No | **Exhaustive enumeration** — no sampling |
+| 11 | Secondary Subsystem (V2) | Medium | YES: flowchart | Only if V1/V2 split exists |
+| 12 | API & Interface Definitions | High | No | API surface — enumerate ALL endpoints |
+| 13 | External Dependencies | High | No | ALL external services/libs |
+| 14 | Cross-Module Integration | **HIGH** | **YES: sequence diagrams** | 2-3 sequence diagrams mandatory |
+| 15 | Critical Invariants | **HIGH** | No | **Prevents dangerous changes** — 8-15 invariants |
+| 16 | Security Architecture | Medium | No | Protocol & safety analysis |
+| 17 | Observability & Telemetry | Medium | No | Production readiness |
+| 18 | Error Handling & Failure Modes | High | No | Production debugging guide |
+| 19 | State Management | High | No | Crash recovery understanding |
+| 20 | Reusable Modules | Low | No | Engineer-facing only |
+| 21 | Key Design Patterns | High | No | **Code snippets required** — actual code |
+| 22 | Configuration & Tuning | High | No | 10-20 most important parameters |
+| 23 | Performance Characteristics | Medium | No | Engineer-facing |
+| 24 | How to Extend (Cookbooks) | **HIGH** | No | **Step-by-step guides** — AI agents need this |
+| 25 | Build System & Dev Workflow | High | No | Produce correct build commands |
+| 26 | Testing Infrastructure | High | No | Know how to test changes |
+| 27 | Tech Debt & Limitations | Medium | No | Avoid deprecated foundations |
+| 28 | Glossary | Medium | No | 15-30 domain terms |
+| A | File Structure | High | No | Full tree with annotations |
+| B | Data Source Mapping | High | No | Cross-reference: who reads what |
+| C | Output Flow Mapping | High | No | Cross-reference: who writes what |
+| D | Sequence Diagrams | **HIGH** | **YES: 2-3 diagrams** | Complex multi-step flows |
+
+### Diagram Checklist
+
+Before completing architecture.md, verify these diagrams exist:
+
+- [ ] **Section 4.1**: High-level topology flowchart (flowchart TD)
+- [ ] **Section 5.1**: Initialization stages state machine (if applicable)
+- [ ] **Section 6**: Separate flowchart for EACH major data-flow path (typically 3-5 diagrams)
+- [ ] **Section 7**: State machine for each stateful module (stateDiagram-v2)
+- [ ] **Section 11**: V2 architecture flowchart (if V1/V2 split exists)
+- [ ] **Section 14**: Sequence diagram for top 2-3 cross-module flows
+- [ ] **Appendix D**: 2-3 detailed sequence diagrams with payloads
+
+### Self-Check Before Completion
+
+Run this checklist before writing architecture.md:
+
+- [ ] **Page count**: Rendered output approaches 30+ pages (not 5-10)
+- [ ] **Diagram count**: At least 5-10 Mermaid diagrams present
+- [ ] **Table population**: ALL tables have real data, not placeholders
+- [ ] **Code snippets**: Actual code from codebase, not pseudocode
+- [ ] **Exhaustive enumeration**: No "and others", "etc.", "similar to above"
+- [ ] **N/A sections**: Explicitly state why skipped, not silently omitted
+- [ ] **File references**: Every claim traceable to specific source file
+
 **After completing analysis: Write this content to `draft/architecture.md` using the Write tool. This is the PRIMARY output. Then run the Condensation Subroutine to derive .ai-context.md.**
 
 ---
 
 ## .ai-context.md Specification
 
-Generate `draft/.ai-context.md` — a self-contained, token-optimized AI context file (200-400 lines).
+Generate `draft/.ai-context.md` — a **machine-optimized** context file for AI/LLM consumption (200-400 lines).
 
-### Crucial Rules
+### Design Principles
 
-1. **Do NOT refer back to architecture.md** (e.g., "See Section 4.1"). Duplicate all critical facts.
-2. **This file must stand alone** as the sole context source for an AI agent making code changes.
-3. **Optimize for token efficiency** — use tables, bullet lists, compact notation instead of prose.
-4. **Include everything for SAFE changes** — invariants, thread safety rules, error handling patterns.
-5. **Include everything for CORRECT changes** — data flow knowledge, component relationships, interface contracts.
+This file is **NOT for humans**. It is optimized for:
+1. **Token efficiency** — minimize tokens while maximizing information density
+2. **Machine parseability** — use consistent, structured formats that LLMs process efficiently
+3. **Self-containment** — complete context without referencing other files
+4. **Action-orientation** — everything an AI needs to make safe, correct code changes
+
+**Format choices**:
+- Use YAML-like key-value pairs (not prose paragraphs)
+- Use arrow notation for graphs (not Mermaid)
+- Use compact tables with `|` separators
+- Use structured lists with consistent prefixes
+- Abbreviate common patterns (e.g., `fn` for function, `ret` for returns)
+- No markdown formatting for emphasis (no `**bold**` or `_italic_`)
+
+### MANDATORY Header Format
+
+**CRITICAL**: Every .ai-context.md file MUST start with this exact structure:
+
+```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:init"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+```
+
+**Do NOT skip the YAML frontmatter. It enables incremental refresh tracking.**
+
+---
 
 ### Required Sections (all mandatory)
 
 ```markdown
-# {PROJECT_NAME} Context Map
+# {PROJECT_NAME}
 
-## Architecture
-- **Type**: (e.g., gRPC Microservice, CLI tool, library, distributed daemon)
-- **Language**: (e.g., Go 1.21, TypeScript 5.3, Python 3.12)
-- **Pattern**: (e.g., Hexagonal, Master/Worker, Pipeline, Event-driven)
-- **Build**: (exact build command)
-- **Test**: (exact test command)
-- **Entry**: (file → function/class)
-- **Config**: (mechanism + location)
-- **Generational**: (V1/V2 split if any, or "single generation")
+## META
+type: {microservice|cli|library|daemon|webapp|api}
+lang: {language} {version}
+pattern: {Hexagonal|MVC|Pipeline|Event-driven|Layered}
+build: {exact command}
+test: {exact command}
+entry: {file}:{function|class}
+config: {mechanism}@{location}
 
-## Component Graph
-(ASCII tree showing full component hierarchy. Each node gets 5-10 word annotation.
-Include sub-components 2-3 levels deep.)
+## GRAPH:COMPONENTS
+{ComponentA}
+  ├─{SubComponentA1}: {5-word purpose}
+  ├─{SubComponentA2}: {5-word purpose}
+  └─{SubComponentA3}
+      ├─{NestedComponent}: {purpose}
+      └─{NestedComponent}: {purpose}
+{ComponentB}
+  └─...
 
-## Dependency Injection / Wiring
-(One paragraph or bullet list explaining how components find each other.
-Name the DI mechanism: constructor injection, context struct, module imports, etc.
-List the 5-10 most important injection tokens / getter names.)
+## GRAPH:DEPENDENCIES
+{Internal} -[{protocol}]-> {External}
+{Internal} -[{protocol}]-> {External}
+Examples:
+  AuthService -[gRPC]-> UserDB
+  API -[HTTP/REST]-> PaymentGateway
+  Worker -[AMQP]-> MessageQueue
 
-## Critical Invariants (DO NOT BREAK)
-(ALL invariants condensed to one line each.
-Format: `- [Category] **Name**: one-sentence rule + where enforced`
-Categories: Data, Security, Concurrency, Ordering, Compatibility, Idempotency
-Aim for 8-15 invariants. MOST IMPORTANT section for agent safety.)
+## GRAPH:DATAFLOW
+FLOW:{FlowName}
+  {source} --{data_type}--> {stage1} --{data_type}--> {stage2} --> {sink}
+FLOW:{AnotherFlow}
+  {source} --> {stage} --> {sink}
+FLOW:ERROR
+  {component} --{error_type}--> {handler} --> {recovery_action}
 
-## Interface Contracts (TypeScript-like IDL)
-(TypeScript-style interface declarations for ALL major extension points.
-Include method signatures with param types and return types.
-Mark optional methods with `?`. Add one-line comments for non-obvious methods.)
+## WIRING
+mechanism: {constructor_injection|context_struct|module_imports|DI_container|singleton}
+tokens: [{token1}, {token2}, {token3}]
+getters: [{getter1}, {getter2}]
 
-## Dependency Graph
-(Arrow notation: `[ComponentA] -> (protocol) -> [ComponentB]`
-Cover ALL external service dependencies and their protocols.)
+## INVARIANTS
+[DATA] {name}: {rule} @{file}:{line}
+[DATA] {name}: {rule} @{file}:{line}
+[SEC] {name}: {rule} @{file}:{line}
+[CONC] {name}: {rule} @{file}:{line}
+[ORD] {name}: {rule} @{file}:{line}
+[COMPAT] {name}: {rule} @{file}:{line}
+[IDEM] {name}: {rule} @{file}:{line}
 
-## Key Data Sources
-(Table or bullet list mapping each data source to which components read it.
-Include: database tables, message queues, API endpoints, config files.)
-
-## Data Flow Summary
-(Prose description — NOT Mermaid — of each major data-flow path.
-One paragraph per flow. Include: source → processing stages → output.
-Cover: primary pipeline, variant flows, safety mechanisms.)
-
-## Error Handling & Failure Recovery
-(Bullet list of failure scenarios and their recovery mechanisms.
-Include: failover, retries, backpressure, hung detection, graceful degradation.)
-
-## Concurrency Safety Rules
-(Bullet list of thread-safety rules specific to this codebase.
-Format: `- **ComponentName**: rule + consequence of violation`
-Include: which components are single-threaded, which locks protect what.)
-
-## Implementation Catalog
-(Complete list of ALL handlers / plugins / algorithms / endpoints / pipelines.
-Use tables: ID/Name | Type/Class | Brief Description
-Group by category. Include V1 AND V2 if both exist.)
-
-## V1 ↔ V2 Migration Status
-(Skip if no generational split. Table mapping V1 → V2 equivalents.
-Include one-line rule: "When adding new X, prefer V1/V2 because Y.")
-
-## Thread Pools / Execution Model
-(Table: Pool Name | Thread Count | What Runs On It)
-
-## Key Configuration
-(Table of 10-20 most important config parameters.
-Columns: Flag/Param | Default | Critical?
-Mark "Critical" for flags that cause data loss or crashes if misconfigured.)
-
-## Extension Points — Step-by-Step Cookbooks
-(For EACH major extension point, a numbered recipe:
-1. File to create (path + naming convention)
-2. Interface to implement (required + optional methods)
-3. Where to register (file + function + mechanism)
-4. Build dependencies to add
-5. Tests required
-MOST IMPORTANT section for agent productivity.)
-
-## Testing Strategy
-- Unit: (exact command)
-- Integration: (framework + location)
-- Key test hooks: (injection points, completion notifiers, overrides)
-
-## File Layout Quick Reference
-(Bullet list mapping logical concepts to file paths.
-Format: `- ConceptName: path/to/file.ext`
-Cover: entry point, controller, registry, algorithms, config, tests, build.)
-
-## Glossary (Critical Terms Only)
-(Table of 10-20 domain terms that appear in code identifiers.
-Columns: Term | Definition (one sentence)
-Only include terms that would confuse an agent reading the code.)
-
-## Draft Integration
-(Cross-references to other Draft files:
-- See `draft/tech-stack.md` for accepted patterns and technology decisions
-- See `draft/workflow.md` for TDD preferences and guardrails
-- See `draft/product.md` for product context and guidelines)
+## INTERFACES
+```{language}
+// Condensed interface definitions - signatures only
+interface {Name} {
+  {method}({params}): {return}  // {one-line purpose}
+  {method}?({params}): {return} // optional
+}
 ```
+
+## CATALOG:{Category}
+{id}|{type}|{file}|{purpose}
+{id}|{type}|{file}|{purpose}
+
+## CATALOG:{AnotherCategory}
+{id}|{type}|{file}|{purpose}
+
+## THREADS
+{pool_name}|{count}|{runs_what}
+{pool_name}|{count}|{runs_what}
+
+## CONFIG
+{param}|{default}|{critical:Y/N}|{purpose}
+{param}|{default}|{critical:Y/N}|{purpose}
+
+## ERRORS
+{scenario}: {recovery}
+{scenario}: {recovery}
+retry_policy: {policy}
+backoff: {strategy}
+
+## CONCURRENCY
+{component}: {rule} -> {violation_consequence}
+{component}: {rule} -> {violation_consequence}
+locks: [{lock1}@{file}, {lock2}@{file}]
+lock_order: {lock1} < {lock2} < {lock3}
+
+## EXTEND:{ExtensionType}
+create: {path/pattern}
+implement: {interface}@{file}
+required: [{method1}, {method2}]
+optional: [{method3}]
+register: {registry}@{file}:{function}
+deps: [{dep1}, {dep2}]
+test: {test_pattern}
+
+## EXTEND:{AnotherType}
+...
+
+## TEST
+unit: {command}
+integration: {command}
+hooks: [{hook1}@{file}, {hook2}@{file}]
+
+## FILES
+entry: {path}
+config: {path}
+routes: {path}
+models: {path}
+services: {path}
+tests: {path}
+build: {path}
+
+## VOCAB
+{term}: {definition}
+{term}: {definition}
+
+## REFS
+tech_stack: draft/tech-stack.md
+workflow: draft/workflow.md
+product: draft/product.md
+```
+
+### Machine-Readable Graph Notation
+
+Use these consistent notations for graphs:
+
+**Component hierarchy** (tree notation):
+```
+Root
+  ├─Child1: purpose
+  ├─Child2: purpose
+  │   ├─Grandchild1: purpose
+  │   └─Grandchild2: purpose
+  └─Child3: purpose
+```
+
+**Dependency arrows** (directed graph):
+```
+A -[protocol]-> B      # A depends on B via protocol
+A --> B                # A depends on B (direct call)
+A -.-> B               # A optionally depends on B
+A <--> B               # bidirectional dependency
+```
+
+**Data flow** (pipeline notation):
+```
+Source --{DataType}--> Transform --{DataType}--> Sink
+         |
+         +--> Branch --{DataType}--> AlternateSink
+```
+
+**State transitions**:
+```
+State1 --(event)--> State2
+State2 --(event)--> State3 | State4  # conditional
+```
+
+### Compression Techniques
+
+Apply these to minimize tokens:
+
+1. **Abbreviate common words**:
+   - `fn` = function, `ret` = returns, `req` = required, `opt` = optional
+   - `cfg` = config, `impl` = implementation, `dep` = dependency
+   - `auth` = authentication, `authz` = authorization
+
+2. **Use symbols**:
+   - `@` = at/in file, `->` = leads to/calls, `|` = or/separator
+   - `?` = optional, `!` = critical/required, `~` = approximate
+
+3. **Omit obvious context**:
+   - Skip "The" and "This" at start of descriptions
+   - Skip file extensions when unambiguous
+   - Skip common prefixes (e.g., `src/` if all files are there)
+
+4. **Use consistent column formats**:
+   - Tables: `col1|col2|col3` (no spaces around `|`)
+   - Key-value: `key: value` (single space after colon)
+   - Lists: `[item1, item2, item3]` (comma-space separator)
 
 ### What to EXCLUDE from .ai-context.md
 
-The following belong ONLY in architecture.md (too verbose for token-efficient context):
-
-- Mermaid diagrams (use prose or ASCII instead)
-- Full code snippets (use TypeScript-like IDL instead)
-- Detailed per-module deep dives (the component graph + interface contracts cover this)
-- Security architecture details (unless directly relevant to code changes)
-- Observability/telemetry details (unless agents need to add logging/metrics)
-- Reusable modules assessment (engineer-facing only)
-- Performance characteristics (engineer-facing only)
-- Full appendices (data source mapping is condensed into "Key Data Sources")
+Exclude (belongs only in architecture.md):
+- Mermaid diagram syntax (use text graphs)
+- Full code implementations (use signatures only)
+- Prose explanations (use structured key-values)
+- Human formatting (bold, italic, headers beyond ##)
+- Redundant information (don't repeat across sections)
+- Historical context (focus on current state)
+- Performance details (unless critical for correctness)
+- Security details (unless needed for code changes)
 
 ### Quality Checklist for .ai-context.md
 
-Before finalizing, verify:
-
-- [ ] An agent can implement a new plugin/handler/algorithm using ONLY this file
-- [ ] An agent knows which thread pool to use for any new async work
-- [ ] An agent knows what invariants to check before emitting side effects
-- [ ] An agent knows the correct error handling pattern for this codebase
-- [ ] An agent can find the right file to modify for any given task
-- [ ] An agent knows what tests to write and how to run them
-- [ ] An agent knows the V1/V2 boundary and which generation to target
-- [ ] No section says "See Section X" or "See architecture.md"
-- [ ] Total length is 200-400 lines (not too short to be useful, not too long to waste tokens)
+Verify before writing:
+- [ ] Agent can implement new extension using ONLY this file
+- [ ] Agent knows correct thread pool for async work
+- [ ] Agent knows invariants to check before side effects
+- [ ] Agent knows error handling pattern
+- [ ] Agent can find correct file for any modification
+- [ ] Agent knows test command and patterns
+- [ ] Agent knows V1/V2 boundary (if applicable)
+- [ ] No prose paragraphs (all structured data)
+- [ ] No references to architecture.md
+- [ ] 200-400 lines total
 
 ---
 
@@ -1410,49 +1898,144 @@ Before finalizing, verify:
 
 After completing the 5-phase analysis:
 
-1. **Gather git metadata**: Run the git commands from "Standard File Metadata" section to collect current state.
+1. **Gather git metadata FIRST**: Run these commands to collect current state:
+   ```bash
+   PROJECT_NAME=$(basename "$(pwd)")
+   GIT_BRANCH=$(git branch --show-current)
+   GIT_REMOTE=$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || echo "none")
+   GIT_COMMIT=$(git rev-parse HEAD)
+   GIT_COMMIT_SHORT=$(git rev-parse --short HEAD)
+   GIT_COMMIT_DATE=$(git log -1 --format="%ci")
+   GIT_COMMIT_MSG=$(git log -1 --format="%s")
+   GIT_DIRTY=$([ -n "$(git status --porcelain)" ] && echo "true" || echo "false")
+   ISO_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+   ```
 
-2. **Write `draft/architecture.md`**:
-   - Start with the YAML frontmatter metadata block (see "Standard File Metadata")
-   - Then generate the comprehensive 30-45 page engineering reference using the specification above
-   - This is the PRIMARY output
+2. **Write `draft/architecture.md`** with this EXACT structure:
+   ```markdown
+   ---
+   project: "{PROJECT_NAME from above}"
+   module: "root"
+   generated_by: "draft:init"
+   generated_at: "{ISO_TIMESTAMP from above}"
+   git:
+     branch: "{GIT_BRANCH}"
+     remote: "{GIT_REMOTE}"
+     commit: "{GIT_COMMIT}"
+     commit_short: "{GIT_COMMIT_SHORT}"
+     commit_date: "{GIT_COMMIT_DATE}"
+     commit_message: "{GIT_COMMIT_MSG}"
+     dirty: {GIT_DIRTY}
+   synced_to_commit: "{GIT_COMMIT}"
+   ---
 
-3. **Derive `draft/.ai-context.md`**: Using the Condensation Subroutine below, condense `architecture.md` into the 200-400 line token-optimized AI context. Include the same metadata header.
+   # Architecture: {PROJECT_NAME}
+
+   > Human-readable engineering reference. 30-45 pages.
+   > For token-optimized AI context, see `draft/.ai-context.md`.
+
+   ---
+
+   ## Table of Contents
+   ... (then continue with full 28 sections + appendices)
+   ```
+
+3. **Derive `draft/.ai-context.md`** with the SAME metadata header, then use the Condensation Subroutine to transform architecture.md content into machine-optimized format.
 
 4. **Present for review**: Show the user a summary of what was discovered before proceeding to Step 2.
 
 **CRITICAL**:
-- Do NOT skip this step. Both files MUST be written before continuing
+- Do NOT skip the YAML frontmatter metadata block — it enables incremental refresh
 - Generate architecture.md FIRST, then derive .ai-context.md from it
-- ALL files MUST include the YAML frontmatter metadata block at the top
+- Both files MUST have the metadata header at the very top
 
 ---
 
 ## Condensation Subroutine: Generate .ai-context.md from architecture.md
 
-This subroutine condenses the comprehensive `architecture.md` into token-optimized `.ai-context.md`. Called by:
+This subroutine transforms the human-readable `architecture.md` into machine-optimized `.ai-context.md`. Called by:
 - **Init** — after generating architecture.md
 - **Implement** — after module status updates
 - **Decompose** — after adding new modules
 - **Refresh** — when updating architecture.md
 
-### Process
+### Transformation Process
 
-1. Read `draft/architecture.md`
-2. Generate `draft/.ai-context.md` with these transformations:
-   - **Condense prose into tables/bullets** — Remove explanatory text, keep facts
-   - **Replace Mermaid diagrams with ASCII/prose** — Token-efficient representation
-   - **Strip section introductions** — Keep only actionable content
-   - **Convert code snippets to TypeScript-like IDL** — Interface signatures only
-   - **Merge related sections** — Combine into the 15+ required sections
-   - **Add Draft Integration section** — Cross-references to other Draft files
-   - **Enforce 200-400 line limit** — Prioritize: invariants > interfaces > cookbooks > catalogs
+1. **Read** `draft/architecture.md`
 
-3. Quality check before writing:
-   - [ ] Self-contained — no references to architecture.md
-   - [ ] All critical invariants preserved
+2. **Transform** each section using these rules:
+
+| architecture.md Section | .ai-context.md Section | Transformation |
+|------------------------|------------------------|----------------|
+| Executive Summary | META | Extract key-value pairs only |
+| Architecture Overview (Mermaid) | GRAPH:COMPONENTS | Convert to tree notation |
+| Component Map | GRAPH:COMPONENTS | Merge into single tree |
+| Data Flow (Mermaid) | GRAPH:DATAFLOW | Convert to arrow notation |
+| External Dependencies | GRAPH:DEPENDENCIES | Convert to `A -[proto]-> B` format |
+| Dependency Injection | WIRING | Extract mechanism + tokens list |
+| Critical Invariants | INVARIANTS | One line per invariant with category prefix |
+| Framework/Extension Points | INTERFACES + EXTEND | Signatures + cookbook steps |
+| Full Catalog | CATALOG:{Category} | Pipe-separated table rows |
+| Concurrency Model | THREADS + CONCURRENCY | Tables + rules |
+| Configuration | CONFIG | Pipe-separated table rows |
+| Error Handling | ERRORS | Key: value pairs |
+| Build/Test | TEST + META | Extract exact commands |
+| File Structure | FILES | Concept: path mappings |
+| Glossary | VOCAB | Term: definition pairs |
+
+3. **Apply compression techniques**:
+   - Remove all prose paragraphs → structured key-values
+   - Remove Mermaid syntax → text-based graph notation
+   - Remove markdown formatting (bold, italic, headers beyond ##)
+   - Abbreviate: `fn`=function, `ret`=returns, `cfg`=config, `impl`=implementation
+   - Use symbols: `@`=at/in, `->`=calls/leads-to, `|`=separator, `?`=optional, `!`=required
+
+4. **Prioritize content** (if exceeding 400 lines, cut in this order):
+   1. INVARIANTS — never cut (safety critical)
+   2. EXTEND — never cut (agent productivity critical)
+   3. GRAPH:* — keep all graphs
+   4. INTERFACES — keep signatures
+   5. CATALOG — can abbreviate to top 20 per category
+   6. CONFIG — can abbreviate to critical=Y only
+   7. VOCAB — can abbreviate to 10 most important
+
+5. **Quality check** before writing:
+   - [ ] No prose paragraphs (all structured)
+   - [ ] No Mermaid syntax (all text graphs)
+   - [ ] No references to architecture.md
+   - [ ] All invariants preserved
    - [ ] Extension cookbooks complete
    - [ ] Within 200-400 lines
+
+### Example Transformation
+
+**architecture.md (human-readable)**:
+```markdown
+### 4.1 High-Level Topology
+
+The AuthService is a microservice that handles user authentication...
+
+```mermaid
+flowchart TD
+    subgraph AuthService
+        API[API Layer] --> Logic[Auth Logic]
+        Logic --> Store[Token Store]
+    end
+    Logic --> UserDB[(User Database)]
+```
+```
+
+**Becomes .ai-context.md (machine-optimized)**:
+```
+## GRAPH:COMPONENTS
+AuthService
+  ├─API: handles HTTP requests
+  ├─Logic: validates credentials, generates tokens
+  └─Store: caches active tokens
+
+## GRAPH:DEPENDENCIES
+AuthService.Logic -[PostgreSQL]-> UserDB
+```
 
 ### Reference from Other Skills
 
@@ -2364,7 +2947,36 @@ Create the track directory and draft files immediately with skeleton structure:
 
 ### Create `draft/tracks/<track_id>/spec-draft.md`:
 
+**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
+
+```bash
+git branch --show-current                    # LOCAL_BRANCH
+git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
+git rev-parse HEAD                           # FULL_SHA
+git rev-parse --short HEAD                   # SHORT_SHA
+git log -1 --format=%ci HEAD                 # COMMIT_DATE
+git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
+git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
+```
+
 ```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+track_id: "<track_id>"
+generated_by: "draft:new-track"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Specification Draft: [Title]
 
 **Track ID:** <track_id>
@@ -2469,7 +3081,26 @@ Create the track directory and draft files immediately with skeleton structure:
 
 ### Create `draft/tracks/<track_id>/plan-draft.md`:
 
+**MANDATORY: Include YAML frontmatter with git metadata** (same git info as spec-draft.md):
+
 ```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+track_id: "<track_id>"
+generated_by: "draft:new-track"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Plan Draft: [Title]
 
 **Track ID:** <track_id>
@@ -4402,9 +5033,38 @@ Create structured markdown report.
 - Project-level: `draft/validation-report.md`
 - Track-level: `draft/tracks/<track-id>/validation-report.md`
 
+**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
+
+```bash
+git branch --show-current                    # LOCAL_BRANCH
+git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
+git rev-parse HEAD                           # FULL_SHA
+git rev-parse --short HEAD                   # SHORT_SHA
+git log -1 --format=%ci HEAD                 # COMMIT_DATE
+git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
+git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
+```
+
 ### Report Format
 
 ```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+track_id: "{TRACK_ID or null}"
+generated_by: "draft:validate"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Validation Report
 
 **Generated:** [ISO timestamp]
@@ -5323,9 +5983,38 @@ Generate report at:
 - **Project-level:** `draft/bughunt-report.md`
 - **Track-level:** `draft/tracks/<track-id>/bughunt-report.md` (if analyzing specific track)
 
+**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
+
+```bash
+git branch --show-current                    # LOCAL_BRANCH
+git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
+git rev-parse HEAD                           # FULL_SHA
+git rev-parse --short HEAD                   # SHORT_SHA
+git log -1 --format=%ci HEAD                 # COMMIT_DATE
+git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
+git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
+```
+
 Report structure:
 
 ```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+track_id: "{TRACK_ID or null}"
+generated_by: "draft:bughunt"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Bug Hunt Report
 
 **Branch:** `[branch-name]`
@@ -5836,11 +6525,40 @@ Merge findings from:
 
 Create unified review report in markdown format.
 
+**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
+
+```bash
+git branch --show-current                    # LOCAL_BRANCH
+git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
+git rev-parse HEAD                           # FULL_SHA
+git rev-parse --short HEAD                   # SHORT_SHA
+git log -1 --format=%ci HEAD                 # COMMIT_DATE
+git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
+git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
+```
+
 ### Track-Level Report
 
 **Path:** `draft/tracks/<id>/review-report.md`
 
 ```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+track_id: "<id>"
+generated_by: "draft:review"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Review Report: <Track Title>
 
 **Track ID:** <id>
@@ -6260,9 +6978,38 @@ Next number = existing count + 1, zero-padded to 3 digits (001, 002, ...).
 
 ## Step 5: Create ADR File
 
+**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
+
+```bash
+git branch --show-current                    # LOCAL_BRANCH
+git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
+git rev-parse HEAD                           # FULL_SHA
+git rev-parse --short HEAD                   # SHORT_SHA
+git log -1 --format=%ci HEAD                 # COMMIT_DATE
+git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
+git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
+```
+
 Create `draft/adrs/<number>-<kebab-case-title>.md`:
 
 ```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+adr_number: <number>
+generated_by: "draft:adr"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+
 # ADR-<number>: <Title>
 
 **Date:** <ISO date>

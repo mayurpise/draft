@@ -55,7 +55,36 @@ Create the track directory and draft files immediately with skeleton structure:
 
 ### Create `draft/tracks/<track_id>/spec-draft.md`:
 
+**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
+
+```bash
+git branch --show-current                    # LOCAL_BRANCH
+git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
+git rev-parse HEAD                           # FULL_SHA
+git rev-parse --short HEAD                   # SHORT_SHA
+git log -1 --format=%ci HEAD                 # COMMIT_DATE
+git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
+git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
+```
+
 ```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+track_id: "<track_id>"
+generated_by: "draft:new-track"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Specification Draft: [Title]
 
 **Track ID:** <track_id>
@@ -160,7 +189,26 @@ Create the track directory and draft files immediately with skeleton structure:
 
 ### Create `draft/tracks/<track_id>/plan-draft.md`:
 
+**MANDATORY: Include YAML frontmatter with git metadata** (same git info as spec-draft.md):
+
 ```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+track_id: "<track_id>"
+generated_by: "draft:new-track"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Plan Draft: [Title]
 
 **Track ID:** <track_id>

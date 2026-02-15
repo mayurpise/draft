@@ -19,6 +19,15 @@ synced_to_commit: "{FULL_SHA}"
 > Self-contained AI context. 200-400 lines. Token-optimized.
 > This file must stand alone — no references to architecture.md or source files needed.
 
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+---
+
 ## Architecture
 
 - **Type**: {type} <!-- e.g., gRPC Microservice, CLI tool, library, REST API -->

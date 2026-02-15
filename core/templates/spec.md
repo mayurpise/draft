@@ -17,8 +17,14 @@ synced_to_commit: "{FULL_SHA}"
 
 # Specification: [Title]
 
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
 **Track ID:** {TRACK_ID}
-**Created:** {ISO_TIMESTAMP}
 **Status:** [ ] Drafting
 
 > This is a working draft. Content will evolve through conversation.

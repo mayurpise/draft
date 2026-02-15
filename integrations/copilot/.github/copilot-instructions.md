@@ -2177,6 +2177,66 @@ You are building a federated knowledge index for a monorepo with multiple servic
 
 ---
 
+## Standard File Metadata
+
+**ALL generated files MUST include the standard YAML frontmatter.** This enables refresh tracking, sync verification, and traceability.
+
+### Gathering Git Information
+
+Before generating any file, run these commands to gather metadata:
+
+```bash
+# Project name (from manifest or directory)
+basename "$(pwd)"
+
+# Git branch
+git branch --show-current
+
+# Git remote tracking branch
+git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || echo "none"
+
+# Git commit SHA (full)
+git rev-parse HEAD
+
+# Git commit SHA (short)
+git rev-parse --short HEAD
+
+# Git commit date
+git log -1 --format="%ci"
+
+# Git commit message (first line)
+git log -1 --format="%s"
+
+# Check for uncommitted changes
+git status --porcelain | head -1
+```
+
+### Metadata Template
+
+Insert this YAML frontmatter block at the **top of every generated file** (`service-index.md`, `dependency-graph.md`, `tech-matrix.md`, `draft-index-bughunt-summary.md`):
+
+```yaml
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:index"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH or 'none'}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{FIRST_LINE_OF_COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+```
+
+> **Note**: `generated_by` uses `draft:command` format (not `draft command`) for cross-platform compatibility.
+
+---
+
 ## Pre-Check
 
 ```bash
@@ -2979,8 +3039,14 @@ synced_to_commit: "{FULL_SHA}"
 
 # Specification Draft: [Title]
 
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
 **Track ID:** <track_id>
-**Created:** [ISO date]
 **Status:** [ ] Drafting
 
 > This is a working draft. Content will evolve through conversation.
@@ -3102,6 +3168,13 @@ synced_to_commit: "{FULL_SHA}"
 ---
 
 # Plan Draft: [Title]
+
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
 
 **Track ID:** <track_id>
 **Spec:** ./spec-draft.md
@@ -3448,6 +3521,67 @@ You are decomposing a project or track into modules with clear responsibilities,
 - Making modules too large (>3 files) or too small (single function)
 - Skipping dependency analysis
 - Not waiting for developer approval at checkpoints
+
+---
+
+## Standard File Metadata
+
+**ALL generated files MUST include the standard YAML frontmatter.** This enables refresh tracking, sync verification, and traceability.
+
+### Gathering Git Information
+
+Before generating any file, run these commands to gather metadata:
+
+```bash
+# Project name (from manifest or directory)
+basename "$(pwd)"
+
+# Git branch
+git branch --show-current
+
+# Git remote tracking branch
+git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || echo "none"
+
+# Git commit SHA (full)
+git rev-parse HEAD
+
+# Git commit SHA (short)
+git rev-parse --short HEAD
+
+# Git commit date
+git log -1 --format="%ci"
+
+# Git commit message (first line)
+git log -1 --format="%s"
+
+# Check for uncommitted changes
+git status --porcelain | head -1
+```
+
+### Metadata Template
+
+Insert this YAML frontmatter block at the **top of every generated file**:
+
+```yaml
+---
+project: "{PROJECT_NAME}"
+module: "{MODULE_NAME or 'root'}"
+track_id: "{TRACK_ID or null}"
+generated_by: "draft:decompose"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH or 'none'}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{FIRST_LINE_OF_COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+```
+
+> **Note**: `generated_by` uses `draft:command` format (not `draft command`) for cross-platform compatibility.
 
 ---
 
@@ -5067,7 +5201,13 @@ synced_to_commit: "{FULL_SHA}"
 
 # Validation Report
 
-**Generated:** [ISO timestamp]
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
 **Scope:** [whole-codebase | track: <track-id>]
 
 ## Summary
@@ -6017,9 +6157,13 @@ synced_to_commit: "{FULL_SHA}"
 
 # Bug Hunt Report
 
-**Branch:** `[branch-name]`
-**Commit:** `[short-hash]`
-**Date:** YYYY-MM-DD HH:MM
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
 **Scope:** [Entire repo | Specific paths | Track: <track-id>]
 **Draft Context:** [Loaded | Not available]
 
@@ -6561,8 +6705,14 @@ synced_to_commit: "{FULL_SHA}"
 
 # Review Report: <Track Title>
 
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
 **Track ID:** <id>
-**Reviewed:** <ISO timestamp>
 **Reviewer:** [Current model name and context window from runtime]
 **Commit Range:** <first_SHA>^..<last_SHA>
 **Diff Stats:** N files changed, M insertions(+), K deletions(-)
@@ -7012,7 +7162,13 @@ synced_to_commit: "{FULL_SHA}"
 
 # ADR-<number>: <Title>
 
-**Date:** <ISO date>
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
 **Status:** Proposed
 **Deciders:** [names or roles]
 
@@ -7400,6 +7556,67 @@ Generate `jira-export.md` from the track's plan for review and editing before cr
 
 ---
 
+## Standard File Metadata
+
+**The generated `jira-export.md` MUST include the standard YAML frontmatter.** This enables traceability and sync verification.
+
+### Gathering Git Information
+
+Before generating the export file, run these commands to gather metadata:
+
+```bash
+# Project name (from manifest or directory)
+basename "$(pwd)"
+
+# Git branch
+git branch --show-current
+
+# Git remote tracking branch
+git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || echo "none"
+
+# Git commit SHA (full)
+git rev-parse HEAD
+
+# Git commit SHA (short)
+git rev-parse --short HEAD
+
+# Git commit date
+git log -1 --format="%ci"
+
+# Git commit message (first line)
+git log -1 --format="%s"
+
+# Check for uncommitted changes
+git status --porcelain | head -1
+```
+
+### Metadata Template
+
+Insert this YAML frontmatter block at the **top of `jira-export.md`**:
+
+```yaml
+---
+project: "{PROJECT_NAME}"
+module: "root"
+track_id: "{TRACK_ID}"
+generated_by: "draft:jira-preview"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH or 'none'}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{FIRST_LINE_OF_COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+```
+
+> **Note**: `generated_by` uses `draft:command` format (not `draft command`) for cross-platform compatibility.
+
+---
+
 ## Mapping Structure
 
 | Draft Concept | Jira Entity |
@@ -7498,13 +7715,32 @@ If `validation-report.md` or `bughunt-report.md` exists in the track directory:
 Create `draft/tracks/<track_id>/jira-export.md`:
 
 ```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+track_id: "{TRACK_ID}"
+generated_by: "draft:jira-preview"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Jira Export: [Track Title]
 
-**Generated:** [ISO timestamp]
-**Track ID:** [track_id]
-**Branch:** `[branch-name]`
-**Commit:** `[short-hash]`
-**Status:** Ready for review
+| Field | Value |
+|-------|-------|
+| Generated | {ISO_TIMESTAMP} |
+| Track ID | {TRACK_ID} |
+| Branch | {LOCAL_BRANCH} |
+| Commit | {SHORT_SHA} |
+| Status | Ready for review |
 
 > Edit this file to adjust story points, descriptions, or sub-tasks before running `draft jira-create`.
 
@@ -9965,6 +10201,15 @@ synced_to_commit: "{FULL_SHA}"
 > Self-contained AI context. 200-400 lines. Token-optimized.
 > This file must stand alone — no references to architecture.md or source files needed.
 
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+---
+
 ## Architecture
 
 - **Type**: {type} <!-- e.g., gRPC Microservice, CLI tool, library, REST API -->
@@ -10173,6 +10418,13 @@ synced_to_commit: "{FULL_SHA}"
 
 > Human-readable engineering reference. 30-45 pages.
 > For token-optimized AI context, see `draft/.ai-context.md`.
+
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
 
 ---
 
@@ -11003,6 +11255,15 @@ synced_to_commit: "{FULL_SHA}"
 
 # Product: [Product Name]
 
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+---
+
 ## Vision
 
 [One paragraph describing what this product does and why it matters to users]
@@ -11121,6 +11382,15 @@ synced_to_commit: "{FULL_SHA}"
 ---
 
 # Tech Stack
+
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+---
 
 ## Languages
 
@@ -11299,6 +11569,15 @@ synced_to_commit: "{FULL_SHA}"
 ---
 
 # Development Workflow
+
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+---
 
 ## Test-Driven Development
 
@@ -11495,8 +11774,14 @@ synced_to_commit: "{FULL_SHA}"
 
 # Specification: [Title]
 
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
 **Track ID:** {TRACK_ID}
-**Created:** {ISO_TIMESTAMP}
 **Status:** [ ] Drafting
 
 > This is a working draft. Content will evolve through conversation.
@@ -11602,10 +11887,35 @@ synced_to_commit: "{FULL_SHA}"
 
 <core-file path="core/templates/service-index.md">
 
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:index"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Service Index
 
-> Auto-generated by `draft index` on [DATE]. Do not edit directly.
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+> Auto-generated. Do not edit directly.
 > Re-run `draft index` to update.
+
+---
 
 ## Overview
 
@@ -11650,10 +11960,35 @@ cd [path/to/service] && draft init
 
 <core-file path="core/templates/dependency-graph.md">
 
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:index"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Service Dependency Graph
 
-> Auto-generated by `draft index` on [DATE]. Do not edit directly.
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+> Auto-generated. Do not edit directly.
 > Re-run `draft index` to update.
+
+---
 
 ## System Topology
 
@@ -11746,10 +12081,35 @@ Services depending on external systems:
 
 <core-file path="core/templates/tech-matrix.md">
 
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:index"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Technology Matrix
 
-> Auto-generated by `draft index` on [DATE]. Do not edit directly.
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+> Auto-generated. Do not edit directly.
 > Re-run `draft index` to update.
+
+---
 
 ## Org Standards
 
@@ -11840,11 +12200,36 @@ Current versions in production:
 
 <core-file path="core/templates/root-product.md">
 
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:index"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Product: [Org/Product Name]
 
-> Synthesized from [X] service contexts by `draft index` on [DATE].
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+> Synthesized from [X] service contexts.
 > Edit this file to refine the overall product vision.
 > Re-running `draft index` will update auto-generated sections but preserve manual edits.
+
+---
 
 ## Vision
 
@@ -11886,11 +12271,36 @@ Current versions in production:
 
 <core-file path="core/templates/root-architecture.md">
 
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:index"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Architecture: [Org/Product Name]
 
-> Synthesized from [X] service contexts by `draft index` on [DATE].
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+> Synthesized from [X] service contexts.
 > This is a **system-of-systems** view. For service internals, see individual service drafts.
 > Re-running `draft index` will update auto-generated sections but preserve manual edits.
+
+---
 
 ## System Overview
 
@@ -12006,11 +12416,36 @@ sequenceDiagram
 
 <core-file path="core/templates/root-tech-stack.md">
 
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:index"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Tech Stack: [Org/Product Name]
 
-> Synthesized from [X] service contexts by `draft index` on [DATE].
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+> Synthesized from [X] service contexts.
 > This defines **org-wide standards**. Service-specific additions are in their local tech-stack.md.
 > Re-running `draft index` will update auto-generated sections but preserve manual edits.
+
+---
 
 ## Org Standards
 

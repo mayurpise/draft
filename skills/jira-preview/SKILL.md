@@ -19,6 +19,67 @@ Generate `jira-export.md` from the track's plan for review and editing before cr
 
 ---
 
+## Standard File Metadata
+
+**The generated `jira-export.md` MUST include the standard YAML frontmatter.** This enables traceability and sync verification.
+
+### Gathering Git Information
+
+Before generating the export file, run these commands to gather metadata:
+
+```bash
+# Project name (from manifest or directory)
+basename "$(pwd)"
+
+# Git branch
+git branch --show-current
+
+# Git remote tracking branch
+git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || echo "none"
+
+# Git commit SHA (full)
+git rev-parse HEAD
+
+# Git commit SHA (short)
+git rev-parse --short HEAD
+
+# Git commit date
+git log -1 --format="%ci"
+
+# Git commit message (first line)
+git log -1 --format="%s"
+
+# Check for uncommitted changes
+git status --porcelain | head -1
+```
+
+### Metadata Template
+
+Insert this YAML frontmatter block at the **top of `jira-export.md`**:
+
+```yaml
+---
+project: "{PROJECT_NAME}"
+module: "root"
+track_id: "{TRACK_ID}"
+generated_by: "draft:jira-preview"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH or 'none'}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{FIRST_LINE_OF_COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+```
+
+> **Note**: `generated_by` uses `draft:command` format (not `/draft:command`) for cross-platform compatibility.
+
+---
+
 ## Mapping Structure
 
 | Draft Concept | Jira Entity |
@@ -117,13 +178,32 @@ If `validation-report.md` or `bughunt-report.md` exists in the track directory:
 Create `draft/tracks/<track_id>/jira-export.md`:
 
 ```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+track_id: "{TRACK_ID}"
+generated_by: "draft:jira-preview"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Jira Export: [Track Title]
 
-**Generated:** [ISO timestamp]
-**Track ID:** [track_id]
-**Branch:** `[branch-name]`
-**Commit:** `[short-hash]`
-**Status:** Ready for review
+| Field | Value |
+|-------|-------|
+| Generated | {ISO_TIMESTAMP} |
+| Track ID | {TRACK_ID} |
+| Branch | {LOCAL_BRANCH} |
+| Commit | {SHORT_SHA} |
+| Status | Ready for review |
 
 > Edit this file to adjust story points, descriptions, or sub-tasks before running `/draft:jira-create`.
 

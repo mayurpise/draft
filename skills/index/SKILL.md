@@ -19,6 +19,66 @@ You are building a federated knowledge index for a monorepo with multiple servic
 
 ---
 
+## Standard File Metadata
+
+**ALL generated files MUST include the standard YAML frontmatter.** This enables refresh tracking, sync verification, and traceability.
+
+### Gathering Git Information
+
+Before generating any file, run these commands to gather metadata:
+
+```bash
+# Project name (from manifest or directory)
+basename "$(pwd)"
+
+# Git branch
+git branch --show-current
+
+# Git remote tracking branch
+git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || echo "none"
+
+# Git commit SHA (full)
+git rev-parse HEAD
+
+# Git commit SHA (short)
+git rev-parse --short HEAD
+
+# Git commit date
+git log -1 --format="%ci"
+
+# Git commit message (first line)
+git log -1 --format="%s"
+
+# Check for uncommitted changes
+git status --porcelain | head -1
+```
+
+### Metadata Template
+
+Insert this YAML frontmatter block at the **top of every generated file** (`service-index.md`, `dependency-graph.md`, `tech-matrix.md`, `draft-index-bughunt-summary.md`):
+
+```yaml
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:index"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH or 'none'}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{FIRST_LINE_OF_COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+```
+
+> **Note**: `generated_by` uses `draft:command` format (not `/draft:command`) for cross-platform compatibility.
+
+---
+
 ## Pre-Check
 
 ```bash

@@ -454,6 +454,46 @@ Generate `draft/architecture.md` — a comprehensive human-readable engineering 
 - Include a **Table of Contents** with numbered sections
 - End the document with: `"End of analysis. Queries should reference the .ai-context.md file for token efficiency."`
 
+### MANDATORY Header Format
+
+**CRITICAL**: Every architecture.md file MUST start with this exact structure. Gather git metadata first, then fill in placeholders.
+
+```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:init"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+
+# Architecture: {PROJECT_NAME}
+
+> Human-readable engineering reference. 30-45 pages.
+> For token-optimized AI context, see `draft/.ai-context.md`.
+
+---
+
+## Table of Contents
+
+1. [Executive Summary](#1-executive-summary)
+2. [AI Agent Quick Reference](#2-ai-agent-quick-reference)
+3. [System Identity & Purpose](#3-system-identity--purpose)
+... (continue with all 28 sections + appendices)
+```
+
+**Do NOT skip the YAML frontmatter. It enables incremental refresh tracking.**
+
+---
+
 ### Report Structure — Follow This Exact Section Ordering
 
 _(Skip or adapt sections per the Adaptive Sections table above.)_
@@ -1429,6 +1469,32 @@ This file is **NOT for humans**. It is optimized for:
 - Abbreviate common patterns (e.g., `fn` for function, `ret` for returns)
 - No markdown formatting for emphasis (no `**bold**` or `_italic_`)
 
+### MANDATORY Header Format
+
+**CRITICAL**: Every .ai-context.md file MUST start with this exact structure:
+
+```markdown
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:init"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+```
+
+**Do NOT skip the YAML frontmatter. It enables incremental refresh tracking.**
+
+---
+
 ### Required Sections (all mandatory)
 
 ```markdown
@@ -1645,21 +1711,56 @@ Verify before writing:
 
 After completing the 5-phase analysis:
 
-1. **Gather git metadata**: Run the git commands from "Standard File Metadata" section to collect current state.
+1. **Gather git metadata FIRST**: Run these commands to collect current state:
+   ```bash
+   PROJECT_NAME=$(basename "$(pwd)")
+   GIT_BRANCH=$(git branch --show-current)
+   GIT_REMOTE=$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || echo "none")
+   GIT_COMMIT=$(git rev-parse HEAD)
+   GIT_COMMIT_SHORT=$(git rev-parse --short HEAD)
+   GIT_COMMIT_DATE=$(git log -1 --format="%ci")
+   GIT_COMMIT_MSG=$(git log -1 --format="%s")
+   GIT_DIRTY=$([ -n "$(git status --porcelain)" ] && echo "true" || echo "false")
+   ISO_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+   ```
 
-2. **Write `draft/architecture.md`**:
-   - Start with the YAML frontmatter metadata block (see "Standard File Metadata")
-   - Then generate the comprehensive 30-45 page engineering reference using the specification above
-   - This is the PRIMARY output
+2. **Write `draft/architecture.md`** with this EXACT structure:
+   ```markdown
+   ---
+   project: "{PROJECT_NAME from above}"
+   module: "root"
+   generated_by: "draft:init"
+   generated_at: "{ISO_TIMESTAMP from above}"
+   git:
+     branch: "{GIT_BRANCH}"
+     remote: "{GIT_REMOTE}"
+     commit: "{GIT_COMMIT}"
+     commit_short: "{GIT_COMMIT_SHORT}"
+     commit_date: "{GIT_COMMIT_DATE}"
+     commit_message: "{GIT_COMMIT_MSG}"
+     dirty: {GIT_DIRTY}
+   synced_to_commit: "{GIT_COMMIT}"
+   ---
 
-3. **Derive `draft/.ai-context.md`**: Using the Condensation Subroutine below, transform `architecture.md` into the 200-400 line **machine-optimized** context file. Use structured key-values and text-based graphs (no Mermaid, no prose). Include the same metadata header.
+   # Architecture: {PROJECT_NAME}
+
+   > Human-readable engineering reference. 30-45 pages.
+   > For token-optimized AI context, see `draft/.ai-context.md`.
+
+   ---
+
+   ## Table of Contents
+   ... (then continue with full 28 sections + appendices)
+   ```
+
+3. **Derive `draft/.ai-context.md`** with the SAME metadata header, then use the Condensation Subroutine to transform architecture.md content into machine-optimized format.
 
 4. **Present for review**: Show the user a summary of what was discovered before proceeding to Step 2.
 
 **CRITICAL**:
-- Do NOT skip this step. Both files MUST be written before continuing
+- Do NOT skip the YAML frontmatter metadata block — it enables incremental refresh
 - Generate architecture.md FIRST, then derive .ai-context.md from it
-- ALL files MUST include the YAML frontmatter metadata block at the top
+- Both files MUST have the metadata header at the very top
 
 ---
 

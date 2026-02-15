@@ -16,6 +16,15 @@ synced_to_commit: "{FULL_SHA}"
 
 # Product: [Product Name]
 
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+---
+
 ## Vision
 
 [One paragraph describing what this product does and why it matters to users]

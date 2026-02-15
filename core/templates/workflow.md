@@ -16,6 +16,15 @@ synced_to_commit: "{FULL_SHA}"
 
 # Development Workflow
 
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+---
+
 ## Test-Driven Development
 
 **Mode:** [strict | flexible | none]

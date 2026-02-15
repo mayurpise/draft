@@ -852,9 +852,13 @@ synced_to_commit: "{FULL_SHA}"
 
 # Bug Hunt Report
 
-**Branch:** `[branch-name]`
-**Commit:** `[short-hash]`
-**Date:** YYYY-MM-DD HH:MM
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
 **Scope:** [Entire repo | Specific paths | Track: <track-id>]
 **Draft Context:** [Loaded | Not available]
 

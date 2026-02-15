@@ -1,8 +1,33 @@
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:index"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Product: [Org/Product Name]
 
-> Synthesized from [X] service contexts by `/draft:index` on [DATE].
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+> Synthesized from [X] service contexts.
 > Edit this file to refine the overall product vision.
 > Re-running `/draft:index` will update auto-generated sections but preserve manual edits.
+
+---
 
 ## Vision
 

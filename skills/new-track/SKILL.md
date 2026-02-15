@@ -87,8 +87,14 @@ synced_to_commit: "{FULL_SHA}"
 
 # Specification Draft: [Title]
 
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
 **Track ID:** <track_id>
-**Created:** [ISO date]
 **Status:** [ ] Drafting
 
 > This is a working draft. Content will evolve through conversation.
@@ -210,6 +216,13 @@ synced_to_commit: "{FULL_SHA}"
 ---
 
 # Plan Draft: [Title]
+
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
 
 **Track ID:** <track_id>
 **Spec:** ./spec-draft.md

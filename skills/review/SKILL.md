@@ -415,8 +415,14 @@ synced_to_commit: "{FULL_SHA}"
 
 # Review Report: <Track Title>
 
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
 **Track ID:** <id>
-**Reviewed:** <ISO timestamp>
 **Reviewer:** [Current model name and context window from runtime]
 **Commit Range:** <first_SHA>^..<last_SHA>
 **Diff Stats:** N files changed, M insertions(+), K deletions(-)

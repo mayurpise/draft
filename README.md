@@ -123,4 +123,4 @@ MIT
 
 ---
 
-**Credits:** Adapted from [gemini-cli-extensions/conductor](https://github.com/gemini-cli-extensions/conductor)
+**Credits:** Inspired by [gemini-cli-extensions/conductor](https://github.com/gemini-cli-extensions/conductor)

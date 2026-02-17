@@ -119,7 +119,7 @@ Each layer narrows the solution space. By the time AI writes code, decisions are
 
 ## License
 
-Apache 2.0
+MIT
 
 ---
 

@@ -119,8 +119,8 @@ Each layer narrows the solution space. By the time AI writes code, decisions are
 
 ## License
 
-Apache 2.0
+MIT
 
 ---
 
-**Credits:** Adapted from [gemini-cli-extensions/conductor](https://github.com/gemini-cli-extensions/conductor)
+**Credits:** Inspired by [gemini-cli-extensions/conductor](https://github.com/gemini-cli-extensions/conductor)

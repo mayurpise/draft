@@ -8,7 +8,7 @@ Works with Claude Code, Cursor, GitHub Copilot, and Gemini.
 
 [**getdraft.dev**](https://getdraft.dev) · [**Docs**](https://getdraft.dev#commands)
 
-🎥 [**Watch: Draft Overview (8 min)**](https://www.youtube.com/watch?v=gBSwFEFVd7Y)
+🎥 [**Watch: Draft Overview (8 min)**](https://www.youtube.com/watch?v=gBSwFEFVd7Y) · [**All Videos**](https://www.youtube.com/playlist?list=PLoN73NRJ_HQPdnR5Su4WkWK-O_7IOrOg_)
 
 ---
 

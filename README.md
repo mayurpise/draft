@@ -2,7 +2,9 @@
 
 **Ship fast. Ship right.**
 
-Establish a disciplined AI development lifecycle with clear specifications, structured planning, and defined quality gates. Replace ad hoc AI coding with a phased approach where every feature begins with context, progresses through execution stages, and concludes with verification.
+AI agents for every stage of the software development lifecycle — architected around human decision-making. Draft drives collaborative design through structured requirements gathering, trade-off analysis, and specification review before execution begins. It then delivers implementation, testing, code review, and validation — all grounded in deep codebase context with full traceability.
+
+Works with Claude Code, Cursor, GitHub Copilot, and Gemini.
 
 [**getdraft.dev**](https://getdraft.dev) · [**Docs**](https://getdraft.dev#commands)
 

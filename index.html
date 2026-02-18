@@ -1207,6 +1207,109 @@
             color: var(--text-primary);
             font-weight: 500;
         }
+
+        /* Video Grid */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .video-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .video-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+
+        .video-card a {
+            text-decoration: none;
+            display: block;
+        }
+
+        .video-card .video-thumb {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            background: var(--bg-tertiary);
+            overflow: hidden;
+        }
+
+        .video-card .video-thumb img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-card .video-thumb::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 48px;
+            height: 48px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 20px;
+            opacity: 0.9;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .video-card:hover .video-thumb::after {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .video-card {
+            cursor: pointer;
+        }
+
+        .video-card.playing {
+            cursor: default;
+        }
+
+        .video-card.playing .video-thumb {
+            padding-bottom: 56.25%;
+        }
+
+        .video-card.playing .video-thumb::after {
+            display: none;
+        }
+
+        .video-card .video-thumb iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .video-card .video-info {
+            padding: 1rem 1.25rem;
+        }
+
+        .video-card .video-title {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
     </style>
 </head>
 
@@ -1255,6 +1358,7 @@
             <button class="tab-button" data-tab="workflow" role="tab" aria-selected="false">Workflow</button>
             <button class="tab-button" data-tab="commands" role="tab" aria-selected="false">Commands</button>
             <button class="tab-button" data-tab="team" role="tab" aria-selected="false">Team</button>
+            <button class="tab-button" data-tab="videos" role="tab" aria-selected="false">Videos</button>
             <button class="tab-button" data-tab="research" role="tab" aria-selected="false">Codebase Research</button>
             <button class="tab-button" data-tab="reference" role="tab" aria-selected="false">Reference</button>
             <button class="tab-button" data-tab="industry" role="tab" aria-selected="false">Industry Standards</button>
@@ -2310,6 +2414,71 @@
             </details>
         </div>
 
+        <!-- VIDEOS TAB -->
+        <div id="tab-videos" class="tab-content" role="tabpanel">
+            <h2>Videos</h2>
+            <p>Short videos covering Draft's methodology, agents, and workflows. <a href="https://www.youtube.com/playlist?list=PLoN73NRJ_HQPdnR5Su4WkWK-O_7IOrOg_" target="_blank" style="color: var(--accent-cyan);">View full playlist</a></p>
+
+            <div class="video-grid">
+                <div class="video-card" onclick="playVideo(this, 'gBSwFEFVd7Y')">
+                    <div class="video-thumb">
+                        <img src="https://i.ytimg.com/vi/gBSwFEFVd7Y/maxresdefault.jpg" alt="Draft - Ship fast. Ship right with AI Coding Assistant" loading="lazy">
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">Draft - Ship fast. Ship right with AI Coding Assistant</div>
+                    </div>
+                </div>
+                <div class="video-card" onclick="playVideo(this, 'gBwsC7sKxTI')">
+                    <div class="video-thumb">
+                        <img src="https://i.ytimg.com/vi/gBwsC7sKxTI/maxresdefault.jpg" alt="The Reviewer Agent" loading="lazy">
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">The Reviewer Agent</div>
+                    </div>
+                </div>
+                <div class="video-card" onclick="playVideo(this, 'XMcHZJLuaGI')">
+                    <div class="video-thumb">
+                        <img src="https://i.ytimg.com/vi/XMcHZJLuaGI/maxresdefault.jpg" alt="The Bughunt Agent" loading="lazy">
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">The Bughunt Agent</div>
+                    </div>
+                </div>
+                <div class="video-card" onclick="playVideo(this, 'LgiExQ3zoA4')">
+                    <div class="video-thumb">
+                        <img src="https://i.ytimg.com/vi/LgiExQ3zoA4/maxresdefault.jpg" alt="Taming AI Chaos" loading="lazy">
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">Taming AI Chaos</div>
+                    </div>
+                </div>
+                <div class="video-card" onclick="playVideo(this, '9nmBm8Io5Qk')">
+                    <div class="video-thumb">
+                        <img src="https://i.ytimg.com/vi/9nmBm8Io5Qk/maxresdefault.jpg" alt="Context Driven Development" loading="lazy">
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">Context Driven Development</div>
+                    </div>
+                </div>
+                <div class="video-card" onclick="playVideo(this, 'P6wYJHNL6k0')">
+                    <div class="video-thumb">
+                        <img src="https://i.ytimg.com/vi/P6wYJHNL6k0/maxresdefault.jpg" alt="Collaborative Intake" loading="lazy">
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">Collaborative Intake</div>
+                    </div>
+                </div>
+                <div class="video-card" onclick="playVideo(this, 'YIfnZNb-OCE')">
+                    <div class="video-thumb">
+                        <img src="https://i.ytimg.com/vi/YIfnZNb-OCE/maxresdefault.jpg" alt="AI's Quality Gatekeeper" loading="lazy">
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">AI's Quality Gatekeeper</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- CODEBASE RESEARCH TAB -->
         <div id="tab-research" class="tab-content" role="tabpanel">
             <h2>Codebase Research</h2>
@@ -2829,7 +2998,7 @@
         <p>Draft Methodology — <a href="https://github.com/mayurpise/draft" target="_blank"
                 rel="noopener noreferrer">View on GitHub</a></p>
         <div class="footer-actions">
-            <a href="https://buymeacoffee.com/mayurpise" target="_blank" rel="noopener noreferrer" class="bmc-btn">☕ Buy
+            <a href="https://buymeacoffee.com/mayurpise" target="_blank" rel="noopener noreferrer" class="bmc-btn" style="display: none;">☕ Buy
                 Me a Coffee</a>
             <div class="share-row">
                 <span class="share-label">Share</span>
@@ -2866,6 +3035,13 @@
     </footer>
 
     <script>
+        function playVideo(card, videoId) {
+            if (card.classList.contains('playing')) return;
+            card.classList.add('playing');
+            var thumb = card.querySelector('.video-thumb');
+            thumb.innerHTML = '<iframe src="https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+        }
+
         function toggleCommandCard(card) {
             const isExpanded = card.classList.toggle('expanded');
             card.setAttribute('aria-expanded', isExpanded);

@@ -1326,10 +1326,11 @@
             </p>
 
             <div style="margin-top: 2rem; max-width: 800px; margin-left: auto; margin-right: auto;">
-                <a href="https://youtu.be/gBSwFEFVd7Y" target="_blank"
-                    style="display: block; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 8px 32px rgba(34, 211, 238, 0.2); text-decoration: none; transition: transform 0.3s ease, box-shadow 0.3s ease;"
+                <div id="hero-video"
+                    style="display: block; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 8px 32px rgba(34, 211, 238, 0.2); cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;"
                     onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 12px 48px rgba(34, 211, 238, 0.3)';"
-                    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 32px rgba(34, 211, 238, 0.2)';">
+                    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 32px rgba(34, 211, 238, 0.2)';"
+                    onclick="this.innerHTML='<iframe src=\'https://www.youtube.com/embed/gBSwFEFVd7Y?autoplay=1&rel=0\' allow=\'autoplay; encrypted-media\' allowfullscreen style=\'position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 8px;\'></iframe>'; this.style.cursor='default'; this.onmouseover=null; this.onmouseout=null; this.onclick=null;">
                     <img src="https://i.ytimg.com/vi/gBSwFEFVd7Y/maxresdefault.jpg" alt="Draft Demo Video"
                         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
                     <div
@@ -1341,7 +1342,7 @@
                             </div>
                         </div>
                     </div>
-                </a>
+                </div>
             </div>
         </div>
         <div class="scroll-indicator">

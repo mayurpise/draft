@@ -32,7 +32,7 @@ ls draft/product.md draft/tech-stack.md draft/workflow.md draft/tracks.md 2>/dev
 If missing, tell user: "Project not initialized. Run `/draft:init` first."
 
 2. Check for `--quick` flag in `$ARGUMENTS`:
-   - If present: strip `--quick` from the description and go directly to **Step 1.5: Quick Mode**
+   - If present: **strip `--quick` from `$ARGUMENTS` now** (before Step 1) and store the cleaned text as the working description for all subsequent steps. Proceed to Step 1, then go directly to **Step 1.5: Quick Mode**.
    - Quick mode is for: hotfixes, tiny isolated changes, work scoped to 1-3 hours
 
 3. Load full project context (these documents ARE the big picture — every track must be grounded in them):
@@ -48,7 +48,7 @@ If missing, tell user: "Project not initialized. Run `/draft:init` first."
 
 ## Step 1: Generate Track ID
 
-Create a short, kebab-case ID from the description:
+Create a short, kebab-case ID from the description (use the stripped description if `--quick` was present):
 - "Add user authentication" → `add-user-auth`
 - "Fix login bug" → `fix-login-bug`
 - If collision risk, append ISO date suffix: `add-user-auth-20250126`
@@ -103,9 +103,13 @@ Then generate both files directly:
 - [ ] **Task N:** Verify — [run tests or check from AC]
 ```
 
-Then jump directly to **Step 8** (Create Metadata & Update Tracks). Skip Steps 2–7.
+Then execute **Step 8** (Create Metadata & Update Tracks) with these overrides for quick tracks:
+- `"type": "quick"` (not `feature|bugfix|refactor`)
+- `"phases": {"total": 1, "completed": 0}` (plan has exactly 1 phase)
 
-Announce:
+Skip Steps 2–7.
+
+After Step 8 completes, announce:
 ```
 Quick track created: <track_id>
 

@@ -1,6 +1,6 @@
 ---
 name: review
-description: Standalone review orchestrator for track-level and project-level code review. Integrates reviewer agent, validate, and bughunt.
+description: Standalone review orchestrator for track-level and project-level code review. Integrates reviewer agent and bughunt.
 ---
 
 # Code Review
@@ -322,10 +322,10 @@ If Stage 3 produces zero findings across all four dimensions, do NOT accept "cle
 4. **Future brittleness** — Is anything hardcoded that will break on scale or config change?
 5. **Missing coverage** — Is there behavior that should be tested but isn't?
 
-If still zero after this pass, document it in the report:
-> "Adversarial pass completed. Zero findings confirmed: [one sentence per question]"
+If still zero after this pass, document it explicitly in the review report:
+> "Adversarial pass completed. Zero findings confirmed: [one sentence per question explaining why each is clean]"
 
-This only adds work when a reviewer claims "nothing to find."
+This prevents lazy LGTM verdicts. It only adds work when a reviewer claims "nothing to find."
 
 ### Issue Classification
 

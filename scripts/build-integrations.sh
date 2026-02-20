@@ -41,6 +41,7 @@ SKILL_ORDER=(
     adr
     status
     revert
+    change
     jira-preview
     jira-create
 )
@@ -61,6 +62,7 @@ get_skill_header() {
         adr)          echo "ADR Command" ;;
         status)       echo "Status Command" ;;
         revert)       echo "Revert Command" ;;
+        change)       echo "Change Command" ;;
         jira-preview) echo "Jira Preview Command" ;;
         jira-create)  echo "Jira Create Command" ;;
         *)            echo "${skill^} Command" ;;
@@ -84,6 +86,7 @@ get_gemini_trigger() {
         adr)          echo "\"document decision\" or \"@draft adr [title]\"" ;;
         status)       echo "\"status\" or \"@draft status\"" ;;
         revert)       echo "\"revert\" or \"@draft revert\"" ;;
+        change)       echo "\"handle change\" or \"@draft change <description>\"" ;;
         jira-preview) echo "\"preview jira\" or \"@draft jira-preview [track-id]\"" ;;
         jira-create)  echo "\"create jira\" or \"@draft jira-create [track-id]\"" ;;
         *)            echo "\"@draft $skill\"" ;;
@@ -107,6 +110,7 @@ get_copilot_trigger() {
         adr)          echo "\"document decision\" or \"draft adr [title]\"" ;;
         status)       echo "\"status\" or \"draft status\"" ;;
         revert)       echo "\"revert\" or \"draft revert\"" ;;
+        change)       echo "\"handle change\" or \"draft change <description>\"" ;;
         jira-preview) echo "\"preview jira\" or \"draft jira-preview [track-id]\"" ;;
         jira-create)  echo "\"create jira\" or \"draft jira-create [track-id]\"" ;;
         *)            echo "\"draft $skill\"" ;;
@@ -421,6 +425,7 @@ COMMON_HEADER
     echo "| \`${command_prefix} adr [title]\` | Architecture Decision Records |"
     echo "| \`${command_prefix} status\` | Show progress overview |"
     echo "| \`${command_prefix} revert\` | Git-aware rollback |"
+    echo "| \`${command_prefix} change <description>\` | Handle mid-track requirement changes |"
     echo "| \`${command_prefix} jira-preview [track-id]\` | Generate jira-export.md for review |"
     echo "| \`${command_prefix} jira-create [track-id]\` | Create Jira issues from export via MCP |"
 
@@ -443,6 +448,7 @@ Recognize these natural language patterns:
 | "hunt bugs", "find bugs" | Run bug hunt |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
+| "requirements changed", "scope changed", "update the spec" | Run change |
 | "preview jira", "export to jira" | Run jira-preview |
 | "create jira", "push to jira" | Run jira-create |
 | "document decision", "create ADR" | Create architecture decision record |

@@ -31,14 +31,18 @@ ls draft/product.md draft/tech-stack.md draft/workflow.md draft/tracks.md 2>/dev
 
 If missing, tell user: "Project not initialized. Run `/draft:init` first."
 
-2. Load full project context (these documents ARE the big picture — every track must be grounded in them):
+2. Check for `--quick` flag in `$ARGUMENTS`:
+   - If present: strip `--quick` from the description and go directly to **Step 1.5: Quick Mode**
+   - Quick mode is for: hotfixes, tiny isolated changes, work scoped to 1-3 hours
+
+3. Load full project context (these documents ARE the big picture — every track must be grounded in them):
 - Read `draft/product.md` — product vision, users, goals, constraints, guidelines (optional section)
 - Read `draft/tech-stack.md` — languages, frameworks, patterns, code style, accepted patterns
 - Read `draft/.ai-context.md` (if exists) — system map, modules, data flows, invariants, security architecture. Falls back to `draft/architecture.md` for legacy projects.
 - Read `draft/workflow.md` — TDD preference, commit conventions, review process, guardrails
 - Read `draft/tracks.md` — existing tracks to check for overlap or dependencies
 
-3. Load guidance references:
+4. Load guidance references:
 - Read `core/templates/intake-questions.md` — structured questions for intake
 - Read `core/knowledge-base.md` — vetted sources for AI guidance
 
@@ -48,6 +52,68 @@ Create a short, kebab-case ID from the description:
 - "Add user authentication" → `add-user-auth`
 - "Fix login bug" → `fix-login-bug`
 - If collision risk, append ISO date suffix: `add-user-auth-20250126`
+
+## Step 1.5: Quick Mode Path (`--quick` only)
+
+**Skip if:** `--quick` was not present in `$ARGUMENTS`.
+
+Skip all intake conversation. Ask only two questions:
+
+1. "What exactly needs to change? (1-2 sentences)"
+2. "How will you know it's done? (list acceptance criteria)"
+
+Then generate both files directly:
+
+**`draft/tracks/<track_id>/spec.md`** (minimal — no YAML frontmatter needed):
+
+```markdown
+# Spec: [Title]
+
+**Track ID:** <track_id>
+**Type:** quick
+
+## What
+
+[description from question 1]
+
+## Acceptance Criteria
+
+- [ ] [from question 2, one per line]
+
+## Non-Goals
+
+- No scope expansion beyond what's described above
+```
+
+**`draft/tracks/<track_id>/plan.md`** (flat — single phase, no phases ceremony):
+
+```markdown
+# Plan: [Title]
+
+**Track ID:** <track_id>
+
+## Phase 1: Complete
+
+**Goal:** [one-line summary from spec]
+**Verification:** [how to confirm ACs are met — run tests / manual check]
+
+### Tasks
+
+- [ ] **Task 1:** [derived from AC 1]
+- [ ] **Task N:** Verify — [run tests or check from AC]
+```
+
+Then jump directly to **Step 8** (Create Metadata & Update Tracks). Skip Steps 2–7.
+
+Announce:
+```
+Quick track created: <track_id>
+
+Files: spec.md (minimal), plan.md (flat)
+Next: /draft:implement
+```
+
+---
 
 ## Step 2: Create Draft Files
 
@@ -397,6 +463,44 @@ If refining:
 - Continue conversation on specific sections
 - Update drafts as discussion progresses
 - Return to this step when ready
+
+---
+
+## Step 4.5: Elicitation Pass
+
+Before finalizing, offer a quick spec stress-test. This takes 2 minutes and often surfaces blind spots.
+
+Based on the track type (feature / bug / refactor), present 3 pre-selected challenge techniques:
+
+**Feature tracks:**
+1. **Pre-mortem** — "It's 6 months later and this feature failed. What went wrong?"
+2. **Scope Boundary** — "What's the smallest version that still achieves the core goal?"
+3. **Edge Case Storm** — Surface 5 boundary conditions not yet in the ACs
+
+**Bug tracks:**
+1. **Root Cause Depth** — "Is the reported symptom the real bug, or a symptom of something deeper?"
+2. **Blast Radius** — "What else could this fix inadvertently break?"
+3. **Regression Risk** — "What existing behavior might this change inadvertently affect?"
+
+**Refactor tracks:**
+1. **Behavior Preservation** — "List every externally visible behavior that must be identical before and after"
+2. **Integration Impact** — "Which callers will break if this interface changes?"
+3. **Rollback Complexity** — "If this refactor needs reverting mid-flight, what's the path?"
+
+Present to the user:
+
+```
+Quick stress-test before finalizing — pick one or skip:
+
+1. [Technique name] — [one-line prompt]
+2. [Technique name] — [one-line prompt]
+3. [Technique name] — [one-line prompt]
+
+Enter 1–3, or "skip":
+```
+
+- **If a number is chosen:** Apply that technique to the current spec-draft.md. Show what it reveals. Update spec-draft.md if findings are significant (new ACs, revised non-goals, added risks).
+- **If "skip":** Proceed directly to Step 5. No friction.
 
 ---
 

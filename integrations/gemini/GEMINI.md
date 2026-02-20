@@ -58,7 +58,7 @@ Recognize these natural language patterns:
 | "start implementing" | Execute implement |
 | "check coverage", "test coverage" | Run coverage |
 | "hunt bugs", "find bugs" | Run bug hunt |
-| "review code", "review track" | Run review |
+| "review code", "review track", "check quality" | Run review |
 | "deep review", "production audit", "module audit" | Run deep-review |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
@@ -179,7 +179,7 @@ You can also use natural language:
 | "check coverage" | `@draft coverage` |
 | "deep review", "audit module" | `@draft deep-review` |
 | "hunt bugs", "find bugs" | `@draft bughunt` |
-| "review code", "review track" | `@draft review` |
+| "review code", "review track", "check quality" | `@draft review` |
 | "requirements changed", "scope changed" | `@draft change` |
 | "preview jira", "export to jira" | `@draft jira-preview` |
 | "create jira issues" | `@draft jira-create` |
@@ -4013,6 +4013,7 @@ For each acceptance criterion in `spec.md`:
 ### Sync Check (if `.ai-context.md` exists)
 
 Compare the `synced_to_commit` values in the YAML frontmatter of `spec.md` and `plan.md`.
+- **Skip if** either file has no YAML frontmatter or no `synced_to_commit` field (quick-mode tracks omit it).
 - If they differ: "⚠️ Spec and plan were synced to different commits — verify they are still aligned."
 
 ### Result

@@ -35,12 +35,13 @@ When `draft/` exists in the project, always consider:
 | `draft decompose` | Module decomposition with dependency mapping |
 | `draft implement` | Execute tasks from plan |
 | `draft coverage` | Code coverage report (target 95%+) |
-| `draft validate [--track <id>]` | Codebase quality validation |
 | `draft bughunt [--track <id>]` | Systematic bug discovery |
 | `draft review [--track <id>]` | Three-stage code review |
+| `draft deep-review [module]` | Exhaustive production-grade module audit |
 | `draft adr [title]` | Architecture Decision Records |
 | `draft status` | Show progress overview |
 | `draft revert` | Git-aware rollback |
+| `draft change <description>` | Handle mid-track requirement changes |
 | `draft jira-preview [track-id]` | Generate jira-export.md for review |
 | `draft jira-create [track-id]` | Create Jira issues from export via MCP |
 
@@ -56,10 +57,12 @@ Recognize these natural language patterns:
 | "break into modules", "decompose" | Run decompose |
 | "start implementing" | Execute implement |
 | "check coverage", "test coverage" | Run coverage |
-| "validate", "check quality" | Run validation |
 | "hunt bugs", "find bugs" | Run bug hunt |
+| "review code", "review track", "check quality" | Run review |
+| "deep review", "production audit", "module audit" | Run deep-review |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
+| "requirements changed", "scope changed", "update the spec" | Run change |
 | "preview jira", "export to jira" | Run jira-preview |
 | "create jira", "push to jira" | Run jira-create |
 | "document decision", "create ADR" | Create architecture decision record |
@@ -120,6 +123,8 @@ Draft is a methodology for structured software development: **Context → Spec &
 | `draft deep-review` | Module lifecycle audit (ACID compliance, enterprise quality) |
 | `draft bughunt` | Exhaustive bug hunt |
 | `draft review` | Code review orchestrator |
+| `draft adr` | Architecture Decision Records |
+| `draft change` | Handle mid-track requirement changes |
 | `draft jira-preview` | Generate Jira export for review |
 | `draft jira-create` | Push issues to Jira via MCP |
 
@@ -173,9 +178,11 @@ You can also use natural language:
 | "undo", "revert" | `draft revert` |
 | "break into modules" | `draft decompose` |
 | "check coverage" | `draft coverage` |
-| "deep review", "audit module" | `draft deep-review` |
+| "deep review", "module audit", "production audit" | `draft deep-review` |
 | "hunt bugs", "find bugs" | `draft bughunt` |
-| "review code", "review track" | `draft review` |
+| "review code", "review track", "check quality" | `draft review` |
+| "document decision", "create ADR" | `draft adr` |
+| "requirements changed", "scope changed", "update the spec" | `draft change` |
 | "preview jira", "export to jira" | `draft jira-preview` |
 | "create jira issues" | `draft jira-create` |
 
@@ -2983,23 +2990,93 @@ ls draft/product.md draft/tech-stack.md draft/workflow.md draft/tracks.md 2>/dev
 
 If missing, tell user: "Project not initialized. Run `draft init` first."
 
-2. Load full project context (these documents ARE the big picture — every track must be grounded in them):
+2. Check for `--quick` flag in `$ARGUMENTS`:
+   - If present: **strip `--quick` from `$ARGUMENTS` now** (before Step 1) and store the cleaned text as the working description for all subsequent steps. Proceed to Step 1, then go directly to **Step 1.5: Quick Mode**.
+   - Quick mode is for: hotfixes, tiny isolated changes, work scoped to 1-3 hours
+
+3. Load full project context (these documents ARE the big picture — every track must be grounded in them):
 - Read `draft/product.md` — product vision, users, goals, constraints, guidelines (optional section)
 - Read `draft/tech-stack.md` — languages, frameworks, patterns, code style, accepted patterns
 - Read `draft/.ai-context.md` (if exists) — system map, modules, data flows, invariants, security architecture. Falls back to `draft/architecture.md` for legacy projects.
 - Read `draft/workflow.md` — TDD preference, commit conventions, review process, guardrails
 - Read `draft/tracks.md` — existing tracks to check for overlap or dependencies
 
-3. Load guidance references:
+4. Load guidance references:
 - Read `core/templates/intake-questions.md` — structured questions for intake
 - Read `core/knowledge-base.md` — vetted sources for AI guidance
 
 ## Step 1: Generate Track ID
 
-Create a short, kebab-case ID from the description:
+Create a short, kebab-case ID from the description (use the stripped description if `--quick` was present):
 - "Add user authentication" → `add-user-auth`
 - "Fix login bug" → `fix-login-bug`
 - If collision risk, append ISO date suffix: `add-user-auth-20250126`
+
+## Step 1.5: Quick Mode Path (`--quick` only)
+
+**Skip if:** `--quick` was not present in `$ARGUMENTS`.
+
+Skip all intake conversation. Ask only two questions:
+
+1. "What exactly needs to change? (1-2 sentences)"
+2. "How will you know it's done? (list acceptance criteria)"
+
+Then generate both files directly:
+
+**`draft/tracks/<track_id>/spec.md`** (minimal — no YAML frontmatter needed):
+
+```markdown
+# Spec: [Title]
+
+**Track ID:** <track_id>
+**Type:** quick
+
+## What
+
+[description from question 1]
+
+## Acceptance Criteria
+
+- [ ] [from question 2, one per line]
+
+## Non-Goals
+
+- No scope expansion beyond what's described above
+```
+
+**`draft/tracks/<track_id>/plan.md`** (flat — single phase, no phases ceremony):
+
+```markdown
+# Plan: [Title]
+
+**Track ID:** <track_id>
+
+## Phase 1: Complete
+
+**Goal:** [one-line summary from spec]
+**Verification:** [how to confirm ACs are met — run tests / manual check]
+
+### Tasks
+
+- [ ] **Task 1:** [derived from AC 1]
+- [ ] **Task N:** Verify — [run tests or check from AC]
+```
+
+Then execute **Step 8** (Create Metadata & Update Tracks) with these overrides for quick tracks:
+- `"type": "quick"` (not `feature|bugfix|refactor`)
+- `"phases": {"total": 1, "completed": 0}` (plan has exactly 1 phase)
+
+Skip Steps 2–7.
+
+After Step 8 completes, announce:
+```
+Quick track created: <track_id>
+
+Files: spec.md (minimal), plan.md (flat)
+Next: draft implement
+```
+
+---
 
 ## Step 2: Create Draft Files
 
@@ -3349,6 +3426,44 @@ If refining:
 - Continue conversation on specific sections
 - Update drafts as discussion progresses
 - Return to this step when ready
+
+---
+
+## Step 4.5: Elicitation Pass
+
+Before finalizing, offer a quick spec stress-test. This takes 2 minutes and often surfaces blind spots.
+
+Based on the track type (feature / bug / refactor), present 3 pre-selected challenge techniques:
+
+**Feature tracks:**
+1. **Pre-mortem** — "It's 6 months later and this feature failed. What went wrong?"
+2. **Scope Boundary** — "What's the smallest version that still achieves the core goal?"
+3. **Edge Case Storm** — Surface 5 boundary conditions not yet in the ACs
+
+**Bug tracks:**
+1. **Root Cause Depth** — "Is the reported symptom the real bug, or a symptom of something deeper?"
+2. **Blast Radius** — "What else could this fix inadvertently break?"
+3. **Regression Risk** — "What existing behavior might this change inadvertently affect?"
+
+**Refactor tracks:**
+1. **Behavior Preservation** — "List every externally visible behavior that must be identical before and after"
+2. **Integration Impact** — "Which callers will break if this interface changes?"
+3. **Rollback Complexity** — "If this refactor needs reverting mid-flight, what's the path?"
+
+Present to the user:
+
+```
+Quick stress-test before finalizing — pick one or skip:
+
+1. [Technique name] — [one-line prompt]
+2. [Technique name] — [one-line prompt]
+3. [Technique name] — [one-line prompt]
+
+Enter 1–3, or "skip":
+```
+
+- **If a number is chosen:** Apply that technique to the current spec-draft.md. Show what it reveals. Update spec-draft.md if findings are significant (new ACs, revised non-goals, added risks).
+- **If "skip":** Proceed directly to Step 5. No friction.
 
 ---
 
@@ -3889,6 +4004,35 @@ If no active track found:
 - Track-level architecture.md created by `draft decompose`
 - Project-level `.ai-context.md` created by `draft init` (brownfield only)
 
+## Step 1.5: Readiness Gate (Fresh Start Only)
+
+**Skip if:** Any task in `plan.md` is already `[x]` — the track is in progress, this check has already passed.
+
+Run once, before the first task of a new track:
+
+### AC Coverage Check
+
+For each acceptance criterion in `spec.md`:
+- Verify at least one task in `plan.md` references or addresses it
+- If an AC has no corresponding task, flag it: "⚠️ AC: '[criterion]' has no task in plan.md"
+
+### Sync Check (if `.ai-context.md` exists)
+
+Compare the `synced_to_commit` values in the YAML frontmatter of `spec.md` and `plan.md`.
+- **Skip if** either file has no YAML frontmatter or no `synced_to_commit` field (quick-mode tracks omit it).
+- If they differ: "⚠️ Spec and plan were synced to different commits — verify they are still aligned."
+
+### Result
+
+**Issues found:** List them, then ask:
+```
+Readiness issues found (see above). Proceed anyway or update first? [proceed/update]
+```
+- `proceed` → add a `## Notes` entry in `plan.md` listing the issues, then continue to Step 2
+- `update` → stop here and let the user refine spec or plan before re-running
+
+**No issues:** Print `Readiness check passed.` and continue to Step 2.
+
 ## Step 2: Find Next Task
 
 Scan `plan.md` for the first uncompleted task:
@@ -4126,15 +4270,19 @@ When all tasks in a phase are `[x]`:
 
 1. Announce: "Phase N complete. Running three-stage review."
 
-### Two-Stage Review (REQUIRED)
+### Three-Stage Review (REQUIRED)
 
-**Stage 1: Spec Compliance**
+**Stage 1: Automated Validation**
+- Fast static checks: architecture conformance, dead code, circular dependencies, OWASP security scans, performance anti-patterns
+- **If critical issues found:** List them, return to implementation
+
+**Stage 2: Spec Compliance** (only if Stage 1 passes)
 - Load track's `spec.md`
 - Verify all requirements for this phase are implemented
 - Check acceptance criteria coverage
 - **If gaps found:** List them, return to implementation
 
-**Stage 2: Code Quality** (only if Stage 1 passes)
+**Stage 3: Code Quality** (only if Stage 2 passes)
 - Verify code follows project patterns (tech-stack.md)
 - Check error handling is appropriate
 - Verify tests cover real logic
@@ -5736,6 +5884,21 @@ Analyze semantic code quality across four dimensions:
 - [ ] Code is readable without excessive comments
 - [ ] Consistent naming and style
 
+#### Adversarial Pass (When Zero Findings)
+
+If Stage 3 produces zero findings across all four dimensions, do NOT accept "clean" without one more look. Ask these 5 questions explicitly:
+
+1. **Error paths** — Is every error/exception handled? Are any failure modes silently swallowed?
+2. **Edge cases** — Are there boundary conditions (empty input, max values, concurrent access) not covered by tests?
+3. **Implicit assumptions** — Does code assume inputs are always valid, services always up, or state always consistent?
+4. **Future brittleness** — Is anything hardcoded that will break on scale or config change?
+5. **Missing coverage** — Is there behavior that should be tested but isn't?
+
+If still zero after this pass, document it explicitly in the review report:
+> "Adversarial pass completed. Zero findings confirmed: [one sentence per question explaining why each is clean]"
+
+This prevents lazy LGTM verdicts. It only adds work when a reviewer claims "nothing to find."
+
 ### Issue Classification
 
 Classify all findings by severity:
@@ -6148,6 +6311,111 @@ draft review commits main...feature-branch
 ```bash
 draft review track my-feature with-bughunt
 ```
+
+---
+
+## Deep Review Command
+
+When user says "deep review" or "draft deep-review [module]":
+
+Perform an exhaustive end-to-end lifecycle review of a service, component, or module. Ensure ACID compliance and production-grade enterprise quality. Unlike standard review commands, this operates strictly at the module level.
+
+## Red Flags - STOP if you're:
+
+- Acting without reading the Draft context (`draft/product.md`, `draft/tech-stack.md`)
+- Modifying production code. This command is for auditing and reporting only. Fixes should be handled in a separate implementation track.
+- Reviewing a module that was already reviewed recently, unless explicitly requested.
+
+---
+
+## Arguments
+
+- `$ARGUMENTS` — Optional: explicit module/service/component name (directory) to review. If omitted, auto-select the next unreviewed module.
+
+---
+
+## Module Selection
+
+1. **Check review history:** Read `draft/deep-review-history.json` if it exists. This file tracks previously reviewed modules with timestamps.
+2. **If `$ARGUMENTS` is provided:** Use that module. If it was previously reviewed, re-review it (the user explicitly requested it).
+3. **If no argument:** Discover all modules/services/components in the codebase (scan directory structure, `__init__.py` files, service boundaries, package definitions). Select the first module NOT present in the review history. If all have been reviewed, pick the one with the oldest review date.
+4. **Announce selection:** State which module was selected and why before proceeding.
+
+---
+
+## Review Phases
+
+### Phase 1: Context & Structural Analysis
+- Read all Draft context files (e.g. `draft/.ai-context.md`, `draft/architecture.md`, `draft/tech-stack.md`) to understand intended boundaries and critical invariants.
+- Map the module's full dependency graph (imports, injected services, external calls)
+- Trace the complete lifecycle: initialization → processing → persistence → cleanup
+- Identify all entry points and exit paths
+- Catalog all state mutations and side effects
+
+### Phase 2: ACID Compliance Audit
+- **Atomicity:** Verify all multi-step operations are wrapped in transactions. Partial failure must not leave corrupt state. Check for missing rollback paths.
+- **Consistency:** Validate all invariants, constraints, and business rules are enforced before and after every state transition. Check schema validation, data type enforcement, and boundary conditions.
+- **Isolation:** Check for race conditions, shared mutable state, concurrent access without locking/synchronization. Verify transaction isolation levels where databases are involved.
+- **Durability:** Confirm committed data survives crashes. Check for fire-and-forget patterns, missing flush/sync calls, and inadequate error handling around persistence.
+
+### Phase 3: Production-Grade Assessment
+- **Resilience:** Graceful degradation, circuit breakers, timeout handling, backpressure
+- **Observability:** Logging coverage (not excessive), structured log fields, correlation IDs, metric emission points
+- **Configuration:** Hardcoded values that should be configurable, missing environment variable validation
+- **State Lifecycle:** Memory accumulation, zombie processes, dropped messages
+
+### Phase 4: Identify Actionable Fixes (Spec Generation)
+Instead of mutating the source code, translate all findings into clear, actionable requirements that a developer (or agent) can implement via Test-Driven Development.
+
+---
+
+## Update Review History
+
+After completing the review, update `draft/deep-review-history.json`:
+
+```json
+{
+  "reviews": [
+    {
+      "module": "<module-name>",
+      "path": "<module-path>",
+      "timestamp": "<ISO-8601>",
+      "issues_found": <count>,
+      "summary": "<one-line summary>"
+    }
+  ]
+}
+```
+
+Create the file in the `draft/` directory if it does not exist. Append to the `reviews` array if it does. Do NOT save to `.claude/` or `.gemini/`.
+
+---
+
+## Final Report Generation
+
+Output a structured summary and detailed "Implementation Spec" for any needed fixes.
+
+**File to create:** `draft/deep-review-report.md`
+
+**Module reviewed:** name and path
+**Issues by category:** ACID | Resilience | Observability
+**Verdict:** PASS / CONDITIONAL PASS / FAIL
+
+Format findings as actionable tasks:
+```markdown
+### [Critical/Important/Minor] Issue Name
+**File:** path/to/file:line
+**Description:** What's wrong conceptually (e.g., Transaction lacks rollback on Exception XYZ).
+**Proposed Fix Specification:**
+- Add `try/except` block catching Exception XYZ.
+- Explicitly call `db.rollback()`.
+- Emit structured log with correlation ID.
+```
+
+**Constraints:**
+- Do not refactor code yourself.
+- Flag ambiguous fixes for human review instead of guessing.
+- If the module is too large, decompose it and review sub-modules sequentially.
 
 ---
 
@@ -6664,6 +6932,213 @@ Options:
 2. Abort revert: git revert --abort
 
 Draft state NOT updated (pending revert completion).
+```
+
+---
+
+## Change Command
+
+When user says "handle change" or "draft change <description>":
+
+You are handling a mid-track requirement change using Draft's Context-Driven Development methodology.
+
+## Red Flags - STOP if you're:
+
+- Applying changes to spec.md or plan.md without showing the user what will change first
+- Invalidating `[x]` completed tasks without flagging them explicitly
+- Proceeding past the CHECKPOINT without user confirmation
+- Editing files when the user said "no" or "edit"
+
+**Show impact before applying. Always confirm.**
+
+---
+
+## Step 1: Parse Arguments
+
+Extract from `$ARGUMENTS`:
+
+- **Change description** — free text describing what needs to change (required)
+- **Track specifier** — optional `track <id>` prefix to target a specific track
+
+### Default Behavior
+
+If no `track <id>` specified:
+- Auto-detect the active `[~]` In Progress track from `draft/tracks.md`
+- If no `[~]` track, find the first `[ ]` Pending track
+- Display: `Auto-detected track: <id> - <name>` before proceeding
+
+If no change description provided:
+- Error: "Usage: `draft change <description>` or `draft change track <id> <description>`"
+
+---
+
+## Step 2: Load Context
+
+1. Read `draft/tracks/<id>/spec.md` — extract requirements and acceptance criteria
+2. Read `draft/tracks/<id>/plan.md` — extract all tasks with their current status (`[ ]`, `[~]`, `[x]`, `[!]`)
+3. Read `draft/tracks/<id>/metadata.json` — for track type and status
+
+---
+
+## Step 3: Analyze Spec Impact
+
+Analyze the change description against the loaded spec.
+
+For each requirement and acceptance criterion, classify the effect:
+
+| Classification | Meaning |
+|---|---|
+| **Added** | New requirement or AC introduced by this change |
+| **Modified** | Existing requirement or AC needs updating |
+| **Removed** | Existing requirement or AC is no longer needed |
+| **Unaffected** | No change needed |
+
+Produce a concise impact list. Example:
+```
+Spec impact:
+- AC #2 "User can export to CSV" → Modified (now also requires JSON format)
+- AC #5 "Export limited to 1000 rows" → Removed (no row limit)
+- NEW: AC #6 "Export progress indicator for large datasets"
+```
+
+---
+
+## Step 4: Map Impact to Plan Tasks
+
+For each task in `plan.md`, determine if the spec change affects it:
+
+- **`[x]` completed tasks** that are now invalidated by the change → flag as:
+  `⚠️ [task description] — may need rework`
+
+- **`[ ]` pending tasks** that need updating → show the proposed new task text
+
+- **`[~]` in-progress tasks** that are affected → flag as:
+  `⚠️ IN PROGRESS: [task description] — review before continuing`
+
+- **Unaffected tasks** — skip, do not mention
+
+---
+
+## Step 5: Present Impact Summary
+
+Display a clear summary before proposing any file changes:
+
+```
+Change: [change description]
+Track:  <track_id> — <track_name>
+
+Spec impact:
+  - [classification] [requirement/AC]
+  - [classification] [requirement/AC]
+
+Plan impact:
+  - ⚠️ [N] completed task(s) may need rework
+  - [M] pending task(s) need updating
+  - [K] in-progress task(s) need review
+
+Completed tasks that may need rework:
+  - [x] [task description] (commit: abc1234)
+
+Pending tasks with proposed changes:
+  Before: - [ ] [original task text]
+  After:  - [ ] [proposed new task text]
+```
+
+---
+
+## Step 6: Show Proposed Amendments
+
+Display only the changed sections of each file (not full rewrites):
+
+### Proposed spec.md changes
+
+Show the diff as before/after for each modified section. Do not rewrite unchanged sections.
+
+### Proposed plan.md changes
+
+Show each task that would be modified as before/after. Do not rewrite the full plan.
+
+---
+
+## Step 7: CHECKPOINT
+
+```
+Apply these changes to spec.md and plan.md? [yes / no / edit]
+```
+
+- **`yes`** — proceed to Step 8
+- **`no`** — discard all proposed changes, announce "No changes applied." and stop
+- **`edit`** — let the user describe adjustments to the proposed amendments, then revise and re-present the CHECKPOINT again. The loop continues until the user selects `yes` or `no`.
+
+---
+
+## Step 8: Apply Changes and Log
+
+1. Apply the agreed amendments to `spec.md` and `plan.md`
+
+2. Update `draft/tracks/<id>/metadata.json`:
+   - Set `updated` to current ISO timestamp
+
+3. Append a Change Log entry to `plan.md`. If a `## Change Log` section does not exist, add it at the bottom:
+
+```markdown
+## Change Log
+
+| Date | Description | Impact |
+|------|-------------|--------|
+| [ISO date] | [change description] | [N completed may need rework, M pending updated] |
+```
+
+4. Announce:
+
+```
+Changes applied: <track_id>
+
+Updated:
+- draft/tracks/<id>/spec.md
+- draft/tracks/<id>/plan.md
+
+[If completed tasks flagged:]
+⚠️  Review N completed task(s) — they may not align with the updated spec.
+    Re-run draft implement to address rework, or draft review to assess.
+
+Next: draft implement to continue, or draft review to assess current state.
+```
+
+---
+
+## Error Handling
+
+### Track Not Found
+```
+Error: Track '<id>' not found.
+Run draft status to see available tracks.
+```
+
+### No Active Track
+```
+Error: No active track found.
+Use: draft change track <id> <description>
+```
+
+### No Spec or Plan
+```
+Error: Missing spec.md or plan.md for track <id>.
+Cannot perform change analysis without both files.
+```
+
+---
+
+## Examples
+
+### Change description for active track
+```bash
+draft change the export format should support JSON in addition to CSV
+```
+
+### Targeting a specific track
+```bash
+draft change track add-export-feature also require a progress indicator for exports over 500 rows
 ```
 
 ---
@@ -7592,6 +8067,7 @@ Draft solves this through **Context-Driven Development**: structured documents t
   - [draft deep-review](#draftdeep-review--module-lifecycle-audit)
   - [draft bughunt](#draftbughunt--exhaustive-bug-discovery)
   - [draft review](#draftreview--code-review-orchestrator)
+  - [draft change](#draftchange--course-correction)
 - [Architecture Mode](#architecture-mode)
 - [Coverage](#coverage)
 - [Notes](#notes)
@@ -7644,7 +8120,7 @@ graph TD
     D -->|"Creates architecture.md"| E
     E -->|"TDD cycle per task"| F{Phase done?}
     F -->|No| E
-    F -->|Yes| G["Two-Stage Review"]
+    F -->|Yes| G["Three-Stage Review"]
     G -->|Pass| H{All phases?}
     G -->|Fail| E
     H -->|No| E
@@ -8131,8 +8607,9 @@ After each task: update `plan.md` status markers, increment `metadata.json` coun
 #### Phase Boundary Review
 
 When all tasks in a phase are `[x]`, a three-stage review is triggered:
-1. **Stage 1: Spec Compliance** — Verify all requirements for the phase are implemented
-2. **Stage 2: Code Quality** — Verify patterns, error handling, test quality; classify issues as Critical/Important/Minor
+1. **Stage 1: Automated Validation** — Fast static checks (architecture conformance, dead code, circular dependencies, OWASP security, performance anti-patterns)
+2. **Stage 2: Spec Compliance** — Verify all requirements for the phase are implemented
+3. **Stage 3: Code Quality** — Verify patterns, error handling, test quality; classify issues as Critical/Important/Minor
 
 Only proceeds to the next phase if no Critical issues remain.
 
@@ -8295,13 +8772,13 @@ Unlike standard review, this tool performs structural analysis and flags deep ar
 
 ### `draft bughunt` — Exhaustive Bug Discovery
 
-Systematic bug hunt across 12 dimensions: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, tests, and maintainability.
+Systematic bug hunt across 11 dimensions: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, and tests.
 
 #### Process
 
 1. Load Draft context (architecture, tech-stack, product)
 2. For tracks: verify implementation matches spec requirements
-3. Analyze code across all 12 dimensions
+3. Analyze code across all 11 dimensions
 4. Verify each finding (trace code paths, check for mitigations, eliminate false positives)
 5. Generate severity-ranked report with fix recommendations
 6. Detect language and test framework (GTest, pytest, go test, Jest/Vitest, cargo test, JUnit)
@@ -8350,6 +8827,37 @@ draft review project                      # review uncommitted changes
 draft review files "src/**/*.ts"          # review specific files
 draft review commits main...HEAD          # review commit range
 draft review track my-feature full        # comprehensive review with bughunt
+```
+
+---
+
+### `draft change` — Course Correction
+
+Handles mid-track requirement changes without losing work. Analyzes the impact of the change on completed and pending tasks, proposes amendments to `spec.md` and `plan.md`, then applies them only after explicit confirmation.
+
+#### When to Use
+
+Use when requirements shift after a track is already in progress:
+- A stakeholder changes scope mid-sprint
+- A dependency constraint forces a pivot
+- New information invalidates part of the original spec
+
+#### Process
+
+1. **Detect active track** — Auto-detects the `[~]` In Progress track; use `track <id>` to target a specific track
+2. **Parse change description** — Extracts the change from `$ARGUMENTS`
+3. **Impact analysis** — Classifies every existing task and AC against the change:
+   - Tasks still valid, need modification, now invalid, or newly required
+   - Completed `[x]` tasks that the change retroactively invalidates are flagged explicitly
+4. **Propose amendments** — Presents exact diffs for `spec.md` and `plan.md` (what will be added, removed, or reworded)
+5. **CHECKPOINT** — `[yes / no / edit]`. No file is touched until the user confirms. The loop continues until the user selects `yes` or `no`.
+6. **Apply & log** — Writes changes to `spec.md` and `plan.md`, appends a timestamped entry to `## Change Log` in `plan.md`, updates `metadata.json`
+
+#### Examples
+
+```bash
+draft change the export format should support JSON in addition to CSV
+draft change track add-export-feature also require a progress indicator for exports over 500 rows
 ```
 
 ---
@@ -8514,9 +9022,10 @@ Natural language patterns that map to Draft commands:
 | "undo", "revert" | Rollback changes |
 | "break into modules" | Module decomposition |
 | "check coverage" | Code coverage report |
-| "deep review", "audit module" | Module lifecycle audit |
+| "deep review", "audit module", "production audit" | Module lifecycle audit |
 | "hunt bugs", "find bugs" | Systematic bug discovery |
-| "review code", "review track" | Code review orchestrator (track/project) |
+| "review code", "review track", "check quality" | Code review orchestrator (track/project) |
+| "requirements changed", "scope changed", "update the spec" | Handle mid-track requirement change |
 | "preview jira", "export to jira" | Preview Jira issues |
 | "create jira issues" | Create Jira issues via MCP |
 | "the plan" | Read active track's plan.md |
@@ -8570,11 +9079,12 @@ Key practices (from Google SRE and distributed systems engineering):
 
 See `core/agents/rca.md` for detailed process.
 
-### Two-Stage Review
+### Three-Stage Review
 
 At phase boundaries:
-1. **Stage 1: Spec Compliance** - Did implementation match specification?
-2. **Stage 2: Code Quality** - Clean architecture, proper error handling, meaningful tests?
+1. **Stage 1: Automated Validation** - Fast static checks for architecture, security, and performance issues
+2. **Stage 2: Spec Compliance** - Did implementation match specification?
+3. **Stage 3: Code Quality** - Clean architecture, proper error handling, meaningful tests?
 
 See `core/agents/reviewer.md` for detailed process.
 
@@ -8633,14 +9143,21 @@ See `core/agents/rca.md` for the full process including distributed systems cons
 
 Activated at phase boundaries during `draft implement`. Performs a three-stage review before proceeding to the next phase.
 
-**Stage 1: Spec Compliance** — Did they build what was specified?
+**Stage 1: Automated Validation** — Is the code structurally sound and secure?
+- Architecture conformance, dead code detection, circular dependencies
+- OWASP security scans (hardcoded secrets, SQL injection, XSS)
+- Performance anti-patterns (N+1 queries, blocking I/O, unbounded queries)
+
+If Stage 1 fails with critical issues, implementation resumes. Stage 2 does not run.
+
+**Stage 2: Spec Compliance** — Did they build what was specified?
 - Requirements coverage (all functional requirements implemented)
 - Scope adherence (no missing features, no scope creep)
 - Behavior correctness (edge cases, error scenarios, integration points)
 
-If Stage 1 fails, gaps are listed and implementation resumes. Stage 2 does not run.
+If Stage 2 fails, gaps are listed and implementation resumes. Stage 3 does not run.
 
-**Stage 2: Code Quality** — Is the code well-crafted?
+**Stage 3: Code Quality** — Is the code well-crafted?
 - Architecture (follows project patterns, separation of concerns)
 - Error handling (appropriate level, helpful user-facing errors)
 - Testing (tests real logic, edge case coverage, maintainability)
@@ -12612,6 +13129,21 @@ Check against the track's `spec.md`:
 4. **Maintainability**
    - [ ] Code is readable without excessive comments
    - [ ] Consistent naming and style
+
+### Adversarial Pass (When Zero Findings)
+
+If Stage 3 produces zero findings across all four dimensions, do NOT accept "clean" without one more look. Ask these 5 questions explicitly:
+
+1. **Error paths** — Is every error/exception handled? Are any failure modes silently swallowed?
+2. **Edge cases** — Are there boundary conditions (empty input, max values, concurrent access) not covered by tests?
+3. **Implicit assumptions** — Does code assume inputs are always valid, services always up, or state always consistent?
+4. **Future brittleness** — Is anything hardcoded that will break on scale or config change?
+5. **Missing coverage** — Is there behavior that should be tested but isn't?
+
+If still zero after this pass, document it explicitly in the review report:
+> "Adversarial pass completed. Zero findings confirmed: [one sentence per question explaining why each is clean]"
+
+This prevents lazy LGTM verdicts. It only adds work when a reviewer claims "nothing to find."
 
 ---
 

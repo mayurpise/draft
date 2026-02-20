@@ -42,6 +42,35 @@ If no active track found:
 - Track-level architecture.md created by `/draft:decompose`
 - Project-level `.ai-context.md` created by `/draft:init` (brownfield only)
 
+## Step 1.5: Readiness Gate (Fresh Start Only)
+
+**Skip if:** Any task in `plan.md` is already `[x]` — the track is in progress, this check has already passed.
+
+Run once, before the first task of a new track:
+
+### AC Coverage Check
+
+For each acceptance criterion in `spec.md`:
+- Verify at least one task in `plan.md` references or addresses it
+- If an AC has no corresponding task, flag it: "⚠️ AC: '[criterion]' has no task in plan.md"
+
+### Sync Check (if `.ai-context.md` exists)
+
+Compare the `synced_to_commit` values in the YAML frontmatter of `spec.md` and `plan.md`.
+- **Skip if** either file has no YAML frontmatter or no `synced_to_commit` field (quick-mode tracks omit it).
+- If they differ: "⚠️ Spec and plan were synced to different commits — verify they are still aligned."
+
+### Result
+
+**Issues found:** List them, then ask:
+```
+Readiness issues found (see above). Proceed anyway or update first? [proceed/update]
+```
+- `proceed` → add a `## Notes` entry in `plan.md` listing the issues, then continue to Step 2
+- `update` → stop here and let the user refine spec or plan before re-running
+
+**No issues:** Print `Readiness check passed.` and continue to Step 2.
+
 ## Step 2: Find Next Task
 
 Scan `plan.md` for the first uncompleted task:

@@ -88,10 +88,10 @@ You can also use natural language:
 | "undo", "revert" | `/draft:revert` |
 | "break into modules" | `/draft:decompose` |
 | "check coverage" | `/draft:coverage` |
-| "deep review", "audit module" | `/draft:deep-review` |
+| "deep review", "module audit", "production audit" | `/draft:deep-review` |
 | "hunt bugs", "find bugs" | `/draft:bughunt` |
 | "review code", "review track", "check quality" | `/draft:review` |
-| "requirements changed", "scope changed" | `/draft:change` |
+| "requirements changed", "scope changed", "update the spec" | `/draft:change` |
 | "preview jira", "export to jira" | `/draft:jira-preview` |
 | "create jira issues" | `/draft:jira-create` |
 

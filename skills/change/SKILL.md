@@ -133,7 +133,7 @@ Apply these changes to spec.md and plan.md? [yes / no / edit]
 
 - **`yes`** — proceed to Step 8
 - **`no`** — discard all proposed changes, announce "No changes applied." and stop
-- **`edit`** — let the user describe adjustments to the proposed amendments, then revise and re-present before asking again
+- **`edit`** — let the user describe adjustments to the proposed amendments, then revise and re-present the CHECKPOINT again. The loop continues until the user selects `yes` or `no`.
 
 ---
 

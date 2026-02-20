@@ -90,7 +90,7 @@ You can also use natural language:
 | "check coverage" | `/draft:coverage` |
 | "deep review", "audit module" | `/draft:deep-review` |
 | "hunt bugs", "find bugs" | `/draft:bughunt` |
-| "review code", "review track" | `/draft:review` |
+| "review code", "review track", "check quality" | `/draft:review` |
 | "requirements changed", "scope changed" | `/draft:change` |
 | "preview jira", "export to jira" | `/draft:jira-preview` |
 | "create jira issues" | `/draft:jira-create` |

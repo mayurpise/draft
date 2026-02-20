@@ -445,7 +445,7 @@ Recognize these natural language patterns:
 | "start implementing" | Execute implement |
 | "check coverage", "test coverage" | Run coverage |
 | "hunt bugs", "find bugs" | Run bug hunt |
-| "review code", "review track" | Run review |
+| "review code", "review track", "check quality" | Run review |
 | "deep review", "production audit", "module audit" | Run deep-review |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |

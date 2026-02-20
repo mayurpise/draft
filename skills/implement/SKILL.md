@@ -57,6 +57,7 @@ For each acceptance criterion in `spec.md`:
 ### Sync Check (if `.ai-context.md` exists)
 
 Compare the `synced_to_commit` values in the YAML frontmatter of `spec.md` and `plan.md`.
+- **Skip if** either file has no YAML frontmatter or no `synced_to_commit` field (quick-mode tracks omit it).
 - If they differ: "⚠️ Spec and plan were synced to different commits — verify they are still aligned."
 
 ### Result

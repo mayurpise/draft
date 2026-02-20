@@ -34,6 +34,8 @@ Draft is a methodology for structured software development: **Context → Spec &
 | `/draft:deep-review` | Module lifecycle audit (ACID compliance, enterprise quality) |
 | `/draft:bughunt` | Exhaustive bug hunt |
 | `/draft:review` | Code review orchestrator |
+| `/draft:adr` | Architecture Decision Records |
+| `/draft:change` | Handle mid-track requirement changes |
 | `/draft:jira-preview` | Generate Jira export for review |
 | `/draft:jira-create` | Push issues to Jira via MCP |
 
@@ -87,9 +89,11 @@ You can also use natural language:
 | "undo", "revert" | `/draft:revert` |
 | "break into modules" | `/draft:decompose` |
 | "check coverage" | `/draft:coverage` |
-| "deep review", "audit module" | `/draft:deep-review` |
+| "deep review", "module audit", "production audit" | `/draft:deep-review` |
 | "hunt bugs", "find bugs" | `/draft:bughunt` |
-| "review code", "review track" | `/draft:review` |
+| "review code", "review track", "check quality" | `/draft:review` |
+| "document decision", "create ADR" | `/draft:adr` |
+| "requirements changed", "scope changed", "update the spec" | `/draft:change` |
 | "preview jira", "export to jira" | `/draft:jira-preview` |
 | "create jira issues" | `/draft:jira-create` |
 

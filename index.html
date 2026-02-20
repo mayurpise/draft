@@ -2309,6 +2309,31 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- /draft:change -->
+                <div class="doc-card">
+                    <div class="card-summary">
+                        <div class="icon">🔀</div>
+                        <div class="name">/draft:change</div>
+                        <p class="purpose">Handle mid-track requirement changes</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ol>
+                            <li>Analyzes impact on all completed and pending tasks</li>
+                            <li>Flags any <code>[x]</code> tasks retroactively invalidated by the change</li>
+                            <li>Proposes exact amendments to <code>spec.md</code> and <code>plan.md</code></li>
+                            <li>Applies changes only after explicit confirmation (CHECKPOINT: yes / no / edit)</li>
+                            <li>Appends a timestamped entry to <code>## Change Log</code> in <code>plan.md</code></li>
+                        </ol>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:change the export format should also support JSON</code>
+                            <code>/draft:change track add-export-feature add progress indicator</code>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 

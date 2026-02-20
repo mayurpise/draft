@@ -42,6 +42,7 @@ Draft solves this through **Context-Driven Development**: structured documents t
   - [/draft:deep-review](#draftdeep-review--module-lifecycle-audit)
   - [/draft:bughunt](#draftbughunt--exhaustive-bug-discovery)
   - [/draft:review](#draftreview--code-review-orchestrator)
+  - [/draft:change](#draftchange--course-correction)
 - [Architecture Mode](#architecture-mode)
 - [Coverage](#coverage)
 - [Notes](#notes)
@@ -805,6 +806,37 @@ Generates unified report at `draft/tracks/<id>/review-report.md` or `draft/revie
 
 ---
 
+### `/draft:change` — Course Correction
+
+Handles mid-track requirement changes without losing work. Analyzes the impact of the change on completed and pending tasks, proposes amendments to `spec.md` and `plan.md`, then applies them only after explicit confirmation.
+
+#### When to Use
+
+Use when requirements shift after a track is already in progress:
+- A stakeholder changes scope mid-sprint
+- A dependency constraint forces a pivot
+- New information invalidates part of the original spec
+
+#### Process
+
+1. **Detect active track** — Auto-detects the `[~]` In Progress track; use `track <id>` to target a specific track
+2. **Parse change description** — Extracts the change from `$ARGUMENTS`
+3. **Impact analysis** — Classifies every existing task and AC against the change:
+   - Tasks still valid, need modification, now invalid, or newly required
+   - Completed `[x]` tasks that the change retroactively invalidates are flagged explicitly
+4. **Propose amendments** — Presents exact diffs for `spec.md` and `plan.md` (what will be added, removed, or reworded)
+5. **CHECKPOINT** — `[yes / no / edit]`. No file is touched until the user confirms. The loop continues until the user selects `yes` or `no`.
+6. **Apply & log** — Writes changes to `spec.md` and `plan.md`, appends a timestamped entry to `## Change Log` in `plan.md`, updates `metadata.json`
+
+#### Examples
+
+```bash
+/draft:change the export format should support JSON in addition to CSV
+/draft:change track add-export-feature also require a progress indicator for exports over 500 rows
+```
+
+---
+
 ## Architecture Mode
 
 Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `architecture.md` exists** - no manual configuration needed.
@@ -965,9 +997,10 @@ Natural language patterns that map to Draft commands:
 | "undo", "revert" | Rollback changes |
 | "break into modules" | Module decomposition |
 | "check coverage" | Code coverage report |
-| "deep review", "audit module" | Module lifecycle audit |
+| "deep review", "audit module", "production audit" | Module lifecycle audit |
 | "hunt bugs", "find bugs" | Systematic bug discovery |
-| "review code", "review track" | Code review orchestrator (track/project) |
+| "review code", "review track", "check quality" | Code review orchestrator (track/project) |
+| "requirements changed", "scope changed", "update the spec" | Handle mid-track requirement change |
 | "preview jira", "export to jira" | Preview Jira issues |
 | "create jira issues" | Create Jira issues via MCP |
 | "the plan" | Read active track's plan.md |

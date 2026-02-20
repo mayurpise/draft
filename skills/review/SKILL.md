@@ -1,6 +1,6 @@
 ---
 name: review
-description: Standalone review orchestrator for track-level and project-level code review. Integrates reviewer agent, validate, and bughunt.
+description: Standalone review orchestrator for track-level and project-level code review. Integrates reviewer agent and bughunt.
 ---
 
 # Code Review
@@ -311,6 +311,21 @@ Analyze semantic code quality across four dimensions:
 #### 4.7: Maintainability
 - [ ] Code is readable without excessive comments
 - [ ] Consistent naming and style
+
+#### Adversarial Pass (When Zero Findings)
+
+If Stage 3 produces zero findings across all four dimensions, do NOT accept "clean" without one more look. Ask these 5 questions explicitly:
+
+1. **Error paths** — Is every error/exception handled? Are any failure modes silently swallowed?
+2. **Edge cases** — Are there boundary conditions (empty input, max values, concurrent access) not covered by tests?
+3. **Implicit assumptions** — Does code assume inputs are always valid, services always up, or state always consistent?
+4. **Future brittleness** — Is anything hardcoded that will break on scale or config change?
+5. **Missing coverage** — Is there behavior that should be tested but isn't?
+
+If still zero after this pass, document it explicitly in the review report:
+> "Adversarial pass completed. Zero findings confirmed: [one sentence per question explaining why each is clean]"
+
+This prevents lazy LGTM verdicts. It only adds work when a reviewer claims "nothing to find."
 
 ### Issue Classification
 

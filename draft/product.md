@@ -49,12 +49,12 @@ Draft is a Claude Code plugin that implements Context-Driven Development — a m
 1. **Project Initialization** (`/draft:init`): 5-phase exhaustive codebase analysis generating architecture.md (30-45 pages) and .ai-context.md (200-400 lines, token-optimized)
 2. **Track Creation** (`/draft:new-track`): Collaborative 6-phase intake producing spec.md and plan.md with risk assessment, acceptance criteria, and phased task breakdown
 3. **TDD Implementation** (`/draft:implement`): Task-by-task execution following RED-GREEN-REFACTOR with phase boundary reviews
-4. **Code Review** (`/draft:review`): Two-stage review (spec compliance + code quality) with reviewer agent protocol
+4. **Code Review** (`/draft:review`): Three-stage review (automated validation → spec compliance → code quality) with reviewer agent protocol
 5. **Cross-Platform Build** (`build-integrations.sh`): Generates Copilot and Gemini integration files from skill definitions
 
 ### Should Have (P1)
-1. **Quality Validation** (`/draft:validate`): 5-category validation against Draft context (architecture conformance, security, performance, dead code, dependency cycles)
-2. **Bug Discovery** (`/draft:bughunt`): 12-dimension exhaustive bug analysis with severity-ranked findings
+1. **Module Lifecycle Audit** (`/draft:deep-review`): ACID compliance and production-grade quality assessment at module level
+2. **Bug Discovery** (`/draft:bughunt`): Exhaustive logic error analysis with severity-ranked findings and regression test generation
 3. **Module Decomposition** (`/draft:decompose`): Architecture-aware module breakdown with dependency mapping
 4. **Monorepo Indexing** (`/draft:index`): Federated knowledge aggregation across services
 

@@ -39,7 +39,7 @@ Draft solves this through **Context-Driven Development**: structured documents t
   - [/draft:jira-preview](#draftjira-preview--preview-jira-issues)
   - [/draft:jira-create](#draftjira-create--create-jira-issues)
   - [/draft:adr](#draftadr--architecture-decision-records)
-  - [/draft:validate](#draftvalidate--codebase-quality-validation)
+  - [/draft:deep-review](#draftdeep-review--module-lifecycle-audit)
   - [/draft:bughunt](#draftbughunt--exhaustive-bug-discovery)
   - [/draft:review](#draftreview--code-review-orchestrator)
 - [Architecture Mode](#architecture-mode)
@@ -94,7 +94,7 @@ graph TD
     D -->|"Creates architecture.md"| E
     E -->|"TDD cycle per task"| F{Phase done?}
     F -->|No| E
-    F -->|Yes| G["Two-Stage Review"]
+    F -->|Yes| G["Three-Stage Review"]
     G -->|Pass| H{All phases?}
     G -->|Fail| E
     H -->|No| E
@@ -103,11 +103,11 @@ graph TD
     J["/draft:status"] -.->|"Check anytime"| E
     K["/draft:revert"] -.->|"Undo if needed"| E
     L["/draft:coverage"] -.->|"After implementation"| E
-    M["/draft:validate"] -.->|"At track end"| I
     N["/draft:bughunt"] -.->|"Quality check"| E
-    O["/draft:review"] -.->|"Code review"| G
+    O["/draft:review"] -.->|"At track end"| G
     P["/draft:adr"] -.->|"Document decisions"| B
     Q["/draft:jira-preview"] -.->|"Export to Jira"| B
+    R["/draft:deep-review"] -.->|"Audit module"| E
 ```
 
 ### Context Hierarchy
@@ -366,8 +366,8 @@ Located in `draft/` of the target project:
 ### Key Sections
 
 - **`product.md` `## Guidelines`** — UX standards, writing style, branding (optional)
-- **`tech-stack.md` `## Accepted Patterns`** — Intentional design decisions honored by bughunt/validate/review
-- **`workflow.md` `## Guardrails`** — Hard constraints enforced by validation commands
+- **`tech-stack.md` `## Accepted Patterns`** — Intentional design decisions honored by bughunt/deep-review/review
+- **`workflow.md` `## Guardrails`** — Hard constraints enforced by review commands
 
 ## Status Markers
 
@@ -580,9 +580,10 @@ After each task: update `plan.md` status markers, increment `metadata.json` coun
 
 #### Phase Boundary Review
 
-When all tasks in a phase are `[x]`, a two-stage review is triggered:
-1. **Stage 1: Spec Compliance** — Verify all requirements for the phase are implemented
-2. **Stage 2: Code Quality** — Verify patterns, error handling, test quality; classify issues as Critical/Important/Minor
+When all tasks in a phase are `[x]`, a three-stage review is triggered:
+1. **Stage 1: Automated Validation** — Fast static checks (architecture conformance, dead code, circular dependencies, OWASP security, performance anti-patterns)
+2. **Stage 2: Spec Compliance** — Verify all requirements for the phase are implemented
+3. **Stage 3: Code Quality** — Verify patterns, error handling, test quality; classify issues as Critical/Important/Minor
 
 Only proceeds to the next phase if no Critical issues remain.
 
@@ -731,77 +732,27 @@ ADRs are stored at `draft/adrs/NNNN-title.md` (e.g., `001-use-postgresql.md`). W
 
 `Proposed` (awaiting review) → `Accepted` (approved and in effect) → `Deprecated` (context changed) or `Superseded by ADR-XXX` (replaced by newer decision).
 
----
+### `/draft:deep-review` — Module Lifecycle Audit
 
-### `/draft:validate` — Codebase Quality Validation
-
-Validates codebase quality using Draft context (`.ai-context.md`, tech-stack.md, product.md). Runs architecture conformance, security scan, and performance analysis. Leverages Critical Invariants and Security Architecture sections from `.ai-context.md` for richer validation.
+Perform an exhaustive end-to-end lifecycle review of a service, component, or module. Evaluates ACID compliance, architectural resilience, and production-grade enterprise quality.
 
 #### Scope
 
-- **Track-level:** `/draft:validate <track-id>` — validates files touched by a specific track
-- **Project-level:** `/draft:validate` (no arguments) — validates entire codebase
+- **Module-level only:** `/draft:deep-review src/auth`
 
-Generates report at `draft/tracks/<id>/validation-report.md` (track) or `draft/validation-report.md` (project). Non-blocking by default — reports warnings without halting workflow.
-
-#### Validation Categories
-
-**Project-Level (5 categories):**
-
-**Architecture Conformance**
-- Module boundary violations (e.g., presentation layer importing database models)
-- Circular dependencies between modules
-- Unauthorized dependencies not listed in tech-stack.md
-- API surface violations (internal modules exposed publicly)
-
-**Dead Code Detection**
-- Unreachable code paths, unused exports, orphaned files
-
-**Dependency Cycle Detection**
-- Circular import chains across modules
-
-**Security Scan**
-- OWASP Top 10 patterns (SQL injection, XSS, broken authentication, insecure deserialization)
-- Hardcoded secrets or credentials in source code
-- Insecure dependencies with known CVEs
-- Missing input validation at system boundaries
-- Insufficient error handling exposing sensitive information
-
-**Performance Anti-Patterns**
-- Bundle size exceeding thresholds defined in product.md
-- N+1 query patterns in database access
-- Algorithmic complexity hotspots (O(n²) or worse in critical paths)
-- Unindexed database queries
-- Memory leaks or resource cleanup issues
-
-**Track-Level (adds 3 categories):**
-
-**Spec Compliance** — Implementation matches spec requirements
-
-**Architectural Impact** — Changes respect module boundaries and dependency rules
-
-**Regression Risk** — Changes don't break existing functionality
-
-#### Report Structure
-
-Each finding includes:
-- **Severity**: Critical (must fix), High (should fix), Medium (consider fixing), Low (informational)
-- **Location**: File path and line number
-- **Evidence**: Code snippet demonstrating the issue
-- **Fix**: Recommended remediation with examples
-- **Draft Context**: How this violates `.ai-context.md` or tech-stack.md constraints
+Unlike standard review, this tool performs structural analysis and flags deep architectural flaws. It maintains a history file at `draft/deep-review-history.json` and generates an actionable specification for fixes at `draft/deep-review-report.md`. It does NOT auto-fix code.
 
 ---
 
 ### `/draft:bughunt` — Exhaustive Bug Discovery
 
-Systematic bug hunt across 12 dimensions: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, tests, and maintainability.
+Systematic bug hunt across 11 dimensions: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, and tests.
 
 #### Process
 
 1. Load Draft context (architecture, tech-stack, product)
 2. For tracks: verify implementation matches spec requirements
-3. Analyze code across all 12 dimensions
+3. Analyze code across all 11 dimensions
 4. Verify each finding (trace code paths, check for mitigations, eliminate false positives)
 5. Generate severity-ranked report with fix recommendations
 6. Detect language and test framework (GTest, pytest, go test, Jest/Vitest, cargo test, JUnit)
@@ -816,30 +767,30 @@ Test files are written directly to the project using native test conventions.
 
 ### `/draft:review` — Code Review Orchestrator
 
-Standalone review command that orchestrates two-stage code review with optional quality tool integration.
+Standalone review command that orchestrates a three-stage code review.
 
 #### Track-Level Review
 
 Reviews a track's implementation against its spec.md and plan.md:
-- **Stage 1:** Spec Compliance — verifies all requirements and acceptance criteria are met
-- **Stage 2:** Code Quality — architecture, error handling, testing, maintainability (only if Stage 1 passes)
+- **Stage 1 (Automated Validation):** Fast, static checks for structural flaws (dead code, circular dependencies, OWASP secrets, N+1 patterns).
+- **Stage 2 (Spec Compliance):** Verifies all functional requirements and acceptance criteria are met.
+- **Stage 3 (Code Quality):** Evaluates architecture, error handling, testing, and maintainability.
 
 Extracts commit SHAs from plan.md to determine diff range. Supports fuzzy track matching.
 
 #### Project-Level Review
 
-Reviews arbitrary changes (code quality only, no spec compliance):
+Reviews arbitrary changes (static validation + code quality only, no spec compliance):
 - `project` — uncommitted changes
 - `files <pattern>` — specific file patterns
 - `commits <range>` — commit range
 
 #### Quality Integration
 
-- `with-validate` — include `/draft:validate` results
 - `with-bughunt` — include `/draft:bughunt` findings
-- `full` — run both validate and bughunt
+- `full` — run review and bughunt
 
-Generates unified report with deduplication across tools.
+Generates unified report at `draft/tracks/<id>/review-report.md` or `draft/review-report.md`.
 
 #### Examples
 
@@ -849,7 +800,7 @@ Generates unified report with deduplication across tools.
 /draft:review project                      # review uncommitted changes
 /draft:review files "src/**/*.ts"          # review specific files
 /draft:review commits main...HEAD          # review commit range
-/draft:review track my-feature full        # comprehensive review with validate and bughunt
+/draft:review track my-feature full        # comprehensive review with bughunt
 ```
 
 ---
@@ -1014,7 +965,7 @@ Natural language patterns that map to Draft commands:
 | "undo", "revert" | Rollback changes |
 | "break into modules" | Module decomposition |
 | "check coverage" | Code coverage report |
-| "validate", "check quality" | Codebase quality validation |
+| "deep review", "audit module" | Module lifecycle audit |
 | "hunt bugs", "find bugs" | Systematic bug discovery |
 | "review code", "review track" | Code review orchestrator (track/project) |
 | "preview jira", "export to jira" | Preview Jira issues |
@@ -1070,11 +1021,12 @@ Key practices (from Google SRE and distributed systems engineering):
 
 See `core/agents/rca.md` for detailed process.
 
-### Two-Stage Review
+### Three-Stage Review
 
 At phase boundaries:
-1. **Stage 1: Spec Compliance** - Did implementation match specification?
-2. **Stage 2: Code Quality** - Clean architecture, proper error handling, meaningful tests?
+1. **Stage 1: Automated Validation** - Fast static checks for architecture, security, and performance issues
+2. **Stage 2: Spec Compliance** - Did implementation match specification?
+3. **Stage 3: Code Quality** - Clean architecture, proper error handling, meaningful tests?
 
 See `core/agents/reviewer.md` for detailed process.
 
@@ -1131,16 +1083,23 @@ See `core/agents/rca.md` for the full process including distributed systems cons
 
 ### Reviewer Agent
 
-Activated at phase boundaries during `/draft:implement`. Performs a two-stage review before proceeding to the next phase.
+Activated at phase boundaries during `/draft:implement`. Performs a three-stage review before proceeding to the next phase.
 
-**Stage 1: Spec Compliance** — Did they build what was specified?
+**Stage 1: Automated Validation** — Is the code structurally sound and secure?
+- Architecture conformance, dead code detection, circular dependencies
+- OWASP security scans (hardcoded secrets, SQL injection, XSS)
+- Performance anti-patterns (N+1 queries, blocking I/O, unbounded queries)
+
+If Stage 1 fails with critical issues, implementation resumes. Stage 2 does not run.
+
+**Stage 2: Spec Compliance** — Did they build what was specified?
 - Requirements coverage (all functional requirements implemented)
 - Scope adherence (no missing features, no scope creep)
 - Behavior correctness (edge cases, error scenarios, integration points)
 
-If Stage 1 fails, gaps are listed and implementation resumes. Stage 2 does not run.
+If Stage 2 fails, gaps are listed and implementation resumes. Stage 3 does not run.
 
-**Stage 2: Code Quality** — Is the code well-crafted?
+**Stage 3: Code Quality** — Is the code well-crafted?
 - Architecture (follows project patterns, separation of concerns)
 - Error handling (appropriate level, helpful user-facing errors)
 - Testing (tests real logic, edge case coverage, maintainability)

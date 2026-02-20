@@ -117,33 +117,30 @@ Do not proceed to next phase until verification passes.
 
 ---
 
-## Validation
+## Review Settings
 
-### Auto-Validation
-- [ ] Auto-validate at track completion
+### Auto-Review
+- [ ] Auto-review at track completion
 
-When enabled, runs `/draft:validate --track <id>` automatically when `/draft:implement` completes a track.
+When enabled, runs `/draft:review track <id>` automatically when `/draft:implement` completes a track.
 
 ### Blocking Behavior
-- [ ] Block on validation failures
+- [ ] Block on review failures
 
 When enabled, halt track completion if critical (✗) issues found. Requires fixes before marking complete.
 
-When disabled (default), validation failures produce warnings only. Issues documented in `draft/tracks/<id>/validation-report.md`.
+When disabled (default), review failures produce warnings only. Issues documented in `draft/tracks/<id>/review-report.md`.
 
-### Validation Scope
+### Review Scope (Stage 1 Automation)
 - [x] Architecture conformance
 - [x] Dead code detection
 - [x] Dependency cycle detection
 - [x] Security scan
 - [x] Performance anti-patterns
-- [x] Spec compliance (track-level only)
-- [x] Architectural impact (track-level only)
-- [x] Regression risk (track-level only)
 
-Uncheck categories to skip during validation. All enabled by default.
+Uncheck categories to skip during validation phase of review. All enabled by default.
 
-> **How to configure:** Edit the checkboxes above directly in this file. Change `[x]` to `[ ]` to disable a validation category. The `/draft:validate` command reads these settings before running.
+> **How to configure:** Edit the checkboxes above directly in this file. Change `[x]` to `[ ]` to disable a category. The `/draft:review` command reads these settings before running.
 
 ---
 
@@ -191,4 +188,4 @@ If task exceeds 5 iterations:
 - [ ] No skipped tests without documented reason
 - [ ] Coverage must not decrease
 
-> Check the guardrails that apply to this project. Unchecked items are not enforced. Commands like bughunt, validate, and review will flag violations of checked guardrails.
+> Check the guardrails that apply to this project. Unchecked items are not enforced. Commands like bughunt, deep-review, and review will flag violations of checked guardrails.

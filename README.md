@@ -58,9 +58,9 @@ Commands use `@draft` syntax.
 | `/draft:init` | Analyze codebase, create context files |
 | `/draft:new-track` | Collaborative spec + plan with AI |
 | `/draft:implement` | TDD workflow with checkpoints |
-| `/draft:review` | Spec compliance + code quality |
-| `/draft:validate` | Architecture + security scan |
-| `/draft:bughunt` | 12-dimension defect discovery |
+| `/draft:review` | 3-stage review (validation + spec compliance + code quality) |
+| `/draft:deep-review` | Enterprise-grade module lifecycle and ACID audit |
+| `/draft:bughunt` | Exhaustive defect discovery |
 
 [See all 14 commands →](core/methodology.md#command-workflows)
 
@@ -75,7 +75,7 @@ Commands use `@draft` syntax.
      ↓
 /draft:implement  →  RED → GREEN → REFACTOR (repeat)
      ↓
-/draft:review  →  Two-stage review (spec + quality)
+/draft:review  →  Three-stage review (validation + spec + quality)
 ```
 
 [Full workflow →](core/methodology.md#core-workflow)

@@ -122,10 +122,8 @@ Analyze systematically across all applicable dimensions. Skip N/A dimensions exp
 
 ### 4. Performance (Backend + UI)
 - Inefficient algorithms and data fetching
-- N+1 queries, over-fetching, chatty APIs
 - Blocking work on main/UI thread
 - Excessive re-renders, unnecessary state updates
-- Large bundles, unused code, slow startup paths
 - Unbounded memory growth (listeners, caches, stores)
 
 ### 5. UI Responsiveness & Perceived Performance
@@ -176,13 +174,6 @@ Analyze systematically across all applicable dimensions. Skip N/A dimensions exp
 - Tests that assert implementation instead of behavior
 - Mismatch between test and real user interaction
 - Flaky tests, timing dependencies
-
-### 12. Maintainability
-- Dead code, unused exports, orphaned files
-- Over-abstracted hooks/components
-- Tight coupling between layers
-- Refactoring hazards (implicit dependencies)
-- Inconsistent naming, patterns
 
 ## Bug Verification Protocol
 

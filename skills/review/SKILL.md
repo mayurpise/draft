@@ -22,10 +22,11 @@ You are conducting a code review using Draft's Context-Driven Development method
 ## Overview
 
 This command orchestrates code review workflows at two levels:
-- **Track-level:** Review against spec.md and plan.md (two-stage: spec compliance + code quality)
-- **Project-level:** Review arbitrary changes (code quality only)
+- **Track-level:** Review against spec.md and plan.md (three-stage: automated validation, spec compliance, code quality)
+- **Project-level:** Review arbitrary changes (automated validation + code quality)
 
-Optionally integrates `/draft:validate` and `/draft:bughunt` for comprehensive quality analysis.
+Optionally integrates `/draft:bughunt` for finding logic errors and writing regression tests.
+Note: Automated static validation (OWASP secrets, dead code, dependency cycles, N+1 patterns) is natively built into Phase 1 of this review.
 
 ---
 
@@ -42,15 +43,15 @@ Extract and validate command arguments from user input.
 - `commits <range>` - Review commit range (e.g., `main...HEAD`, `abc123..def456`)
 
 **Quality integration modifiers:**
-- `with-validate` - Include `/draft:validate` results
+- `with-validate` - (Deprecated) Ignored as validation is natively built-in.
 - `with-bughunt` - Include `/draft:bughunt` results
-- `full` - Include both validate and bughunt (equivalent to `with-validate with-bughunt`)
+- `full` - Include bughunt results
 
 ### Validation Rules
 
 1. **Scope requirement:** At least one scope specifier OR no arguments (auto-detect track)
 2. **Mutual exclusivity:** Only one of `track`, `project`, `files`, `commits`
-3. **Modifier normalization:** If `full` is present, enable both `with-validate` and `with-bughunt`, discarding redundant individual modifiers. No error — silently normalize.
+3. **Modifier normalization:** If `full` is present, enable `with-bughunt`, discarding redundant individual modifiers. No error — silently normalize.
 
 ### Default Behavior
 
@@ -235,74 +236,80 @@ Skip non-source files to focus review:
 
 ## Step 4: Run Reviewer Agent
 
-Apply two-stage review process from `core/agents/reviewer.md`.
+Apply a three-stage review process (merging static validation and semantic review).
 
-### Stage 1: Spec Compliance (Track-Level Only)
+### Stage 1: Automated Validation (Static Checks)
+
+**Run for both track-level and project-level reviews**
+
+**Goal:** Detect structural, security, and performance issues using fast, objective searches across the diff.
+
+For the files changed in the diff, perform static checks using `grep` or similar tools:
+1. **Architecture Conformance:** Search for pattern violations documented in `draft/.ai-context.md`. (e.g. `import * from 'database'` in a React component).
+2. **Dead Code:** Check for newly exported functions/classes in the diff that have 0 references across the codebase.
+3. **Dependency Cycles:** Trace the import chains for new imports to ensure no circular dependencies (e.g., A → B → C → A) are introduced.
+4. **Security Scan (OWASP):** Scan the diff for:
+   - Hardcoded secrets and API keys
+   - SQL injection risks (string concatenation in queries)
+   - XSS vulnerabilities (`innerHTML` or raw DOM insertion)
+5. **Performance Anti-patterns:** Scan the diff for:
+   - N+1 database queries (loops containing queries)
+   - Blocking synchronous I/O within async functions
+   - Unbounded queries lacking pagination
+
+**Verdict:**
+- **PASS:** No critical issues found → Proceed to Stage 2
+- **FAIL:** ANY Critical issue found (e.g., circular dependency, hardcoded secret, raw SQL injection) → List the static analysis failures, generate the review report, and **STOP**. Do not proceed to Stage 2. This prevents wasting effort on structurally broken code.
+
+### Stage 2: Spec Compliance (Track-Level Only)
 
 **Skip for project-level reviews (no spec exists)**
 
-Load spec.md acceptance criteria and verify implementation:
+Load `spec.md` acceptance criteria and verify implementation:
 
 #### 4.1: Requirements Coverage
 
-For each functional requirement in spec.md:
+For each functional requirement in `spec.md`:
 - [ ] Requirement implemented (find evidence in diff)
 - [ ] Files modified/created match requirement
-- [ ] No missing features
 
 #### 4.2: Acceptance Criteria
 
-For each criterion in spec.md:
+For each criterion in `spec.md`:
 - [ ] Criterion met (check against diff)
 - [ ] Test coverage exists (if TDD enabled)
-- [ ] Edge cases handled
 
 #### 4.3: Scope Adherence
 
 - [ ] No missing features from spec
 - [ ] No extra unneeded work (scope creep)
-- [ ] Non-goals remain untouched
 
 **Verdict:**
-- **PASS:** All requirements implemented AND all acceptance criteria met → Proceed to Stage 2
-- **FAIL:** ANY requirement missing OR ANY acceptance criterion not met → List gaps, report, and stop (no Stage 2)
+- **PASS:** All requirements implemented AND all acceptance criteria met → Proceed to Stage 3
+- **FAIL:** ANY requirement missing OR ANY acceptance criterion not met → List gaps, report, and stop (no Stage 3)
 
-### Stage 2: Code Quality
+### Stage 3: Code Quality
 
-**Run for both track-level (if Stage 1 passes) and project-level reviews**
+**Run for both track-level (if Stage 2 passes) and project-level reviews**
 
-Analyze code quality across four dimensions:
+Analyze semantic code quality across four dimensions:
 
 #### 4.4: Architecture
-
 - [ ] Follows project patterns (from tech-stack.md or CLAUDE.md)
 - [ ] Appropriate separation of concerns
-- [ ] No unnecessary complexity
-- [ ] Module boundaries respected (if `.ai-context.md` or `architecture.md` exists)
 - [ ] Critical invariants honored (if `.ai-context.md` exists — check ## Critical Invariants section)
-- [ ] Data state transitions are valid (if `.ai-context.md` exists — check ## Data Lifecycle state machines)
-- [ ] Consistency boundaries respected — no strong-consistency assumptions across eventual-consistency seams
-- [ ] Failure recovery paths exist for each write path stage (check ## Critical Paths failure recovery matrix)
 
 #### 4.5: Error Handling
-
 - [ ] Errors handled at appropriate level
 - [ ] User-facing errors are helpful
-- [ ] System errors are logged
 - [ ] No silent failures
 
 #### 4.6: Testing
-
 - [ ] Tests test real logic (not implementation details)
 - [ ] Edge cases have test coverage
-- [ ] Tests are maintainable
-- [ ] No brittle assertions
 
 #### 4.7: Maintainability
-
 - [ ] Code is readable without excessive comments
-- [ ] No obvious performance issues
-- [ ] No security vulnerabilities (SQL injection, XSS, hardcoded secrets)
 - [ ] Consistent naming and style
 
 ### Issue Classification
@@ -326,27 +333,9 @@ Classify all findings by severity:
 
 ## Step 5: Run Quality Tools (Optional)
 
-If `with-validate`, `with-bughunt`, or `full` modifier set, integrate additional quality checks.
+If `with-bughunt` or `full` modifier is set, integrate bug hunting.
 
-### 5.1: Run Validate
-
-If `with-validate` or `full`:
-
-**Track-level:**
-```bash
-/draft:validate <id>
-```
-
-**Project-level:**
-```bash
-/draft:validate
-```
-
-Parse output from `draft/tracks/<id>/validation-report.md` or `draft/validation-report.md`
-
-### 5.2: Run Bughunt
-
-If `with-bughunt` or `full`:
+### 5.1: Run Bughunt
 
 **Track-level:**
 ```bash
@@ -360,12 +349,11 @@ If `with-bughunt` or `full`:
 
 Parse output from `draft/tracks/<id>/bughunt-report.md` or `draft/bughunt-report.md`
 
-### 5.3: Aggregate Findings
+### 5.2: Aggregate Findings
 
 Merge findings from:
-1. Reviewer agent (Stage 1 + Stage 2)
-2. Validate results (if run)
-3. Bughunt results (if run)
+1. Reviewer agent (Stage 1, 2, 3)
+2. Bughunt results (if run)
 
 **Deduplication:**
 - Two findings are duplicates if they reference the **same file and line number**
@@ -429,7 +417,21 @@ synced_to_commit: "{FULL_SHA}"
 
 ---
 
-## Stage 1: Spec Compliance
+## Stage 1: Automated Validation
+
+**Status:** PASS / FAIL
+
+- **Architecture Conformance:** PASS/FAIL
+- **Dead Code:** N found
+- **Dependency Cycles:** PASS/FAIL
+- **Security Scan:** N issues found
+- **Performance:** N anti-patterns detected
+
+[If FAIL: List critical structural issues and stop here]
+
+---
+
+## Stage 2: Spec Compliance
 
 **Status:** PASS / FAIL
 
@@ -447,7 +449,7 @@ synced_to_commit: "{FULL_SHA}"
 
 ---
 
-## Stage 2: Code Quality
+## Stage 3: Code Quality
 
 **Status:** PASS / PASS WITH NOTES / FAIL
 
@@ -462,16 +464,9 @@ synced_to_commit: "{FULL_SHA}"
 
 ---
 
-## Additional Quality Checks
-
-[If with-validate or full]
-### Validation Results
-- **Architecture Conformance:** PASS/FAIL
-- **Security Scan:** N issues found
-- **Performance:** N anti-patterns detected
-- Full report: `./validation-report.md`
-
 [If with-bughunt or full]
+## Integrations
+
 ### Bug Hunt Results
 - **Critical bugs:** N found
 - **High severity:** N found
@@ -482,7 +477,7 @@ synced_to_commit: "{FULL_SHA}"
 
 ## Summary
 
-**Total Issues:** N
+**Total Semantic Issues:** N
 - Critical: N
 - Important: N
 - Minor: N
@@ -512,7 +507,7 @@ synced_to_commit: "{FULL_SHA}"
 **Path:** `draft/review-report.md` (all project-level scopes write to this same path)
 
 Similar format but:
-- No Stage 1 section (no spec compliance)
+- No Stage 2 section (no spec compliance)
 - Header shows scope instead of track ID:
   - `project`: "Scope: Uncommitted changes"
   - `files <pattern>`: "Scope: Files matching '<pattern>'"
@@ -570,13 +565,13 @@ Display summary to user with actionable next steps.
 Report: draft/tracks/<id>/review-report.md
 
 Summary:
-- Stage 1 (Spec Compliance): PASS
-- Stage 2 (Code Quality): PASS WITH NOTES
-- Total issues: 12 (0 Critical, 3 Important, 9 Minor)
+- Stage 1 (Automated Validation): PASS
+- Stage 2 (Spec Compliance): PASS
+- Stage 3 (Code Quality): PASS WITH NOTES
+- Total semantic issues: 12 (0 Critical, 3 Important, 9 Minor)
 
 [If full]
 Additional Checks:
-- Validation: 2 warnings
 - Bug Hunt: 5 medium-severity findings
 
 Verdict: PASS WITH NOTES
@@ -595,11 +590,12 @@ Next: Address findings and run /draft:review again, or mark track complete.
 
 Report: draft/tracks/<id>/review-report.md
 
-Stage 1 (Spec Compliance): FAIL
+Stage 1 (Automated Validation): PASS
+Stage 2 (Spec Compliance): FAIL
 - 3 requirements not implemented
 - 2 acceptance criteria not met
 
-Stage 2: SKIPPED (Stage 1 must pass first)
+Stage 3: SKIPPED (Stage 2 must pass first)
 
 Verdict: FAIL
 
@@ -724,7 +720,7 @@ Options:
 /draft:review commits main...feature-branch
 ```
 
-### Review with validation only
+### Review with bughunt
 ```bash
-/draft:review track my-feature with-validate
+/draft:review track my-feature with-bughunt
 ```

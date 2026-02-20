@@ -105,7 +105,7 @@ Draft is a Claude Code plugin that implements Context-Driven Development methodo
 
 1. **Provides structured AI development workflows** via 15 slash commands that enforce context-first development
 2. **Generates persistent project context** (product.md, tech-stack.md, architecture.md, .ai-context.md) that constrains AI behavior across sessions
-3. **Manages feature tracks** with specifications, phased plans, metadata tracking, and two-stage reviews
+3. **Manages feature tracks** with specifications, phased plans, metadata tracking, and three-stage reviews
 4. **Builds cross-platform integration files** from skill sources for Copilot and Gemini
 5. **Enforces quality disciplines** including TDD cycles, systematic debugging, root cause analysis, and verification-before-completion
 6. **Supports monorepo workflows** via service indexing and aggregation commands
@@ -195,7 +195,7 @@ Draft operates through two distinct lifecycles:
 3. User invokes `/draft:init` — skill instructions guide Claude to analyze codebase, create `draft/` directory
 4. User invokes `/draft:new-track` — skill guides Claude through collaborative spec/plan creation
 5. User invokes `/draft:implement` — skill guides Claude through TDD cycle per task
-6. Supporting commands (`/draft:status`, `/draft:review`, `/draft:validate`, etc.) provide ongoing quality enforcement
+6. Supporting commands (`/draft:status`, `/draft:review`, `/draft:deep-review`, `/draft:bughunt`, etc.) provide ongoing quality enforcement
 
 ---
 
@@ -211,7 +211,7 @@ The plugin has no runtime orchestrator. Claude Code's plugin system serves as th
 | `skills/bughunt/SKILL.md` | Skill | 12-dimension exhaustive bug discovery | 985 |
 | `skills/validate/SKILL.md` | Skill | Codebase quality validation (5 categories) | 869 |
 | `skills/index/SKILL.md` | Skill | Monorepo service aggregation | 794 |
-| `skills/review/SKILL.md` | Skill | Two-stage code review orchestration | 730 |
+| `skills/review/SKILL.md` | Skill | Three-stage code review orchestration | 730 |
 | `skills/new-track/SKILL.md` | Skill | Collaborative spec + plan creation | 567 |
 | `skills/jira-preview/SKILL.md` | Skill | Generate Jira export from plan | 457 |
 | `skills/implement/SKILL.md` | Skill | TDD task execution | 417 |
@@ -226,7 +226,7 @@ The plugin has no runtime orchestrator. Claude Code's plugin system serves as th
 | `core/knowledge-base.md` | Reference | Vetted source citations | 127 |
 | `core/agents/architect.md` | Agent | Module decomposition, stories, skeletons | 336 |
 | `core/agents/rca.md` | Agent | Root cause analysis methodology | 253 |
-| `core/agents/reviewer.md` | Agent | Two-stage review process | 165 |
+| `core/agents/reviewer.md` | Agent | Three-stage review process | 165 |
 | `core/agents/planner.md` | Agent | Plan generation and task breakdown | 145 |
 | `core/agents/debugger.md` | Agent | Systematic debugging process | 114 |
 | `scripts/build-integrations.sh` | Script | Integration file generator | 642 |
@@ -399,7 +399,7 @@ Integration output skips these 3 lines via `tail -n +4`.
 **Source Files**:
 - `core/agents/architect.md` — Module decomposition, stories, skeletons (336 lines)
 - `core/agents/rca.md` — Root cause analysis methodology (253 lines)
-- `core/agents/reviewer.md` — Two-stage review process (165 lines)
+- `core/agents/reviewer.md` — Three-stage review process (165 lines)
 - `core/agents/planner.md` — Plan generation and task breakdown (145 lines)
 - `core/agents/debugger.md` — Systematic debugging process (114 lines)
 
@@ -418,7 +418,7 @@ Integration output skips these 3 lines via `tail -n +4`.
 - **Architect**: 5 module decomposition rules (single responsibility, size ≤3 files, clear API, minimal coupling, testable isolation). Cycle-breaking framework with 3 strategies (extract shared interface, invert dependency, merge modules). Story lifecycle (placeholder → written → updated).
 - **Debugger**: 4-phase process (Investigate → Analyze → Hypothesize → Implement). Iron law: no fixes without root cause. Escalation after 3 failed hypothesis cycles.
 - **RCA**: Extends debugger with blast radius scoping, differential analysis, 5 Whys technique, hypothesis logging table, root cause classification (8 categories), blameless RCA summary template.
-- **Reviewer**: 2-stage review (Spec Compliance → Code Quality). 3-tier severity (Critical blocks, Important should-fix, Minor note-later). Stage 2 only runs if Stage 1 passes.
+- **Reviewer**: 3-stage review (Automated Validation → Spec Compliance → Code Quality). 3-tier severity (Critical blocks, Important should-fix, Minor note-later). Each stage gates the next.
 - **Planner**: Phase decomposition (Foundation → Implementation → Integration → Polish). Task granularity guidelines. Integration with Architect agent for module-aligned plans.
 
 ### 7.3 Templates Module (core/templates/)
@@ -586,7 +586,7 @@ For integration generation, skills must also be listed in the `SKILL_ORDER` arra
 | 7 | `coverage` | Execution | 184 | Code coverage measurement and gap analysis |
 | 8 | `validate` | Quality | 869 | 5-category codebase quality validation |
 | 9 | `bughunt` | Quality | 985 | 12-dimension exhaustive bug discovery |
-| 10 | `review` | Quality | 730 | Two-stage code review orchestrator |
+| 10 | `review` | Quality | 730 | Three-stage code review orchestrator |
 | 11 | `adr` | Planning | 237 | Architecture Decision Record management |
 | 12 | `status` | Management | 133 | Progress overview display |
 | 13 | `revert` | Management | 147 | Git-aware rollback at task/phase/track level |
@@ -599,7 +599,7 @@ For integration generation, skills must also be listed in the `SKILL_ORDER` arra
 |---|------|-------|-------------|---------|
 | 1 | `architect` | 336 | decompose, implement | Module decomposition, stories, skeletons |
 | 2 | `rca` | 253 | new-track (bug) | Root cause analysis methodology |
-| 3 | `reviewer` | 165 | implement | Phase boundary two-stage review |
+| 3 | `reviewer` | 165 | implement | Phase boundary three-stage review |
 | 4 | `planner` | 145 | new-track, decompose | Plan generation and task breakdown |
 | 5 | `debugger` | 114 | implement | Systematic debugging for blocked tasks |
 
@@ -1267,7 +1267,7 @@ draft/
 │   │   ├── debugger.md       ← Systematic debugging (4-phase process)
 │   │   ├── planner.md        ← Plan generation and task breakdown
 │   │   ├── rca.md            ← Root cause analysis methodology
-│   │   └── reviewer.md       ← Two-stage review (spec + quality)
+│   │   └── reviewer.md       ← Three-stage review (spec + quality)
 │   └── templates/
 │       ├── ai-context.md     ← Token-optimized AI context template
 │       ├── architecture.md   ← 28-section engineering reference template

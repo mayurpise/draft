@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides slash commands for structured software development through specifications and plans before implementation. Commands: `/draft:init`, `/draft:index`, `/draft:new-track`, `/draft:implement`, `/draft:status`, `/draft:revert`, `/draft:decompose`, `/draft:coverage`, `/draft:review`, `/draft:deep-review`, `/draft:bughunt`, `/draft:adr`, `/draft:jira-preview`, `/draft:jira-create`. Run `/draft` for overview.
+Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides slash commands for structured software development through specifications and plans before implementation. Commands: `/draft:init`, `/draft:index`, `/draft:new-track`, `/draft:implement`, `/draft:status`, `/draft:revert`, `/draft:decompose`, `/draft:coverage`, `/draft:review`, `/draft:deep-review`, `/draft:bughunt`, `/draft:adr`, `/draft:change`, `/draft:jira-preview`, `/draft:jira-create`. Run `/draft` for overview.
 
 ## Build Commands
 

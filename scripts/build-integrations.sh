@@ -35,9 +35,9 @@ SKILL_ORDER=(
     decompose
     implement
     coverage
-    validate
     bughunt
     review
+    deep-review
     adr
     status
     revert
@@ -56,9 +56,9 @@ get_skill_header() {
         decompose)    echo "Decompose Command" ;;
         implement)    echo "Implement Command" ;;
         coverage)     echo "Coverage Command" ;;
-        validate)     echo "Validate Command" ;;
         bughunt)      echo "Bug Hunt Command" ;;
         review)       echo "Review Command" ;;
+        deep-review)  echo "Deep Review Command" ;;
         adr)          echo "ADR Command" ;;
         status)       echo "Status Command" ;;
         revert)       echo "Revert Command" ;;
@@ -80,9 +80,9 @@ get_gemini_trigger() {
         decompose)    echo "\"break into modules\" or \"@draft decompose\"" ;;
         implement)    echo "\"implement\" or \"@draft implement\"" ;;
         coverage)     echo "\"check coverage\" or \"@draft coverage\"" ;;
-        validate)     echo "\"validate\" or \"@draft validate [--track <id>]\"" ;;
         bughunt)      echo "\"hunt bugs\" or \"@draft bughunt [--track <id>]\"" ;;
         review)       echo "\"review code\" or \"@draft review [--track <id>] [--full]\"" ;;
+        deep-review)  echo "\"deep review\" or \"@draft deep-review [module]\"" ;;
         adr)          echo "\"document decision\" or \"@draft adr [title]\"" ;;
         status)       echo "\"status\" or \"@draft status\"" ;;
         revert)       echo "\"revert\" or \"@draft revert\"" ;;
@@ -104,9 +104,9 @@ get_copilot_trigger() {
         decompose)    echo "\"break into modules\" or \"draft decompose\"" ;;
         implement)    echo "\"implement\" or \"draft implement\"" ;;
         coverage)     echo "\"check coverage\" or \"draft coverage\"" ;;
-        validate)     echo "\"validate\" or \"draft validate [--track <id>]\"" ;;
         bughunt)      echo "\"hunt bugs\" or \"draft bughunt [--track <id>]\"" ;;
         review)       echo "\"review code\" or \"draft review [--track <id>] [--full]\"" ;;
+        deep-review)  echo "\"deep review\" or \"draft deep-review [module]\"" ;;
         adr)          echo "\"document decision\" or \"draft adr [title]\"" ;;
         status)       echo "\"status\" or \"draft status\"" ;;
         revert)       echo "\"revert\" or \"draft revert\"" ;;
@@ -419,9 +419,9 @@ COMMON_HEADER
     echo "| \`${command_prefix} decompose\` | Module decomposition with dependency mapping |"
     echo "| \`${command_prefix} implement\` | Execute tasks from plan |"
     echo "| \`${command_prefix} coverage\` | Code coverage report (target 95%+) |"
-    echo "| \`${command_prefix} validate [--track <id>]\` | Codebase quality validation |"
     echo "| \`${command_prefix} bughunt [--track <id>]\` | Systematic bug discovery |"
     echo "| \`${command_prefix} review [--track <id>]\` | Three-stage code review |"
+    echo "| \`${command_prefix} deep-review [module]\` | Exhaustive production-grade module audit |"
     echo "| \`${command_prefix} adr [title]\` | Architecture Decision Records |"
     echo "| \`${command_prefix} status\` | Show progress overview |"
     echo "| \`${command_prefix} revert\` | Git-aware rollback |"
@@ -444,8 +444,9 @@ Recognize these natural language patterns:
 | "break into modules", "decompose" | Run decompose |
 | "start implementing" | Execute implement |
 | "check coverage", "test coverage" | Run coverage |
-| "validate", "check quality" | Run validation |
 | "hunt bugs", "find bugs" | Run bug hunt |
+| "review code", "review track" | Run review |
+| "deep review", "production audit", "module audit" | Run deep-review |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
 | "requirements changed", "scope changed", "update the spec" | Run change |

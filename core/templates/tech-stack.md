@@ -167,7 +167,7 @@ graph TD
 ## Accepted Patterns
 
 <!-- Intentional design decisions that may appear unusual but are correct -->
-<!-- bughunt, validate, and review commands will honor these exceptions -->
+<!-- bughunt, deep-review, and review commands will honor these exceptions -->
 
 | Pattern | Location | Rationale |
 |---------|----------|-----------|

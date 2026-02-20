@@ -49,9 +49,11 @@
       "featureList": [
         "Context-driven development methodology",
         "AI-assisted code generation with quality gates",
+        "Three-stage code review (validation, spec compliance, code quality)",
+        "Enterprise-grade module lifecycle and ACID compliance audits",
+        "Exhaustive bug hunting with regression test generation",
         "Monorepo federation and service aggregation",
         "Architecture Decision Records (ADR)",
-        "Automated code review orchestration",
         "Test coverage reporting (95%+ target)",
         "Security validation (OWASP Top 10)",
         "TDD workflow enforcement",
@@ -1470,7 +1472,7 @@
 
 <span class="code-comment"># 4. Verify quality</span>
 <span class="code-keyword">/draft:coverage</span>
-<span class="code-keyword">/draft:validate</span></code></pre>
+<span class="code-keyword">/draft:review</span></code></pre>
                 </div>
             </details>
 
@@ -1631,12 +1633,17 @@
                         <div class="hierarchy-level">
                             <div class="num">4</div>
                             <div class="file">.ai-context.md</div>
-                            <div class="desc">200-400 lines, machine-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary (brownfield only). Source of truth for all AI agents.</div>
+                            <div class="desc">200-400 lines, machine-optimized, self-contained AI context. 15+ mandatory
+                                sections: architecture, invariants, interface contracts, data flows, concurrency rules,
+                                error handling, implementation catalogs, extension cookbooks, testing strategy, glossary
+                                (brownfield only). Source of truth for all AI agents.</div>
                         </div>
                         <div class="hierarchy-level">
                             <div class="num">5</div>
                             <div class="file">architecture.md</div>
-                            <div class="desc">30-45 page human-readable engineering reference (source of truth). 25 sections + 4 appendices with Mermaid diagrams, code snippets, and prose explanations. Generated from 5-phase codebase analysis.</div>
+                            <div class="desc">30-45 page human-readable engineering reference (source of truth). 25
+                                sections + 4 appendices with Mermaid diagrams, code snippets, and prose explanations.
+                                Generated from 5-phase codebase analysis.</div>
                         </div>
                     </div>
 
@@ -1664,16 +1671,18 @@
                     <summary>Step 4: Implement</summary>
                     <p><strong>/draft:implement</strong> executes one task at a time from the plan, follows TDD cycle
                         (test first, then code, then refactor), runs verification gates before marking completion, and
-                        triggers two-stage review at phase boundaries.</p>
+                        triggers three-stage review at phase boundaries.</p>
                 </details>
 
                 <details>
                     <summary>Step 5: Verify Quality</summary>
                     <p>Passing tests doesn't guarantee good code. <strong>/draft:coverage</strong> measures test
-                        completeness (95%+ target). <strong>/draft:validate</strong> runs context-aware checks:
+                        completeness (95%+ target). <strong>/draft:review</strong> runs context-aware checks:
                         architecture conformance, security scans (hardcoded secrets, SQL injection, XSS), performance
-                        anti-patterns. <strong>/draft:bughunt</strong> performs exhaustive bug hunting across 12
-                        dimensions.</p>
+                        anti-patterns, and compliance with the spec. <strong>/draft:bughunt</strong> performs exhaustive
+                        bug hunting across 12
+                        dimensions. <strong>/draft:deep-review</strong> audits entire modules for ACID compliance and
+                        architectural resilience.</p>
                 </details>
 
                 <details>
@@ -1695,7 +1704,8 @@
                         <div class="hierarchy-level">
                             <div class="num">3</div>
                             <div class="file">.ai-context.md</div>
-                            <div class="desc">"Express API → Service layer → Prisma ORM → PostgreSQL" + data state machines, consistency boundaries</div>
+                            <div class="desc">"Express API → Service layer → Prisma ORM → PostgreSQL" + data state
+                                machines, consistency boundaries</div>
                         </div>
                         <div class="hierarchy-level">
                             <div class="num">4</div>
@@ -1848,12 +1858,15 @@
                     <summary>Architecture Discovery (Brownfield)</summary>
                     <p>For brownfield projects, <code>/draft:init</code> performs a deep six-phase codebase analysis
                         that generates <code>architecture.md</code> (comprehensive engineering reference) and derives
-                        <code>.ai-context.md</code> (machine-optimized AI context). These documents become the persistent
-                        context every future track references.</p>
+                        <code>.ai-context.md</code> (machine-optimized AI context). These documents become the
+                        persistent
+                        context every future track references.
+                    </p>
 
                     <p><strong>Phase 1: Orientation</strong> — System map with mermaid diagrams, directory hierarchy,
                         entry points, request/response flow, tech stack inventory</p>
-                    <p><strong>Phase 2: Logic</strong> — Data lifecycle (state machines, storage topology, transformation
+                    <p><strong>Phase 2: Logic</strong> — Data lifecycle (state machines, storage topology,
+                        transformation
                         chains), design patterns, complexity hotspots, conventions, external dependencies, critical
                         invariants, security architecture, concurrency model, error handling, observability</p>
                     <p><strong>Phase 3: Module Discovery</strong> — Module dependencies, module inventory, dependency
@@ -1896,7 +1909,7 @@
                 </details>
 
                 <details>
-                    <summary>Two-Stage Review</summary>
+                    <summary>Three-Stage Review</summary>
                     <p>At every phase boundary, the Reviewer Agent runs two sequential checks:</p>
                     <p><strong>Stage 1: Spec Compliance</strong> — All functional requirements implemented? Acceptance
                         criteria met? No scope creep or missing features?</p>
@@ -1916,15 +1929,15 @@
                 </details>
 
                 <details>
-                    <summary>Systematic Validation</summary>
-                    <p><code>/draft:validate</code> uses Draft context (.ai-context.md, tech-stack.md) to catch quality
-                        issues tests miss — architecture violations, data state machine violations, consistency boundary
-                        breaches, hardcoded secrets, N+1 queries, missing input validation, critical invariant violations.
-                        Non-blocking by default. Results in <code>validation-report.md</code>.</p>
+                    <summary>Module Lifecycle Audit</summary>
+                    <p><code>/draft:deep-review</code> performs an exhaustive end-to-end lifecycle review of a service,
+                        component, or module. It evaluates ACID compliance, architectural resilience, and
+                        production-grade enterprise quality. Non-blocking by default. Results in
+                        <code>deep-review-report.md</code>.</p>
                 </details>
 
                 <details>
-                    <summary>Exhaustive Bug Hunt (12 dimensions)</summary>
+                    <summary>Exhaustive Bug Hunt (11 dimensions)</summary>
                     <p><code>/draft:bughunt</code> performs exhaustive defect discovery: correctness, reliability,
                         security, performance, UI responsiveness, concurrency, state management, API contracts,
                         accessibility, configuration, tests, maintainability. Findings severity-ranked
@@ -1975,7 +1988,8 @@
                             <li><strong>Architecture discovery</strong> (brownfield): 6-phase deep analysis with mermaid
                                 diagrams, data state machines, consistency boundaries</li>
                             <li>Creates <code>product.md</code>, <code>tech-stack.md</code>, <code>workflow.md</code>,
-                                <code>.ai-context.md</code>, <code>architecture.md</code></li>
+                                <code>.ai-context.md</code>, <code>architecture.md</code>
+                            </li>
                             <li>Optionally enables Architecture Mode for module decomposition</li>
                             <li>Creates <code>tracks.md</code> master registry</li>
                         </ol>
@@ -2053,7 +2067,7 @@
                             <li>Finds next uncompleted task in active track</li>
                             <li>Executes TDD cycle: RED → GREEN → REFACTOR</li>
                             <li>Updates plan status markers and metadata</li>
-                            <li>At phase boundaries: runs two-stage review</li>
+                            <li>At phase boundaries: runs three-stage review</li>
                         </ol>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
@@ -2122,7 +2136,8 @@
                         <ol>
                             <li>Proposes modules with: name, responsibility, files, API, dependencies</li>
                             <li>Maps dependencies, detects cycles, generates dependency diagram</li>
-                            <li>Creates <code>architecture.md</code> with module definitions (derives <code>.ai-context.md</code>)</li>
+                            <li>Creates <code>architecture.md</code> with module definitions (derives
+                                <code>.ai-context.md</code>)</li>
                         </ol>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
@@ -2154,26 +2169,25 @@
                     </div>
                 </div>
 
-                <!-- /draft:validate -->
+                <!-- /draft:deep-review -->
                 <div class="doc-card">
                     <div class="card-summary">
                         <div class="icon">✅</div>
-                        <div class="name">/draft:validate</div>
-                        <p class="purpose">Systematic quality validation</p>
+                        <div class="name">/draft:deep-review</div>
+                        <p class="purpose">Module lifecycle audit</p>
                         <div class="expand-indicator">▼</div>
                     </div>
                     <div class="card-details">
-                        <h4>Checks:</h4>
+                        <h4>Evaluates:</h4>
                         <ul>
-                            <li>Architecture conformance</li>
-                            <li>Dead code detection</li>
-                            <li>Security scan (secrets, SQL injection, XSS)</li>
-                            <li>Performance anti-patterns</li>
-                            <li>Spec compliance (track-level)</li>
+                            <li>ACID compliance</li>
+                            <li>Architectural resilience</li>
+                            <li>Production-grade enterprise quality</li>
+                            <li>Structural analysis</li>
                         </ul>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
-                            <code>/draft:validate</code>
+                            <code>/draft:deep-review src/auth</code>
                         </div>
                     </div>
                 </div>
@@ -2183,11 +2197,11 @@
                     <div class="card-summary">
                         <div class="icon">🔍</div>
                         <div class="name">/draft:bughunt</div>
-                        <p class="purpose">Exhaustive bug hunt across 12 dimensions</p>
+                        <p class="purpose">Exhaustive bug hunt across 11 dimensions</p>
                         <div class="expand-indicator">▼</div>
                     </div>
                     <div class="card-details">
-                        <h4>12 dimensions analyzed:</h4>
+                        <h4>11 dimensions analyzed:</h4>
                         <ul>
                             <li>Correctness, reliability, security, performance</li>
                             <li>UI responsiveness, concurrency, state management</li>
@@ -2212,9 +2226,10 @@
                     <div class="card-details">
                         <h4>Track-level review:</h4>
                         <ol>
-                            <li><strong>Stage 1:</strong> Spec compliance verification</li>
-                            <li><strong>Stage 2:</strong> Code quality checks</li>
-                            <li>Optional: Runs <code>/draft:validate</code> and <code>/draft:bughunt</code></li>
+                            <li><strong>Stage 1:</strong> Automated static validation</li>
+                            <li><strong>Stage 2:</strong> Spec compliance verification</li>
+                            <li><strong>Stage 3:</strong> Code quality checks</li>
+                            <li>Optional: Runs <code>/draft:bughunt</code></li>
                         </ol>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
@@ -2309,11 +2324,15 @@
                 <div class="hierarchy">
                     <div class="hierarchy-level">
                         <div class="num">1</div>
-                        <div class="file">product.md + tech-stack.md + .ai-context.md + architecture.md + workflow.md</div>
+                        <div class="file">product.md + tech-stack.md + .ai-context.md + architecture.md + workflow.md
+                        </div>
                         <div class="desc">Tech lead runs <code>/draft:init</code>. For brownfield projects, Draft
-                            performs deep 5-phase architecture discovery — generating <code>architecture.md</code> (30-45 pages, 25 sections + appendices with Mermaid diagrams) and deriving
-                            <code>.ai-context.md</code> (200-400 lines, 15+ sections: invariants, interface contracts, data flows, cookbooks). Team reviews project vision,
-                            technical choices, system architecture, and workflow preferences via PR.</div>
+                            performs deep 5-phase architecture discovery — generating <code>architecture.md</code>
+                            (30-45 pages, 25 sections + appendices with Mermaid diagrams) and deriving
+                            <code>.ai-context.md</code> (200-400 lines, 15+ sections: invariants, interface contracts,
+                            data flows, cookbooks). Team reviews project vision,
+                            technical choices, system architecture, and workflow preferences via PR.
+                        </div>
                     </div>
                     <div class="hierarchy-level">
                         <div class="num">2</div>
@@ -2327,7 +2346,9 @@
                         <div class="num">3</div>
                         <div class="file">.ai-context.md + architecture.md</div>
                         <div class="desc">Lead runs <code>/draft:decompose</code>. Team reviews module boundaries, API
-                            surfaces, dependency graph, and implementation order via PR. <code>architecture.md</code> is the 30-45 page source of truth; <code>.ai-context.md</code> is the machine-optimized AI context derived from it. Senior engineers validate the
+                            surfaces, dependency graph, and implementation order via PR. <code>architecture.md</code> is
+                            the 30-45 page source of truth; <code>.ai-context.md</code> is the machine-optimized AI
+                            context derived from it. Senior engineers validate the
                             architecture without touching the codebase.</div>
                     </div>
                     <div class="hierarchy-level">
@@ -2343,7 +2364,8 @@
                         <div class="file">Implementation + Verification</div>
                         <div class="desc">Only after all documents are merged does coding start. Every developer has
                             full context: what to build (<code>spec.md</code>), in what order (<code>plan.md</code>),
-                            with what boundaries (<code>.ai-context.md</code> / <code>architecture.md</code>). After implementation, quality tools
+                            with what boundaries (<code>.ai-context.md</code> / <code>architecture.md</code>). After
+                            implementation, quality tools
                             verify completeness.</div>
                     </div>
                 </div>
@@ -2418,12 +2440,15 @@
         <!-- VIDEOS TAB -->
         <div id="tab-videos" class="tab-content" role="tabpanel">
             <h2>Videos</h2>
-            <p>Short videos covering Draft's methodology, agents, and workflows. <a href="https://www.youtube.com/playlist?list=PLoN73NRJ_HQPdnR5Su4WkWK-O_7IOrOg_" target="_blank" style="color: var(--accent-cyan);">View full playlist</a></p>
+            <p>Short videos covering Draft's methodology, agents, and workflows. <a
+                    href="https://www.youtube.com/playlist?list=PLoN73NRJ_HQPdnR5Su4WkWK-O_7IOrOg_" target="_blank"
+                    style="color: var(--accent-cyan);">View full playlist</a></p>
 
             <div class="video-grid">
                 <div class="video-card" onclick="playVideo(this, 'gBSwFEFVd7Y')">
                     <div class="video-thumb">
-                        <img src="https://i.ytimg.com/vi/gBSwFEFVd7Y/maxresdefault.jpg" alt="Draft - Ship fast. Ship right with AI Coding Assistant" loading="lazy">
+                        <img src="https://i.ytimg.com/vi/gBSwFEFVd7Y/maxresdefault.jpg"
+                            alt="Draft - Ship fast. Ship right with AI Coding Assistant" loading="lazy">
                     </div>
                     <div class="video-info">
                         <div class="video-title">Draft - Ship fast. Ship right with AI Coding Assistant</div>
@@ -2431,7 +2456,8 @@
                 </div>
                 <div class="video-card" onclick="playVideo(this, 'gBwsC7sKxTI')">
                     <div class="video-thumb">
-                        <img src="https://i.ytimg.com/vi/gBwsC7sKxTI/maxresdefault.jpg" alt="The Reviewer Agent" loading="lazy">
+                        <img src="https://i.ytimg.com/vi/gBwsC7sKxTI/maxresdefault.jpg" alt="The Reviewer Agent"
+                            loading="lazy">
                     </div>
                     <div class="video-info">
                         <div class="video-title">The Reviewer Agent</div>
@@ -2439,7 +2465,8 @@
                 </div>
                 <div class="video-card" onclick="playVideo(this, 'XMcHZJLuaGI')">
                     <div class="video-thumb">
-                        <img src="https://i.ytimg.com/vi/XMcHZJLuaGI/maxresdefault.jpg" alt="The Bughunt Agent" loading="lazy">
+                        <img src="https://i.ytimg.com/vi/XMcHZJLuaGI/maxresdefault.jpg" alt="The Bughunt Agent"
+                            loading="lazy">
                     </div>
                     <div class="video-info">
                         <div class="video-title">The Bughunt Agent</div>
@@ -2447,7 +2474,8 @@
                 </div>
                 <div class="video-card" onclick="playVideo(this, 'LgiExQ3zoA4')">
                     <div class="video-thumb">
-                        <img src="https://i.ytimg.com/vi/LgiExQ3zoA4/maxresdefault.jpg" alt="Taming AI Chaos" loading="lazy">
+                        <img src="https://i.ytimg.com/vi/LgiExQ3zoA4/maxresdefault.jpg" alt="Taming AI Chaos"
+                            loading="lazy">
                     </div>
                     <div class="video-info">
                         <div class="video-title">Taming AI Chaos</div>
@@ -2455,7 +2483,8 @@
                 </div>
                 <div class="video-card" onclick="playVideo(this, '9nmBm8Io5Qk')">
                     <div class="video-thumb">
-                        <img src="https://i.ytimg.com/vi/9nmBm8Io5Qk/maxresdefault.jpg" alt="Context Driven Development" loading="lazy">
+                        <img src="https://i.ytimg.com/vi/9nmBm8Io5Qk/maxresdefault.jpg" alt="Context Driven Development"
+                            loading="lazy">
                     </div>
                     <div class="video-info">
                         <div class="video-title">Context Driven Development</div>
@@ -2463,7 +2492,8 @@
                 </div>
                 <div class="video-card" onclick="playVideo(this, 'P6wYJHNL6k0')">
                     <div class="video-thumb">
-                        <img src="https://i.ytimg.com/vi/P6wYJHNL6k0/maxresdefault.jpg" alt="Collaborative Intake" loading="lazy">
+                        <img src="https://i.ytimg.com/vi/P6wYJHNL6k0/maxresdefault.jpg" alt="Collaborative Intake"
+                            loading="lazy">
                     </div>
                     <div class="video-info">
                         <div class="video-title">Collaborative Intake</div>
@@ -2471,7 +2501,8 @@
                 </div>
                 <div class="video-card" onclick="playVideo(this, 'YIfnZNb-OCE')">
                     <div class="video-thumb">
-                        <img src="https://i.ytimg.com/vi/YIfnZNb-OCE/maxresdefault.jpg" alt="AI's Quality Gatekeeper" loading="lazy">
+                        <img src="https://i.ytimg.com/vi/YIfnZNb-OCE/maxresdefault.jpg" alt="AI's Quality Gatekeeper"
+                            loading="lazy">
                     </div>
                     <div class="video-info">
                         <div class="video-title">AI's Quality Gatekeeper</div>
@@ -2484,7 +2515,8 @@
         <div id="tab-research" class="tab-content" role="tabpanel">
             <h2>Codebase Research</h2>
             <p>Every AI interaction starts with understanding. <code>/draft:init</code> performs a deep 6-phase analysis
-                of your codebase and produces <strong>architecture.md</strong> — a comprehensive engineering reference that derives <strong>.ai-context.md</strong>,
+                of your codebase and produces <strong>architecture.md</strong> — a comprehensive engineering reference
+                that derives <strong>.ai-context.md</strong>,
                 captures how your system actually works. Not how it was designed. How it works today.</p>
 
             <details open>
@@ -2590,7 +2622,7 @@
                         <div>Condensed from architecture.md — auto-refreshed on mutations</div>
                     </div>
                     <div class="comparison-row">
-                        <div>Consumed by: /draft:implement, /draft:validate, /draft:bughunt, /draft:review, any
+                        <div>Consumed by: /draft:implement, /draft:deep-review, /draft:bughunt, /draft:review, any
                             external AI tool</div>
                         <div>Consumed by: engineers, team leads, new hires, PR reviewers</div>
                     </div>
@@ -2612,27 +2644,28 @@
                         <div class="num" style="background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan);">$</div>
                         <div class="file" style="color: var(--accent-cyan);">Reduces Token Cost</div>
                         <div class="desc">Instead of reading dozens of files to understand context, the AI reads one
-                            structured document. Fewer input tokens per session, compounding across every interaction.</div>
+                            structured document. Fewer input tokens per session, compounding across every interaction.
+                        </div>
                     </div>
                     <div class="hierarchy-level">
-                        <div class="num"
-                            style="background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald);">H</div>
+                        <div class="num" style="background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald);">H
+                        </div>
                         <div class="file" style="color: var(--accent-emerald);">Eliminates Hallucinations</div>
                         <div class="desc">When the AI doesn't know your architecture, it invents one. .ai-context.md
                             fills the knowledge gap with facts — actual file paths, real state machines, documented
                             invariants — leaving nothing to guess.</div>
                     </div>
                     <div class="hierarchy-level">
-                        <div class="num"
-                            style="background: rgba(251, 191, 36, 0.2); color: var(--accent-amber);">A</div>
+                        <div class="num" style="background: rgba(251, 191, 36, 0.2); color: var(--accent-amber);">A
+                        </div>
                         <div class="file" style="color: var(--accent-amber);">Improves Accuracy</div>
                         <div class="desc">Code generation respects existing patterns, module boundaries, naming
                             conventions, and data contracts. The AI writes code that fits your system because it knows
                             your system.</div>
                     </div>
                     <div class="hierarchy-level">
-                        <div class="num"
-                            style="background: rgba(251, 113, 133, 0.2); color: var(--accent-rose);">B</div>
+                        <div class="num" style="background: rgba(251, 113, 133, 0.2); color: var(--accent-rose);">B
+                        </div>
                         <div class="file" style="color: var(--accent-rose);">Catches More Bugs</div>
                         <div class="desc">Bug hunting with data state machines finds invalid transitions. Consistency
                             boundaries reveal eventual-consistency bugs. Failure recovery matrices expose missing
@@ -2690,27 +2723,29 @@
                                 refresh</code> updates the document when the codebase evolves.</div>
                     </div>
                     <div class="hierarchy-level">
-                        <div class="num"
-                            style="background: rgba(251, 191, 36, 0.2); color: var(--accent-amber);">M</div>
+                        <div class="num" style="background: rgba(251, 191, 36, 0.2); color: var(--accent-amber);">M
+                        </div>
                         <div class="file">Mutated by Commands</div>
                         <div class="desc"><code>/draft:implement</code> updates module status after completing tasks.
                             <code>/draft:decompose</code> adds new modules with dependency graphs. Each mutation
-                            auto-refreshes the derived .ai-context.md. The documents evolve with the code.</div>
+                            auto-refreshes the derived .ai-context.md. The documents evolve with the code.
+                        </div>
                     </div>
                     <div class="hierarchy-level">
-                        <div class="num"
-                            style="background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald);">G</div>
+                        <div class="num" style="background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald);">G
+                        </div>
                         <div class="file">Git-Tracked & Reviewable</div>
                         <div class="desc">Every change to architecture.md goes through the same PR review process as
                             code. Architecture decisions become visible, diffable, and blameable. History is
                             preserved.</div>
                     </div>
                     <div class="hierarchy-level">
-                        <div class="num"
-                            style="background: rgba(251, 113, 133, 0.2); color: var(--accent-rose);">P</div>
+                        <div class="num" style="background: rgba(251, 113, 133, 0.2); color: var(--accent-rose);">P
+                        </div>
                         <div class="file">Tool-Agnostic</div>
                         <div class="desc">Not locked to any AI vendor. Claude Code, Cursor, GitHub Copilot, Gemini,
-                            or any future tool can consume .ai-context.md (or architecture.md). Your codebase understanding is an asset you
+                            or any future tool can consume .ai-context.md (or architecture.md). Your codebase
+                            understanding is an asset you
                             own, not a feature of a subscription.</div>
                     </div>
                 </div>
@@ -2846,7 +2881,7 @@
                         <div>Progress is tracked, not assumed → Prevents lost context</div>
                     </div>
                     <div class="comparison-row">
-                        <div>Two-stage review</div>
+                        <div>Three-stage review</div>
                         <div>Spec compliance before code quality → Prevents quality gaps</div>
                     </div>
                     <div class="comparison-row">
@@ -2906,7 +2941,7 @@
                         <tr>
                             <td><strong>3</strong></td>
                             <td><strong>Structured Code Review</strong></td>
-                            <td><strong>/draft:review</strong><br>Two-stage review: 1) Spec compliance, 2) Code quality.
+                            <td><strong>/draft:review</strong><br>Three-stage review: 1) Spec compliance, 2) Code quality.
                             </td>
                             <td><strong>Readability / Owners</strong><br>Google's "Critique" system.</td>
                             <td>Google, Meta</td>
@@ -2914,7 +2949,8 @@
                         <tr>
                             <td><strong>3</strong></td>
                             <td><strong>Arch. Decision Records</strong></td>
-                            <td><strong>.ai-context.md + architecture.md</strong><br>Documenting <em>why</em> the system is built this
+                            <td><strong>.ai-context.md + architecture.md</strong><br>Documenting <em>why</em> the system
+                                is built this
                                 way. Machine-optimized + human-readable dual output.</td>
                             <td><strong>ADRs</strong><br>Immutable records of architectural choices.</td>
                             <td>Spotify, AWS, GitHub</td>
@@ -2972,8 +3008,7 @@
                     <div class="comparison-row">
                         <div>
                             <strong>/draft:review</strong><br>
-                            Splits review into Verification (Spec compliance) and Validation (Quality). Automates the
-                            "Readability" aspect via <code>/draft:validate</code>.
+                            Three-stage review: Automated Validation (architecture, security, performance), Spec Compliance, and Code Quality. Stage 1 automates quality checks that would require manual review elsewhere.
                         </div>
                         <div>
                             <strong>Critique & Readability</strong><br>
@@ -2999,7 +3034,8 @@
         <p>Draft Methodology — <a href="https://github.com/mayurpise/draft" target="_blank"
                 rel="noopener noreferrer">View on GitHub</a></p>
         <div class="footer-actions">
-            <a href="https://buymeacoffee.com/mayurpise" target="_blank" rel="noopener noreferrer" class="bmc-btn" style="display: none;">☕ Buy
+            <a href="https://buymeacoffee.com/mayurpise" target="_blank" rel="noopener noreferrer" class="bmc-btn"
+                style="display: none;">☕ Buy
                 Me a Coffee</a>
             <div class="share-row">
                 <span class="share-label">Share</span>

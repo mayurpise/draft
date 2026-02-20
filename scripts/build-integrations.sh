@@ -417,7 +417,7 @@ COMMON_HEADER
     echo "| \`${command_prefix} coverage\` | Code coverage report (target 95%+) |"
     echo "| \`${command_prefix} validate [--track <id>]\` | Codebase quality validation |"
     echo "| \`${command_prefix} bughunt [--track <id>]\` | Systematic bug discovery |"
-    echo "| \`${command_prefix} review [--track <id>]\` | Two-stage code review |"
+    echo "| \`${command_prefix} review [--track <id>]\` | Three-stage code review |"
     echo "| \`${command_prefix} adr [title]\` | Architecture Decision Records |"
     echo "| \`${command_prefix} status\` | Show progress overview |"
     echo "| \`${command_prefix} revert\` | Git-aware rollback |"

@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **BREAKING:** `/draft:validate` deprecated and removed. Functionality absorbed into `/draft:review` Stage 1 (Automated Validation).
+- `/draft:review` upgraded from 2-stage to 3-stage process:
+  - **Stage 1 (NEW):** Automated Validation — fast static checks for architecture conformance, dead code, circular dependencies, OWASP security scans (hardcoded secrets, SQL injection, XSS), and performance anti-patterns (N+1 queries, blocking I/O, unbounded queries)
+  - **Stage 2:** Spec Compliance — requirements coverage, acceptance criteria verification (unchanged from previous Stage 1)
+  - **Stage 3:** Code Quality — architecture, error handling, testing, maintainability (unchanged from previous Stage 2)
+- `/draft:bughunt` refined to focus strictly on logic errors and regression test generation; removed Maintainability dimension (Dimension 12) to eliminate overlap with review/deep-review
+- `core/agents/reviewer.md` updated to 3-stage process matching new review workflow
+- `with-validate` modifier in `/draft:review` deprecated (now ignored; validation is natively built into Stage 1)
+- `full` modifier in `/draft:review` now only enables `with-bughunt` (validation is always included)
+
+### Added
+- `/draft:deep-review` — Enterprise-grade module lifecycle and ACID compliance audit
+  - Performs exhaustive end-to-end review of services, components, or modules
+  - Evaluates ACID compliance (Atomicity, Consistency, Isolation, Durability)
+  - Assesses architectural resilience and production-grade quality
+  - Generates Implementation Spec for fixes without mutating code
+  - Maintains history at `draft/deep-review-history.json`
+  - Generates reports at `draft/deep-review-report.md`
+
+### Removed
+- `/draft:validate` command — **Migration:** Use `/draft:review` for automated quality checks (now built into Stage 1)
+- Skills: `skills/validate/SKILL.md` deleted (functionality absorbed)
+
 ## [1.3.0] - 2026-02-08
 
 ### Added

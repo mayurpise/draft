@@ -13,7 +13,7 @@ You are implementing tasks from the active track's plan following the TDD workfl
 - Skipping TDD cycle when workflow.md has TDD enabled
 - Marking a task `[x]` without fresh verification evidence
 - Batching multiple tasks into a single commit
-- Proceeding past a phase boundary without running the two-stage review
+- Proceeding past a phase boundary without running the three-stage review
 - Writing production code before a failing test (when TDD is strict)
 - Assuming a test passes without actually running it
 
@@ -277,17 +277,21 @@ Before marking ANY task/phase/track complete:
 
 When all tasks in a phase are `[x]`:
 
-1. Announce: "Phase N complete. Running two-stage review."
+1. Announce: "Phase N complete. Running three-stage review."
 
-### Two-Stage Review (REQUIRED)
+### Three-Stage Review (REQUIRED)
 
-**Stage 1: Spec Compliance**
+**Stage 1: Automated Validation**
+- Fast static checks: architecture conformance, dead code, circular dependencies, OWASP security scans, performance anti-patterns
+- **If critical issues found:** List them, return to implementation
+
+**Stage 2: Spec Compliance** (only if Stage 1 passes)
 - Load track's `spec.md`
 - Verify all requirements for this phase are implemented
 - Check acceptance criteria coverage
 - **If gaps found:** List them, return to implementation
 
-**Stage 2: Code Quality** (only if Stage 1 passes)
+**Stage 3: Code Quality** (only if Stage 2 passes)
 - Verify code follows project patterns (tech-stack.md)
 - Check error handling is appropriate
 - Verify tests cover real logic
@@ -309,15 +313,15 @@ See `core/agents/reviewer.md` for detailed review process.
 
 When all phases complete:
 
-1. **Run validation (if enabled):**
-   - Read `draft/workflow.md` validation configuration
-   - Check if auto-validation enabled:
+1. **Run review (if enabled):**
+   - Read `draft/workflow.md` review configuration
+   - Check if auto-review enabled:
      ```markdown
-     ## Validation
-     - [x] Auto-validate at track completion
+     ## Review Settings
+     - [x] Auto-review at track completion
      ```
-   - If enabled, run `/draft:validate <track_id>`
-   - Check validation results:
+   - If enabled, run `/draft:review track <track_id>`
+   - Check review results:
      - If block-on-failure enabled AND critical issues found → HALT, require fixes
      - Otherwise, document warnings and continue
 

@@ -37,7 +37,7 @@ When `draft/` exists in the project, always consider:
 | `draft coverage` | Code coverage report (target 95%+) |
 | `draft validate [--track <id>]` | Codebase quality validation |
 | `draft bughunt [--track <id>]` | Systematic bug discovery |
-| `draft review [--track <id>]` | Two-stage code review |
+| `draft review [--track <id>]` | Three-stage code review |
 | `draft adr [title]` | Architecture Decision Records |
 | `draft status` | Show progress overview |
 | `draft revert` | Git-aware rollback |
@@ -117,7 +117,7 @@ Draft is a methodology for structured software development: **Context → Spec &
 | `draft revert` | Git-aware rollback |
 | `draft decompose` | Module decomposition with dependency mapping |
 | `draft coverage` | Code coverage report (target 95%+) |
-| `draft validate` | Validate codebase quality |
+| `draft deep-review` | Module lifecycle audit (ACID compliance, enterprise quality) |
 | `draft bughunt` | Exhaustive bug hunt |
 | `draft review` | Code review orchestrator |
 | `draft jira-preview` | Generate Jira export for review |
@@ -173,7 +173,7 @@ You can also use natural language:
 | "undo", "revert" | `draft revert` |
 | "break into modules" | `draft decompose` |
 | "check coverage" | `draft coverage` |
-| "validate", "check quality" | `draft validate` |
+| "deep review", "audit module" | `draft deep-review` |
 | "hunt bugs", "find bugs" | `draft bughunt` |
 | "review code", "review track" | `draft review` |
 | "preview jira", "export to jira" | `draft jira-preview` |
@@ -3860,7 +3860,7 @@ You are implementing tasks from the active track's plan following the TDD workfl
 - Skipping TDD cycle when workflow.md has TDD enabled
 - Marking a task `[x]` without fresh verification evidence
 - Batching multiple tasks into a single commit
-- Proceeding past a phase boundary without running the two-stage review
+- Proceeding past a phase boundary without running the three-stage review
 - Writing production code before a failing test (when TDD is strict)
 - Assuming a test passes without actually running it
 
@@ -4124,7 +4124,7 @@ Before marking ANY task/phase/track complete:
 
 When all tasks in a phase are `[x]`:
 
-1. Announce: "Phase N complete. Running two-stage review."
+1. Announce: "Phase N complete. Running three-stage review."
 
 ### Two-Stage Review (REQUIRED)
 
@@ -4156,15 +4156,15 @@ See `core/agents/reviewer.md` for detailed review process.
 
 When all phases complete:
 
-1. **Run validation (if enabled):**
-   - Read `draft/workflow.md` validation configuration
-   - Check if auto-validation enabled:
+1. **Run review (if enabled):**
+   - Read `draft/workflow.md` review configuration
+   - Check if auto-review enabled:
      ```markdown
-     ## Validation
-     - [x] Auto-validate at track completion
+     ## Review Settings
+     - [x] Auto-review at track completion
      ```
-   - If enabled, run `draft validate <track_id>`
-   - Check validation results:
+   - If enabled, run `draft review track <track_id>`
+   - Check review results:
      - If block-on-failure enabled AND critical issues found → HALT, require fixes
      - Otherwise, document warnings and continue
 
@@ -4449,875 +4449,6 @@ When coverage is run again on the same track/module:
 
 ---
 
-## Validate Command
-
-When user says "validate" or "draft validate [--track <id>]":
-
-You are validating codebase quality using Draft context files to ensure architectural conformance, security, and spec compliance.
-
-## Red Flags - STOP if you're:
-
-- Reporting validation results without actually running checks
-- Making up check counts or findings
-- Skipping categories of validation
-- Not generating the actual report file
-- Claiming "no issues" without evidence
-
-**Run the checks. Report the evidence.**
-
----
-
-## Usage
-
-- `draft validate` - Validate entire codebase
-- `draft validate <track-id>` - Validate specific track
-
-## Pre-Check
-
-1. Verify Draft is initialized:
-```bash
-ls draft/product.md draft/tech-stack.md draft/workflow.md 2>/dev/null
-```
-
-If missing, tell user: "Project not initialized. Run `draft init` first."
-
-## Step 1: Parse Arguments & Determine Scope
-
-Extract arguments from the command invocation.
-
-**Validation Modes:**
-- **Project-Level:** No arguments → validate entire codebase
-- **Track-Level:** `<track-id>` → validate specific track
-
-### Track-Level Mode
-
-If `<track-id>` specified:
-
-1. Verify track exists: `ls draft/tracks/<track-id>/spec.md`
-2. If not found, tell user: "Track '<track-id>' not found. Check `draft/tracks.md` for valid track IDs."
-3. Read `draft/tracks/<track-id>/spec.md` for acceptance criteria
-4. Get changed files via git: `git diff --name-only main..HEAD` (or appropriate base branch)
-
-## Step 2: Load Draft Context
-
-Read the following context files:
-
-1. `draft/workflow.md` - Check validation configuration, **Guardrails** section
-2. `draft/tech-stack.md` - Technology constraints, dependency list, **Accepted Patterns** section
-3. `draft/product.md` - Product context, guidelines (optional)
-4. `draft/.ai-context.md` - Architectural patterns, critical invariants, security architecture (if exists). Falls back to `draft/architecture.md` for legacy projects.
-
-**Important context sections:**
-- `tech-stack.md` `## Accepted Patterns` - Skip flagging these as issues (intentional design decisions)
-- `workflow.md` `## Guardrails` - Enforce checked guardrails as validation rules
-
-Extract validation configuration from `workflow.md`:
-```markdown
-## Validation
-- [x] Auto-validate at track completion
-- [ ] Block on validation failures
-- Scope: architecture, security, performance, spec-compliance
-```
-
-If no validation section exists, use defaults:
-- Auto-validate: disabled
-- Block on failures: false
-- Scope: all checks
-
-## Step 3: Run Validation Checks
-
-### Project-Level Validation (whole codebase)
-
-Run all 5 validators:
-
-#### 3.1 Architecture Conformance
-
-**Goal:** Verify code follows documented architectural patterns.
-
-**Process:**
-
-1. **Check for architecture context:**
-   ```bash
-   ls draft/.ai-context.md draft/architecture.md 2>/dev/null
-   ```
-   If neither found, skip this check with message: "No .ai-context.md or architecture.md found - skipping pattern validation"
-
-2. **Parse architectural patterns:**
-   - Read `draft/.ai-context.md` (preferred) or `draft/architecture.md` (legacy fallback)
-   - Also read **Critical Invariants** and **Security Architecture** sections from `.ai-context.md` for richer validation
-   - Read **Data Lifecycle** (state machines, storage topology) and **Critical Paths** (consistency boundaries, failure recovery matrix) for data integrity validation
-   - Search for sections: "Patterns", "Standards", "Conventions", "Code Organization"
-   - Extract documented rules (look for bullets, numbered lists, bolded statements)
-   - Common pattern types:
-     - File organization (e.g., "All components in src/components/")
-     - Naming conventions (e.g., "Test files must end in .test.ts")
-     - Structural rules (e.g., "All API routes use auth middleware")
-     - Dependency rules (e.g., "UI components cannot import from database layer")
-
-3. **Validate patterns:**
-   - For each documented pattern, verify compliance using grep/find
-   - Example checks:
-     ```bash
-     # Pattern: "All API routes use auth middleware"
-     grep -r "app\.(get|post|put|delete)" --include="*.ts" | grep -v "authMiddleware"
-
-     # Pattern: "Test files end in .test.ts"
-     find . -path "*/test/*" -name "*.ts" ! -name "*.test.ts"
-
-     # Pattern: "No direct database imports in UI layer"
-     grep -r "import.*from.*database" src/components/
-     ```
-
-4. **Report violations:**
-   - List file:line for each violation
-   - Include pattern name and expected behavior
-   - Classify severity based on architecture.md language:
-     - "MUST" / "REQUIRED" → ✗ Critical
-     - "SHOULD" / "RECOMMENDED" → ⚠ Warning
-
-**Output format:**
-```
-✓ All API routes use auth middleware (15 files checked)
-✗ **CRITICAL:** src/components/UserList.tsx:12 - Direct database import (violates layer separation)
-⚠ src/utils/helper.ts - Missing header comment (recommended by standards)
-```
-
-#### 3.2 Dead Code Detection
-
-**Goal:** Identify unused exports and unreferenced code.
-
-**Process:**
-
-1. **Identify source directories:**
-   - Read `tech-stack.md` for project structure hints
-   - Common patterns: `src/`, `lib/`, `app/`, `packages/`
-   - Exclude: `node_modules/`, `dist/`, `build/`, `coverage/`, `*.test.*`, `*.spec.*`
-
-2. **Find all exports:**
-   ```bash
-   # JavaScript/TypeScript
-   grep -r "export \(default\|const\|function\|class\|interface\|type\)" src/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx"
-
-   # Python
-   grep -r "^def \|^class " --include="*.py" | grep -v "^    "  # Top-level only
-
-   # Go
-   grep -r "^func [A-Z]" --include="*.go"  # Exported functions (capitalized)
-   ```
-
-3. **Track imports/references:**
-   - For each exported symbol, search for imports/usage across codebase
-   - Exclude self-references (same file)
-   ```bash
-   # Check if 'UserService' is imported anywhere
-   grep -r "import.*UserService" src/ --exclude="user-service.ts"
-   grep -r "UserService" src/ --exclude="user-service.ts"
-   ```
-
-4. **Flag unreferenced exports:**
-   - Exports with zero external references → potential dead code
-   - Note: May be public API, CLI entry points, or future use
-   - Classify as ⚠ Warning (not Critical) - requires manual review
-
-**Output format:**
-```
-⚠ src/utils/old-parser.ts:15 - Function 'parseOldFormat' has no references (0 imports)
-⚠ src/components/Deprecated.tsx - Entire file unreferenced (no imports)
-✓ src/services/user.ts - All exports referenced
-```
-
-**Performance optimization:**
-- Limit to files changed in last 90 days if full scan takes >10s
-- Use `git log --since="90 days ago" --name-only --pretty=format: | sort -u`
-
-#### 3.3 Dependency Cycle Detection
-
-**Goal:** Detect circular dependencies that can cause runtime errors and complicate maintenance.
-
-**Process:**
-
-1. **Build dependency graph:**
-   - Parse import statements from source files
-   ```bash
-   # JavaScript/TypeScript - extract imports
-   grep -r "import.*from" src/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx"
-
-   # Python
-   grep -r "^import \|^from .* import" --include="*.py"
-
-   # Go
-   grep -r "^import" --include="*.go"
-   ```
-
-2. **Detect cycles using tools:**
-   - **JavaScript/TypeScript:**
-     ```bash
-     # Use madge if available
-     npx madge --circular src/
-
-     # Fallback: manual cycle detection
-     # For each file, trace import chain and detect if it imports itself transitively
-     ```
-
-   - **Python:**
-     ```bash
-     # Use pydeps if available
-     pydeps --show-cycles src/
-
-     # Fallback: parse import statements and build adjacency list
-     ```
-
-   - **Go:**
-     ```bash
-     # Go detects cycles at compile time
-     go list -f '{{.ImportPath}} {{.Imports}}' ./... | grep cycle
-     ```
-
-3. **Manual cycle detection (fallback):**
-   - Build adjacency list: `file -> [imported files]`
-   - Run depth-first search (DFS) with visited tracking
-   - If visiting a node already in current path → cycle detected
-   - Record cycle chain
-
-4. **Report cycles:**
-   - Show complete cycle chain (A → B → C → A)
-   - Classify as ✗ Critical (cycles break modularity)
-   - Suggest breaking the cycle (extract interface, dependency injection)
-
-**Output format:**
-```
-✗ **CRITICAL:** Circular dependency detected
-   src/services/user.ts → src/models/user.ts → src/services/auth.ts → src/services/user.ts
-   Suggestion: Extract shared types to src/types/user.ts
-
-✓ No circular dependencies detected (42 files analyzed)
-```
-
-**Tool detection priority:**
-1. Check package.json for madge/pydeps/eslint-plugin-import
-2. Try running tool directly (may be globally installed)
-3. Fall back to manual detection if no tools available
-
-#### 3.4 Security Scan
-
-**Goal:** Detect common security vulnerabilities aligned with OWASP Top 10 (2021).
-
-**OWASP Top 10 Coverage:**
-| # | OWASP Category | Check |
-|---|----------------|-------|
-| A01 | Broken Access Control | Auth/authz checks below |
-| A02 | Cryptographic Failures | Weak hashing, hardcoded secrets |
-| A03 | Injection | SQL injection, command injection |
-| A04 | Insecure Design | Missing input validation |
-| A05 | Security Misconfiguration | Cookie flags, CORS, headers |
-| A06 | Vulnerable Components | Dependency audit |
-| A07 | Auth Failures | JWT misuse, session handling |
-| A08 | Data Integrity Failures | Insecure deserialization |
-| A09 | Logging Failures | Missing security event logging |
-| A10 | SSRF | Server-side request forgery patterns |
-
-**Process:**
-
-1. **Hardcoded Secrets Detection (A02):**
-   ```bash
-   # API keys, tokens, passwords in source code
-   grep -rE "(api[_-]?key|API[_-]?KEY|secret|SECRET|password|PASSWORD|token|TOKEN)\s*=\s*['\"][^'\"]{8,}" src/ --exclude="*.test.*" --exclude="*.spec.*"
-
-   # AWS credentials
-   grep -rE "AKIA[0-9A-Z]{16}" src/
-
-   # Private keys
-   grep -rE "BEGIN (RSA |EC |DSA )?PRIVATE KEY" src/
-
-   # Database URLs with credentials
-   grep -rE "(postgres|mysql|mongodb)://[^:]+:[^@]+@" src/
-   ```
-   - Exclude: `.env.example`, test fixtures, documentation
-   - Severity: ✗ Critical
-
-2. **Injection Patterns (A03):**
-   ```bash
-   # String concatenation in queries (JavaScript/TypeScript)
-   grep -rE "(query|execute)\s*\(\s*['\"`].*\$\{|query.*\+\s*[a-zA-Z]" src/ --include="*.ts" --include="*.js"
-
-   # Python f-strings in queries
-   grep -rE "execute\(f['\"]|cursor\.execute\(.*\{" --include="*.py"
-
-   # Raw SQL construction
-   grep -rE "\"SELECT.*\"\s*\+|'SELECT.*'\s*\+" src/
-   ```
-   - Severity: ✗ Critical
-
-3. **Missing Input Validation (A04):**
-   ```bash
-   # API routes without validation middleware
-   # Check if request parameters used directly without validation
-   grep -rE "req\.(body|params|query)\.[a-zA-Z]+\s*\)" src/routes/ src/api/ --include="*.ts" --include="*.js"
-
-   # Look for sanitization/validation patterns nearby
-   # If missing, flag as warning
-   ```
-   - Severity: ⚠ Warning (manual review needed)
-
-4. **Insecure Auth/Session Handling (A01, A07):**
-   ```bash
-   # JWT without secret validation
-   grep -rE "jwt\.decode\(" src/ --include="*.ts" --include="*.js"  # Should use verify, not decode
-
-   # Session cookies without httpOnly/secure flags
-   grep -rE "cookie\(.*\)" src/ | grep -v "httpOnly.*secure"
-
-   # Weak password hashing (MD5, SHA1)
-   grep -rE "(md5|MD5|sha1|SHA1)\(" src/
-   ```
-   - Severity: ✗ Critical (JWT, weak hashing), ⚠ Warning (cookie flags)
-
-5. **Cross-Site Scripting (A03 — XSS):**
-   ```bash
-   # Dangerous HTML insertion
-   grep -rE "innerHTML\s*=|dangerouslySetInnerHTML" src/ --include="*.tsx" --include="*.jsx"
-
-   # Unescaped user input in templates
-   grep -rE "\{\{.*req\.(body|params|query)" src/
-   ```
-   - Severity: ✗ Critical
-
-6. **Vulnerable Dependencies (A06):**
-   ```bash
-   # Node.js
-   npm audit --json 2>/dev/null | head -50
-
-   # Python
-   pip audit 2>/dev/null || safety check 2>/dev/null
-
-   # Go
-   govulncheck ./... 2>/dev/null
-   ```
-   - If audit tool unavailable, check for known-vulnerable version patterns
-   - Severity: ✗ Critical (known CVEs), ⚠ Warning (outdated dependencies)
-
-7. **CSRF Protection (A01):**
-   ```bash
-   # State-changing endpoints without CSRF tokens
-   grep -rE "(app\.(post|put|delete|patch))" src/ --include="*.ts" --include="*.js" | grep -v "csrf\|CSRF\|csrfToken"
-
-   # Forms without CSRF tokens
-   grep -rE "<form.*method=['\"]post['\"]" src/ | grep -v "csrf\|_token"
-   ```
-   - Severity: ⚠ Warning (requires manual review of auth mechanism — token-based APIs may not need CSRF)
-
-8. **Insecure Deserialization (A08):**
-   ```bash
-   # Unsafe deserialization (Python)
-   grep -rE "pickle\.loads|yaml\.load\((?!.*Loader)" --include="*.py"
-
-   # Unsafe JSON parsing from untrusted sources (Node.js)
-   grep -rE "eval\(|new Function\(" src/ --include="*.ts" --include="*.js"
-
-   # Java unsafe deserialization
-   grep -rE "ObjectInputStream|readObject\(\)" --include="*.java"
-   ```
-   - Severity: ✗ Critical
-
-9. **Missing Security Logging (A09):**
-   ```bash
-   # Auth endpoints without logging
-   grep -rE "(login|logout|register|password|auth)" src/ --include="*.ts" --include="*.js" -l | while read f; do
-     grep -L "log\.\|logger\.\|console\.log\|winston\.\|pino\." "$f"
-   done
-
-   # Failed auth attempts should be logged
-   grep -rE "(unauthorized|forbidden|401|403)" src/ | grep -v "log\|logger"
-   ```
-   - Severity: ⚠ Warning
-
-10. **Server-Side Request Forgery (A10):**
-    ```bash
-    # URL from user input passed to fetch/request
-    grep -rE "(fetch|axios|request|http\.get)\s*\(\s*(req\.|params\.|query\.|body\.)" src/ --include="*.ts" --include="*.js"
-
-    # Python
-    grep -rE "(requests\.get|urlopen)\s*\(.*request\." --include="*.py"
-    ```
-    - Severity: ✗ Critical
-
-**Output format:**
-```
-✗ **CRITICAL:** src/auth/jwt.ts:23 - Hardcoded JWT secret "my-secret-key"
-   Risk: Secret exposed in version control
-   Fix: Move to environment variable (process.env.JWT_SECRET)
-
-✗ **CRITICAL:** src/api/users.ts:45 - SQL injection risk
-   Code: query("SELECT * FROM users WHERE id = " + userId)
-   Fix: Use parameterized queries
-
-⚠ src/routes/posts.ts:67 - Missing input validation on req.body.email
-   Recommendation: Add validation middleware or zod schema
-
-✓ No hardcoded secrets detected (38 files scanned)
-```
-
-**Exclusions:**
-- Test files (*.test.*, *.spec.*)
-- Example/documentation files
-- Third-party code (node_modules, vendor)
-
-#### 3.5 Performance Anti-Patterns
-
-**Goal:** Identify common performance issues that degrade application responsiveness.
-
-**Process:**
-
-1. **N+1 Query Detection:**
-   ```bash
-   # Loops with database calls inside (JavaScript/TypeScript)
-   grep -rE "for\s*\(.*\)\s*\{" src/ -A 5 --include="*.ts" --include="*.js" | grep -E "(await.*find|query|execute|get)"
-
-   # .map() with async database calls
-   grep -rE "\.map\(.*=>.*\{" src/ -A 3 | grep -E "(await.*find|query)"
-
-   # Python loops with ORM queries
-   grep -rE "for .* in .*:" --include="*.py" -A 3 | grep -E "(\.get\(|\.filter\(|\.query\()"
-   ```
-   - Context: Show loop + query lines
-   - Severity: ⚠ Warning
-   - Suggestion: Use bulk queries (IN clause, joins, eager loading)
-
-2. **Blocking I/O in Async Contexts:**
-   ```bash
-   # Synchronous file operations in async functions (Node.js)
-   grep -rE "async.*function" src/ -A 10 --include="*.ts" --include="*.js" | grep -E "fs\.(readFileSync|writeFileSync|readSync)"
-
-   # Synchronous crypto in async code
-   grep -rE "async.*function" src/ -A 10 | grep -E "(crypto\.pbkdf2Sync|bcrypt\.hashSync)"
-
-   # Python blocking calls in async functions
-   grep -rE "async def" --include="*.py" -A 10 | grep -E "(open\(|requests\.|time\.sleep)"
-   ```
-   - Severity: ⚠ Warning
-   - Suggestion: Use async alternatives (fs.promises, bcrypt.hash, aiohttp)
-
-3. **Synchronous Operations in Hot Paths:**
-   ```bash
-   # Sync operations in HTTP handlers/middleware
-   grep -rE "(app\.(get|post|put|delete)|router\.|@(Get|Post|Put|Delete))" src/ -A 10 | grep -E "(Sync\(|\.join\(|JSON\.parse)"
-
-   # Heavy computation in request handlers (regex, JSON parsing large payloads)
-   grep -rE "(req\.(body|query|params))" src/ -A 3 | grep -E "JSON\.parse.*req\."
-   ```
-   - Severity: ⚠ Warning (unless proven hot path via profiling)
-   - Suggestion: Move to worker threads, use streaming parsers
-
-4. **Missing Pagination:**
-   ```bash
-   # Database queries without LIMIT
-   grep -rE "find\(\)\.toArray\(\)|findAll\(\)|query\(.*SELECT.*FROM" src/ | grep -v "LIMIT\|limit\|take"
-   ```
-   - Severity: ⚠ Warning
-   - Suggestion: Add pagination (LIMIT/OFFSET, cursor-based)
-
-5. **Inefficient String Concatenation in Loops:**
-   ```bash
-   # String concatenation in loops (JavaScript)
-   grep -rE "for\s*\(.*\)\s*\{" src/ -A 5 | grep -E "\+\s*['\"]"
-
-   # Python string concat in loops
-   grep -rE "for .* in .*:" --include="*.py" -A 3 | grep -E "\+\s*['\"]"
-   ```
-   - Severity: ⚠ Warning (micro-optimization, usually not critical)
-   - Suggestion: Use array.join() or StringBuilder
-
-**Output format:**
-```
-⚠ src/api/users.ts:34 - Potential N+1 query
-   Code: for (const user of users) { await db.posts.find({ userId: user.id }) }
-   Impact: 1 query per user (N+1 pattern)
-   Fix: Use JOIN or IN clause: db.posts.find({ userId: { $in: userIds } })
-
-⚠ src/services/crypto.ts:12 - Blocking I/O in async function
-   Code: async hashPassword() { bcrypt.hashSync(password, 10) }
-   Impact: Blocks event loop during CPU-intensive hashing
-   Fix: Use async variant: await bcrypt.hash(password, 10)
-
-⚠ src/api/posts.ts:56 - Missing pagination
-   Code: const posts = await db.posts.find()
-   Impact: Could fetch millions of records
-   Fix: Add limit: find().limit(100)
-
-✓ No N+1 queries detected in hot paths
-```
-
-**Note:** Performance warnings require context - mark as ⚠ Warning, not ✗ Critical, unless clearly in hot path.
-
-### Track-Level Validation (specific track)
-
-Run project-level checks scoped to changed files, PLUS:
-
-#### 3.6 Spec Compliance
-
-**Goal:** Verify all acceptance criteria from spec.md have corresponding test coverage.
-
-**Process:**
-
-1. **Parse acceptance criteria:**
-   ```bash
-   # Read spec.md and extract acceptance criteria section
-   grep -A 100 "## Acceptance Criteria" draft/tracks/<track-id>/spec.md
-   ```
-
-2. **Extract individual criteria:**
-   - Look for checkbox list items: `- [ ] Criterion text`
-   - Parse each criterion into testable requirement
-   - Example: "User can login with email and password" → need login test
-
-3. **Search for corresponding tests:**
-   - For each criterion, search test files for related tests
-   - Common test file patterns:
-     ```bash
-     # Find test files
-     find . -name "*.test.ts" -o -name "*.test.js" -o -name "*.spec.ts" -o -name "*.spec.py"
-
-     # Search for test cases related to criterion
-     grep -r "describe\|it\|test\|def test_" <test-files> | grep -i "<criterion-keywords>"
-     ```
-
-4. **Match criteria to tests:**
-   - Extract keywords from criterion (e.g., "login", "email", "password")
-   - Search test files for test cases with those keywords
-   - Check test descriptions match criterion intent
-   - Example matching:
-     ```
-     Criterion: "User can login with email and password"
-     Keywords: login, email, password
-     Found: it("should login user with valid email and password")
-     Status: ✓ Covered
-     ```
-
-5. **Report uncovered criteria:**
-   - List criteria without matching tests
-   - Suggest test cases to write
-
-**Output format:**
-```
-Spec Compliance: 4/5 criteria covered
-
-✓ Criterion: "User can login with email and password"
-   Test: src/auth/auth.test.ts:12 - "should login user with valid email and password"
-
-✗ Criterion: "System sends password reset email"
-   Status: No matching test found
-   Suggestion: Add test in src/auth/password-reset.test.ts
-
-✓ Criterion: "Invalid credentials show error message"
-   Test: src/auth/auth.test.ts:34 - "should show error for invalid credentials"
-```
-
-**Matching strategy:**
-- Exact keyword match (high confidence)
-- Fuzzy match with keyword overlap (medium confidence)
-- Manual review needed if no match (list as uncovered)
-
-#### 3.7 Architectural Impact
-
-**Goal:** Detect if track changes introduce new dependencies or violate architectural patterns.
-
-**Process:**
-
-1. **Get changed files:**
-   ```bash
-   # Get files modified in current branch vs main
-   git diff --name-only main..HEAD
-
-   # Or from track metadata (git log since track creation)
-   git log --since="<track-created-date>" --name-only --pretty=format: | sort -u
-   ```
-
-2. **Detect new dependencies:**
-   - Parse import statements from changed files
-   - Extract package/module names
-   ```bash
-   # JavaScript/TypeScript - extract npm packages
-   grep "import.*from ['\"]" <changed-files> | grep -v "^\./" | grep -v "^@/"
-
-   # Python - extract pip packages
-   grep "^import \|^from .* import" <changed-files> | grep -v "^\."
-
-   # Go - extract go modules
-   grep "import \"" <changed-files> | grep -v "^\."
-   ```
-
-3. **Cross-reference with tech-stack.md:**
-   - Read `draft/tech-stack.md`
-   - Extract documented dependencies (frameworks, libraries)
-   - Compare imported packages against documented list
-   - Flag any new packages not in tech-stack.md
-
-4. **Check architectural pattern compliance:**
-   - If `draft/architecture.md` exists, read documented patterns
-   - Run same pattern checks as Section 3.1 but scoped to changed files only
-   - Common violations:
-     - UI layer importing from database layer
-     - Breaking module boundaries
-     - Violating dependency direction rules
-
-**Output format:**
-```
-Architectural Impact Analysis
-
-New Dependencies Detected:
-⚠ axios (src/api/client.ts:3)
-   Not documented in tech-stack.md
-   Recommendation: Update tech-stack.md or use existing fetch API
-
-✓ All imports use documented dependencies
-
-Pattern Violations:
-✗ src/components/UserProfile.tsx:15 - Direct database import
-   Pattern: UI components cannot import from database layer
-   File imports: import { db } from '../database/client'
-   Fix: Use API service layer instead
-
-✓ No architectural pattern violations detected
-
-Summary:
-- 1 new dependency (requires documentation)
-- 1 pattern violation (critical)
-- 12 files changed, 11 compliant
-```
-
-#### 3.8 Regression Risk
-
-**Goal:** Analyze the blast radius of track changes to identify regression risk.
-
-**Process:**
-
-1. **Identify changed files:**
-   ```bash
-   git diff --name-only main..HEAD
-   ```
-
-2. **Find reverse dependencies (who imports these files):**
-   ```bash
-   # For each changed file, find all files that import it
-   for file in <changed-files>; do
-     # Extract module name/path
-     module_path=$(echo $file | sed 's/\.[^.]*$//')  # Remove extension
-
-     # Search for imports of this module
-     grep -r "import.*from ['\"].*$module_path" src/ --include="*.ts" --include="*.js" --include="*.py"
-   done
-   ```
-
-3. **Build affected module tree:**
-   - Start with changed files (direct impact)
-   - Find files that import changed files (1st degree impact)
-   - Recursively find files that import 1st degree files (2nd degree impact)
-   - Stop at 2-3 degrees to avoid full tree explosion
-
-4. **Identify critical paths:**
-   - Critical path indicators:
-     - Authentication/authorization modules
-     - Database connection/transaction handling
-     - Payment processing
-     - API entry points (routes, controllers)
-   - Check if changed files or their dependents match critical patterns:
-     ```bash
-     grep -E "(auth|login|session|payment|transaction|database|db)" <affected-files>
-     ```
-
-5. **Calculate blast radius:**
-   - Count unique affected files
-   - Classify by degree (direct, 1st, 2nd)
-   - Flag if critical paths affected
-
-**Output format:**
-```
-Regression Risk Analysis
-
-Changed Files: 3
-- src/services/user.ts
-- src/models/user.ts
-- src/utils/validation.ts
-
-Blast Radius:
-- Direct impact: 3 files
-- 1st degree: 14 files (import changed modules)
-- 2nd degree: 27 files (transitively affected)
-- Total affected: 44 files
-
-Critical Paths Affected:
-⚠ Authentication flow (src/auth/middleware.ts imports src/services/user.ts)
-⚠ User API endpoints (src/api/users.ts imports src/services/user.ts)
-✓ Payment processing not affected
-
-Risk Level: MEDIUM
-- Moderate blast radius (44 files)
-- 2 critical paths affected
-- Recommendation: Run full integration tests, especially auth flow
-
-Affected Modules by Degree:
-[1st] src/api/users.ts
-[1st] src/auth/middleware.ts
-[1st] src/components/UserProfile.tsx
-[2nd] src/api/posts.ts (via users.ts)
-[2nd] src/pages/Dashboard.tsx (via UserProfile.tsx)
-... (39 more files)
-```
-
-**Risk Classification:**
-- **LOW:** <10 affected files, no critical paths
-- **MEDIUM:** 10-50 affected files or 1-2 critical paths
-- **HIGH:** >50 affected files or 3+ critical paths
-
-**Performance:** Limit dependency traversal to 2 degrees and top 50 most-impacted files to keep report concise.
-
-## Step 4: Generate Validation Report
-
-Create structured markdown report.
-
-### Report Location
-- Project-level: `draft/validation-report.md`
-- Track-level: `draft/tracks/<track-id>/validation-report.md`
-
-**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
-
-```bash
-git branch --show-current                    # LOCAL_BRANCH
-git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
-git rev-parse HEAD                           # FULL_SHA
-git rev-parse --short HEAD                   # SHORT_SHA
-git log -1 --format=%ci HEAD                 # COMMIT_DATE
-git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
-git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
-```
-
-### Report Format
-
-```markdown
----
-project: "{PROJECT_NAME}"
-module: "root"
-track_id: "{TRACK_ID or null}"
-generated_by: "draft:validate"
-generated_at: "{ISO_TIMESTAMP}"
-git:
-  branch: "{LOCAL_BRANCH}"
-  remote: "{REMOTE/BRANCH}"
-  commit: "{FULL_SHA}"
-  commit_short: "{SHORT_SHA}"
-  commit_date: "{COMMIT_DATE}"
-  commit_message: "{COMMIT_MESSAGE}"
-  dirty: {true|false}
-synced_to_commit: "{FULL_SHA}"
----
-
-# Validation Report
-
-| Field | Value |
-|-------|-------|
-| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
-| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
-| **Generated** | {ISO_TIMESTAMP} |
-| **Synced To** | `{FULL_SHA}` |
-
-**Scope:** [whole-codebase | track: <track-id>]
-
-## Summary
-- ✓ [count] checks passed
-- ⚠ [count] warnings
-- ✗ [count] critical issues
-
----
-
-## Architecture Conformance ([✓/⚠/✗] [passed]/[total])
-[List of checks with status]
-
-## Dead Code ([✓/⚠/✗] [passed]/[total])
-[List of unused exports/functions]
-
-## Dependency Cycles ([✓/⚠/✗] [passed]/[total])
-[List of circular dependencies]
-
-## Security ([✓/⚠/✗] [passed]/[total])
-[List of vulnerabilities]
-
-## Performance ([✓/⚠/✗] [passed]/[total])
-[List of anti-patterns]
-
-[Track-Level Only Sections:]
-
-## Spec Compliance ([✓/⚠/✗] [passed]/[total])
-[Acceptance criteria coverage]
-
-## Architectural Impact ([✓/⚠/✗] [passed]/[total])
-[New dependencies, pattern violations]
-
-## Regression Risk ([✓/⚠/✗] [passed]/[total])
-[Blast radius analysis]
-```
-
-### Status Markers
-- ✓ - Check passed
-- ⚠ - Warning (non-critical issue)
-- ✗ - Critical issue (requires attention)
-
-### Implementation
-
-1. **Collect all validation results** from Steps 3.1-3.8
-2. **Count status markers:** total ✓, ⚠, ✗ across all sections
-3. **Generate report file** using template above
-4. **Write to correct path:**
-   ```bash
-   # Project-level
-   cat > draft/validation-report.md <<'EOF'
-   [report content]
-   EOF
-
-   # Track-level
-   cat > draft/tracks/<track-id>/validation-report.md <<'EOF'
-   [report content]
-   EOF
-   ```
-5. **Include timestamp:** ISO 8601 format (e.g., `2026-02-03T14:30:00Z`)
-6. **Omit empty sections:** If a validation category has no findings, show "✓ No issues detected"
-
-## Step 5: Present Results
-
-Announce validation results:
-
-```
-Validation complete.
-
-Scope: [whole-codebase | track: <track-id>]
-Results: ✓ [pass] | ⚠ [warn] | ✗ [critical]
-
-Report: [path to report file]
-
-[If warnings or critical issues:]
-Review the report for details. Validation is non-blocking unless configured otherwise in workflow.md.
-
-[If block-on-failure enabled and critical issues found:]
-⚠️  VALIDATION FAILED - Critical issues must be resolved before proceeding.
-```
-
-## Integration with draft implement
-
-When called from `draft implement` at track completion:
-1. Read `workflow.md` validation config
-2. If auto-validate enabled, run track-level validation
-3. Generate report
-4. If block-on-failure enabled and critical issues found, halt implementation
-5. Otherwise, warn and continue
-
-## Notes
-
-- Validation complements `draft coverage` (tests) with architectural/security checks
-- Non-blocking by default to maintain velocity
-- Leverages Draft context for intelligent, project-specific validation
-- Track-level validation scopes to changed files for faster feedback
-
----
-
 ## Bug Hunt Command
 
 When user says "hunt bugs" or "draft bughunt [--track <id>]":
@@ -5439,10 +4570,8 @@ Analyze systematically across all applicable dimensions. Skip N/A dimensions exp
 
 ### 4. Performance (Backend + UI)
 - Inefficient algorithms and data fetching
-- N+1 queries, over-fetching, chatty APIs
 - Blocking work on main/UI thread
 - Excessive re-renders, unnecessary state updates
-- Large bundles, unused code, slow startup paths
 - Unbounded memory growth (listeners, caches, stores)
 
 ### 5. UI Responsiveness & Perceived Performance
@@ -5493,13 +4622,6 @@ Analyze systematically across all applicable dimensions. Skip N/A dimensions exp
 - Tests that assert implementation instead of behavior
 - Mismatch between test and real user interaction
 - Flaky tests, timing dependencies
-
-### 12. Maintainability
-- Dead code, unused exports, orphaned files
-- Over-abstracted hooks/components
-- Tight coupling between layers
-- Refactoring hazards (implicit dependencies)
-- Inconsistent naming, patterns
 
 ## Bug Verification Protocol
 
@@ -6324,10 +5446,11 @@ You are conducting a code review using Draft's Context-Driven Development method
 ## Overview
 
 This command orchestrates code review workflows at two levels:
-- **Track-level:** Review against spec.md and plan.md (two-stage: spec compliance + code quality)
-- **Project-level:** Review arbitrary changes (code quality only)
+- **Track-level:** Review against spec.md and plan.md (three-stage: automated validation, spec compliance, code quality)
+- **Project-level:** Review arbitrary changes (automated validation + code quality)
 
-Optionally integrates `draft validate` and `draft bughunt` for comprehensive quality analysis.
+Optionally integrates `draft bughunt` for finding logic errors and writing regression tests.
+Note: Automated static validation (OWASP secrets, dead code, dependency cycles, N+1 patterns) is natively built into Phase 1 of this review.
 
 ---
 
@@ -6344,15 +5467,15 @@ Extract and validate command arguments from user input.
 - `commits <range>` - Review commit range (e.g., `main...HEAD`, `abc123..def456`)
 
 **Quality integration modifiers:**
-- `with-validate` - Include `draft validate` results
+- `with-validate` - (Deprecated) Ignored as validation is natively built-in.
 - `with-bughunt` - Include `draft bughunt` results
-- `full` - Include both validate and bughunt (equivalent to `with-validate with-bughunt`)
+- `full` - Include bughunt results
 
 ### Validation Rules
 
 1. **Scope requirement:** At least one scope specifier OR no arguments (auto-detect track)
 2. **Mutual exclusivity:** Only one of `track`, `project`, `files`, `commits`
-3. **Modifier normalization:** If `full` is present, enable both `with-validate` and `with-bughunt`, discarding redundant individual modifiers. No error — silently normalize.
+3. **Modifier normalization:** If `full` is present, enable `with-bughunt`, discarding redundant individual modifiers. No error — silently normalize.
 
 ### Default Behavior
 
@@ -6537,74 +5660,80 @@ Skip non-source files to focus review:
 
 ## Step 4: Run Reviewer Agent
 
-Apply two-stage review process from `core/agents/reviewer.md`.
+Apply a three-stage review process (merging static validation and semantic review).
 
-### Stage 1: Spec Compliance (Track-Level Only)
+### Stage 1: Automated Validation (Static Checks)
+
+**Run for both track-level and project-level reviews**
+
+**Goal:** Detect structural, security, and performance issues using fast, objective searches across the diff.
+
+For the files changed in the diff, perform static checks using `grep` or similar tools:
+1. **Architecture Conformance:** Search for pattern violations documented in `draft/.ai-context.md`. (e.g. `import * from 'database'` in a React component).
+2. **Dead Code:** Check for newly exported functions/classes in the diff that have 0 references across the codebase.
+3. **Dependency Cycles:** Trace the import chains for new imports to ensure no circular dependencies (e.g., A → B → C → A) are introduced.
+4. **Security Scan (OWASP):** Scan the diff for:
+   - Hardcoded secrets and API keys
+   - SQL injection risks (string concatenation in queries)
+   - XSS vulnerabilities (`innerHTML` or raw DOM insertion)
+5. **Performance Anti-patterns:** Scan the diff for:
+   - N+1 database queries (loops containing queries)
+   - Blocking synchronous I/O within async functions
+   - Unbounded queries lacking pagination
+
+**Verdict:**
+- **PASS:** No critical issues found → Proceed to Stage 2
+- **FAIL:** ANY Critical issue found (e.g., circular dependency, hardcoded secret, raw SQL injection) → List the static analysis failures, generate the review report, and **STOP**. Do not proceed to Stage 2. This prevents wasting effort on structurally broken code.
+
+### Stage 2: Spec Compliance (Track-Level Only)
 
 **Skip for project-level reviews (no spec exists)**
 
-Load spec.md acceptance criteria and verify implementation:
+Load `spec.md` acceptance criteria and verify implementation:
 
 #### 4.1: Requirements Coverage
 
-For each functional requirement in spec.md:
+For each functional requirement in `spec.md`:
 - [ ] Requirement implemented (find evidence in diff)
 - [ ] Files modified/created match requirement
-- [ ] No missing features
 
 #### 4.2: Acceptance Criteria
 
-For each criterion in spec.md:
+For each criterion in `spec.md`:
 - [ ] Criterion met (check against diff)
 - [ ] Test coverage exists (if TDD enabled)
-- [ ] Edge cases handled
 
 #### 4.3: Scope Adherence
 
 - [ ] No missing features from spec
 - [ ] No extra unneeded work (scope creep)
-- [ ] Non-goals remain untouched
 
 **Verdict:**
-- **PASS:** All requirements implemented AND all acceptance criteria met → Proceed to Stage 2
-- **FAIL:** ANY requirement missing OR ANY acceptance criterion not met → List gaps, report, and stop (no Stage 2)
+- **PASS:** All requirements implemented AND all acceptance criteria met → Proceed to Stage 3
+- **FAIL:** ANY requirement missing OR ANY acceptance criterion not met → List gaps, report, and stop (no Stage 3)
 
-### Stage 2: Code Quality
+### Stage 3: Code Quality
 
-**Run for both track-level (if Stage 1 passes) and project-level reviews**
+**Run for both track-level (if Stage 2 passes) and project-level reviews**
 
-Analyze code quality across four dimensions:
+Analyze semantic code quality across four dimensions:
 
 #### 4.4: Architecture
-
 - [ ] Follows project patterns (from tech-stack.md or CLAUDE.md)
 - [ ] Appropriate separation of concerns
-- [ ] No unnecessary complexity
-- [ ] Module boundaries respected (if `.ai-context.md` or `architecture.md` exists)
 - [ ] Critical invariants honored (if `.ai-context.md` exists — check ## Critical Invariants section)
-- [ ] Data state transitions are valid (if `.ai-context.md` exists — check ## Data Lifecycle state machines)
-- [ ] Consistency boundaries respected — no strong-consistency assumptions across eventual-consistency seams
-- [ ] Failure recovery paths exist for each write path stage (check ## Critical Paths failure recovery matrix)
 
 #### 4.5: Error Handling
-
 - [ ] Errors handled at appropriate level
 - [ ] User-facing errors are helpful
-- [ ] System errors are logged
 - [ ] No silent failures
 
 #### 4.6: Testing
-
 - [ ] Tests test real logic (not implementation details)
 - [ ] Edge cases have test coverage
-- [ ] Tests are maintainable
-- [ ] No brittle assertions
 
 #### 4.7: Maintainability
-
 - [ ] Code is readable without excessive comments
-- [ ] No obvious performance issues
-- [ ] No security vulnerabilities (SQL injection, XSS, hardcoded secrets)
 - [ ] Consistent naming and style
 
 ### Issue Classification
@@ -6628,27 +5757,9 @@ Classify all findings by severity:
 
 ## Step 5: Run Quality Tools (Optional)
 
-If `with-validate`, `with-bughunt`, or `full` modifier set, integrate additional quality checks.
+If `with-bughunt` or `full` modifier is set, integrate bug hunting.
 
-### 5.1: Run Validate
-
-If `with-validate` or `full`:
-
-**Track-level:**
-```bash
-draft validate <id>
-```
-
-**Project-level:**
-```bash
-draft validate
-```
-
-Parse output from `draft/tracks/<id>/validation-report.md` or `draft/validation-report.md`
-
-### 5.2: Run Bughunt
-
-If `with-bughunt` or `full`:
+### 5.1: Run Bughunt
 
 **Track-level:**
 ```bash
@@ -6662,12 +5773,11 @@ draft bughunt
 
 Parse output from `draft/tracks/<id>/bughunt-report.md` or `draft/bughunt-report.md`
 
-### 5.3: Aggregate Findings
+### 5.2: Aggregate Findings
 
 Merge findings from:
-1. Reviewer agent (Stage 1 + Stage 2)
-2. Validate results (if run)
-3. Bughunt results (if run)
+1. Reviewer agent (Stage 1, 2, 3)
+2. Bughunt results (if run)
 
 **Deduplication:**
 - Two findings are duplicates if they reference the **same file and line number**
@@ -6731,7 +5841,21 @@ synced_to_commit: "{FULL_SHA}"
 
 ---
 
-## Stage 1: Spec Compliance
+## Stage 1: Automated Validation
+
+**Status:** PASS / FAIL
+
+- **Architecture Conformance:** PASS/FAIL
+- **Dead Code:** N found
+- **Dependency Cycles:** PASS/FAIL
+- **Security Scan:** N issues found
+- **Performance:** N anti-patterns detected
+
+[If FAIL: List critical structural issues and stop here]
+
+---
+
+## Stage 2: Spec Compliance
 
 **Status:** PASS / FAIL
 
@@ -6749,7 +5873,7 @@ synced_to_commit: "{FULL_SHA}"
 
 ---
 
-## Stage 2: Code Quality
+## Stage 3: Code Quality
 
 **Status:** PASS / PASS WITH NOTES / FAIL
 
@@ -6764,16 +5888,9 @@ synced_to_commit: "{FULL_SHA}"
 
 ---
 
-## Additional Quality Checks
-
-[If with-validate or full]
-### Validation Results
-- **Architecture Conformance:** PASS/FAIL
-- **Security Scan:** N issues found
-- **Performance:** N anti-patterns detected
-- Full report: `./validation-report.md`
-
 [If with-bughunt or full]
+## Integrations
+
 ### Bug Hunt Results
 - **Critical bugs:** N found
 - **High severity:** N found
@@ -6784,7 +5901,7 @@ synced_to_commit: "{FULL_SHA}"
 
 ## Summary
 
-**Total Issues:** N
+**Total Semantic Issues:** N
 - Critical: N
 - Important: N
 - Minor: N
@@ -6814,7 +5931,7 @@ synced_to_commit: "{FULL_SHA}"
 **Path:** `draft/review-report.md` (all project-level scopes write to this same path)
 
 Similar format but:
-- No Stage 1 section (no spec compliance)
+- No Stage 2 section (no spec compliance)
 - Header shows scope instead of track ID:
   - `project`: "Scope: Uncommitted changes"
   - `files <pattern>`: "Scope: Files matching '<pattern>'"
@@ -6872,13 +5989,13 @@ Display summary to user with actionable next steps.
 Report: draft/tracks/<id>/review-report.md
 
 Summary:
-- Stage 1 (Spec Compliance): PASS
-- Stage 2 (Code Quality): PASS WITH NOTES
-- Total issues: 12 (0 Critical, 3 Important, 9 Minor)
+- Stage 1 (Automated Validation): PASS
+- Stage 2 (Spec Compliance): PASS
+- Stage 3 (Code Quality): PASS WITH NOTES
+- Total semantic issues: 12 (0 Critical, 3 Important, 9 Minor)
 
 [If full]
 Additional Checks:
-- Validation: 2 warnings
 - Bug Hunt: 5 medium-severity findings
 
 Verdict: PASS WITH NOTES
@@ -6897,11 +6014,12 @@ Next: Address findings and run draft review again, or mark track complete.
 
 Report: draft/tracks/<id>/review-report.md
 
-Stage 1 (Spec Compliance): FAIL
+Stage 1 (Automated Validation): PASS
+Stage 2 (Spec Compliance): FAIL
 - 3 requirements not implemented
 - 2 acceptance criteria not met
 
-Stage 2: SKIPPED (Stage 1 must pass first)
+Stage 3: SKIPPED (Stage 2 must pass first)
 
 Verdict: FAIL
 
@@ -7026,9 +6144,9 @@ draft review files "src/**/*.ts"
 draft review commits main...feature-branch
 ```
 
-### Review with validation only
+### Review with bughunt
 ```bash
-draft review track my-feature with-validate
+draft review track my-feature with-bughunt
 ```
 
 ---
@@ -7843,8 +6961,8 @@ h3. Verification
 | Critical | Security | src/auth.ts:45 | Hardcoded API key | Secret exposed in version control | Move to environment variable |
 | Warning | Architecture | src/utils.ts:12 | Layer boundary violation | UI importing from database layer | Use API service layer instead |
 
-> Validation findings are compliance issues from `draft validate`. Include in Epic description for awareness.
-> Critical validation findings should also be created as Bug issues (same as bughunt bugs) to ensure they are tracked and resolved.
+> Review findings are from `draft review` Stage 1 (Automated Validation) or `draft deep-review`. Include in Epic description for awareness.
+> Critical review findings should also be created as Bug issues (same as bughunt bugs) to ensure they are tracked and resolved.
 
 ---
 
@@ -8471,7 +7589,7 @@ Draft solves this through **Context-Driven Development**: structured documents t
   - [draft jira-preview](#draftjira-preview--preview-jira-issues)
   - [draft jira-create](#draftjira-create--create-jira-issues)
   - [draft adr](#draftadr--architecture-decision-records)
-  - [draft validate](#draftvalidate--codebase-quality-validation)
+  - [draft deep-review](#draftdeep-review--module-lifecycle-audit)
   - [draft bughunt](#draftbughunt--exhaustive-bug-discovery)
   - [draft review](#draftreview--code-review-orchestrator)
 - [Architecture Mode](#architecture-mode)
@@ -8535,11 +7653,11 @@ graph TD
     J["draft status"] -.->|"Check anytime"| E
     K["draft revert"] -.->|"Undo if needed"| E
     L["draft coverage"] -.->|"After implementation"| E
-    M["draft validate"] -.->|"At track end"| I
     N["draft bughunt"] -.->|"Quality check"| E
-    O["draft review"] -.->|"Code review"| G
+    O["draft review"] -.->|"At track end"| G
     P["draft adr"] -.->|"Document decisions"| B
     Q["draft jira-preview"] -.->|"Export to Jira"| B
+    R["draft deep-review"] -.->|"Audit module"| E
 ```
 
 ### Context Hierarchy
@@ -8798,8 +7916,8 @@ Located in `draft/` of the target project:
 ### Key Sections
 
 - **`product.md` `## Guidelines`** — UX standards, writing style, branding (optional)
-- **`tech-stack.md` `## Accepted Patterns`** — Intentional design decisions honored by bughunt/validate/review
-- **`workflow.md` `## Guardrails`** — Hard constraints enforced by validation commands
+- **`tech-stack.md` `## Accepted Patterns`** — Intentional design decisions honored by bughunt/deep-review/review
+- **`workflow.md` `## Guardrails`** — Hard constraints enforced by review commands
 
 ## Status Markers
 
@@ -9012,7 +8130,7 @@ After each task: update `plan.md` status markers, increment `metadata.json` coun
 
 #### Phase Boundary Review
 
-When all tasks in a phase are `[x]`, a two-stage review is triggered:
+When all tasks in a phase are `[x]`, a three-stage review is triggered:
 1. **Stage 1: Spec Compliance** — Verify all requirements for the phase are implemented
 2. **Stage 2: Code Quality** — Verify patterns, error handling, test quality; classify issues as Critical/Important/Minor
 
@@ -9163,65 +8281,15 @@ ADRs are stored at `draft/adrs/NNNN-title.md` (e.g., `001-use-postgresql.md`). W
 
 `Proposed` (awaiting review) → `Accepted` (approved and in effect) → `Deprecated` (context changed) or `Superseded by ADR-XXX` (replaced by newer decision).
 
----
+### `draft deep-review` — Module Lifecycle Audit
 
-### `draft validate` — Codebase Quality Validation
-
-Validates codebase quality using Draft context (`.ai-context.md`, tech-stack.md, product.md). Runs architecture conformance, security scan, and performance analysis. Leverages Critical Invariants and Security Architecture sections from `.ai-context.md` for richer validation.
+Perform an exhaustive end-to-end lifecycle review of a service, component, or module. Evaluates ACID compliance, architectural resilience, and production-grade enterprise quality.
 
 #### Scope
 
-- **Track-level:** `draft validate <track-id>` — validates files touched by a specific track
-- **Project-level:** `draft validate` (no arguments) — validates entire codebase
+- **Module-level only:** `draft deep-review src/auth`
 
-Generates report at `draft/tracks/<id>/validation-report.md` (track) or `draft/validation-report.md` (project). Non-blocking by default — reports warnings without halting workflow.
-
-#### Validation Categories
-
-**Project-Level (5 categories):**
-
-**Architecture Conformance**
-- Module boundary violations (e.g., presentation layer importing database models)
-- Circular dependencies between modules
-- Unauthorized dependencies not listed in tech-stack.md
-- API surface violations (internal modules exposed publicly)
-
-**Dead Code Detection**
-- Unreachable code paths, unused exports, orphaned files
-
-**Dependency Cycle Detection**
-- Circular import chains across modules
-
-**Security Scan**
-- OWASP Top 10 patterns (SQL injection, XSS, broken authentication, insecure deserialization)
-- Hardcoded secrets or credentials in source code
-- Insecure dependencies with known CVEs
-- Missing input validation at system boundaries
-- Insufficient error handling exposing sensitive information
-
-**Performance Anti-Patterns**
-- Bundle size exceeding thresholds defined in product.md
-- N+1 query patterns in database access
-- Algorithmic complexity hotspots (O(n²) or worse in critical paths)
-- Unindexed database queries
-- Memory leaks or resource cleanup issues
-
-**Track-Level (adds 3 categories):**
-
-**Spec Compliance** — Implementation matches spec requirements
-
-**Architectural Impact** — Changes respect module boundaries and dependency rules
-
-**Regression Risk** — Changes don't break existing functionality
-
-#### Report Structure
-
-Each finding includes:
-- **Severity**: Critical (must fix), High (should fix), Medium (consider fixing), Low (informational)
-- **Location**: File path and line number
-- **Evidence**: Code snippet demonstrating the issue
-- **Fix**: Recommended remediation with examples
-- **Draft Context**: How this violates `.ai-context.md` or tech-stack.md constraints
+Unlike standard review, this tool performs structural analysis and flags deep architectural flaws. It maintains a history file at `draft/deep-review-history.json` and generates an actionable specification for fixes at `draft/deep-review-report.md`. It does NOT auto-fix code.
 
 ---
 
@@ -9248,30 +8316,30 @@ Test files are written directly to the project using native test conventions.
 
 ### `draft review` — Code Review Orchestrator
 
-Standalone review command that orchestrates two-stage code review with optional quality tool integration.
+Standalone review command that orchestrates a three-stage code review.
 
 #### Track-Level Review
 
 Reviews a track's implementation against its spec.md and plan.md:
-- **Stage 1:** Spec Compliance — verifies all requirements and acceptance criteria are met
-- **Stage 2:** Code Quality — architecture, error handling, testing, maintainability (only if Stage 1 passes)
+- **Stage 1 (Automated Validation):** Fast, static checks for structural flaws (dead code, circular dependencies, OWASP secrets, N+1 patterns).
+- **Stage 2 (Spec Compliance):** Verifies all functional requirements and acceptance criteria are met.
+- **Stage 3 (Code Quality):** Evaluates architecture, error handling, testing, and maintainability.
 
 Extracts commit SHAs from plan.md to determine diff range. Supports fuzzy track matching.
 
 #### Project-Level Review
 
-Reviews arbitrary changes (code quality only, no spec compliance):
+Reviews arbitrary changes (static validation + code quality only, no spec compliance):
 - `project` — uncommitted changes
 - `files <pattern>` — specific file patterns
 - `commits <range>` — commit range
 
 #### Quality Integration
 
-- `with-validate` — include `draft validate` results
 - `with-bughunt` — include `draft bughunt` findings
-- `full` — run both validate and bughunt
+- `full` — run review and bughunt
 
-Generates unified report with deduplication across tools.
+Generates unified report at `draft/tracks/<id>/review-report.md` or `draft/review-report.md`.
 
 #### Examples
 
@@ -9281,7 +8349,7 @@ draft review track add-user-auth          # review specific track
 draft review project                      # review uncommitted changes
 draft review files "src/**/*.ts"          # review specific files
 draft review commits main...HEAD          # review commit range
-draft review track my-feature full        # comprehensive review with validate and bughunt
+draft review track my-feature full        # comprehensive review with bughunt
 ```
 
 ---
@@ -9446,7 +8514,7 @@ Natural language patterns that map to Draft commands:
 | "undo", "revert" | Rollback changes |
 | "break into modules" | Module decomposition |
 | "check coverage" | Code coverage report |
-| "validate", "check quality" | Codebase quality validation |
+| "deep review", "audit module" | Module lifecycle audit |
 | "hunt bugs", "find bugs" | Systematic bug discovery |
 | "review code", "review track" | Code review orchestrator (track/project) |
 | "preview jira", "export to jira" | Preview Jira issues |
@@ -9563,7 +8631,7 @@ See `core/agents/rca.md` for the full process including distributed systems cons
 
 ### Reviewer Agent
 
-Activated at phase boundaries during `draft implement`. Performs a two-stage review before proceeding to the next phase.
+Activated at phase boundaries during `draft implement`. Performs a three-stage review before proceeding to the next phase.
 
 **Stage 1: Spec Compliance** — Did they build what was specified?
 - Requirements coverage (all functional requirements implemented)
@@ -11546,7 +10614,7 @@ graph TD
 ## Accepted Patterns
 
 <!-- Intentional design decisions that may appear unusual but are correct -->
-<!-- bughunt, validate, and review commands will honor these exceptions -->
+<!-- bughunt, deep-review, and review commands will honor these exceptions -->
 
 | Pattern | Location | Rationale |
 |---------|----------|-----------|
@@ -11683,33 +10751,30 @@ Do not proceed to next phase until verification passes.
 
 ---
 
-## Validation
+## Review Settings
 
-### Auto-Validation
-- [ ] Auto-validate at track completion
+### Auto-Review
+- [ ] Auto-review at track completion
 
-When enabled, runs `draft validate --track <id>` automatically when `draft implement` completes a track.
+When enabled, runs `draft review track <id>` automatically when `draft implement` completes a track.
 
 ### Blocking Behavior
-- [ ] Block on validation failures
+- [ ] Block on review failures
 
 When enabled, halt track completion if critical (✗) issues found. Requires fixes before marking complete.
 
-When disabled (default), validation failures produce warnings only. Issues documented in `draft/tracks/<id>/validation-report.md`.
+When disabled (default), review failures produce warnings only. Issues documented in `draft/tracks/<id>/review-report.md`.
 
-### Validation Scope
+### Review Scope (Stage 1 Automation)
 - [x] Architecture conformance
 - [x] Dead code detection
 - [x] Dependency cycle detection
 - [x] Security scan
 - [x] Performance anti-patterns
-- [x] Spec compliance (track-level only)
-- [x] Architectural impact (track-level only)
-- [x] Regression risk (track-level only)
 
-Uncheck categories to skip during validation. All enabled by default.
+Uncheck categories to skip during validation phase of review. All enabled by default.
 
-> **How to configure:** Edit the checkboxes above directly in this file. Change `[x]` to `[ ]` to disable a validation category. The `draft validate` command reads these settings before running.
+> **How to configure:** Edit the checkboxes above directly in this file. Change `[x]` to `[ ]` to disable a category. The `draft review` command reads these settings before running.
 
 ---
 
@@ -11757,7 +10822,7 @@ If task exceeds 5 iterations:
 - [ ] No skipped tests without documented reason
 - [ ] Coverage must not decrease
 
-> Check the guardrails that apply to this project. Unchecked items are not enforced. Commands like bughunt, validate, and review will flag violations of checked guardrails.
+> Check the guardrails that apply to this project. Unchecked items are not enforced. Commands like bughunt, deep-review, and review will flag violations of checked guardrails.
 
 </core-file>
 
@@ -13448,8 +12513,9 @@ If after 3 hypothesis cycles the root cause is not confirmed:
 <core-file path="core/agents/reviewer.md">
 
 ---
-description: Two-stage code review agent for phase boundaries. Ensures spec compliance before examining code quality.
+description: Three-stage code review agent for phase boundaries. Ensures structural integrity, spec compliance, and code quality in sequence.
 capabilities:
+  - Automated static validation
   - Specification compliance verification
   - Code quality assessment
   - Issue severity classification
@@ -13458,11 +12524,46 @@ capabilities:
 
 # Reviewer Agent
 
-You are a two-stage code review agent. At phase boundaries, perform both stages in order.
+You are a three-stage code review agent. At phase boundaries, perform all stages in order.
 
-## Two-Stage Process
+## Three-Stage Process
 
-### Stage 1: Spec Compliance (REQUIRED)
+### Stage 1: Automated Validation (REQUIRED)
+
+**Question:** Is the code structurally sound and secure?
+
+Perform fast, objective static checks using grep/search across the diff:
+
+1. **Architecture Conformance**
+   - [ ] No pattern violations from `.ai-context.md` or `architecture.md`
+   - [ ] Module boundaries respected
+   - [ ] No unauthorized cross-layer imports
+
+2. **Dead Code Detection**
+   - [ ] No newly exported functions/classes with 0 references
+   - [ ] No unreachable code paths
+
+3. **Dependency Cycles**
+   - [ ] No circular import chains introduced
+   - [ ] Clean dependency graph
+
+4. **Security Scan (OWASP)**
+   - [ ] No hardcoded secrets or API keys
+   - [ ] No SQL injection risks (string concatenation in queries)
+   - [ ] No XSS vulnerabilities (`innerHTML`, raw DOM insertion)
+
+5. **Performance Anti-Patterns**
+   - [ ] No N+1 database queries (loops containing queries)
+   - [ ] No blocking synchronous I/O in async functions
+   - [ ] No unbounded queries without pagination
+
+**If Stage 1 FAILS (any critical issue):** Stop here. List structural failures and return to implementation. Do NOT proceed to Stage 2.
+
+**If Stage 1 PASSES:** Proceed to Stage 2.
+
+---
+
+### Stage 2: Spec Compliance (only if Stage 1 passes)
 
 **Question:** Did they build what was specified?
 
@@ -13483,25 +12584,25 @@ Check against the track's `spec.md`:
    - [ ] Error scenarios addressed
    - [ ] Integration points work as specified
 
-**If Stage 1 FAILS:** Stop here. List gaps and return to implementation.
+**If Stage 2 FAILS:** Stop here. List gaps and return to implementation.
 
-**If Stage 1 PASSES:** Proceed to Stage 2.
+**If Stage 2 PASSES:** Proceed to Stage 3.
 
 ---
 
-### Stage 2: Code Quality (only if Stage 1 passes)
+### Stage 3: Code Quality (only if Stage 2 passes)
 
 **Question:** Is the code well-crafted?
 
 1. **Architecture**
    - [ ] Follows project patterns (from tech-stack.md)
    - [ ] Appropriate separation of concerns
-   - [ ] No unnecessary complexity
+   - [ ] Critical invariants honored (if `.ai-context.md` exists)
 
 2. **Error Handling**
    - [ ] Errors handled at appropriate level
    - [ ] User-facing errors are helpful
-   - [ ] System errors are logged
+   - [ ] No silent failures
 
 3. **Testing**
    - [ ] Tests test real logic (not implementation details)
@@ -13510,8 +12611,7 @@ Check against the track's `spec.md`:
 
 4. **Maintainability**
    - [ ] Code is readable without excessive comments
-   - [ ] No obvious performance issues
-   - [ ] No security vulnerabilities
+   - [ ] Consistent naming and style
 
 ---
 
@@ -13551,7 +12651,21 @@ Check against the track's `spec.md`:
 ```markdown
 # Phase Review: [Phase Name]
 
-## Stage 1: Spec Compliance
+## Stage 1: Automated Validation
+
+**Status:** PASS / FAIL
+
+- **Architecture Conformance:** PASS/FAIL
+- **Dead Code:** N found
+- **Dependency Cycles:** PASS/FAIL
+- **Security Scan:** N issues found
+- **Performance:** N anti-patterns detected
+
+[If FAIL: List critical structural issues and stop here]
+
+---
+
+## Stage 2: Spec Compliance
 
 **Status:** PASS / FAIL
 
@@ -13568,7 +12682,7 @@ Check against the track's `spec.md`:
 
 ---
 
-## Stage 2: Code Quality
+## Stage 3: Code Quality
 
 **Status:** PASS / PASS WITH NOTES / FAIL
 
@@ -13597,7 +12711,9 @@ Check against the track's `spec.md`:
 
 | Don't | Instead |
 |-------|---------|
-| Skip Stage 1 and jump to code quality | Always verify spec compliance first |
+| Skip Stage 1 for structural checks | Always validate architecture/security first |
+| Jump to Stage 2 when Stage 1 fails | Fix structural issues before spec review |
+| Skip Stage 2 and jump to code quality | Always verify spec compliance before quality |
 | Nitpick style when spec is incomplete | Fix spec gaps before style concerns |
 | Block on minor issues | Only block on Critical/Important |
 | Accept "good enough" on Critical issues | Critical must be fixed |
@@ -13607,10 +12723,11 @@ Check against the track's `spec.md`:
 
 At phase boundary in `draft implement`:
 
-1. Load track's `spec.md` for requirements
-2. Run Stage 1 against completed phase tasks
-3. If Stage 1 passes, run Stage 2
-4. Document findings in plan.md under phase
-5. Only proceed to next phase if review passes
+1. Run Stage 1: Automated static validation
+2. If Stage 1 passes, load track's `spec.md` for requirements
+3. Run Stage 2: Spec compliance against completed phase tasks
+4. If Stage 2 passes, run Stage 3: Code quality
+5. Document findings in plan.md under phase
+6. Only proceed to next phase if review passes
 
 </core-file>

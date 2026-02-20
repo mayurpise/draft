@@ -294,8 +294,8 @@ h3. Verification
 | Critical | Security | src/auth.ts:45 | Hardcoded API key | Secret exposed in version control | Move to environment variable |
 | Warning | Architecture | src/utils.ts:12 | Layer boundary violation | UI importing from database layer | Use API service layer instead |
 
-> Validation findings are compliance issues from `/draft:validate`. Include in Epic description for awareness.
-> Critical validation findings should also be created as Bug issues (same as bughunt bugs) to ensure they are tracked and resolved.
+> Review findings are from `/draft:review` Stage 1 (Automated Validation) or `/draft:deep-review`. Include in Epic description for awareness.
+> Critical review findings should also be created as Bug issues (same as bughunt bugs) to ensure they are tracked and resolved.
 
 ---
 

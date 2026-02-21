@@ -1,6 +1,6 @@
 ---
 name: decompose
-description: Decompose project or track into modules with dependency mapping. Creates .ai-context.md (source of truth) and derives architecture.md (human-readable) with module definitions, dependency diagram, and implementation order.
+description: Decompose project or track into modules with dependency mapping. Updates architecture.md (source of truth) and derives .ai-context.md (token-optimized, derived from architecture.md) with module definitions, dependency diagram, and implementation order.
 ---
 
 # Decompose
@@ -11,7 +11,7 @@ You are decomposing a project or track into modules with clear responsibilities,
 
 - Defining modules without understanding the codebase
 - Creating modules with circular dependencies
-- Making modules too large (>3 files) or too small (single function)
+- Making modules too large (>5 files, excluding test files) or too small (single function)
 - Skipping dependency analysis
 - Not waiting for developer approval at checkpoints
 
@@ -225,7 +225,7 @@ Parallel opportunities: config and database can start after logging.
 Write the architecture document using the template from `core/templates/ai-context.md` (project-wide) or `core/templates/architecture.md` (track-scoped):
 
 **Location:**
-- Project-wide: `draft/.ai-context.md` (then derive `draft/architecture.md` using the Derivation Subroutine from `/draft:init`)
+- Project-wide: Update `draft/architecture.md` with the module changes, then run the Condensation Subroutine (defined in `/draft:init`) to regenerate `draft/.ai-context.md`
 - Track-scoped: `draft/tracks/<id>/architecture.md`
 
 **Contents:**
@@ -299,10 +299,12 @@ Next steps:
 - Review architecture.md and edit as needed
 - Run /draft:implement to start building (stories, execution state,
   and skeleton checkpoints will activate automatically)
-- Run /draft:coverage after implementation to verify test quality
+- After implementation is complete, run `/draft:coverage` to verify test quality
 ```
 
 ## Mutation Protocol for .ai-context.md (Project-Wide)
+
+> If `draft/.ai-context.md` already exists (e.g., from `/draft:init`), use the Mutation Protocol below to append new modules. Only use the template for fresh creation when no `.ai-context.md` exists.
 
 When adding new modules to project-wide `.ai-context.md`:
 
@@ -311,13 +313,14 @@ When adding new modules to project-wide `.ai-context.md`:
 3. Update `## Dependency Table`, `## Dependency Order`, `## Module Dependency Diagram`
 4. Do NOT remove/modify `[x] Existing` modules
 5. Update YAML frontmatter `git.commit` and `git.message` to current HEAD
-6. After update, regenerate `draft/architecture.md` using the Derivation Subroutine defined in `/draft:init`
+6. After updating `draft/architecture.md` with the module changes, run the Condensation Subroutine (defined in `/draft:init`) to regenerate `draft/.ai-context.md`
 
 **Safe write pattern:**
 1. Backup `.ai-context.md` → `.ai-context.md.backup`
 2. Write changes to `.ai-context.md.new`
 3. Present diff for review
-4. On approval: replace; on rejection: discard
+4. On approval: replace `.ai-context.md` with `.ai-context.md.new`, then delete `.ai-context.md.backup`
+5. On rejection: delete `.ai-context.md.new` and rename `.ai-context.md.backup` back to `.ai-context.md`
 
 ## Updating architecture context
 

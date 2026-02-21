@@ -22,7 +22,7 @@ You are computing and reporting code coverage for the active track or a specific
 1. Read `draft/tech-stack.md` for test framework and language info
 2. Find active track from `draft/tracks.md`
 3. If track has `architecture.md` (track-level) or project has `.ai-context.md`, identify current module for scoping
-4. Read `draft/workflow.md` for coverage target (default: 95%)
+4. Look for `coverage_target` in `draft/workflow.md`. If absent, default to 95%.
 
 If no active track and no argument provided:
 - Tell user: "No active track. Provide a path or track ID, or run `/draft:new-track` first."
@@ -59,7 +59,7 @@ Build the coverage command with the appropriate scope/filter flags.
 
 ## Step 4: Run Coverage
 
-1. Execute the coverage command
+1. Execute the coverage command. Request machine-readable output when possible: `--json` for Jest, `--cov-report=json` for pytest, `-coverprofile` for Go, `--coverage-output-format json` for dotnet.
 2. Capture full output
 3. If command fails:
    - Check if dependencies are installed (test framework, coverage plugin)
@@ -158,6 +158,8 @@ After developer approves:
    }
    ```
 
+4. **Write detailed coverage report** to `draft/tracks/<id>/coverage-report.md` with timestamped entries for historical tracking.
+
 ## Completion
 
 Announce:
@@ -178,7 +180,7 @@ Results recorded in:
 ## Re-running Coverage
 
 When coverage is run again on the same track/module:
-1. Compare with previous results
+1. Compare with previous results from metadata.json. If no previous coverage data found in metadata.json, skip delta comparison and report current values only.
 2. Show delta: "Coverage improved from 87.3% to 96.2% (+8.9%)"
 3. Highlight newly covered lines
 4. Update all records with latest results

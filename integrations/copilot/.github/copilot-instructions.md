@@ -142,12 +142,13 @@ Every feature follows this lifecycle:
 2. **New Track** - Create specification and plan
 3. **Implement** - Execute tasks with TDD workflow
 4. **Verify** - Confirm acceptance criteria met
+5. **Quality** - Run `draft review` for code review, `draft bughunt` for bug hunting, `draft deep-review` for module audits
 
 ## Context Files
 
 When `draft/` exists, these files guide development:
-- `draft/.ai-context.md` - Source of truth for AI agents (dense codebase understanding)
-- `draft/architecture.md` - Human-readable engineering guide (derived from .ai-context.md)
+- `draft/architecture.md` - Source of truth: human-readable engineering reference (30-45 pages)
+- `draft/.ai-context.md` - Derived from architecture.md: token-optimized AI context (200-400 lines)
 - `draft/product.md` - Product vision and goals
 - `draft/tech-stack.md` - Technical constraints
 - `draft/workflow.md` - TDD and commit preferences
@@ -333,6 +334,8 @@ If `draft/` exists with context files:
 - Announce: "Project already initialized. Use `draft init refresh` to update context or `draft new-track` to create a feature."
 - Stop here.
 
+> **Rollback note:** If init fails partway, delete the `draft/` directory and re-run `draft init`.
+
 ### Monorepo Detection
 
 Check for monorepo indicators:
@@ -362,7 +365,7 @@ If the user runs `draft init refresh`:
    **a. Read synced commit from metadata:**
    ```bash
    # Extract synced_to_commit from YAML frontmatter
-   grep -A1 "synced_to_commit:" draft/architecture.md | tail -1 | tr -d ' "'
+   grep "synced_to_commit:" draft/architecture.md | head -1 | sed 's/.*synced_to_commit:[[:space:]]*"\{0,1\}\([^"]*\)"\{0,1\}/\1/'
    ```
    This returns the commit SHA the docs were last synced to (more reliable than file modification time).
 
@@ -375,13 +378,13 @@ If the user runs `draft init refresh`:
    **c. Check if docs were generated with dirty state:**
    If the original `git.dirty: true`, warn: "Previous generation had uncommitted changes. Full refresh recommended."
 
-   **c. Categorize changes:**
+   **d. Categorize changes:**
    - **Added files**: New modules, components, or features to document
    - **Modified files**: Existing sections that may need updates
    - **Deleted files**: Components to remove from documentation
    - **Renamed files**: Update file references
 
-   **d. Targeted analysis (only changed files):**
+   **e. Targeted analysis (only changed files):**
    - Read each changed file to understand modifications
    - Identify which architecture.md sections are affected:
      - New files → Component Map, Implementation Catalog, File Structure
@@ -392,20 +395,20 @@ If the user runs `draft init refresh`:
    - Preserve unchanged sections exactly as-is
    - Preserve modules added by `draft decompose` (planned modules)
 
-   **e. Present incremental diff:**
+   **f. Present incremental diff:**
    Show user:
    - Files analyzed: `N changed files since <date>`
    - Sections updated: list of affected sections
    - Summary of changes per section
 
-   **f. On user approval:**
+   **g. On user approval:**
    - Update only the affected sections in `draft/architecture.md`
    - Regenerate `draft/.ai-context.md` using the Condensation Subroutine
 
-   **g. On user rejection:**
+   **h. On user rejection:**
    - No changes made
 
-   **h. Fallback to full refresh:**
+   **i. Fallback to full refresh:**
    If `synced_to_commit` is missing from metadata, or the commit SHA doesn't exist in git history:
    ```bash
    git cat-file -t <SYNCED_SHA> 2>/dev/null || echo "not found"
@@ -414,7 +417,7 @@ If the user runs `draft init refresh`:
 
    - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now
 
-   **i. Update metadata after refresh:**
+   **j. Update metadata after refresh:**
    After successful refresh, update the YAML frontmatter in all modified files:
    - `generated_by`: `draft init refresh`
    - `generated_at`: current timestamp
@@ -470,6 +473,8 @@ Perform a **one-time, exhaustive analysis** of the existing codebase. This is NO
 - **Target 30-45 pages** — shorter output indicates incomplete analysis
 
 If the codebase is large (200+ files), focus on the module boundaries but still enumerate exhaustively within each module.
+
+> **Large codebase guardrail:** If the codebase exceeds 500 source files, limit deep dives to the top 20 most-imported modules and summarize others in a table.
 
 ### Execution Strategy for Depth
 
@@ -2254,7 +2259,31 @@ ls draft/ 2>/dev/null
 - Announce: "Root draft/ directory not found. Run `draft init` at monorepo root first to create base context, then run `draft index` to aggregate service knowledge."
 - Stop here.
 
-**If `draft/` exists:** Continue to Step 1.
+**If `draft/` exists:** Continue to lockfile check.
+
+## Lockfile Check
+
+Before proceeding, check for a stale lock:
+
+```bash
+ls draft/.index-lock 2>/dev/null
+```
+
+- **If `draft/.index-lock` exists and is less than 10 minutes old:** Warn: "Previous indexing may be incomplete. Remove `draft/.index-lock` to proceed." Stop here.
+- **If `draft/.index-lock` exists and is older than 10 minutes:** Remove it and continue.
+- **If no lock exists:** Continue.
+
+Create `draft/.index-lock` with the current timestamp before starting:
+
+```bash
+date -u +"%Y-%m-%dT%H:%M:%SZ" > draft/.index-lock
+```
+
+**On completion (Step 9) or fatal error, remove the lock:**
+
+```bash
+rm -f draft/.index-lock
+```
 
 ## Step 1: Parse Arguments
 
@@ -2263,7 +2292,7 @@ Check for optional arguments:
 - `bughunt [dir1 dir2 ...]`: Run bug hunt across subdirectories with `draft/` folders
   - If no directories specified: auto-discover all subdirectories with `draft/`
   - If directories specified: run bughunt only in those subdirectories (skip if no `draft/`)
-  - Generate summary report at repository root: `draft-index-bughunt-summary.md`
+  - Generate summary report at: `draft/bughunt-summary.md`
 
 **If `bughunt` argument detected:** Skip to Step 1A (Bughunt Mode) instead of continuing to Step 2.
 
@@ -2350,7 +2379,7 @@ Extract from each report:
 
 ### 1A.4: Generate Aggregate Summary Report
 
-Create `draft-index-bughunt-summary.md` at repository root:
+Create `draft/bughunt-summary.md`:
 
 ```markdown
 # Draft Index: Bughunt Summary
@@ -2417,7 +2446,7 @@ Grand Total Bugs:
   Medium:   Y
   Low:      Z
 
-Summary Report: draft-index-bughunt-summary.md
+Summary Report: draft/bughunt-summary.md
 
 Directories requiring immediate attention:
   - services/billing/ (1 CRITICAL)
@@ -2556,7 +2585,9 @@ billing-service: [auth-service]
 api-gateway: [auth-service, billing-service]
 ```
 
-Update each service's `manifest.json` with `dependents` field (reverse lookup).
+### Step 6.2: Resolve Dependents (Reverse Lookup)
+
+For each service S, iterate all other services' `dependencies` arrays. If S appears in another service's dependencies, add that service to S's `dependents` array. Write the updated `manifest.json` for each service.
 
 ## Step 7: Generate Root Aggregated Files
 
@@ -2698,6 +2729,10 @@ Services deviating from org standards:
 | ml-service | Python instead of Go/TS | ML ecosystem |
 | analytics | MongoDB instead of Postgres | Time-series workload |
 ```
+
+### Placeholder Detection
+
+A file is considered a placeholder if it contains the marker `<!-- AUTO-GENERATED -->` or is smaller than 100 bytes. Placeholders may be overwritten without confirmation. Non-placeholder files require user confirmation before overwriting.
 
 ### 7.4 Synthesize `draft/product.md` (if not exists or is placeholder)
 
@@ -2868,6 +2903,14 @@ graph TD
 | @org/logging | Structured logging | 1.x | all services |
 ```
 
+### 7.7 Synthesize `draft/.ai-context.md` (if not exists or is placeholder)
+
+After generating `draft/architecture.md`, derive a condensed `draft/.ai-context.md` using the Condensation Subroutine (as defined in `draft init`). This provides a token-optimized, self-contained AI context file at the root level aggregating all service knowledge.
+
+- Read the synthesized `draft/architecture.md`
+- Condense into 200-400 lines covering: system overview, service catalog, inter-service dependencies, shared infrastructure, cross-cutting patterns, critical invariants, and entry points
+- If `draft/.ai-context.md` already exists and is not a placeholder, prompt before overwriting
+
 ## Step 8: Create Root Config
 
 Create `draft/config.yaml` if not exists:
@@ -2902,6 +2945,12 @@ reindex_triggers:
 ```
 
 ## Step 9: Completion Report
+
+Remove the lockfile:
+
+```bash
+rm -f draft/.index-lock
+```
 
 ```
 ═══════════════════════════════════════════════════════════
@@ -3010,7 +3059,8 @@ If missing, tell user: "Project not initialized. Run `draft init` first."
 Create a short, kebab-case ID from the description (use the stripped description if `--quick` was present):
 - "Add user authentication" → `add-user-auth`
 - "Fix login bug" → `fix-login-bug`
-- If collision risk, append ISO date suffix: `add-user-auth-20250126`
+
+Check if `draft/tracks/<track_id>/` already exists. If collision detected, append `-<ISO-date>` suffix (e.g., `feature-auth-2026-02-21`). Verify the suffixed path is also free before proceeding.
 
 ## Step 1.5: Quick Mode Path (`--quick` only)
 
@@ -3191,7 +3241,7 @@ synced_to_commit: "{FULL_SHA}"
 | [e.g., Scope creep] | 3 | 3 | 9 | [e.g., Strict non-goals enforcement] |
 
 ## Deployment Strategy
-<!-- Define rollout approach for production delivery -->
+<!-- Define rollout approach for production delivery. For bug fixes and minor refactors, this section may be removed or marked N/A. -->
 
 ### Rollout Phases
 1. **Canary** (1-5% traffic) — Validate core flows, monitor error rates
@@ -3472,7 +3522,11 @@ Enter 1–3, or "skip":
 When user confirms spec is ready:
 
 1. Update spec-draft.md status to `[x] Complete`
-2. Rename `spec-draft.md` → `spec.md`
+2. Finalize `spec-draft.md` → `spec.md`:
+   1. Read `spec-draft.md` content.
+   2. Write content to `spec.md`.
+   3. Verify `spec.md` exists and has non-empty content.
+   4. Delete `spec-draft.md`.
 3. Update Context References with specific connections to product.md, tech-stack.md, .ai-context.md
 4. Add Conversation Log summary with key decisions and reasoning
 
@@ -3556,11 +3610,13 @@ If either missing:
     "completed": 0
   },
   "tasks": {
-    "total": 0,
+    "total": "<count all `- [ ]` task lines in plan.md>",
     "completed": 0
   }
 }
 ```
+
+Count all `- [ ]` task lines in `plan.md` and set `tasks.total` in `metadata.json` accordingly instead of 0.
 
 **Note:** ISO timestamps can use either `Z` or `.000Z` suffix (both valid ISO 8601). No format constraint enforced — both second precision (`2026-02-08T12:00:00Z`) and millisecond precision (`2026-02-08T12:00:00.000Z`) are acceptable.
 
@@ -3645,7 +3701,7 @@ You are decomposing a project or track into modules with clear responsibilities,
 
 - Defining modules without understanding the codebase
 - Creating modules with circular dependencies
-- Making modules too large (>3 files) or too small (single function)
+- Making modules too large (>5 files, excluding test files) or too small (single function)
 - Skipping dependency analysis
 - Not waiting for developer approval at checkpoints
 
@@ -3859,7 +3915,7 @@ Parallel opportunities: config and database can start after logging.
 Write the architecture document using the template from `core/templates/ai-context.md` (project-wide) or `core/templates/architecture.md` (track-scoped):
 
 **Location:**
-- Project-wide: `draft/.ai-context.md` (then derive `draft/architecture.md` using the Derivation Subroutine from `draft init`)
+- Project-wide: Update `draft/architecture.md` with the module changes, then run the Condensation Subroutine (defined in `draft init`) to regenerate `draft/.ai-context.md`
 - Track-scoped: `draft/tracks/<id>/architecture.md`
 
 **Contents:**
@@ -3933,10 +3989,12 @@ Next steps:
 - Review architecture.md and edit as needed
 - Run draft implement to start building (stories, execution state,
   and skeleton checkpoints will activate automatically)
-- Run draft coverage after implementation to verify test quality
+- After implementation is complete, run `draft coverage` to verify test quality
 ```
 
 ## Mutation Protocol for .ai-context.md (Project-Wide)
+
+> If `draft/.ai-context.md` already exists (e.g., from `draft init`), use the Mutation Protocol below to append new modules. Only use the template for fresh creation when no `.ai-context.md` exists.
 
 When adding new modules to project-wide `.ai-context.md`:
 
@@ -3945,13 +4003,14 @@ When adding new modules to project-wide `.ai-context.md`:
 3. Update `## Dependency Table`, `## Dependency Order`, `## Module Dependency Diagram`
 4. Do NOT remove/modify `[x] Existing` modules
 5. Update YAML frontmatter `git.commit` and `git.message` to current HEAD
-6. After update, regenerate `draft/architecture.md` using the Derivation Subroutine defined in `draft init`
+6. After updating `draft/architecture.md` with the module changes, run the Condensation Subroutine (defined in `draft init`) to regenerate `draft/.ai-context.md`
 
 **Safe write pattern:**
 1. Backup `.ai-context.md` → `.ai-context.md.backup`
 2. Write changes to `.ai-context.md.new`
 3. Present diff for review
-4. On approval: replace; on rejection: discard
+4. On approval: replace `.ai-context.md` with `.ai-context.md.new`, then delete `.ai-context.md.backup`
+5. On rejection: delete `.ai-context.md.new` and rename `.ai-context.md.backup` back to `.ai-context.md`
 
 ## Updating architecture context
 
@@ -3980,6 +4039,10 @@ You are implementing tasks from the active track's plan following the TDD workfl
 - Assuming a test passes without actually running it
 
 **Verify before you mark complete. One task, one commit.**
+
+## Constraints
+
+Draft skills are designed for single-agent, single-track execution. Do not run multiple Draft commands concurrently on the same track.
 
 ---
 
@@ -4216,6 +4279,7 @@ After completing each task:
 1. Commit FIRST (REQUIRED - non-negotiable):
    - Stage only files changed by this task (never `git add .`)
    - `git add <specific files>`
+   - Verify staged changes exist before committing: `git diff --cached --quiet`. If nothing staged, skip the commit step.
    - `git commit -m "type(<track_id>): task description"`
    - Get commit SHA: `git rev-parse --short HEAD`
    - Do NOT proceed to the next task without committing
@@ -4240,7 +4304,7 @@ After completing each task:
 5. If `.ai-context.md` or `architecture.md` exists for the track:
    - Update module status markers (`[ ]` → `[~]` when first task in module starts, `[~]` → `[x]` when all tasks complete)
    - Fill in Story placeholders with the approved story from Step 2.5
-   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.message` to current HEAD, then regenerate `draft/architecture.md` using the Derivation Subroutine defined in `draft init`
+   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.message` to current HEAD. Update `draft/architecture.md` with structural changes, then run the Condensation Subroutine (defined in `draft init`) to regenerate `draft/.ai-context.md`.
 
 ## Verification Gate (REQUIRED)
 
@@ -4273,7 +4337,7 @@ When all tasks in a phase are `[x]`:
 ### Three-Stage Review (REQUIRED)
 
 **Stage 1: Automated Validation**
-- Fast static checks: architecture conformance, dead code, circular dependencies, OWASP security scans, performance anti-patterns
+- Fast static checks: architecture conformance, dead code, circular dependencies, performance anti-patterns. Review for common security anti-patterns (OWASP top 10). For automated checks, use language-specific tools (e.g., `npm audit` for JS, `bandit` for Python, `cargo audit` for Rust).
 - **If critical issues found:** List them, return to implementation
 
 **Stage 2: Spec Compliance** (only if Stage 1 passes)
@@ -4341,7 +4405,7 @@ Summary:
 - Duration: [if tracked]
 
 [If validation ran:]
-Validation: ✓ [pass] | ⚠ [warn] | ✗ [critical]
+Validation: PASS | WARN | CRITICAL
 Report: draft/tracks/<track_id>/validation-report.md
 
 All acceptance criteria from spec.md should be verified.
@@ -4434,7 +4498,7 @@ You are computing and reporting code coverage for the active track or a specific
 1. Read `draft/tech-stack.md` for test framework and language info
 2. Find active track from `draft/tracks.md`
 3. If track has `architecture.md` (track-level) or project has `.ai-context.md`, identify current module for scoping
-4. Read `draft/workflow.md` for coverage target (default: 95%)
+4. Look for `coverage_target` in `draft/workflow.md`. If absent, default to 95%.
 
 If no active track and no argument provided:
 - Tell user: "No active track. Provide a path or track ID, or run `draft new-track` first."
@@ -4471,7 +4535,7 @@ Build the coverage command with the appropriate scope/filter flags.
 
 ## Step 4: Run Coverage
 
-1. Execute the coverage command
+1. Execute the coverage command. Request machine-readable output when possible: `--json` for Jest, `--cov-report=json` for pytest, `-coverprofile` for Go, `--coverage-output-format json` for dotnet.
 2. Capture full output
 3. If command fails:
    - Check if dependencies are installed (test framework, coverage plugin)
@@ -4570,6 +4634,8 @@ After developer approves:
    }
    ```
 
+4. **Write detailed coverage report** to `draft/tracks/<id>/coverage-report.md` with timestamped entries for historical tracking.
+
 ## Completion
 
 Announce:
@@ -4590,7 +4656,7 @@ Results recorded in:
 ## Re-running Coverage
 
 When coverage is run again on the same track/module:
-1. Compare with previous results
+1. Compare with previous results from metadata.json. If no previous coverage data found in metadata.json, skip delta comparison and report current values only.
 2. Show delta: "Coverage improved from 87.3% to 96.2% (+8.9%)"
 3. Highlight newly covered lines
 4. Update all records with latest results
@@ -4661,7 +4727,9 @@ Use this context to:
 
 ### 2. Confirm Scope
 
-Ask user to confirm scope:
+When invoked programmatically by `draft review` with `with-bughunt`, skip scope confirmation and inherit the scope from the calling command.
+
+Otherwise, ask user to confirm scope:
 - **Entire repo** - Full codebase analysis
 - **Specific paths** - Target directories or files
 - **Track-level** (specify `<track-id>`) - Focus on files relevant to a specific track
@@ -4682,7 +4750,7 @@ If no Draft context exists, proceed with code-only analysis.
 
 ## Dimension Applicability Check
 
-Before analyzing all 12 dimensions, determine which apply to this codebase:
+Before analyzing all 11 dimensions, determine which apply to this codebase:
 
 - **Skip explicitly** rather than forcing analysis of N/A dimensions
 - **Mark skipped dimensions** with reason in report summary
@@ -5268,7 +5336,7 @@ After writing all test files, validate them using the project's native toolchain
    | **Fails — import/include error** | Fix the import path, retry (up to 2 retries) |
    | **Fails — missing dep** | Add the dependency, retry (up to 2 retries) |
    | **Fails — type/API mismatch** | Fix the test to match actual API signatures, retry (up to 2 retries) |
-   | **Persistent failure (3 attempts)** | Mark as `BUILD_FAILED` with the error message in report |
+   | **Persistent failure (3 attempts)** | Mark as `BUILD_FAILED` with the error message in report. Delete the broken test file and note in the report: "Test file removed due to persistent build failure." |
 
 3. **Do NOT run the tests.** The tests are designed to **FAIL** against the current buggy code — that's the point. Validation checks only syntax, types, and linking. Running them would produce expected failures that aren't useful here.
 
@@ -5615,7 +5683,6 @@ Extract and validate command arguments from user input.
 - `commits <range>` - Review commit range (e.g., `main...HEAD`, `abc123..def456`)
 
 **Quality integration modifiers:**
-- `with-validate` - (Deprecated) Ignored as validation is natively built-in.
 - `with-bughunt` - Include `draft bughunt` results
 - `full` - Include bughunt results
 
@@ -5741,12 +5808,7 @@ Once track is resolved:
 
 For project-level reviews (no track context):
 
-1. **Read project guidelines:**
-   - Load `CLAUDE.md` (project instructions)
-   - Load `core/methodology.md` (Draft methodology)
-   - Load `core/agents/reviewer.md` (review criteria)
-
-2. **Load Draft context (if available):**
+1. **Load Draft context (if available):**
    - Read `draft/.ai-context.md` (system architecture, critical invariants, security architecture). Falls back to `draft/architecture.md` for legacy projects.
    - Read `draft/tech-stack.md` (technical constraints, **Accepted Patterns**)
    - Read `draft/workflow.md` (**Guardrails** section)
@@ -5754,7 +5816,7 @@ For project-level reviews (no track context):
    **Honor Accepted Patterns** - Don't flag patterns documented in `tech-stack.md` `## Accepted Patterns`
    **Enforce Guardrails** - Flag violations of checked guardrails in `workflow.md` `## Guardrails`
 
-3. **Note limitations:**
+2. **Note limitations:**
    - No spec.md → Skip Stage 1 (spec compliance)
    - Run Stage 2 (code quality) only
 
@@ -5810,9 +5872,7 @@ Skip non-source files to focus review:
 
 Apply a three-stage review process (merging static validation and semantic review).
 
-### Stage 1: Automated Validation (Static Checks)
-
-**Run for both track-level and project-level reviews**
+### Stage 1: Automated Validation
 
 **Goal:** Detect structural, security, and performance issues using fast, objective searches across the diff.
 
@@ -5908,6 +5968,10 @@ Classify all findings by severity:
 | **Critical** | Blocks release, breaks functionality, security issue | Must fix before proceeding |
 | **Important** | Degrades quality, technical debt | Should fix before phase complete |
 | **Minor** | Style, optimization, nice-to-have | Note for later, don't block |
+
+**Scope-specific behavior:**
+- For **track-level** reviews: Run all three stages. Stage 2 uses `spec.md` acceptance criteria loaded in Step 2.
+- For **project-level** reviews: Skip Stage 2 (no spec). Run Stage 1 and Stage 3 only.
 
 **Issue format:**
 ```markdown
@@ -6338,7 +6402,12 @@ Perform an exhaustive end-to-end lifecycle review of a service, component, or mo
 
 1. **Check review history:** Read `draft/deep-review-history.json` if it exists. This file tracks previously reviewed modules with timestamps.
 2. **If `$ARGUMENTS` is provided:** Use that module. If it was previously reviewed, re-review it (the user explicitly requested it).
-3. **If no argument:** Discover all modules/services/components in the codebase (scan directory structure, `__init__.py` files, service boundaries, package definitions). Select the first module NOT present in the review history. If all have been reviewed, pick the one with the oldest review date.
+3. **If no argument:** Discover all modules using the following priority order:
+   1. Use module definitions from `draft/.ai-context.md` if it exists (check `## Modules` or `## Module Catalog` sections).
+   2. Use top-level directories under `src/` or equivalent source root.
+   3. Use directories containing `__init__.py`, `package.json`, or `go.mod`.
+   Document which heuristic was used in the report.
+   Select the first module NOT present in the review history. If all have been reviewed, pick the one with the oldest review date.
 4. **Announce selection:** State which module was selected and why before proceeding.
 
 ---
@@ -6359,6 +6428,9 @@ Perform an exhaustive end-to-end lifecycle review of a service, component, or mo
 - **Durability:** Confirm committed data survives crashes. Check for fire-and-forget patterns, missing flush/sync calls, and inadequate error handling around persistence.
 
 ### Phase 3: Production-Grade Assessment
+
+**Applicability note:** Skip categories that are not applicable to the module type (e.g., circuit breakers and backpressure are backend-specific; skip for frontend/CLI modules).
+
 - **Resilience:** Graceful degradation, circuit breakers, timeout handling, backpressure
 - **Observability:** Logging coverage (not excessive), structured log fields, correlation IDs, metric emission points
 - **Configuration:** Hardcoded values that should be configurable, missing environment variable validation
@@ -6395,11 +6467,44 @@ Create the file in the `draft/` directory if it does not exist. Append to the `r
 
 Output a structured summary and detailed "Implementation Spec" for any needed fixes.
 
-**File to create:** `draft/deep-review-report.md`
+**File to create:** `draft/deep-review-reports/<module-name>.md`
+
+Create the `draft/deep-review-reports/` directory if it does not exist.
+
+**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
+
+```bash
+git branch --show-current                    # LOCAL_BRANCH
+git rev-parse HEAD                           # FULL_SHA
+git rev-parse --short HEAD                   # SHORT_SHA
+git log -1 --format=%ci HEAD                 # COMMIT_DATE
+```
+
+Report template:
+
+```markdown
+---
+module: "<module-name>"
+module_path: "<module-path>"
+generated_by: "draft:deep-review"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+reviewer: "{model name from runtime}"
+---
+```
 
 **Module reviewed:** name and path
 **Issues by category:** ACID | Resilience | Observability
 **Verdict:** PASS / CONDITIONAL PASS / FAIL
+
+**Verdict criteria:**
+- **FAIL** = any Critical issue found.
+- **CONDITIONAL PASS** = no Critical issues but Important issues exist.
+- **PASS** = only Minor issues or no issues.
 
 Format findings as actionable tasks:
 ```markdown
@@ -6490,8 +6595,10 @@ Stop here after listing.
 If argument is `supersede <number>`:
 1. Read the ADR file `draft/adrs/<number>-*.md`
 2. Change status from `Accepted` to `Superseded by ADR-<new_number>`
-3. Ask what new ADR supersedes it, or create the new one
-4. Stop here after updating.
+3. In the OLD ADR's References section, add: "Superseded by ADR-<new_number>"
+4. Ask what new ADR supersedes it, or create the new one
+5. In the NEW ADR's References section, add: "Supersedes ADR-<old_number>"
+6. Stop here after updating.
 
 ## Step 2: Gather Decision Context
 
@@ -6518,11 +6625,13 @@ Cross-reference the decision against existing context:
 ## Step 4: Determine ADR Number
 
 ```bash
-# Count existing ADRs and increment
-ls draft/adrs/*.md 2>/dev/null | wc -l
+# Extract the highest existing ADR number from filenames
+ls draft/adrs/*.md 2>/dev/null | sed 's/.*ADR-\([0-9]*\).*/\1/' | sort -n | tail -1
 ```
 
-Next number = existing count + 1, zero-padded to 3 digits (001, 002, ...).
+Next number = highest existing ADR number + 1, zero-padded to 3 digits (001, 002, ...). If no ADRs exist, start at 001.
+
+Verify the target filename `draft/adrs/ADR-<number>-*.md` does not already exist. If collision, increment the number until a free slot is found.
 
 ## Step 5: Create ADR File
 
@@ -6628,7 +6737,7 @@ Review the ADR and update status to "Accepted" when approved.
 If the decision affects existing Draft context:
 
 1. **tech-stack.md** — If introducing or removing technology, note: "Consider updating draft/tech-stack.md to reflect this decision."
-2. **.ai-context.md** — If changing architectural patterns, note: "Consider updating draft/.ai-context.md to reflect this decision (architecture.md will be auto-derived)."
+2. **architecture.md** — If changing architectural patterns, note: "Consider updating `draft/architecture.md` to reflect this decision (`.ai-context.md` will be auto-refreshed via Condensation Subroutine)."
 3. **Superseded ADRs** — If this decision replaces a previous one, update the old ADR's status.
 
 ## ADR Status Lifecycle
@@ -6678,7 +6787,7 @@ Display a comprehensive overview of project progress.
 
 1. Read `draft/tracks.md` for track list
 2. For each active track, read:
-   - `draft/tracks/<id>/metadata.json` for stats
+   - `draft/tracks/<id>/metadata.json` for stats. If `metadata.json` is malformed or unreadable, display `(metadata unavailable)` for that track's statistics instead of failing.
    - `draft/tracks/<id>/plan.md` for task status
    - `draft/tracks/<id>/architecture.md` for module status (if exists)
 3. Check for project-wide `draft/.ai-context.md` (or legacy `draft/architecture.md`) for module status
@@ -6732,7 +6841,7 @@ ORPHANED TRACKS
 
 Recovery options:
 1. Add to tracks.md manually if track is valid
-2. Remove directory if track was abandoned: rm -rf draft/tracks/<id>/
+2. To resolve orphaned tracks, run `draft revert` or manually add the track entry back to `tracks.md`
 
 RECENTLY COMPLETED
 ─────────────────────────────────────────────────────────
@@ -6808,6 +6917,12 @@ Perform intelligent git revert that understands Draft's logical units of work.
 
 ---
 
+## Step 0: Pre-flight Check
+
+Run `git status --porcelain`. If output is non-empty, warn the user about uncommitted changes and suggest stashing or committing first. Do NOT proceed until working tree is clean.
+
+---
+
 ## Step 1: Analyze What to Revert
 
 Ask user what level to revert:
@@ -6838,7 +6953,7 @@ git log --oneline --grep="<track_id>"
 git log --oneline --since="<phase_start>" --until="<phase_end>" --grep="<track_id>"
 ```
 
-**Cross-reference:** Verify SHAs from `plan.md` match the git log results. If mismatched, prefer git log as source of truth.
+**Cross-reference:** Verify SHAs from `plan.md` match the git log results. Git log is always authoritative for commit identification. plan.md is authoritative for task-to-commit mapping. On SHA mismatch, prefer git log and warn the user.
 
 ## Step 3: Preview Revert
 
@@ -6873,6 +6988,8 @@ Proceed with revert? (yes/no)
 
 If confirmed:
 
+Maintain a list of successfully reverted commits during execution.
+
 ```bash
 # Revert each commit in reverse order (newest first)
 git revert --no-commit <commit1>
@@ -6882,6 +6999,8 @@ git revert --no-commit <commit2>
 # Create single revert commit
 git commit -m "revert(<track_id>): Revert [task/phase description]"
 ```
+
+On conflict, report: "Successfully reverted: [list]. Conflict on: [sha]. Run `git revert --abort` to undo partial state."
 
 ## Step 5: Update Draft State
 
@@ -6894,8 +7013,11 @@ git commit -m "revert(<track_id>): Revert [task/phase description]"
    - Decrement tasks.completed
    - Decrement phases.completed if applicable
    - Update timestamp
+   - **Phase status transitions:** If any task in a completed phase is reverted: change phase status to `[~]` In Progress. If ALL tasks in a phase are reverted: change phase status to `[ ]` Pending.
 
 3. Update `draft/tracks.md` if track status changed
+
+4. **Stale reports:** After revert, existing `review-report.md` and `validation-report.md` for the track are stale. Add a warning header to these files: `> **WARNING: This report predates a revert operation and may be stale. Re-run the review/validation.**` Or delete them if the revert is substantial.
 
 ## Step 6: Confirm
 
@@ -6915,6 +7037,12 @@ Git status:
 The reverted tasks are now available to re-implement.
 Run draft implement to continue.
 ```
+
+## Recovery
+
+If the process is interrupted between git revert and Draft state update, the recovery procedure is: check `git log` for the revert commit, then manually update plan.md task statuses to match the reverted state.
+
+---
 
 ## Abort Handling
 
@@ -7242,8 +7370,7 @@ synced_to_commit: "{FULL_SHA}"
 4. Read the track's `plan.md` for phases and tasks
 5. Read the track's `metadata.json` for title and type
 6. Read the track's `spec.md` for epic description
-7. Read `core/templates/jira.md` for field structure
-8. Check for quality reports:
+7. Check for quality reports:
    - `draft/tracks/<id>/validation-report.md` — compliance findings
    - `draft/tracks/<id>/bughunt-report.md` — defect findings
 
@@ -7436,8 +7563,8 @@ h3. Verification
 | Critical | Security | src/auth.ts:45 | Hardcoded API key | Secret exposed in version control | Move to environment variable |
 | Warning | Architecture | src/utils.ts:12 | Layer boundary violation | UI importing from database layer | Use API service layer instead |
 
-> Review findings are from `draft review` Stage 1 (Automated Validation) or `draft deep-review`. Include in Epic description for awareness.
-> Critical review findings should also be created as Bug issues (same as bughunt bugs) to ensure they are tracked and resolved.
+> Review findings are from track validation (from `draft implement`) and `draft bughunt`. Include in Epic description for awareness.
+> Critical findings should also be created as Bug issues (same as bughunt bugs) to ensure they are tracked and resolved.
 
 ---
 
@@ -7591,8 +7718,9 @@ Next steps:
 - Warn: "spec.md not found, using plan overview for epic description."
 
 **If jira-export.md already exists:**
-- Warn: "jira-export.md already exists. Overwriting with fresh generation."
-- Proceed with overwrite (user can always re-edit)
+- Check if it has been manually modified (look for user-added content not matching generated patterns — e.g., edited descriptions, added rows, changed story points from generated values)
+- If modifications detected, prompt user: "Existing jira-export.md appears to have manual edits. Overwrite? [y/N]"
+- If unmodified (matches generated patterns), proceed with regeneration
 
 **If phase has no tasks:**
 - Create story with 1 story point
@@ -7654,7 +7782,7 @@ If no track found:
 ## Step 3: Check MCP-Jira Availability
 
 Attempt to detect MCP-Jira tools:
-1. Check if `mcp_jira_create_issue` or similar tool is available
+1. List available MCP tools and search for Jira-related ones. Known tool name variants: `mcp_jira_create_issue`, `jira_createIssue`, `create_jira_issue`, `jira-create-issue`. Use whichever is available.
 2. If unavailable:
    ```
    MCP-Jira not configured.
@@ -7695,7 +7823,24 @@ If export contains `## Quality Reports` section:
 - Parse bughunt bug issues with all sections (location, confidence, code evidence, data flow trace, issue, impact, verification done, why not a false positive, fix, regression test)
 - Extract all fields for each finding to populate Jira issue descriptions
 
+## Step 4b: Validate Project Key
+
+Before creating issues, attempt to fetch project metadata via MCP to verify the project key exists. Fail fast with a clear error if invalid:
+
+```
+MCP call: get_project (or equivalent)
+- project: [project key]
+```
+
+If the project key is invalid or not found:
+- Error: "Jira project '[KEY]' not found. Verify the project key and try again."
+- Stop execution.
+
 ## Step 5: Create Issues via MCP
+
+**Incremental persistence:** After creating each issue, immediately update the corresponding entry in `jira-export.md` with the Jira key. This ensures re-runs can skip already-created items even if the process fails mid-way.
+
+**Note:** Some Jira configurations do not allow setting status during creation. If status setting fails, create in default status and log a warning.
 
 ### 5a. Create Epic
 ```
@@ -7802,7 +7947,9 @@ MCP call: create_issue
 
 **All bugs from bughunt-report.md get their own Bug issue.** They are linked to the Epic but separate from Stories (phases). This keeps implementation work (Stories/Sub-tasks) distinct from defect tracking (Bugs).
 
-## Step 6: Update Tracking
+## Step 6: Finalize Tracking
+
+`jira-export.md` has already been updated incrementally during Step 5. Now update `plan.md` with the Jira keys:
 
 1. **Update plan.md:**
    Add Jira keys to phase headers and tasks:
@@ -7813,19 +7960,10 @@ MCP call: create_issue
    - [x] **Task 1.2:** Extract security utilities [PROJ-126]
    ```
 
-2. **Update jira-export.md:**
-   Change status and add keys:
+2. **Set jira-export.md status to Created:**
    ```markdown
    **Status:** Created
    **Epic Key:** PROJ-123
-
-   ## Story 1: [Phase Name] [PROJ-124]
-
-   ### Sub-tasks
-   | # | Summary | Status | Key |
-   |---|---------|--------|-----|
-   | 1.1 | Extract logging utilities | Done | PROJ-125 |
-   | 1.2 | Extract security utilities | Done | PROJ-126 |
    ```
 
 ## Step 7: Report
@@ -8070,7 +8208,6 @@ Draft solves this through **Context-Driven Development**: structured documents t
   - [draft change](#draftchange--course-correction)
 - [Architecture Mode](#architecture-mode)
 - [Coverage](#coverage)
-- [Notes](#notes)
 - [Jira Integration (Optional)](#jira-integration-optional)
 - [TDD Workflow (Optional)](#tdd-workflow-optional)
 - [Intent Mapping](#intent-mapping)
@@ -8303,17 +8440,6 @@ draft implement
 draft status
 ```
 
-### Cursor Integration (Optional)
-
-Cursor natively supports the `.claude/` plugin structure. Add via:
-
-Cursor > Settings > Rules, Skills, Subagents > Rules > New > Add from Github:
-```
-https://github.com/mayurpise/draft.git
-```
-
-Then use: `draft init`, `draft new-track`, `draft implement`
-
 ### GitHub Copilot Integration (Optional)
 
 Draft also works with GitHub Copilot via `copilot-instructions.md`:
@@ -8464,7 +8590,7 @@ If `draft/` already exists with context files, init reports "already initialized
 Re-scans and updates existing context without starting from scratch.
 
 1. **Tech Stack Refresh** — Re-scans `package.json`, `go.mod`, etc. Compares with existing `draft/tech-stack.md`. Proposes updates.
-2. **Architecture Refresh** — Re-runs architecture discovery and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `draft decompose`. Presents changes for review before writing. After updating `architecture.md`, derives `draft/.ai-context.md` using the Condensation Subroutine.
+2. **Architecture Refresh** — Re-runs architecture discovery and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `draft decompose`. Presents changes for review before writing. After updating `architecture.md`, derives `draft/.ai-context.md` using the Condensation Subroutine (defined in `draft init`).
 3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
@@ -9092,6 +9218,8 @@ See `core/agents/reviewer.md` for detailed process.
 
 ## Agents
 
+**Note:** Canonical agent behavior is defined in `core/agents/*.md`. This section provides summaries for reference. When in doubt, defer to the agent files.
+
 Draft includes five specialized agent behaviors that activate during specific workflow phases.
 
 ### Debugger Agent
@@ -9210,6 +9338,10 @@ See `core/agents/planner.md` for the full planning process and integration workf
 
 ---
 
+## Concurrency
+
+Draft skills are designed for single-agent, single-track execution. Do not run multiple Draft commands concurrently on the same track.
+
 ## Communication Style
 
 Lead with conclusions. Be concise. Prioritize clarity over comprehensiveness.
@@ -9256,13 +9388,13 @@ AI guidance during track creation must be grounded in vetted sources. When provi
 - **The Phoenix Project** (Kim, Behr, Spafford) — Flow, feedback, continuous improvement
 
 ### Craft & Practice
-- **The Pragmatic Programmer** (Hunt, Thomas) — Tracer bullets, DRY, orthogonality, good enough software
+- **The Pragmatic Programmer** (Hunt, Thomas, 20th Anniversary ed., 2019) — Tracer bullets, DRY, orthogonality, good enough software
 - **Clean Code** (Robert Martin) — Naming, functions, error handling, code smells
-- **Refactoring** (Martin Fowler) — Code smells, refactoring patterns, incremental improvement
+- **Refactoring** (Martin Fowler, 2nd ed., 2018) — Code smells, refactoring patterns, incremental improvement
 - **Working Effectively with Legacy Code** (Michael Feathers) — Seams, characterization tests, breaking dependencies
 
 ### Microservices & Distribution
-- **Building Microservices** (Sam Newman) — Service boundaries, decomposition, communication patterns
+- **Building Microservices** (Sam Newman, 2nd ed., 2021) — Service boundaries, decomposition, communication patterns
 - **Microservices Patterns** (Chris Richardson) — Saga, CQRS, event sourcing, API gateway
 - **Enterprise Integration Patterns** (Hohpe, Woolf) — Messaging, routing, transformation, endpoints
 
@@ -11180,6 +11312,11 @@ synced_to_commit: "{FULL_SHA}"
 
 **Mode:** [strict | flexible | none]
 
+**Coverage Target:**
+```yaml
+coverage_target: 95  # Minimum coverage percentage (default: 95%)
+```
+
 ### Strict TDD
 
 **Iron Law:** No production code without a failing test first.
@@ -12472,7 +12609,8 @@ function validateEntries(
 
 1. **Before coding a file** - Write Story, present for approval
 2. **Before TDD cycle** - Design execution state, generate skeletons, present each for approval
-3. **After task completion** - Update module status in `.ai-context.md` (or `architecture.md`) if it exists. For project-level `.ai-context.md` updates, also trigger the Derivation Subroutine from `draft init` to regenerate `architecture.md`.
+3. **After task completion** - Update module status in `.ai-context.md` (or `architecture.md`) if it exists. For project-level `.ai-context.md` updates, also trigger the Condensation Subroutine (see `draft init`) to regenerate `.ai-context.md` from `architecture.md`.
+4. **Validation report** - When track validation is enabled, results are persisted to `draft/tracks/<id>/validation-report.md`.
 
 ### Escalation
 
@@ -12504,6 +12642,10 @@ capabilities:
 **Iron Law:** No fixes without root cause investigation first.
 
 You are a systematic debugging agent. When a task is blocked (`[!]`), follow this process exactly.
+
+## Context Loading
+
+Before investigating, load `draft/.ai-context.md` (or `draft/architecture.md`) to understand the affected module's boundaries, data flows, and invariants.
 
 ## The Four Phases
 
@@ -12595,6 +12737,10 @@ If after 3 hypothesis cycles you haven't found root cause:
 3. Ask for external input
 4. Consider if this needs architectural review
 
+## Cross-Reference
+
+For bug tracks requiring formal root cause analysis, see `core/agents/rca.md` which extends this process with blast radius analysis, differential analysis, and root cause classification.
+
 ## Integration with Draft
 
 When debugging a blocked task:
@@ -12653,10 +12799,19 @@ Organize plans into phases:
 3. **Integration** - Connecting components
 4. **Polish** - Error handling, edge cases, docs
 
+### Phase Assignment Rules
+
+| Phase | Assign Here |
+|-------|-------------|
+| **Foundation** | Data models, types, interfaces, configuration |
+| **Implementation** | Business logic, core features |
+| **Integration** | Wiring components, external APIs, cross-module connections |
+| **Polish** | Error handling, edge cases, documentation, cleanup |
+
 ## Task Granularity
 
 Good task:
-- Completable in 1-4 hours
+- Completable in a focused session
 - Has clear success criteria
 - Produces testable output
 - Fits in single commit
@@ -12751,6 +12906,10 @@ For features requiring module decomposition:
 
 The planner does NOT define module boundaries — that is the architect agent's responsibility. The planner organizes tasks that the architect's modules inform.
 
+## Technical Approach References
+
+When recommending technical approaches, cite sources from `core/knowledge-base.md` where applicable.
+
 ## Escalation
 
 If requirements are ambiguous after analysis:
@@ -12798,7 +12957,7 @@ Before investigating, load and reference the project's big picture documents:
 
 | Document | Use During RCA |
 |----------|---------------|
-| `draft/.ai-context.md` | Identify affected module, trace cross-module data flows, data state machines, consistency boundaries, failure recovery paths. Falls back to `draft/architecture.md` for legacy projects. |
+| `draft/.ai-context.md` | Identify affected module, trace cross-module data flows, data state machines, consistency boundaries, failure recovery paths. Falls back to `draft/architecture.md` for projects without `.ai-context.md`. |
 | `draft/tech-stack.md` | Check framework version constraints, known library issues, runtime behavior |
 | `draft/product.md` | Understand the affected user flow and its business criticality |
 | `draft/workflow.md` | Follow the project's test and commit conventions during the fix phase |
@@ -12930,6 +13089,7 @@ Once you find the immediate cause, ask "why" to find the root:
    - Full test suite passes
    - Original reproduction steps no longer trigger the bug
    - No behavior changes outside the blast radius
+   - Follow commit conventions and guardrails from `draft/workflow.md`
 4. **Write RCA summary** — Concise, factual, blameless:
 
 ```markdown
@@ -13021,6 +13181,8 @@ If after 3 hypothesis cycles the root cause is not confirmed:
 5. Root cause summary is added to `spec.md` after Phase 2 completion
 6. The debugger agent (`core/agents/debugger.md`) handles blocked tasks within any track; the RCA agent handles the overall investigation flow for bug tracks
 
+**Decision rule:** For blocked tasks within bug tracks, follow the RCA agent (investigation context is already established). The debugger agent applies to blocked tasks in feature and refactor tracks.
+
 </core-file>
 
 ---
@@ -13074,6 +13236,10 @@ Perform fast, objective static checks using grep/search across the diff:
    - [ ] No blocking synchronous I/O in async functions
    - [ ] No unbounded queries without pagination
 
+6. **Cross-Module Integrity** (when changes span multiple modules per `.ai-context.md`)
+   - [ ] Each module's boundary is respected
+   - [ ] Cross-module contracts are maintained
+
 **If Stage 1 FAILS (any critical issue):** Stop here. List structural failures and return to implementation. Do NOT proceed to Stage 2.
 
 **If Stage 1 PASSES:** Proceed to Stage 2.
@@ -13101,9 +13267,14 @@ Check against the track's `spec.md`:
    - [ ] Error scenarios addressed
    - [ ] Integration points work as specified
 
+**Verdict options:**
+- **PASS** — All requirements met, all acceptance criteria verified
+- **PASS WITH NOTES** — All requirements met but minor gaps exist in acceptance criteria verification
+- **FAIL** — Missing requirements or acceptance criteria not met
+
 **If Stage 2 FAILS:** Stop here. List gaps and return to implementation.
 
-**If Stage 2 PASSES:** Proceed to Stage 3.
+**If Stage 2 PASSES (or PASS WITH NOTES):** Proceed to Stage 3.
 
 ---
 
@@ -13129,6 +13300,8 @@ Check against the track's `spec.md`:
 4. **Maintainability**
    - [ ] Code is readable without excessive comments
    - [ ] Consistent naming and style
+   - [ ] No functions exceeding reasonable complexity (consider cognitive complexity)
+   - [ ] No deeply nested control flow (>3 levels)
 
 ### Adversarial Pass (When Zero Findings)
 

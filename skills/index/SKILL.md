@@ -89,7 +89,31 @@ ls draft/ 2>/dev/null
 - Announce: "Root draft/ directory not found. Run `/draft:init` at monorepo root first to create base context, then run `/draft:index` to aggregate service knowledge."
 - Stop here.
 
-**If `draft/` exists:** Continue to Step 1.
+**If `draft/` exists:** Continue to lockfile check.
+
+## Lockfile Check
+
+Before proceeding, check for a stale lock:
+
+```bash
+ls draft/.index-lock 2>/dev/null
+```
+
+- **If `draft/.index-lock` exists and is less than 10 minutes old:** Warn: "Previous indexing may be incomplete. Remove `draft/.index-lock` to proceed." Stop here.
+- **If `draft/.index-lock` exists and is older than 10 minutes:** Remove it and continue.
+- **If no lock exists:** Continue.
+
+Create `draft/.index-lock` with the current timestamp before starting:
+
+```bash
+date -u +"%Y-%m-%dT%H:%M:%SZ" > draft/.index-lock
+```
+
+**On completion (Step 9) or fatal error, remove the lock:**
+
+```bash
+rm -f draft/.index-lock
+```
 
 ## Step 1: Parse Arguments
 
@@ -98,7 +122,7 @@ Check for optional arguments:
 - `bughunt [dir1 dir2 ...]`: Run bug hunt across subdirectories with `draft/` folders
   - If no directories specified: auto-discover all subdirectories with `draft/`
   - If directories specified: run bughunt only in those subdirectories (skip if no `draft/`)
-  - Generate summary report at repository root: `draft-index-bughunt-summary.md`
+  - Generate summary report at: `draft/bughunt-summary.md`
 
 **If `bughunt` argument detected:** Skip to Step 1A (Bughunt Mode) instead of continuing to Step 2.
 
@@ -185,7 +209,7 @@ Extract from each report:
 
 ### 1A.4: Generate Aggregate Summary Report
 
-Create `draft-index-bughunt-summary.md` at repository root:
+Create `draft/bughunt-summary.md`:
 
 ```markdown
 # Draft Index: Bughunt Summary
@@ -252,7 +276,7 @@ Grand Total Bugs:
   Medium:   Y
   Low:      Z
 
-Summary Report: draft-index-bughunt-summary.md
+Summary Report: draft/bughunt-summary.md
 
 Directories requiring immediate attention:
   - services/billing/ (1 CRITICAL)
@@ -391,7 +415,9 @@ billing-service: [auth-service]
 api-gateway: [auth-service, billing-service]
 ```
 
-Update each service's `manifest.json` with `dependents` field (reverse lookup).
+### Step 6.2: Resolve Dependents (Reverse Lookup)
+
+For each service S, iterate all other services' `dependencies` arrays. If S appears in another service's dependencies, add that service to S's `dependents` array. Write the updated `manifest.json` for each service.
 
 ## Step 7: Generate Root Aggregated Files
 
@@ -533,6 +559,10 @@ Services deviating from org standards:
 | ml-service | Python instead of Go/TS | ML ecosystem |
 | analytics | MongoDB instead of Postgres | Time-series workload |
 ```
+
+### Placeholder Detection
+
+A file is considered a placeholder if it contains the marker `<!-- AUTO-GENERATED -->` or is smaller than 100 bytes. Placeholders may be overwritten without confirmation. Non-placeholder files require user confirmation before overwriting.
 
 ### 7.4 Synthesize `draft/product.md` (if not exists or is placeholder)
 
@@ -703,6 +733,14 @@ graph TD
 | @org/logging | Structured logging | 1.x | all services |
 ```
 
+### 7.7 Synthesize `draft/.ai-context.md` (if not exists or is placeholder)
+
+After generating `draft/architecture.md`, derive a condensed `draft/.ai-context.md` using the Condensation Subroutine (as defined in `/draft:init`). This provides a token-optimized, self-contained AI context file at the root level aggregating all service knowledge.
+
+- Read the synthesized `draft/architecture.md`
+- Condense into 200-400 lines covering: system overview, service catalog, inter-service dependencies, shared infrastructure, cross-cutting patterns, critical invariants, and entry points
+- If `draft/.ai-context.md` already exists and is not a placeholder, prompt before overwriting
+
 ## Step 8: Create Root Config
 
 Create `draft/config.yaml` if not exists:
@@ -737,6 +775,12 @@ reindex_triggers:
 ```
 
 ## Step 9: Completion Report
+
+Remove the lockfile:
+
+```bash
+rm -f draft/.index-lock
+```
 
 ```
 ═══════════════════════════════════════════════════════════

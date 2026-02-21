@@ -72,8 +72,10 @@ Stop here after listing.
 If argument is `supersede <number>`:
 1. Read the ADR file `draft/adrs/<number>-*.md`
 2. Change status from `Accepted` to `Superseded by ADR-<new_number>`
-3. Ask what new ADR supersedes it, or create the new one
-4. Stop here after updating.
+3. In the OLD ADR's References section, add: "Superseded by ADR-<new_number>"
+4. Ask what new ADR supersedes it, or create the new one
+5. In the NEW ADR's References section, add: "Supersedes ADR-<old_number>"
+6. Stop here after updating.
 
 ## Step 2: Gather Decision Context
 
@@ -100,11 +102,13 @@ Cross-reference the decision against existing context:
 ## Step 4: Determine ADR Number
 
 ```bash
-# Count existing ADRs and increment
-ls draft/adrs/*.md 2>/dev/null | wc -l
+# Extract the highest existing ADR number from filenames
+ls draft/adrs/*.md 2>/dev/null | sed 's/.*ADR-\([0-9]*\).*/\1/' | sort -n | tail -1
 ```
 
-Next number = existing count + 1, zero-padded to 3 digits (001, 002, ...).
+Next number = highest existing ADR number + 1, zero-padded to 3 digits (001, 002, ...). If no ADRs exist, start at 001.
+
+Verify the target filename `draft/adrs/ADR-<number>-*.md` does not already exist. If collision, increment the number until a free slot is found.
 
 ## Step 5: Create ADR File
 
@@ -210,7 +214,7 @@ Review the ADR and update status to "Accepted" when approved.
 If the decision affects existing Draft context:
 
 1. **tech-stack.md** — If introducing or removing technology, note: "Consider updating draft/tech-stack.md to reflect this decision."
-2. **.ai-context.md** — If changing architectural patterns, note: "Consider updating draft/.ai-context.md to reflect this decision (architecture.md will be auto-derived)."
+2. **architecture.md** — If changing architectural patterns, note: "Consider updating `draft/architecture.md` to reflect this decision (`.ai-context.md` will be auto-refreshed via Condensation Subroutine)."
 3. **Superseded ADRs** — If this decision replaces a previous one, update the old ADR's status.
 
 ## ADR Status Lifecycle

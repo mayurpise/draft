@@ -38,10 +38,19 @@ Organize plans into phases:
 3. **Integration** - Connecting components
 4. **Polish** - Error handling, edge cases, docs
 
+### Phase Assignment Rules
+
+| Phase | Assign Here |
+|-------|-------------|
+| **Foundation** | Data models, types, interfaces, configuration |
+| **Implementation** | Business logic, core features |
+| **Integration** | Wiring components, external APIs, cross-module connections |
+| **Polish** | Error handling, edge cases, documentation, cleanup |
+
 ## Task Granularity
 
 Good task:
-- Completable in 1-4 hours
+- Completable in a focused session
 - Has clear success criteria
 - Produces testable output
 - Fits in single commit
@@ -135,6 +144,10 @@ For features requiring module decomposition:
 6. **Developer approves plan** - Final checkpoint before implementation
 
 The planner does NOT define module boundaries — that is the architect agent's responsibility. The planner organizes tasks that the architect's modules inform.
+
+## Technical Approach References
+
+When recommending technical approaches, cite sources from `core/knowledge-base.md` where applicable.
 
 ## Escalation
 

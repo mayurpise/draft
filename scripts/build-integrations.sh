@@ -240,7 +240,7 @@ emit_core_files() {
             echo "<core-file path=\"core/${core_file}\">"
             echo ""
             # Apply transform to core file content
-            cat "$full_path" | $transform_fn
+            "$transform_fn" < "$full_path"
             echo ""
             echo "</core-file>"
         else
@@ -508,10 +508,11 @@ COMMON_HEADER2
             echo ""
             echo "When user says $($get_trigger_fn "$skill"):"
             echo ""
-            extract_body "$skill_file" | $transform_fn | tail -n +4
+            extract_body "$skill_file" | "$transform_fn" | tail -n +4
         else
             echo "" >&2
-            echo "WARNING: Skill file not found: $skill_file" >&2
+            echo "ERROR: Skill file not found: $skill_file" >&2
+            exit 1
         fi
     done
 

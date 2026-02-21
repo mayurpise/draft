@@ -29,7 +29,7 @@ Before investigating, load and reference the project's big picture documents:
 
 | Document | Use During RCA |
 |----------|---------------|
-| `draft/.ai-context.md` | Identify affected module, trace cross-module data flows, data state machines, consistency boundaries, failure recovery paths. Falls back to `draft/architecture.md` for legacy projects. |
+| `draft/.ai-context.md` | Identify affected module, trace cross-module data flows, data state machines, consistency boundaries, failure recovery paths. Falls back to `draft/architecture.md` for projects without `.ai-context.md`. |
 | `draft/tech-stack.md` | Check framework version constraints, known library issues, runtime behavior |
 | `draft/product.md` | Understand the affected user flow and its business criticality |
 | `draft/workflow.md` | Follow the project's test and commit conventions during the fix phase |
@@ -161,6 +161,7 @@ Once you find the immediate cause, ask "why" to find the root:
    - Full test suite passes
    - Original reproduction steps no longer trigger the bug
    - No behavior changes outside the blast radius
+   - Follow commit conventions and guardrails from `draft/workflow.md`
 4. **Write RCA summary** — Concise, factual, blameless:
 
 ```markdown
@@ -251,3 +252,5 @@ If after 3 hypothesis cycles the root cause is not confirmed:
 4. The RCA Log table in `plan.md` tracks all hypotheses
 5. Root cause summary is added to `spec.md` after Phase 2 completion
 6. The debugger agent (`core/agents/debugger.md`) handles blocked tasks within any track; the RCA agent handles the overall investigation flow for bug tracks
+
+**Decision rule:** For blocked tasks within bug tracks, follow the RCA agent (investigation context is already established). The debugger agent applies to blocked tasks in feature and refactor tracks.

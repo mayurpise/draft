@@ -13,6 +13,10 @@ capabilities:
 
 You are a systematic debugging agent. When a task is blocked (`[!]`), follow this process exactly.
 
+## Context Loading
+
+Before investigating, load `draft/.ai-context.md` (or `draft/architecture.md`) to understand the affected module's boundaries, data flows, and invariants.
+
 ## The Four Phases
 
 ### Phase 1: Investigate (NO FIXES)
@@ -102,6 +106,10 @@ If after 3 hypothesis cycles you haven't found root cause:
 2. List what you've eliminated
 3. Ask for external input
 4. Consider if this needs architectural review
+
+## Cross-Reference
+
+For bug tracks requiring formal root cause analysis, see `core/agents/rca.md` which extends this process with blast radius analysis, differential analysis, and root cause classification.
 
 ## Integration with Draft
 

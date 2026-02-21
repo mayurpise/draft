@@ -100,8 +100,7 @@ synced_to_commit: "{FULL_SHA}"
 4. Read the track's `plan.md` for phases and tasks
 5. Read the track's `metadata.json` for title and type
 6. Read the track's `spec.md` for epic description
-7. Read `core/templates/jira.md` for field structure
-8. Check for quality reports:
+7. Check for quality reports:
    - `draft/tracks/<id>/validation-report.md` — compliance findings
    - `draft/tracks/<id>/bughunt-report.md` — defect findings
 
@@ -294,8 +293,8 @@ h3. Verification
 | Critical | Security | src/auth.ts:45 | Hardcoded API key | Secret exposed in version control | Move to environment variable |
 | Warning | Architecture | src/utils.ts:12 | Layer boundary violation | UI importing from database layer | Use API service layer instead |
 
-> Review findings are from `/draft:review` Stage 1 (Automated Validation) or `/draft:deep-review`. Include in Epic description for awareness.
-> Critical review findings should also be created as Bug issues (same as bughunt bugs) to ensure they are tracked and resolved.
+> Review findings are from track validation (from `/draft:implement`) and `/draft:bughunt`. Include in Epic description for awareness.
+> Critical findings should also be created as Bug issues (same as bughunt bugs) to ensure they are tracked and resolved.
 
 ---
 
@@ -449,8 +448,9 @@ Next steps:
 - Warn: "spec.md not found, using plan overview for epic description."
 
 **If jira-export.md already exists:**
-- Warn: "jira-export.md already exists. Overwriting with fresh generation."
-- Proceed with overwrite (user can always re-edit)
+- Check if it has been manually modified (look for user-added content not matching generated patterns — e.g., edited descriptions, added rows, changed story points from generated values)
+- If modifications detected, prompt user: "Existing jira-export.md appears to have manual edits. Overwrite? [y/N]"
+- If unmodified (matches generated patterns), proceed with regeneration
 
 **If phase has no tasks:**
 - Create story with 1 story point

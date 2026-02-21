@@ -18,13 +18,13 @@ AI guidance during track creation must be grounded in vetted sources. When provi
 - **The Phoenix Project** (Kim, Behr, Spafford) — Flow, feedback, continuous improvement
 
 ### Craft & Practice
-- **The Pragmatic Programmer** (Hunt, Thomas) — Tracer bullets, DRY, orthogonality, good enough software
+- **The Pragmatic Programmer** (Hunt, Thomas, 20th Anniversary ed., 2019) — Tracer bullets, DRY, orthogonality, good enough software
 - **Clean Code** (Robert Martin) — Naming, functions, error handling, code smells
-- **Refactoring** (Martin Fowler) — Code smells, refactoring patterns, incremental improvement
+- **Refactoring** (Martin Fowler, 2nd ed., 2018) — Code smells, refactoring patterns, incremental improvement
 - **Working Effectively with Legacy Code** (Michael Feathers) — Seams, characterization tests, breaking dependencies
 
 ### Microservices & Distribution
-- **Building Microservices** (Sam Newman) — Service boundaries, decomposition, communication patterns
+- **Building Microservices** (Sam Newman, 2nd ed., 2021) — Service boundaries, decomposition, communication patterns
 - **Microservices Patterns** (Chris Richardson) — Saga, CQRS, event sourcing, API gateway
 - **Enterprise Integration Patterns** (Hohpe, Woolf) — Messaging, routing, transformation, endpoints
 

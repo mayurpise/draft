@@ -51,7 +51,8 @@ If missing, tell user: "Project not initialized. Run `/draft:init` first."
 Create a short, kebab-case ID from the description (use the stripped description if `--quick` was present):
 - "Add user authentication" → `add-user-auth`
 - "Fix login bug" → `fix-login-bug`
-- If collision risk, append ISO date suffix: `add-user-auth-20250126`
+
+Check if `draft/tracks/<track_id>/` already exists. If collision detected, append `-<ISO-date>` suffix (e.g., `feature-auth-2026-02-21`). Verify the suffixed path is also free before proceeding.
 
 ## Step 1.5: Quick Mode Path (`--quick` only)
 
@@ -232,7 +233,7 @@ synced_to_commit: "{FULL_SHA}"
 | [e.g., Scope creep] | 3 | 3 | 9 | [e.g., Strict non-goals enforcement] |
 
 ## Deployment Strategy
-<!-- Define rollout approach for production delivery -->
+<!-- Define rollout approach for production delivery. For bug fixes and minor refactors, this section may be removed or marked N/A. -->
 
 ### Rollout Phases
 1. **Canary** (1-5% traffic) — Validate core flows, monitor error rates
@@ -513,7 +514,11 @@ Enter 1–3, or "skip":
 When user confirms spec is ready:
 
 1. Update spec-draft.md status to `[x] Complete`
-2. Rename `spec-draft.md` → `spec.md`
+2. Finalize `spec-draft.md` → `spec.md`:
+   1. Read `spec-draft.md` content.
+   2. Write content to `spec.md`.
+   3. Verify `spec.md` exists and has non-empty content.
+   4. Delete `spec-draft.md`.
 3. Update Context References with specific connections to product.md, tech-stack.md, .ai-context.md
 4. Add Conversation Log summary with key decisions and reasoning
 
@@ -597,11 +602,13 @@ If either missing:
     "completed": 0
   },
   "tasks": {
-    "total": 0,
+    "total": "<count all `- [ ]` task lines in plan.md>",
     "completed": 0
   }
 }
 ```
+
+Count all `- [ ]` task lines in `plan.md` and set `tasks.total` in `metadata.json` accordingly instead of 0.
 
 **Note:** ISO timestamps can use either `Z` or `.000Z` suffix (both valid ISO 8601). No format constraint enforced — both second precision (`2026-02-08T12:00:00Z`) and millisecond precision (`2026-02-08T12:00:00.000Z`) are acceptable.
 

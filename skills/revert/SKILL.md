@@ -20,6 +20,12 @@ Perform intelligent git revert that understands Draft's logical units of work.
 
 ---
 
+## Step 0: Pre-flight Check
+
+Run `git status --porcelain`. If output is non-empty, warn the user about uncommitted changes and suggest stashing or committing first. Do NOT proceed until working tree is clean.
+
+---
+
 ## Step 1: Analyze What to Revert
 
 Ask user what level to revert:
@@ -50,7 +56,7 @@ git log --oneline --grep="<track_id>"
 git log --oneline --since="<phase_start>" --until="<phase_end>" --grep="<track_id>"
 ```
 
-**Cross-reference:** Verify SHAs from `plan.md` match the git log results. If mismatched, prefer git log as source of truth.
+**Cross-reference:** Verify SHAs from `plan.md` match the git log results. Git log is always authoritative for commit identification. plan.md is authoritative for task-to-commit mapping. On SHA mismatch, prefer git log and warn the user.
 
 ## Step 3: Preview Revert
 
@@ -85,6 +91,8 @@ Proceed with revert? (yes/no)
 
 If confirmed:
 
+Maintain a list of successfully reverted commits during execution.
+
 ```bash
 # Revert each commit in reverse order (newest first)
 git revert --no-commit <commit1>
@@ -94,6 +102,8 @@ git revert --no-commit <commit2>
 # Create single revert commit
 git commit -m "revert(<track_id>): Revert [task/phase description]"
 ```
+
+On conflict, report: "Successfully reverted: [list]. Conflict on: [sha]. Run `git revert --abort` to undo partial state."
 
 ## Step 5: Update Draft State
 
@@ -106,8 +116,11 @@ git commit -m "revert(<track_id>): Revert [task/phase description]"
    - Decrement tasks.completed
    - Decrement phases.completed if applicable
    - Update timestamp
+   - **Phase status transitions:** If any task in a completed phase is reverted: change phase status to `[~]` In Progress. If ALL tasks in a phase are reverted: change phase status to `[ ]` Pending.
 
 3. Update `draft/tracks.md` if track status changed
+
+4. **Stale reports:** After revert, existing `review-report.md` and `validation-report.md` for the track are stale. Add a warning header to these files: `> **WARNING: This report predates a revert operation and may be stale. Re-run the review/validation.**` Or delete them if the revert is substantial.
 
 ## Step 6: Confirm
 
@@ -127,6 +140,12 @@ Git status:
 The reverted tasks are now available to re-implement.
 Run /draft:implement to continue.
 ```
+
+## Recovery
+
+If the process is interrupted between git revert and Draft state update, the recovery procedure is: check `git log` for the revert commit, then manually update plan.md task statuses to match the reverted state.
+
+---
 
 ## Abort Handling
 

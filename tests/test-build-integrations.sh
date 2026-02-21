@@ -27,7 +27,7 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 BUILD_SCRIPT="$ROOT_DIR/scripts/build-integrations.sh"
 COPILOT_OUTPUT="$ROOT_DIR/integrations/copilot/.github/copilot-instructions.md"
 GEMINI_OUTPUT="$ROOT_DIR/integrations/gemini/GEMINI.md"
-BASELINE="/tmp/copilot-baseline"
+BASELINE="$(mktemp)"
 
 PASS=0
 FAIL=0
@@ -61,6 +61,16 @@ if [[ -f "$BUILD_SCRIPT" && -x "$BUILD_SCRIPT" ]]; then
     BUILD_OUTPUT=$("$BUILD_SCRIPT" 2>&1) || true
     echo "$BUILD_OUTPUT" | head -5
     echo ""
+fi
+
+# --- Build stderr check ---
+echo ""
+echo "## Build stderr check"
+if [[ -f "$BUILD_SCRIPT" && -x "$BUILD_SCRIPT" ]]; then
+    BUILD_STDERR=$("$BUILD_SCRIPT" 2>&1 >/dev/null) || true
+    HAS_WARNING=$(echo "$BUILD_STDERR" | grep -c -E 'WARNING|ERROR' || true)
+    assert "Build produces no WARNING or ERROR on stderr" \
+        "$([[ "${HAS_WARNING:-0}" -eq 0 ]] && echo true || echo false)"
 fi
 
 # --- Copilot output tests ---

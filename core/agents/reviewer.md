@@ -43,6 +43,10 @@ Perform fast, objective static checks using grep/search across the diff:
    - [ ] No blocking synchronous I/O in async functions
    - [ ] No unbounded queries without pagination
 
+6. **Cross-Module Integrity** (when changes span multiple modules per `.ai-context.md`)
+   - [ ] Each module's boundary is respected
+   - [ ] Cross-module contracts are maintained
+
 **If Stage 1 FAILS (any critical issue):** Stop here. List structural failures and return to implementation. Do NOT proceed to Stage 2.
 
 **If Stage 1 PASSES:** Proceed to Stage 2.
@@ -70,9 +74,14 @@ Check against the track's `spec.md`:
    - [ ] Error scenarios addressed
    - [ ] Integration points work as specified
 
+**Verdict options:**
+- **PASS** — All requirements met, all acceptance criteria verified
+- **PASS WITH NOTES** — All requirements met but minor gaps exist in acceptance criteria verification
+- **FAIL** — Missing requirements or acceptance criteria not met
+
 **If Stage 2 FAILS:** Stop here. List gaps and return to implementation.
 
-**If Stage 2 PASSES:** Proceed to Stage 3.
+**If Stage 2 PASSES (or PASS WITH NOTES):** Proceed to Stage 3.
 
 ---
 
@@ -98,6 +107,8 @@ Check against the track's `spec.md`:
 4. **Maintainability**
    - [ ] Code is readable without excessive comments
    - [ ] Consistent naming and style
+   - [ ] No functions exceeding reasonable complexity (consider cognitive complexity)
+   - [ ] No deeply nested control flow (>3 levels)
 
 ### Adversarial Pass (When Zero Findings)
 

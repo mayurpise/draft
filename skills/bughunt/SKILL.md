@@ -65,7 +65,9 @@ Use this context to:
 
 ### 2. Confirm Scope
 
-Ask user to confirm scope:
+When invoked programmatically by `/draft:review` with `with-bughunt`, skip scope confirmation and inherit the scope from the calling command.
+
+Otherwise, ask user to confirm scope:
 - **Entire repo** - Full codebase analysis
 - **Specific paths** - Target directories or files
 - **Track-level** (specify `<track-id>`) - Focus on files relevant to a specific track
@@ -86,7 +88,7 @@ If no Draft context exists, proceed with code-only analysis.
 
 ## Dimension Applicability Check
 
-Before analyzing all 12 dimensions, determine which apply to this codebase:
+Before analyzing all 11 dimensions, determine which apply to this codebase:
 
 - **Skip explicitly** rather than forcing analysis of N/A dimensions
 - **Mark skipped dimensions** with reason in report summary
@@ -672,7 +674,7 @@ After writing all test files, validate them using the project's native toolchain
    | **Fails — import/include error** | Fix the import path, retry (up to 2 retries) |
    | **Fails — missing dep** | Add the dependency, retry (up to 2 retries) |
    | **Fails — type/API mismatch** | Fix the test to match actual API signatures, retry (up to 2 retries) |
-   | **Persistent failure (3 attempts)** | Mark as `BUILD_FAILED` with the error message in report |
+   | **Persistent failure (3 attempts)** | Mark as `BUILD_FAILED` with the error message in report. Delete the broken test file and note in the report: "Test file removed due to persistent build failure." |
 
 3. **Do NOT run the tests.** The tests are designed to **FAIL** against the current buggy code — that's the point. Validation checks only syntax, types, and linking. Running them would produce expected failures that aren't useful here.
 

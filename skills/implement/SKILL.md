@@ -19,6 +19,10 @@ You are implementing tasks from the active track's plan following the TDD workfl
 
 **Verify before you mark complete. One task, one commit.**
 
+## Constraints
+
+Draft skills are designed for single-agent, single-track execution. Do not run multiple Draft commands concurrently on the same track.
+
 ---
 
 ## Step 1: Load Context
@@ -254,6 +258,7 @@ After completing each task:
 1. Commit FIRST (REQUIRED - non-negotiable):
    - Stage only files changed by this task (never `git add .`)
    - `git add <specific files>`
+   - Verify staged changes exist before committing: `git diff --cached --quiet`. If nothing staged, skip the commit step.
    - `git commit -m "type(<track_id>): task description"`
    - Get commit SHA: `git rev-parse --short HEAD`
    - Do NOT proceed to the next task without committing
@@ -278,7 +283,7 @@ After completing each task:
 5. If `.ai-context.md` or `architecture.md` exists for the track:
    - Update module status markers (`[ ]` → `[~]` when first task in module starts, `[~]` → `[x]` when all tasks complete)
    - Fill in Story placeholders with the approved story from Step 2.5
-   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.message` to current HEAD, then regenerate `draft/architecture.md` using the Derivation Subroutine defined in `/draft:init`
+   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.message` to current HEAD. Update `draft/architecture.md` with structural changes, then run the Condensation Subroutine (defined in `/draft:init`) to regenerate `draft/.ai-context.md`.
 
 ## Verification Gate (REQUIRED)
 
@@ -311,7 +316,7 @@ When all tasks in a phase are `[x]`:
 ### Three-Stage Review (REQUIRED)
 
 **Stage 1: Automated Validation**
-- Fast static checks: architecture conformance, dead code, circular dependencies, OWASP security scans, performance anti-patterns
+- Fast static checks: architecture conformance, dead code, circular dependencies, performance anti-patterns. Review for common security anti-patterns (OWASP top 10). For automated checks, use language-specific tools (e.g., `npm audit` for JS, `bandit` for Python, `cargo audit` for Rust).
 - **If critical issues found:** List them, return to implementation
 
 **Stage 2: Spec Compliance** (only if Stage 1 passes)
@@ -379,7 +384,7 @@ Summary:
 - Duration: [if tracked]
 
 [If validation ran:]
-Validation: ✓ [pass] | ⚠ [warn] | ✗ [critical]
+Validation: PASS | WARN | CRITICAL
 Report: draft/tracks/<track_id>/validation-report.md
 
 All acceptance criteria from spec.md should be verified.

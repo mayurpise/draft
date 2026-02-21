@@ -139,6 +139,8 @@ If `draft/` exists with context files:
 - Announce: "Project already initialized. Use `/draft:init refresh` to update context or `/draft:new-track` to create a feature."
 - Stop here.
 
+> **Rollback note:** If init fails partway, delete the `draft/` directory and re-run `/draft:init`.
+
 ### Monorepo Detection
 
 Check for monorepo indicators:
@@ -168,7 +170,7 @@ If the user runs `/draft:init refresh`:
    **a. Read synced commit from metadata:**
    ```bash
    # Extract synced_to_commit from YAML frontmatter
-   grep -A1 "synced_to_commit:" draft/architecture.md | tail -1 | tr -d ' "'
+   grep "synced_to_commit:" draft/architecture.md | head -1 | sed 's/.*synced_to_commit:[[:space:]]*"\{0,1\}\([^"]*\)"\{0,1\}/\1/'
    ```
    This returns the commit SHA the docs were last synced to (more reliable than file modification time).
 
@@ -181,13 +183,13 @@ If the user runs `/draft:init refresh`:
    **c. Check if docs were generated with dirty state:**
    If the original `git.dirty: true`, warn: "Previous generation had uncommitted changes. Full refresh recommended."
 
-   **c. Categorize changes:**
+   **d. Categorize changes:**
    - **Added files**: New modules, components, or features to document
    - **Modified files**: Existing sections that may need updates
    - **Deleted files**: Components to remove from documentation
    - **Renamed files**: Update file references
 
-   **d. Targeted analysis (only changed files):**
+   **e. Targeted analysis (only changed files):**
    - Read each changed file to understand modifications
    - Identify which architecture.md sections are affected:
      - New files → Component Map, Implementation Catalog, File Structure
@@ -198,20 +200,20 @@ If the user runs `/draft:init refresh`:
    - Preserve unchanged sections exactly as-is
    - Preserve modules added by `/draft:decompose` (planned modules)
 
-   **e. Present incremental diff:**
+   **f. Present incremental diff:**
    Show user:
    - Files analyzed: `N changed files since <date>`
    - Sections updated: list of affected sections
    - Summary of changes per section
 
-   **f. On user approval:**
+   **g. On user approval:**
    - Update only the affected sections in `draft/architecture.md`
    - Regenerate `draft/.ai-context.md` using the Condensation Subroutine
 
-   **g. On user rejection:**
+   **h. On user rejection:**
    - No changes made
 
-   **h. Fallback to full refresh:**
+   **i. Fallback to full refresh:**
    If `synced_to_commit` is missing from metadata, or the commit SHA doesn't exist in git history:
    ```bash
    git cat-file -t <SYNCED_SHA> 2>/dev/null || echo "not found"
@@ -220,7 +222,7 @@ If the user runs `/draft:init refresh`:
 
    - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now
 
-   **i. Update metadata after refresh:**
+   **j. Update metadata after refresh:**
    After successful refresh, update the YAML frontmatter in all modified files:
    - `generated_by`: `/draft:init refresh`
    - `generated_at`: current timestamp
@@ -276,6 +278,8 @@ Perform a **one-time, exhaustive analysis** of the existing codebase. This is NO
 - **Target 30-45 pages** — shorter output indicates incomplete analysis
 
 If the codebase is large (200+ files), focus on the module boundaries but still enumerate exhaustively within each module.
+
+> **Large codebase guardrail:** If the codebase exceeds 500 source files, limit deep dives to the top 20 most-imported modules and summarize others in a table.
 
 ### Execution Strategy for Depth
 

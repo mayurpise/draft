@@ -23,7 +23,7 @@ Display a comprehensive overview of project progress.
 
 1. Read `draft/tracks.md` for track list
 2. For each active track, read:
-   - `draft/tracks/<id>/metadata.json` for stats
+   - `draft/tracks/<id>/metadata.json` for stats. If `metadata.json` is malformed or unreadable, display `(metadata unavailable)` for that track's statistics instead of failing.
    - `draft/tracks/<id>/plan.md` for task status
    - `draft/tracks/<id>/architecture.md` for module status (if exists)
 3. Check for project-wide `draft/.ai-context.md` (or legacy `draft/architecture.md`) for module status
@@ -77,7 +77,7 @@ ORPHANED TRACKS
 
 Recovery options:
 1. Add to tracks.md manually if track is valid
-2. Remove directory if track was abandoned: rm -rf draft/tracks/<id>/
+2. To resolve orphaned tracks, run `/draft:revert` or manually add the track entry back to `tracks.md`
 
 RECENTLY COMPLETED
 ─────────────────────────────────────────────────────────

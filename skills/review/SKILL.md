@@ -43,7 +43,6 @@ Extract and validate command arguments from user input.
 - `commits <range>` - Review commit range (e.g., `main...HEAD`, `abc123..def456`)
 
 **Quality integration modifiers:**
-- `with-validate` - (Deprecated) Ignored as validation is natively built-in.
 - `with-bughunt` - Include `/draft:bughunt` results
 - `full` - Include bughunt results
 
@@ -169,12 +168,7 @@ Once track is resolved:
 
 For project-level reviews (no track context):
 
-1. **Read project guidelines:**
-   - Load `CLAUDE.md` (project instructions)
-   - Load `core/methodology.md` (Draft methodology)
-   - Load `core/agents/reviewer.md` (review criteria)
-
-2. **Load Draft context (if available):**
+1. **Load Draft context (if available):**
    - Read `draft/.ai-context.md` (system architecture, critical invariants, security architecture). Falls back to `draft/architecture.md` for legacy projects.
    - Read `draft/tech-stack.md` (technical constraints, **Accepted Patterns**)
    - Read `draft/workflow.md` (**Guardrails** section)
@@ -182,7 +176,7 @@ For project-level reviews (no track context):
    **Honor Accepted Patterns** - Don't flag patterns documented in `tech-stack.md` `## Accepted Patterns`
    **Enforce Guardrails** - Flag violations of checked guardrails in `workflow.md` `## Guardrails`
 
-3. **Note limitations:**
+2. **Note limitations:**
    - No spec.md → Skip Stage 1 (spec compliance)
    - Run Stage 2 (code quality) only
 
@@ -238,9 +232,7 @@ Skip non-source files to focus review:
 
 Apply a three-stage review process (merging static validation and semantic review).
 
-### Stage 1: Automated Validation (Static Checks)
-
-**Run for both track-level and project-level reviews**
+### Stage 1: Automated Validation
 
 **Goal:** Detect structural, security, and performance issues using fast, objective searches across the diff.
 
@@ -336,6 +328,10 @@ Classify all findings by severity:
 | **Critical** | Blocks release, breaks functionality, security issue | Must fix before proceeding |
 | **Important** | Degrades quality, technical debt | Should fix before phase complete |
 | **Minor** | Style, optimization, nice-to-have | Note for later, don't block |
+
+**Scope-specific behavior:**
+- For **track-level** reviews: Run all three stages. Stage 2 uses `spec.md` acceptance criteria loaded in Step 2.
+- For **project-level** reviews: Skip Stage 2 (no spec). Run Stage 1 and Stage 3 only.
 
 **Issue format:**
 ```markdown

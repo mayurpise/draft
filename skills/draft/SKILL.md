@@ -53,12 +53,13 @@ Every feature follows this lifecycle:
 2. **New Track** - Create specification and plan
 3. **Implement** - Execute tasks with TDD workflow
 4. **Verify** - Confirm acceptance criteria met
+5. **Quality** - Run `/draft:review` for code review, `/draft:bughunt` for bug hunting, `/draft:deep-review` for module audits
 
 ## Context Files
 
 When `draft/` exists, these files guide development:
-- `draft/.ai-context.md` - Source of truth for AI agents (dense codebase understanding)
-- `draft/architecture.md` - Human-readable engineering guide (derived from .ai-context.md)
+- `draft/architecture.md` - Source of truth: human-readable engineering reference (30-45 pages)
+- `draft/.ai-context.md` - Derived from architecture.md: token-optimized AI context (200-400 lines)
 - `draft/product.md` - Product vision and goals
 - `draft/tech-stack.md` - Technical constraints
 - `draft/workflow.md` - TDD and commit preferences

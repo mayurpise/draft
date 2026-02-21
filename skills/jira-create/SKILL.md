@@ -55,7 +55,7 @@ If no track found:
 ## Step 3: Check MCP-Jira Availability
 
 Attempt to detect MCP-Jira tools:
-1. Check if `mcp_jira_create_issue` or similar tool is available
+1. List available MCP tools and search for Jira-related ones. Known tool name variants: `mcp_jira_create_issue`, `jira_createIssue`, `create_jira_issue`, `jira-create-issue`. Use whichever is available.
 2. If unavailable:
    ```
    MCP-Jira not configured.
@@ -96,7 +96,24 @@ If export contains `## Quality Reports` section:
 - Parse bughunt bug issues with all sections (location, confidence, code evidence, data flow trace, issue, impact, verification done, why not a false positive, fix, regression test)
 - Extract all fields for each finding to populate Jira issue descriptions
 
+## Step 4b: Validate Project Key
+
+Before creating issues, attempt to fetch project metadata via MCP to verify the project key exists. Fail fast with a clear error if invalid:
+
+```
+MCP call: get_project (or equivalent)
+- project: [project key]
+```
+
+If the project key is invalid or not found:
+- Error: "Jira project '[KEY]' not found. Verify the project key and try again."
+- Stop execution.
+
 ## Step 5: Create Issues via MCP
+
+**Incremental persistence:** After creating each issue, immediately update the corresponding entry in `jira-export.md` with the Jira key. This ensures re-runs can skip already-created items even if the process fails mid-way.
+
+**Note:** Some Jira configurations do not allow setting status during creation. If status setting fails, create in default status and log a warning.
 
 ### 5a. Create Epic
 ```
@@ -203,7 +220,9 @@ MCP call: create_issue
 
 **All bugs from bughunt-report.md get their own Bug issue.** They are linked to the Epic but separate from Stories (phases). This keeps implementation work (Stories/Sub-tasks) distinct from defect tracking (Bugs).
 
-## Step 6: Update Tracking
+## Step 6: Finalize Tracking
+
+`jira-export.md` has already been updated incrementally during Step 5. Now update `plan.md` with the Jira keys:
 
 1. **Update plan.md:**
    Add Jira keys to phase headers and tasks:
@@ -214,19 +233,10 @@ MCP call: create_issue
    - [x] **Task 1.2:** Extract security utilities [PROJ-126]
    ```
 
-2. **Update jira-export.md:**
-   Change status and add keys:
+2. **Set jira-export.md status to Created:**
    ```markdown
    **Status:** Created
    **Epic Key:** PROJ-123
-
-   ## Story 1: [Phase Name] [PROJ-124]
-
-   ### Sub-tasks
-   | # | Summary | Status | Key |
-   |---|---------|--------|-----|
-   | 1.1 | Extract logging utilities | Done | PROJ-125 |
-   | 1.2 | Extract security utilities | Done | PROJ-126 |
    ```
 
 ## Step 7: Report

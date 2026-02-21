@@ -45,7 +45,6 @@ Draft solves this through **Context-Driven Development**: structured documents t
   - [/draft:change](#draftchange--course-correction)
 - [Architecture Mode](#architecture-mode)
 - [Coverage](#coverage)
-- [Notes](#notes)
 - [Jira Integration (Optional)](#jira-integration-optional)
 - [TDD Workflow (Optional)](#tdd-workflow-optional)
 - [Intent Mapping](#intent-mapping)
@@ -278,17 +277,6 @@ You should see the list of available Draft commands. If not, check that the plug
 /draft:status
 ```
 
-### Cursor Integration (Optional)
-
-Cursor natively supports the `.claude/` plugin structure. Add via:
-
-Cursor > Settings > Rules, Skills, Subagents > Rules > New > Add from Github:
-```
-https://github.com/mayurpise/draft.git
-```
-
-Then use: `@draft init`, `@draft new-track`, `@draft implement`
-
 ### GitHub Copilot Integration (Optional)
 
 Draft also works with GitHub Copilot via `copilot-instructions.md`:
@@ -439,7 +427,7 @@ If `draft/` already exists with context files, init reports "already initialized
 Re-scans and updates existing context without starting from scratch.
 
 1. **Tech Stack Refresh** — Re-scans `package.json`, `go.mod`, etc. Compares with existing `draft/tech-stack.md`. Proposes updates.
-2. **Architecture Refresh** — Re-runs architecture discovery and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `/draft:decompose`. Presents changes for review before writing. After updating `architecture.md`, derives `draft/.ai-context.md` using the Condensation Subroutine.
+2. **Architecture Refresh** — Re-runs architecture discovery and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `/draft:decompose`. Presents changes for review before writing. After updating `architecture.md`, derives `draft/.ai-context.md` using the Condensation Subroutine (defined in `/draft:init`).
 3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
@@ -1067,6 +1055,8 @@ See `core/agents/reviewer.md` for detailed process.
 
 ## Agents
 
+**Note:** Canonical agent behavior is defined in `core/agents/*.md`. This section provides summaries for reference. When in doubt, defer to the agent files.
+
 Draft includes five specialized agent behaviors that activate during specific workflow phases.
 
 ### Debugger Agent
@@ -1184,6 +1174,10 @@ Activated during `/draft:new-track` plan creation and `/draft:decompose`. Provid
 See `core/agents/planner.md` for the full planning process and integration workflows.
 
 ---
+
+## Concurrency
+
+Draft skills are designed for single-agent, single-track execution. Do not run multiple Draft commands concurrently on the same track.
 
 ## Communication Style
 

@@ -29,6 +29,11 @@ synced_to_commit: "{FULL_SHA}"
 
 **Mode:** [strict | flexible | none]
 
+**Coverage Target:**
+```yaml
+coverage_target: 95  # Minimum coverage percentage (default: 95%)
+```
+
 ### Strict TDD
 
 **Iron Law:** No production code without a failing test first.

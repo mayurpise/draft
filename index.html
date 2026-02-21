@@ -1910,11 +1910,13 @@
 
                 <details>
                     <summary>Three-Stage Review</summary>
-                    <p>At every phase boundary, the Reviewer Agent runs two sequential checks:</p>
-                    <p><strong>Stage 1: Spec Compliance</strong> — All functional requirements implemented? Acceptance
+                    <p>At every phase boundary, the Reviewer Agent runs three sequential checks:</p>
+                    <p><strong>Stage 1: Automated Validation</strong> — Architecture conformance, dead code, circular
+                        dependencies, security anti-patterns, performance issues.</p>
+                    <p><strong>Stage 2: Spec Compliance</strong> — All functional requirements implemented? Acceptance
                         criteria met? No scope creep or missing features?</p>
-                    <p><strong>Stage 2: Code Quality</strong> — Follows project patterns from tech-stack.md? Appropriate
-                        error handling? Tests cover real logic?</p>
+                    <p><strong>Stage 3: Code Quality</strong> — Follows project patterns from tech-stack.md? Appropriate
+                        error handling? Tests cover real logic? Maintainability and complexity.</p>
                     <p>Critical issues must be fixed before proceeding. Important issues should be fixed. Minor issues
                         noted but don't block.</p>
                 </details>
@@ -1985,7 +1987,7 @@
                         <h4>What it does:</h4>
                         <ol>
                             <li>Detects brownfield (existing) vs greenfield (new) project</li>
-                            <li><strong>Architecture discovery</strong> (brownfield): 6-phase deep analysis with mermaid
+                            <li><strong>Architecture discovery</strong> (brownfield): 5-phase deep analysis with mermaid
                                 diagrams, data state machines, consistency boundaries</li>
                             <li>Creates <code>product.md</code>, <code>tech-stack.md</code>, <code>workflow.md</code>,
                                 <code>.ai-context.md</code>, <code>architecture.md</code>
@@ -2539,7 +2541,7 @@
         <!-- CODEBASE RESEARCH TAB -->
         <div id="tab-research" class="tab-content" role="tabpanel">
             <h2>Codebase Research</h2>
-            <p>Every AI interaction starts with understanding. <code>/draft:init</code> performs a deep 6-phase analysis
+            <p>Every AI interaction starts with understanding. <code>/draft:init</code> performs a deep 5-phase analysis
                 of your codebase and produces <strong>architecture.md</strong> — a comprehensive engineering reference
                 that derives <strong>.ai-context.md</strong>,
                 captures how your system actually works. Not how it was designed. How it works today.</p>

@@ -24,6 +24,8 @@ node_modules/
 /draft/bughunt-report.md
 /draft/validation-report.md
 /draft/tracks/*/validation-report.md
+/draft/deep-review-report.md
+/draft/deep-review-history.json
 
 INDUSTRY_REVIEW.md
 RECOMMENDATIONS.md

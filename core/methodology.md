@@ -543,6 +543,12 @@ Scans `plan.md` for the first uncompleted task:
 - `[x]` Completed — skips
 - `[!]` Blocked — skips, notifies user
 
+#### Production Robustness Patterns (always active)
+
+During code generation, the implement skill applies trigger→pattern rules across 6 dimensions: **atomicity** (all-or-nothing mutations, atomic file writes, DB-first state updates), **isolation** (lock-guarded shared state, deep-copy returns, no DB I/O under locks), **durability** (crash-recoverable state, no fire-and-forget writes), **defensive boundaries** (numeric validation, API response validation, parameterized SQL), **idempotency** (dedup keys, legal state transitions, alert dedup), and **fail-closed** (deny on error/missing data). Patterns activate based on code triggers — no manual opt-in needed.
+
+When `draft/.ai-context.md` exists, project-specific invariants (lock ordering, concurrency model, consistency boundaries) are loaded as active constraints and take precedence over general patterns.
+
 #### TDD Cycle (when enabled in `workflow.md`)
 
 1. **RED** — Write a failing test that captures the requirement. Run the test, verify it fails with an assertion failure (not a syntax error).

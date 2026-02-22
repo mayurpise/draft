@@ -62,7 +62,7 @@ Commands use `@draft` syntax.
 | `/draft:deep-review` | Enterprise-grade module lifecycle and ACID audit |
 | `/draft:bughunt` | Exhaustive defect discovery |
 
-[See all 15 commands →](core/methodology.md#command-workflows)
+[See all 16 commands →](core/methodology.md#command-workflows)
 
 ---
 

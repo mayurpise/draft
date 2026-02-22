@@ -37,6 +37,11 @@ Draft skills are designed for single-agent, single-track execution. Do not run m
    - Project-level: `draft/.ai-context.md` (or legacy `draft/architecture.md`)
    - If either exists → **Enable architecture mode** (Story, Execution State, Skeletons)
    - If neither exists → Standard TDD workflow
+7. **Load production invariants** (if `draft/.ai-context.md` exists):
+   - Read the `## INVARIANTS` section (and `## CONCURRENCY` if present)
+   - Identify which invariants reference files this task will modify (same file or same module)
+   - Keep matching invariants as **active constraints** for this task — these govern code generation, not just review
+   - If invariants reference lock ordering, fail-closed behavior, or data integrity rules: these are non-negotiable during implementation
 
 If no active track found:
 - Tell user: "No active track found. Run `/draft:new-track` to create one."
@@ -183,6 +188,70 @@ See `core/agents/architect.md` for execution state and skeleton guidelines.
 
 ---
 
+### Step 3.0c: Production Robustness Patterns (REQUIRED)
+
+**Applies to all code generation** — architecture mode or not. These patterns are generation directives, not a post-hoc checklist. Apply them **while writing code**, not after.
+
+When your implementation hits any of these triggers, use the corresponding pattern. Do not write code that violates these and plan to "fix it later."
+
+#### Atomicity
+
+| Trigger | Required Pattern |
+|---------|-----------------|
+| Multi-step state mutation (DB + memory, multiple records) | Wrap in transaction or try/finally with rollback on failure |
+| File write | Write to temp file + atomic rename to target path. Never write directly to the target. |
+| DB write paired with in-memory state update | DB-first: persist to DB, update memory only on DB success. Never update memory optimistically. |
+| Resource acquisition (locks, file handles, connections, capital) | Release in `finally` / `defer` / RAII — never rely on happy-path-only cleanup |
+
+#### Isolation
+
+| Trigger | Required Pattern |
+|---------|-----------------|
+| Method mutates shared/instance state | Acquire the class's or module's existing lock before mutation |
+| Lifecycle operations (start/stop/reset/reconnect) | Use a dedicated lifecycle lock, separate from data locks |
+| Returning internal state to callers | Return a deep copy or frozen snapshot — never a mutable reference to internal state |
+| Acquiring a second lock while holding one | Follow documented lock ordering. If no ordering exists, do not nest locks — restructure to acquire sequentially. |
+| DB I/O while holding a state lock | Move DB I/O outside the lock scope. Lock only the in-memory mutation, not the I/O. |
+
+#### Durability
+
+| Trigger | Required Pattern |
+|---------|-----------------|
+| Critical state that must survive crashes | Ensure state is recoverable from DB/disk alone — no reliance on in-memory-only state for recovery |
+| Async DB write (fire-and-forget) | Await the write. Check return value or propagate exceptions. No fire-and-forget on data persistence. |
+| Event log / audit trail / fill history | Use append-only pattern where specified by architecture |
+
+#### Defensive Boundaries
+
+| Trigger | Required Pattern |
+|---------|-----------------|
+| External numeric data used in arithmetic | Guard with `isFinite()` / `isnan()` / equivalent before any calculation |
+| External API/webhook response consumed | Validate expected fields exist and have correct types before accessing nested properties |
+| SQL query with dynamic values | Parameterized queries only — zero string interpolation for values |
+| Dynamic column names, table names, or identifiers in SQL | Validate against an explicit allowlist — never pass user-controlled strings as identifiers |
+
+#### Idempotency
+
+| Trigger | Required Pattern |
+|---------|-----------------|
+| Operation that may be retried (network calls, queue consumers, webhook handlers) | Use a dedup key (UUID, request ID, fill ID) — check-before-write or upsert |
+| State transition (status changes, lifecycle events) | Validate the transition is legal from the current state. Reject terminal→terminal transitions. |
+| Alert / notification emission | Dedup on (alert_type, entity_id, time_window) to prevent re-firing on retries |
+
+#### Fail-Closed
+
+| Trigger | Required Pattern |
+|---------|-----------------|
+| Error path or exception handler that determines access/action | Default to the safe/restrictive/deny state — never default to permissive on error |
+| Missing data, null, or undefined where a decision depends on it | Treat as deny/reject/skip — not as allow/proceed |
+| Config or feature flag missing/unparseable | Use the restrictive default — system runs in safe mode, not open mode |
+
+**Enforcement:** These patterns override convenience. If following a pattern makes the code more verbose, that's correct — the verbosity is the safety. If a pattern is genuinely N/A for the current task (e.g., no DB in a pure utility function), skip it — only apply relevant patterns.
+
+**If project invariants were loaded in Step 1:** Cross-reference them here. Project-specific invariants (lock ordering, concurrency model, consistency boundaries) take precedence over these general patterns when they conflict.
+
+---
+
 ### Step 3.1: Implement (TDD Workflow)
 
 For each task, follow this workflow based on `workflow.md`. If skeletons were generated in Step 3.0b, fill them in using the TDD cycle below.
@@ -254,6 +323,11 @@ This prevents large, unreviewable code drops. Each chunk should be a coherent, r
 **Iron Law:** Every completed task gets its own commit. No batching. No skipping.
 
 After completing each task:
+
+0. **Quick robustness scan** (30-second check before committing):
+   - Scan the code you just wrote against the Step 3.0c triggers
+   - If any trigger is present but the pattern wasn't applied: fix it now
+   - This is a rapid pattern-match, not a full review — you should have applied these during generation, this catches anything missed
 
 1. Commit FIRST (REQUIRED - non-negotiable):
    - Stage only files changed by this task (never `git add .`)

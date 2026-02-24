@@ -209,6 +209,7 @@ Stories flow through three stages:
 - **Be specific about data flow** - Name the data, describe transformations
 - **Keep it concise** - 5-15 lines max. If longer, the module is too complex.
 - **Update when algorithm changes** - Story must reflect current logic
+- **Elegance check** - Before presenting the story, ask: "Is this the simplest algorithm that satisfies the requirements?" If a cleaner approach exists, propose it here — the story stage is the cheapest place to change direction, before skeletons and TDD lock in the design. Skip for trivial tasks.
 
 ### Anti-Patterns
 

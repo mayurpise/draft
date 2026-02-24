@@ -1,3 +1,7 @@
+---
+generated_by: draft:bughunt
+---
+
 # Bug Hunt Report
 
 **Branch:** `main`

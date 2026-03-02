@@ -27,6 +27,9 @@ node_modules/
 /draft/deep-review-report.md
 /draft/deep-review-history.json
 
+# Internal docs (strategy, blogs, competitive analysis)
+docs/internal/
+
 INDUSTRY_REVIEW.md
 RECOMMENDATIONS.md
 codebase_researcher.md

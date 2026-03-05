@@ -44,6 +44,7 @@ SKILL_ORDER=(
     change
     jira-preview
     jira-create
+    epic-status
 )
 
 get_skill_header() {
@@ -65,6 +66,7 @@ get_skill_header() {
         change)       echo "Change Command" ;;
         jira-preview) echo "Jira Preview Command" ;;
         jira-create)  echo "Jira Create Command" ;;
+        epic-status)  echo "Epic Status Command" ;;
         *)            echo "${skill^} Command" ;;
     esac
 }
@@ -89,6 +91,7 @@ get_gemini_trigger() {
         change)       echo "\"handle change\" or \"@draft change <description>\"" ;;
         jira-preview) echo "\"preview jira\" or \"@draft jira-preview [track-id]\"" ;;
         jira-create)  echo "\"create jira\" or \"@draft jira-create [track-id]\"" ;;
+        epic-status)  echo "\"qualify epic\" or \"@draft epic-status <EPIC_ID>\"" ;;
         *)            echo "\"@draft $skill\"" ;;
     esac
 }
@@ -113,6 +116,7 @@ get_copilot_trigger() {
         change)       echo "\"handle change\" or \"draft change <description>\"" ;;
         jira-preview) echo "\"preview jira\" or \"draft jira-preview [track-id]\"" ;;
         jira-create)  echo "\"create jira\" or \"draft jira-create [track-id]\"" ;;
+        epic-status)  echo "\"qualify epic\" or \"draft epic-status <EPIC_ID>\"" ;;
         *)            echo "\"draft $skill\"" ;;
     esac
 }

@@ -118,7 +118,7 @@ rm -f draft/.index-lock
 ## Step 1: Parse Arguments
 
 Check for optional arguments:
-- `init-missing`: Also initialize services that don't have `draft/` directories
+- `--init-missing`: Also initialize services that don't have `draft/` directories
 - `bughunt [dir1 dir2 ...]`: Run bug hunt across subdirectories with `draft/` folders
   - If no directories specified: auto-discover all subdirectories with `draft/`
   - If directories specified: run bughunt only in those subdirectories (skip if no `draft/`)
@@ -164,9 +164,11 @@ Target directories for bughunt:
 
 For each target directory:
 
-1. **Navigate to directory:**
-   ```bash
-   cd <target-dir>
+1. **Set working directory** to `<target-dir>` for the bughunt scope. The AI agent should invoke `/draft:bughunt` with the target directory as the scope path, rather than using `cd`:
+   ```
+   /draft:bughunt
+   → (scope prompt) → "Specific paths"
+   → (paths prompt) → <target-dir>
    ```
 
 2. **Announce:**
@@ -174,15 +176,9 @@ For each target directory:
    Running bughunt in <target-dir>...
    ```
 
-3. **Invoke `/draft:bughunt` skill:**
-   - Let `/draft:bughunt` run its full workflow
+3. **Let `/draft:bughunt` run its full workflow:**
    - Report will be generated at `<target-dir>/draft/bughunt-report.md`
    - Capture exit status (success/failure)
-
-4. **Return to repository root:**
-   ```bash
-   cd -
-   ```
 
 5. **Record results:**
    - Directory path
@@ -361,7 +357,7 @@ Uninitialized services:
 
 **If `init-missing` argument is NOT present:**
 - Just report uninitialized services and continue
-- Suggest: "Run `/draft:index init-missing` to initialize these services"
+- Suggest: "Run `/draft:index --init-missing` to initialize these services"
 
 ## Step 5: Aggregate Context from Initialized Services
 
@@ -453,7 +449,7 @@ The following services have not been initialized with `/draft:init`:
 - `services/legacy-reports/`
 - `services/admin-tools/`
 
-Run `/draft:index init-missing` or initialize individually with:
+Run `/draft:index --init-missing` or initialize individually with:
 ```bash
 cd services/legacy-reports && /draft:init
 ```

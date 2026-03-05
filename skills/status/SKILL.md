@@ -77,7 +77,7 @@ ORPHANED TRACKS
 
 Recovery options:
 1. Add to tracks.md manually if track is valid
-2. To resolve orphaned tracks, run `/draft:revert` or manually add the track entry back to `tracks.md`
+2. Remove orphaned track directory if no longer needed
 
 RECENTLY COMPLETED
 ─────────────────────────────────────────────────────────

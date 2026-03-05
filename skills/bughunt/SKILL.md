@@ -242,10 +242,10 @@ Only report bugs with HIGH or CONFIRMED confidence:
 |-------|----------|--------|
 | **CONFIRMED** | Verified through code trace, no mitigating factors found | Report as bug |
 | **HIGH** | Strong evidence, checked context, no obvious mitigation | Report as bug |
-| **MEDIUM** | Suspicious but couldn't verify all factors | Use AskUserQuestion to check with user before reporting |
+| **MEDIUM** | Suspicious but couldn't verify all factors | Ask user to confirm before reporting |
 | **LOW** | Possible issue but likely handled elsewhere | Do NOT report |
 
-**Example AskUserQuestion for MEDIUM Confidence:**
+**Example confirmation prompt for MEDIUM Confidence:**
 "I found a potential race condition in `src/handler.ts:45` where async state updates may overwrite each other. However, I couldn't verify if there's a locking mechanism elsewhere. Should I report this as a bug?"
 
 ### Evidence Requirements

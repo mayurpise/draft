@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `/draft:epic-status` — Epic qualification pipeline via MCP servers:
+  - 7-phase pipeline: Prerequisites → Epic/Story Collection → Document Collection → Code Changes → Quality Analysis → Test Gap Analysis → Report Generation
+  - MCP-first: Jira MCP (required), Code Review MCP (Gerrit/GitHub/GitLab with auto-detection), TestRail MCP (optional)
+  - Runs `/draft:deep-review`, `/draft:bughunt`, and `/draft:coverage` with full Draft context
+  - Test gap analysis with codebase test discovery, test shipping status per story, Test Adequacy Score (weighted 0-100%)
+  - Framework-specific test suggestions: unit, regression (from bughunt findings), integration (cross-module)
+  - Qualification verdict: QUALIFIED / PARTIALLY QUALIFIED / NOT QUALIFIED with 10-criterion checklist
+  - Requirements Traceability Matrix linking requirements → stories → code changes → tests → findings
+  - Design document and test plan synthesis via MCP cascade (Google Drive, Confluence, WebFetch)
+  - Remediation plan with phased fix recommendations
+  - Delta comparison from previous qualification runs
+  - Output: `draft/epic-status/<EPIC_ID>/` (qualification-report.md, context.md, remediation-plan.md, synthesis files)
+
+### Fixed
+- **Cross-skill consistency audit** (29 issues fixed across 13 files):
+  - `/draft:deep-review`: Added `draft/` pre-check, added missing metadata fields (project, remote, commit_message, dirty, synced_to_commit)
+  - `/draft:change`: Added `draft/` pre-check, added git traceability to Change Log entries
+  - `/draft:revert`: Added `draft/` pre-check, added "nothing to revert" handling for zero-commit tracks
+  - `/draft:coverage`: Fixed `.ai-context.md` direct write → update `architecture.md` then Condensation Subroutine, added YAML frontmatter requirement
+  - `/draft:decompose`: Rewrote Mutation Protocol to be `architecture.md`-first, fixed Step 5 template contradiction, aligned module threshold >5 → >3
+  - `/draft:review`: Fixed anti-patterns table stage references, fixed bughunt invocation syntax
+  - `/draft:bughunt`: Replaced non-existent `AskUserQuestion` tool reference
+  - `/draft:adr`: Fixed filename format mismatch (`ADR-<N>` vs `<N>-<kebab>`) and sed regex
+  - `/draft:new-track`: Standardized file operations (write+delete instead of rename)
+  - `/draft:index`: Fixed bughunt mode `cd` pattern, standardized `--init-missing` flag format
+  - `/draft:status`: Fixed orphan recovery suggestion (was incorrectly suggesting `/draft:revert`)
+  - `CLAUDE.md`: Updated "Two-Stage Review" → "Three-Stage Review"
+
 ### Changed
 - **BREAKING:** `/draft:validate` deprecated and removed. Functionality absorbed into `/draft:review` Stage 1 (Automated Validation).
 - `/draft:review` upgraded from 2-stage to 3-stage process:

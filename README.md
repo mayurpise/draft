@@ -76,8 +76,9 @@ Commands use `@draft` syntax.
 | **`/draft:review`** | 3-stage review (validation + spec compliance + code quality) |
 | **`/draft:deep-review`** | Enterprise-grade module lifecycle and ACID audit |
 | **`/draft:bughunt`** | Exhaustive defect discovery |
+| **`/draft:epic-status`** | Qualify a Jira Epic via MCP (stories, code changes, tests, gap analysis) |
 
-[See all 16 commands →](core/methodology.md#command-workflows)
+[See all 17 commands →](core/methodology.md#command-workflows)
 
 ---
 

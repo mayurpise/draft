@@ -62,6 +62,7 @@
         "Security validation (OWASP Top 10)",
         "TDD workflow enforcement",
         "Jira integration",
+        "Epic qualification pipeline via MCP (Jira + Gerrit/GitHub/GitLab)",
         "Git-aware rollback"
       ],
       "screenshot": "https://getdraft.dev/social-preview.png"
@@ -2476,6 +2477,37 @@
                         <div class="usage-examples">
                             <code>/draft:change the export format should also support JSON</code>
                             <code>/draft:change track add-export-feature add progress indicator</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- /draft:epic-status -->
+                <div class="doc-card">
+                    <div class="card-summary">
+                        <div class="icon">&#x1f4ca;</div>
+                        <div class="name">/draft:epic-status</div>
+                        <p class="purpose">Qualify a Jira Epic via MCP pipeline</p>
+                        <div class="expand-indicator">&#x25BC;</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ol>
+                            <li>Collects epic stories, documents, and code changes via Jira + Code Review MCP</li>
+                            <li>Runs <code>/draft:deep-review</code>, <code>/draft:bughunt</code>, and <code>/draft:coverage</code></li>
+                            <li>Discovers codebase tests, computes Test Adequacy Score</li>
+                            <li>Generates framework-specific test suggestions (unit, regression, integration)</li>
+                            <li>Produces qualification report with 10-criterion verdict</li>
+                        </ol>
+                        <h4>Requirements:</h4>
+                        <ul>
+                            <li>Jira MCP server configured (required)</li>
+                            <li>Code Review MCP: Gerrit, GitHub, or GitLab (auto-detected)</li>
+                            <li>Draft context (<code>/draft:init</code> must be run first)</li>
+                        </ul>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:epic-status ENG-446236</code>
+                            <code>/draft:epic-status PROJ-1234</code>
                         </div>
                     </div>
                 </div>

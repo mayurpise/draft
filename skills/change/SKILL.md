@@ -18,6 +18,16 @@ You are handling a mid-track requirement change using Draft's Context-Driven Dev
 
 ---
 
+## Step 0: Verify Draft Context
+
+```bash
+ls draft/tracks.md 2>/dev/null
+```
+
+If `draft/` does not exist: **STOP** — "No Draft context found. Run `/draft:init` first."
+
+---
+
 ## Step 1: Parse Arguments
 
 Extract from `$ARGUMENTS`:
@@ -144,7 +154,7 @@ Apply these changes to spec.md and plan.md? [yes / no / edit]
 2. Update `draft/tracks/<id>/metadata.json`:
    - Set `updated` to current ISO timestamp
 
-3. Append a Change Log entry to `plan.md`. If a `## Change Log` section does not exist, add it at the bottom:
+3. Append a Change Log entry (with current git SHA and timestamp) to `plan.md`. If a `## Change Log` section does not exist, add it at the bottom:
 
 ```markdown
 ## Change Log

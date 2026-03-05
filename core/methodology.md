@@ -43,6 +43,7 @@ Draft solves this through **Context-Driven Development**: structured documents t
   - [/draft:bughunt](#draftbughunt--exhaustive-bug-discovery)
   - [/draft:review](#draftreview--code-review-orchestrator)
   - [/draft:change](#draftchange--course-correction)
+  - [/draft:epic-status](#draftepic-status--epic-qualification)
 - [Architecture Mode](#architecture-mode)
 - [Coverage](#coverage)
 - [Jira Integration (Optional)](#jira-integration-optional)
@@ -108,6 +109,7 @@ graph TD
     P["/draft:adr"] -.->|"Document decisions"| B
     Q["/draft:jira-preview"] -.->|"Export to Jira"| B
     R["/draft:deep-review"] -.->|"Audit module"| E
+    S["/draft:epic-status"] -.->|"Qualify epic"| I
 ```
 
 ### Context Hierarchy
@@ -831,6 +833,41 @@ Use when requirements shift after a track is already in progress:
 
 ---
 
+### `/draft:epic-status` — Epic Qualification
+
+Qualifies a Jira Epic by running a 7-phase MCP pipeline: collect stories, fetch documents (design doc, test plan), gather code changes, audit quality via Draft commands, analyze test coverage, and produce a gap-analysis report with qualification verdict.
+
+#### When to Use
+
+Use when an epic is nearing completion and you need a qualification assessment:
+- Pre-release epic readiness check
+- Sprint review quality evidence
+- Gap analysis for incomplete epics
+- Delta tracking across qualification runs
+
+#### Process
+
+1. **Prerequisites** — Validate epic ID, verify MCP servers (Jira required, Code Review MCP auto-detected: Gerrit/GitHub/GitLab), verify Draft context (`draft:init` if needed)
+2. **Epic & Story Collection** — Fetch epic metadata, discover stories (with JQL fallbacks), enrich with comments, collect sub-tasks, classify stories (code/non-code/excluded), verify resolution status
+3. **Document Collection** — Fetch design docs and test plans via MCP cascade (Google Drive → Confluence → WebFetch), synthesize TestRail data
+4. **Code Change Collection** — Extract change IDs from story comments, fetch per-change data (files, commit messages, review status), verify merge status and Code-Review labels, classify test vs production files
+5. **Quality Analysis** — Run `/draft:deep-review` per module, `/draft:bughunt` scoped to changed files, `/draft:coverage` per module
+6. **Test Gap Analysis** — Codebase test discovery, test shipping status per story, AC→test mapping, coverage gaps, regression tests from bughunt, Test Adequacy Score (0-100%)
+7. **Report Generation** — Qualification verdict (QUALIFIED/PARTIALLY QUALIFIED/NOT QUALIFIED), requirements traceability matrix, remediation plan, delta from previous run
+
+#### Output
+
+```
+draft/epic-status/<EPIC_ID>/
+  qualification-report.md    # Full report with verdict
+  context.md                 # Intermediate context synthesis
+  remediation-plan.md        # If gaps found
+  design-doc-synthesis.md    # If design doc accessible
+  test-data-synthesis.md     # If test plan accessible
+```
+
+---
+
 ## Architecture Mode
 
 Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `architecture.md` exists** - no manual configuration needed.
@@ -997,6 +1034,7 @@ Natural language patterns that map to Draft commands:
 | "requirements changed", "scope changed", "update the spec" | Handle mid-track requirement change |
 | "preview jira", "export to jira" | Preview Jira issues |
 | "create jira issues" | Create Jira issues via MCP |
+| "qualify epic", "epic status", "epic qualification" | Epic qualification pipeline |
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |
 

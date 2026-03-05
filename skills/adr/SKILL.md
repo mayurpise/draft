@@ -103,12 +103,12 @@ Cross-reference the decision against existing context:
 
 ```bash
 # Extract the highest existing ADR number from filenames
-ls draft/adrs/*.md 2>/dev/null | sed 's/.*ADR-\([0-9]*\).*/\1/' | sort -n | tail -1
+ls draft/adrs/*.md 2>/dev/null | sed 's/.*\/\([0-9]*\)-.*/\1/' | sort -n | tail -1
 ```
 
 Next number = highest existing ADR number + 1, zero-padded to 3 digits (001, 002, ...). If no ADRs exist, start at 001.
 
-Verify the target filename `draft/adrs/ADR-<number>-*.md` does not already exist. If collision, increment the number until a free slot is found.
+Verify the target filename `draft/adrs/<number>-<kebab-case-title>.md` does not already exist. If collision, increment the number until a free slot is found.
 
 ## Step 5: Create ADR File
 

@@ -142,7 +142,7 @@ After developer approves:
    - Uncovered: defensive null checks in jwt.ts (justified)
    ```
 
-2. **Update architecture context** (track-level `architecture.md` or project-level `.ai-context.md`, if exists) - Add coverage to module status:
+2. **Update architecture context** — update `draft/architecture.md` (or track-level `architecture.md`) with coverage data, then run the Condensation Subroutine (defined in `/draft:init`) to regenerate `draft/.ai-context.md`:
    ```markdown
    - **Status:** [x] Complete (Coverage: 96.2%)
    ```
@@ -158,7 +158,7 @@ After developer approves:
    }
    ```
 
-4. **Write detailed coverage report** to `draft/tracks/<id>/coverage-report.md` with timestamped entries for historical tracking.
+4. **Write detailed coverage report** to `draft/tracks/<id>/coverage-report.md` with YAML frontmatter (include `project`, `track_id`, `generated_by: "draft:coverage"`, `generated_at`, `git` metadata matching other skills) and timestamped entries for historical tracking.
 
 ## Completion
 
@@ -173,7 +173,7 @@ Gaps documented: [count testable] testable, [count justified] justified
 
 Results recorded in:
 - plan.md (phase notes)
-- .ai-context.md (module status) [if applicable]
+- architecture.md → .ai-context.md (module status, via Condensation Subroutine) [if applicable]
 - metadata.json (coverage data)
 ```
 

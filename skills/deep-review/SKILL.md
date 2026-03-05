@@ -9,7 +9,7 @@ Perform an exhaustive end-to-end lifecycle review of a service, component, or mo
 
 ## Red Flags - STOP if you're:
 
-- Acting without reading the Draft context (`draft/product.md`, `draft/tech-stack.md`)
+- Acting without reading the Draft context (`draft/.ai-context.md`, `draft/tech-stack.md`, `draft/product.md`)
 - Modifying production code. This command is for auditing and reporting only. Fixes should be handled in a separate implementation track.
 - Reviewing a module that was already reviewed recently, unless explicitly requested.
 
@@ -18,6 +18,16 @@ Perform an exhaustive end-to-end lifecycle review of a service, component, or mo
 ## Arguments
 
 - `$ARGUMENTS` — Optional: explicit module/service/component name (directory) to review. If omitted, auto-select the next unreviewed module.
+
+---
+
+## Step 0: Verify Draft Context
+
+```bash
+ls draft/.ai-context.md 2>/dev/null
+```
+
+If `draft/` does not exist: **STOP** — "No Draft context found. Run `/draft:init` first. Deep review requires `draft/.ai-context.md` and `draft/tech-stack.md` to evaluate against project standards."
 
 ---
 
@@ -98,24 +108,32 @@ Create the `draft/deep-review-reports/` directory if it does not exist.
 
 ```bash
 git branch --show-current                    # LOCAL_BRANCH
+git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
 git rev-parse HEAD                           # FULL_SHA
 git rev-parse --short HEAD                   # SHORT_SHA
 git log -1 --format=%ci HEAD                 # COMMIT_DATE
+git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
+git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
 ```
 
 Report template:
 
 ```markdown
 ---
+project: "{PROJECT_NAME}"
 module: "<module-name>"
 module_path: "<module-path>"
 generated_by: "draft:deep-review"
 generated_at: "{ISO_TIMESTAMP}"
 git:
   branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
   commit: "{FULL_SHA}"
   commit_short: "{SHORT_SHA}"
   commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{from draft/.ai-context.md frontmatter, if available}"
 reviewer: "{model name from runtime}"
 ---
 ```

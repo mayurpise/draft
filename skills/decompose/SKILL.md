@@ -11,7 +11,7 @@ You are decomposing a project or track into modules with clear responsibilities,
 
 - Defining modules without understanding the codebase
 - Creating modules with circular dependencies
-- Making modules too large (>5 files, excluding test files) or too small (single function)
+- Making modules too large (>3 files, excluding test files) or too small (single function)
 - Skipping dependency analysis
 - Not waiting for developer approval at checkpoints
 
@@ -222,7 +222,7 @@ Parallel opportunities: config and database can start after logging.
 
 ## Step 5: Generate Architecture Context
 
-Write the architecture document using the template from `core/templates/ai-context.md` (project-wide) or `core/templates/architecture.md` (track-scoped):
+Write the architecture document using the template from `core/templates/architecture.md`:
 
 **Location:**
 - Project-wide: Update `draft/architecture.md` with the module changes, then run the Condensation Subroutine (defined in `/draft:init`) to regenerate `draft/.ai-context.md`
@@ -302,25 +302,23 @@ Next steps:
 - After implementation is complete, run `/draft:coverage` to verify test quality
 ```
 
-## Mutation Protocol for .ai-context.md (Project-Wide)
+## Mutation Protocol for architecture.md and .ai-context.md (Project-Wide)
 
-> If `draft/.ai-context.md` already exists (e.g., from `/draft:init`), use the Mutation Protocol below to append new modules. Only use the template for fresh creation when no `.ai-context.md` exists.
+> `draft/architecture.md` is the source of truth. `draft/.ai-context.md` is derived from it via the Condensation Subroutine (defined in `/draft:init`). Always update `architecture.md` first, then regenerate `.ai-context.md`.
 
-When adding new modules to project-wide `.ai-context.md`:
+When adding new modules to the project-wide architecture:
 
-1. Append `### Module: <name>` block after existing modules in `## Modules`
-2. Set Status to `[ ] Not Started`
-3. Update `## Dependency Table`, `## Dependency Order`, `## Module Dependency Diagram`
-4. Do NOT remove/modify `[x] Existing` modules
-5. Update YAML frontmatter `git.commit` and `git.message` to current HEAD
-6. After updating `draft/architecture.md` with the module changes, run the Condensation Subroutine (defined in `/draft:init`) to regenerate `draft/.ai-context.md`
+1. Update `draft/architecture.md`: append module definitions, update dependency diagram and table
+2. Do NOT remove/modify `[x] Existing` modules
+3. Update YAML frontmatter `git.commit` and `git.message` to current HEAD
+4. Run the Condensation Subroutine (defined in `/draft:init`) to regenerate `draft/.ai-context.md`
 
-**Safe write pattern:**
-1. Backup `.ai-context.md` → `.ai-context.md.backup`
-2. Write changes to `.ai-context.md.new`
+**Safe write pattern for architecture.md:**
+1. Backup `architecture.md` → `architecture.md.backup`
+2. Write changes to `architecture.md.new`
 3. Present diff for review
-4. On approval: replace `.ai-context.md` with `.ai-context.md.new`, then delete `.ai-context.md.backup`
-5. On rejection: delete `.ai-context.md.new` and rename `.ai-context.md.backup` back to `.ai-context.md`
+4. On approval: replace `architecture.md` with `architecture.md.new`, run Condensation Subroutine, then delete `architecture.md.backup`
+5. On rejection: delete `architecture.md.new` and rename `architecture.md.backup` back to `architecture.md`
 
 ## Updating architecture context
 

@@ -564,7 +564,7 @@ Present plan-draft.md for review.
 When user confirms plan is ready:
 
 1. Update plan-draft.md status to `[x] Complete`
-2. Rename `plan-draft.md` → `plan.md`
+2. Write final content to `plan.md`, then delete `plan-draft.md`
 3. Validate phases against spec requirements
 4. Ensure all acceptance criteria are covered by tasks
 

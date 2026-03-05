@@ -22,7 +22,14 @@ Perform intelligent git revert that understands Draft's logical units of work.
 
 ## Step 0: Pre-flight Check
 
-Run `git status --porcelain`. If output is non-empty, warn the user about uncommitted changes and suggest stashing or committing first. Do NOT proceed until working tree is clean.
+1. **Verify Draft context exists:**
+   ```bash
+   ls draft/tracks.md 2>/dev/null
+   ```
+   If `draft/` does not exist: **STOP** — "No Draft context found. Run `/draft:init` first."
+
+2. **Check working tree:**
+   Run `git status --porcelain`. If output is non-empty, warn the user about uncommitted changes and suggest stashing or committing first. Do NOT proceed until working tree is clean.
 
 ---
 
@@ -40,7 +47,9 @@ If user specifies by name/description, find the matching commits.
 
 **Primary method:** Read `plan.md` — every completed task has its commit SHA recorded inline. Use these SHAs directly.
 
-**Fallback method (if SHAs missing):** Search git log by track ID pattern:
+**If no commits found** (all tasks are `[ ]` Pending with no SHAs): announce "No commits found for this scope — nothing to revert." and **STOP**.
+
+**Fallback method (if SHAs missing but completed tasks exist):** Search git log by track ID pattern:
 
 For Draft-managed work, commits follow pattern:
 - `feat(<track_id>): <description>`

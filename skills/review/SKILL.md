@@ -350,7 +350,7 @@ If `with-bughunt` or `full` modifier is set, integrate bug hunting.
 
 **Track-level:**
 ```bash
-/draft:bughunt <id>
+/draft:bughunt --track <id>
 ```
 
 **Project-level:**
@@ -686,8 +686,9 @@ Options:
 
 | Don't | Instead |
 |-------|---------|
-| Skip Stage 1 for track reviews | Always verify spec compliance first |
-| Run Stage 2 when Stage 1 fails | Fix spec gaps before quality checks |
+| Skip Stage 1 (Automated Validation) | Always run automated checks first |
+| Skip Stage 2 (Spec Compliance) | Always verify spec compliance before quality checks |
+| Run Stage 3 when Stage 2 fails | Fix spec gaps before quality checks |
 | Ignore incomplete tasks | Warn user, suggest completing work first |
 | Auto-fix issues found | Report only, let developer decide |
 | Batch multiple tracks | Review one track at a time |

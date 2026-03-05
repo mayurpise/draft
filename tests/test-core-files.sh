@@ -18,20 +18,7 @@ CORE_DIR="$ROOT_DIR/core"
 COPILOT_OUTPUT="$ROOT_DIR/integrations/copilot/.github/copilot-instructions.md"
 GEMINI_OUTPUT="$ROOT_DIR/integrations/gemini/GEMINI.md"
 
-PASS=0
-FAIL=0
-
-assert() {
-    local description="$1"
-    local result="$2"
-    if [[ "$result" == "true" ]]; then
-        echo "  PASS: $description"
-        PASS=$((PASS + 1))
-    else
-        echo "  FAIL: $description"
-        FAIL=$((FAIL + 1))
-    fi
-}
+source "$SCRIPT_DIR/test-helpers.sh"
 
 echo "=== Core file inlining tests ==="
 echo ""

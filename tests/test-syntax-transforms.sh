@@ -10,20 +10,8 @@
 #   ./tests/test-syntax-transforms.sh
 set -euo pipefail
 
-PASS=0
-FAIL=0
-
-assert() {
-    local description="$1"
-    local result="$2"
-    if [[ "$result" == "true" ]]; then
-        echo "  PASS: $description"
-        PASS=$((PASS + 1))
-    else
-        echo "  FAIL: $description"
-        FAIL=$((FAIL + 1))
-    fi
-}
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/test-helpers.sh"
 
 # Replicate the transform functions from build-integrations.sh
 transform_gemini_syntax() {

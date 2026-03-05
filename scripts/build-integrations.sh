@@ -132,12 +132,12 @@ extract_body() {
         return 1
     fi
 
-    # Extract and validate frontmatter (use || true to ignore SIGPIPE from head)
+    # Extract and validate frontmatter (awk stops at closing ---, naturally bounded)
     local frontmatter
     frontmatter=$(awk '
         /^---$/ { if (!seen_first) { seen_first=1; next } else { exit } }
         seen_first { print }
-    ' "$file" | head -20 || true)
+    ' "$file")
 
     # Validate required fields
     if ! echo "$frontmatter" | grep -q "^name:"; then
@@ -245,7 +245,8 @@ emit_core_files() {
             echo "</core-file>"
         else
             echo "" >&2
-            echo "WARNING: Core file not found: $full_path" >&2
+            echo "ERROR: Core file not found: $full_path" >&2
+            exit 1
         fi
     done
 }
@@ -373,8 +374,8 @@ PROACTIVE
 
 build_integration() {
     local command_prefix="$1"        # "@draft" | "draft"
-    local get_trigger_fn="$2"        # "get_cursor_trigger" | "get_copilot_trigger"
-    local transform_fn="$3"          # "transform_cursor_syntax" | "transform_copilot_syntax"
+    local get_trigger_fn="$2"        # "get_gemini_trigger" | "get_copilot_trigger"
+    local transform_fn="$3"          # "transform_gemini_syntax" | "transform_copilot_syntax"
     local story_marker="$4"          # "@draft" | "draft"
 
     # Header (common for all integrations)
@@ -479,8 +480,8 @@ COMMON_HEADER2
     # Skill loop with parameterized trigger and transform functions
     for skill in "${SKILL_ORDER[@]}"; do
         # Validate skill name format (security: prevent path traversal)
-        if [[ ! "$skill" =~ ^[a-z0-9-]+$ ]]; then
-            echo "ERROR: Invalid skill name '$skill' (must be lowercase alphanumeric + hyphens)" >&2
+        if [[ ! "$skill" =~ ^[a-z][a-z0-9]*(-[a-z0-9]+)*$ ]]; then
+            echo "ERROR: Invalid skill name '$skill' (must be kebab-case: start with letter, no leading/trailing hyphens)" >&2
             exit 1
         fi
 
@@ -630,21 +631,36 @@ main() {
     mkdir -p "$(dirname "$COPILOT_OUTPUT")"
     mkdir -p "$(dirname "$GEMINI_OUTPUT")"
 
-    # Generate Copilot integration
+    local start_seconds=$SECONDS
+
+    # Generate Copilot integration (atomic: write to temp, verify, then mv)
     echo "── Copilot ─────────────────────────────────────"
-    build_copilot > "$COPILOT_OUTPUT"
+    local copilot_tmp="${COPILOT_OUTPUT}.tmp"
+    build_copilot > "$copilot_tmp"
     echo "  Generated: $COPILOT_OUTPUT"
-    verify_output "Copilot" "$COPILOT_OUTPUT" "no" || exit 1
+    if verify_output "Copilot" "$copilot_tmp" "no"; then
+        mv "$copilot_tmp" "$COPILOT_OUTPUT"
+    else
+        rm -f "$copilot_tmp"
+        exit 1
+    fi
     echo ""
 
-    # Generate Gemini integration
+    # Generate Gemini integration (atomic: write to temp, verify, then mv)
     echo "── Gemini ──────────────────────────────────────"
-    build_gemini > "$GEMINI_OUTPUT"
+    local gemini_tmp="${GEMINI_OUTPUT}.tmp"
+    build_gemini > "$gemini_tmp"
     echo "  Generated: $GEMINI_OUTPUT"
-    verify_output "Gemini" "$GEMINI_OUTPUT" "yes" || exit 1
+    if verify_output "Gemini" "$gemini_tmp" "yes"; then
+        mv "$gemini_tmp" "$GEMINI_OUTPUT"
+    else
+        rm -f "$gemini_tmp"
+        exit 1
+    fi
     echo ""
 
-    echo "All integrations built successfully."
+    local elapsed=$((SECONDS - start_seconds))
+    echo "All integrations built successfully. (${elapsed}s)"
 }
 
 main "$@"

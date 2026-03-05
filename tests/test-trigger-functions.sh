@@ -17,20 +17,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 BUILD_SCRIPT="$ROOT_DIR/scripts/build-integrations.sh"
 
-PASS=0
-FAIL=0
-
-assert() {
-    local description="$1"
-    local result="$2"
-    if [[ "$result" == "true" ]]; then
-        echo "  PASS: $description"
-        PASS=$((PASS + 1))
-    else
-        echo "  FAIL: $description"
-        FAIL=$((FAIL + 1))
-    fi
-}
+source "$SCRIPT_DIR/test-helpers.sh"
 
 echo "=== Trigger function coverage tests ==="
 echo ""

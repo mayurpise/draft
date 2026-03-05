@@ -227,27 +227,41 @@ Before generating any file, run these commands to gather metadata:
 # Project name (from manifest or directory)
 basename "$(pwd)"
 
-# Git branch
-git branch --show-current
+# Check if inside a git repository
+if git rev-parse --is-inside-work-tree 2>/dev/null; then
+  # Git branch
+  git branch --show-current
 
-# Git remote tracking branch
-git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || echo "none"
+  # Git remote tracking branch
+  git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || echo "none"
 
-# Git commit SHA (full)
-git rev-parse HEAD
+  # Git commit SHA (full) — fails on repos with zero commits
+  git rev-parse HEAD 2>/dev/null || echo "none"
 
-# Git commit SHA (short)
-git rev-parse --short HEAD
+  # Git commit SHA (short)
+  git rev-parse --short HEAD 2>/dev/null || echo "none"
 
-# Git commit date
-git log -1 --format="%ci"
+  # Git commit date
+  git log -1 --format="%ci" 2>/dev/null || echo "none"
 
-# Git commit message (first line)
-git log -1 --format="%s"
+  # Git commit message (first line)
+  git log -1 --format="%s" 2>/dev/null || echo "none"
 
-# Check for uncommitted changes
-git status --porcelain | head -1
+  # Check for uncommitted changes
+  git status --porcelain | head -1
+else
+  # Non-git project: use fallback values
+  echo "none"  # branch
+  echo "none"  # remote
+  echo "none"  # commit
+  echo "none"  # commit_short
+  echo "none"  # commit_date
+  echo "none"  # commit_message
+  # dirty: N/A for non-git projects
+fi
 ```
+
+> **Non-git projects:** If the project is not a git repository, all git metadata fields will be set to `"none"` and `git.dirty` to `false`. Refresh mode's incremental sync (`synced_to_commit`) will not function — full re-analysis is required on each refresh.
 
 ### Metadata Template
 
@@ -334,7 +348,26 @@ If `draft/` exists with context files:
 - Announce: "Project already initialized. Use `draft init refresh` to update context or `draft new-track` to create a feature."
 - Stop here.
 
-> **Rollback note:** If init fails partway, delete the `draft/` directory and re-run `draft init`.
+### Atomic File Staging
+
+To prevent partial initialization from leaving a broken `draft/` directory:
+
+1. **Stage all files** in a temporary directory (`draft.tmp/`) during init
+2. **On success**: `mv draft.tmp/ draft/` (atomic rename on POSIX)
+3. **On failure**: `rm -rf draft.tmp/` — no half-initialized state left behind
+
+```bash
+# Before writing any files:
+mkdir -p draft.tmp/tracks
+
+# Write all files to draft.tmp/ instead of draft/
+# ... (product.md, tech-stack.md, workflow.md, tracks.md, architecture.md, .ai-context.md)
+
+# After all files are written and verified:
+mv draft.tmp/ draft/
+```
+
+> **Forced re-init:** If `draft/` exists and the user explicitly requests a fresh init (not refresh), confirm with user before removing the existing `draft/` directory.
 
 ### Monorepo Detection
 
@@ -354,6 +387,10 @@ If `draft/architecture.md` exists WITHOUT `draft/.ai-context.md`:
 - If user accepts: Run the Condensation Subroutine to derive `.ai-context.md` from existing `architecture.md`
 - If user declines: Continue without .ai-context.md
 
+If `draft/.ai-context.md` exists WITHOUT `draft/architecture.md`:
+- Announce: "Detected .ai-context.md without its source architecture.md. The derived file exists but its primary source is missing (may have been accidentally deleted). Recommend running `draft init refresh` to regenerate architecture.md from codebase analysis."
+- Do NOT delete the existing `.ai-context.md` — it still provides useful context until `architecture.md` is regenerated
+
 ### Refresh Mode
 
 If the user runs `draft init refresh`:
@@ -365,9 +402,15 @@ If the user runs `draft init refresh`:
    **a. Read synced commit from metadata:**
    ```bash
    # Extract synced_to_commit from YAML frontmatter
-   grep "synced_to_commit:" draft/architecture.md | head -1 | sed 's/.*synced_to_commit:[[:space:]]*"\{0,1\}\([^"]*\)"\{0,1\}/\1/'
+   SYNCED_SHA=$(grep "synced_to_commit:" draft/architecture.md | head -1 | sed 's/.*synced_to_commit:[[:space:]]*"\{0,1\}\([^"]*\)"\{0,1\}/\1/')
+
+   # Validate extracted SHA is a real git object
+   if [ -z "$SYNCED_SHA" ] || ! git cat-file -t "$SYNCED_SHA" 2>/dev/null; then
+     echo "Invalid or missing synced_to_commit — falling back to full refresh"
+     # Jump to step (i) — full refresh
+   fi
    ```
-   This returns the commit SHA the docs were last synced to (more reliable than file modification time).
+   This returns the commit SHA the docs were last synced to (more reliable than file modification time). The SHA is validated before use to prevent silent failures in `git diff`.
 
    **b. Get changed files since that commit:**
    ```bash
@@ -385,7 +428,9 @@ If the user runs `draft init refresh`:
    - **Renamed files**: Update file references
 
    **e. Targeted analysis (only changed files):**
-   - Read each changed file to understand modifications
+   > **Guardrail:** If more than 100 files changed since last sync, recommend full 5-phase refresh instead of incremental analysis. Too many changes means the incremental approach loses its token-efficiency advantage.
+
+   - Read each changed file to understand modifications (up to 100 files; if more, fall back to full refresh)
    - Identify which architecture.md sections are affected:
      - New files → Component Map, Implementation Catalog, File Structure
      - Modified interfaces → API Definitions, Interface Contracts
@@ -406,7 +451,8 @@ If the user runs `draft init refresh`:
    - Regenerate `draft/.ai-context.md` using the Condensation Subroutine
 
    **h. On user rejection:**
-   - No changes made
+   - No changes made to `draft/architecture.md`
+   - However, verify `.ai-context.md` consistency: if `.ai-context.md` is missing or its `synced_to_commit` differs from `architecture.md`, offer to regenerate it from the current (unchanged) `architecture.md`
 
    **i. Fallback to full refresh:**
    If `synced_to_commit` is missing from metadata, or the commit SHA doesn't exist in git history:
@@ -419,7 +465,7 @@ If the user runs `draft init refresh`:
 
    **j. Update metadata after refresh:**
    After successful refresh, update the YAML frontmatter in all modified files:
-   - `generated_by`: `draft init refresh`
+   - `generated_by`: `draft:init refresh`
    - `generated_at`: current timestamp
    - `git.*`: current git state
    - `synced_to_commit`: current HEAD SHA
@@ -474,7 +520,7 @@ Perform a **one-time, exhaustive analysis** of the existing codebase. This is NO
 
 If the codebase is large (200+ files), focus on the module boundaries but still enumerate exhaustively within each module.
 
-> **Large codebase guardrail:** If the codebase exceeds 500 source files, limit deep dives to the top 20 most-imported modules and summarize others in a table.
+> **Large codebase guardrail:** If the codebase exceeds 500 source files, limit deep dives to the top 20 most-imported modules and summarize others in a table. Rank modules by the number of unique files that import/reference them (descending). For dynamic languages where static import counting is impractical, rank by file count within each module directory (larger modules first).
 
 ### Execution Strategy for Depth
 
@@ -1564,7 +1610,7 @@ Before writing architecture.md, verify your output matches these expectations:
 | **Invariants documented** | 8 | 10-15 |
 | **Modules deep-dived** | 5 | 5-8 |
 
-**If your output is under 25 pages, you have NOT completed exhaustive analysis. Go back and expand HIGH-priority sections.**
+**Page count guidance:** Minimum acceptable is 25 pages. Target is 30-45 pages. Under 25 pages indicates incomplete analysis — go back and expand HIGH-priority sections.
 
 ---
 
@@ -2154,7 +2200,8 @@ Next steps:
 1. Review draft/.ai-context.md — verify the AI context is complete and accurate
 2. Review draft/architecture.md — human-friendly version for team onboarding
 3. Review and edit the other generated files as needed
-4. Run `draft new-track` to start planning a feature"
+4. Run `draft new-track` to start planning a feature
+5. Run `draft init refresh` after significant codebase changes to update architecture context"
 
 For **Greenfield** projects, announce:
 "Draft initialized successfully!
@@ -2167,7 +2214,8 @@ Created:
 
 Next steps:
 1. Review and edit the generated files as needed
-2. Run `draft new-track` to start planning a feature"
+2. Run `draft new-track` to start planning a feature
+3. Run `draft init refresh` after adding substantial code to generate architecture context"
 
 ---
 

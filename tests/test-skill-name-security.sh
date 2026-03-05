@@ -7,7 +7,7 @@
 # - Build script rejects skill names with spaces or special characters
 # - Build script accepts valid lowercase-alphanumeric-hyphen names
 #
-# The build script validates: [[ ! "$skill" =~ ^[a-z0-9-]+$ ]]
+# The build script validates: [[ ! "$skill" =~ ^[a-z][a-z0-9]*(-[a-z0-9]+)*$ ]]
 #
 # Usage:
 #   ./tests/test-skill-name-security.sh
@@ -16,25 +16,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
-PASS=0
-FAIL=0
+source "$SCRIPT_DIR/test-helpers.sh"
 
-assert() {
-    local description="$1"
-    local result="$2"
-    if [[ "$result" == "true" ]]; then
-        echo "  PASS: $description"
-        PASS=$((PASS + 1))
-    else
-        echo "  FAIL: $description"
-        FAIL=$((FAIL + 1))
-    fi
-}
-
-# The validation regex from build-integrations.sh
+# The validation regex from build-integrations.sh (kebab-case enforcement)
 is_valid_skill_name() {
     local name="$1"
-    [[ "$name" =~ ^[a-z0-9-]+$ ]]
+    [[ "$name" =~ ^[a-z][a-z0-9]*(-[a-z0-9]+)*$ ]]
 }
 
 echo "=== Skill name security validation tests ==="
@@ -105,7 +92,21 @@ for skill_dir in "$SKILLS_DIR"/*/; do
         ALL_VALID=false
     fi
 done
-assert "All skill directory names match ^[a-z0-9-]+$" "$ALL_VALID"
+assert "All skill directory names match kebab-case regex" "$ALL_VALID"
+
+# --- Kebab-case enforcement (tighter regex) ---
+echo ""
+echo "## Kebab-case enforcement"
+assert "Rejects '---' (all hyphens)" \
+    "$(is_valid_skill_name "---" && echo false || echo true)"
+assert "Rejects '-init' (leading hyphen)" \
+    "$(is_valid_skill_name "-init" && echo false || echo true)"
+assert "Rejects 'init-' (trailing hyphen)" \
+    "$(is_valid_skill_name "init-" && echo false || echo true)"
+assert "Rejects '123skill' (starts with digit)" \
+    "$(is_valid_skill_name "123skill" && echo false || echo true)"
+assert "Rejects 'a--b' (consecutive hyphens)" \
+    "$(is_valid_skill_name "a--b" && echo false || echo true)"
 
 # --- Summary ---
 echo ""

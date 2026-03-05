@@ -18,20 +18,7 @@ PLUGIN_JSON="$ROOT_DIR/.claude-plugin/plugin.json"
 MARKETPLACE_JSON="$ROOT_DIR/.claude-plugin/marketplace.json"
 SKILLS_DIR="$ROOT_DIR/skills"
 
-PASS=0
-FAIL=0
-
-assert() {
-    local description="$1"
-    local result="$2"
-    if [[ "$result" == "true" ]]; then
-        echo "  PASS: $description"
-        PASS=$((PASS + 1))
-    else
-        echo "  FAIL: $description"
-        FAIL=$((FAIL + 1))
-    fi
-}
+source "$SCRIPT_DIR/test-helpers.sh"
 
 # Check if jq is available; if not, use python3 as fallback
 json_get() {

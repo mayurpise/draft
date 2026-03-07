@@ -38,7 +38,7 @@ Draft is a methodology for structured software development: **Context → Spec &
 | `/draft:change` | Handle mid-track requirement changes |
 | `/draft:jira-preview` | Generate Jira export for review |
 | `/draft:jira-create` | Push issues to Jira via MCP |
-| `/draft:epic-status` | Qualify a Jira Epic (MCP pipeline: stories, code changes, tests, gap analysis) |
+
 
 ## Quick Start
 
@@ -98,7 +98,7 @@ You can also use natural language:
 | "requirements changed", "scope changed", "update the spec" | `/draft:change` |
 | "preview jira", "export to jira" | `/draft:jira-preview` |
 | "create jira issues" | `/draft:jira-create` |
-| "qualify epic", "epic status", "epic qualification" | `/draft:epic-status` |
+
 
 ## Need Help?
 

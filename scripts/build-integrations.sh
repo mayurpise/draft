@@ -572,8 +572,19 @@ verify_output() {
     local output_file="$2"
     local expect_at_draft="$3"  # "yes" or "no"
 
-    local line_count
-    line_count=$(wc -l < "$output_file")
+    local line_count old_syntax_count at_draft_count
+    # Single pass with awk to count lines and check patterns
+    read -r line_count old_syntax_count at_draft_count < <(awk '
+        {
+            total_lines++
+            if (/\/draft:/) old_count++
+            if (/@draft/) at_count++
+        }
+        END {
+            print total_lines+0, old_count+0, at_count+0
+        }
+    ' "$output_file")
+
     echo "  Lines: $line_count"
 
     # Count skills included
@@ -586,9 +597,6 @@ verify_output() {
     echo "  Skills: $skill_count/${#SKILL_ORDER[@]}"
 
     # Verify no /draft: references remain
-    local old_syntax_count
-    old_syntax_count=$(grep -c "/draft:" "$output_file" 2>/dev/null || true)
-    old_syntax_count=${old_syntax_count:-0}
     if [[ "$old_syntax_count" -gt 0 ]]; then
         echo "  WARNING: Found $old_syntax_count '/draft:' references (should be 0)"
         return 1
@@ -597,9 +605,6 @@ verify_output() {
     fi
 
     # Verify @draft presence based on integration type
-    local at_draft_count
-    at_draft_count=$(grep -c "@draft" "$output_file" 2>/dev/null || true)
-    at_draft_count=${at_draft_count:-0}
     if [[ "$expect_at_draft" == "yes" ]]; then
         echo "  Found $at_draft_count '@draft' references"
     else

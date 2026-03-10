@@ -45,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - `/draft:validate` command — **Migration:** Use `/draft:review` for automated quality checks (now built into Stage 1)
 - Skills: `skills/validate/SKILL.md` deleted (functionality absorbed)
+- Templates: Unused `core/templates/metadata.json` deleted (skills use hardcoded templates)
 
 ## [1.3.0] - 2026-02-08
 

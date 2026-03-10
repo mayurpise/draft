@@ -3292,9 +3292,11 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Top-level tab switching
+            // Cache DOM elements
             const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
 
+            // Top-level tab switching
             tabButtons.forEach(button => {
                 button.addEventListener('click', function () {
                     const targetTab = this.getAttribute('data-tab');
@@ -3307,7 +3309,7 @@
                     this.classList.add('active');
                     this.setAttribute('aria-selected', 'true');
 
-                    document.querySelectorAll('.tab-content').forEach(content => {
+                    tabContents.forEach(content => {
                         content.classList.remove('active');
                     });
 

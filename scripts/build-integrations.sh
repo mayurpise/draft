@@ -182,7 +182,8 @@ transform_copilot_syntax() {
         -e 's|/draft:([a-z-]+)|draft \1|g' \
         -e 's|@draft\b|draft|g' \
         -e 's|`@draft`|`draft`|g' \
-        -e 's|`@draft |`draft |g'
+        -e 's|`@draft |`draft |g' \
+        -e 's#@((architect|debugger|planner|rca|reviewer)\b)#@workspace#g'
 }
 
 # ─────────────────────────────────────────────────────────

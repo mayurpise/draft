@@ -64,7 +64,7 @@ Draft is a Claude Code plugin that implements Context-Driven Development methodo
 - **Languages**: Markdown (skill definitions, ~12,000 lines), Bash (build/test scripts, ~762 lines), HTML (landing page, ~3,600 lines)
 - **Entry Point**: `.claude-plugin/plugin.json` → auto-discovery of `skills/*/SKILL.md`
 - **Architecture Style**: Convention-over-configuration plugin system; document-driven methodology engine
-- **Component Count**: 15 skills, 5 agent behaviors, 16 templates, 1 build script, 1 test script
+- **Component Count**: 15 skills, 5 agent behaviors, 14 templates, 1 build script, 1 test script
 - **Primary Data Sources**: User's `draft/` directory (product.md, tech-stack.md, .ai-context.md, tracks/), user's git repository
 - **Primary Action Targets**: User's `draft/` directory (generates/updates markdown files, JSON metadata), integration output files (copilot-instructions.md, GEMINI.md)
 
@@ -143,7 +143,7 @@ flowchart TD
                 A4["planner.md"]
                 A5["rca.md"]
             end
-            subgraph Templates["templates/ (16 files)"]
+            subgraph Templates["templates/ (14 files)"]
                 T1["product.md"]
                 T2["tech-stack.md"]
                 T3["architecture.md"]
@@ -434,7 +434,6 @@ Integration output skips these 3 lines via `tail -n +4`.
 - `core/templates/workflow.md` — TDD/commit/review configuration template (194 lines)
 - `core/templates/tech-stack.md` — Technology stack template (178 lines)
 - `core/templates/jira.md` — Jira configuration and story template (112 lines)
-- `core/templates/metadata.json` — Track status/progress JSON schema (25 lines)
 - `core/templates/service-index.md` — Monorepo service registry template (64 lines)
 - `core/templates/dependency-graph.md` — Service dependency topology template (112 lines)
 - `core/templates/tech-matrix.md` — Technology distribution template (110 lines)
@@ -603,7 +602,7 @@ For integration generation, skills must also be listed in the `SKILL_ORDER` arra
 | 4 | `planner` | 145 | new-track, decompose | Plan generation and task breakdown |
 | 5 | `debugger` | 114 | implement | Systematic debugging for blocked tasks |
 
-### 10.3 Templates (16)
+### 10.3 Templates (14)
 
 | # | Name | Lines | Used By |
 |---|------|-------|---------|
@@ -621,8 +620,6 @@ For integration generation, skills must also be listed in the `SKILL_ORDER` arra
 | 12 | `tech-matrix.md` | 110 | index |
 | 13 | `root-product.md` | 62 | index |
 | 14 | `service-index.md` | 64 | index |
-| 15 | `metadata.json` | 25 | new-track |
-| 16 | `intake-questions.md` | 396 | new-track |
 
 ### 10.4 Core References (2)
 
@@ -739,7 +736,7 @@ synced_to_commit: string   # full SHA for incremental refresh
 
 Skills reference templates by path for output structure:
 - `init` references `core/templates/product.md`, `core/templates/tech-stack.md`, `core/templates/workflow.md`, `core/templates/architecture.md`, `core/templates/ai-context.md`
-- `new-track` references `core/templates/spec.md`, `core/templates/intake-questions.md`, `core/templates/metadata.json`
+- `new-track` references `core/templates/spec.md`, `core/templates/intake-questions.md`
 - `index` references `core/templates/service-index.md`, `core/templates/dependency-graph.md`, `core/templates/tech-matrix.md`, `core/templates/root-*.md`
 
 ### 13.2 Skill → Agent Integration
@@ -1274,7 +1271,6 @@ draft/
 │       ├── dependency-graph.md ← Service dependency topology template
 │       ├── intake-questions.md ← 6-phase structured dialogue template
 │       ├── jira.md           ← Jira config and story template
-│       ├── metadata.json     ← Track metadata JSON schema
 │       ├── product.md        ← Product vision template
 │       ├── root-architecture.md ← Monorepo system-of-systems template
 │       ├── root-product.md   ← Monorepo synthesized product template

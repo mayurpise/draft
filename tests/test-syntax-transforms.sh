@@ -11,21 +11,24 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+BUILD_SCRIPT="$ROOT_DIR/scripts/build-integrations.sh"
 source "$SCRIPT_DIR/test-helpers.sh"
 
-# Replicate the transform functions from build-integrations.sh
-transform_gemini_syntax() {
-    sed -E \
-        -e 's|/draft:([a-z-]+)|@draft \1|g'
-}
+# Extract function definitions from the build script
+FUNC_FILE="$(mktemp)"
+# Extract exactly the function bodies, accounting for potential DOS line endings or trailing spaces
+sed -n '/^transform_gemini_syntax()/,/^}/p' "$BUILD_SCRIPT" | tr -d '\r' > "$FUNC_FILE"
+sed -n '/^transform_copilot_syntax()/,/^}/p' "$BUILD_SCRIPT" | tr -d '\r' >> "$FUNC_FILE"
 
-transform_copilot_syntax() {
-    sed -E \
-        -e 's|/draft:([a-z-]+)|draft \1|g' \
-        -e 's|@draft\b|draft|g' \
-        -e 's|`@draft`|`draft`|g' \
-        -e 's|`@draft |`draft |g'
-}
+# Source the functions
+if ! source "$FUNC_FILE"; then
+    echo "ERROR: Failed to source extracted functions from $FUNC_FILE"
+    cat -n "$FUNC_FILE"
+    rm -f "$FUNC_FILE"
+    exit 1
+fi
+rm -f "$FUNC_FILE"
 
 assert_transform() {
     local description="$1"
@@ -133,6 +136,65 @@ assert_transform "No match - plain text unchanged" \
     transform_copilot_syntax \
     "This has no draft commands" \
     "This has no draft commands"
+
+echo ""
+echo "## Copilot: /draft: → draft (Boundary cases)"
+assert_transform "Double-hyphenated command" \
+    transform_copilot_syntax \
+    "/draft:deep-review" \
+    "draft deep-review"
+
+assert_transform "Start of string" \
+    transform_copilot_syntax \
+    "/draft:init should work" \
+    "draft init should work"
+
+assert_transform "End of string" \
+    transform_copilot_syntax \
+    "Use /draft:init" \
+    "Use draft init"
+
+assert_transform "Mixed @draft and /draft:" \
+    transform_copilot_syntax \
+    "Use @draft or /draft:init" \
+    "Use draft or draft init"
+
+echo ""
+echo "## Copilot: Agent tags → @workspace"
+assert_transform "Reviewer agent" \
+    transform_copilot_syntax \
+    "Ask @reviewer for help" \
+    "Ask @workspace for help"
+
+assert_transform "Architect agent" \
+    transform_copilot_syntax \
+    "Ask @architect for design" \
+    "Ask @workspace for design"
+
+assert_transform "Multiple agents" \
+    transform_copilot_syntax \
+    "@planner and @debugger" \
+    "@workspace and @workspace"
+
+assert_transform "Agent with trailing punctuation" \
+    transform_copilot_syntax \
+    "Contact @rca." \
+    "Contact @workspace."
+
+assert_transform "Backticked agent" \
+    transform_copilot_syntax \
+    'Use `@reviewer`' \
+    'Use `@workspace`'
+
+assert_transform "Should NOT transform non-agent @ tags (Java annotations)" \
+    transform_copilot_syntax \
+    "@Override" \
+    "@Override"
+
+assert_transform "Should NOT transform email addresses" \
+    transform_copilot_syntax \
+    "email@example.com" \
+    "email@example.com"
 
 # --- Summary ---
 echo ""

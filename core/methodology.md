@@ -42,6 +42,7 @@ Draft solves this through **Context-Driven Development**: structured documents t
   - [/draft:deep-review](#draftdeep-review--module-lifecycle-audit)
   - [/draft:bughunt](#draftbughunt--exhaustive-bug-discovery)
   - [/draft:review](#draftreview--code-review-orchestrator)
+  - [/draft:learn](#draftlearn--pattern-discovery--guardrails-update)
   - [/draft:change](#draftchange--course-correction)
 - [Architecture Mode](#architecture-mode)
 - [Coverage](#coverage)
@@ -63,7 +64,8 @@ Draft solves this through **Context-Driven Development**: structured documents t
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
 | `architecture.md` | **Source of truth.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary. Auto-refreshed on mutations. | AI re-analyzing codebase every session |
-| `workflow.md` | TDD preference, commit style, review process, guardrails | AI skipping tests or making giant commits |
+| `workflow.md` | TDD preference, commit style, review process | AI skipping tests or making giant commits |
+| `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns | AI repeating false positives or missing known-bad patterns |
 | `spec.md` | Acceptance criteria for a specific track | Scope creep, gold-plating |
 | `plan.md` | Ordered phases with verification steps | AI attempting everything at once |
 
@@ -348,7 +350,8 @@ Located in `draft/` of the target project:
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
 | `architecture.md` | **Source of truth.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices. Generated from 5-phase codebase analysis. |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context with 15+ mandatory sections. Consumed by all Draft commands and external AI tools. Auto-refreshed on mutations. |
-| `workflow.md` | TDD preferences, commit strategy, guardrails |
+| `workflow.md` | TDD preferences, commit strategy, validation config |
+| `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns |
 | `jira.md` | Jira project configuration (optional) |
 | `tracks.md` | Master list of all tracks |
 
@@ -356,7 +359,7 @@ Located in `draft/` of the target project:
 
 - **`product.md` `## Guidelines`** — UX standards, writing style, branding (optional)
 - **`tech-stack.md` `## Accepted Patterns`** — Intentional design decisions honored by bughunt/deep-review/review
-- **`workflow.md` `## Guardrails`** — Hard constraints enforced by review commands
+- **`guardrails.md`** — Hard guardrails (human-defined constraints), learned conventions (auto-discovered, skip in analysis), learned anti-patterns (auto-discovered, always flag)
 
 ## Status Markers
 
@@ -415,10 +418,12 @@ Draft auto-classifies the project:
 
 3. **Product definition** — Dialogue to define product vision, users, goals, constraints, guidelines (optional) → `draft/product.md`
 4. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield. Includes accepted patterns section → `draft/tech-stack.md`
-5. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process, guardrails → `draft/workflow.md`
-6. **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `/draft:decompose` on a track. File-based activation - no opt-in needed.
+5. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
+6. **Guardrails configuration** — Hard guardrails, learned conventions, learned anti-patterns → `draft/guardrails.md`
 7. **Tracks registry** — Empty tracks list → `draft/tracks.md`
 8. **Directory structure** — Creates `draft/tracks/` directory
+
+> **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `/draft:decompose` on a track. File-based activation — no opt-in needed.
 
 If `draft/` already exists with context files, init reports "already initialized" and suggests using `/draft:init refresh` or `/draft:new-track`.
 
@@ -473,7 +478,8 @@ Every new track loads the full project context before spec creation:
 - `draft/product.md` — product vision, users, goals, guidelines
 - `draft/tech-stack.md` — languages, frameworks, patterns, accepted patterns
 - `draft/.ai-context.md` — system map, modules, data flows, invariants, security architecture (if exists). Falls back to `draft/architecture.md` for legacy projects.
-- `draft/workflow.md` — TDD preference, commit conventions, guardrails
+- `draft/workflow.md` — TDD preference, commit conventions
+- `draft/guardrails.md` — Hard guardrails, learned conventions, learned anti-patterns
 - `draft/tracks.md` — existing tracks (check for overlap/dependencies)
 
 Every spec includes a **Context References** section that explicitly links back to these documents with a one-line description of how each is relevant to this track. This ensures every track is grounded in the big picture.
@@ -800,6 +806,40 @@ Generates unified report at `draft/tracks/<id>/review-report.md` or `draft/revie
 
 ---
 
+### `/draft:learn` — Pattern Discovery & Guardrails Update
+
+Scans the codebase to discover recurring coding patterns and updates `draft/guardrails.md` with learned conventions (skip in future analysis) and anti-patterns (always flag). Creates a continuous improvement loop where quality commands become more accurate over time.
+
+#### How It Works
+
+1. Loads existing guardrails and Draft context
+2. Scans source files across pattern dimensions: error handling, naming, architecture, concurrency, data flow, testing, configuration
+3. Identifies patterns with 3+ consistent occurrences
+4. Cross-references against `tech-stack.md ## Accepted Patterns` and `.ai-context.md` to avoid duplicates
+5. Updates `draft/guardrails.md` with new entries (conventions or anti-patterns)
+
+#### Subcommands
+
+- No arguments — full codebase scan
+- `promote` — review high-confidence learned patterns for promotion to Hard Guardrails or Accepted Patterns
+- `migrate` — migrate `## Guardrails` from legacy `workflow.md` to `guardrails.md`
+- `<path>` — scan specific directory or file pattern
+
+#### Continuous Learning Loop
+
+Quality commands (`/draft:bughunt`, `/draft:deep-review`, `/draft:review`) also update guardrails incrementally after each run via the shared pattern learning procedure. `/draft:learn` performs a comprehensive standalone scan.
+
+#### Examples
+
+```bash
+/draft:learn                           # full codebase pattern scan
+/draft:learn src/api/                  # scan specific directory
+/draft:learn promote                   # review promotion candidates
+/draft:learn migrate                   # migrate from workflow.md
+```
+
+---
+
 ### `/draft:change` — Course Correction
 
 Handles mid-track requirement changes without losing work. Analyzes the impact of the change on completed and pending tasks, proposes amendments to `spec.md` and `plan.md`, then applies them only after explicit confirmation.
@@ -994,6 +1034,7 @@ Natural language patterns that map to Draft commands:
 | "deep review", "audit module", "production audit" | Module lifecycle audit |
 | "hunt bugs", "find bugs" | Systematic bug discovery |
 | "review code", "review track", "check quality" | Code review orchestrator (track/project) |
+| "learn patterns", "update guardrails", "discover conventions" | Pattern discovery & guardrails update |
 | "requirements changed", "scope changed", "update the spec" | Handle mid-track requirement change |
 | "preview jira", "export to jira" | Preview Jira issues |
 | "create jira issues" | Create Jira issues via MCP |

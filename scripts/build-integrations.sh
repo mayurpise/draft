@@ -38,6 +38,7 @@ SKILL_ORDER=(
     bughunt
     review
     deep-review
+    learn
     adr
     status
     revert
@@ -59,6 +60,7 @@ get_skill_header() {
         bughunt)      echo "Bug Hunt Command" ;;
         review)       echo "Review Command" ;;
         deep-review)  echo "Deep Review Command" ;;
+        learn)        echo "Learn Command" ;;
         adr)          echo "ADR Command" ;;
         status)       echo "Status Command" ;;
         revert)       echo "Revert Command" ;;
@@ -83,6 +85,7 @@ get_gemini_trigger() {
         bughunt)      echo "\"hunt bugs\" or \"@draft bughunt [--track <id>]\"" ;;
         review)       echo "\"review code\" or \"@draft review [--track <id>] [--full]\"" ;;
         deep-review)  echo "\"deep review\" or \"@draft deep-review [module]\"" ;;
+        learn)        echo "\"learn patterns\" or \"@draft learn [promote|migrate|path]\"" ;;
         adr)          echo "\"document decision\" or \"@draft adr [title]\"" ;;
         status)       echo "\"status\" or \"@draft status\"" ;;
         revert)       echo "\"revert\" or \"@draft revert\"" ;;
@@ -107,6 +110,7 @@ get_copilot_trigger() {
         bughunt)      echo "\"hunt bugs\" or \"draft bughunt [--track <id>]\"" ;;
         review)       echo "\"review code\" or \"draft review [--track <id>] [--full]\"" ;;
         deep-review)  echo "\"deep review\" or \"draft deep-review [module]\"" ;;
+        learn)        echo "\"learn patterns\" or \"draft learn [promote|migrate|path]\"" ;;
         adr)          echo "\"document decision\" or \"draft adr [title]\"" ;;
         status)       echo "\"status\" or \"draft status\"" ;;
         revert)       echo "\"revert\" or \"draft revert\"" ;;
@@ -196,7 +200,9 @@ CORE_FILES=(
     # Shared procedures
     "shared/draft-context-loading.md"
     "shared/git-report-metadata.md"
+    "shared/pattern-learning.md"
     # Templates
+    "templates/guardrails.md"
     "templates/intake-questions.md"
     "templates/ai-context.md"
     "templates/architecture.md"
@@ -436,6 +442,7 @@ COMMON_HEADER
     echo "| \`${command_prefix} bughunt [--track <id>]\` | Systematic bug discovery |"
     echo "| \`${command_prefix} review [--track <id>]\` | Three-stage code review |"
     echo "| \`${command_prefix} deep-review [module]\` | Exhaustive production-grade module audit |"
+    echo "| \`${command_prefix} learn [promote\\|migrate]\` | Discover coding patterns, update guardrails |"
     echo "| \`${command_prefix} adr [title]\` | Architecture Decision Records |"
     echo "| \`${command_prefix} status\` | Show progress overview |"
     echo "| \`${command_prefix} revert\` | Git-aware rollback |"
@@ -461,6 +468,7 @@ Recognize these natural language patterns:
 | "hunt bugs", "find bugs" | Run bug hunt |
 | "review code", "review track", "check quality" | Run review |
 | "deep review", "production audit", "module audit" | Run deep-review |
+| "learn patterns", "update guardrails", "discover conventions" | Run learn |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
 | "requirements changed", "scope changed", "update the spec" | Run change |

@@ -205,5 +205,6 @@ interface {ServiceName} {
 ## Draft Integration
 
 - See `draft/tech-stack.md` for accepted patterns and technology decisions
-- See `draft/workflow.md` for TDD preferences and guardrails
+- See `draft/workflow.md` for TDD preferences and commit conventions
+- See `draft/guardrails.md` for hard guardrails, learned conventions, and learned anti-patterns
 - See `draft/product.md` for product context and guidelines

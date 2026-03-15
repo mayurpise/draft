@@ -2385,6 +2385,31 @@
                     </div>
                 </div>
 
+                <!-- /draft:learn -->
+                <div class="doc-card">
+                    <div class="card-summary">
+                        <div class="icon">🔍</div>
+                        <div class="name">/draft:learn</div>
+                        <p class="purpose">Discover patterns, update guardrails</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ul>
+                            <li>Scans codebase for recurring coding patterns (3+ occurrences)</li>
+                            <li>Learns <strong>conventions</strong> (skip in future analysis)</li>
+                            <li>Learns <strong>anti-patterns</strong> (always flag in future)</li>
+                            <li>Updates <code>draft/guardrails.md</code></li>
+                        </ul>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:learn</code>
+                            <code>/draft:learn promote</code>
+                            <code>/draft:learn migrate</code>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- /draft:jira-preview -->
                 <div class="doc-card">
                     <div class="card-summary">
@@ -2951,7 +2976,8 @@
 ├── <span class="code-file">tech-stack.md</span>       <span class="code-comment"># Technical choices, accepted patterns</span>
 ├── <span class="code-file">architecture.md</span>     <span class="code-comment"># Source of truth: 30-45 pages, Mermaid diagrams, code snippets</span>
 ├── <span class="code-file">.ai-context.md</span>      <span class="code-comment"># Derived: 200-400 lines, machine-optimized AI context</span>
-├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD, commit, validation, guardrails</span>
+├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD, commit, validation config</span>
+├── <span class="code-file">guardrails.md</span>       <span class="code-comment"># Hard guardrails, learned conventions, anti-patterns</span>
 ├── <span class="code-file">validation-report.md</span> <span class="code-comment"># Project-level quality checks (generated)</span>
 ├── <span class="code-file">jira.md</span>             <span class="code-comment"># Jira project config (optional)</span>
 ├── <span class="code-file">tracks.md</span>           <span class="code-comment"># Master track list</span>

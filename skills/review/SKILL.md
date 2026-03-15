@@ -669,6 +669,12 @@ Options:
 
 ---
 
+## Pattern Learning
+
+After generating the review report, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with patterns discovered during this review.
+
+---
+
 ## Examples
 
 ### Review active track

@@ -61,7 +61,7 @@ synced_to_commit: "22bc5fd8f630421d6d64d621708257cc26eb5d60"
 Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides 15 slash commands (`/draft:init`, `/draft:new-track`, `/draft:implement`, etc.) that impose structured workflows on AI-assisted software development: specifications before code, phased plans before execution, and verification before completion claims. The plugin is a collection of Markdown-based skill files, shell scripts for cross-platform integration generation, and template files for consistent document output. It targets Claude Code natively, with generated integrations for GitHub Copilot and Gemini.
 
 **Key Facts:**
-- **Languages**: Markdown (skill definitions, ~12,000 lines), Bash (build/test scripts, ~762 lines), HTML (landing page, ~3,600 lines)
+- **Languages**: Markdown (skill definitions, ~12,000 lines), Bash (build/test scripts, ~776 lines), HTML (landing page, ~3,600 lines)
 - **Entry Point**: `.claude-plugin/plugin.json` → auto-discovery of `skills/*/SKILL.md`
 - **Architecture Style**: Convention-over-configuration plugin system; document-driven methodology engine
 - **Component Count**: 15 skills, 5 agent behaviors, 14 templates, 1 build script, 1 test script
@@ -229,7 +229,7 @@ The plugin has no runtime orchestrator. Claude Code's plugin system serves as th
 | `core/agents/reviewer.md` | Agent | Three-stage review process | 165 |
 | `core/agents/planner.md` | Agent | Plan generation and task breakdown | 145 |
 | `core/agents/debugger.md` | Agent | Systematic debugging process | 114 |
-| `scripts/build-integrations.sh` | Script | Integration file generator | 642 |
+| `scripts/build-integrations.sh` | Script | Integration file generator | 656 |
 | `tests/test-build-integrations.sh` | Script | Build output verification | 120 |
 
 ### 5.2 Interaction Model
@@ -372,7 +372,7 @@ description: Brief description
 Execution instructions...
 ```
 
-**Body Format Constraint**: After frontmatter, body must be: blank line, `# Title` heading, blank line. The build script (`build-integrations.sh:482-495`) validates this with:
+**Body Format Constraint**: After frontmatter, body must be: blank line, `# Title` heading, blank line. The build script (`build-integrations.sh:488-501`) validates this with:
 ```bash
 line1=$(echo "$body_head" | sed -n '1p')  # must be blank
 line2=$(echo "$body_head" | sed -n '2p')  # must start with "# "
@@ -829,7 +829,7 @@ The `init` skill defines a "Condensation Subroutine" that other skills reference
 
 ### Input Validation
 
-- **Skill name validation**: Build script validates `[a-z0-9-]+` regex (`build-integrations.sh:474-478`) to prevent path traversal attacks via malicious skill names
+- **Skill name validation**: Build script validates `[a-z0-9-]+` regex (`build-integrations.sh:474-477`) to prevent path traversal attacks via malicious skill names
 - **Frontmatter validation**: `extract_body()` (`build-integrations.sh:121-163`) validates presence of `---` delimiters and required fields before processing
 
 ### Secrets Management
@@ -1067,10 +1067,9 @@ Users configure Draft behavior via `draft/workflow.md` checkboxes:
 
    Execution instructions here...
    ```
-3. **Add to SKILL_ORDER** in `scripts/build-integrations.sh:30-46`
-4. **Add display name** to `get_skill_header()` case statement (`build-integrations.sh:48-68`)
-5. **Add trigger** to `get_gemini_trigger()` (`build-integrations.sh:71-91`)
-6. **Add trigger** to `get_copilot_trigger()` (`build-integrations.sh:94-114`)
+3. **Add to SKILL_ORDER** in `scripts/build-integrations.sh:30-47`
+4. **Add display name** to `get_skill_header()` case statement (`build-integrations.sh:50-70`)
+5. **Add trigger** to `get_trigger()` (`build-integrations.sh:75-98`)
 7. **Rebuild**: `make build`
 8. **Test**: `make test`
 9. **Document** in `README.md` and `CLAUDE.md`

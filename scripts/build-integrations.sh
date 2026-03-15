@@ -193,6 +193,9 @@ CORE_FILES=(
     # Methodology
     "methodology.md"
     "knowledge-base.md"
+    # Shared procedures
+    "shared/draft-context-loading.md"
+    "shared/git-report-metadata.md"
     # Templates
     "templates/intake-questions.md"
     "templates/ai-context.md"

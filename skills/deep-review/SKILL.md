@@ -48,7 +48,7 @@ If `draft/` does not exist: **STOP** — "No Draft context found. Run `/draft:in
 ## Review Phases
 
 ### Phase 1: Context & Structural Analysis
-- Read all Draft context files (e.g. `draft/.ai-context.md`, `draft/architecture.md` (if exists), `draft/tech-stack.md`) to understand intended boundaries and critical invariants.
+- Load Draft context following the procedure in `core/shared/draft-context-loading.md`. Use loaded context to understand intended boundaries and critical invariants.
 - Map the module's full dependency graph (imports, injected services, external calls)
 - Trace the complete lifecycle: initialization → processing → persistence → cleanup
 - Identify all entry points and exit paths
@@ -104,38 +104,13 @@ Output a structured summary and detailed "Implementation Spec" for any needed fi
 
 Create the `draft/deep-review-reports/` directory if it does not exist.
 
-**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
+**MANDATORY: Include YAML frontmatter with git metadata.** Follow the procedure in `core/shared/git-report-metadata.md` to gather git info and generate the frontmatter. Use `generated_by: "draft:deep-review"` and set `module` to the reviewed module name.
 
-```bash
-git branch --show-current                    # LOCAL_BRANCH
-git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
-git rev-parse HEAD                           # FULL_SHA
-git rev-parse --short HEAD                   # SHORT_SHA
-git log -1 --format=%ci HEAD                 # COMMIT_DATE
-git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
-git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
-```
+Additional deep-review fields beyond the standard template:
 
-Report template:
-
-```markdown
----
-project: "{PROJECT_NAME}"
-module: "<module-name>"
+```yaml
 module_path: "<module-path>"
-generated_by: "draft:deep-review"
-generated_at: "{ISO_TIMESTAMP}"
-git:
-  branch: "{LOCAL_BRANCH}"
-  remote: "{REMOTE/BRANCH}"
-  commit: "{FULL_SHA}"
-  commit_short: "{SHORT_SHA}"
-  commit_date: "{COMMIT_DATE}"
-  commit_message: "{COMMIT_MESSAGE}"
-  dirty: {true|false}
-synced_to_commit: "{from draft/.ai-context.md frontmatter, if available}"
 reviewer: "{model name from runtime}"
----
 ```
 
 **Module reviewed:** name and path

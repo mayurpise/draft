@@ -4742,6 +4742,19 @@ You are conducting an exhaustive bug hunt on this Git repository, enhanced by Dr
 
 **The bug report is the primary deliverable.** Every verified bug MUST appear in the final report regardless of whether a regression test can be written. Regression tests are a supplementary output — helpful when possible, but never a filter for bug inclusion.
 
+## Relationship to Built-in Bug Hunt Agents
+
+Some AI tools (e.g., Claude Code) provide a built-in `bughunt` agent that auto-discovers project structure and runs parallel sweeps. `draft bughunt` is **complementary, not competing**:
+
+| | `draft bughunt` | Built-in bughunt agent |
+|---|---|---|
+| **Approach** | Context-driven methodology with 11 analysis dimensions and verification protocol | Auto-discovery with parallel sweep subagents |
+| **Draft context** | Uses architecture, tech-stack, product, guardrails for false-positive elimination | No Draft context awareness |
+| **Output** | Severity-ranked report with evidence | Inline fixes + regression tests |
+| **Modifies code** | No (report + regression tests only) | Yes (finds AND fixes) |
+
+**When to use which:** Use `draft bughunt` when you need context-aware analysis with structured evidence and false-positive elimination. Use the built-in agent when you want fast parallel sweeps with auto-fix capability. For maximum coverage, run both — `draft bughunt` catches context-specific bugs the built-in misses, and vice versa.
+
 ## Red Flags - STOP if you're:
 
 - Hunting for bugs without reading Draft context first (architecture.md, tech-stack.md, product.md)
@@ -4772,14 +4785,9 @@ Store this for the report header. All bugs found are relative to this specific b
 
 ### 1. Load Draft Context (if available)
 
-If `draft/` directory exists, read and internalize:
+Read and follow the base procedure in `core/shared/draft-context-loading.md`.
 
-- [ ] `draft/.ai-context.md` - Module boundaries, dependencies, intended patterns, **Critical Invariants**, **Concurrency Model**, **Error Handling**. Falls back to `draft/architecture.md` for legacy projects.
-- [ ] `draft/tech-stack.md` - Frameworks, libraries, known constraints, **Accepted Patterns**
-- [ ] `draft/product.md` - Product intent, user flows, requirements, guidelines
-- [ ] `draft/workflow.md` - Team conventions, testing preferences, **Guardrails**
-
-Use this context to:
+**Bug-hunt-specific context application:**
 - Flag violations of intended architecture as bugs (coupling, boundary violations)
 - Apply framework-specific checks from tech-stack (React anti-patterns, Node gotchas, etc.)
 - Catch bugs that violate product requirements or user flows
@@ -4791,8 +4799,6 @@ Use this context to:
 - **Leverage Storage Topology** — Identify data loss risks at each tier (cache eviction without writeback, event log gaps, missing archive)
 - **Leverage Consistency Boundaries** — Find bugs at eventual consistency seams (stale reads, lost events, missing reconciliation)
 - **Leverage Failure Recovery Matrix** — Verify idempotency claims, check for partial failure states without recovery paths
-- **Honor Accepted Patterns** - Skip flagging patterns documented in tech-stack.md `## Accepted Patterns`
-- **Enforce Guardrails** - Flag violations of checked guardrails in workflow.md `## Guardrails`
 
 ### 2. Confirm Scope
 
@@ -5553,46 +5559,16 @@ ln -sf bughunt-report-<timestamp>.md draft/tracks/<track-id>/bughunt-report-late
 
 Previous timestamped reports are preserved. The `-latest.md` symlink always points to the most recent report.
 
-**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
-
-```bash
-git branch --show-current                    # LOCAL_BRANCH
-git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
-git rev-parse HEAD                           # FULL_SHA
-git rev-parse --short HEAD                   # SHORT_SHA
-git log -1 --format=%ci HEAD                 # COMMIT_DATE
-git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
-git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
-```
+**MANDATORY: Include YAML frontmatter with git metadata.** Follow the procedure in `core/shared/git-report-metadata.md` to gather git info and generate the frontmatter. Use `generated_by: "draft:bughunt"`.
 
 Report structure:
 
 ```markdown
----
-project: "{PROJECT_NAME}"
-module: "root"
-track_id: "{TRACK_ID or null}"
-generated_by: "draft:bughunt"
-generated_at: "{ISO_TIMESTAMP}"
-git:
-  branch: "{LOCAL_BRANCH}"
-  remote: "{REMOTE/BRANCH}"
-  commit: "{FULL_SHA}"
-  commit_short: "{SHORT_SHA}"
-  commit_date: "{COMMIT_DATE}"
-  commit_message: "{COMMIT_MESSAGE}"
-  dirty: {true|false}
-synced_to_commit: "{FULL_SHA}"
----
+[YAML frontmatter — see core/shared/git-report-metadata.md]
 
 # Bug Hunt Report
 
-| Field | Value |
-|-------|-------|
-| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
-| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
-| **Generated** | {ISO_TIMESTAMP} |
-| **Synced To** | `{FULL_SHA}` |
+[Report header table — see core/shared/git-report-metadata.md]
 
 **Scope:** [Entire repo | Specific paths | Track: <track-id>]
 **Draft Context:** [Loaded | Not available]
@@ -5890,12 +5866,7 @@ Once track is resolved:
 For project-level reviews (no track context):
 
 1. **Load Draft context (if available):**
-   - Read `draft/.ai-context.md` (system architecture, critical invariants, security architecture). Falls back to `draft/architecture.md` for legacy projects.
-   - Read `draft/tech-stack.md` (technical constraints, **Accepted Patterns**)
-   - Read `draft/workflow.md` (**Guardrails** section)
-
-   **Honor Accepted Patterns** - Don't flag patterns documented in `tech-stack.md` `## Accepted Patterns`
-   **Enforce Guardrails** - Flag violations of checked guardrails in `workflow.md` `## Guardrails`
+   Follow the base procedure in `core/shared/draft-context-loading.md`. Honor Accepted Patterns and enforce Guardrails as defined there.
 
 2. **Note limitations:**
    - No spec.md → Skip Stage 1 (spec compliance)
@@ -6099,17 +6070,7 @@ Merge findings from:
 
 Create unified review report in markdown format.
 
-**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
-
-```bash
-git branch --show-current                    # LOCAL_BRANCH
-git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
-git rev-parse HEAD                           # FULL_SHA
-git rev-parse --short HEAD                   # SHORT_SHA
-git log -1 --format=%ci HEAD                 # COMMIT_DATE
-git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
-git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
-```
+**MANDATORY: Include YAML frontmatter with git metadata.** Follow the procedure in `core/shared/git-report-metadata.md` to gather git info, generate frontmatter, and include the report header table. Use `generated_by: "draft:review"`.
 
 ### Track-Level Report
 
@@ -6121,31 +6082,11 @@ ln -sf review-report-<timestamp>.md draft/tracks/<id>/review-report-latest.md
 ```
 
 ```markdown
----
-project: "{PROJECT_NAME}"
-module: "root"
-track_id: "<id>"
-generated_by: "draft:review"
-generated_at: "{ISO_TIMESTAMP}"
-git:
-  branch: "{LOCAL_BRANCH}"
-  remote: "{REMOTE/BRANCH}"
-  commit: "{FULL_SHA}"
-  commit_short: "{SHORT_SHA}"
-  commit_date: "{COMMIT_DATE}"
-  commit_message: "{COMMIT_MESSAGE}"
-  dirty: {true|false}
-synced_to_commit: "{FULL_SHA}"
----
+[YAML frontmatter — see core/shared/git-report-metadata.md, use track_id: "<id>"]
 
 # Review Report: <Track Title>
 
-| Field | Value |
-|-------|-------|
-| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
-| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
-| **Generated** | {ISO_TIMESTAMP} |
-| **Synced To** | `{FULL_SHA}` |
+[Report header table — see core/shared/git-report-metadata.md]
 
 **Track ID:** <id>
 **Reviewer:** [Current model name and context window from runtime]
@@ -6515,7 +6456,7 @@ If `draft/` does not exist: **STOP** — "No Draft context found. Run `draft ini
 ## Review Phases
 
 ### Phase 1: Context & Structural Analysis
-- Read all Draft context files (e.g. `draft/.ai-context.md`, `draft/architecture.md` (if exists), `draft/tech-stack.md`) to understand intended boundaries and critical invariants.
+- Load Draft context following the procedure in `core/shared/draft-context-loading.md`. Use loaded context to understand intended boundaries and critical invariants.
 - Map the module's full dependency graph (imports, injected services, external calls)
 - Trace the complete lifecycle: initialization → processing → persistence → cleanup
 - Identify all entry points and exit paths
@@ -6571,38 +6512,13 @@ Output a structured summary and detailed "Implementation Spec" for any needed fi
 
 Create the `draft/deep-review-reports/` directory if it does not exist.
 
-**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
+**MANDATORY: Include YAML frontmatter with git metadata.** Follow the procedure in `core/shared/git-report-metadata.md` to gather git info and generate the frontmatter. Use `generated_by: "draft:deep-review"` and set `module` to the reviewed module name.
 
-```bash
-git branch --show-current                    # LOCAL_BRANCH
-git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
-git rev-parse HEAD                           # FULL_SHA
-git rev-parse --short HEAD                   # SHORT_SHA
-git log -1 --format=%ci HEAD                 # COMMIT_DATE
-git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
-git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
-```
+Additional deep-review fields beyond the standard template:
 
-Report template:
-
-```markdown
----
-project: "{PROJECT_NAME}"
-module: "<module-name>"
+```yaml
 module_path: "<module-path>"
-generated_by: "draft:deep-review"
-generated_at: "{ISO_TIMESTAMP}"
-git:
-  branch: "{LOCAL_BRANCH}"
-  remote: "{REMOTE/BRANCH}"
-  commit: "{FULL_SHA}"
-  commit_short: "{SHORT_SHA}"
-  commit_date: "{COMMIT_DATE}"
-  commit_message: "{COMMIT_MESSAGE}"
-  dirty: {true|false}
-synced_to_commit: "{from draft/.ai-context.md frontmatter, if available}"
 reviewer: "{model name from runtime}"
----
 ```
 
 **Module reviewed:** name and path
@@ -9699,6 +9615,172 @@ When providing guidance, cite sources naturally:
 > "Watch for N+1 queries (common GraphQL pitfall) — use DataLoader pattern."
 
 > "Circuit breaker pattern (Release It!) would help here — fail fast instead of cascading timeouts."
+
+</core-file>
+
+---
+
+## core/shared/draft-context-loading.md
+
+<core-file path="core/shared/draft-context-loading.md">
+
+# Draft Context Loading
+
+Standard procedure for loading Draft project context. All quality commands (bughunt, deep-review, review) follow this procedure before analysis.
+
+Referenced by: `draft bughunt`, `draft deep-review`, `draft review`
+
+## Base Context Files
+
+If `draft/` directory exists, read and internalize these files in order:
+
+| Priority | File | Purpose | Fallback |
+|----------|------|---------|----------|
+| 1 | `draft/.ai-context.md` | Module boundaries, dependencies, critical invariants, concurrency model, error handling, data flows | `draft/architecture.md` (legacy projects) |
+| 2 | `draft/tech-stack.md` | Frameworks, libraries, constraints, **Accepted Patterns** | — |
+| 3 | `draft/product.md` | Product vision, user flows, requirements, **Guidelines** | — |
+| 4 | `draft/workflow.md` | Team conventions, testing preferences, **Guardrails** | — |
+
+## Special Sections to Honor
+
+### Accepted Patterns (`tech-stack.md` → `## Accepted Patterns`)
+
+Patterns listed here are **intentional design decisions**. Do NOT flag these as bugs, issues, or violations. They represent deliberate trade-offs documented by the team.
+
+### Guardrails (`workflow.md` → `## Guardrails`)
+
+Checked guardrails are **hard constraints**. Flag violations of enabled guardrails as issues regardless of context.
+
+### Critical Invariants (`.ai-context.md` → `## Critical Invariants`)
+
+Invariants covering data safety, security, concurrency, ordering, and idempotency. Check for violations across all relevant code paths.
+
+## Track Context (when scoped to a track)
+
+If analyzing a specific track, also load:
+
+| File | Purpose |
+|------|---------|
+| `draft/tracks/<id>/spec.md` | Requirements, acceptance criteria, edge cases |
+| `draft/tracks/<id>/plan.md` | Implementation tasks, phases, dependencies |
+
+Use track context to:
+- Verify implemented features match spec requirements
+- Check edge cases listed in spec are handled
+- Focus analysis on files modified/created by the track
+
+## Degradation Behavior
+
+| Scenario | Behavior |
+|----------|----------|
+| No `draft/` directory | Proceed with code-only analysis (no context enrichment) |
+| `.ai-context.md` missing | Fall back to `draft/architecture.md` if it exists |
+| `tech-stack.md` missing | Skip framework-specific checks |
+| `product.md` missing | Skip product requirement verification |
+| `workflow.md` missing | Skip guardrail enforcement |
+| Track files missing | Warn and proceed with project-level scope |
+
+## Context-Enriched Analysis
+
+Once loaded, Draft context enables analysis that pure code reading cannot:
+
+- **Architecture violations** — Coupling or boundary violations against intended module structure
+- **Framework-specific checks** — Anti-patterns for the specific frameworks in tech-stack.md
+- **Product requirement bugs** — Behavior that contradicts product.md user flows
+- **Invariant violations** — Data safety, security, concurrency, ordering, idempotency violations
+- **Concurrency analysis** — Race conditions and deadlocks informed by the documented concurrency model
+- **Error handling gaps** — Missing failure modes against documented failure recovery matrix
+- **State machine violations** — Invalid transitions, missing guards, states with no exit
+- **Consistency boundary bugs** — Stale reads, lost events at eventual-consistency seams
+
+</core-file>
+
+---
+
+## core/shared/git-report-metadata.md
+
+<core-file path="core/shared/git-report-metadata.md">
+
+# Git Report Metadata
+
+Shared procedure for gathering git metadata and generating YAML frontmatter in Draft reports.
+
+Referenced by: `draft bughunt`, `draft deep-review`, `draft review`
+
+## Git Metadata Commands
+
+Gather git info before writing the report:
+
+```bash
+git branch --show-current                    # LOCAL_BRANCH
+git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
+git rev-parse HEAD                           # FULL_SHA
+git rev-parse --short HEAD                   # SHORT_SHA
+git log -1 --format=%ci HEAD                 # COMMIT_DATE
+git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
+git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
+```
+
+## YAML Frontmatter Template
+
+Every Draft report MUST include this frontmatter block at the top of the file. Replace placeholders with values from the commands above.
+
+```yaml
+---
+project: "{PROJECT_NAME}"
+module: "{MODULE_NAME or 'root'}"
+track_id: "{TRACK_ID or null}"
+generated_by: "{COMMAND_NAME}"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+```
+
+### Field Notes
+
+- `project` — Derive from the repository name or `draft/product.md` title
+- `module` — Use `"root"` for project-level reports; use the module name/path for module-level reports
+- `track_id` — Set to the track ID if scoped to a track; `null` otherwise
+- `generated_by` — The Draft command that produced this report (e.g., `"draft:bughunt"`, `"draft:deep-review"`, `"draft:review"`)
+- `synced_to_commit` — Use the full SHA; or pull from `draft/.ai-context.md` frontmatter if available
+
+## Report Header Table
+
+Include this summary table immediately after the frontmatter for human readability:
+
+```markdown
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+```
+
+## Timestamped File Naming
+
+Reports use timestamped filenames with a `-latest.md` symlink:
+
+```bash
+# Generate timestamp
+TIMESTAMP=$(date +%Y-%m-%dT%H%M)
+
+# Write report to timestamped file
+# Example: draft/bughunt-report-2026-03-15T1430.md
+
+# Create symlink to latest
+ln -sf <report-filename> <report-dir>/<report-type>-latest.md
+```
+
+Previous timestamped reports are preserved. The `-latest.md` symlink always points to the most recent report.
 
 </core-file>
 

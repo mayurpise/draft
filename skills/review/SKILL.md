@@ -170,12 +170,7 @@ Once track is resolved:
 For project-level reviews (no track context):
 
 1. **Load Draft context (if available):**
-   - Read `draft/.ai-context.md` (system architecture, critical invariants, security architecture). Falls back to `draft/architecture.md` for legacy projects.
-   - Read `draft/tech-stack.md` (technical constraints, **Accepted Patterns**)
-   - Read `draft/workflow.md` (**Guardrails** section)
-
-   **Honor Accepted Patterns** - Don't flag patterns documented in `tech-stack.md` `## Accepted Patterns`
-   **Enforce Guardrails** - Flag violations of checked guardrails in `workflow.md` `## Guardrails`
+   Follow the base procedure in `core/shared/draft-context-loading.md`. Honor Accepted Patterns and enforce Guardrails as defined there.
 
 2. **Note limitations:**
    - No spec.md → Skip Stage 1 (spec compliance)
@@ -379,17 +374,7 @@ Merge findings from:
 
 Create unified review report in markdown format.
 
-**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
-
-```bash
-git branch --show-current                    # LOCAL_BRANCH
-git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
-git rev-parse HEAD                           # FULL_SHA
-git rev-parse --short HEAD                   # SHORT_SHA
-git log -1 --format=%ci HEAD                 # COMMIT_DATE
-git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
-git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
-```
+**MANDATORY: Include YAML frontmatter with git metadata.** Follow the procedure in `core/shared/git-report-metadata.md` to gather git info, generate frontmatter, and include the report header table. Use `generated_by: "draft:review"`.
 
 ### Track-Level Report
 
@@ -401,31 +386,11 @@ ln -sf review-report-<timestamp>.md draft/tracks/<id>/review-report-latest.md
 ```
 
 ```markdown
----
-project: "{PROJECT_NAME}"
-module: "root"
-track_id: "<id>"
-generated_by: "draft:review"
-generated_at: "{ISO_TIMESTAMP}"
-git:
-  branch: "{LOCAL_BRANCH}"
-  remote: "{REMOTE/BRANCH}"
-  commit: "{FULL_SHA}"
-  commit_short: "{SHORT_SHA}"
-  commit_date: "{COMMIT_DATE}"
-  commit_message: "{COMMIT_MESSAGE}"
-  dirty: {true|false}
-synced_to_commit: "{FULL_SHA}"
----
+[YAML frontmatter — see core/shared/git-report-metadata.md, use track_id: "<id>"]
 
 # Review Report: <Track Title>
 
-| Field | Value |
-|-------|-------|
-| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
-| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
-| **Generated** | {ISO_TIMESTAMP} |
-| **Synced To** | `{FULL_SHA}` |
+[Report header table — see core/shared/git-report-metadata.md]
 
 **Track ID:** <id>
 **Reviewer:** [Current model name and context window from runtime]

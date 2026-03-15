@@ -54,7 +54,28 @@ Every feature follows this lifecycle:
 2. **New Track** - Create specification and plan
 3. **Implement** - Execute tasks with TDD workflow
 4. **Verify** - Confirm acceptance criteria met
-5. **Quality** - Run `/draft:review` for code review, `/draft:bughunt` for bug hunting, `/draft:deep-review` for module audits
+5. **Quality** - Run quality commands (see guide below)
+
+## Quality Commands — When to Use Which
+
+Three commands form an **audit spectrum** from narrow to broad to deep:
+
+| Command | Scope | Question It Answers | Output |
+|---------|-------|-------------------|--------|
+| `/draft:review` | Change-scoped (track, diff, commits) | "Does this change meet spec and quality gates?" | Three-stage review report with verdict |
+| `/draft:bughunt` | Codebase-scoped (repo, paths, track) | "What bugs exist in this code?" | Severity-ranked bug report + regression tests |
+| `/draft:deep-review` | Module-scoped (single service/component) | "Is this module production-ready?" | ACID compliance audit + implementation spec |
+
+### Decision Guide
+
+- **Just finished a track?** → `/draft:review` — validates against spec, checks quality gates
+- **Suspicious of bugs across the codebase?** → `/draft:bughunt` — 11-dimension sweep with verification protocol
+- **Shipping a module to production?** → `/draft:deep-review` — ACID compliance, resilience, observability audit
+- **Want everything?** → `/draft:review full` (includes bughunt), then `/draft:deep-review` for critical modules
+
+### Relationship to Built-in Bug Hunt Agents
+
+Some AI tools provide built-in bug hunt agents (e.g., Claude Code's `bughunt` agent). These are **complementary** to `/draft:bughunt` — the built-in agents offer fast parallel sweeps with auto-fix, while Draft's bughunt adds context-aware analysis using your architecture, tech-stack, and product context for better false-positive elimination. For maximum coverage, run both.
 
 ## Context Files
 

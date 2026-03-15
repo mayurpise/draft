@@ -457,9 +457,9 @@ Summary:
 - Tasks: M/M
 - Duration: [if tracked]
 
-[If validation ran:]
-Validation: PASS | WARN | CRITICAL
-Report: draft/tracks/<track_id>/validation-report.md
+[If review ran:]
+Review: PASS | PASS WITH NOTES | FAIL
+Report: draft/tracks/<track_id>/review-report-latest.md
 
 All acceptance criteria from spec.md should be verified.
 

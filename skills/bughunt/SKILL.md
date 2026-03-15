@@ -11,6 +11,19 @@ You are conducting an exhaustive bug hunt on this Git repository, enhanced by Dr
 
 **The bug report is the primary deliverable.** Every verified bug MUST appear in the final report regardless of whether a regression test can be written. Regression tests are a supplementary output — helpful when possible, but never a filter for bug inclusion.
 
+## Relationship to Built-in Bug Hunt Agents
+
+Some AI tools (e.g., Claude Code) provide a built-in `bughunt` agent that auto-discovers project structure and runs parallel sweeps. `/draft:bughunt` is **complementary, not competing**:
+
+| | `/draft:bughunt` | Built-in bughunt agent |
+|---|---|---|
+| **Approach** | Context-driven methodology with 11 analysis dimensions and verification protocol | Auto-discovery with parallel sweep subagents |
+| **Draft context** | Uses architecture, tech-stack, product, guardrails for false-positive elimination | No Draft context awareness |
+| **Output** | Severity-ranked report with evidence | Inline fixes + regression tests |
+| **Modifies code** | No (report + regression tests only) | Yes (finds AND fixes) |
+
+**When to use which:** Use `/draft:bughunt` when you need context-aware analysis with structured evidence and false-positive elimination. Use the built-in agent when you want fast parallel sweeps with auto-fix capability. For maximum coverage, run both — `/draft:bughunt` catches context-specific bugs the built-in misses, and vice versa.
+
 ## Red Flags - STOP if you're:
 
 - Hunting for bugs without reading Draft context first (architecture.md, tech-stack.md, product.md)
@@ -41,14 +54,9 @@ Store this for the report header. All bugs found are relative to this specific b
 
 ### 1. Load Draft Context (if available)
 
-If `draft/` directory exists, read and internalize:
+Read and follow the base procedure in `core/shared/draft-context-loading.md`.
 
-- [ ] `draft/.ai-context.md` - Module boundaries, dependencies, intended patterns, **Critical Invariants**, **Concurrency Model**, **Error Handling**. Falls back to `draft/architecture.md` for legacy projects.
-- [ ] `draft/tech-stack.md` - Frameworks, libraries, known constraints, **Accepted Patterns**
-- [ ] `draft/product.md` - Product intent, user flows, requirements, guidelines
-- [ ] `draft/workflow.md` - Team conventions, testing preferences, **Guardrails**
-
-Use this context to:
+**Bug-hunt-specific context application:**
 - Flag violations of intended architecture as bugs (coupling, boundary violations)
 - Apply framework-specific checks from tech-stack (React anti-patterns, Node gotchas, etc.)
 - Catch bugs that violate product requirements or user flows
@@ -60,8 +68,6 @@ Use this context to:
 - **Leverage Storage Topology** — Identify data loss risks at each tier (cache eviction without writeback, event log gaps, missing archive)
 - **Leverage Consistency Boundaries** — Find bugs at eventual consistency seams (stale reads, lost events, missing reconciliation)
 - **Leverage Failure Recovery Matrix** — Verify idempotency claims, check for partial failure states without recovery paths
-- **Honor Accepted Patterns** - Skip flagging patterns documented in tech-stack.md `## Accepted Patterns`
-- **Enforce Guardrails** - Flag violations of checked guardrails in workflow.md `## Guardrails`
 
 ### 2. Confirm Scope
 
@@ -808,49 +814,30 @@ Severity levels:
 ## Report Generation
 
 Generate report at:
-- **Project-level:** `draft/bughunt-report.md`
-- **Track-level:** `draft/tracks/<track-id>/bughunt-report.md` (if analyzing specific track)
+- **Project-level:** `draft/bughunt-report-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`)
+- **Track-level:** `draft/tracks/<track-id>/bughunt-report-<timestamp>.md` (if analyzing specific track)
 
-**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
-
+After writing the timestamped report, create a symlink pointing to it:
 ```bash
-git branch --show-current                    # LOCAL_BRANCH
-git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
-git rev-parse HEAD                           # FULL_SHA
-git rev-parse --short HEAD                   # SHORT_SHA
-git log -1 --format=%ci HEAD                 # COMMIT_DATE
-git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
-git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
+# Project-level
+ln -sf bughunt-report-<timestamp>.md draft/bughunt-report-latest.md
+
+# Track-level
+ln -sf bughunt-report-<timestamp>.md draft/tracks/<track-id>/bughunt-report-latest.md
 ```
+
+Previous timestamped reports are preserved. The `-latest.md` symlink always points to the most recent report.
+
+**MANDATORY: Include YAML frontmatter with git metadata.** Follow the procedure in `core/shared/git-report-metadata.md` to gather git info and generate the frontmatter. Use `generated_by: "draft:bughunt"`.
 
 Report structure:
 
 ```markdown
----
-project: "{PROJECT_NAME}"
-module: "root"
-track_id: "{TRACK_ID or null}"
-generated_by: "draft:bughunt"
-generated_at: "{ISO_TIMESTAMP}"
-git:
-  branch: "{LOCAL_BRANCH}"
-  remote: "{REMOTE/BRANCH}"
-  commit: "{FULL_SHA}"
-  commit_short: "{SHORT_SHA}"
-  commit_date: "{COMMIT_DATE}"
-  commit_message: "{COMMIT_MESSAGE}"
-  dirty: {true|false}
-synced_to_commit: "{FULL_SHA}"
----
+[YAML frontmatter — see core/shared/git-report-metadata.md]
 
 # Bug Hunt Report
 
-| Field | Value |
-|-------|-------|
-| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
-| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
-| **Generated** | {ISO_TIMESTAMP} |
-| **Synced To** | `{FULL_SHA}` |
+[Report header table — see core/shared/git-report-metadata.md]
 
 **Scope:** [Entire repo | Specific paths | Track: <track-id>]
 **Draft Context:** [Loaded | Not available]
@@ -976,3 +963,4 @@ Bugs that cannot have automated regression tests (config issues, documentation, 
 - **Validate before reporting** — If tests were written, validate syntax/compilation before finalizing; include validation status in the report
 - **Respect project conventions** — Match existing test directory structure, naming patterns, import conventions, and framework idioms
 - **Use native frameworks** — pytest for Python, `go test` for Go, GTest for C++, Jest/Vitest for JS/TS, `cargo test` for Rust, JUnit for Java — never force a foreign test framework
+- **Learn from findings** — After report generation, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with newly discovered conventions and anti-patterns

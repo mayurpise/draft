@@ -125,11 +125,11 @@ On conflict, report: "Successfully reverted: [list]. Conflict on: [sha]. Run `gi
    - Decrement tasks.completed
    - Decrement phases.completed if applicable
    - Update timestamp
-   - **Phase status transitions:** If any task in a completed phase is reverted: change phase status to `[~]` In Progress. If ALL tasks in a phase are reverted: change phase status to `[ ]` Pending.
+   - **Note:** `metadata.json` only stores `phases.total` (int) and `phases.completed` (int). Decrement `phases.completed` if all tasks in a previously completed phase are reverted. Phase status markers (`[~]`, `[x]`, `[ ]`) are tracked in `plan.md` text, not in `metadata.json`. Update `plan.md` phase headings accordingly: if any task in a completed phase is reverted, mark that phase `[~]` In Progress in `plan.md`; if ALL tasks are reverted, mark it `[ ]` Pending in `plan.md`.
 
 3. Update `draft/tracks.md` if track status changed
 
-4. **Stale reports:** After revert, existing `review-report.md` and `validation-report.md` for the track are stale. Add a warning header to these files: `> **WARNING: This report predates a revert operation and may be stale. Re-run the review/validation.**` Or delete them if the revert is substantial.
+4. **Stale reports:** After revert, existing `review-report-latest.md` and `bughunt-report-latest.md` for the track are stale. Add a warning header to the symlink targets (the actual timestamped files): `> **WARNING: This report predates a revert operation and may be stale. Re-run the review/bughunt.**` Or delete them if the revert is substantial.
 
 ## Step 6: Confirm
 

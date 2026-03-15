@@ -5,15 +5,15 @@ description: Generate Jira export file from track plan for review before creatin
 
 # Preview Jira Issues from Track Plan
 
-Generate `jira-export.md` from the track's plan for review and editing before creating actual Jira issues.
+Generate a timestamped `jira-export-<timestamp>.md` (with `jira-export-latest.md` symlink) from the track's plan for review and editing before creating actual Jira issues.
 
 ## Red Flags - STOP if you're:
 
 - Generating a preview without an approved plan.md
 - Assigning story points inconsistent with task count
 - Missing sub-tasks that exist in plan.md
-- Not including quality findings when validation/bughunt reports exist
-- Overwriting a reviewed jira-export.md without warning the user
+- Not including quality findings when review/bughunt reports exist
+- Overwriting a reviewed jira-export without warning the user
 
 **Plan first, then preview. Accuracy over speed.**
 
@@ -21,7 +21,7 @@ Generate `jira-export.md` from the track's plan for review and editing before cr
 
 ## Standard File Metadata
 
-**The generated `jira-export.md` MUST include the standard YAML frontmatter.** This enables traceability and sync verification.
+**The generated `jira-export-<timestamp>.md` MUST include the standard YAML frontmatter.** This enables traceability and sync verification.
 
 ### Gathering Git Information
 
@@ -55,7 +55,7 @@ git status --porcelain | head -1
 
 ### Metadata Template
 
-Insert this YAML frontmatter block at the **top of `jira-export.md`**:
+Insert this YAML frontmatter block at the **top of the timestamped `jira-export-<timestamp>.md`**:
 
 ```yaml
 ---
@@ -101,8 +101,8 @@ synced_to_commit: "{FULL_SHA}"
 5. Read the track's `metadata.json` for title and type
 6. Read the track's `spec.md` for epic description
 7. Check for quality reports:
-   - `draft/tracks/<id>/validation-report.md` — compliance findings
-   - `draft/tracks/<id>/bughunt-report.md` — defect findings
+   - `draft/tracks/<id>/review-report-latest.md` — review findings (from `/draft:review`)
+   - `draft/tracks/<id>/bughunt-report-latest.md` — defect findings
 
 If no track found:
 - Tell user: "No track found. Run `/draft:new-track` to create one, or specify track ID."
@@ -140,9 +140,9 @@ Count tasks per phase and assign points to the **story**:
 
 ## Step 3: Extract Quality Findings (if reports exist)
 
-If `validation-report.md` or `bughunt-report.md` exists in the track directory:
+If `review-report-latest.md` or `bughunt-report-latest.md` exists in the track directory:
 
-### From `bughunt-report.md`
+### From `bughunt-report-latest.md`
 
 1. Parse findings by severity (Critical, High, Medium, Low)
 2. Extract **all sections** for each bug:
@@ -158,9 +158,9 @@ If `validation-report.md` or `bughunt-report.md` exists in the track directory:
    - **Regression Test** — test case that would catch this bug
 3. Group by severity for the export
 
-### From `validation-report.md`
+### From `review-report-latest.md`
 
-1. Parse findings from each validation category (Architecture Conformance, Dead Code, Dependency Cycles, Security, Performance, Spec Compliance, Architectural Impact, Regression Risk)
+1. Parse findings from review report stages — Stage 1: Automated Validation (Architecture Conformance, Dead Code, Dependency Cycles, Security Scan, Performance), Stage 2: Spec Compliance, Stage 3: Code Quality (Architecture, Error Handling, Testing, Maintainability)
 2. Extract for each finding:
    - **Severity** — Critical (✗) or Warning (⚠)
    - **Category** — which validator produced it
@@ -174,7 +174,21 @@ If `validation-report.md` or `bughunt-report.md` exists in the track directory:
 
 ## Step 4: Generate Export File
 
-Create `draft/tracks/<track_id>/jira-export.md`:
+Generate the timestamped filename and create the export file with symlink:
+
+```bash
+TIMESTAMP=$(date +%Y-%m-%dT%H%M)
+EXPORT_FILE="draft/tracks/<track_id>/jira-export-${TIMESTAMP}.md"
+SYMLINK="draft/tracks/<track_id>/jira-export-latest.md"
+```
+
+Create `${EXPORT_FILE}` and then create/update the symlink:
+
+```bash
+ln -sf "jira-export-${TIMESTAMP}.md" "${SYMLINK}"
+```
+
+File contents for `${EXPORT_FILE}`:
 
 ```markdown
 ---
@@ -286,21 +300,21 @@ h3. Verification
 
 ## Quality Reports
 
-### Validation Findings (informational)
+### Review Findings (informational)
 
 | Severity | Category | Location | Issue | Risk/Impact | Fix |
 |----------|----------|----------|-------|-------------|-----|
 | Critical | Security | src/auth.ts:45 | Hardcoded API key | Secret exposed in version control | Move to environment variable |
 | Warning | Architecture | src/utils.ts:12 | Layer boundary violation | UI importing from database layer | Use API service layer instead |
 
-> Review findings are from track validation (from `/draft:implement`) and `/draft:bughunt`. Include in Epic description for awareness.
+> Review findings are from `/draft:review` and `/draft:bughunt`. Include in Epic description for awareness.
 > Critical findings should also be created as Bug issues (same as bughunt bugs) to ensure they are tracked and resolved.
 
 ---
 
 ## Bug Issues (from Bug Hunt Report)
 
-Each bug from `bughunt-report.md` becomes a separate **Bug** issue linked to the Epic.
+Each bug from `bughunt-report-latest.md` becomes a separate **Bug** issue linked to the Epic.
 
 ### Bug 1: [CRITICAL] Off-by-one error in pagination
 
@@ -319,14 +333,14 @@ CONFIRMED
 
 h3. Code Evidence
 {code}
-// The actual problematic code from bughunt-report.md
+// The actual problematic code from bughunt-report-latest.md
 {code}
 
 h3. Data Flow Trace
 [How data reaches this point: caller → caller → this function]
 
 h3. Issue
-[Full description from bughunt-report.md]
+[Full description from bughunt-report-latest.md]
 
 h3. Impact
 [User-visible or system failure mode]
@@ -339,13 +353,13 @@ h3. Verification Done
 - No upstream guards found
 
 h3. Why Not a False Positive
-[Explicit reasoning from bughunt-report.md]
+[Explicit reasoning from bughunt-report-latest.md]
 
 h3. Fix
 [Minimal code change or mitigation from report]
 
 h3. Regression Test
-[Test case from bughunt-report.md, or "N/A" with reason]
+[Test case from bughunt-report-latest.md, or "N/A" with reason]
 
 ---
 🤖 Generated with Draft (Bug Hunt)
@@ -371,14 +385,14 @@ HIGH
 
 h3. Code Evidence
 {code}
-// The actual problematic code from bughunt-report.md
+// The actual problematic code from bughunt-report-latest.md
 {code}
 
 h3. Data Flow Trace
 [How data reaches this point: caller → caller → this function]
 
 h3. Issue
-[Full description from bughunt-report.md]
+[Full description from bughunt-report-latest.md]
 
 h3. Impact
 [User-visible or system failure mode]
@@ -387,13 +401,13 @@ h3. Verification Done
 [Checklist of verification steps completed]
 
 h3. Why Not a False Positive
-[Explicit reasoning from bughunt-report.md]
+[Explicit reasoning from bughunt-report-latest.md]
 
 h3. Fix
 [Fix recommendation from report]
 
 h3. Regression Test
-[Test case from bughunt-report.md, or "N/A" with reason]
+[Test case from bughunt-report-latest.md, or "N/A" with reason]
 
 ---
 🤖 Generated with Draft (Bug Hunt)
@@ -402,7 +416,7 @@ Branch: [branch-name] | Commit: [short-hash]
 
 ---
 
-[Continue for all bugs from bughunt-report.md...]
+[Continue for all bugs from bughunt-report-latest.md...]
 
 > **Priority Mapping:** Critical → Highest, High → High, Medium → Medium, Low → Low
 > All bugs are linked to the Epic but are separate from Stories (phases).
@@ -414,27 +428,28 @@ Branch: [branch-name] | Commit: [short-hash]
 Jira Preview Generated
 
 Track: [track_id] - [title]
-Export: draft/tracks/<id>/jira-export.md
+Export: draft/tracks/<id>/jira-export-<timestamp>.md
+Symlink: draft/tracks/<id>/jira-export-latest.md
 
 Summary:
 - 1 epic
 - N stories (phases)
 - M sub-tasks (tasks)
 - P total story points
-- B bugs (from bughunt-report.md)
+- B bugs (from bughunt-report-latest.md)
 
 Breakdown:
 - Phase 1: [name] - X pts, Y tasks
 - Phase 2: [name] - X pts, Y tasks
 - Phase 3: [name] - X pts, Y tasks
 
-Bugs (if bughunt-report.md exists):
+Bugs (if bughunt-report-latest.md exists):
 - X critical bugs
 - Y high bugs
 - Z medium/low bugs
 
 Next steps:
-1. Review and edit jira-export.md (adjust points, descriptions, sub-tasks, bug priorities)
+1. Review and edit the export file via jira-export-latest.md (adjust points, descriptions, sub-tasks, bug priorities)
 2. Run `/draft:jira-create` to create issues in Jira
 ```
 
@@ -447,10 +462,10 @@ Next steps:
 - Use plan.md overview for epic description
 - Warn: "spec.md not found, using plan overview for epic description."
 
-**If jira-export.md already exists:**
-- Check if it has been manually modified (look for user-added content not matching generated patterns — e.g., edited descriptions, added rows, changed story points from generated values)
-- If modifications detected, prompt user: "Existing jira-export.md appears to have manual edits. Overwrite? [y/N]"
-- If unmodified (matches generated patterns), proceed with regeneration
+**If jira-export-latest.md already exists:**
+- Check if the target file has been manually modified (look for user-added content not matching generated patterns — e.g., edited descriptions, added rows, changed story points from generated values)
+- If modifications detected, prompt user: "Existing jira-export appears to have manual edits. Overwrite? [y/N]"
+- If unmodified (matches generated patterns), proceed with regeneration (new timestamped file + updated symlink)
 
 **If phase has no tasks:**
 - Create story with 1 story point

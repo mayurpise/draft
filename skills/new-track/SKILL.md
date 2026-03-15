@@ -39,7 +39,8 @@ If missing, tell user: "Project not initialized. Run `/draft:init` first."
 - Read `draft/product.md` — product vision, users, goals, constraints, guidelines (optional section)
 - Read `draft/tech-stack.md` — languages, frameworks, patterns, code style, accepted patterns
 - Read `draft/.ai-context.md` (if exists) — system map, modules, data flows, invariants, security architecture. Falls back to `draft/architecture.md` for legacy projects.
-- Read `draft/workflow.md` — TDD preference, commit conventions, review process, guardrails
+- Read `draft/workflow.md` — TDD preference, commit conventions, review process
+- Read `draft/guardrails.md` (if exists) — hard guardrails, learned conventions, learned anti-patterns
 - Read `draft/tracks.md` — existing tracks to check for overlap or dependencies
 
 4. Load guidance references:

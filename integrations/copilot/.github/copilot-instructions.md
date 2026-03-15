@@ -38,6 +38,7 @@ When `draft/` exists in the project, always consider:
 | `draft bughunt [--track <id>]` | Systematic bug discovery |
 | `draft review [--track <id>]` | Three-stage code review |
 | `draft deep-review [module]` | Exhaustive production-grade module audit |
+| `draft learn [promote\|migrate]` | Discover coding patterns, update guardrails |
 | `draft adr [title]` | Architecture Decision Records |
 | `draft status` | Show progress overview |
 | `draft revert` | Git-aware rollback |
@@ -60,6 +61,7 @@ Recognize these natural language patterns:
 | "hunt bugs", "find bugs" | Run bug hunt |
 | "review code", "review track", "check quality" | Run review |
 | "deep review", "production audit", "module audit" | Run deep-review |
+| "learn patterns", "update guardrails", "discover conventions" | Run learn |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
 | "requirements changed", "scope changed", "update the spec" | Run change |
@@ -1947,6 +1949,14 @@ Ask about:
 - Commit style and frequency
 - Validation settings (auto-validate, blocking behavior)
 
+## Step 4.1: Guardrails Configuration
+
+Create `draft/guardrails.md` using the template from `core/templates/guardrails.md`.
+
+**Include the Standard File Metadata header at the top of the file.**
+
+Ask which hard guardrails to enable (check items that apply to this project). The Learned Conventions and Learned Anti-Patterns sections start empty — they are populated by `draft learn` and quality commands over time.
+
 ## Step 5: Initialize Tracks
 
 Create `draft/tracks.md` with metadata header:
@@ -1997,6 +2007,7 @@ Created:
 - draft/product.md
 - draft/tech-stack.md
 - draft/workflow.md
+- draft/guardrails.md
 - draft/tracks.md
 
 Next steps:
@@ -2013,6 +2024,7 @@ Created:
 - draft/product.md
 - draft/tech-stack.md
 - draft/workflow.md
+- draft/guardrails.md
 - draft/tracks.md
 
 Next steps:
@@ -3028,7 +3040,8 @@ If missing, tell user: "Project not initialized. Run `draft init` first."
 - Read `draft/product.md` — product vision, users, goals, constraints, guidelines (optional section)
 - Read `draft/tech-stack.md` — languages, frameworks, patterns, code style, accepted patterns
 - Read `draft/.ai-context.md` (if exists) — system map, modules, data flows, invariants, security architecture. Falls back to `draft/architecture.md` for legacy projects.
-- Read `draft/workflow.md` — TDD preference, commit conventions, review process, guardrails
+- Read `draft/workflow.md` — TDD preference, commit conventions, review process
+- Read `draft/guardrails.md` (if exists) — hard guardrails, learned conventions, learned anti-patterns
 - Read `draft/tracks.md` — existing tracks to check for overlap or dependencies
 
 4. Load guidance references:
@@ -5694,6 +5707,7 @@ Bugs that cannot have automated regression tests (config issues, documentation, 
 - **Validate before reporting** — If tests were written, validate syntax/compilation before finalizing; include validation status in the report
 - **Respect project conventions** — Match existing test directory structure, naming patterns, import conventions, and framework idioms
 - **Use native frameworks** — pytest for Python, `go test` for Go, GTest for C++, Jest/Vitest for JS/TS, `cargo test` for Rust, JUnit for Java — never force a foreign test framework
+- **Learn from findings** — After report generation, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with newly discovered conventions and anti-patterns
 
 ---
 
@@ -6365,6 +6379,12 @@ Options:
 
 ---
 
+## Pattern Learning
+
+After generating the review report, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with patterns discovered during this review.
+
+---
+
 ## Examples
 
 ### Review active track
@@ -6545,6 +6565,296 @@ Format findings as actionable tasks:
 - Do not refactor code yourself.
 - Flag ambiguous fixes for human review instead of guessing.
 - If the module is too large, decompose it and review sub-modules sequentially.
+
+---
+
+## Pattern Learning
+
+After generating the report, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with patterns discovered during this module audit. Module-level reviews often reveal architecture and concurrency conventions that are valuable for future analysis.
+
+---
+
+## Learn Command
+
+When user says "learn patterns" or "draft learn [promote|migrate|path]":
+
+Scan the codebase to discover recurring coding patterns and update `draft/guardrails.md` with learned conventions and anti-patterns. This improves future quality command accuracy by reducing false positives and catching known-bad patterns.
+
+## Red Flags - STOP if you're:
+
+- Writing to guardrails.md without reading the codebase first
+- Learning a pattern from fewer than 3 occurrences
+- Auto-promoting patterns to Hard Guardrails (requires human approval)
+- Overwriting human-curated Hard Guardrails with learned patterns
+- Learning patterns that contradict `tech-stack.md ## Accepted Patterns`
+- Removing existing learned entries (only update or add)
+
+**Evidence over assumptions. Quantity over anecdote.**
+
+---
+
+## Arguments
+
+- No arguments — full codebase pattern scan
+- `promote` — review high-confidence learned patterns and offer promotion to Hard Guardrails or Accepted Patterns
+- `migrate` — migrate `## Guardrails` from `workflow.md` to `guardrails.md` (for existing projects)
+- `<path>` — scan specific directory or file pattern
+
+---
+
+## Step 0: Verify Draft Context
+
+```bash
+ls draft/ 2>/dev/null
+```
+
+If `draft/` does not exist: **STOP** — "No Draft context found. Run `draft init` first."
+
+---
+
+## Step 1: Load Existing Guardrails
+
+### 1.1: Check for guardrails.md
+
+```bash
+ls draft/guardrails.md 2>/dev/null
+```
+
+If it exists, read it and internalize:
+- Current Hard Guardrails (checked items)
+- Current Learned Conventions (existing entries)
+- Current Learned Anti-Patterns (existing entries)
+
+### 1.2: Check for Legacy Guardrails (migration path)
+
+If `draft/guardrails.md` does NOT exist:
+
+1. Check `draft/workflow.md` for `## Guardrails` section
+2. If found, announce: "Found guardrails in workflow.md. Creating guardrails.md and migrating."
+3. Create `draft/guardrails.md` using template from `core/templates/guardrails.md`
+4. Copy checked guardrail items from `workflow.md ## Guardrails` into the Hard Guardrails section
+5. Add a comment in `workflow.md` where `## Guardrails` was:
+   ```markdown
+   ## Guardrails
+
+   > **Migrated** — Guardrails have moved to `draft/guardrails.md`. See that file for hard guardrails, learned conventions, and learned anti-patterns.
+   ```
+
+If `migrate` argument was given, stop here after migration. Otherwise, continue to pattern scanning.
+
+### 1.3: Load Supporting Context
+
+Read and follow `core/shared/draft-context-loading.md` for full Draft context. Key files:
+- `draft/.ai-context.md` — Module boundaries, invariants, concurrency model
+- `draft/tech-stack.md` — Frameworks, accepted patterns (do not learn patterns that duplicate these)
+- `draft/product.md` — Product requirements
+
+---
+
+## Step 2: Codebase Pattern Scan
+
+### 2.1: Discover Source Files
+
+```bash
+# Find all source files (exclude vendored, generated, build artifacts)
+find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \
+  -o -name "*.py" -o -name "*.go" -o -name "*.rs" -o -name "*.java" \
+  -o -name "*.cpp" -o -name "*.cc" -o -name "*.h" -o -name "*.hpp" \
+  -o -name "*.rb" -o -name "*.php" -o -name "*.swift" -o -name "*.kt" \) \
+  -not -path "*/node_modules/*" -not -path "*/vendor/*" -not -path "*/.git/*" \
+  -not -path "*/dist/*" -not -path "*/build/*" -not -path "*/__pycache__/*" \
+  -not -path "*/draft/*" \
+  | head -500
+```
+
+If scope argument provided, filter to that path.
+
+### 2.2: Analyze Pattern Dimensions
+
+Scan the codebase across these dimensions, looking for **recurring patterns** (3+ occurrences):
+
+#### Error Handling Conventions
+- How errors are caught, logged, and propagated
+- Custom error classes or error codes
+- Try/catch patterns, error boundaries
+- Retry and fallback strategies
+
+#### Naming Conventions
+- Variable, function, class naming styles beyond language defaults
+- File naming patterns (kebab-case, PascalCase, etc.)
+- Module/directory organization conventions
+
+#### Architecture Patterns
+- Import/dependency patterns (barrel exports, lazy loading)
+- State management approaches
+- API call patterns (centralized client, interceptors)
+- Component composition patterns
+
+#### Concurrency Patterns
+- Async/await usage conventions
+- Locking and synchronization approaches
+- Queue and worker patterns
+- Cancellation and timeout handling
+
+#### Data Flow Patterns
+- Validation placement (boundary vs deep)
+- Serialization/deserialization conventions
+- Caching strategies
+- Data transformation pipelines
+
+#### Testing Conventions
+- Test file placement and naming
+- Test structure (arrange/act/assert, given/when/then)
+- Mock/stub conventions
+- Fixture and factory patterns
+
+#### Configuration Patterns
+- Environment variable access patterns
+- Feature flag patterns
+- Config file conventions
+
+### 2.3: Cross-Reference Existing Knowledge
+
+For each candidate pattern:
+
+1. **Check `tech-stack.md ## Accepted Patterns`** — if already documented there, skip (no duplication)
+2. **Check existing `guardrails.md` entries** — if already learned, update evidence count and date
+3. **Check `.ai-context.md`** — if described as architecture, skip (it's documented)
+4. **Verify consistency** — sample 3+ instances and confirm they follow the same approach
+
+---
+
+## Step 3: Apply Confidence Threshold
+
+Follow the threshold from `core/shared/pattern-learning.md`:
+
+| Evidence | Confidence | Action |
+|----------|------------|--------|
+| Found 1-2x | — | Skip (insufficient data) |
+| Found 3-5x, all consistent | `medium` | Learn as convention or anti-pattern |
+| Found >5x, all consistent, cross-verified | `high` | Learn + flag as promotion candidate |
+| Found >5x but inconsistent | — | Do NOT learn (investigate inconsistency) |
+
+### Distinguishing Conventions from Anti-Patterns
+
+- **Convention:** Pattern is consistently applied AND does not cause bugs, security issues, or violations of documented invariants
+- **Anti-Pattern:** Pattern is consistently applied BUT causes or risks bugs, security issues, performance problems, or invariant violations
+
+---
+
+## Step 4: Update guardrails.md
+
+Follow the write procedure in `core/shared/pattern-learning.md`:
+
+1. Read current `draft/guardrails.md`
+2. For each new pattern: check for duplicates, then append
+3. For existing patterns: update evidence count, confidence, `last_verified`
+4. Update YAML frontmatter `synced_to_commit`
+
+### Entry Format — Convention
+
+```markdown
+### [Pattern Name]
+- **Category:** error-handling | naming | architecture | concurrency | state-management | data-flow | testing | configuration
+- **Confidence:** high | medium
+- **Evidence:** Found in N files — `path/file1.ext:line`, `path/file2.ext:line`, `path/file3.ext:line`
+- **Last verified:** YYYY-MM-DD
+- **Discovered by:** draft:learn on YYYY-MM-DD
+- **Description:** [What the pattern is and why it's intentional]
+```
+
+### Entry Format — Anti-Pattern
+
+```markdown
+### [Anti-Pattern Name]
+- **Category:** security | reliability | performance | correctness | concurrency
+- **Severity:** critical | high | medium
+- **Evidence:** Found in N files — `path/file1.ext:line`, `path/file2.ext:line`
+- **Last verified:** YYYY-MM-DD
+- **Discovered by:** draft:learn on YYYY-MM-DD
+- **Description:** [What the pattern is and why it's problematic]
+- **Suggested fix:** [Brief description of the correct approach]
+```
+
+---
+
+## Step 5: Promotion Workflow (when `promote` argument given)
+
+Review all learned patterns with `confidence: high` and present promotion candidates:
+
+```
+Pattern promotion candidates:
+
+1. [Convention] "Centralized API client pattern" (high confidence, 12 files)
+   → Promote to: tech-stack.md ## Accepted Patterns? [y/n]
+
+2. [Convention] "Error boundary at route level" (high confidence, 8 files)
+   → Promote to: Hard Guardrail (enforce always)? [y/n]
+
+3. [Anti-Pattern] "Unguarded .env access" (high confidence, 6 files)
+   → Promote to: Hard Guardrail (enforce always)? [y/n]
+```
+
+For each promoted pattern:
+- **Convention → Accepted Pattern**: Append to `draft/tech-stack.md ## Accepted Patterns` and remove from guardrails.md Learned Conventions
+- **Convention → Hard Guardrail**: Move from Learned Conventions to Hard Guardrails section (as checked `[x]` item)
+- **Anti-Pattern → Hard Guardrail**: Move from Learned Anti-Patterns to Hard Guardrails section (as checked `[x]` item)
+
+---
+
+## Step 6: Generate Summary Report
+
+Display results to the user:
+
+```
+draft learn complete
+
+Scanned: N source files across M directories
+Duration: ~Xs
+
+Results:
+  New conventions learned:     N  [list names]
+  New anti-patterns learned:   N  [list names]
+  Existing patterns updated:   N  [list names]
+  Skipped (insufficient data): N
+  Skipped (already documented): N
+
+Promotion candidates (high confidence):
+  N patterns ready for promotion — run draft learn promote to review
+
+Updated: draft/guardrails.md
+```
+
+---
+
+## How Quality Commands Use guardrails.md
+
+After `draft learn` populates guardrails.md, all quality commands automatically:
+
+| Section | Quality Command Behavior |
+|---------|------------------------|
+| **Hard Guardrails** (checked) | Flag violations as issues |
+| **Learned Conventions** | Skip these patterns during analysis (not bugs) |
+| **Learned Anti-Patterns** | Always flag these patterns as bugs |
+| **Unchecked Hard Guardrails** | Ignore (not enforced) |
+
+This creates a **continuous improvement loop**:
+1. Quality command runs → discovers patterns → updates guardrails.md
+2. Next quality command run → reads updated guardrails.md → fewer false positives, catches known-bad patterns
+3. `draft learn promote` → graduates stable patterns to permanent status
+
+---
+
+## Anti-Patterns
+
+| Don't | Instead |
+|-------|---------|
+| Learn from <3 occurrences | Require minimum 3 consistent instances |
+| Auto-promote to Hard Guardrails | Always require human approval for promotion |
+| Overwrite human-curated entries | Learned patterns complement, never replace |
+| Learn framework defaults as conventions | Only learn project-specific patterns |
+| Remove entries on re-scan | Update evidence/dates, never delete |
+| Learn from test/mock code | Focus on production source code |
 
 ---
 
@@ -8318,6 +8628,7 @@ Draft solves this through **Context-Driven Development**: structured documents t
   - [draft deep-review](#draftdeep-review--module-lifecycle-audit)
   - [draft bughunt](#draftbughunt--exhaustive-bug-discovery)
   - [draft review](#draftreview--code-review-orchestrator)
+  - [draft learn](#draftlearn--pattern-discovery--guardrails-update)
   - [draft change](#draftchange--course-correction)
 - [Architecture Mode](#architecture-mode)
 - [Coverage](#coverage)
@@ -8339,7 +8650,8 @@ Draft solves this through **Context-Driven Development**: structured documents t
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
 | `architecture.md` | **Source of truth.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary. Auto-refreshed on mutations. | AI re-analyzing codebase every session |
-| `workflow.md` | TDD preference, commit style, review process, guardrails | AI skipping tests or making giant commits |
+| `workflow.md` | TDD preference, commit style, review process | AI skipping tests or making giant commits |
+| `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns | AI repeating false positives or missing known-bad patterns |
 | `spec.md` | Acceptance criteria for a specific track | Scope creep, gold-plating |
 | `plan.md` | Ordered phases with verification steps | AI attempting everything at once |
 
@@ -8624,7 +8936,8 @@ Located in `draft/` of the target project:
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
 | `architecture.md` | **Source of truth.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices. Generated from 5-phase codebase analysis. |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context with 15+ mandatory sections. Consumed by all Draft commands and external AI tools. Auto-refreshed on mutations. |
-| `workflow.md` | TDD preferences, commit strategy, guardrails |
+| `workflow.md` | TDD preferences, commit strategy, validation config |
+| `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns |
 | `jira.md` | Jira project configuration (optional) |
 | `tracks.md` | Master list of all tracks |
 
@@ -8632,7 +8945,7 @@ Located in `draft/` of the target project:
 
 - **`product.md` `## Guidelines`** — UX standards, writing style, branding (optional)
 - **`tech-stack.md` `## Accepted Patterns`** — Intentional design decisions honored by bughunt/deep-review/review
-- **`workflow.md` `## Guardrails`** — Hard constraints enforced by review commands
+- **`guardrails.md`** — Hard guardrails (human-defined constraints), learned conventions (auto-discovered, skip in analysis), learned anti-patterns (auto-discovered, always flag)
 
 ## Status Markers
 
@@ -8691,10 +9004,12 @@ Draft auto-classifies the project:
 
 3. **Product definition** — Dialogue to define product vision, users, goals, constraints, guidelines (optional) → `draft/product.md`
 4. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield. Includes accepted patterns section → `draft/tech-stack.md`
-5. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process, guardrails → `draft/workflow.md`
-6. **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `draft decompose` on a track. File-based activation - no opt-in needed.
+5. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
+6. **Guardrails configuration** — Hard guardrails, learned conventions, learned anti-patterns → `draft/guardrails.md`
 7. **Tracks registry** — Empty tracks list → `draft/tracks.md`
 8. **Directory structure** — Creates `draft/tracks/` directory
+
+> **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `draft decompose` on a track. File-based activation — no opt-in needed.
 
 If `draft/` already exists with context files, init reports "already initialized" and suggests using `draft init refresh` or `draft new-track`.
 
@@ -8749,7 +9064,8 @@ Every new track loads the full project context before spec creation:
 - `draft/product.md` — product vision, users, goals, guidelines
 - `draft/tech-stack.md` — languages, frameworks, patterns, accepted patterns
 - `draft/.ai-context.md` — system map, modules, data flows, invariants, security architecture (if exists). Falls back to `draft/architecture.md` for legacy projects.
-- `draft/workflow.md` — TDD preference, commit conventions, guardrails
+- `draft/workflow.md` — TDD preference, commit conventions
+- `draft/guardrails.md` — Hard guardrails, learned conventions, learned anti-patterns
 - `draft/tracks.md` — existing tracks (check for overlap/dependencies)
 
 Every spec includes a **Context References** section that explicitly links back to these documents with a one-line description of how each is relevant to this track. This ensures every track is grounded in the big picture.
@@ -9076,6 +9392,40 @@ draft review track my-feature full        # comprehensive review with bughunt
 
 ---
 
+### `draft learn` — Pattern Discovery & Guardrails Update
+
+Scans the codebase to discover recurring coding patterns and updates `draft/guardrails.md` with learned conventions (skip in future analysis) and anti-patterns (always flag). Creates a continuous improvement loop where quality commands become more accurate over time.
+
+#### How It Works
+
+1. Loads existing guardrails and Draft context
+2. Scans source files across pattern dimensions: error handling, naming, architecture, concurrency, data flow, testing, configuration
+3. Identifies patterns with 3+ consistent occurrences
+4. Cross-references against `tech-stack.md ## Accepted Patterns` and `.ai-context.md` to avoid duplicates
+5. Updates `draft/guardrails.md` with new entries (conventions or anti-patterns)
+
+#### Subcommands
+
+- No arguments — full codebase scan
+- `promote` — review high-confidence learned patterns for promotion to Hard Guardrails or Accepted Patterns
+- `migrate` — migrate `## Guardrails` from legacy `workflow.md` to `guardrails.md`
+- `<path>` — scan specific directory or file pattern
+
+#### Continuous Learning Loop
+
+Quality commands (`draft bughunt`, `draft deep-review`, `draft review`) also update guardrails incrementally after each run via the shared pattern learning procedure. `draft learn` performs a comprehensive standalone scan.
+
+#### Examples
+
+```bash
+draft learn                           # full codebase pattern scan
+draft learn src/api/                  # scan specific directory
+draft learn promote                   # review promotion candidates
+draft learn migrate                   # migrate from workflow.md
+```
+
+---
+
 ### `draft change` — Course Correction
 
 Handles mid-track requirement changes without losing work. Analyzes the impact of the change on completed and pending tasks, proposes amendments to `spec.md` and `plan.md`, then applies them only after explicit confirmation.
@@ -9270,6 +9620,7 @@ Natural language patterns that map to Draft commands:
 | "deep review", "audit module", "production audit" | Module lifecycle audit |
 | "hunt bugs", "find bugs" | Systematic bug discovery |
 | "review code", "review track", "check quality" | Code review orchestrator (track/project) |
+| "learn patterns", "update guardrails", "discover conventions" | Pattern discovery & guardrails update |
 | "requirements changed", "scope changed", "update the spec" | Handle mid-track requirement change |
 | "preview jira", "export to jira" | Preview Jira issues |
 | "create jira issues" | Create Jira issues via MCP |
@@ -9626,9 +9977,9 @@ When providing guidance, cite sources naturally:
 
 # Draft Context Loading
 
-Standard procedure for loading Draft project context. All quality commands (bughunt, deep-review, review) follow this procedure before analysis.
+Standard procedure for loading Draft project context. All Draft commands that read project context follow this procedure before analysis or execution.
 
-Referenced by: `draft bughunt`, `draft deep-review`, `draft review`
+Referenced by: `draft bughunt`, `draft deep-review`, `draft review`, `draft learn`, `draft new-track`, `draft implement`, `draft init` (refresh), and others
 
 ## Base Context Files
 
@@ -9639,7 +9990,8 @@ If `draft/` directory exists, read and internalize these files in order:
 | 1 | `draft/.ai-context.md` | Module boundaries, dependencies, critical invariants, concurrency model, error handling, data flows | `draft/architecture.md` (legacy projects) |
 | 2 | `draft/tech-stack.md` | Frameworks, libraries, constraints, **Accepted Patterns** | — |
 | 3 | `draft/product.md` | Product vision, user flows, requirements, **Guidelines** | — |
-| 4 | `draft/workflow.md` | Team conventions, testing preferences, **Guardrails** | — |
+| 4 | `draft/workflow.md` | Team conventions, testing preferences | — |
+| 5 | `draft/guardrails.md` | Hard guardrails, **Learned Conventions**, **Learned Anti-Patterns** | `draft/workflow.md` `## Guardrails` (legacy) |
 
 ## Special Sections to Honor
 
@@ -9647,9 +9999,18 @@ If `draft/` directory exists, read and internalize these files in order:
 
 Patterns listed here are **intentional design decisions**. Do NOT flag these as bugs, issues, or violations. They represent deliberate trade-offs documented by the team.
 
-### Guardrails (`workflow.md` → `## Guardrails`)
+### Guardrails (`guardrails.md`)
 
-Checked guardrails are **hard constraints**. Flag violations of enabled guardrails as issues regardless of context.
+Three types of guardrails, each with different enforcement behavior:
+
+| Section | Behavior |
+|---------|----------|
+| **Hard Guardrails** (checked `[x]`) | Always flag violations as issues |
+| **Learned Conventions** | Skip these patterns during analysis — they are verified intentional patterns |
+| **Learned Anti-Patterns** | Always flag these patterns — they are verified problematic patterns |
+| **Hard Guardrails** (unchecked `[ ]`) | Ignore (not enforced) |
+
+**Legacy fallback:** If `draft/guardrails.md` does not exist, check `draft/workflow.md` for a `## Guardrails` section and enforce checked items there. Suggest running `draft learn migrate` to move to the new format.
 
 ### Critical Invariants (`.ai-context.md` → `## Critical Invariants`)
 
@@ -9677,7 +10038,8 @@ Use track context to:
 | `.ai-context.md` missing | Fall back to `draft/architecture.md` if it exists |
 | `tech-stack.md` missing | Skip framework-specific checks |
 | `product.md` missing | Skip product requirement verification |
-| `workflow.md` missing | Skip guardrail enforcement |
+| `workflow.md` missing | Skip workflow preferences |
+| `guardrails.md` missing | Fall back to `workflow.md ## Guardrails`; if neither exists, skip guardrail enforcement |
 | Track files missing | Warn and proceed with project-level scope |
 
 ## Context-Enriched Analysis
@@ -9692,6 +10054,8 @@ Once loaded, Draft context enables analysis that pure code reading cannot:
 - **Error handling gaps** — Missing failure modes against documented failure recovery matrix
 - **State machine violations** — Invalid transitions, missing guards, states with no exit
 - **Consistency boundary bugs** — Stale reads, lost events at eventual-consistency seams
+- **Guardrail violations** — Checked hard guardrails and learned anti-patterns from guardrails.md
+- **False positive suppression** — Learned conventions and accepted patterns are skipped during analysis
 
 </core-file>
 
@@ -9781,6 +10145,247 @@ ln -sf <report-filename> <report-dir>/<report-type>-latest.md
 ```
 
 Previous timestamped reports are preserved. The `-latest.md` symlink always points to the most recent report.
+
+</core-file>
+
+---
+
+## core/shared/pattern-learning.md
+
+<core-file path="core/shared/pattern-learning.md">
+
+# Pattern Learning — Post-Analysis Phase
+
+Shared procedure for auto-discovering coding patterns after quality analysis. Run as the final phase of `draft bughunt`, `draft deep-review`, and `draft review`.
+
+Referenced by: `draft bughunt`, `draft deep-review`, `draft review`, `draft learn`
+
+---
+
+## When to Run
+
+Execute this phase **after** the main analysis and report generation are complete. This phase updates `draft/guardrails.md` with newly discovered patterns.
+
+**Skip this phase if:**
+- `draft/` directory does not exist (no Draft context)
+- Analysis found zero findings to learn from
+- Running in a read-only or preview mode
+
+---
+
+## Step 1: Identify Pattern Candidates
+
+Review the findings from the just-completed analysis and identify:
+
+### Convention Candidates (patterns to NOT flag in future)
+
+Look for patterns that were **considered during analysis but determined to be intentional**:
+
+- Patterns checked during the Pattern Prevalence Check that were found >3x and all instances were correct
+- Patterns that matched a framework idiom confirmed by documentation
+- Patterns flagged as MEDIUM confidence but verified as intentional after investigation
+- Recurring code structures that follow a consistent project convention
+
+### Anti-Pattern Candidates (patterns to ALWAYS flag in future)
+
+Look for patterns that were **confirmed as bugs across multiple locations**:
+
+- Bug patterns found in 3+ locations with the same root cause
+- Patterns that violate documented invariants consistently
+- Security or reliability patterns that appeared as confirmed bugs
+
+---
+
+## Step 2: Apply Confidence Threshold
+
+| Evidence | Confidence | Action |
+|----------|------------|--------|
+| Pattern found 1-2x | — | Do not learn (insufficient data) |
+| Pattern found 3-5x, all consistent | `medium` | Add to guardrails.md |
+| Pattern found >5x, all consistent, verified across multiple files | `high` | Add to guardrails.md, suggest promotion |
+| Pattern found >5x but some instances are buggy | — | Do NOT learn (inconsistent — real problem exists) |
+
+---
+
+## Step 3: Check for Duplicates
+
+Before adding a new entry to `draft/guardrails.md`:
+
+1. Read current `draft/guardrails.md`
+2. Check if the pattern already exists under Learned Conventions or Learned Anti-Patterns
+3. If it exists:
+   - Update `last_verified` date
+   - Increase evidence count if new instances were found
+   - Upgrade confidence from `medium` → `high` if threshold met
+4. If it does NOT exist: append as new entry
+
+---
+
+## Step 4: Write to guardrails.md
+
+### 4.0: Update File Metadata
+
+Before writing entries, update the YAML frontmatter in `draft/guardrails.md`:
+- Set `synced_to_commit` to the current HEAD commit SHA
+- Update `git.commit`, `git.commit_short`, `git.commit_date`, `git.commit_message` fields
+
+### Convention Entry Format
+
+Append under `## Learned Conventions`:
+
+```markdown
+### [Pattern Name]
+- **Category:** error-handling | naming | architecture | concurrency | state-management | data-flow | testing | configuration
+- **Confidence:** high | medium
+- **Evidence:** Found in N files — `path/file1.ext:line`, `path/file2.ext:line`, `path/file3.ext:line`
+- **Last verified:** YYYY-MM-DD
+- **Discovered by:** draft:[command] on YYYY-MM-DD
+- **Description:** [What the pattern is and why it's intentional]
+```
+
+### Anti-Pattern Entry Format
+
+Append under `## Learned Anti-Patterns`:
+
+```markdown
+### [Anti-Pattern Name]
+- **Category:** security | reliability | performance | correctness | concurrency
+- **Severity:** critical | high | medium
+- **Evidence:** Found in N files — `path/file1.ext:line`, `path/file2.ext:line`
+- **Last verified:** YYYY-MM-DD
+- **Discovered by:** draft:[command] on YYYY-MM-DD
+- **Description:** [What the pattern is and why it's problematic]
+- **Suggested fix:** [Brief description of the correct approach]
+```
+
+---
+
+## Step 5: Report Learning Summary
+
+After updating guardrails.md, append a brief learning summary to the end of the quality report:
+
+```markdown
+## Pattern Learning
+
+| Action | Count | Details |
+|--------|-------|---------|
+| New conventions learned | N | [names] |
+| New anti-patterns learned | N | [names] |
+| Existing patterns re-verified | N | [names] |
+| Promotion candidates (high confidence) | N | [names] |
+```
+
+---
+
+## Constraints
+
+- **Never auto-promote** learned patterns to Hard Guardrails — that requires human decision via `draft learn promote`
+- **Never remove** existing entries — only update evidence/confidence/dates
+- **Cap at 50 learned entries** per section — if at capacity, replace the oldest `medium` confidence entry that hasn't been re-verified in 90+ days
+- **Human-curated always wins** — Hard Guardrails and `tech-stack.md ## Accepted Patterns` take precedence over learned patterns if there's a conflict
+- **Preserve file metadata** — update `synced_to_commit` in the YAML frontmatter when modifying guardrails.md
+
+</core-file>
+
+---
+
+## core/templates/guardrails.md
+
+<core-file path="core/templates/guardrails.md">
+
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:init"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
+
+# Guardrails
+
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+---
+
+This file defines project-level guardrails and learned coding patterns. All quality commands (`draft bughunt`, `draft deep-review`, `draft review`) read this file and enforce its rules.
+
+- **Hard Guardrails** — Human-defined constraints. Violations are always flagged.
+- **Learned Conventions** — Auto-discovered patterns that are intentional. Quality commands skip these.
+- **Learned Anti-Patterns** — Auto-discovered patterns that are problematic. Quality commands always flag these.
+
+Run `draft learn` to scan the codebase and update learned patterns. Quality commands also update this file incrementally after each run.
+
+---
+
+## Hard Guardrails
+
+<!-- Hard constraints that must never be violated. Check [x] to enable enforcement. -->
+
+### Git & Version Control
+- [ ] No direct commits to main/master
+- [ ] No force push to shared branches
+- [ ] PR required for all changes
+
+### Code Quality
+- [ ] No console.log/print statements in production code
+- [ ] No commented-out code blocks
+- [ ] No TODO comments without linked issue
+
+### Security
+- [ ] No secrets/credentials in code
+- [ ] No disabled security checks without documented exception
+- [ ] Dependencies must pass security audit
+
+### Testing
+- [ ] Tests required before merge
+- [ ] No skipped tests without documented reason
+- [ ] Coverage must not decrease
+
+> Check the guardrails that apply to this project. Unchecked items are not enforced. Quality commands flag violations of checked guardrails only.
+
+---
+
+## Learned Conventions
+
+<!-- Auto-discovered coding patterns verified as intentional. Quality commands skip these. -->
+<!-- Each entry is added by draft learn or by quality commands during post-analysis. -->
+<!-- Format: pattern name, category, confidence, evidence, description. -->
+
+<!-- No learned conventions yet. Run draft learn or a quality command to discover patterns. -->
+
+---
+
+## Learned Anti-Patterns
+
+<!-- Auto-discovered patterns verified as problematic. Quality commands always flag these. -->
+<!-- Each entry is added by draft learn or by quality commands during post-analysis. -->
+
+<!-- No learned anti-patterns yet. Run draft learn or a quality command to discover patterns. -->
+
+---
+
+## Pattern Promotion
+
+Learned patterns with `confidence: high` and consistent evidence across multiple quality runs are candidates for promotion:
+
+- **Convention → Accepted Pattern**: Promote to `tech-stack.md ## Accepted Patterns` for technology-level decisions
+- **Convention → Hard Guardrail**: Promote to Hard Guardrails above if the team wants enforcement
+- **Anti-Pattern → Hard Guardrail**: Promote to Hard Guardrails above for mandatory enforcement
+
+Run `draft learn promote` to review candidates.
 
 </core-file>
 
@@ -10402,7 +11007,8 @@ interface {ServiceName} {
 ## Draft Integration
 
 - See `draft/tech-stack.md` for accepted patterns and technology decisions
-- See `draft/workflow.md` for TDD preferences and guardrails
+- See `draft/workflow.md` for TDD preferences and commit conventions
+- See `draft/guardrails.md` for hard guardrails, learned conventions, and learned anti-patterns
 - See `draft/product.md` for product context and guidelines
 
 </core-file>
@@ -11740,29 +12346,7 @@ If task exceeds 5 iterations:
 
 ## Guardrails
 
-<!-- Hard constraints that must never be violated -->
-
-### Git & Version Control
-- [ ] No direct commits to main/master
-- [ ] No force push to shared branches
-- [ ] PR required for all changes
-
-### Code Quality
-- [ ] No console.log/print statements in production code
-- [ ] No commented-out code blocks
-- [ ] No TODO comments without linked issue
-
-### Security
-- [ ] No secrets/credentials in code
-- [ ] No disabled security checks without documented exception
-- [ ] Dependencies must pass security audit
-
-### Testing
-- [ ] Tests required before merge
-- [ ] No skipped tests without documented reason
-- [ ] Coverage must not decrease
-
-> Check the guardrails that apply to this project. Unchecked items are not enforced. Commands like bughunt, deep-review, and review will flag violations of checked guardrails.
+> **See `draft/guardrails.md`** — Hard guardrails, learned conventions, and learned anti-patterns are managed in the dedicated guardrails file. Run `draft learn` to discover patterns and update guardrails.
 
 </core-file>
 
@@ -13376,7 +13960,7 @@ Once you find the immediate cause, ask "why" to find the root:
    - Full test suite passes
    - Original reproduction steps no longer trigger the bug
    - No behavior changes outside the blast radius
-   - Follow commit conventions and guardrails from `draft/workflow.md`
+   - Follow commit conventions from `draft/workflow.md` and guardrails from `draft/guardrails.md`
 4. **Write RCA summary** — Concise, factual, blameless:
 
 ```markdown

@@ -963,3 +963,4 @@ Bugs that cannot have automated regression tests (config issues, documentation, 
 - **Validate before reporting** — If tests were written, validate syntax/compilation before finalizing; include validation status in the report
 - **Respect project conventions** — Match existing test directory structure, naming patterns, import conventions, and framework idioms
 - **Use native frameworks** — pytest for Python, `go test` for Go, GTest for C++, Jest/Vitest for JS/TS, `cargo test` for Rust, JUnit for Java — never force a foreign test framework
+- **Learn from findings** — After report generation, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with newly discovered conventions and anti-patterns

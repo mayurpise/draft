@@ -137,3 +137,9 @@ Format findings as actionable tasks:
 - Do not refactor code yourself.
 - Flag ambiguous fixes for human review instead of guessing.
 - If the module is too large, decompose it and review sub-modules sequentially.
+
+---
+
+## Pattern Learning
+
+After generating the report, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with patterns discovered during this module audit. Module-level reviews often reveal architecture and concurrency conventions that are valuable for future analysis.

@@ -171,26 +171,4 @@ If task exceeds 5 iterations:
 
 ## Guardrails
 
-<!-- Hard constraints that must never be violated -->
-
-### Git & Version Control
-- [ ] No direct commits to main/master
-- [ ] No force push to shared branches
-- [ ] PR required for all changes
-
-### Code Quality
-- [ ] No console.log/print statements in production code
-- [ ] No commented-out code blocks
-- [ ] No TODO comments without linked issue
-
-### Security
-- [ ] No secrets/credentials in code
-- [ ] No disabled security checks without documented exception
-- [ ] Dependencies must pass security audit
-
-### Testing
-- [ ] Tests required before merge
-- [ ] No skipped tests without documented reason
-- [ ] Coverage must not decrease
-
-> Check the guardrails that apply to this project. Unchecked items are not enforced. Commands like bughunt, deep-review, and review will flag violations of checked guardrails.
+> **See `draft/guardrails.md`** — Hard guardrails, learned conventions, and learned anti-patterns are managed in the dedicated guardrails file. Run `/draft:learn` to discover patterns and update guardrails.

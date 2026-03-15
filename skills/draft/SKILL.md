@@ -36,6 +36,7 @@ Draft is a methodology for structured software development: **Context → Spec &
 | `/draft:review` | Code review orchestrator |
 | `/draft:adr` | Architecture Decision Records |
 | `/draft:change` | Handle mid-track requirement changes |
+| `/draft:learn` | Discover coding patterns and update guardrails |
 | `/draft:jira-preview` | Generate Jira export for review |
 | `/draft:jira-create` | Push issues to Jira via MCP |
 
@@ -85,6 +86,7 @@ When `draft/` exists, these files guide development:
 - `draft/product.md` - Product vision and goals
 - `draft/tech-stack.md` - Technical constraints
 - `draft/workflow.md` - TDD and commit preferences
+- `draft/guardrails.md` - Hard guardrails, learned conventions, learned anti-patterns
 - `draft/tracks.md` - Active work items
 
 ## Status Markers
@@ -117,6 +119,7 @@ You can also use natural language:
 | "review code", "review track", "check quality" | `/draft:review` |
 | "document decision", "create ADR" | `/draft:adr` |
 | "requirements changed", "scope changed", "update the spec" | `/draft:change` |
+| "learn patterns", "update guardrails", "discover conventions" | `/draft:learn` |
 | "preview jira", "export to jira" | `/draft:jira-preview` |
 | "create jira issues" | `/draft:jira-create` |
 

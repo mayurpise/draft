@@ -1858,6 +1858,14 @@ Ask about:
 - Commit style and frequency
 - Validation settings (auto-validate, blocking behavior)
 
+## Step 4.1: Guardrails Configuration
+
+Create `draft/guardrails.md` using the template from `core/templates/guardrails.md`.
+
+**Include the Standard File Metadata header at the top of the file.**
+
+Ask which hard guardrails to enable (check items that apply to this project). The Learned Conventions and Learned Anti-Patterns sections start empty — they are populated by `/draft:learn` and quality commands over time.
+
 ## Step 5: Initialize Tracks
 
 Create `draft/tracks.md` with metadata header:
@@ -1908,6 +1916,7 @@ Created:
 - draft/product.md
 - draft/tech-stack.md
 - draft/workflow.md
+- draft/guardrails.md
 - draft/tracks.md
 
 Next steps:
@@ -1924,6 +1933,7 @@ Created:
 - draft/product.md
 - draft/tech-stack.md
 - draft/workflow.md
+- draft/guardrails.md
 - draft/tracks.md
 
 Next steps:

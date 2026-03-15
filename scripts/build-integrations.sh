@@ -38,13 +38,13 @@ SKILL_ORDER=(
     bughunt
     review
     deep-review
+    learn
     adr
     status
     revert
     change
     jira-preview
     jira-create
-    epic-status
 )
 
 get_skill_header() {
@@ -60,13 +60,13 @@ get_skill_header() {
         bughunt)      echo "Bug Hunt Command" ;;
         review)       echo "Review Command" ;;
         deep-review)  echo "Deep Review Command" ;;
+        learn)        echo "Learn Command" ;;
         adr)          echo "ADR Command" ;;
         status)       echo "Status Command" ;;
         revert)       echo "Revert Command" ;;
         change)       echo "Change Command" ;;
         jira-preview) echo "Jira Preview Command" ;;
         jira-create)  echo "Jira Create Command" ;;
-        epic-status)  echo "Epic Status Command" ;;
         *)            echo "${skill^} Command" ;;
     esac
 }
@@ -86,6 +86,7 @@ get_trigger() {
         bughunt)      echo "\"hunt bugs\" or \"${prefix}draft bughunt [--track <id>]\"" ;;
         review)       echo "\"review code\" or \"${prefix}draft review [--track <id>] [--full]\"" ;;
         deep-review)  echo "\"deep review\" or \"${prefix}draft deep-review [module]\"" ;;
+        learn)        echo "\"learn patterns\" or \"${prefix}draft learn [promote|migrate|path]\"" ;;
         adr)          echo "\"document decision\" or \"${prefix}draft adr [title]\"" ;;
         status)       echo "\"status\" or \"${prefix}draft status\"" ;;
         revert)       echo "\"revert\" or \"${prefix}draft revert\"" ;;
@@ -168,7 +169,8 @@ transform_copilot_syntax() {
         -e 's|/draft:([a-z-]+)|draft \1|g' \
         -e 's|@draft\b|draft|g' \
         -e 's|`@draft`|`draft`|g' \
-        -e 's|`@draft |`draft |g'
+        -e 's|`@draft |`draft |g' \
+        -e 's#@((architect|debugger|planner|rca|reviewer)\b)#@workspace#g'
 }
 
 # ─────────────────────────────────────────────────────────
@@ -182,7 +184,12 @@ CORE_FILES=(
     # Methodology
     "methodology.md"
     "knowledge-base.md"
+    # Shared procedures
+    "shared/draft-context-loading.md"
+    "shared/git-report-metadata.md"
+    "shared/pattern-learning.md"
     # Templates
+    "templates/guardrails.md"
     "templates/intake-questions.md"
     "templates/ai-context.md"
     "templates/architecture.md"
@@ -283,18 +290,27 @@ When blocked (`[!]`), follow the four phases IN ORDER:
 
 **Anti-patterns:** "Let me try this...", changing multiple things at once, skipping reproduction, fixing without understanding. If after 3 hypothesis cycles no root cause found: document findings, list eliminations, ask for external input.
 
-### Two-Stage Review (Reviewer Agent)
-At phase boundaries, run BOTH stages in order:
+### Three-Stage Review (Reviewer Agent)
+At phase boundaries, run ALL three stages in order:
 
-**Stage 1: Spec Compliance** — Did we build what was specified?
+**Stage 1: Automated Validation** (REQUIRED) — Is the code structurally sound and secure?
+- Architecture conformance (no pattern violations, module boundaries respected)
+- Dead code detection (no unused exports, no unreachable paths)
+- Dependency cycle check (no circular imports)
+- Security scan (no hardcoded secrets, no injection risks)
+- Performance anti-patterns (no N+1 queries, no blocking I/O in async)
+
+**If Stage 1 FAILS:** Stop. List structural failures and return to implementation.
+
+**Stage 2: Spec Compliance** (only if Stage 1 passes) — Did we build what was specified?
 - All functional requirements implemented
 - All acceptance criteria met
 - No missing features, no scope creep
 - Edge cases and error scenarios addressed
 
-**If Stage 1 FAILS:** Stop. List gaps and return to implementation.
+**If Stage 2 FAILS:** Stop. List gaps and return to implementation.
 
-**Stage 2: Code Quality** (only if Stage 1 passes) — Is the code well-crafted?
+**Stage 3: Code Quality** (only if Stage 2 passes) — Is the code well-crafted?
 - Follows project patterns (tech-stack.md)
 - Appropriate error handling
 - Tests cover real logic (not implementation details)
@@ -413,6 +429,7 @@ COMMON_HEADER
     echo "| \`${command_prefix} bughunt [--track <id>]\` | Systematic bug discovery |"
     echo "| \`${command_prefix} review [--track <id>]\` | Three-stage code review |"
     echo "| \`${command_prefix} deep-review [module]\` | Exhaustive production-grade module audit |"
+    echo "| \`${command_prefix} learn [promote\\|migrate]\` | Discover coding patterns, update guardrails |"
     echo "| \`${command_prefix} adr [title]\` | Architecture Decision Records |"
     echo "| \`${command_prefix} status\` | Show progress overview |"
     echo "| \`${command_prefix} revert\` | Git-aware rollback |"
@@ -438,6 +455,7 @@ Recognize these natural language patterns:
 | "hunt bugs", "find bugs" | Run bug hunt |
 | "review code", "review track", "check quality" | Run review |
 | "deep review", "production audit", "module audit" | Run deep-review |
+| "learn patterns", "update guardrails", "discover conventions" | Run learn |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
 | "requirements changed", "scope changed", "update the spec" | Run change |
@@ -469,6 +487,12 @@ COMMON_HEADER2
 
     # Skill loop with parameterized trigger and transform functions
     for skill in "${SKILL_ORDER[@]}"; do
+        # Skip 'draft' skill — its content (commands table, core workflow,
+        # status markers) is already covered by the static COMMON_HEADER above.
+        if [[ "$skill" == "draft" ]]; then
+            continue
+        fi
+
         # Validate skill name format (security: prevent path traversal)
         if [[ ! "$skill" =~ ^[a-z][a-z0-9]*(-[a-z0-9]+)*$ ]]; then
             echo "ERROR: Invalid skill name '$skill' (must be kebab-case: start with letter, no leading/trailing hyphens)" >&2
@@ -562,8 +586,19 @@ verify_output() {
     local output_file="$2"
     local expect_at_draft="$3"  # "yes" or "no"
 
-    local line_count
-    line_count=$(wc -l < "$output_file")
+    local line_count old_syntax_count at_draft_count
+    # Single pass with awk to count lines and check patterns
+    read -r line_count old_syntax_count at_draft_count < <(awk '
+        {
+            total_lines++
+            if (/\/draft:/) old_count++
+            if (/@draft/) at_count++
+        }
+        END {
+            print total_lines+0, old_count+0, at_count+0
+        }
+    ' "$output_file")
+
     echo "  Lines: $line_count"
 
     # Count skills included
@@ -576,9 +611,6 @@ verify_output() {
     echo "  Skills: $skill_count/${#SKILL_ORDER[@]}"
 
     # Verify no /draft: references remain
-    local old_syntax_count
-    old_syntax_count=$(grep -c "/draft:" "$output_file" 2>/dev/null || true)
-    old_syntax_count=${old_syntax_count:-0}
     if [[ "$old_syntax_count" -gt 0 ]]; then
         echo "  WARNING: Found $old_syntax_count '/draft:' references (should be 0)"
         return 1
@@ -587,9 +619,6 @@ verify_output() {
     fi
 
     # Verify @draft presence based on integration type
-    local at_draft_count
-    at_draft_count=$(grep -c "@draft" "$output_file" 2>/dev/null || true)
-    at_draft_count=${at_draft_count:-0}
     if [[ "$expect_at_draft" == "yes" ]]; then
         echo "  Found $at_draft_count '@draft' references"
     else

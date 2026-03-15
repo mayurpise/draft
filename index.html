@@ -2385,6 +2385,31 @@
                     </div>
                 </div>
 
+                <!-- /draft:learn -->
+                <div class="doc-card">
+                    <div class="card-summary">
+                        <div class="icon">🔍</div>
+                        <div class="name">/draft:learn</div>
+                        <p class="purpose">Discover patterns, update guardrails</p>
+                        <div class="expand-indicator">▼</div>
+                    </div>
+                    <div class="card-details">
+                        <h4>What it does:</h4>
+                        <ul>
+                            <li>Scans codebase for recurring coding patterns (3+ occurrences)</li>
+                            <li>Learns <strong>conventions</strong> (skip in future analysis)</li>
+                            <li>Learns <strong>anti-patterns</strong> (always flag in future)</li>
+                            <li>Updates <code>draft/guardrails.md</code></li>
+                        </ul>
+                        <h4>Usage:</h4>
+                        <div class="usage-examples">
+                            <code>/draft:learn</code>
+                            <code>/draft:learn promote</code>
+                            <code>/draft:learn migrate</code>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- /draft:jira-preview -->
                 <div class="doc-card">
                     <div class="card-summary">
@@ -2481,36 +2506,7 @@
                     </div>
                 </div>
 
-                <!-- /draft:epic-status -->
-                <div class="doc-card">
-                    <div class="card-summary">
-                        <div class="icon">&#x1f4ca;</div>
-                        <div class="name">/draft:epic-status</div>
-                        <p class="purpose">Qualify a Jira Epic via MCP pipeline</p>
-                        <div class="expand-indicator">&#x25BC;</div>
-                    </div>
-                    <div class="card-details">
-                        <h4>What it does:</h4>
-                        <ol>
-                            <li>Collects epic stories, documents, and code changes via Jira + Code Review MCP</li>
-                            <li>Runs <code>/draft:deep-review</code>, <code>/draft:bughunt</code>, and <code>/draft:coverage</code></li>
-                            <li>Discovers codebase tests, computes Test Adequacy Score</li>
-                            <li>Generates framework-specific test suggestions (unit, regression, integration)</li>
-                            <li>Produces qualification report with 10-criterion verdict</li>
-                        </ol>
-                        <h4>Requirements:</h4>
-                        <ul>
-                            <li>Jira MCP server configured (required)</li>
-                            <li>Code Review MCP: Gerrit, GitHub, or GitLab (auto-detected)</li>
-                            <li>Draft context (<code>/draft:init</code> must be run first)</li>
-                        </ul>
-                        <h4>Usage:</h4>
-                        <div class="usage-examples">
-                            <code>/draft:epic-status ENG-446236</code>
-                            <code>/draft:epic-status PROJ-1234</code>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
 
@@ -2980,7 +2976,8 @@
 ├── <span class="code-file">tech-stack.md</span>       <span class="code-comment"># Technical choices, accepted patterns</span>
 ├── <span class="code-file">architecture.md</span>     <span class="code-comment"># Source of truth: 30-45 pages, Mermaid diagrams, code snippets</span>
 ├── <span class="code-file">.ai-context.md</span>      <span class="code-comment"># Derived: 200-400 lines, machine-optimized AI context</span>
-├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD, commit, validation, guardrails</span>
+├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD, commit, validation config</span>
+├── <span class="code-file">guardrails.md</span>       <span class="code-comment"># Hard guardrails, learned conventions, anti-patterns</span>
 ├── <span class="code-file">validation-report.md</span> <span class="code-comment"># Project-level quality checks (generated)</span>
 ├── <span class="code-file">jira.md</span>             <span class="code-comment"># Jira project config (optional)</span>
 ├── <span class="code-file">tracks.md</span>           <span class="code-comment"># Master track list</span>
@@ -3292,9 +3289,11 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Top-level tab switching
+            // Cache DOM elements
             const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
 
+            // Top-level tab switching
             tabButtons.forEach(button => {
                 button.addEventListener('click', function () {
                     const targetTab = this.getAttribute('data-tab');
@@ -3307,7 +3306,7 @@
                     this.classList.add('active');
                     this.setAttribute('aria-selected', 'true');
 
-                    document.querySelectorAll('.tab-content').forEach(content => {
+                    tabContents.forEach(content => {
                         content.classList.remove('active');
                     });
 

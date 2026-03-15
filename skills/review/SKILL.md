@@ -119,9 +119,10 @@ Once track is resolved:
    - Load `draft/tracks/<id>/plan.md`
    - Extract commit SHAs from completed `[x]` task lines only. Match pattern: 7+ character hex strings in parentheses, regex `\(([a-f0-9]{7,})\)`. Example: `- [x] **Task 1.1:** Description (7a7dc85)`. Collect SHAs in order of appearance; deduplicate keeping first occurrence.
    - Determine commit range:
-     - First commit: `git rev-parse <first_SHA>^` (parent of first)
+     - First commit parent: run `git rev-parse <first_SHA>^ 2>/dev/null`
+     - If the parent exists: use `<first_SHA>^..<last_SHA>` as the range
+     - If the parent does NOT exist (first commit in the repo — `git rev-parse` fails): use the empty tree SHA `4b825dc642cb6eb9a060e54bf8d69288fbee4904` as the range start, i.e., `4b825dc642cb6eb9a060e54bf8d69288fbee4904..<last_SHA>`. Alternatively, for single-commit ranges, use `git diff-tree --root -p <first_SHA>` to obtain the diff.
      - Last commit: `<last_SHA>`
-     - Range: `<first_SHA>^..<last_SHA>`
 
 4. **Check for incomplete work:**
    - Parse plan.md task statuses
@@ -169,12 +170,7 @@ Once track is resolved:
 For project-level reviews (no track context):
 
 1. **Load Draft context (if available):**
-   - Read `draft/.ai-context.md` (system architecture, critical invariants, security architecture). Falls back to `draft/architecture.md` for legacy projects.
-   - Read `draft/tech-stack.md` (technical constraints, **Accepted Patterns**)
-   - Read `draft/workflow.md` (**Guardrails** section)
-
-   **Honor Accepted Patterns** - Don't flag patterns documented in `tech-stack.md` `## Accepted Patterns`
-   **Enforce Guardrails** - Flag violations of checked guardrails in `workflow.md` `## Guardrails`
+   Follow the base procedure in `core/shared/draft-context-loading.md`. Honor Accepted Patterns and enforce Guardrails as defined there.
 
 2. **Note limitations:**
    - No spec.md → Skip Stage 1 (spec compliance)
@@ -358,7 +354,7 @@ If `with-bughunt` or `full` modifier is set, integrate bug hunting.
 /draft:bughunt
 ```
 
-Parse output from `draft/tracks/<id>/bughunt-report.md` or `draft/bughunt-report.md`
+Parse output from `draft/tracks/<id>/bughunt-report-latest.md` or `draft/bughunt-report-latest.md`
 
 ### 5.2: Aggregate Findings
 
@@ -378,48 +374,23 @@ Merge findings from:
 
 Create unified review report in markdown format.
 
-**MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
-
-```bash
-git branch --show-current                    # LOCAL_BRANCH
-git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
-git rev-parse HEAD                           # FULL_SHA
-git rev-parse --short HEAD                   # SHORT_SHA
-git log -1 --format=%ci HEAD                 # COMMIT_DATE
-git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
-git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
-```
+**MANDATORY: Include YAML frontmatter with git metadata.** Follow the procedure in `core/shared/git-report-metadata.md` to gather git info, generate frontmatter, and include the report header table. Use `generated_by: "draft:review"`.
 
 ### Track-Level Report
 
-**Path:** `draft/tracks/<id>/review-report.md`
+**Path:** `draft/tracks/<id>/review-report-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`)
+
+After writing the timestamped report, create a symlink pointing to it:
+```bash
+ln -sf review-report-<timestamp>.md draft/tracks/<id>/review-report-latest.md
+```
 
 ```markdown
----
-project: "{PROJECT_NAME}"
-module: "root"
-track_id: "<id>"
-generated_by: "draft:review"
-generated_at: "{ISO_TIMESTAMP}"
-git:
-  branch: "{LOCAL_BRANCH}"
-  remote: "{REMOTE/BRANCH}"
-  commit: "{FULL_SHA}"
-  commit_short: "{SHORT_SHA}"
-  commit_date: "{COMMIT_DATE}"
-  commit_message: "{COMMIT_MESSAGE}"
-  dirty: {true|false}
-synced_to_commit: "{FULL_SHA}"
----
+[YAML frontmatter — see core/shared/git-report-metadata.md, use track_id: "<id>"]
 
 # Review Report: <Track Title>
 
-| Field | Value |
-|-------|-------|
-| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
-| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
-| **Generated** | {ISO_TIMESTAMP} |
-| **Synced To** | `{FULL_SHA}` |
+[Report header table — see core/shared/git-report-metadata.md]
 
 **Track ID:** <id>
 **Reviewer:** [Current model name and context window from runtime]
@@ -515,7 +486,12 @@ synced_to_commit: "{FULL_SHA}"
 
 ### Project-Level Report
 
-**Path:** `draft/review-report.md` (all project-level scopes write to this same path)
+**Path:** `draft/review-report-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`)
+
+After writing the timestamped report, create a symlink pointing to it:
+```bash
+ln -sf review-report-<timestamp>.md draft/review-report-latest.md
+```
 
 Similar format but:
 - No Stage 2 section (no spec compliance)
@@ -523,14 +499,12 @@ Similar format but:
   - `project`: "Scope: Uncommitted changes"
   - `files <pattern>`: "Scope: Files matching '<pattern>'"
   - `commits <range>`: "Scope: Commits <range>"
-- Each run overwrites the previous report; include "Previous review: <timestamp>" if prior report exists
+- Each run creates a new timestamped file; the `-latest.md` symlink always points to the most recent report
+- Include "Previous review: <timestamp>" if a prior `-latest.md` symlink exists (read its target to determine the previous timestamp)
 
-### Report Overwrite Behavior
+### Report History
 
-If report already exists:
-1. Read existing report timestamp
-2. Overwrite file
-3. Include note: "Previous review: <date>"
+Previous timestamped reports are preserved. The `-latest.md` symlink always points to the most recent report.
 
 ---
 
@@ -573,7 +547,7 @@ Display summary to user with actionable next steps.
 ```
 ✅ Review complete: <track_id>
 
-Report: draft/tracks/<id>/review-report.md
+Report: draft/tracks/<id>/review-report-<timestamp>.md (symlink: review-report-latest.md)
 
 Summary:
 - Stage 1 (Automated Validation): PASS
@@ -599,7 +573,7 @@ Next: Address findings and run /draft:review again, or mark track complete.
 ```
 ❌ Review failed: <track_id>
 
-Report: draft/tracks/<id>/review-report.md
+Report: draft/tracks/<id>/review-report-<timestamp>.md (symlink: review-report-latest.md)
 
 Stage 1 (Automated Validation): PASS
 Stage 2 (Spec Compliance): FAIL
@@ -692,6 +666,12 @@ Options:
 | Ignore incomplete tasks | Warn user, suggest completing work first |
 | Auto-fix issues found | Report only, let developer decide |
 | Batch multiple tracks | Review one track at a time |
+
+---
+
+## Pattern Learning
+
+After generating the review report, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with patterns discovered during this review.
 
 ---
 

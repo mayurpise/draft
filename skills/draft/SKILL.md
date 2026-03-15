@@ -36,9 +36,10 @@ Draft is a methodology for structured software development: **Context → Spec &
 | `/draft:review` | Code review orchestrator |
 | `/draft:adr` | Architecture Decision Records |
 | `/draft:change` | Handle mid-track requirement changes |
+| `/draft:learn` | Discover coding patterns and update guardrails |
 | `/draft:jira-preview` | Generate Jira export for review |
 | `/draft:jira-create` | Push issues to Jira via MCP |
-| `/draft:epic-status` | Qualify a Jira Epic (MCP pipeline: stories, code changes, tests, gap analysis) |
+
 
 ## Quick Start
 
@@ -54,7 +55,28 @@ Every feature follows this lifecycle:
 2. **New Track** - Create specification and plan
 3. **Implement** - Execute tasks with TDD workflow
 4. **Verify** - Confirm acceptance criteria met
-5. **Quality** - Run `/draft:review` for code review, `/draft:bughunt` for bug hunting, `/draft:deep-review` for module audits
+5. **Quality** - Run quality commands (see guide below)
+
+## Quality Commands — When to Use Which
+
+Three commands form an **audit spectrum** from narrow to broad to deep:
+
+| Command | Scope | Question It Answers | Output |
+|---------|-------|-------------------|--------|
+| `/draft:review` | Change-scoped (track, diff, commits) | "Does this change meet spec and quality gates?" | Three-stage review report with verdict |
+| `/draft:bughunt` | Codebase-scoped (repo, paths, track) | "What bugs exist in this code?" | Severity-ranked bug report + regression tests |
+| `/draft:deep-review` | Module-scoped (single service/component) | "Is this module production-ready?" | ACID compliance audit + implementation spec |
+
+### Decision Guide
+
+- **Just finished a track?** → `/draft:review` — validates against spec, checks quality gates
+- **Suspicious of bugs across the codebase?** → `/draft:bughunt` — 11-dimension sweep with verification protocol
+- **Shipping a module to production?** → `/draft:deep-review` — ACID compliance, resilience, observability audit
+- **Want everything?** → `/draft:review full` (includes bughunt), then `/draft:deep-review` for critical modules
+
+### Relationship to Built-in Bug Hunt Agents
+
+Some AI tools provide built-in bug hunt agents (e.g., Claude Code's `bughunt` agent). These are **complementary** to `/draft:bughunt` — the built-in agents offer fast parallel sweeps with auto-fix, while Draft's bughunt adds context-aware analysis using your architecture, tech-stack, and product context for better false-positive elimination. For maximum coverage, run both.
 
 ## Context Files
 
@@ -64,6 +86,7 @@ When `draft/` exists, these files guide development:
 - `draft/product.md` - Product vision and goals
 - `draft/tech-stack.md` - Technical constraints
 - `draft/workflow.md` - TDD and commit preferences
+- `draft/guardrails.md` - Hard guardrails, learned conventions, learned anti-patterns
 - `draft/tracks.md` - Active work items
 
 ## Status Markers
@@ -96,9 +119,10 @@ You can also use natural language:
 | "review code", "review track", "check quality" | `/draft:review` |
 | "document decision", "create ADR" | `/draft:adr` |
 | "requirements changed", "scope changed", "update the spec" | `/draft:change` |
+| "learn patterns", "update guardrails", "discover conventions" | `/draft:learn` |
 | "preview jira", "export to jira" | `/draft:jira-preview` |
 | "create jira issues" | `/draft:jira-create` |
-| "qualify epic", "epic status", "epic qualification" | `/draft:epic-status` |
+
 
 ## Need Help?
 

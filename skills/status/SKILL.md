@@ -36,6 +36,10 @@ Display a comprehensive overview of project progress.
 
 ## Output Format
 
+Check each track's `metadata.json` `type` field to determine display format.
+
+### Standard (multi-phase) tracks
+
 ```
 ═══════════════════════════════════════════════════════════
                       DRAFT STATUS
@@ -60,6 +64,29 @@ ACTIVE TRACKS
   Phase:  0/2
   Tasks:  0/6 complete
 
+```
+
+### Quick-mode tracks (metadata.json `type` is `"quick"`)
+
+Quick-mode tracks use flat task numbering (`Task 1:`, `Task 2:`) without phases. Display them with a flat task list instead of the phase-grouped tree:
+
+```
+[track-id-3] Quick Feature
+  Status: [~] In Progress
+  Type:   quick
+  Tasks:  2/5 complete
+  ├─ [x] Task 1: Description
+  ├─ [x] Task 2: Description
+  ├─ [~] Task 3: Description  ← CURRENT
+  ├─ [ ] Task 4: Description
+  └─ [ ] Task 5: Description
+```
+
+Do **not** show `Phase: X/Y` for quick-mode tracks — they have no phases.
+
+### Remaining sections (shared by both formats)
+
+```
 MODULES (if architecture.md exists)
 ─────────────────────────────────────────────────────────
 Module A         [x] Complete  (Coverage: 96.2%)

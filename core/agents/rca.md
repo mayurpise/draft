@@ -161,7 +161,7 @@ Once you find the immediate cause, ask "why" to find the root:
    - Full test suite passes
    - Original reproduction steps no longer trigger the bug
    - No behavior changes outside the blast radius
-   - Follow commit conventions and guardrails from `draft/workflow.md`
+   - Follow commit conventions from `draft/workflow.md` and guardrails from `draft/guardrails.md`
 4. **Write RCA summary** — Concise, factual, blameless:
 
 ```markdown

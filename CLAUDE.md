@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides slash commands for structured software development through specifications and plans before implementation. Commands: `/draft:init`, `/draft:index`, `/draft:new-track`, `/draft:implement`, `/draft:status`, `/draft:revert`, `/draft:decompose`, `/draft:coverage`, `/draft:review`, `/draft:deep-review`, `/draft:bughunt`, `/draft:adr`, `/draft:change`, `/draft:jira-preview`, `/draft:jira-create`, `/draft:epic-status`. Run `/draft` for overview.
+Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides slash commands for structured software development through specifications and plans before implementation. Commands: `/draft:init`, `/draft:index`, `/draft:new-track`, `/draft:implement`, `/draft:status`, `/draft:revert`, `/draft:decompose`, `/draft:coverage`, `/draft:review`, `/draft:deep-review`, `/draft:bughunt`, `/draft:learn`, `/draft:adr`, `/draft:change`, `/draft:jira-preview`, `/draft:jira-create`. Run `/draft` for overview.
 
 ## Build Commands
 
@@ -34,6 +34,7 @@ skills/                     # Slash command implementations
   └── <command>/SKILL.md    # Frontmatter (name, description) + execution body
 core/
   ├── methodology.md        # Master methodology (update first)
+  ├── shared/               # Shared procedures (context loading, git metadata, pattern learning)
   ├── templates/            # Templates used by /draft:init
   └── agents/               # Specialized agent behaviors (architect, debugger, planner, rca, reviewer)
 integrations/copilot/.github/
@@ -49,12 +50,13 @@ integrations/gemini/
 name: skill-name
 description: Brief description
 ---
+
 # Skill Title
 
 Execution instructions below...
 ```
 
-The frontmatter configures the command; the body contains step-by-step instructions. The body **must** start with a `# Title` heading followed by a blank line — the build script skips the first 3 lines of the body (via `tail -n +4`) when inlining skills into integration files.
+The frontmatter configures the command; the body contains step-by-step instructions. After the closing `---` of frontmatter, the body **must** follow this exact format: (1) a blank line, (2) `# Title` heading, (3) a blank line, (4) content. The build script validates this structure and skips the first 3 lines of the body (via `tail -n +4`) when inlining skills into integration files.
 
 ## Maintaining the Plugin
 
@@ -81,7 +83,8 @@ When users use Draft, it creates a `draft/` directory in their project:
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
 | `architecture.md` | **Source of truth.** 30-45 page human-readable engineering reference with 25 sections + appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ sections covering architecture, invariants, interfaces, data flows, concurrency, error handling, catalogs, cookbooks, testing, glossary. Consumed by all Draft commands and external AI tools. Auto-refreshed on mutations. |
-| `workflow.md` | TDD preferences, commit strategy, validation config, guardrails |
+| `workflow.md` | TDD preferences, commit strategy, validation config |
+| `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns |
 | `tracks.md` | Master list of all tracks |
 | `tracks/<id>/` | Individual tracks with `spec.md`, `plan.md`, `metadata.json`, `validation-report.md` |
 | `validation-report.md` | Project-level validation results (architecture, security, performance) |
@@ -90,7 +93,7 @@ When users use Draft, it creates a `draft/` directory in their project:
 
 - **`product.md` `## Guidelines`** - UX standards, writing style, branding (optional)
 - **`tech-stack.md` `## Accepted Patterns`** - Intentional design decisions that bughunt/review/deep-review should honor
-- **`workflow.md` `## Guardrails`** - Hard constraints enforced by validation commands
+- **`guardrails.md`** - Hard guardrails (human-defined constraints), learned conventions (auto-discovered, skip in analysis), learned anti-patterns (auto-discovered, always flag)
 
 ### Status Markers
 

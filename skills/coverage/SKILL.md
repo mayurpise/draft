@@ -142,7 +142,7 @@ After developer approves:
    - Uncovered: defensive null checks in jwt.ts (justified)
    ```
 
-2. **Update architecture context** — update `draft/architecture.md` (or track-level `architecture.md`) with coverage data, then run the Condensation Subroutine (defined in `/draft:init`) to regenerate `draft/.ai-context.md`:
+2. **Update architecture context** — update the project-level `draft/architecture.md` with coverage data (not a track-level architecture file), then run the Condensation Subroutine (defined in `/draft:init`) to regenerate `draft/.ai-context.md`. The Condensation Subroutine only applies to the project-level `draft/architecture.md` → `draft/.ai-context.md` pipeline:
    ```markdown
    - **Status:** [x] Complete (Coverage: 96.2%)
    ```
@@ -158,7 +158,14 @@ After developer approves:
    }
    ```
 
-4. **Write detailed coverage report** to `draft/tracks/<id>/coverage-report.md` with YAML frontmatter (include `project`, `track_id`, `generated_by: "draft:coverage"`, `generated_at`, `git` metadata matching other skills) and timestamped entries for historical tracking.
+4. **Write detailed coverage report** to `draft/tracks/<id>/coverage-report-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`) with YAML frontmatter (include `project`, `track_id`, `generated_by: "draft:coverage"`, `generated_at`, `git` metadata matching other skills) and timestamped entries for historical tracking.
+
+   After writing the timestamped report, create a symlink pointing to it:
+   ```bash
+   ln -sf coverage-report-<timestamp>.md draft/tracks/<id>/coverage-report-latest.md
+   ```
+
+   Previous timestamped reports are preserved. The `-latest.md` symlink always points to the most recent report.
 
 ## Completion
 
@@ -170,6 +177,8 @@ Overall: [percentage]% (target: [target]%)
 Status: [PASS / BELOW TARGET]
 Files analyzed: [count]
 Gaps documented: [count testable] testable, [count justified] justified
+
+Report: draft/tracks/<id>/coverage-report-<timestamp>.md (symlink: coverage-report-latest.md)
 
 Results recorded in:
 - plan.md (phase notes)

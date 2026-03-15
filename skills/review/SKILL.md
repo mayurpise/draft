@@ -119,9 +119,10 @@ Once track is resolved:
    - Load `draft/tracks/<id>/plan.md`
    - Extract commit SHAs from completed `[x]` task lines only. Match pattern: 7+ character hex strings in parentheses, regex `\(([a-f0-9]{7,})\)`. Example: `- [x] **Task 1.1:** Description (7a7dc85)`. Collect SHAs in order of appearance; deduplicate keeping first occurrence.
    - Determine commit range:
-     - First commit: `git rev-parse <first_SHA>^` (parent of first)
+     - First commit parent: run `git rev-parse <first_SHA>^ 2>/dev/null`
+     - If the parent exists: use `<first_SHA>^..<last_SHA>` as the range
+     - If the parent does NOT exist (first commit in the repo — `git rev-parse` fails): use the empty tree SHA `4b825dc642cb6eb9a060e54bf8d69288fbee4904` as the range start, i.e., `4b825dc642cb6eb9a060e54bf8d69288fbee4904..<last_SHA>`. Alternatively, for single-commit ranges, use `git diff-tree --root -p <first_SHA>` to obtain the diff.
      - Last commit: `<last_SHA>`
-     - Range: `<first_SHA>^..<last_SHA>`
 
 4. **Check for incomplete work:**
    - Parse plan.md task statuses
@@ -358,7 +359,7 @@ If `with-bughunt` or `full` modifier is set, integrate bug hunting.
 /draft:bughunt
 ```
 
-Parse output from `draft/tracks/<id>/bughunt-report.md` or `draft/bughunt-report.md`
+Parse output from `draft/tracks/<id>/bughunt-report-latest.md` or `draft/bughunt-report-latest.md`
 
 ### 5.2: Aggregate Findings
 
@@ -392,7 +393,12 @@ git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
 
 ### Track-Level Report
 
-**Path:** `draft/tracks/<id>/review-report.md`
+**Path:** `draft/tracks/<id>/review-report-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`)
+
+After writing the timestamped report, create a symlink pointing to it:
+```bash
+ln -sf review-report-<timestamp>.md draft/tracks/<id>/review-report-latest.md
+```
 
 ```markdown
 ---
@@ -515,7 +521,12 @@ synced_to_commit: "{FULL_SHA}"
 
 ### Project-Level Report
 
-**Path:** `draft/review-report.md` (all project-level scopes write to this same path)
+**Path:** `draft/review-report-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`)
+
+After writing the timestamped report, create a symlink pointing to it:
+```bash
+ln -sf review-report-<timestamp>.md draft/review-report-latest.md
+```
 
 Similar format but:
 - No Stage 2 section (no spec compliance)
@@ -523,14 +534,12 @@ Similar format but:
   - `project`: "Scope: Uncommitted changes"
   - `files <pattern>`: "Scope: Files matching '<pattern>'"
   - `commits <range>`: "Scope: Commits <range>"
-- Each run overwrites the previous report; include "Previous review: <timestamp>" if prior report exists
+- Each run creates a new timestamped file; the `-latest.md` symlink always points to the most recent report
+- Include "Previous review: <timestamp>" if a prior `-latest.md` symlink exists (read its target to determine the previous timestamp)
 
-### Report Overwrite Behavior
+### Report History
 
-If report already exists:
-1. Read existing report timestamp
-2. Overwrite file
-3. Include note: "Previous review: <date>"
+Previous timestamped reports are preserved. The `-latest.md` symlink always points to the most recent report.
 
 ---
 
@@ -573,7 +582,7 @@ Display summary to user with actionable next steps.
 ```
 ✅ Review complete: <track_id>
 
-Report: draft/tracks/<id>/review-report.md
+Report: draft/tracks/<id>/review-report-<timestamp>.md (symlink: review-report-latest.md)
 
 Summary:
 - Stage 1 (Automated Validation): PASS
@@ -599,7 +608,7 @@ Next: Address findings and run /draft:review again, or mark track complete.
 ```
 ❌ Review failed: <track_id>
 
-Report: draft/tracks/<id>/review-report.md
+Report: draft/tracks/<id>/review-report-<timestamp>.md (symlink: review-report-latest.md)
 
 Stage 1 (Automated Validation): PASS
 Stage 2 (Spec Compliance): FAIL

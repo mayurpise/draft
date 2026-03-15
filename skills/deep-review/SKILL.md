@@ -48,7 +48,7 @@ If `draft/` does not exist: **STOP** — "No Draft context found. Run `/draft:in
 ## Review Phases
 
 ### Phase 1: Context & Structural Analysis
-- Read all Draft context files (e.g. `draft/.ai-context.md`, `draft/architecture.md`, `draft/tech-stack.md`) to understand intended boundaries and critical invariants.
+- Read all Draft context files (e.g. `draft/.ai-context.md`, `draft/architecture.md` (if exists), `draft/tech-stack.md`) to understand intended boundaries and critical invariants.
 - Map the module's full dependency graph (imports, injected services, external calls)
 - Trace the complete lifecycle: initialization → processing → persistence → cleanup
 - Identify all entry points and exit paths

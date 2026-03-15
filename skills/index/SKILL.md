@@ -180,7 +180,7 @@ For each target directory:
    - Report will be generated at `<target-dir>/draft/bughunt-report.md`
    - Capture exit status (success/failure)
 
-5. **Record results:**
+4. **Record results:**
    - Directory path
    - Total bugs found (by severity)
    - Report location
@@ -419,7 +419,7 @@ For each service S, iterate all other services' `dependencies` arrays. If S appe
 
 ### 7.1 Generate `draft/service-index.md`
 
-Use template from `core/templates/service-index.md`:
+Use the following inline template:
 
 ```markdown
 # Service Index

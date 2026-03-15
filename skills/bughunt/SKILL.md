@@ -808,8 +808,19 @@ Severity levels:
 ## Report Generation
 
 Generate report at:
-- **Project-level:** `draft/bughunt-report.md`
-- **Track-level:** `draft/tracks/<track-id>/bughunt-report.md` (if analyzing specific track)
+- **Project-level:** `draft/bughunt-report-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`)
+- **Track-level:** `draft/tracks/<track-id>/bughunt-report-<timestamp>.md` (if analyzing specific track)
+
+After writing the timestamped report, create a symlink pointing to it:
+```bash
+# Project-level
+ln -sf bughunt-report-<timestamp>.md draft/bughunt-report-latest.md
+
+# Track-level
+ln -sf bughunt-report-<timestamp>.md draft/tracks/<track-id>/bughunt-report-latest.md
+```
+
+Previous timestamped reports are preserved. The `-latest.md` symlink always points to the most recent report.
 
 **MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
 

@@ -1,17 +1,17 @@
 ---
 name: jira-create
-description: Create Jira issues from jira-export.md via MCP. Auto-generates export if missing.
+description: Create Jira issues from jira-export-latest.md via MCP. Auto-generates export if missing.
 ---
 
 # Create Jira Issues from Export
 
-Create Jira epic, stories, and sub-tasks from `jira-export.md` using MCP-Jira. If no export file exists, auto-generates one first.
+Create Jira epic, stories, and sub-tasks from `jira-export-latest.md` using MCP-Jira. If no export file exists, auto-generates one first.
 
 ## Red Flags - STOP if you're:
 
-- Creating Jira issues without reviewing `jira-export.md` first (run `/draft:jira-preview`)
+- Creating Jira issues without reviewing `jira-export-latest.md` first (run `/draft:jira-preview`)
 - Proceeding when MCP-Jira is not configured
-- Creating duplicate issues (check if jira-export.md already has Jira keys)
+- Creating duplicate issues (check if jira-export-latest.md already has Jira keys)
 - Not verifying the target Jira project before creation
 - Skipping the export file update after issue creation
 
@@ -36,19 +36,19 @@ Create Jira epic, stories, and sub-tasks from `jira-export.md` using MCP-Jira. I
    ```
 2. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)
 3. If track ID provided as argument, use that instead
-4. Check for `draft/tracks/<track_id>/jira-export.md`
+4. Check for `draft/tracks/<track_id>/jira-export-latest.md`
 
 If no track found:
 - Tell user: "No track found. Run `/draft:new-track` to create one, or specify track ID."
 
 ## Step 2: Ensure Export Exists
 
-**If `jira-export.md` exists:**
-- Read and parse the export file
+**If `jira-export-latest.md` exists:**
+- Read and parse the export file (follows symlink to timestamped file)
 - Proceed to Step 3
 
-**If `jira-export.md` missing:**
-- Inform user: "No jira-export.md found. Generating preview first..."
+**If `jira-export-latest.md` missing:**
+- Inform user: "No jira-export-latest.md found. Generating preview first..."
 - Execute `/draft:jira-preview` logic to generate it
 - Proceed to Step 3
 
@@ -65,13 +65,13 @@ Attempt to detect MCP-Jira tools:
    2. Run `/draft:jira-create` again
 
    Or manually import from:
-     draft/tracks/<id>/jira-export.md
+     draft/tracks/<id>/jira-export-latest.md
    ```
    - Stop execution
 
 ## Step 4: Parse Export File
 
-Extract from `jira-export.md`:
+Extract from `jira-export-latest.md`:
 
 ### Epic
 - Summary (from `**Summary:**` line)
@@ -96,7 +96,21 @@ If export contains `## Quality Reports` section:
 - Parse bughunt bug issues with all sections (location, confidence, code evidence, data flow trace, issue, impact, verification done, why not a false positive, fix, regression test)
 - Extract all fields for each finding to populate Jira issue descriptions
 
-## Step 4b: Validate Project Key
+## Step 4b: Resolve Project Key
+
+Read `draft/workflow.md` and look for a `## Jira` section containing `Project Key: <KEY>`.
+
+- **If found:** Use that key.
+- **If not found:** Prompt the user: "No Jira project key configured. Enter your Jira project key (e.g., PROJ):"
+  After the user provides the key, append the following to `draft/workflow.md`:
+  ```markdown
+  ## Jira
+
+  Project Key: <KEY>
+  ```
+  This persists the key for all future `/draft:jira-create` and `/draft:jira-preview` invocations.
+
+### Validate Project Key
 
 Before creating issues, attempt to fetch project metadata via MCP to verify the project key exists. Fail fast with a clear error if invalid:
 
@@ -111,7 +125,7 @@ If the project key is invalid or not found:
 
 ## Step 5: Create Issues via MCP
 
-**Incremental persistence:** After creating each issue, immediately update the corresponding entry in `jira-export.md` with the Jira key. This ensures re-runs can skip already-created items even if the process fails mid-way.
+**Incremental persistence:** After creating each issue, immediately update the corresponding entry in the export file (via `jira-export-latest.md` symlink) with the Jira key. This ensures re-runs can skip already-created items even if the process fails mid-way.
 
 **Note:** Some Jira configurations do not allow setting status during creation. If status setting fails, create in default status and log a warning.
 
@@ -155,7 +169,7 @@ MCP call: create_issue
 
 ### 5d. Create Bug Issues (from Bug Hunt Report)
 
-For **each bug** in the `## Bug Issues` section of jira-export.md, create a separate Bug issue:
+For **each bug** in the `## Bug Issues` section of jira-export-latest.md, create a separate Bug issue:
 
 ```
 MCP call: create_issue
@@ -171,7 +185,7 @@ MCP call: create_issue
 
   h3. Code Evidence
   {code}
-  [The actual problematic code snippet from bughunt-report.md]
+  [The actual problematic code snippet from bughunt-report-latest.md]
   {code}
 
   h3. Data Flow Trace
@@ -191,13 +205,13 @@ MCP call: create_issue
   - No upstream guards found
 
   h3. Why Not a False Positive
-  [Explicit reasoning from bughunt-report.md]
+  [Explicit reasoning from bughunt-report-latest.md]
 
   h3. Fix
   [Minimal code change or mitigation from report]
 
   h3. Regression Test
-  [Test case from bughunt-report.md, or "N/A" with reason]
+  [Test case from bughunt-report-latest.md, or "N/A" with reason]
 
   ---
   🤖 Generated with Draft (Bug Hunt)
@@ -218,11 +232,11 @@ MCP call: create_issue
 - Capture bug key (e.g., PROJ-131)
 - Report: "- Bug: PROJ-131 - [Critical] Correctness: Off-by-one error"
 
-**All bugs from bughunt-report.md get their own Bug issue.** They are linked to the Epic but separate from Stories (phases). This keeps implementation work (Stories/Sub-tasks) distinct from defect tracking (Bugs).
+**All bugs from bughunt-report-latest.md get their own Bug issue.** They are linked to the Epic but separate from Stories (phases). This keeps implementation work (Stories/Sub-tasks) distinct from defect tracking (Bugs).
 
 ## Step 6: Finalize Tracking
 
-`jira-export.md` has already been updated incrementally during Step 5. Now update `plan.md` with the Jira keys:
+The export file (via `jira-export-latest.md`) has already been updated incrementally during Step 5. Now update `plan.md` with the Jira keys:
 
 1. **Update plan.md:**
    Add Jira keys to phase headers and tasks:
@@ -233,7 +247,7 @@ MCP call: create_issue
    - [x] **Task 1.2:** Extract security utilities [PROJ-126]
    ```
 
-2. **Set jira-export.md status to Created:**
+2. **Set export file status to Created (in the timestamped file via jira-export-latest.md):**
    ```markdown
    **Status:** Created
    **Epic Key:** PROJ-123
@@ -267,7 +281,7 @@ Total: 1 epic, N stories, M sub-tasks, B bugs, P story points
 
 Updated:
 - plan.md (added issue keys to phases and tasks)
-- jira-export.md (marked as created with keys)
+- jira-export-latest.md (marked as created with keys)
 ```
 
 ## Error Handling
@@ -284,7 +298,7 @@ Partial creation:
 - Story 2: (skipped)
 
 Fix the issue and run `/draft:jira-create` again.
-Already-created issues will be detected by keys in jira-export.md.
+Already-created issues will be detected by keys in jira-export-latest.md.
 ```
 
 **If export has existing keys:**
@@ -294,8 +308,9 @@ Already-created issues will be detected by keys in jira-export.md.
 - Still create sub-tasks if story exists but sub-tasks don't have keys
 
 **If project not configured:**
-- Prompt user: "Which Jira project should issues be created in?"
-- Store in `draft/workflow.md` for future use
+- No `## Jira` section with `Project Key:` found in `draft/workflow.md`
+- Prompt user: "No Jira project key configured. Enter your Jira project key (e.g., PROJ):"
+- Save to `draft/workflow.md` under a `## Jira` section as `Project Key: <KEY>`
 
 **If plan.md phases don't match export:**
 - Warn: "Export has N stories but plan has M phases. Proceeding with export structure."

@@ -294,18 +294,27 @@ When blocked (`[!]`), follow the four phases IN ORDER:
 
 **Anti-patterns:** "Let me try this...", changing multiple things at once, skipping reproduction, fixing without understanding. If after 3 hypothesis cycles no root cause found: document findings, list eliminations, ask for external input.
 
-### Two-Stage Review (Reviewer Agent)
-At phase boundaries, run BOTH stages in order:
+### Three-Stage Review (Reviewer Agent)
+At phase boundaries, run ALL three stages in order:
 
-**Stage 1: Spec Compliance** — Did we build what was specified?
+**Stage 1: Automated Validation** (REQUIRED) — Is the code structurally sound and secure?
+- Architecture conformance (no pattern violations, module boundaries respected)
+- Dead code detection (no unused exports, no unreachable paths)
+- Dependency cycle check (no circular imports)
+- Security scan (no hardcoded secrets, no injection risks)
+- Performance anti-patterns (no N+1 queries, no blocking I/O in async)
+
+**If Stage 1 FAILS:** Stop. List structural failures and return to implementation.
+
+**Stage 2: Spec Compliance** (only if Stage 1 passes) — Did we build what was specified?
 - All functional requirements implemented
 - All acceptance criteria met
 - No missing features, no scope creep
 - Edge cases and error scenarios addressed
 
-**If Stage 1 FAILS:** Stop. List gaps and return to implementation.
+**If Stage 2 FAILS:** Stop. List gaps and return to implementation.
 
-**Stage 2: Code Quality** (only if Stage 1 passes) — Is the code well-crafted?
+**Stage 3: Code Quality** (only if Stage 2 passes) — Is the code well-crafted?
 - Follows project patterns (tech-stack.md)
 - Appropriate error handling
 - Tests cover real logic (not implementation details)
@@ -480,6 +489,12 @@ COMMON_HEADER2
 
     # Skill loop with parameterized trigger and transform functions
     for skill in "${SKILL_ORDER[@]}"; do
+        # Skip 'draft' skill — its content (commands table, core workflow,
+        # status markers) is already covered by the static COMMON_HEADER above.
+        if [[ "$skill" == "draft" ]]; then
+            continue
+        fi
+
         # Validate skill name format (security: prevent path traversal)
         if [[ ! "$skill" =~ ^[a-z][a-z0-9]*(-[a-z0-9]+)*$ ]]; then
             echo "ERROR: Invalid skill name '$skill' (must be kebab-case: start with letter, no leading/trailing hyphens)" >&2

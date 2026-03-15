@@ -6,7 +6,7 @@
     "name": "mayurpise"
   },
   "homepage": "https://github.com/mayurpise/draft",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "keywords": [
     "context-driven-development",
     "ai-assisted",
@@ -18,5 +18,23 @@
     "tdd",
     "validation",
     "enterprise"
+  ],
+  "skills": [
+    "skills/adr/SKILL.md",
+    "skills/bughunt/SKILL.md",
+    "skills/change/SKILL.md",
+    "skills/coverage/SKILL.md",
+    "skills/decompose/SKILL.md",
+    "skills/deep-review/SKILL.md",
+    "skills/draft/SKILL.md",
+    "skills/implement/SKILL.md",
+    "skills/index/SKILL.md",
+    "skills/init/SKILL.md",
+    "skills/jira-create/SKILL.md",
+    "skills/jira-preview/SKILL.md",
+    "skills/new-track/SKILL.md",
+    "skills/revert/SKILL.md",
+    "skills/review/SKILL.md",
+    "skills/status/SKILL.md"
   ]
 }

@@ -285,6 +285,13 @@ Phase 2: [Module B] (depends on Module A)
 
 **Wait for developer approval before writing changes to plan.md.**
 
+### Step 6b: Sync Metadata After Restructuring
+
+After applying the approved plan changes:
+
+1. **Update `metadata.json`:** Set `phases.total` to match the new number of phases in the restructured plan.
+2. **Update `draft/tracks.md`:** Update the phase count for this track's entry to reflect the new total (e.g., `Phase: 0/4` → `Phase: 0/5` if a phase was added).
+
 ## Completion
 
 Announce:

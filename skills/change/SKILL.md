@@ -90,6 +90,9 @@ For each task in `plan.md`, determine if the spec change affects it:
 - **`[~]` in-progress tasks** that are affected → flag as:
   `⚠️ IN PROGRESS: [task description] — review before continuing`
 
+- **`[!]` blocked tasks** that are affected → flag as:
+  `⚠️ BLOCKED: [task description] — re-evaluate; requirement change may alter blocking condition or resolution path`
+
 - **Unaffected tasks** — skip, do not mention
 
 ---
@@ -110,6 +113,7 @@ Plan impact:
   - ⚠️ [N] completed task(s) may need rework
   - [M] pending task(s) need updating
   - [K] in-progress task(s) need review
+  - [B] blocked task(s) need re-evaluation
 
 Completed tasks that may need rework:
   - [x] [task description] (commit: abc1234)

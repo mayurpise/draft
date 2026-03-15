@@ -49,12 +49,13 @@ integrations/gemini/
 name: skill-name
 description: Brief description
 ---
+
 # Skill Title
 
 Execution instructions below...
 ```
 
-The frontmatter configures the command; the body contains step-by-step instructions. The body **must** start with a `# Title` heading followed by a blank line — the build script skips the first 3 lines of the body (via `tail -n +4`) when inlining skills into integration files.
+The frontmatter configures the command; the body contains step-by-step instructions. After the closing `---` of frontmatter, the body **must** follow this exact format: (1) a blank line, (2) `# Title` heading, (3) a blank line, (4) content. The build script validates this structure and skips the first 3 lines of the body (via `tail -n +4`) when inlining skills into integration files.
 
 ## Maintaining the Plugin
 

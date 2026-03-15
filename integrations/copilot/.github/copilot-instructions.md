@@ -90,114 +90,6 @@ Recognize and use these throughout plan.md:
 
 ---
 
-## Draft Overview
-
-When user says "help" or "draft":
-
-Draft is a methodology for structured software development: **Context → Spec & Plan → Implement**
-
-## Red Flags - STOP if you're:
-
-- Jumping straight to implementation without reading existing Draft context
-- Suggesting `draft implement` before a track has an approved spec and plan
-- Not checking `draft/tracks.md` for existing active tracks before creating new ones
-- Skipping the recommended command and going freeform
-- Ignoring existing .ai-context.md, product.md, tech-stack.md, or workflow.md context
-
-**Read context first. Follow the workflow.**
-
----
-
-## Available Commands
-
-| Command | Purpose |
-|---------|---------|
-| `draft init` | Initialize project (run once) |
-| `draft index` | Aggregate monorepo service contexts (run at root) |
-| `draft new-track` | Create feature/bug track with spec and plan |
-| `draft implement` | Execute tasks from plan with TDD |
-| `draft status` | Show progress overview |
-| `draft revert` | Git-aware rollback |
-| `draft decompose` | Module decomposition with dependency mapping |
-| `draft coverage` | Code coverage report (target 95%+) |
-| `draft deep-review` | Module lifecycle audit (ACID compliance, enterprise quality) |
-| `draft bughunt` | Exhaustive bug hunt |
-| `draft review` | Code review orchestrator |
-| `draft adr` | Architecture Decision Records |
-| `draft change` | Handle mid-track requirement changes |
-| `draft jira-preview` | Generate Jira export for review |
-| `draft jira-create` | Push issues to Jira via MCP |
-
-
-## Quick Start
-
-1. **First time?** Run `draft init` to initialize your project
-2. **Starting a feature?** Run `draft new-track "your feature description"`
-3. **Ready to code?** Run `draft implement` to execute tasks
-4. **Check progress?** Run `draft status`
-
-## Core Workflow
-
-Every feature follows this lifecycle:
-1. **Setup** - Initialize project context (once per project)
-2. **New Track** - Create specification and plan
-3. **Implement** - Execute tasks with TDD workflow
-4. **Verify** - Confirm acceptance criteria met
-5. **Quality** - Run `draft review` for code review, `draft bughunt` for bug hunting, `draft deep-review` for module audits
-
-## Context Files
-
-When `draft/` exists, these files guide development:
-- `draft/architecture.md` - Source of truth: human-readable engineering reference (30-45 pages)
-- `draft/.ai-context.md` - Derived from architecture.md: token-optimized AI context (200-400 lines)
-- `draft/product.md` - Product vision and goals
-- `draft/tech-stack.md` - Technical constraints
-- `draft/workflow.md` - TDD and commit preferences
-- `draft/tracks.md` - Active work items
-
-## Status Markers
-
-Used throughout plan.md files:
-
-| Marker | Meaning |
-|--------|---------|
-| `[ ]` | Pending |
-| `[~]` | In Progress |
-| `[x]` | Completed |
-| `[!]` | Blocked |
-
-## Intent Mapping
-
-You can also use natural language:
-
-| Say this... | Runs this |
-|-------------|-----------|
-| "set up the project" | `draft init` |
-| "index services", "aggregate context" | `draft index` |
-| "new feature", "add X" | `draft new-track` |
-| "start implementing" | `draft implement` |
-| "what's the status" | `draft status` |
-| "undo", "revert" | `draft revert` |
-| "break into modules" | `draft decompose` |
-| "check coverage" | `draft coverage` |
-| "deep review", "module audit", "production audit" | `draft deep-review` |
-| "hunt bugs", "find bugs" | `draft bughunt` |
-| "review code", "review track", "check quality" | `draft review` |
-| "document decision", "create ADR" | `draft adr` |
-| "requirements changed", "scope changed", "update the spec" | `draft change` |
-| "preview jira", "export to jira" | `draft jira-preview` |
-| "create jira issues" | `draft jira-create` |
-
-
-## Need Help?
-
-- Run `/draft` (this command) for overview
-- Run `draft status` to see current state
-- Check `draft/tracks/<track_id>/spec.md` for requirements
-- Check `draft/tracks/<track_id>/plan.md` for task details
-
----
-
 ## Init Command
 
 When user says "init draft" or "draft init [refresh]":
@@ -2011,98 +1903,7 @@ After completing the 5-phase analysis:
 
 ---
 
-## Condensation Subroutine: Generate .ai-context.md from architecture.md
-
-This subroutine transforms the human-readable `architecture.md` into machine-optimized `.ai-context.md`. Called by:
-- **Init** — after generating architecture.md
-- **Implement** — after module status updates
-- **Decompose** — after adding new modules
-- **Refresh** — when updating architecture.md
-
-### Transformation Process
-
-1. **Read** `draft/architecture.md`
-
-2. **Transform** each section using these rules:
-
-| architecture.md Section | .ai-context.md Section | Transformation |
-|------------------------|------------------------|----------------|
-| Executive Summary | META | Extract key-value pairs only |
-| Architecture Overview (Mermaid) | GRAPH:COMPONENTS | Convert to tree notation |
-| Component Map | GRAPH:COMPONENTS | Merge into single tree |
-| Data Flow (Mermaid) | GRAPH:DATAFLOW | Convert to arrow notation |
-| External Dependencies | GRAPH:DEPENDENCIES | Convert to `A -[proto]-> B` format |
-| Dependency Injection | WIRING | Extract mechanism + tokens list |
-| Critical Invariants | INVARIANTS | One line per invariant with category prefix |
-| Framework/Extension Points | INTERFACES + EXTEND | Signatures + cookbook steps |
-| Full Catalog | CATALOG:{Category} | Pipe-separated table rows |
-| Concurrency Model | THREADS + CONCURRENCY | Tables + rules |
-| Configuration | CONFIG | Pipe-separated table rows |
-| Error Handling | ERRORS | Key: value pairs |
-| Build/Test | TEST + META | Extract exact commands |
-| File Structure | FILES | Concept: path mappings |
-| Glossary | VOCAB | Term: definition pairs |
-
-3. **Apply compression techniques**:
-   - Remove all prose paragraphs → structured key-values
-   - Remove Mermaid syntax → text-based graph notation
-   - Remove markdown formatting (bold, italic, headers beyond ##)
-   - Abbreviate: `fn`=function, `ret`=returns, `cfg`=config, `impl`=implementation
-   - Use symbols: `@`=at/in, `->`=calls/leads-to, `|`=separator, `?`=optional, `!`=required
-
-4. **Prioritize content** (if exceeding 400 lines, cut in this order):
-   1. INVARIANTS — never cut (safety critical)
-   2. EXTEND — never cut (agent productivity critical)
-   3. GRAPH:* — keep all graphs
-   4. INTERFACES — keep signatures
-   5. CATALOG — can abbreviate to top 20 per category
-   6. CONFIG — can abbreviate to critical=Y only
-   7. VOCAB — can abbreviate to 10 most important
-
-5. **Quality check** before writing:
-   - [ ] No prose paragraphs (all structured)
-   - [ ] No Mermaid syntax (all text graphs)
-   - [ ] No references to architecture.md
-   - [ ] All invariants preserved
-   - [ ] Extension cookbooks complete
-   - [ ] Within 200-400 lines
-
-### Example Transformation
-
-**architecture.md (human-readable)**:
-```markdown
-### 4.1 High-Level Topology
-
-The AuthService is a microservice that handles user authentication...
-
-```mermaid
-flowchart TD
-    subgraph AuthService
-        API[API Layer] --> Logic[Auth Logic]
-        Logic --> Store[Token Store]
-    end
-    Logic --> UserDB[(User Database)]
-```
-```
-
-**Becomes .ai-context.md (machine-optimized)**:
-```
-## GRAPH:COMPONENTS
-AuthService
-  ├─API: handles HTTP requests
-  ├─Logic: validates credentials, generates tokens
-  └─Store: caches active tokens
-
-## GRAPH:DEPENDENCIES
-AuthService.Logic -[PostgreSQL]-> UserDB
-```
-
-### Reference from Other Skills
-
-Other skills that mutate `architecture.md` should trigger this subroutine with:
-> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` using the Condensation Subroutine defined in `draft init`."
-
----
+> **Note:** After generating or updating `architecture.md`, run the **Condensation Subroutine** (defined at the end of this skill) to derive `.ai-context.md`.
 
 ## Step 2: Product Definition
 
@@ -2218,6 +2019,140 @@ Next steps:
 1. Review and edit the generated files as needed
 2. Run `draft new-track` to start planning a feature
 3. Run `draft init refresh` after adding substantial code to generate architecture context"
+
+---
+
+## Condensation Subroutine
+
+This is a self-contained, callable procedure for generating `draft/.ai-context.md` from `draft/architecture.md`. Any skill that mutates `architecture.md` should execute this subroutine afterward to keep the derived context file in sync.
+
+**Called by:** `draft init`, `draft init refresh`, `draft implement`, `draft decompose`, `draft coverage`, `draft index`
+
+### Inputs
+
+| Input | Path | Description |
+|-------|------|-------------|
+| architecture.md | `draft/architecture.md` | Human-readable 30-45 page engineering reference (source of truth) |
+
+### Outputs
+
+| Output | Path | Description |
+|--------|------|-------------|
+| .ai-context.md | `draft/.ai-context.md` | Token-optimized, machine-readable AI context (200-400 lines) |
+
+### Target Size
+
+- **Minimum**: 200 lines
+- **Maximum**: 400 lines
+- Under 200 lines indicates incomplete condensation — go back and ensure all sections are represented
+- Over 400 lines indicates insufficient compression — apply prioritization rules below
+
+### Procedure
+
+#### Step 1: Read Source
+
+Read the full contents of `draft/architecture.md`. Extract the YAML frontmatter metadata block — it will be reused (with updated `generated_by` and `generated_at`) for the output file.
+
+#### Step 2: Write YAML Frontmatter
+
+Start `draft/.ai-context.md` with an updated YAML frontmatter block. Copy all `git.*` and `synced_to_commit` fields from `architecture.md`. Set:
+- `generated_by`: the calling command (e.g., `draft:init`, `draft:implement`)
+- `generated_at`: current ISO 8601 timestamp
+
+#### Step 3: Transform Sections
+
+Transform each `architecture.md` section into machine-optimized format using this mapping:
+
+| architecture.md Section | .ai-context.md Section | Transformation |
+|------------------------|------------------------|----------------|
+| Executive Summary | META | Extract key-value pairs only (type, lang, pattern, build, test, entry, config) |
+| Architecture Overview (Mermaid) | GRAPH:COMPONENTS | Convert Mermaid diagrams to tree notation using `├─` / `└─` |
+| Component Map | GRAPH:COMPONENTS | Merge into the same tree |
+| Data Flow (Mermaid) | GRAPH:DATAFLOW | Convert to `FLOW:{Name}` with arrow notation: `source --{type}--> sink` |
+| External Dependencies | GRAPH:DEPENDENCIES | Convert to `A -[protocol]-> B` format |
+| Dependency Injection | WIRING | Extract mechanism + tokens/getters lists |
+| Critical Invariants | INVARIANTS | One line per invariant: `[CATEGORY] name: rule @file:line` |
+| Framework/Extension Points | INTERFACES + EXTEND | Condensed signatures + cookbook steps |
+| Full Catalog | CATALOG:{Category} | Pipe-separated rows: `id|type|file|purpose` |
+| Concurrency Model | THREADS + CONCURRENCY | Pipe-separated rows + rules with violation consequences |
+| Configuration | CONFIG | Pipe-separated rows: `param|default|critical:Y/N|purpose` |
+| Error Handling | ERRORS | Key-value pairs: `scenario: recovery` |
+| Build/Test | TEST + META | Extract exact commands |
+| File Structure | FILES | Concept-to-path mappings: `entry: path`, `config: path`, etc. |
+| Glossary | VOCAB | `term: definition` pairs |
+
+#### Step 4: Apply Compression
+
+- Remove all prose paragraphs — use structured key-value pairs instead
+- Remove Mermaid syntax — use text-based graph notation (`├─`, `-->`, `-[proto]->`)
+- Remove markdown formatting (no `**bold**`, no `_italic_`, no headers beyond `##`)
+- Abbreviate common words: `fn`=function, `ret`=returns, `cfg`=config, `impl`=implementation, `req`=required, `opt`=optional, `dep`=dependency, `auth`=authentication, `authz`=authorization
+- Use symbols: `@`=at/in file, `->`=calls/leads-to, `|`=column separator, `?`=optional, `!`=required/critical
+
+#### Step 5: Prioritize Content
+
+If the output exceeds 400 lines, cut sections in this order (bottom = cut first):
+
+| Priority | Section | Rule |
+|----------|---------|------|
+| 1 (never cut) | INVARIANTS | Safety critical — preserve every invariant |
+| 2 (never cut) | EXTEND | Agent productivity critical — preserve all cookbook steps |
+| 3 | GRAPH:* | Keep all component, dependency, and dataflow graphs |
+| 4 | INTERFACES | Keep all signatures |
+| 5 | CATALOG | Can abbreviate to top 20 entries per category |
+| 6 | CONFIG | Can abbreviate to `critical:Y` entries only |
+| 7 (cut first) | VOCAB | Can abbreviate to 10 most important terms |
+
+#### Step 6: Quality Check
+
+Before writing `draft/.ai-context.md`, verify:
+
+- [ ] No prose paragraphs remain (all content is structured data)
+- [ ] No Mermaid syntax (all diagrams converted to text graphs)
+- [ ] No references to `architecture.md` (file must be self-contained)
+- [ ] All invariants from architecture.md are preserved
+- [ ] Extension cookbooks are complete (an agent can follow them without other files)
+- [ ] Output is within 200-400 lines
+- [ ] YAML frontmatter metadata is present at the top
+
+#### Step 7: Write Output
+
+Write the completed content to `draft/.ai-context.md`.
+
+### Example Transformation
+
+**architecture.md input:**
+```markdown
+### 4.1 High-Level Topology
+
+The AuthService is a microservice that handles user authentication...
+
+```mermaid
+flowchart TD
+    subgraph AuthService
+        API[API Layer] --> Logic[Auth Logic]
+        Logic --> Store[Token Store]
+    end
+    Logic --> UserDB[(User Database)]
+```
+```
+
+**.ai-context.md output:**
+```
+## GRAPH:COMPONENTS
+AuthService
+  ├─API: handles HTTP requests
+  ├─Logic: validates credentials, generates tokens
+  └─Store: caches active tokens
+
+## GRAPH:DEPENDENCIES
+AuthService.Logic -[PostgreSQL]-> UserDB
+```
+
+### Reference for Other Skills
+
+Other skills that mutate `draft/architecture.md` should invoke this subroutine with:
+> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` using the Condensation Subroutine defined in `draft init`."
 
 ---
 
@@ -2400,7 +2335,7 @@ For each target directory:
    - Report will be generated at `<target-dir>/draft/bughunt-report.md`
    - Capture exit status (success/failure)
 
-5. **Record results:**
+4. **Record results:**
    - Directory path
    - Total bugs found (by severity)
    - Report location
@@ -2639,7 +2574,7 @@ For each service S, iterate all other services' `dependencies` arrays. If S appe
 
 ### 7.1 Generate `draft/service-index.md`
 
-Use template from `core/templates/service-index.md`:
+Use the following inline template:
 
 ```markdown
 # Service Index
@@ -4021,6 +3956,13 @@ Phase 2: [Module B] (depends on Module A)
 
 **Wait for developer approval before writing changes to plan.md.**
 
+### Step 6b: Sync Metadata After Restructuring
+
+After applying the approved plan changes:
+
+1. **Update `metadata.json`:** Set `phases.total` to match the new number of phases in the restructured plan.
+2. **Update `draft/tracks.md`:** Update the phase count for this track's entry to reflect the new total (e.g., `Phase: 0/4` → `Phase: 0/5` if a phase was added).
+
 ## Completion
 
 Announce:
@@ -4522,9 +4464,9 @@ Summary:
 - Tasks: M/M
 - Duration: [if tracked]
 
-[If validation ran:]
-Validation: PASS | WARN | CRITICAL
-Report: draft/tracks/<track_id>/validation-report.md
+[If review ran:]
+Review: PASS | PASS WITH NOTES | FAIL
+Report: draft/tracks/<track_id>/review-report-latest.md
 
 All acceptance criteria from spec.md should be verified.
 
@@ -4736,7 +4678,7 @@ After developer approves:
    - Uncovered: defensive null checks in jwt.ts (justified)
    ```
 
-2. **Update architecture context** — update `draft/architecture.md` (or track-level `architecture.md`) with coverage data, then run the Condensation Subroutine (defined in `draft init`) to regenerate `draft/.ai-context.md`:
+2. **Update architecture context** — update the project-level `draft/architecture.md` with coverage data (not a track-level architecture file), then run the Condensation Subroutine (defined in `draft init`) to regenerate `draft/.ai-context.md`. The Condensation Subroutine only applies to the project-level `draft/architecture.md` → `draft/.ai-context.md` pipeline:
    ```markdown
    - **Status:** [x] Complete (Coverage: 96.2%)
    ```
@@ -4752,7 +4694,14 @@ After developer approves:
    }
    ```
 
-4. **Write detailed coverage report** to `draft/tracks/<id>/coverage-report.md` with YAML frontmatter (include `project`, `track_id`, `generated_by: "draft:coverage"`, `generated_at`, `git` metadata matching other skills) and timestamped entries for historical tracking.
+4. **Write detailed coverage report** to `draft/tracks/<id>/coverage-report-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`) with YAML frontmatter (include `project`, `track_id`, `generated_by: "draft:coverage"`, `generated_at`, `git` metadata matching other skills) and timestamped entries for historical tracking.
+
+   After writing the timestamped report, create a symlink pointing to it:
+   ```bash
+   ln -sf coverage-report-<timestamp>.md draft/tracks/<id>/coverage-report-latest.md
+   ```
+
+   Previous timestamped reports are preserved. The `-latest.md` symlink always points to the most recent report.
 
 ## Completion
 
@@ -4764,6 +4713,8 @@ Overall: [percentage]% (target: [target]%)
 Status: [PASS / BELOW TARGET]
 Files analyzed: [count]
 Gaps documented: [count testable] testable, [count justified] justified
+
+Report: draft/tracks/<id>/coverage-report-<timestamp>.md (symlink: coverage-report-latest.md)
 
 Results recorded in:
 - plan.md (phase notes)
@@ -5588,8 +5539,19 @@ Severity levels:
 ## Report Generation
 
 Generate report at:
-- **Project-level:** `draft/bughunt-report.md`
-- **Track-level:** `draft/tracks/<track-id>/bughunt-report.md` (if analyzing specific track)
+- **Project-level:** `draft/bughunt-report-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`)
+- **Track-level:** `draft/tracks/<track-id>/bughunt-report-<timestamp>.md` (if analyzing specific track)
+
+After writing the timestamped report, create a symlink pointing to it:
+```bash
+# Project-level
+ln -sf bughunt-report-<timestamp>.md draft/bughunt-report-latest.md
+
+# Track-level
+ln -sf bughunt-report-<timestamp>.md draft/tracks/<track-id>/bughunt-report-latest.md
+```
+
+Previous timestamped reports are preserved. The `-latest.md` symlink always points to the most recent report.
 
 **MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
 
@@ -5877,9 +5839,10 @@ Once track is resolved:
    - Load `draft/tracks/<id>/plan.md`
    - Extract commit SHAs from completed `[x]` task lines only. Match pattern: 7+ character hex strings in parentheses, regex `\(([a-f0-9]{7,})\)`. Example: `- [x] **Task 1.1:** Description (7a7dc85)`. Collect SHAs in order of appearance; deduplicate keeping first occurrence.
    - Determine commit range:
-     - First commit: `git rev-parse <first_SHA>^` (parent of first)
+     - First commit parent: run `git rev-parse <first_SHA>^ 2>/dev/null`
+     - If the parent exists: use `<first_SHA>^..<last_SHA>` as the range
+     - If the parent does NOT exist (first commit in the repo — `git rev-parse` fails): use the empty tree SHA `4b825dc642cb6eb9a060e54bf8d69288fbee4904` as the range start, i.e., `4b825dc642cb6eb9a060e54bf8d69288fbee4904..<last_SHA>`. Alternatively, for single-commit ranges, use `git diff-tree --root -p <first_SHA>` to obtain the diff.
      - Last commit: `<last_SHA>`
-     - Range: `<first_SHA>^..<last_SHA>`
 
 4. **Check for incomplete work:**
    - Parse plan.md task statuses
@@ -6116,7 +6079,7 @@ draft bughunt --track <id>
 draft bughunt
 ```
 
-Parse output from `draft/tracks/<id>/bughunt-report.md` or `draft/bughunt-report.md`
+Parse output from `draft/tracks/<id>/bughunt-report-latest.md` or `draft/bughunt-report-latest.md`
 
 ### 5.2: Aggregate Findings
 
@@ -6150,7 +6113,12 @@ git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
 
 ### Track-Level Report
 
-**Path:** `draft/tracks/<id>/review-report.md`
+**Path:** `draft/tracks/<id>/review-report-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`)
+
+After writing the timestamped report, create a symlink pointing to it:
+```bash
+ln -sf review-report-<timestamp>.md draft/tracks/<id>/review-report-latest.md
+```
 
 ```markdown
 ---
@@ -6273,7 +6241,12 @@ synced_to_commit: "{FULL_SHA}"
 
 ### Project-Level Report
 
-**Path:** `draft/review-report.md` (all project-level scopes write to this same path)
+**Path:** `draft/review-report-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`)
+
+After writing the timestamped report, create a symlink pointing to it:
+```bash
+ln -sf review-report-<timestamp>.md draft/review-report-latest.md
+```
 
 Similar format but:
 - No Stage 2 section (no spec compliance)
@@ -6281,14 +6254,12 @@ Similar format but:
   - `project`: "Scope: Uncommitted changes"
   - `files <pattern>`: "Scope: Files matching '<pattern>'"
   - `commits <range>`: "Scope: Commits <range>"
-- Each run overwrites the previous report; include "Previous review: <timestamp>" if prior report exists
+- Each run creates a new timestamped file; the `-latest.md` symlink always points to the most recent report
+- Include "Previous review: <timestamp>" if a prior `-latest.md` symlink exists (read its target to determine the previous timestamp)
 
-### Report Overwrite Behavior
+### Report History
 
-If report already exists:
-1. Read existing report timestamp
-2. Overwrite file
-3. Include note: "Previous review: <date>"
+Previous timestamped reports are preserved. The `-latest.md` symlink always points to the most recent report.
 
 ---
 
@@ -6331,7 +6302,7 @@ Display summary to user with actionable next steps.
 ```
 ✅ Review complete: <track_id>
 
-Report: draft/tracks/<id>/review-report.md
+Report: draft/tracks/<id>/review-report-<timestamp>.md (symlink: review-report-latest.md)
 
 Summary:
 - Stage 1 (Automated Validation): PASS
@@ -6357,7 +6328,7 @@ Next: Address findings and run draft review again, or mark track complete.
 ```
 ❌ Review failed: <track_id>
 
-Report: draft/tracks/<id>/review-report.md
+Report: draft/tracks/<id>/review-report-<timestamp>.md (symlink: review-report-latest.md)
 
 Stage 1 (Automated Validation): PASS
 Stage 2 (Spec Compliance): FAIL
@@ -6544,7 +6515,7 @@ If `draft/` does not exist: **STOP** — "No Draft context found. Run `draft ini
 ## Review Phases
 
 ### Phase 1: Context & Structural Analysis
-- Read all Draft context files (e.g. `draft/.ai-context.md`, `draft/architecture.md`, `draft/tech-stack.md`) to understand intended boundaries and critical invariants.
+- Read all Draft context files (e.g. `draft/.ai-context.md`, `draft/architecture.md` (if exists), `draft/tech-stack.md`) to understand intended boundaries and critical invariants.
 - Map the module's full dependency graph (imports, injected services, external calls)
 - Trace the complete lifecycle: initialization → processing → persistence → cleanup
 - Identify all entry points and exit paths
@@ -6937,6 +6908,10 @@ Display a comprehensive overview of project progress.
 
 ## Output Format
 
+Check each track's `metadata.json` `type` field to determine display format.
+
+### Standard (multi-phase) tracks
+
 ```
 ═══════════════════════════════════════════════════════════
                       DRAFT STATUS
@@ -6961,6 +6936,29 @@ ACTIVE TRACKS
   Phase:  0/2
   Tasks:  0/6 complete
 
+```
+
+### Quick-mode tracks (metadata.json `type` is `"quick"`)
+
+Quick-mode tracks use flat task numbering (`Task 1:`, `Task 2:`) without phases. Display them with a flat task list instead of the phase-grouped tree:
+
+```
+[track-id-3] Quick Feature
+  Status: [~] In Progress
+  Type:   quick
+  Tasks:  2/5 complete
+  ├─ [x] Task 1: Description
+  ├─ [x] Task 2: Description
+  ├─ [~] Task 3: Description  ← CURRENT
+  ├─ [ ] Task 4: Description
+  └─ [ ] Task 5: Description
+```
+
+Do **not** show `Phase: X/Y` for quick-mode tracks — they have no phases.
+
+### Remaining sections (shared by both formats)
+
+```
 MODULES (if architecture.md exists)
 ─────────────────────────────────────────────────────────
 Module A         [x] Complete  (Coverage: 96.2%)
@@ -7159,11 +7157,11 @@ On conflict, report: "Successfully reverted: [list]. Conflict on: [sha]. Run `gi
    - Decrement tasks.completed
    - Decrement phases.completed if applicable
    - Update timestamp
-   - **Phase status transitions:** If any task in a completed phase is reverted: change phase status to `[~]` In Progress. If ALL tasks in a phase are reverted: change phase status to `[ ]` Pending.
+   - **Note:** `metadata.json` only stores `phases.total` (int) and `phases.completed` (int). Decrement `phases.completed` if all tasks in a previously completed phase are reverted. Phase status markers (`[~]`, `[x]`, `[ ]`) are tracked in `plan.md` text, not in `metadata.json`. Update `plan.md` phase headings accordingly: if any task in a completed phase is reverted, mark that phase `[~]` In Progress in `plan.md`; if ALL tasks are reverted, mark it `[ ]` Pending in `plan.md`.
 
 3. Update `draft/tracks.md` if track status changed
 
-4. **Stale reports:** After revert, existing `review-report.md` and `validation-report.md` for the track are stale. Add a warning header to these files: `> **WARNING: This report predates a revert operation and may be stale. Re-run the review/validation.**` Or delete them if the revert is substantial.
+4. **Stale reports:** After revert, existing `review-report-latest.md` and `bughunt-report-latest.md` for the track are stale. Add a warning header to the symlink targets (the actual timestamped files): `> **WARNING: This report predates a revert operation and may be stale. Re-run the review/bughunt.**` Or delete them if the revert is substantial.
 
 ## Step 6: Confirm
 
@@ -7299,6 +7297,9 @@ For each task in `plan.md`, determine if the spec change affects it:
 - **`[~]` in-progress tasks** that are affected → flag as:
   `⚠️ IN PROGRESS: [task description] — review before continuing`
 
+- **`[!]` blocked tasks** that are affected → flag as:
+  `⚠️ BLOCKED: [task description] — re-evaluate; requirement change may alter blocking condition or resolution path`
+
 - **Unaffected tasks** — skip, do not mention
 
 ---
@@ -7319,6 +7320,7 @@ Plan impact:
   - ⚠️ [N] completed task(s) may need rework
   - [M] pending task(s) need updating
   - [K] in-progress task(s) need review
+  - [B] blocked task(s) need re-evaluation
 
 Completed tasks that may need rework:
   - [x] [task description] (commit: abc1234)
@@ -7431,15 +7433,15 @@ draft change track add-export-feature also require a progress indicator for expo
 
 When user says "preview jira" or "draft jira-preview [track-id]":
 
-Generate `jira-export.md` from the track's plan for review and editing before creating actual Jira issues.
+Generate a timestamped `jira-export-<timestamp>.md` (with `jira-export-latest.md` symlink) from the track's plan for review and editing before creating actual Jira issues.
 
 ## Red Flags - STOP if you're:
 
 - Generating a preview without an approved plan.md
 - Assigning story points inconsistent with task count
 - Missing sub-tasks that exist in plan.md
-- Not including quality findings when validation/bughunt reports exist
-- Overwriting a reviewed jira-export.md without warning the user
+- Not including quality findings when review/bughunt reports exist
+- Overwriting a reviewed jira-export without warning the user
 
 **Plan first, then preview. Accuracy over speed.**
 
@@ -7447,7 +7449,7 @@ Generate `jira-export.md` from the track's plan for review and editing before cr
 
 ## Standard File Metadata
 
-**The generated `jira-export.md` MUST include the standard YAML frontmatter.** This enables traceability and sync verification.
+**The generated `jira-export-<timestamp>.md` MUST include the standard YAML frontmatter.** This enables traceability and sync verification.
 
 ### Gathering Git Information
 
@@ -7481,7 +7483,7 @@ git status --porcelain | head -1
 
 ### Metadata Template
 
-Insert this YAML frontmatter block at the **top of `jira-export.md`**:
+Insert this YAML frontmatter block at the **top of the timestamped `jira-export-<timestamp>.md`**:
 
 ```yaml
 ---
@@ -7527,8 +7529,8 @@ synced_to_commit: "{FULL_SHA}"
 5. Read the track's `metadata.json` for title and type
 6. Read the track's `spec.md` for epic description
 7. Check for quality reports:
-   - `draft/tracks/<id>/validation-report.md` — compliance findings
-   - `draft/tracks/<id>/bughunt-report.md` — defect findings
+   - `draft/tracks/<id>/review-report-latest.md` — review findings (from `draft review`)
+   - `draft/tracks/<id>/bughunt-report-latest.md` — defect findings
 
 If no track found:
 - Tell user: "No track found. Run `draft new-track` to create one, or specify track ID."
@@ -7566,9 +7568,9 @@ Count tasks per phase and assign points to the **story**:
 
 ## Step 3: Extract Quality Findings (if reports exist)
 
-If `validation-report.md` or `bughunt-report.md` exists in the track directory:
+If `review-report-latest.md` or `bughunt-report-latest.md` exists in the track directory:
 
-### From `bughunt-report.md`
+### From `bughunt-report-latest.md`
 
 1. Parse findings by severity (Critical, High, Medium, Low)
 2. Extract **all sections** for each bug:
@@ -7584,9 +7586,9 @@ If `validation-report.md` or `bughunt-report.md` exists in the track directory:
    - **Regression Test** — test case that would catch this bug
 3. Group by severity for the export
 
-### From `validation-report.md`
+### From `review-report-latest.md`
 
-1. Parse findings from each validation category (Architecture Conformance, Dead Code, Dependency Cycles, Security, Performance, Spec Compliance, Architectural Impact, Regression Risk)
+1. Parse findings from review report stages — Stage 1: Automated Validation (Architecture Conformance, Dead Code, Dependency Cycles, Security Scan, Performance), Stage 2: Spec Compliance, Stage 3: Code Quality (Architecture, Error Handling, Testing, Maintainability)
 2. Extract for each finding:
    - **Severity** — Critical (✗) or Warning (⚠)
    - **Category** — which validator produced it
@@ -7600,7 +7602,21 @@ If `validation-report.md` or `bughunt-report.md` exists in the track directory:
 
 ## Step 4: Generate Export File
 
-Create `draft/tracks/<track_id>/jira-export.md`:
+Generate the timestamped filename and create the export file with symlink:
+
+```bash
+TIMESTAMP=$(date +%Y-%m-%dT%H%M)
+EXPORT_FILE="draft/tracks/<track_id>/jira-export-${TIMESTAMP}.md"
+SYMLINK="draft/tracks/<track_id>/jira-export-latest.md"
+```
+
+Create `${EXPORT_FILE}` and then create/update the symlink:
+
+```bash
+ln -sf "jira-export-${TIMESTAMP}.md" "${SYMLINK}"
+```
+
+File contents for `${EXPORT_FILE}`:
 
 ```markdown
 ---
@@ -7712,21 +7728,21 @@ h3. Verification
 
 ## Quality Reports
 
-### Validation Findings (informational)
+### Review Findings (informational)
 
 | Severity | Category | Location | Issue | Risk/Impact | Fix |
 |----------|----------|----------|-------|-------------|-----|
 | Critical | Security | src/auth.ts:45 | Hardcoded API key | Secret exposed in version control | Move to environment variable |
 | Warning | Architecture | src/utils.ts:12 | Layer boundary violation | UI importing from database layer | Use API service layer instead |
 
-> Review findings are from track validation (from `draft implement`) and `draft bughunt`. Include in Epic description for awareness.
+> Review findings are from `draft review` and `draft bughunt`. Include in Epic description for awareness.
 > Critical findings should also be created as Bug issues (same as bughunt bugs) to ensure they are tracked and resolved.
 
 ---
 
 ## Bug Issues (from Bug Hunt Report)
 
-Each bug from `bughunt-report.md` becomes a separate **Bug** issue linked to the Epic.
+Each bug from `bughunt-report-latest.md` becomes a separate **Bug** issue linked to the Epic.
 
 ### Bug 1: [CRITICAL] Off-by-one error in pagination
 
@@ -7745,14 +7761,14 @@ CONFIRMED
 
 h3. Code Evidence
 {code}
-// The actual problematic code from bughunt-report.md
+// The actual problematic code from bughunt-report-latest.md
 {code}
 
 h3. Data Flow Trace
 [How data reaches this point: caller → caller → this function]
 
 h3. Issue
-[Full description from bughunt-report.md]
+[Full description from bughunt-report-latest.md]
 
 h3. Impact
 [User-visible or system failure mode]
@@ -7765,13 +7781,13 @@ h3. Verification Done
 - No upstream guards found
 
 h3. Why Not a False Positive
-[Explicit reasoning from bughunt-report.md]
+[Explicit reasoning from bughunt-report-latest.md]
 
 h3. Fix
 [Minimal code change or mitigation from report]
 
 h3. Regression Test
-[Test case from bughunt-report.md, or "N/A" with reason]
+[Test case from bughunt-report-latest.md, or "N/A" with reason]
 
 ---
 🤖 Generated with Draft (Bug Hunt)
@@ -7797,14 +7813,14 @@ HIGH
 
 h3. Code Evidence
 {code}
-// The actual problematic code from bughunt-report.md
+// The actual problematic code from bughunt-report-latest.md
 {code}
 
 h3. Data Flow Trace
 [How data reaches this point: caller → caller → this function]
 
 h3. Issue
-[Full description from bughunt-report.md]
+[Full description from bughunt-report-latest.md]
 
 h3. Impact
 [User-visible or system failure mode]
@@ -7813,13 +7829,13 @@ h3. Verification Done
 [Checklist of verification steps completed]
 
 h3. Why Not a False Positive
-[Explicit reasoning from bughunt-report.md]
+[Explicit reasoning from bughunt-report-latest.md]
 
 h3. Fix
 [Fix recommendation from report]
 
 h3. Regression Test
-[Test case from bughunt-report.md, or "N/A" with reason]
+[Test case from bughunt-report-latest.md, or "N/A" with reason]
 
 ---
 🤖 Generated with Draft (Bug Hunt)
@@ -7828,7 +7844,7 @@ Branch: [branch-name] | Commit: [short-hash]
 
 ---
 
-[Continue for all bugs from bughunt-report.md...]
+[Continue for all bugs from bughunt-report-latest.md...]
 
 > **Priority Mapping:** Critical → Highest, High → High, Medium → Medium, Low → Low
 > All bugs are linked to the Epic but are separate from Stories (phases).
@@ -7840,27 +7856,28 @@ Branch: [branch-name] | Commit: [short-hash]
 Jira Preview Generated
 
 Track: [track_id] - [title]
-Export: draft/tracks/<id>/jira-export.md
+Export: draft/tracks/<id>/jira-export-<timestamp>.md
+Symlink: draft/tracks/<id>/jira-export-latest.md
 
 Summary:
 - 1 epic
 - N stories (phases)
 - M sub-tasks (tasks)
 - P total story points
-- B bugs (from bughunt-report.md)
+- B bugs (from bughunt-report-latest.md)
 
 Breakdown:
 - Phase 1: [name] - X pts, Y tasks
 - Phase 2: [name] - X pts, Y tasks
 - Phase 3: [name] - X pts, Y tasks
 
-Bugs (if bughunt-report.md exists):
+Bugs (if bughunt-report-latest.md exists):
 - X critical bugs
 - Y high bugs
 - Z medium/low bugs
 
 Next steps:
-1. Review and edit jira-export.md (adjust points, descriptions, sub-tasks, bug priorities)
+1. Review and edit the export file via jira-export-latest.md (adjust points, descriptions, sub-tasks, bug priorities)
 2. Run `draft jira-create` to create issues in Jira
 ```
 
@@ -7873,10 +7890,10 @@ Next steps:
 - Use plan.md overview for epic description
 - Warn: "spec.md not found, using plan overview for epic description."
 
-**If jira-export.md already exists:**
-- Check if it has been manually modified (look for user-added content not matching generated patterns — e.g., edited descriptions, added rows, changed story points from generated values)
-- If modifications detected, prompt user: "Existing jira-export.md appears to have manual edits. Overwrite? [y/N]"
-- If unmodified (matches generated patterns), proceed with regeneration
+**If jira-export-latest.md already exists:**
+- Check if the target file has been manually modified (look for user-added content not matching generated patterns — e.g., edited descriptions, added rows, changed story points from generated values)
+- If modifications detected, prompt user: "Existing jira-export appears to have manual edits. Overwrite? [y/N]"
+- If unmodified (matches generated patterns), proceed with regeneration (new timestamped file + updated symlink)
 
 **If phase has no tasks:**
 - Create story with 1 story point
@@ -7888,13 +7905,13 @@ Next steps:
 
 When user says "create jira" or "draft jira-create [track-id]":
 
-Create Jira epic, stories, and sub-tasks from `jira-export.md` using MCP-Jira. If no export file exists, auto-generates one first.
+Create Jira epic, stories, and sub-tasks from `jira-export-latest.md` using MCP-Jira. If no export file exists, auto-generates one first.
 
 ## Red Flags - STOP if you're:
 
-- Creating Jira issues without reviewing `jira-export.md` first (run `draft jira-preview`)
+- Creating Jira issues without reviewing `jira-export-latest.md` first (run `draft jira-preview`)
 - Proceeding when MCP-Jira is not configured
-- Creating duplicate issues (check if jira-export.md already has Jira keys)
+- Creating duplicate issues (check if jira-export-latest.md already has Jira keys)
 - Not verifying the target Jira project before creation
 - Skipping the export file update after issue creation
 
@@ -7919,19 +7936,19 @@ Create Jira epic, stories, and sub-tasks from `jira-export.md` using MCP-Jira. I
    ```
 2. Find active track from `draft/tracks.md` (look for `[~] In Progress` or first `[ ]` track)
 3. If track ID provided as argument, use that instead
-4. Check for `draft/tracks/<track_id>/jira-export.md`
+4. Check for `draft/tracks/<track_id>/jira-export-latest.md`
 
 If no track found:
 - Tell user: "No track found. Run `draft new-track` to create one, or specify track ID."
 
 ## Step 2: Ensure Export Exists
 
-**If `jira-export.md` exists:**
-- Read and parse the export file
+**If `jira-export-latest.md` exists:**
+- Read and parse the export file (follows symlink to timestamped file)
 - Proceed to Step 3
 
-**If `jira-export.md` missing:**
-- Inform user: "No jira-export.md found. Generating preview first..."
+**If `jira-export-latest.md` missing:**
+- Inform user: "No jira-export-latest.md found. Generating preview first..."
 - Execute `draft jira-preview` logic to generate it
 - Proceed to Step 3
 
@@ -7948,13 +7965,13 @@ Attempt to detect MCP-Jira tools:
    2. Run `draft jira-create` again
 
    Or manually import from:
-     draft/tracks/<id>/jira-export.md
+     draft/tracks/<id>/jira-export-latest.md
    ```
    - Stop execution
 
 ## Step 4: Parse Export File
 
-Extract from `jira-export.md`:
+Extract from `jira-export-latest.md`:
 
 ### Epic
 - Summary (from `**Summary:**` line)
@@ -7979,7 +7996,21 @@ If export contains `## Quality Reports` section:
 - Parse bughunt bug issues with all sections (location, confidence, code evidence, data flow trace, issue, impact, verification done, why not a false positive, fix, regression test)
 - Extract all fields for each finding to populate Jira issue descriptions
 
-## Step 4b: Validate Project Key
+## Step 4b: Resolve Project Key
+
+Read `draft/workflow.md` and look for a `## Jira` section containing `Project Key: <KEY>`.
+
+- **If found:** Use that key.
+- **If not found:** Prompt the user: "No Jira project key configured. Enter your Jira project key (e.g., PROJ):"
+  After the user provides the key, append the following to `draft/workflow.md`:
+  ```markdown
+  ## Jira
+
+  Project Key: <KEY>
+  ```
+  This persists the key for all future `draft jira-create` and `draft jira-preview` invocations.
+
+### Validate Project Key
 
 Before creating issues, attempt to fetch project metadata via MCP to verify the project key exists. Fail fast with a clear error if invalid:
 
@@ -7994,7 +8025,7 @@ If the project key is invalid or not found:
 
 ## Step 5: Create Issues via MCP
 
-**Incremental persistence:** After creating each issue, immediately update the corresponding entry in `jira-export.md` with the Jira key. This ensures re-runs can skip already-created items even if the process fails mid-way.
+**Incremental persistence:** After creating each issue, immediately update the corresponding entry in the export file (via `jira-export-latest.md` symlink) with the Jira key. This ensures re-runs can skip already-created items even if the process fails mid-way.
 
 **Note:** Some Jira configurations do not allow setting status during creation. If status setting fails, create in default status and log a warning.
 
@@ -8038,7 +8069,7 @@ MCP call: create_issue
 
 ### 5d. Create Bug Issues (from Bug Hunt Report)
 
-For **each bug** in the `## Bug Issues` section of jira-export.md, create a separate Bug issue:
+For **each bug** in the `## Bug Issues` section of jira-export-latest.md, create a separate Bug issue:
 
 ```
 MCP call: create_issue
@@ -8054,7 +8085,7 @@ MCP call: create_issue
 
   h3. Code Evidence
   {code}
-  [The actual problematic code snippet from bughunt-report.md]
+  [The actual problematic code snippet from bughunt-report-latest.md]
   {code}
 
   h3. Data Flow Trace
@@ -8074,13 +8105,13 @@ MCP call: create_issue
   - No upstream guards found
 
   h3. Why Not a False Positive
-  [Explicit reasoning from bughunt-report.md]
+  [Explicit reasoning from bughunt-report-latest.md]
 
   h3. Fix
   [Minimal code change or mitigation from report]
 
   h3. Regression Test
-  [Test case from bughunt-report.md, or "N/A" with reason]
+  [Test case from bughunt-report-latest.md, or "N/A" with reason]
 
   ---
   🤖 Generated with Draft (Bug Hunt)
@@ -8101,11 +8132,11 @@ MCP call: create_issue
 - Capture bug key (e.g., PROJ-131)
 - Report: "- Bug: PROJ-131 - [Critical] Correctness: Off-by-one error"
 
-**All bugs from bughunt-report.md get their own Bug issue.** They are linked to the Epic but separate from Stories (phases). This keeps implementation work (Stories/Sub-tasks) distinct from defect tracking (Bugs).
+**All bugs from bughunt-report-latest.md get their own Bug issue.** They are linked to the Epic but separate from Stories (phases). This keeps implementation work (Stories/Sub-tasks) distinct from defect tracking (Bugs).
 
 ## Step 6: Finalize Tracking
 
-`jira-export.md` has already been updated incrementally during Step 5. Now update `plan.md` with the Jira keys:
+The export file (via `jira-export-latest.md`) has already been updated incrementally during Step 5. Now update `plan.md` with the Jira keys:
 
 1. **Update plan.md:**
    Add Jira keys to phase headers and tasks:
@@ -8116,7 +8147,7 @@ MCP call: create_issue
    - [x] **Task 1.2:** Extract security utilities [PROJ-126]
    ```
 
-2. **Set jira-export.md status to Created:**
+2. **Set export file status to Created (in the timestamped file via jira-export-latest.md):**
    ```markdown
    **Status:** Created
    **Epic Key:** PROJ-123
@@ -8150,7 +8181,7 @@ Total: 1 epic, N stories, M sub-tasks, B bugs, P story points
 
 Updated:
 - plan.md (added issue keys to phases and tasks)
-- jira-export.md (marked as created with keys)
+- jira-export-latest.md (marked as created with keys)
 ```
 
 ## Error Handling
@@ -8167,7 +8198,7 @@ Partial creation:
 - Story 2: (skipped)
 
 Fix the issue and run `draft jira-create` again.
-Already-created issues will be detected by keys in jira-export.md.
+Already-created issues will be detected by keys in jira-export-latest.md.
 ```
 
 **If export has existing keys:**
@@ -8177,8 +8208,9 @@ Already-created issues will be detected by keys in jira-export.md.
 - Still create sub-tasks if story exists but sub-tasks don't have keys
 
 **If project not configured:**
-- Prompt user: "Which Jira project should issues be created in?"
-- Store in `draft/workflow.md` for future use
+- No `## Jira` section with `Project Key:` found in `draft/workflow.md`
+- Prompt user: "No Jira project key configured. Enter your Jira project key (e.g., PROJ):"
+- Save to `draft/workflow.md` under a `## Jira` section as `Project Key: <KEY>`
 
 **If plan.md phases don't match export:**
 - Warn: "Export has N stories but plan has M phases. Proceeding with export structure."
@@ -8227,18 +8259,27 @@ When blocked (`[!]`), follow the four phases IN ORDER:
 
 **Anti-patterns:** "Let me try this...", changing multiple things at once, skipping reproduction, fixing without understanding. If after 3 hypothesis cycles no root cause found: document findings, list eliminations, ask for external input.
 
-### Two-Stage Review (Reviewer Agent)
-At phase boundaries, run BOTH stages in order:
+### Three-Stage Review (Reviewer Agent)
+At phase boundaries, run ALL three stages in order:
 
-**Stage 1: Spec Compliance** — Did we build what was specified?
+**Stage 1: Automated Validation** (REQUIRED) — Is the code structurally sound and secure?
+- Architecture conformance (no pattern violations, module boundaries respected)
+- Dead code detection (no unused exports, no unreachable paths)
+- Dependency cycle check (no circular imports)
+- Security scan (no hardcoded secrets, no injection risks)
+- Performance anti-patterns (no N+1 queries, no blocking I/O in async)
+
+**If Stage 1 FAILS:** Stop. List structural failures and return to implementation.
+
+**Stage 2: Spec Compliance** (only if Stage 1 passes) — Did we build what was specified?
 - All functional requirements implemented
 - All acceptance criteria met
 - No missing features, no scope creep
 - Edge cases and error scenarios addressed
 
-**If Stage 1 FAILS:** Stop. List gaps and return to implementation.
+**If Stage 2 FAILS:** Stop. List gaps and return to implementation.
 
-**Stage 2: Code Quality** (only if Stage 1 passes) — Is the code well-crafted?
+**Stage 3: Code Quality** (only if Stage 2 passes) — Is the code well-crafted?
 - Follows project patterns (tech-stack.md)
 - Appropriate error handling
 - Tests cover real logic (not implementation details)

@@ -138,11 +138,11 @@ To add a new skill to the Draft plugin:
        esac
    }
 
-   # Add to get_gemini_trigger() and get_copilot_trigger():
-   get_gemini_trigger() {
+   # Add to get_trigger():
+   get_trigger() {
        case "$skill" in
            ...
-           my-skill) echo "\"my skill\" or \"@draft my-skill\"" ;;
+           my-skill) echo "\"my skill\" or \"${prefix}draft my-skill\"" ;;
        esac
    }
    ```

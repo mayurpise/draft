@@ -71,54 +71,41 @@ get_skill_header() {
     esac
 }
 
+# Common logic for trigger generation
+get_trigger() {
+    local skill="$1"
+    local prefix="$2"
+    case "$skill" in
+        draft)        echo "\"help\" or \"${prefix}draft\"" ;;
+        init)         echo "\"init draft\" or \"${prefix}draft init [refresh]\"" ;;
+        index)        echo "\"index services\" or \"${prefix}draft index [--init-missing]\"" ;;
+        new-track)    echo "\"new feature\" or \"${prefix}draft new-track <description>\"" ;;
+        decompose)    echo "\"break into modules\" or \"${prefix}draft decompose\"" ;;
+        implement)    echo "\"implement\" or \"${prefix}draft implement\"" ;;
+        coverage)     echo "\"check coverage\" or \"${prefix}draft coverage\"" ;;
+        bughunt)      echo "\"hunt bugs\" or \"${prefix}draft bughunt [--track <id>]\"" ;;
+        review)       echo "\"review code\" or \"${prefix}draft review [--track <id>] [--full]\"" ;;
+        deep-review)  echo "\"deep review\" or \"${prefix}draft deep-review [module]\"" ;;
+        learn)        echo "\"learn patterns\" or \"${prefix}draft learn [promote|migrate|path]\"" ;;
+        adr)          echo "\"document decision\" or \"${prefix}draft adr [title]\"" ;;
+        status)       echo "\"status\" or \"${prefix}draft status\"" ;;
+        revert)       echo "\"revert\" or \"${prefix}draft revert\"" ;;
+        change)       echo "\"handle change\" or \"${prefix}draft change <description>\"" ;;
+        jira-preview) echo "\"preview jira\" or \"${prefix}draft jira-preview [track-id]\"" ;;
+        jira-create)  echo "\"create jira\" or \"${prefix}draft jira-create [track-id]\"" ;;
+        epic-status)  echo "\"qualify epic\" or \"${prefix}draft epic-status <EPIC_ID>\"" ;;
+        *)            echo "\"${prefix}draft $skill\"" ;;
+    esac
+}
+
 # Gemini uses @draft syntax
 get_gemini_trigger() {
-    local skill="$1"
-    case "$skill" in
-        draft)        echo "\"help\" or \"@draft\"" ;;
-        init)         echo "\"init draft\" or \"@draft init [refresh]\"" ;;
-        index)        echo "\"index services\" or \"@draft index [--init-missing]\"" ;;
-        new-track)    echo "\"new feature\" or \"@draft new-track <description>\"" ;;
-        decompose)    echo "\"break into modules\" or \"@draft decompose\"" ;;
-        implement)    echo "\"implement\" or \"@draft implement\"" ;;
-        coverage)     echo "\"check coverage\" or \"@draft coverage\"" ;;
-        bughunt)      echo "\"hunt bugs\" or \"@draft bughunt [--track <id>]\"" ;;
-        review)       echo "\"review code\" or \"@draft review [--track <id>] [--full]\"" ;;
-        deep-review)  echo "\"deep review\" or \"@draft deep-review [module]\"" ;;
-        learn)        echo "\"learn patterns\" or \"@draft learn [promote|migrate|path]\"" ;;
-        adr)          echo "\"document decision\" or \"@draft adr [title]\"" ;;
-        status)       echo "\"status\" or \"@draft status\"" ;;
-        revert)       echo "\"revert\" or \"@draft revert\"" ;;
-        change)       echo "\"handle change\" or \"@draft change <description>\"" ;;
-        jira-preview) echo "\"preview jira\" or \"@draft jira-preview [track-id]\"" ;;
-        jira-create)  echo "\"create jira\" or \"@draft jira-create [track-id]\"" ;;
-        *)            echo "\"@draft $skill\"" ;;
-    esac
+    get_trigger "$1" "@"
 }
 
 # Copilot uses natural language (no @ mentions)
 get_copilot_trigger() {
-    local skill="$1"
-    case "$skill" in
-        draft)        echo "\"help\" or \"draft\"" ;;
-        init)         echo "\"init draft\" or \"draft init [refresh]\"" ;;
-        index)        echo "\"index services\" or \"draft index [--init-missing]\"" ;;
-        new-track)    echo "\"new feature\" or \"draft new-track <description>\"" ;;
-        decompose)    echo "\"break into modules\" or \"draft decompose\"" ;;
-        implement)    echo "\"implement\" or \"draft implement\"" ;;
-        coverage)     echo "\"check coverage\" or \"draft coverage\"" ;;
-        bughunt)      echo "\"hunt bugs\" or \"draft bughunt [--track <id>]\"" ;;
-        review)       echo "\"review code\" or \"draft review [--track <id>] [--full]\"" ;;
-        deep-review)  echo "\"deep review\" or \"draft deep-review [module]\"" ;;
-        learn)        echo "\"learn patterns\" or \"draft learn [promote|migrate|path]\"" ;;
-        adr)          echo "\"document decision\" or \"draft adr [title]\"" ;;
-        status)       echo "\"status\" or \"draft status\"" ;;
-        revert)       echo "\"revert\" or \"draft revert\"" ;;
-        change)       echo "\"handle change\" or \"draft change <description>\"" ;;
-        jira-preview) echo "\"preview jira\" or \"draft jira-preview [track-id]\"" ;;
-        jira-create)  echo "\"create jira\" or \"draft jira-create [track-id]\"" ;;
-        *)            echo "\"draft $skill\"" ;;
-    esac
+    get_trigger "$1" ""
 }
 
 # ─────────────────────────────────────────────────────────

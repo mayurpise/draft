@@ -33,16 +33,22 @@ extract_case_entries() {
     sed -n "/^${func_name}()/,/^}/p" "$BUILD_SCRIPT" | grep -oP '^\s+\K[a-z0-9-]+(?=\))' || true
 }
 
-HEADER_CASES=$(extract_case_entries "get_skill_header")
-GEMINI_CASES=$(extract_case_entries "get_gemini_trigger")
-COPILOT_CASES=$(extract_case_entries "get_copilot_trigger")
+# Convert case entries to associative arrays for O(1) lookup
+declare -A HEADER_CASES_MAP
+for skill_case in $(extract_case_entries "get_skill_header"); do HEADER_CASES_MAP["$skill_case"]=1; done
+
+declare -A GEMINI_CASES_MAP
+for skill_case in $(extract_case_entries "get_gemini_trigger"); do GEMINI_CASES_MAP["$skill_case"]=1; done
+
+declare -A COPILOT_CASES_MAP
+for skill_case in $(extract_case_entries "get_copilot_trigger"); do COPILOT_CASES_MAP["$skill_case"]=1; done
 
 # --- get_skill_header coverage ---
 echo "## get_skill_header coverage"
 ALL_HEADER=true
 for skill in "${SKILL_ORDER[@]}"; do
     [[ -z "$skill" ]] && continue
-    if ! echo "$HEADER_CASES" | grep -qx "$skill"; then
+    if [[ -z "${HEADER_CASES_MAP[$skill]-}" ]]; then
         echo "  MISSING in get_skill_header: $skill"
         ALL_HEADER=false
     fi
@@ -55,7 +61,7 @@ echo "## get_gemini_trigger coverage"
 ALL_GEMINI=true
 for skill in "${SKILL_ORDER[@]}"; do
     [[ -z "$skill" ]] && continue
-    if ! echo "$GEMINI_CASES" | grep -qx "$skill"; then
+    if [[ -z "${GEMINI_CASES_MAP[$skill]-}" ]]; then
         echo "  MISSING in get_gemini_trigger: $skill"
         ALL_GEMINI=false
     fi
@@ -68,7 +74,7 @@ echo "## get_copilot_trigger coverage"
 ALL_COPILOT=true
 for skill in "${SKILL_ORDER[@]}"; do
     [[ -z "$skill" ]] && continue
-    if ! echo "$COPILOT_CASES" | grep -qx "$skill"; then
+    if [[ -z "${COPILOT_CASES_MAP[$skill]-}" ]]; then
         echo "  MISSING in get_copilot_trigger: $skill"
         ALL_COPILOT=false
     fi

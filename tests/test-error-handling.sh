@@ -33,7 +33,7 @@ create_modified_script() {
     cp "$BUILD_SCRIPT" "$dest"
     chmod +x "$dest"
     # Override ROOT_DIR to point to the real repo root
-    sed -i "s|^ROOT_DIR=.*|ROOT_DIR=\"$ROOT_DIR\"|" "$dest"
+    awk -v root="$ROOT_DIR" '{if (/^ROOT_DIR=/) print "ROOT_DIR=\"" root "\""; else print}' "$dest" > "$dest.tmp" && mv "$dest.tmp" "$dest" && chmod +x "$dest"
 }
 
 echo "=== Error handling tests ==="
@@ -45,7 +45,7 @@ MODIFIED_SCRIPT="$TMPDIR_BASE/modified-build.sh"
 create_modified_script "$MODIFIED_SCRIPT"
 
 # Add a fake skill to SKILL_ORDER
-sed -i 's/^SKILL_ORDER=(/SKILL_ORDER=(\n    zzz-nonexistent-skill/' "$MODIFIED_SCRIPT"
+awk '/^SKILL_ORDER=\(/{print; print "    zzz-nonexistent-skill"; next}1' "$MODIFIED_SCRIPT" > "$MODIFIED_SCRIPT.tmp" && mv "$MODIFIED_SCRIPT.tmp" "$MODIFIED_SCRIPT" && chmod +x "$MODIFIED_SCRIPT"
 
 STDERR=$("$MODIFIED_SCRIPT" 2>&1 >/dev/null || true)
 EXIT_CODE=0
@@ -77,7 +77,7 @@ EOF
 
 MODIFIED_SCRIPT2="$TMPDIR_BASE/modified-build2.sh"
 create_modified_script "$MODIFIED_SCRIPT2"
-sed -i 's/^SKILL_ORDER=(/SKILL_ORDER=(\n    zzz-test-bad-frontmatter/' "$MODIFIED_SCRIPT2"
+awk '/^SKILL_ORDER=\(/{print; print "    zzz-test-bad-frontmatter"; next}1' "$MODIFIED_SCRIPT2" > "$MODIFIED_SCRIPT2.tmp" && mv "$MODIFIED_SCRIPT2.tmp" "$MODIFIED_SCRIPT2" && chmod +x "$MODIFIED_SCRIPT2"
 
 STDERR2=$("$MODIFIED_SCRIPT2" 2>&1 >/dev/null || true)
 EXIT_CODE2=0
@@ -99,7 +99,7 @@ MODIFIED_SCRIPT3="$TMPDIR_BASE/modified-build3.sh"
 create_modified_script "$MODIFIED_SCRIPT3"
 
 # Add an invalid skill name (uppercase)
-sed -i 's/^SKILL_ORDER=(/SKILL_ORDER=(\n    InvalidName/' "$MODIFIED_SCRIPT3"
+awk '/^SKILL_ORDER=\(/{print; print "    InvalidName"; next}1' "$MODIFIED_SCRIPT3" > "$MODIFIED_SCRIPT3.tmp" && mv "$MODIFIED_SCRIPT3.tmp" "$MODIFIED_SCRIPT3" && chmod +x "$MODIFIED_SCRIPT3"
 
 STDERR3=$("$MODIFIED_SCRIPT3" 2>&1 >/dev/null || true)
 EXIT_CODE3=0

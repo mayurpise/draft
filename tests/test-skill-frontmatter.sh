@@ -220,24 +220,22 @@ assert "Accepts valid skill with correct frontmatter and body" \
 echo ""
 echo "## Real skill validation"
 ALL_REAL_PASS=true
-for skill_dir in "$SKILLS_DIR"/*/; do
-    skill_name=$(basename "$skill_dir")
-    skill_file="$skill_dir/SKILL.md"
-    if [[ -f "$skill_file" ]]; then
-        # Re-use the test runner against real skills
-        TMPDIR_REAL="$TMPDIR_BASE/real-$skill_name"
-        mkdir -p "$TMPDIR_REAL"
-        cp "$TMPDIR_BASE/no-delimiters/test-runner.sh" "$TMPDIR_REAL/test-runner.sh" 2>/dev/null || true
-        # Use the first test runner we created
-        RUNNER="$TMPDIR_BASE/no-delimiters/test-runner.sh"
-        if [[ -x "$RUNNER" ]]; then
+RUNNER="$TMPDIR_BASE/no-delimiters/test-runner.sh"
+if [[ ! -x "$RUNNER" ]]; then
+    echo "  FAIL: test-runner.sh was not created by earlier test — cannot validate real skills"
+    ALL_REAL_PASS=false
+else
+    for skill_dir in "$SKILLS_DIR"/*/; do
+        skill_name=$(basename "$skill_dir")
+        skill_file="$skill_dir/SKILL.md"
+        if [[ -f "$skill_file" ]]; then
             if ! "$RUNNER" "$skill_file" > /dev/null 2>&1; then
                 echo "  FAIL: Real skill '$skill_name' failed validation"
                 ALL_REAL_PASS=false
             fi
         fi
-    fi
-done
+    done
+fi
 assert "All real skills (skills/*) pass frontmatter + body validation" "$ALL_REAL_PASS"
 
 # --- Summary ---

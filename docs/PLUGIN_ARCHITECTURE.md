@@ -2,13 +2,13 @@
 
 ## How Skills are Registered
 
-Claude Code plugins use **convention-over-configuration** for skill discovery.
+Claude Code plugins use a **directory convention** combined with **explicit registration** in `plugin.json`.
 
 ### Discovery Mechanism
 
-Skills are auto-discovered from the `skills/` directory. No explicit registration in `plugin.json` is required.
+Skills follow a directory convention (`skills/<name>/SKILL.md`) and are explicitly listed in the `skills` array in `plugin.json`.
 
-**Requirements for auto-discovery:**
+**Requirements for skill registration:**
 1. File location: `skills/<skill-name>/SKILL.md`
 2. YAML frontmatter with required fields:
    ```yaml
@@ -18,12 +18,13 @@ Skills are auto-discovered from the `skills/` directory. No explicit registratio
    ---
    ```
 3. Execution instructions in markdown body (after frontmatter)
+4. Skill path listed in the `skills` array in `.claude-plugin/plugin.json`
 
 ### Plugin Structure
 
 ```
 .claude-plugin/
-├── plugin.json           # Metadata only (name, version, author, license)
+├── plugin.json           # Metadata + skills array (explicit skill registration)
 └── marketplace.json      # Marketplace listing info
 
 skills/
@@ -36,21 +37,26 @@ skills/
 
 ### What plugin.json Contains
 
-The `plugin.json` file only contains **metadata**, not skill registrations:
+The `plugin.json` file contains **metadata** and an explicit **skills array** listing all skill file paths:
 
 ```json
 {
   "name": "draft",
   "description": "...",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "author": { "name": "..." },
   "homepage": "...",
-  "license": "Apache-2.0",
-  "keywords": [...]
+  "license": "MIT",
+  "keywords": [...],
+  "skills": [
+    "skills/adr/SKILL.md",
+    "skills/bughunt/SKILL.md",
+    ...
+  ]
 }
 ```
 
-**Note:** There is NO `skills` array in plugin.json. Skills are discovered automatically.
+**Note:** The `skills` array explicitly registers all skill files. Skills must also follow the directory convention (`skills/<name>/SKILL.md`).
 
 ### Verification
 
@@ -147,12 +153,18 @@ To add a new skill to the Draft plugin:
    }
    ```
 
-3. **Rebuild integrations:**
+3. **Register in plugin.json:**
+   ```bash
+   # Add to .claude-plugin/plugin.json "skills" array:
+   "skills/my-skill/SKILL.md"
+   ```
+
+4. **Rebuild integrations:**
    ```bash
    make build
    ```
 
-4. **Test:**
+5. **Test:**
    ```bash
    # In Claude Code:
    /draft:my-skill
@@ -164,20 +176,19 @@ To add a new skill to the Draft plugin:
    draft my-skill
    ```
 
-### Why No Explicit Registration?
+### Registration Model
 
-**Benefits of auto-discovery:**
-- ✅ Less configuration boilerplate
-- ✅ Convention encourages consistent structure
-- ✅ Adding skills is just "create file in skills/"
-- ✅ Reduces plugin.json to pure metadata
+**Directory convention + explicit registration:**
+- Skills follow a consistent directory structure (`skills/<name>/SKILL.md`)
+- Each skill is explicitly listed in `plugin.json`'s `skills` array
+- The build script uses `SKILL_ORDER` for integration generation ordering
 
 **Tradeoffs:**
-- ⚠️ Skill must follow naming convention (skills/<name>/SKILL.md)
+- ⚠️ Skill must follow naming convention (`skills/<name>/SKILL.md`)
+- ⚠️ Must update both `plugin.json` and `SKILL_ORDER` in the build script
 - ⚠️ Name collision possible if not careful
-- ⚠️ No way to disable a skill without deleting file
 
 ---
 
-**Last Updated:** 2026-02-07
-**Plugin Version:** 1.0.0
+**Last Updated:** 2026-03-19
+**Plugin Version:** 2.0.0

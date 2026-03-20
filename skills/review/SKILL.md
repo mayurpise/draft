@@ -453,7 +453,7 @@ ln -sf review-report-<timestamp>.md draft/tracks/<id>/review-report-latest.md
 - **Critical bugs:** N found
 - **High severity:** N found
 - **Medium severity:** N found
-- Full report: `./bughunt-report.md`
+- Full report: `./bughunt-report-latest.md`
 
 ---
 

@@ -198,6 +198,7 @@ CORE_FILES=(
     "templates/tech-stack.md"
     "templates/workflow.md"
     "templates/spec.md"
+    "templates/plan.md"
     # Index templates (monorepo)
     "templates/service-index.md"
     "templates/dependency-graph.md"
@@ -623,7 +624,9 @@ verify_output() {
         echo "  Found $at_draft_count '@draft' references"
     else
         if [[ "$at_draft_count" -gt 0 ]]; then
-            echo "  WARNING: Found $at_draft_count '@draft' references (should be 0 for $label)"
+            echo "  WARNING: Found $at_draft_count '@draft' references (should be 0 for $label)" >&2
+            echo "  Offending lines:" >&2
+            grep -n '@draft' "$output_file" | head -5 >&2
             return 1
         else
             echo "  Syntax check: OK (no @draft references)"

@@ -44,16 +44,16 @@ assert "SKILL_ORDER count matches disk skill count" \
 # --- Every disk skill is in SKILL_ORDER ---
 echo ""
 echo "## Disk skills present in SKILL_ORDER"
+
+# Create associative array for O(1) membership check
+declare -A SKILL_ORDER_MAP
+for skill in "${SKILL_ORDER[@]}"; do
+    SKILL_ORDER_MAP["$skill"]=1
+done
+
 ALL_DISK_IN_ORDER=true
 for disk_skill in "${DISK_SKILLS[@]}"; do
-    FOUND=false
-    for order_skill in "${SKILL_ORDER[@]}"; do
-        if [[ "$disk_skill" == "$order_skill" ]]; then
-            FOUND=true
-            break
-        fi
-    done
-    if [[ "$FOUND" == "false" ]]; then
+    if [[ -z "${SKILL_ORDER_MAP["$disk_skill"]:-}" ]]; then
         echo "  MISSING from SKILL_ORDER: $disk_skill"
         ALL_DISK_IN_ORDER=false
     fi

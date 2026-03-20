@@ -3278,6 +3278,13 @@
     <script>
         function playVideo(card, videoId) {
             if (card.classList.contains('playing')) return;
+
+            // Basic validation to prevent DOM-based XSS
+            if (!/^[a-zA-Z0-9_-]+$/.test(videoId)) {
+                console.error('Invalid video ID');
+                return;
+            }
+
             card.classList.add('playing');
             var thumb = card.querySelector('.video-thumb');
             thumb.innerHTML = '<iframe src="https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';

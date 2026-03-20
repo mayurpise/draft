@@ -42,60 +42,22 @@ run_build_with_skill() {
 
     # Create a minimal build script that tests just extract_body + validation
     # by sourcing the relevant functions from the real build script
-    cat > "$tmpdir/test-runner.sh" << 'RUNNER'
+    cat > "$tmpdir/test-runner.sh" << RUNNER
 #!/usr/bin/env bash
 set -euo pipefail
 
-SKILL_FILE="$1"
+SKILL_FILE="\$1"
 
-# Extract body content from a SKILL.md file (strip YAML frontmatter)
-extract_body() {
-    local file="$1"
-
-    if ! grep -q "^---$" "$file"; then
-        echo "ERROR: Missing YAML frontmatter in $file" >&2
-        return 1
-    fi
-
-    local frontmatter
-    frontmatter=$(awk '
-        /^---$/ { if (!seen_first) { seen_first=1; next } else { exit } }
-        seen_first { print }
-    ' "$file" | head -20 || true)
-
-    if ! echo "$frontmatter" | grep -q "^name:"; then
-        echo "ERROR: Missing 'name:' field in frontmatter of $file" >&2
-        return 1
-    fi
-
-    if ! echo "$frontmatter" | grep -q "^description:"; then
-        echo "ERROR: Missing 'description:' field in frontmatter of $file" >&2
-        return 1
-    fi
-
-    awk '
-        BEGIN { in_frontmatter = 0; found_end = 0 }
-        /^---$/ {
-            if (in_frontmatter == 0) {
-                in_frontmatter = 1
-                next
-            } else if (found_end == 0) {
-                found_end = 1
-                next
-            }
-        }
-        found_end == 1 { print }
-    ' "$file"
-}
+source "$SCRIPT_DIR/test-helpers.sh"
 
 # Run extract_body
-BODY=$(extract_body "$SKILL_FILE") || exit 1
+BODY=\$(extract_body "\$SKILL_FILE") || exit 1
 
 # Validate body format: line 1 blank, line 2 starts with #, line 3 blank
-line1=$(echo "$BODY" | sed -n '1p')
-line2=$(echo "$BODY" | sed -n '2p')
-line3=$(echo "$BODY" | sed -n '3p')
-if [[ -n "$line1" ]] || [[ ! "$line2" =~ ^#\  ]] || [[ -n "$line3" ]]; then
+line1=\$(echo "\$BODY" | sed -n '1p')
+line2=\$(echo "\$BODY" | sed -n '2p')
+line3=\$(echo "\$BODY" | sed -n '3p')
+if [[ -n "\$line1" ]] || [[ ! "\$line2" =~ ^#\  ]] || [[ -n "\$line3" ]]; then
     echo "ERROR: Body format invalid" >&2
     exit 1
 fi

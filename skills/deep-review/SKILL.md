@@ -53,12 +53,17 @@ If `draft/` does not exist: **STOP** — "No Draft context found. Run `/draft:in
 - Trace the complete lifecycle: initialization → processing → persistence → cleanup
 - Identify all entry points and exit paths
 - Catalog all state mutations and side effects
+- **API Contract Drift Detection:** Compare the module's actual code interfaces against documented contracts (OpenAPI/Swagger specs, Protobuf/gRPC definitions, GraphQL schema files, TypeScript type exports). Flag drift: endpoints that exist in code but not in the spec (or vice versa). Flag type mismatches between spec and implementation. Reference: Amazon, Google large-scale changes.
 
 ### Phase 2: ACID Compliance Audit
 - **Atomicity:** Verify all multi-step operations are wrapped in transactions. Partial failure must not leave corrupt state. Check for missing rollback paths.
 - **Consistency:** Validate all invariants, constraints, and business rules are enforced before and after every state transition. Check schema validation, data type enforcement, and boundary conditions.
 - **Isolation:** Check for race conditions, shared mutable state, concurrent access without locking/synchronization. Verify transaction isolation levels where databases are involved.
 - **Durability:** Confirm committed data survives crashes. Check for fire-and-forget patterns, missing flush/sync calls, and inadequate error handling around persistence.
+- **Event Sourcing:** Are events immutable? Is event replay idempotent? Is the event store append-only?
+- **CQRS:** Are read/write models eventually consistent? Is consistency lag acceptable for the use case?
+- **Saga Pattern:** Are compensating transactions defined for each step? What happens on partial saga failure?
+- **Eventual Consistency:** Are there convergence guarantees? How is conflict resolution handled (LWW, CRDT, manual)? Reference: Amazon distributed systems.
 
 ### Phase 3: Production-Grade Assessment
 
@@ -66,11 +71,50 @@ If `draft/` does not exist: **STOP** — "No Draft context found. Run `/draft:in
 
 - **Resilience:** Graceful degradation, circuit breakers, timeout handling, backpressure
 - **Observability:** Logging coverage (not excessive), structured log fields, correlation IDs, metric emission points
+  - **Structured logging:** Are logs structured (JSON/key-value) vs free-form strings?
+  - **Log level correctness:** Are ERROR/WARN/INFO/DEBUG used appropriately? Are expected conditions logged at DEBUG, not ERROR?
+  - **PII leakage:** Do logs or error messages expose personally identifiable information, tokens, or credentials?
+  - **Tracing spans:** Are spans created at service boundaries? Do spans include relevant attributes (user_id, request_id)?
+  - **Metric cardinality:** Are metric labels bounded? Unbounded labels (e.g., user_id as label) cause metric explosion.
+  - **Alerting coverage:** Are critical failure modes covered by alerts? Are there runbooks linked to alerts?
+  - Reference: Netflix Full Cycle Developers, Google SRE.
 - **Configuration:** Hardcoded values that should be configurable, missing environment variable validation
 - **State Lifecycle:** Memory accumulation, zombie processes, dropped messages
+- **SLO/SLA Alignment:**
+  - Does the module's observed/expected error rate match defined SLOs?
+  - **Latency profiles:** Are p50, p95, p99 latency targets defined and achievable?
+  - **Error budget:** What percentage of the error budget has been consumed? Is the module in "protect" or "innovate" mode?
+  - **Availability:** Does the module's uptime target (99.9%, 99.99%) match its actual architecture?
+  - If no SLOs are defined, recommend defining them. Reference: Google SRE (https://sre.google/sre-book/service-level-objectives/).
+- **Database Schema Analysis:**
+  - **Missing indexes:** Queries filtering/joining on unindexed columns.
+  - **Wide table scans:** SELECT * or queries without WHERE clauses on large tables.
+  - **Schema constraints:** Missing NOT NULL, UNIQUE, FOREIGN KEY constraints.
+  - **Migration safety:** Can migrations run without downtime? Are they backward-compatible?
+  - **N+1 at schema level:** Relationships that require multiple queries instead of joins.
+  - Reference: Google large-scale changes.
 
 ### Phase 4: Identify Actionable Fixes (Spec Generation)
 Instead of mutating the source code, translate all findings into clear, actionable requirements that a developer (or agent) can implement via Test-Driven Development.
+
+### Phase 5: Resilience & Chaos Engineering Assessment
+
+**Applicability note:** Skip categories not applicable to the module type (e.g., network partitions are irrelevant for purely local CLI tools).
+
+- **Dependency failure scenarios:** What happens when each external dependency (database, cache, message queue, external API) is unavailable? Are there timeouts, fallbacks, circuit breakers?
+- **Timeout analysis:** Are all external calls bounded by timeouts? Are timeout values appropriate (not too long, not too short)?
+- **Disk/resource exhaustion:** What happens when disk fills, memory is exhausted, file descriptors run out?
+- **Clock skew:** Does the module make assumptions about clock synchronization? Are distributed timestamps handled correctly?
+- **Network partitions:** How does the module behave during partial network failures? Split-brain scenarios?
+- **Retry behavior:** Does retry logic use exponential backoff with jitter? Is there a retry budget to prevent retry storms?
+- **Graceful degradation:** Can non-critical features be disabled without affecting core functionality?
+- **Load shedding:** Under extreme load, does the module shed excess requests gracefully?
+- **Capacity/Load Modeling:**
+  - What happens at 10x current traffic? 100x?
+  - Identify bottlenecks: connection pools, thread pools, rate limits, queue depth.
+  - Are there horizontal scaling capabilities?
+  - What is the theoretical maximum throughput?
+- Reference: Netflix Chaos Monkey, Netflix Simian Army, Amazon GameDay.
 
 ---
 

@@ -46,13 +46,27 @@ Before investigating, load and reference the project's big picture documents:
    - If reproducible: document exact inputs, environment, and output
    - If intermittent: document frequency, conditions, and any patterns (time-of-day, load, data-dependent)
 2. **Capture evidence** — Error messages, stack traces, log output, HTTP responses. Verbatim, not summarized.
-3. **Define blast radius:**
+3. **Assess detection lag:**
+   - When did this bug actually start occurring? (check `git log`, deploy timestamps, first error in logs)
+   - When was it detected/reported?
+   - What is the detection lag? (time between occurrence and detection)
+   - What monitoring gap allowed this lag? (missing alert, missing metric, missing log, no synthetic monitoring)
+   - Record this in the RCA summary — detection lag >24h should generate a prevention item for improved observability
+   - **Reference:** Google SRE Postmortem Culture — detection lag reveals systemic observability gaps
+4. **Define blast radius:**
    - What's broken: [specific flows, endpoints, data paths]
    - What's NOT broken: [adjacent functionality that still works]
    - Boundary: [the module/layer/service where the failure lives]
-4. **Map against .ai-context.md** — Identify which module(s) are involved. Check data state machines for invalid transitions. Check consistency boundaries for eventual-consistency bugs. Note module boundaries — the bug is likely within one module, and the fix should stay there.
+5. **Quantify SLO impact:**
+   - Which SLOs were violated? (availability, latency, error rate, throughput)
+   - Error budget burn: estimate how much error budget was consumed by this incident
+   - Customer impact: how many users affected, for how long?
+   - Express in SLO terms: "Availability dropped from 99.95% to 99.2% for 3 hours, burning ~40% of monthly error budget"
+   - If no SLOs are defined for this service, add prevention item: "Define SLOs for [service name]"
+   - **Reference:** Google SRE — SLO impact quantification enables principled prioritization of fixes and prevention
+6. **Map against .ai-context.md** — Identify which module(s) are involved. Check data state machines for invalid transitions. Check consistency boundaries for eventual-consistency bugs. Note module boundaries — the bug is likely within one module, and the fix should stay there.
 
-**Output:** Reproduction confirmed with evidence. Blast radius documented. Investigation scoped to specific module(s).
+**Output:** Reproduction confirmed with evidence. Blast radius and SLO impact documented. Investigation scoped to specific module(s).
 
 **Anti-patterns:**
 - Starting to read code before reproducing
@@ -173,11 +187,31 @@ Once you find the immediate cause, ask "why" to find the root:
 **Classification:** [logic error | race condition | data corruption | config error | dependency issue | missing validation]
 **Introduced:** [commit/date/release if identifiable]
 
+### Detection Lag
+- **First occurred:** [date/time — from git log, deploy timestamps, or first error in logs]
+- **First detected:** [date/time — when reported or alerted]
+- **Detection lag:** [duration]
+- **Monitoring gap:** [what observability improvement would have caught this sooner]
+
+### SLO Impact
+- **SLOs violated:** [list affected SLOs — availability, latency, error rate]
+- **Error budget burn:** [estimate of error budget consumed]
+- **Customer impact:** [N users affected for M duration]
+
 ### Timeline
-1. [When first reported / observed]
-2. [When investigated]
-3. [When root cause confirmed]
-4. [When fix deployed]
+To populate this timeline, use automated commit/deploy history:
+```bash
+# Find commits in the incident window
+git log --oneline --since="YYYY-MM-DD" --until="YYYY-MM-DD" -- <affected-paths>
+```
+Cross-reference deploy timestamps if available. Identify the last known-good state and the first known-bad state.
+
+1. [Last known-good state — commit/deploy]
+2. [First known-bad state — commit/deploy]
+3. [When first reported / observed]
+4. [When investigated]
+5. [When root cause confirmed]
+6. [When fix deployed]
 
 ### What Happened
 [2-3 sentences: factual description of the failure chain]
@@ -190,8 +224,26 @@ Once you find the immediate cause, ask "why" to find the root:
 - **Test:** `test_file:line` — [regression test description]
 
 ### Prevention
-- [ ] [Action to prevent this class of bug — e.g., add validation, improve monitoring]
-- [ ] [Structural improvement — e.g., type safety, integration test, circuit breaker]
+
+Classify each prevention item into one of four categories. This taxonomy enables trend analysis across incidents.
+
+**Detection improvement** — Better monitoring, alerting, or logging to catch this sooner:
+- [ ] [e.g., add alert for error rate spike on /api/checkout]
+- [ ] [e.g., add structured logging at service boundary]
+
+**Process improvement** — Better review, testing, or deployment practices:
+- [ ] [e.g., add integration test to CI for this flow]
+- [ ] [e.g., require canary deployment for payment service changes]
+
+**Code improvement** — Fix the code pattern or logic that allowed this:
+- [ ] [e.g., add null guard at data transformation layer]
+- [ ] [e.g., validate input schema at API boundary]
+
+**Architecture improvement** — Structural change to make this class of bug impossible:
+- [ ] [e.g., replace shared mutable state with event sourcing]
+- [ ] [e.g., add circuit breaker between services A and B]
+
+**Reference:** Google SRE Workbook: Postmortem Analysis — categorized prevention items enable teams to identify systemic gaps (e.g., "80% of our incidents need detection improvements").
 ```
 
 ---

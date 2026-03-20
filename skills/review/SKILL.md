@@ -245,9 +245,68 @@ For the files changed in the diff, perform static checks using `grep` or similar
    - Blocking synchronous I/O within async functions
    - Unbounded queries lacking pagination
 
+6. **Context-Specific Checks:** Identify the primary domain of changed files and apply domain-specific checks:
+
+   - **Crypto/Security changes** (files matching `auth`, `crypto`, `security`, `token`, `password`, `hash`, `encrypt`):
+     - [ ] Timing-safe comparisons used (no `==` for secret comparison)
+     - [ ] Constant-time operations for sensitive data
+     - [ ] Secure random generation (no `Math.random()` for security)
+     - [ ] Key length meets minimum requirements
+   - **Database/Migration changes** (files matching `migration`, `schema`, `model`, `entity`, `repository`):
+     - [ ] Backward compatibility preserved (no destructive column drops without migration path)
+     - [ ] Index coverage for new queries
+     - [ ] Constraint preservation (foreign keys, unique constraints)
+     - [ ] Zero-downtime migration safety (no table locks on large tables)
+   - **API Endpoint changes** (files matching `controller`, `handler`, `route`, `endpoint`, `resolver`):
+     - [ ] Backward compatibility of public signatures (no breaking param changes)
+     - [ ] Input validation present for all new parameters
+     - [ ] Rate limiting configured for new endpoints
+     - [ ] Authentication/authorization checks in place
+   - **Configuration changes** (files matching `config`, `env`, `settings`):
+     - [ ] No secrets exposed in plaintext
+     - [ ] Validation at startup for required config values
+     - [ ] Fallback defaults provided where appropriate
+   - **UI/Frontend changes** (files matching `component`, `view`, `page`, `template`):
+     - [ ] No XSS vectors (`innerHTML`, `dangerouslySetInnerHTML`, `v-html`)
+     - [ ] Accessibility present (ARIA attributes, keyboard navigation)
+     - [ ] Performance impact considered (bundle size, render cycles)
+
+7. **Breaking Change Detection:** Check for public API changes in the diff:
+   - [ ] Exported function/method signatures unchanged (no added required params, no changed return types)
+   - [ ] No removed or renamed exported symbols
+   - [ ] Error types and error codes unchanged
+   - [ ] Serialization format preserved (JSON field names, protobuf field numbers)
+   - Flag as **CRITICAL** if breaking change found with no deprecation period or version bump
+
+8. **Threat Model (STRIDE):** For new endpoints or data mutations, check:
+   - **S**poofing: Can the caller's identity be faked? (authentication check)
+   - **T**ampering: Can request data be modified in transit? (integrity check)
+   - **R**epudiation: Are actions logged for audit? (logging check)
+   - **I**nformation Disclosure: Does the response leak internal details? (error message check)
+   - **D**enial of Service: Can the endpoint be abused? (rate limiting, resource limits)
+   - **E**levation of Privilege: Are authorization checks in place? (RBAC/ABAC check)
+
 **Verdict:**
 - **PASS:** No critical issues found → Proceed to Stage 2
 - **FAIL:** ANY Critical issue found (e.g., circular dependency, hardcoded secret, raw SQL injection) → List the static analysis failures, generate the review report, and **STOP**. Do not proceed to Stage 2. This prevents wasting effort on structurally broken code.
+
+### SAST Tool Recommendations
+
+After completing Stage 1, recommend appropriate static analysis tools based on the project's `tech-stack.md`. Check if these tools are already configured in CI; if not, recommend adding them.
+
+| Language | Recommended Tools |
+|----------|-------------------|
+| JavaScript/TypeScript | ESLint with `eslint-plugin-security`, Semgrep |
+| Python | Bandit, Semgrep, pylint |
+| Java | Error Prone, SpotBugs, Semgrep |
+| Go | gosec, staticcheck |
+| Rust | `cargo clippy`, `cargo audit` |
+| C/C++ | Clang Static Analyzer, cppcheck |
+| Multi-language | Semgrep (https://semgrep.dev/), CodeQL (https://codeql.github.com/) |
+
+References: Meta Infer for CI integration patterns, Google Error Prone for compile-time analysis.
+
+Include tool recommendations in the review report under Stage 1 as a "Recommended Tooling" subsection. Only recommend tools relevant to the languages detected in the diff.
 
 ### Stage 2: Spec Compliance (Track-Level Only)
 
@@ -299,6 +358,13 @@ Analyze semantic code quality across four dimensions:
 #### 4.7: Maintainability
 - [ ] Code is readable without excessive comments
 - [ ] Consistent naming and style
+
+#### 4.8: Diff Complexity Metrics
+- [ ] No functions exceeding cognitive complexity threshold (>15)
+- [ ] No files with high churn + high complexity (flag as refactoring candidates)
+- [ ] No deeply nested control flow (>3 levels of nesting)
+
+For each flagged function, report: file path, function name, estimated complexity, and recommended action (split, extract, simplify).
 
 #### Adversarial Pass (When Zero Findings)
 

@@ -4266,6 +4266,15 @@ When your implementation hits any of these triggers, use the corresponding patte
 | Missing data, null, or undefined where a decision depends on it | Treat as deny/reject/skip — not as allow/proceed |
 | Config or feature flag missing/unparseable | Use the restrictive default — system runs in safe mode, not open mode |
 
+#### Resilience
+
+| Trigger | Required Pattern |
+|---------|-----------------|
+| Any retry logic | Exponential backoff with jitter — never fixed-interval or immediate retries. Prevents retry storms. |
+| Cache population under high concurrency | Cache stampede prevention: use probabilistic early expiration or request coalescing to prevent thundering herd |
+| External dependency call (HTTP, RPC, DB to external service) | Circuit breaker pattern: track failure rate, open circuit on threshold, allow periodic probes to recover |
+| Non-critical dependency failure | Graceful degradation: return cached/default/partial result rather than failing the entire request |
+
 **Enforcement:** These patterns override convenience. If following a pattern makes the code more verbose, that's correct — the verbosity is the safety. If a pattern is genuinely N/A for the current task (e.g., no DB in a pure utility function), skip it — only apply relevant patterns.
 
 **If project invariants were loaded in Step 1:** Cross-reference them here. Project-specific invariants (lock ordering, concurrency model, consistency boundaries) take precedence over these general patterns when they conflict.
@@ -4275,6 +4284,20 @@ When your implementation hits any of these triggers, use the corresponding patte
 ### Step 3.1: Implement (TDD Workflow)
 
 For each task, follow this workflow based on `workflow.md`. If skeletons were generated in Step 3.0b, fill them in using the TDD cycle below.
+
+### Characterization Testing (Refactoring Existing Code Without Tests)
+
+When a task involves refactoring existing code that lacks test coverage, run this **before** the TDD cycle:
+
+1. **Identify seams** (Michael Feathers' technique):
+   - Object seams: interfaces where test doubles can be injected
+   - Link seams: module imports that can be swapped
+2. **Write characterization tests** that capture the current behavior as a baseline
+   - Run the existing code and record actual outputs for representative inputs
+   - These tests document "what it does now," not "what it should do"
+3. Proceed with the TDD cycle below for the new/changed behavior
+4. Characterization tests serve as a safety net — if they break during refactoring, the behavioral change is intentional or a regression
+- Reference: "Working Effectively with Legacy Code" (Michael Feathers)
 
 ### If TDD Enabled:
 
@@ -4289,6 +4312,30 @@ For each task, follow this workflow based on `workflow.md`. If skeletons were ge
 5. Announce: "Test failing as expected: [failure message]"
 ```
 
+**Test Quality Checklist (REQUIRED for every test):**
+- No shared mutable state between test cases — each test sets up its own state
+- Assertion density: every test must have at least one meaningful assertion (not just `assertTrue(true)`)
+- No logic in tests: no conditionals, loops, or try/catch in test code — tests should be trivially readable
+- DAMP over DRY: prefer descriptive and meaningful test names and setup over deduplication
+- Test behavior, not implementation: verify observable outcomes, not internal method calls
+- One behavior per test: each test should verify exactly one logical behavior
+- Reference: Google SWE Book Ch. 12, Google Testing Blog "Test Behavior, Not Implementation"
+
+**Property-Based Testing Checkpoint:**
+After writing example-based tests, consider whether property-based tests would add value:
+- For pure functions (no side effects, deterministic): suggest property-based tests
+- For mathematical operations: suggest algebraic properties (commutativity, associativity, identity)
+- For serialization: suggest round-trip property (serialize → deserialize = identity)
+- For sorting: suggest ordering, permutation, length-preservation properties
+- Tool recommendations by language:
+  - Python: Hypothesis (https://hypothesis.works/)
+  - JavaScript/TypeScript: fast-check (https://fast-check.dev/)
+  - Java: jqwik (https://jqwik.net/)
+  - Rust: proptest (https://github.com/proptest-rs/proptest)
+  - Go: rapid (https://github.com/flyingmutant/rapid)
+- Reference: Amazon ShardStore property-based testing
+- **Not mandatory** — skip if the function is not pure or properties are not obvious
+
 **3b. GREEN - Implement Minimum Code**
 ```
 1. Write MINIMUM code to make test pass (no extras)
@@ -4296,6 +4343,23 @@ For each task, follow this workflow based on `workflow.md`. If skeletons were ge
 3. Show test output with pass
 4. Announce: "Test passing: [evidence]"
 ```
+
+**Observability Prompts (consider during implementation):**
+- Structured logging at key decision points (not just errors)
+- Metrics emission for latency-sensitive operations (counters, histograms)
+- Tracing span creation at service boundaries and significant internal operations
+- Error classification (transient vs permanent) for retry logic
+- These are prompts, not mandates — use engineering judgment on what's appropriate for the task
+- Reference: Netflix Full Cycle Developers
+
+**Contract Testing Checkpoint (Service Boundaries Only):**
+When implementing new API endpoints, message handlers, or service-to-service interfaces:
+- Suggest consumer-driven contract tests to verify interface compatibility
+- For REST APIs: suggest Pact (https://pact.io/) or Spring Cloud Contract
+- For GraphQL: suggest schema validation tests
+- For message queues: suggest schema registry validation
+- Skip for purely internal modules with no cross-service communication
+- Reference: ThoughtWorks Tech Radar, Pact documentation
 
 **3c. REFACTOR - Clean with Tests Green**
 ```
@@ -4571,7 +4635,8 @@ You are computing and reporting code coverage for the active track or a specific
 1. Read `draft/tech-stack.md` for test framework and language info
 2. Find active track from `draft/tracks.md`
 3. If track has `architecture.md` (track-level) or project has `.ai-context.md`, identify current module for scoping
-4. Look for `coverage_target` in `draft/workflow.md`. If absent, default to 95%.
+4. Look for `coverage_target` in `draft/workflow.md`. Check for per-module targets first (see Per-Module Coverage Enforcement below); if absent, default to 95%.
+5. Check if `draft/tracks/<id>/bughunt-report-latest.md` exists for cross-referencing (see Coverage-Bughunt Cross-Reference below)
 
 If no active track and no argument provided:
 - Tell user: "No active track. Provide a path or track ID, or run `@draft new-track` first."
@@ -4645,15 +4710,33 @@ src/auth/jwt.ts:78       Defensive null check (unreachable via public API)
 ═══════════════════════════════════════════════════════════
 ```
 
+## Step 5b: Branch/Condition Coverage (Optional)
+
+Beyond line coverage, evaluate branch coverage for modules with complex conditional logic:
+
+1. **When to apply:** If the module contains nested conditionals, switch statements, or complex boolean expressions, line coverage alone is insufficient. 100% line coverage can miss untested branches in complex if/else/switch logic.
+2. **Branch coverage** measures whether every branch of every decision point has been exercised. Enable it with the appropriate flag:
+   - Jest/Vitest: `--coverage --coverageReporters=json-summary` (branch data included by default)
+   - pytest: `--cov --cov-branch`
+   - Go: `go test -covermode=count` (counts execution per branch)
+   - JaCoCo: branch coverage reported by default
+   - lcov/gcov: `--rc lcov_branch_coverage=1`
+3. **MC/DC (Modified Condition/Decision Coverage)** — For safety-critical modules (auth, payments, crypto), recommend MC/DC analysis. MC/DC requires that each condition in a decision independently affects the outcome. This is the standard in DO-178C (avionics) and referenced in ISTQB Advanced Test Analyst syllabi.
+   - Present MC/DC gaps separately from standard branch coverage gaps
+   - Flag any boolean expression with 3+ conditions as an MC/DC candidate
+
+Include branch coverage percentage in the report alongside line coverage when branch analysis is performed.
+
 ## Step 6: Analyze Gaps
 
-For files below target:
+For files below target (using per-module targets when configured — see Per-Module Coverage Enforcement):
 
 1. **Identify uncovered lines** - List specific line ranges and what they contain
 2. **Classify each gap:**
    - **Testable** - Can and should be covered. Suggest specific test to write.
    - **Defensive** - Assertions, error handlers for impossible states. Acceptable to leave uncovered.
    - **Infrastructure** - Framework boilerplate, main entry points. Usually acceptable.
+   - **Legacy/Brownfield** - Modules with 0% or very low coverage that need refactoring. Apply Characterization Testing (see below).
 3. **Suggest tests** for testable gaps:
    ```
    SUGGESTED TESTS
@@ -4666,6 +4749,107 @@ For files below target:
       - Input: token with exp in the past
       - Expected: throws AuthError with code TOKEN_EXPIRED
    ```
+
+## Step 6b: Characterization Testing (Brownfield/Legacy Code)
+
+When encountering modules with 0% or very low coverage that need refactoring, do not attempt to write unit tests for untested legacy code directly. Instead, apply the Golden Master / Approval Testing approach (ref: Michael Feathers, "Working Effectively with Legacy Code"):
+
+1. **Create Golden Master baselines** — Generate fixed-seed inputs that exercise the module's public interface. Capture all outputs (return values, side effects, logs) as the approved baseline.
+2. **Lock behavior with approval tests** — Any change that alters the captured output triggers a test failure, making the current behavior explicit and protected.
+3. **Refactor under Golden Master safety net** — With approval tests guarding against regressions, refactor the module incrementally.
+4. **Write proper unit tests via TDD during refactoring** — As you extract and clarify logic, write focused unit tests using RED → GREEN → REFACTOR.
+5. **Remove approval tests** — Once proper unit test coverage meets the target, retire the Golden Master tests.
+
+**Tool references:**
+- ApprovalTests (https://approvaltests.com/) — available for Java, C#, Python, JS, and more
+- Verify (.NET) — snapshot testing library
+
+Present characterization testing recommendations in the gap analysis when applicable.
+
+## Step 6c: Mutation Testing Awareness
+
+After measuring line coverage (and branch coverage if applicable), prompt the engineer to consider mutation testing for critical modules. Mutation testing introduces small code changes (mutants) into the source; if existing tests still pass, the mutant "survived," indicating weak test assertions even at high line coverage.
+
+**When to recommend:** Modules at 90%+ line coverage that are high-risk (auth, payments, crypto, data persistence) or where past bugs have occurred. Mutation testing is most valuable when line coverage is already high but test quality is uncertain.
+
+**Mutation score** = killed mutants / total non-equivalent mutants. Target: 80%+ for critical modules.
+
+**Tool recommendations by language:**
+
+| Language | Tool | Reference |
+|----------|------|-----------|
+| Java | PIT | https://pitest.org/ |
+| JavaScript/TypeScript | Stryker | https://stryker-mutator.io/ |
+| Python | mutmut | https://github.com/boxed/mutmut |
+| Rust | cargo-mutants | https://github.com/sourcefrog/cargo-mutants |
+| C# | Stryker.NET | https://stryker-mutator.io/ |
+| Go | go-mutesting | https://github.com/zimmski/go-mutesting |
+
+**Reference:** Google's mutation testing program is used by 6,000+ engineers and processes approximately 30% of all code diffs, validating that mutation testing scales to large codebases.
+
+Include mutation testing recommendations in the report when applicable, but do not block coverage completion on mutation analysis — it is advisory.
+
+## Step 6d: Coverage-Bughunt Cross-Reference
+
+If a bughunt report exists (`draft/tracks/<id>/bughunt-report-latest.md` or `draft/bughunt-report-latest.md`):
+
+1. **Parse bughunt findings** — Extract file paths and line ranges of confirmed or suspected bugs.
+2. **Cross-reference with uncovered code paths** — Identify bughunt findings that fall in uncovered lines.
+3. **Flag as highest-priority test gaps** — Confirmed bugs in uncovered code are the most dangerous gaps. Present them prominently:
+   ```
+   BUGHUNT CROSS-REFERENCE
+   ─────────────────────────────────────────────────────────
+   ⚠ CRITICAL: Bug "Race condition in session refresh" (bughunt #3)
+     at src/auth/session.ts:112-118 — IN UNCOVERED CODE
+     → Write a test that exposes this bug FIRST before fixing
+
+   ⚠ HIGH: Bug "Missing null check on user lookup" (bughunt #7)
+     at src/users/repository.ts:45 — IN UNCOVERED CODE
+     → Write a regression test targeting this path
+   ```
+4. **Prioritize suggested tests** — Tests that cover bughunt-flagged code should appear first in the SUGGESTED TESTS section.
+
+## Per-Module Coverage Enforcement
+
+Instead of applying a single global coverage target, support differentiated targets by module risk level. Check `draft/workflow.md` for a `coverage_targets` section:
+
+```yaml
+# Example workflow.md configuration
+coverage_targets:
+  high_risk: 95    # auth, payments, crypto, data persistence
+  business_logic: 85
+  infrastructure: 70
+  generated: exclude
+  modules:
+    src/auth/: high_risk
+    src/payments/: high_risk
+    src/crypto/: high_risk
+    src/db/: high_risk
+    src/api/handlers/: business_logic
+    src/utils/: infrastructure
+    src/generated/: generated
+```
+
+**If no per-module configuration exists**, apply these defaults and inform the developer:
+
+| Risk Level | Target | Applies To |
+|------------|--------|------------|
+| High-risk | 95%+ | Auth, payments, crypto, data persistence modules |
+| Business logic | 85%+ | Core domain logic, API handlers |
+| Infrastructure | 70%+ | Utilities, glue code, configuration |
+| Generated | Exclude | Auto-generated code, proto stubs, ORM models |
+
+**Classification heuristic:** Infer module risk from directory names and file content when explicit configuration is absent. Flag the inferred classification in the report so the developer can correct it.
+
+In the coverage report, show per-module targets alongside actual coverage:
+```
+PER-FILE BREAKDOWN (module-level targets)
+─────────────────────────────────────────────────────────
+src/auth/middleware.ts    96.2%  [high_risk: 95%]    PASS
+src/auth/jwt.ts           72.1%  [high_risk: 95%]    FAIL
+src/utils/logger.ts       75.0%  [infrastructure: 70%]  PASS
+src/generated/api.ts       —     [generated: excluded]
+```
 
 ## Step 7: Developer Review
 
@@ -4761,7 +4945,7 @@ Some AI tools (e.g., Claude Code) provide a built-in `bughunt` agent that auto-d
 
 | | `@draft bughunt` | Built-in bughunt agent |
 |---|---|---|
-| **Approach** | Context-driven methodology with 11 analysis dimensions and verification protocol | Auto-discovery with parallel sweep subagents |
+| **Approach** | Context-driven methodology with 14 analysis dimensions and verification protocol | Auto-discovery with parallel sweep subagents |
 | **Draft context** | Uses architecture, tech-stack, product, guardrails for false-positive elimination | No Draft context awareness |
 | **Output** | Severity-ranked report with evidence | Inline fixes + regression tests |
 | **Modifies code** | No (report + regression tests only) | Yes (finds AND fixes) |
@@ -4838,16 +5022,18 @@ If no Draft context exists, proceed with code-only analysis.
 
 ## Dimension Applicability Check
 
-Before analyzing all 11 dimensions, determine which apply to this codebase:
+Before analyzing all 14 dimensions, determine which apply to this codebase:
 
 - **Skip explicitly** rather than forcing analysis of N/A dimensions
 - **Mark skipped dimensions** with reason in report summary
 
 **Examples of skipping:**
 - "N/A - no backend code" (skip dimensions 2, 8, 10 for frontend-only repo)
-- "N/A - no UI components" (skip dimensions 5, 9 for CLI tool)
+- "N/A - no UI components" (skip dimensions 5, 9, 14 for CLI tool)
 - "N/A - no database" (skip dimension 2 for in-memory app)
 - "N/A - no external integrations" (skip dimension 8)
+- "N/A - no external dependencies" (skip dimension 12 for zero-dependency project)
+- "N/A - no user-facing strings" (skip dimension 14 for libraries/APIs)
 
 ## Analysis Dimensions
 
@@ -4871,6 +5057,12 @@ Analyze systematically across all applicable dimensions. Skip N/A dimensions exp
 - Secrets, tokens, auth data exposure
 - CSRF, insecure deserialization
 - Path traversal, command injection
+- **Taint tracking (end-to-end data flow analysis):**
+  - Identify all entry points: HTTP params, form data, file uploads, env vars, CLI args, message queue payloads, webhook bodies
+  - Trace user input to dangerous sinks: SQL queries, shell exec, eval, innerHTML, file path construction, URL construction, deserialization, template rendering
+  - For each sink, verify sanitization/validation exists on every path from source to sink
+  - Flag paths where unsanitized input reaches a sink without passing through a validator, encoder, or sanitizer
+  - Reference: OWASP Top 10, Meta Infer taint analysis methodology
 
 ### 4. Performance (Backend + UI)
 - Inefficient algorithms and data fetching
@@ -4926,6 +5118,33 @@ Analyze systematically across all applicable dimensions. Skip N/A dimensions exp
 - Tests that assert implementation instead of behavior
 - Mismatch between test and real user interaction
 - Flaky tests, timing dependencies
+- **Property-based testing gaps:** pure/mathematical functions without invariant-based tests (e.g., `encode(decode(x)) == x`, sorting idempotency, associativity)
+- **Test isolation violations:** shared mutable state between test cases (global variables, singletons, class-level state modified in tests without reset)
+- **Test double misuse:** mocks that leak state across tests, over-mocking (>3 mocks per test suggests testing wiring not behavior), stubs that diverge from real implementation behavior
+- **Assertion density:** tests with zero or weak assertions (`assertTrue(true)`, `expect(result).toBeDefined()` only, empty catch blocks in test code, `assert result is not None` as sole check)
+- **Flaky test patterns:** time-dependent assertions (sleep, Date.now, timestamps), port/file system assumptions, test ordering dependencies, non-deterministic data (random seeds, UUIDs without control)
+
+### 12. Dependency & Supply Chain Security
+- **Known CVEs:** Check dependencies against known vulnerability databases (reference tools: Snyk, Trivy, OWASP Dependency-Check, `npm audit`, `pip-audit`, `cargo audit`, `go vuln`)
+- **Unpinned dependency versions:** Lockfile freshness, use of version ranges (`^`, `~`, `*`, `>=`) without lockfile enforcement, missing lockfile entirely
+- **Deprecated packages:** Dependencies with known deprecation notices, archived repositories, or no maintenance activity
+- **License conflicts:** GPL dependencies in MIT/Apache projects, AGPL in proprietary code, incompatible license combinations in the dependency tree
+- **Typosquatting risk:** Packages with names similar to popular ones (e.g., `lodahs` vs `lodash`, `reqeusts` vs `requests`), recently published packages with few downloads
+- **Transitive dependency depth:** Deeply nested dependency chains (>5 levels) increase supply chain attack surface; flag packages that pull in disproportionate transitive trees
+- Reference: Google OSS-Fuzz, Microsoft SDL, OpenSSF Scorecard
+
+### 13. Algorithmic Complexity
+- **Quadratic or worse loops:** O(n^2) or worse nested loops over collections (nested `.filter()` inside `.map()`, repeated linear scans, cartesian joins in application code)
+- **Regex catastrophic backtracking:** Nested quantifiers (`(a+)+`, `(a|a)*`), unbounded repetition with overlapping alternatives — flag any regex applied to user-controlled input
+- **Unbounded recursion:** Recursive functions without depth limits, missing base cases, or base cases that depend on external/mutable state
+- **Cache invalidation storms:** Cache miss triggering expensive recomputation that itself invalidates caches, thundering herd on cache expiry without jitter/locking
+- **Hot path inefficiency:** Sorting/searching in hot paths without appropriate data structures (linear scan where hash map suffices, repeated sorting of same collection, string concatenation in loops)
+
+### 14. Internationalization & Localization
+- **Hardcoded user-facing strings:** Strings displayed to users embedded directly in source code rather than externalized to resource files/i18n frameworks
+- **Locale-sensitive operations without locale parameter:** String comparison (`<`, `>`, `localeCompare` without locale), date formatting (`toLocaleDateString` without explicit locale), number formatting, sorting (alphabetical sort that assumes ASCII ordering)
+- **RTL layout issues:** Hardcoded LTR assumptions in UI code (absolute `left`/`right` positioning, directional margin/padding, text alignment assumptions)
+- **Unicode handling bugs:** String length vs byte length confusion, missing normalization (NFC/NFD), emoji handling (multi-codepoint sequences split incorrectly, `string.length` vs grapheme count), surrogate pair handling in substring operations
 
 ## Bug Verification Protocol
 
@@ -5437,6 +5656,22 @@ After writing all test files, validate them using the project's native toolchain
    SKIPPED:      1 target (N/A — race condition not reliably testable)
    ```
 
+## Fix Suggestion Generation
+
+For each bug with CONFIRMED or HIGH confidence, generate a minimal suggested fix alongside the bug report. Fix suggestions are advisory — they are never auto-applied.
+
+### Fix Generation Rules
+
+1. **Minimal change principle:** The fix must be the smallest code change that addresses the root cause. Do not refactor surrounding code, add features, or improve style.
+2. **Before/after format:** Include the exact current code (BEFORE) and the suggested fix (AFTER) as code snippets with file path and line numbers.
+3. **Root cause targeting:** The fix must address the root cause identified in the bug's data flow trace, not a symptom. If the root cause is in a different location than the symptom, fix at the root.
+4. **Mark as SUGGESTED:** Every fix must be clearly marked as `SUGGESTED (REVIEW REQUIRED)` — never imply auto-application.
+5. **One fix per bug:** Each bug gets exactly one suggested fix. If multiple fix strategies exist, choose the most conservative one and note alternatives.
+6. **Preserve behavior:** The fix must not change behavior beyond correcting the identified bug. No side-effect improvements.
+7. **Skip when inappropriate:** Mark fix as `N/A` for bugs where the fix requires architectural changes, significant refactoring, or domain knowledge beyond what the code provides.
+
+Reference: Meta SapFix — automated fix suggestion with human-in-the-loop validation.
+
 ## Output Format
 
 For each verified bug:
@@ -5469,6 +5704,16 @@ For each verified bug:
 [Explicit statement: "No sanitization exists because X", "Framework Y doesn't escape Z in this context", etc.]
 
 **Fix:** [Minimal code change or mitigation]
+
+**Suggested Fix (REVIEW REQUIRED):**
+```[language]
+// BEFORE (current buggy code):
+[exact code snippet from the codebase]
+
+// AFTER (suggested fix):
+[minimal change that addresses root cause]
+```
+_This fix is SUGGESTED only — human review required before applying. Reference: Meta SapFix methodology._
 
 **Regression Test:**
 **Status:** [COVERED | PARTIAL | WRONG_ASSERTION | NO_COVERAGE | N/A]
@@ -5955,9 +6200,68 @@ For the files changed in the diff, perform static checks using `grep` or similar
    - Blocking synchronous I/O within async functions
    - Unbounded queries lacking pagination
 
+6. **Context-Specific Checks:** Identify the primary domain of changed files and apply domain-specific checks:
+
+   - **Crypto/Security changes** (files matching `auth`, `crypto`, `security`, `token`, `password`, `hash`, `encrypt`):
+     - [ ] Timing-safe comparisons used (no `==` for secret comparison)
+     - [ ] Constant-time operations for sensitive data
+     - [ ] Secure random generation (no `Math.random()` for security)
+     - [ ] Key length meets minimum requirements
+   - **Database/Migration changes** (files matching `migration`, `schema`, `model`, `entity`, `repository`):
+     - [ ] Backward compatibility preserved (no destructive column drops without migration path)
+     - [ ] Index coverage for new queries
+     - [ ] Constraint preservation (foreign keys, unique constraints)
+     - [ ] Zero-downtime migration safety (no table locks on large tables)
+   - **API Endpoint changes** (files matching `controller`, `handler`, `route`, `endpoint`, `resolver`):
+     - [ ] Backward compatibility of public signatures (no breaking param changes)
+     - [ ] Input validation present for all new parameters
+     - [ ] Rate limiting configured for new endpoints
+     - [ ] Authentication/authorization checks in place
+   - **Configuration changes** (files matching `config`, `env`, `settings`):
+     - [ ] No secrets exposed in plaintext
+     - [ ] Validation at startup for required config values
+     - [ ] Fallback defaults provided where appropriate
+   - **UI/Frontend changes** (files matching `component`, `view`, `page`, `template`):
+     - [ ] No XSS vectors (`innerHTML`, `dangerouslySetInnerHTML`, `v-html`)
+     - [ ] Accessibility present (ARIA attributes, keyboard navigation)
+     - [ ] Performance impact considered (bundle size, render cycles)
+
+7. **Breaking Change Detection:** Check for public API changes in the diff:
+   - [ ] Exported function/method signatures unchanged (no added required params, no changed return types)
+   - [ ] No removed or renamed exported symbols
+   - [ ] Error types and error codes unchanged
+   - [ ] Serialization format preserved (JSON field names, protobuf field numbers)
+   - Flag as **CRITICAL** if breaking change found with no deprecation period or version bump
+
+8. **Threat Model (STRIDE):** For new endpoints or data mutations, check:
+   - **S**poofing: Can the caller's identity be faked? (authentication check)
+   - **T**ampering: Can request data be modified in transit? (integrity check)
+   - **R**epudiation: Are actions logged for audit? (logging check)
+   - **I**nformation Disclosure: Does the response leak internal details? (error message check)
+   - **D**enial of Service: Can the endpoint be abused? (rate limiting, resource limits)
+   - **E**levation of Privilege: Are authorization checks in place? (RBAC/ABAC check)
+
 **Verdict:**
 - **PASS:** No critical issues found → Proceed to Stage 2
 - **FAIL:** ANY Critical issue found (e.g., circular dependency, hardcoded secret, raw SQL injection) → List the static analysis failures, generate the review report, and **STOP**. Do not proceed to Stage 2. This prevents wasting effort on structurally broken code.
+
+### SAST Tool Recommendations
+
+After completing Stage 1, recommend appropriate static analysis tools based on the project's `tech-stack.md`. Check if these tools are already configured in CI; if not, recommend adding them.
+
+| Language | Recommended Tools |
+|----------|-------------------|
+| JavaScript/TypeScript | ESLint with `eslint-plugin-security`, Semgrep |
+| Python | Bandit, Semgrep, pylint |
+| Java | Error Prone, SpotBugs, Semgrep |
+| Go | gosec, staticcheck |
+| Rust | `cargo clippy`, `cargo audit` |
+| C/C++ | Clang Static Analyzer, cppcheck |
+| Multi-language | Semgrep (https://semgrep.dev/), CodeQL (https://codeql.github.com/) |
+
+References: Meta Infer for CI integration patterns, Google Error Prone for compile-time analysis.
+
+Include tool recommendations in the review report under Stage 1 as a "Recommended Tooling" subsection. Only recommend tools relevant to the languages detected in the diff.
 
 ### Stage 2: Spec Compliance (Track-Level Only)
 
@@ -6009,6 +6313,13 @@ Analyze semantic code quality across four dimensions:
 #### 4.7: Maintainability
 - [ ] Code is readable without excessive comments
 - [ ] Consistent naming and style
+
+#### 4.8: Diff Complexity Metrics
+- [ ] No functions exceeding cognitive complexity threshold (>15)
+- [ ] No files with high churn + high complexity (flag as refactoring candidates)
+- [ ] No deeply nested control flow (>3 levels of nesting)
+
+For each flagged function, report: file path, function name, estimated complexity, and recommended action (split, extract, simplify).
 
 #### Adversarial Pass (When Zero Findings)
 
@@ -6481,12 +6792,17 @@ If `draft/` does not exist: **STOP** — "No Draft context found. Run `@draft in
 - Trace the complete lifecycle: initialization → processing → persistence → cleanup
 - Identify all entry points and exit paths
 - Catalog all state mutations and side effects
+- **API Contract Drift Detection:** Compare the module's actual code interfaces against documented contracts (OpenAPI/Swagger specs, Protobuf/gRPC definitions, GraphQL schema files, TypeScript type exports). Flag drift: endpoints that exist in code but not in the spec (or vice versa). Flag type mismatches between spec and implementation. Reference: Amazon, Google large-scale changes.
 
 ### Phase 2: ACID Compliance Audit
 - **Atomicity:** Verify all multi-step operations are wrapped in transactions. Partial failure must not leave corrupt state. Check for missing rollback paths.
 - **Consistency:** Validate all invariants, constraints, and business rules are enforced before and after every state transition. Check schema validation, data type enforcement, and boundary conditions.
 - **Isolation:** Check for race conditions, shared mutable state, concurrent access without locking/synchronization. Verify transaction isolation levels where databases are involved.
 - **Durability:** Confirm committed data survives crashes. Check for fire-and-forget patterns, missing flush/sync calls, and inadequate error handling around persistence.
+- **Event Sourcing:** Are events immutable? Is event replay idempotent? Is the event store append-only?
+- **CQRS:** Are read/write models eventually consistent? Is consistency lag acceptable for the use case?
+- **Saga Pattern:** Are compensating transactions defined for each step? What happens on partial saga failure?
+- **Eventual Consistency:** Are there convergence guarantees? How is conflict resolution handled (LWW, CRDT, manual)? Reference: Amazon distributed systems.
 
 ### Phase 3: Production-Grade Assessment
 
@@ -6494,11 +6810,50 @@ If `draft/` does not exist: **STOP** — "No Draft context found. Run `@draft in
 
 - **Resilience:** Graceful degradation, circuit breakers, timeout handling, backpressure
 - **Observability:** Logging coverage (not excessive), structured log fields, correlation IDs, metric emission points
+  - **Structured logging:** Are logs structured (JSON/key-value) vs free-form strings?
+  - **Log level correctness:** Are ERROR/WARN/INFO/DEBUG used appropriately? Are expected conditions logged at DEBUG, not ERROR?
+  - **PII leakage:** Do logs or error messages expose personally identifiable information, tokens, or credentials?
+  - **Tracing spans:** Are spans created at service boundaries? Do spans include relevant attributes (user_id, request_id)?
+  - **Metric cardinality:** Are metric labels bounded? Unbounded labels (e.g., user_id as label) cause metric explosion.
+  - **Alerting coverage:** Are critical failure modes covered by alerts? Are there runbooks linked to alerts?
+  - Reference: Netflix Full Cycle Developers, Google SRE.
 - **Configuration:** Hardcoded values that should be configurable, missing environment variable validation
 - **State Lifecycle:** Memory accumulation, zombie processes, dropped messages
+- **SLO/SLA Alignment:**
+  - Does the module's observed/expected error rate match defined SLOs?
+  - **Latency profiles:** Are p50, p95, p99 latency targets defined and achievable?
+  - **Error budget:** What percentage of the error budget has been consumed? Is the module in "protect" or "innovate" mode?
+  - **Availability:** Does the module's uptime target (99.9%, 99.99%) match its actual architecture?
+  - If no SLOs are defined, recommend defining them. Reference: Google SRE (https://sre.google/sre-book/service-level-objectives/).
+- **Database Schema Analysis:**
+  - **Missing indexes:** Queries filtering/joining on unindexed columns.
+  - **Wide table scans:** SELECT * or queries without WHERE clauses on large tables.
+  - **Schema constraints:** Missing NOT NULL, UNIQUE, FOREIGN KEY constraints.
+  - **Migration safety:** Can migrations run without downtime? Are they backward-compatible?
+  - **N+1 at schema level:** Relationships that require multiple queries instead of joins.
+  - Reference: Google large-scale changes.
 
 ### Phase 4: Identify Actionable Fixes (Spec Generation)
 Instead of mutating the source code, translate all findings into clear, actionable requirements that a developer (or agent) can implement via Test-Driven Development.
+
+### Phase 5: Resilience & Chaos Engineering Assessment
+
+**Applicability note:** Skip categories not applicable to the module type (e.g., network partitions are irrelevant for purely local CLI tools).
+
+- **Dependency failure scenarios:** What happens when each external dependency (database, cache, message queue, external API) is unavailable? Are there timeouts, fallbacks, circuit breakers?
+- **Timeout analysis:** Are all external calls bounded by timeouts? Are timeout values appropriate (not too long, not too short)?
+- **Disk/resource exhaustion:** What happens when disk fills, memory is exhausted, file descriptors run out?
+- **Clock skew:** Does the module make assumptions about clock synchronization? Are distributed timestamps handled correctly?
+- **Network partitions:** How does the module behave during partial network failures? Split-brain scenarios?
+- **Retry behavior:** Does retry logic use exponential backoff with jitter? Is there a retry budget to prevent retry storms?
+- **Graceful degradation:** Can non-critical features be disabled without affecting core functionality?
+- **Load shedding:** Under extreme load, does the module shed excess requests gracefully?
+- **Capacity/Load Modeling:**
+  - What happens at 10x current traffic? 100x?
+  - Identify bottlenecks: connection pools, thread pools, rate limits, queue depth.
+  - Are there horizontal scaling capabilities?
+  - What is the theoretical maximum throughput?
+- Reference: Netflix Chaos Monkey, Netflix Simian Army, Amazon GameDay.
 
 ---
 
@@ -6713,7 +7068,46 @@ Scan the codebase across these dimensions, looking for **recurring patterns** (3
 - Feature flag patterns
 - Config file conventions
 
-### 2.3: Cross-Reference Existing Knowledge
+### 2.3: Temporal Pattern Analysis
+
+Detect patterns that are being phased out by the team:
+
+1. **Identify declining patterns** — For each candidate pattern, use `git blame` to check the age of files containing it:
+   - **Old files** (last modified >1 year ago): high occurrence of the pattern
+   - **New files** (last modified <6 months ago): low or zero occurrence of the pattern
+   - If occurrence ratio old:new is >3:1, flag as a declining pattern
+2. **Mark declining patterns** — When writing to guardrails.md, add `declining: true` to the entry metadata:
+   ```markdown
+   - **Declining:** yes — found in 8 old files (avg age 18mo), 1 new file (avg age 2mo). Being replaced by [newer pattern].
+   ```
+3. **Do NOT propagate declining patterns** — Quality commands should not flag absence of a declining pattern as inconsistency
+4. **Example:** Old error handling style `try/catch with manual logging` found in files last modified >1 year ago, newer files use structured error middleware — the old style is declining, not a convention to enforce
+
+**Reference:** Google large-scale changes (Rosie) — systematic detection of patterns being migrated away from.
+
+### 2.4: Cross-Service Pattern Comparison (Monorepo)
+
+When in a monorepo (detected by `draft/service-index.md` existing OR multiple `draft/` directories OR presence of `packages/`, `services/`, `apps/` directories):
+
+1. **Scan across services** — Run pattern analysis in each service/package independently
+2. **Compare patterns for the same concern** — For each pattern dimension (error handling, naming, etc.):
+   - Does Service A use a different approach than Service B for the same concern?
+   - Example: Service A uses `Result<T, E>` for error handling, Service B uses exceptions
+3. **Flag inconsistencies** — Report cross-service divergences:
+   ```
+   Cross-service inconsistency: Error Handling
+     services/auth/ → uses custom Result type (5 files)
+     services/billing/ → uses thrown exceptions (8 files)
+     Suggestion: standardize on one approach
+   ```
+4. **Respect intentional differences** — Do NOT flag inconsistencies when:
+   - Services use different languages or frameworks
+   - The pattern difference is documented in `tech-stack.md` or `.ai-context.md`
+   - The services have fundamentally different runtime requirements
+
+**Reference:** Google monorepo practices — consistent patterns across services reduce cognitive overhead and enable large-scale tooling.
+
+### 2.5: Cross-Reference Existing Knowledge
 
 For each candidate pattern:
 
@@ -6739,6 +7133,60 @@ Follow the threshold from `core/shared/pattern-learning.md`:
 
 - **Convention:** Pattern is consistently applied AND does not cause bugs, security issues, or violations of documented invariants
 - **Anti-Pattern:** Pattern is consistently applied BUT causes or risks bugs, security issues, performance problems, or invariant violations
+
+---
+
+## Step 3.5: Pattern Conflict Detection
+
+Before saving any new pattern, check for conflicts with existing entries:
+
+1. **Check against existing conventions** — Does the new pattern contradict a learned convention?
+2. **Check against existing anti-patterns** — Does the new pattern contradict a learned anti-pattern?
+3. **Check against Hard Guardrails** — Does the new pattern violate a hard guardrail?
+
+**If conflict found:**
+- Do NOT silently save the new pattern
+- Alert the user with both patterns side by side:
+  ```
+  CONFLICT DETECTED:
+
+  Existing convention: "Use async/await for all async operations"
+    Evidence: 12 files, high confidence, learned 2025-01-15
+
+  New candidate: "Avoid async in database module — use callback style"
+    Evidence: 4 files in src/db/, medium confidence
+
+  These may both be valid (module-scoped exception) or one may be outdated.
+  Options:
+    [1] Keep both (new pattern is a scoped exception)
+    [2] Replace existing with new (pattern has evolved)
+    [3] Discard new (existing is correct)
+  ```
+- Wait for user input before proceeding
+
+**Reference:** Google Code Health — conflicting patterns create confusion and should be resolved explicitly.
+
+---
+
+## Step 3.7: External Benchmark Comparison
+
+After discovering patterns, optionally compare project conventions against community standards for the detected language:
+
+| Language | Benchmarks |
+|----------|-----------|
+| **Go** | Effective Go, Go Code Review Comments |
+| **Python** | PEP 8, PEP 20, Google Python Style Guide |
+| **Java** | Effective Java, Google Java Style Guide |
+| **TypeScript** | typescript-eslint recommended rules |
+| **Rust** | Rust API Guidelines, Clippy lints |
+| **C/C++** | Google C++ Style Guide, C++ Core Guidelines |
+
+For each project convention that **deviates** from its language's community standard:
+1. Note the deviation in the summary report (not as an anti-pattern — deviations may be intentional)
+2. If the deviation is undocumented, suggest adding it to `tech-stack.md ## Accepted Patterns` with a rationale
+3. Example: project uses `snake_case` for TypeScript functions (deviates from `camelCase` convention) — flag for documentation, not correction
+
+**Reference:** Google Abseil Tips of the Week, language-specific style guides — deviations from community standards increase onboarding friction and should be documented even when intentional.
 
 ---
 
@@ -13640,6 +14088,21 @@ Before investigating, load `draft/.ai-context.md` (or `draft/architecture.md`) t
 - Is this an environment difference?
 - Is this a state management issue?
 
+#### Language-Specific Debugging Techniques
+
+Apply these language-specific techniques during analysis:
+
+| Language | Techniques |
+|----------|-----------|
+| **JavaScript/TypeScript** | Async stack traces (`--async-stack-traces`), event loop lag detection, unhandled rejection tracking (`process.on('unhandledRejection')`), `node --inspect` for Chrome DevTools |
+| **Python** | `traceback` module for full chain, `sys.settrace` for call tracing, `asyncio` debug mode (`PYTHONASYNCIODEBUG=1`), `pdb.set_trace()` / `breakpoint()` |
+| **Go** | Goroutine dumps (`SIGQUIT` / `runtime.Stack()`), race detector (`go test -race`), `pprof` for CPU/memory, `GODEBUG` environment variables |
+| **Java** | Thread dumps (`jstack`), heap dumps (`jmap`), JMX monitoring, remote debugging (`-agentlib:jdwp`) |
+| **Rust** | `RUST_BACKTRACE=1` for full backtraces, `miri` for undefined behavior detection, `cargo expand` for macro debugging, `RUST_LOG` for tracing |
+| **C/C++** | GDB/LLDB for interactive debugging, core dump analysis, Valgrind for memory errors, sanitizers (ASan, MSan, TSan, UBSan) |
+
+Select techniques appropriate to the language and failure type. Not all techniques apply to every bug.
+
 **Output:** Root cause hypothesis with supporting evidence.
 
 ---
@@ -13673,6 +14136,56 @@ Before investigating, load `draft/.ai-context.md` (or `draft/architecture.md`) t
 5. **Document root cause** - Update spec.md with findings
 
 **Output:** Fix committed with regression test.
+
+---
+
+## Performance Debugging Path
+
+For performance issues (latency regressions, throughput degradation, memory growth), follow this specialized path instead of the general four phases:
+
+### Perf Phase 1: Investigate — Profile Before Guessing
+
+Do NOT guess at performance bottlenecks. Profile first.
+
+| Language | Profiling Tools |
+|----------|----------------|
+| **Node.js** | `--prof` for V8 profiler, `clinic.js` (doctor, bubbleprof, flame), `0x` for flame graphs |
+| **Python** | `cProfile` / `profile` module, `py-spy` for sampling profiler (no code changes), `memory_profiler` for memory |
+| **Java** | JDK Flight Recorder (JFR), `async-profiler`, VisualVM, JMH for microbenchmarks |
+| **Go** | `pprof` (CPU, memory, goroutine, block profiles), `go test -bench`, `go tool trace` |
+| **Rust** | `flamegraph` crate, `criterion` for benchmarks, `perf` on Linux, `cargo flamegraph` |
+| **C/C++** | `perf` / `perf record`, Valgrind (`callgrind`), `gprof`, Intel VTune |
+
+### Perf Phase 2: Analyze — Compare Against Baseline
+
+1. **Capture current profile** — flame graph, allocation profile, or latency histogram
+2. **Capture baseline profile** — from last known-good version (checkout prior commit, re-profile)
+3. **Diff the profiles** — identify hot paths, new allocations, or I/O changes between versions
+4. **Categorize the bottleneck:**
+   - CPU-bound: hot loop, expensive computation, unoptimized algorithm
+   - Memory-bound: excessive allocations, GC pressure, memory leaks
+   - I/O-bound: slow queries, network latency, disk operations
+   - Concurrency-bound: lock contention, goroutine/thread starvation
+
+### Perf Phase 3: Hypothesize — Target the Hot Path
+
+1. Form a single performance hypothesis: "The regression is caused by [X] at `file:line`"
+2. Predict the improvement: "Fixing this should reduce p99 latency by ~Y ms"
+3. Verify the hot path accounts for the regression (not just being slow in general)
+
+### Perf Phase 4: Implement — Benchmark First, Then Optimize
+
+1. **Write a benchmark test** — captures current (slow) performance with reproducible numbers
+2. **Implement the optimization** — address the identified bottleneck only
+3. **Re-run benchmark** — verify measurable improvement
+4. **Re-run full test suite** — ensure correctness is preserved
+5. **Re-profile** — confirm the hot path is resolved and no new bottleneck appeared
+
+**Anti-patterns for performance debugging:**
+- Optimizing without profiling data
+- Optimizing code that isn't on the hot path
+- Micro-optimizing when the bottleneck is I/O
+- Sacrificing readability for unmeasurable gains
 
 ---
 
@@ -13932,13 +14445,27 @@ Before investigating, load and reference the project's big picture documents:
    - If reproducible: document exact inputs, environment, and output
    - If intermittent: document frequency, conditions, and any patterns (time-of-day, load, data-dependent)
 2. **Capture evidence** — Error messages, stack traces, log output, HTTP responses. Verbatim, not summarized.
-3. **Define blast radius:**
+3. **Assess detection lag:**
+   - When did this bug actually start occurring? (check `git log`, deploy timestamps, first error in logs)
+   - When was it detected/reported?
+   - What is the detection lag? (time between occurrence and detection)
+   - What monitoring gap allowed this lag? (missing alert, missing metric, missing log, no synthetic monitoring)
+   - Record this in the RCA summary — detection lag >24h should generate a prevention item for improved observability
+   - **Reference:** Google SRE Postmortem Culture — detection lag reveals systemic observability gaps
+4. **Define blast radius:**
    - What's broken: [specific flows, endpoints, data paths]
    - What's NOT broken: [adjacent functionality that still works]
    - Boundary: [the module/layer/service where the failure lives]
-4. **Map against .ai-context.md** — Identify which module(s) are involved. Check data state machines for invalid transitions. Check consistency boundaries for eventual-consistency bugs. Note module boundaries — the bug is likely within one module, and the fix should stay there.
+5. **Quantify SLO impact:**
+   - Which SLOs were violated? (availability, latency, error rate, throughput)
+   - Error budget burn: estimate how much error budget was consumed by this incident
+   - Customer impact: how many users affected, for how long?
+   - Express in SLO terms: "Availability dropped from 99.95% to 99.2% for 3 hours, burning ~40% of monthly error budget"
+   - If no SLOs are defined for this service, add prevention item: "Define SLOs for [service name]"
+   - **Reference:** Google SRE — SLO impact quantification enables principled prioritization of fixes and prevention
+6. **Map against .ai-context.md** — Identify which module(s) are involved. Check data state machines for invalid transitions. Check consistency boundaries for eventual-consistency bugs. Note module boundaries — the bug is likely within one module, and the fix should stay there.
 
-**Output:** Reproduction confirmed with evidence. Blast radius documented. Investigation scoped to specific module(s).
+**Output:** Reproduction confirmed with evidence. Blast radius and SLO impact documented. Investigation scoped to specific module(s).
 
 **Anti-patterns:**
 - Starting to read code before reproducing
@@ -14059,11 +14586,31 @@ Once you find the immediate cause, ask "why" to find the root:
 **Classification:** [logic error | race condition | data corruption | config error | dependency issue | missing validation]
 **Introduced:** [commit/date/release if identifiable]
 
+### Detection Lag
+- **First occurred:** [date/time — from git log, deploy timestamps, or first error in logs]
+- **First detected:** [date/time — when reported or alerted]
+- **Detection lag:** [duration]
+- **Monitoring gap:** [what observability improvement would have caught this sooner]
+
+### SLO Impact
+- **SLOs violated:** [list affected SLOs — availability, latency, error rate]
+- **Error budget burn:** [estimate of error budget consumed]
+- **Customer impact:** [N users affected for M duration]
+
 ### Timeline
-1. [When first reported / observed]
-2. [When investigated]
-3. [When root cause confirmed]
-4. [When fix deployed]
+To populate this timeline, use automated commit/deploy history:
+```bash
+# Find commits in the incident window
+git log --oneline --since="YYYY-MM-DD" --until="YYYY-MM-DD" -- <affected-paths>
+```
+Cross-reference deploy timestamps if available. Identify the last known-good state and the first known-bad state.
+
+1. [Last known-good state — commit/deploy]
+2. [First known-bad state — commit/deploy]
+3. [When first reported / observed]
+4. [When investigated]
+5. [When root cause confirmed]
+6. [When fix deployed]
 
 ### What Happened
 [2-3 sentences: factual description of the failure chain]
@@ -14076,8 +14623,26 @@ Once you find the immediate cause, ask "why" to find the root:
 - **Test:** `test_file:line` — [regression test description]
 
 ### Prevention
-- [ ] [Action to prevent this class of bug — e.g., add validation, improve monitoring]
-- [ ] [Structural improvement — e.g., type safety, integration test, circuit breaker]
+
+Classify each prevention item into one of four categories. This taxonomy enables trend analysis across incidents.
+
+**Detection improvement** — Better monitoring, alerting, or logging to catch this sooner:
+- [ ] [e.g., add alert for error rate spike on /api/checkout]
+- [ ] [e.g., add structured logging at service boundary]
+
+**Process improvement** — Better review, testing, or deployment practices:
+- [ ] [e.g., add integration test to CI for this flow]
+- [ ] [e.g., require canary deployment for payment service changes]
+
+**Code improvement** — Fix the code pattern or logic that allowed this:
+- [ ] [e.g., add null guard at data transformation layer]
+- [ ] [e.g., validate input schema at API boundary]
+
+**Architecture improvement** — Structural change to make this class of bug impossible:
+- [ ] [e.g., replace shared mutable state with event sourcing]
+- [ ] [e.g., add circuit breaker between services A and B]
+
+**Reference:** Google SRE Workbook: Postmortem Analysis — categorized prevention items enable teams to identify systemic gaps (e.g., "80% of our incidents need detection improvements").
 ```
 
 ---
@@ -14198,6 +14763,15 @@ Perform fast, objective static checks using grep/search across the diff:
    - [ ] Each module's boundary is respected
    - [ ] Cross-module contracts are maintained
 
+7. **Context-Specific Checks**
+
+   When reviewing changes, identify the primary domain of the diff (security, database, API, config, UI) and apply domain-specific checks in addition to the standard checklist above:
+   - **Security/crypto files:** Timing-safe comparisons, constant-time operations, secure random generation, key length requirements
+   - **Database/migration files:** Backward compatibility, index coverage, constraint preservation, zero-downtime migration safety
+   - **API/endpoint files:** Public signature backward compatibility, input validation, rate limiting, authentication/authorization
+   - **Configuration files:** Secrets exposure, startup validation, fallback defaults
+   - **UI/frontend files:** XSS vectors, accessibility (ARIA, keyboard nav), performance (bundle impact)
+
 **If Stage 1 FAILS (any critical issue):** Stop here. List structural failures and return to implementation. Do NOT proceed to Stage 2.
 
 **If Stage 1 PASSES:** Proceed to Stage 2.
@@ -14270,6 +14844,8 @@ If Stage 3 produces zero findings across all four dimensions, do NOT accept "cle
 3. **Implicit assumptions** — Does code assume inputs are always valid, services always up, or state always consistent?
 4. **Future brittleness** — Is anything hardcoded that will break on scale or config change?
 5. **Missing coverage** — Is there behavior that should be tested but isn't?
+6. **Guardrails** — Do any changes violate learned anti-patterns from `guardrails.md`?
+7. **Invariants** — Do any changes violate critical invariants documented in `.ai-context.md`?
 
 If still zero after this pass, document it explicitly in the review report:
 > "Adversarial pass completed. Zero findings confirmed: [one sentence per question explaining why each is clean]"

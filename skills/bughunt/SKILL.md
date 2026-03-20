@@ -17,7 +17,7 @@ Some AI tools (e.g., Claude Code) provide a built-in `bughunt` agent that auto-d
 
 | | `/draft:bughunt` | Built-in bughunt agent |
 |---|---|---|
-| **Approach** | Context-driven methodology with 11 analysis dimensions and verification protocol | Auto-discovery with parallel sweep subagents |
+| **Approach** | Context-driven methodology with 14 analysis dimensions and verification protocol | Auto-discovery with parallel sweep subagents |
 | **Draft context** | Uses architecture, tech-stack, product, guardrails for false-positive elimination | No Draft context awareness |
 | **Output** | Severity-ranked report with evidence | Inline fixes + regression tests |
 | **Modifies code** | No (report + regression tests only) | Yes (finds AND fixes) |
@@ -94,16 +94,18 @@ If no Draft context exists, proceed with code-only analysis.
 
 ## Dimension Applicability Check
 
-Before analyzing all 11 dimensions, determine which apply to this codebase:
+Before analyzing all 14 dimensions, determine which apply to this codebase:
 
 - **Skip explicitly** rather than forcing analysis of N/A dimensions
 - **Mark skipped dimensions** with reason in report summary
 
 **Examples of skipping:**
 - "N/A - no backend code" (skip dimensions 2, 8, 10 for frontend-only repo)
-- "N/A - no UI components" (skip dimensions 5, 9 for CLI tool)
+- "N/A - no UI components" (skip dimensions 5, 9, 14 for CLI tool)
 - "N/A - no database" (skip dimension 2 for in-memory app)
 - "N/A - no external integrations" (skip dimension 8)
+- "N/A - no external dependencies" (skip dimension 12 for zero-dependency project)
+- "N/A - no user-facing strings" (skip dimension 14 for libraries/APIs)
 
 ## Analysis Dimensions
 
@@ -127,6 +129,12 @@ Analyze systematically across all applicable dimensions. Skip N/A dimensions exp
 - Secrets, tokens, auth data exposure
 - CSRF, insecure deserialization
 - Path traversal, command injection
+- **Taint tracking (end-to-end data flow analysis):**
+  - Identify all entry points: HTTP params, form data, file uploads, env vars, CLI args, message queue payloads, webhook bodies
+  - Trace user input to dangerous sinks: SQL queries, shell exec, eval, innerHTML, file path construction, URL construction, deserialization, template rendering
+  - For each sink, verify sanitization/validation exists on every path from source to sink
+  - Flag paths where unsanitized input reaches a sink without passing through a validator, encoder, or sanitizer
+  - Reference: OWASP Top 10, Meta Infer taint analysis methodology
 
 ### 4. Performance (Backend + UI)
 - Inefficient algorithms and data fetching
@@ -182,6 +190,33 @@ Analyze systematically across all applicable dimensions. Skip N/A dimensions exp
 - Tests that assert implementation instead of behavior
 - Mismatch between test and real user interaction
 - Flaky tests, timing dependencies
+- **Property-based testing gaps:** pure/mathematical functions without invariant-based tests (e.g., `encode(decode(x)) == x`, sorting idempotency, associativity)
+- **Test isolation violations:** shared mutable state between test cases (global variables, singletons, class-level state modified in tests without reset)
+- **Test double misuse:** mocks that leak state across tests, over-mocking (>3 mocks per test suggests testing wiring not behavior), stubs that diverge from real implementation behavior
+- **Assertion density:** tests with zero or weak assertions (`assertTrue(true)`, `expect(result).toBeDefined()` only, empty catch blocks in test code, `assert result is not None` as sole check)
+- **Flaky test patterns:** time-dependent assertions (sleep, Date.now, timestamps), port/file system assumptions, test ordering dependencies, non-deterministic data (random seeds, UUIDs without control)
+
+### 12. Dependency & Supply Chain Security
+- **Known CVEs:** Check dependencies against known vulnerability databases (reference tools: Snyk, Trivy, OWASP Dependency-Check, `npm audit`, `pip-audit`, `cargo audit`, `go vuln`)
+- **Unpinned dependency versions:** Lockfile freshness, use of version ranges (`^`, `~`, `*`, `>=`) without lockfile enforcement, missing lockfile entirely
+- **Deprecated packages:** Dependencies with known deprecation notices, archived repositories, or no maintenance activity
+- **License conflicts:** GPL dependencies in MIT/Apache projects, AGPL in proprietary code, incompatible license combinations in the dependency tree
+- **Typosquatting risk:** Packages with names similar to popular ones (e.g., `lodahs` vs `lodash`, `reqeusts` vs `requests`), recently published packages with few downloads
+- **Transitive dependency depth:** Deeply nested dependency chains (>5 levels) increase supply chain attack surface; flag packages that pull in disproportionate transitive trees
+- Reference: Google OSS-Fuzz, Microsoft SDL, OpenSSF Scorecard
+
+### 13. Algorithmic Complexity
+- **Quadratic or worse loops:** O(n^2) or worse nested loops over collections (nested `.filter()` inside `.map()`, repeated linear scans, cartesian joins in application code)
+- **Regex catastrophic backtracking:** Nested quantifiers (`(a+)+`, `(a|a)*`), unbounded repetition with overlapping alternatives — flag any regex applied to user-controlled input
+- **Unbounded recursion:** Recursive functions without depth limits, missing base cases, or base cases that depend on external/mutable state
+- **Cache invalidation storms:** Cache miss triggering expensive recomputation that itself invalidates caches, thundering herd on cache expiry without jitter/locking
+- **Hot path inefficiency:** Sorting/searching in hot paths without appropriate data structures (linear scan where hash map suffices, repeated sorting of same collection, string concatenation in loops)
+
+### 14. Internationalization & Localization
+- **Hardcoded user-facing strings:** Strings displayed to users embedded directly in source code rather than externalized to resource files/i18n frameworks
+- **Locale-sensitive operations without locale parameter:** String comparison (`<`, `>`, `localeCompare` without locale), date formatting (`toLocaleDateString` without explicit locale), number formatting, sorting (alphabetical sort that assumes ASCII ordering)
+- **RTL layout issues:** Hardcoded LTR assumptions in UI code (absolute `left`/`right` positioning, directional margin/padding, text alignment assumptions)
+- **Unicode handling bugs:** String length vs byte length confusion, missing normalization (NFC/NFD), emoji handling (multi-codepoint sequences split incorrectly, `string.length` vs grapheme count), surrogate pair handling in substring operations
 
 ## Bug Verification Protocol
 
@@ -693,6 +728,22 @@ After writing all test files, validate them using the project's native toolchain
    SKIPPED:      1 target (N/A — race condition not reliably testable)
    ```
 
+## Fix Suggestion Generation
+
+For each bug with CONFIRMED or HIGH confidence, generate a minimal suggested fix alongside the bug report. Fix suggestions are advisory — they are never auto-applied.
+
+### Fix Generation Rules
+
+1. **Minimal change principle:** The fix must be the smallest code change that addresses the root cause. Do not refactor surrounding code, add features, or improve style.
+2. **Before/after format:** Include the exact current code (BEFORE) and the suggested fix (AFTER) as code snippets with file path and line numbers.
+3. **Root cause targeting:** The fix must address the root cause identified in the bug's data flow trace, not a symptom. If the root cause is in a different location than the symptom, fix at the root.
+4. **Mark as SUGGESTED:** Every fix must be clearly marked as `SUGGESTED (REVIEW REQUIRED)` — never imply auto-application.
+5. **One fix per bug:** Each bug gets exactly one suggested fix. If multiple fix strategies exist, choose the most conservative one and note alternatives.
+6. **Preserve behavior:** The fix must not change behavior beyond correcting the identified bug. No side-effect improvements.
+7. **Skip when inappropriate:** Mark fix as `N/A` for bugs where the fix requires architectural changes, significant refactoring, or domain knowledge beyond what the code provides.
+
+Reference: Meta SapFix — automated fix suggestion with human-in-the-loop validation.
+
 ## Output Format
 
 For each verified bug:
@@ -725,6 +776,16 @@ For each verified bug:
 [Explicit statement: "No sanitization exists because X", "Framework Y doesn't escape Z in this context", etc.]
 
 **Fix:** [Minimal code change or mitigation]
+
+**Suggested Fix (REVIEW REQUIRED):**
+```[language]
+// BEFORE (current buggy code):
+[exact code snippet from the codebase]
+
+// AFTER (suggested fix):
+[minimal change that addresses root cause]
+```
+_This fix is SUGGESTED only — human review required before applying. Reference: Meta SapFix methodology._
 
 **Regression Test:**
 **Status:** [COVERED | PARTIAL | WRONG_ASSERTION | NO_COVERAGE | N/A]

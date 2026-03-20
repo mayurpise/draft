@@ -47,6 +47,15 @@ Perform fast, objective static checks using grep/search across the diff:
    - [ ] Each module's boundary is respected
    - [ ] Cross-module contracts are maintained
 
+7. **Context-Specific Checks**
+
+   When reviewing changes, identify the primary domain of the diff (security, database, API, config, UI) and apply domain-specific checks in addition to the standard checklist above:
+   - **Security/crypto files:** Timing-safe comparisons, constant-time operations, secure random generation, key length requirements
+   - **Database/migration files:** Backward compatibility, index coverage, constraint preservation, zero-downtime migration safety
+   - **API/endpoint files:** Public signature backward compatibility, input validation, rate limiting, authentication/authorization
+   - **Configuration files:** Secrets exposure, startup validation, fallback defaults
+   - **UI/frontend files:** XSS vectors, accessibility (ARIA, keyboard nav), performance (bundle impact)
+
 **If Stage 1 FAILS (any critical issue):** Stop here. List structural failures and return to implementation. Do NOT proceed to Stage 2.
 
 **If Stage 1 PASSES:** Proceed to Stage 2.
@@ -119,6 +128,8 @@ If Stage 3 produces zero findings across all four dimensions, do NOT accept "cle
 3. **Implicit assumptions** — Does code assume inputs are always valid, services always up, or state always consistent?
 4. **Future brittleness** — Is anything hardcoded that will break on scale or config change?
 5. **Missing coverage** — Is there behavior that should be tested but isn't?
+6. **Guardrails** — Do any changes violate learned anti-patterns from `guardrails.md`?
+7. **Invariants** — Do any changes violate critical invariants documented in `.ai-context.md`?
 
 If still zero after this pass, document it explicitly in the review report:
 > "Adversarial pass completed. Zero findings confirmed: [one sentence per question explaining why each is clean]"

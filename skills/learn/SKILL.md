@@ -140,7 +140,46 @@ Scan the codebase across these dimensions, looking for **recurring patterns** (3
 - Feature flag patterns
 - Config file conventions
 
-### 2.3: Cross-Reference Existing Knowledge
+### 2.3: Temporal Pattern Analysis
+
+Detect patterns that are being phased out by the team:
+
+1. **Identify declining patterns** — For each candidate pattern, use `git blame` to check the age of files containing it:
+   - **Old files** (last modified >1 year ago): high occurrence of the pattern
+   - **New files** (last modified <6 months ago): low or zero occurrence of the pattern
+   - If occurrence ratio old:new is >3:1, flag as a declining pattern
+2. **Mark declining patterns** — When writing to guardrails.md, add `declining: true` to the entry metadata:
+   ```markdown
+   - **Declining:** yes — found in 8 old files (avg age 18mo), 1 new file (avg age 2mo). Being replaced by [newer pattern].
+   ```
+3. **Do NOT propagate declining patterns** — Quality commands should not flag absence of a declining pattern as inconsistency
+4. **Example:** Old error handling style `try/catch with manual logging` found in files last modified >1 year ago, newer files use structured error middleware — the old style is declining, not a convention to enforce
+
+**Reference:** Google large-scale changes (Rosie) — systematic detection of patterns being migrated away from.
+
+### 2.4: Cross-Service Pattern Comparison (Monorepo)
+
+When in a monorepo (detected by `draft/service-index.md` existing OR multiple `draft/` directories OR presence of `packages/`, `services/`, `apps/` directories):
+
+1. **Scan across services** — Run pattern analysis in each service/package independently
+2. **Compare patterns for the same concern** — For each pattern dimension (error handling, naming, etc.):
+   - Does Service A use a different approach than Service B for the same concern?
+   - Example: Service A uses `Result<T, E>` for error handling, Service B uses exceptions
+3. **Flag inconsistencies** — Report cross-service divergences:
+   ```
+   Cross-service inconsistency: Error Handling
+     services/auth/ → uses custom Result type (5 files)
+     services/billing/ → uses thrown exceptions (8 files)
+     Suggestion: standardize on one approach
+   ```
+4. **Respect intentional differences** — Do NOT flag inconsistencies when:
+   - Services use different languages or frameworks
+   - The pattern difference is documented in `tech-stack.md` or `.ai-context.md`
+   - The services have fundamentally different runtime requirements
+
+**Reference:** Google monorepo practices — consistent patterns across services reduce cognitive overhead and enable large-scale tooling.
+
+### 2.5: Cross-Reference Existing Knowledge
 
 For each candidate pattern:
 
@@ -166,6 +205,60 @@ Follow the threshold from `core/shared/pattern-learning.md`:
 
 - **Convention:** Pattern is consistently applied AND does not cause bugs, security issues, or violations of documented invariants
 - **Anti-Pattern:** Pattern is consistently applied BUT causes or risks bugs, security issues, performance problems, or invariant violations
+
+---
+
+## Step 3.5: Pattern Conflict Detection
+
+Before saving any new pattern, check for conflicts with existing entries:
+
+1. **Check against existing conventions** — Does the new pattern contradict a learned convention?
+2. **Check against existing anti-patterns** — Does the new pattern contradict a learned anti-pattern?
+3. **Check against Hard Guardrails** — Does the new pattern violate a hard guardrail?
+
+**If conflict found:**
+- Do NOT silently save the new pattern
+- Alert the user with both patterns side by side:
+  ```
+  CONFLICT DETECTED:
+
+  Existing convention: "Use async/await for all async operations"
+    Evidence: 12 files, high confidence, learned 2025-01-15
+
+  New candidate: "Avoid async in database module — use callback style"
+    Evidence: 4 files in src/db/, medium confidence
+
+  These may both be valid (module-scoped exception) or one may be outdated.
+  Options:
+    [1] Keep both (new pattern is a scoped exception)
+    [2] Replace existing with new (pattern has evolved)
+    [3] Discard new (existing is correct)
+  ```
+- Wait for user input before proceeding
+
+**Reference:** Google Code Health — conflicting patterns create confusion and should be resolved explicitly.
+
+---
+
+## Step 3.7: External Benchmark Comparison
+
+After discovering patterns, optionally compare project conventions against community standards for the detected language:
+
+| Language | Benchmarks |
+|----------|-----------|
+| **Go** | Effective Go, Go Code Review Comments |
+| **Python** | PEP 8, PEP 20, Google Python Style Guide |
+| **Java** | Effective Java, Google Java Style Guide |
+| **TypeScript** | typescript-eslint recommended rules |
+| **Rust** | Rust API Guidelines, Clippy lints |
+| **C/C++** | Google C++ Style Guide, C++ Core Guidelines |
+
+For each project convention that **deviates** from its language's community standard:
+1. Note the deviation in the summary report (not as an anti-pattern — deviations may be intentional)
+2. If the deviation is undocumented, suggest adding it to `tech-stack.md ## Accepted Patterns` with a rationale
+3. Example: project uses `snake_case` for TypeScript functions (deviates from `camelCase` convention) — flag for documentation, not correction
+
+**Reference:** Google Abseil Tips of the Week, language-specific style guides — deviations from community standards increase onboarding friction and should be documented even when intentional.
 
 ---
 

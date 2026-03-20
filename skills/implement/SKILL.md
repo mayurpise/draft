@@ -246,6 +246,15 @@ When your implementation hits any of these triggers, use the corresponding patte
 | Missing data, null, or undefined where a decision depends on it | Treat as deny/reject/skip — not as allow/proceed |
 | Config or feature flag missing/unparseable | Use the restrictive default — system runs in safe mode, not open mode |
 
+#### Resilience
+
+| Trigger | Required Pattern |
+|---------|-----------------|
+| Any retry logic | Exponential backoff with jitter — never fixed-interval or immediate retries. Prevents retry storms. |
+| Cache population under high concurrency | Cache stampede prevention: use probabilistic early expiration or request coalescing to prevent thundering herd |
+| External dependency call (HTTP, RPC, DB to external service) | Circuit breaker pattern: track failure rate, open circuit on threshold, allow periodic probes to recover |
+| Non-critical dependency failure | Graceful degradation: return cached/default/partial result rather than failing the entire request |
+
 **Enforcement:** These patterns override convenience. If following a pattern makes the code more verbose, that's correct — the verbosity is the safety. If a pattern is genuinely N/A for the current task (e.g., no DB in a pure utility function), skip it — only apply relevant patterns.
 
 **If project invariants were loaded in Step 1:** Cross-reference them here. Project-specific invariants (lock ordering, concurrency model, consistency boundaries) take precedence over these general patterns when they conflict.
@@ -255,6 +264,20 @@ When your implementation hits any of these triggers, use the corresponding patte
 ### Step 3.1: Implement (TDD Workflow)
 
 For each task, follow this workflow based on `workflow.md`. If skeletons were generated in Step 3.0b, fill them in using the TDD cycle below.
+
+### Characterization Testing (Refactoring Existing Code Without Tests)
+
+When a task involves refactoring existing code that lacks test coverage, run this **before** the TDD cycle:
+
+1. **Identify seams** (Michael Feathers' technique):
+   - Object seams: interfaces where test doubles can be injected
+   - Link seams: module imports that can be swapped
+2. **Write characterization tests** that capture the current behavior as a baseline
+   - Run the existing code and record actual outputs for representative inputs
+   - These tests document "what it does now," not "what it should do"
+3. Proceed with the TDD cycle below for the new/changed behavior
+4. Characterization tests serve as a safety net — if they break during refactoring, the behavioral change is intentional or a regression
+- Reference: "Working Effectively with Legacy Code" (Michael Feathers)
 
 ### If TDD Enabled:
 
@@ -269,6 +292,30 @@ For each task, follow this workflow based on `workflow.md`. If skeletons were ge
 5. Announce: "Test failing as expected: [failure message]"
 ```
 
+**Test Quality Checklist (REQUIRED for every test):**
+- No shared mutable state between test cases — each test sets up its own state
+- Assertion density: every test must have at least one meaningful assertion (not just `assertTrue(true)`)
+- No logic in tests: no conditionals, loops, or try/catch in test code — tests should be trivially readable
+- DAMP over DRY: prefer descriptive and meaningful test names and setup over deduplication
+- Test behavior, not implementation: verify observable outcomes, not internal method calls
+- One behavior per test: each test should verify exactly one logical behavior
+- Reference: Google SWE Book Ch. 12, Google Testing Blog "Test Behavior, Not Implementation"
+
+**Property-Based Testing Checkpoint:**
+After writing example-based tests, consider whether property-based tests would add value:
+- For pure functions (no side effects, deterministic): suggest property-based tests
+- For mathematical operations: suggest algebraic properties (commutativity, associativity, identity)
+- For serialization: suggest round-trip property (serialize → deserialize = identity)
+- For sorting: suggest ordering, permutation, length-preservation properties
+- Tool recommendations by language:
+  - Python: Hypothesis (https://hypothesis.works/)
+  - JavaScript/TypeScript: fast-check (https://fast-check.dev/)
+  - Java: jqwik (https://jqwik.net/)
+  - Rust: proptest (https://github.com/proptest-rs/proptest)
+  - Go: rapid (https://github.com/flyingmutant/rapid)
+- Reference: Amazon ShardStore property-based testing
+- **Not mandatory** — skip if the function is not pure or properties are not obvious
+
 **3b. GREEN - Implement Minimum Code**
 ```
 1. Write MINIMUM code to make test pass (no extras)
@@ -276,6 +323,23 @@ For each task, follow this workflow based on `workflow.md`. If skeletons were ge
 3. Show test output with pass
 4. Announce: "Test passing: [evidence]"
 ```
+
+**Observability Prompts (consider during implementation):**
+- Structured logging at key decision points (not just errors)
+- Metrics emission for latency-sensitive operations (counters, histograms)
+- Tracing span creation at service boundaries and significant internal operations
+- Error classification (transient vs permanent) for retry logic
+- These are prompts, not mandates — use engineering judgment on what's appropriate for the task
+- Reference: Netflix Full Cycle Developers
+
+**Contract Testing Checkpoint (Service Boundaries Only):**
+When implementing new API endpoints, message handlers, or service-to-service interfaces:
+- Suggest consumer-driven contract tests to verify interface compatibility
+- For REST APIs: suggest Pact (https://pact.io/) or Spring Cloud Contract
+- For GraphQL: suggest schema validation tests
+- For message queues: suggest schema registry validation
+- Skip for purely internal modules with no cross-service communication
+- Reference: ThoughtWorks Tech Radar, Pact documentation
 
 **3c. REFACTOR - Clean with Tests Green**
 ```

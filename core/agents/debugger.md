@@ -52,6 +52,21 @@ Before investigating, load `draft/.ai-context.md` (or `draft/architecture.md`) t
 - Is this an environment difference?
 - Is this a state management issue?
 
+#### Language-Specific Debugging Techniques
+
+Apply these language-specific techniques during analysis:
+
+| Language | Techniques |
+|----------|-----------|
+| **JavaScript/TypeScript** | Async stack traces (`--async-stack-traces`), event loop lag detection, unhandled rejection tracking (`process.on('unhandledRejection')`), `node --inspect` for Chrome DevTools |
+| **Python** | `traceback` module for full chain, `sys.settrace` for call tracing, `asyncio` debug mode (`PYTHONASYNCIODEBUG=1`), `pdb.set_trace()` / `breakpoint()` |
+| **Go** | Goroutine dumps (`SIGQUIT` / `runtime.Stack()`), race detector (`go test -race`), `pprof` for CPU/memory, `GODEBUG` environment variables |
+| **Java** | Thread dumps (`jstack`), heap dumps (`jmap`), JMX monitoring, remote debugging (`-agentlib:jdwp`) |
+| **Rust** | `RUST_BACKTRACE=1` for full backtraces, `miri` for undefined behavior detection, `cargo expand` for macro debugging, `RUST_LOG` for tracing |
+| **C/C++** | GDB/LLDB for interactive debugging, core dump analysis, Valgrind for memory errors, sanitizers (ASan, MSan, TSan, UBSan) |
+
+Select techniques appropriate to the language and failure type. Not all techniques apply to every bug.
+
 **Output:** Root cause hypothesis with supporting evidence.
 
 ---
@@ -85,6 +100,56 @@ Before investigating, load `draft/.ai-context.md` (or `draft/architecture.md`) t
 5. **Document root cause** - Update spec.md with findings
 
 **Output:** Fix committed with regression test.
+
+---
+
+## Performance Debugging Path
+
+For performance issues (latency regressions, throughput degradation, memory growth), follow this specialized path instead of the general four phases:
+
+### Perf Phase 1: Investigate — Profile Before Guessing
+
+Do NOT guess at performance bottlenecks. Profile first.
+
+| Language | Profiling Tools |
+|----------|----------------|
+| **Node.js** | `--prof` for V8 profiler, `clinic.js` (doctor, bubbleprof, flame), `0x` for flame graphs |
+| **Python** | `cProfile` / `profile` module, `py-spy` for sampling profiler (no code changes), `memory_profiler` for memory |
+| **Java** | JDK Flight Recorder (JFR), `async-profiler`, VisualVM, JMH for microbenchmarks |
+| **Go** | `pprof` (CPU, memory, goroutine, block profiles), `go test -bench`, `go tool trace` |
+| **Rust** | `flamegraph` crate, `criterion` for benchmarks, `perf` on Linux, `cargo flamegraph` |
+| **C/C++** | `perf` / `perf record`, Valgrind (`callgrind`), `gprof`, Intel VTune |
+
+### Perf Phase 2: Analyze — Compare Against Baseline
+
+1. **Capture current profile** — flame graph, allocation profile, or latency histogram
+2. **Capture baseline profile** — from last known-good version (checkout prior commit, re-profile)
+3. **Diff the profiles** — identify hot paths, new allocations, or I/O changes between versions
+4. **Categorize the bottleneck:**
+   - CPU-bound: hot loop, expensive computation, unoptimized algorithm
+   - Memory-bound: excessive allocations, GC pressure, memory leaks
+   - I/O-bound: slow queries, network latency, disk operations
+   - Concurrency-bound: lock contention, goroutine/thread starvation
+
+### Perf Phase 3: Hypothesize — Target the Hot Path
+
+1. Form a single performance hypothesis: "The regression is caused by [X] at `file:line`"
+2. Predict the improvement: "Fixing this should reduce p99 latency by ~Y ms"
+3. Verify the hot path accounts for the regression (not just being slow in general)
+
+### Perf Phase 4: Implement — Benchmark First, Then Optimize
+
+1. **Write a benchmark test** — captures current (slow) performance with reproducible numbers
+2. **Implement the optimization** — address the identified bottleneck only
+3. **Re-run benchmark** — verify measurable improvement
+4. **Re-run full test suite** — ensure correctness is preserved
+5. **Re-profile** — confirm the hot path is resolved and no new bottleneck appeared
+
+**Anti-patterns for performance debugging:**
+- Optimizing without profiling data
+- Optimizing code that isn't on the hot path
+- Micro-optimizing when the bottleneck is I/O
+- Sacrificing readability for unmeasurable gains
 
 ---
 

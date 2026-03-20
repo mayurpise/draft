@@ -71,12 +71,21 @@ Commands use `@draft` syntax.
 | Command | What It Does |
 |---------|--------------|
 | **`/draft:init`** | Analyze codebase, create context files |
+| **`/draft:index`** | Aggregate monorepo service contexts |
 | **`/draft:new-track`** | Collaborative spec + plan with AI |
+| **`/draft:decompose`** | Module decomposition with dependency mapping |
 | **`/draft:implement`** | TDD workflow with checkpoints |
+| **`/draft:coverage`** | Code coverage report (target 95%+) |
 | **`/draft:review`** | 3-stage review (validation + spec compliance + code quality) |
 | **`/draft:deep-review`** | Enterprise-grade module lifecycle and ACID audit |
 | **`/draft:bughunt`** | Exhaustive defect discovery |
 | **`/draft:learn`** | Discover coding patterns, update guardrails |
+| **`/draft:adr`** | Architecture Decision Records |
+| **`/draft:status`** | Show progress overview |
+| **`/draft:revert`** | Git-aware rollback |
+| **`/draft:change`** | Handle mid-track requirement changes |
+| **`/draft:jira-preview`** | Generate Jira export for review |
+| **`/draft:jira-create`** | Push issues to Jira via MCP |
 
 [See all 17 commands →](core/methodology.md#command-workflows)
 

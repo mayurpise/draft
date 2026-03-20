@@ -121,7 +121,7 @@ You can also use natural language:
 | "requirements changed", "scope changed", "update the spec" | `/draft:change` |
 | "learn patterns", "update guardrails", "discover conventions" | `/draft:learn` |
 | "preview jira", "export to jira" | `/draft:jira-preview` |
-| "create jira issues" | `/draft:jira-create` |
+| "create jira", "push to jira" | `/draft:jira-create` |
 
 
 ## Need Help?

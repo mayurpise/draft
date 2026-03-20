@@ -2344,7 +2344,7 @@ For each target directory:
    ```
 
 3. **Let `@draft bughunt` run its full workflow:**
-   - Report will be generated at `<target-dir>/draft/bughunt-report.md`
+   - Report will be generated at `<target-dir>/draft/bughunt-report-<timestamp>.md`
    - Capture exit status (success/failure)
 
 4. **Record results:**
@@ -2361,7 +2361,7 @@ After all bughunts complete, read each generated report:
 
 ```bash
 # For each target directory
-cat <dir>/draft/bughunt-report.md
+cat <dir>/draft/bughunt-report-latest.md
 ```
 
 Extract from each report:
@@ -6163,7 +6163,7 @@ ln -sf review-report-<timestamp>.md draft/tracks/<id>/review-report-latest.md
 - **Critical bugs:** N found
 - **High severity:** N found
 - **Medium severity:** N found
-- Full report: `./bughunt-report.md`
+- Full report: `./bughunt-report-latest.md`
 
 ---
 
@@ -9347,7 +9347,7 @@ Systematic bug hunt across 11 dimensions: correctness, reliability, security, pe
 8. Write regression tests in the project's native framework (new files for NO_COVERAGE, modifications for PARTIAL/WRONG_ASSERTION)
 9. Validate tests compile/parse via language-appropriate command (up to 2 retries; never run tests — they are expected to fail against buggy code)
 
-Generates report at `draft/bughunt-report.md` or `draft/tracks/<id>/bughunt-report.md`.
+Generates report at `draft/bughunt-report-<timestamp>.md` (symlinked as `bughunt-report-latest.md`) or `draft/tracks/<id>/bughunt-report-<timestamp>.md`.
 Test files are written directly to the project using native test conventions.
 
 ---
@@ -12479,6 +12479,93 @@ synced_to_commit: "{FULL_SHA}"
 > Key decisions and reasoning captured during intake.
 
 [Conversation summary will be added here]
+
+</core-file>
+
+---
+
+## core/templates/plan.md
+
+<core-file path="core/templates/plan.md">
+
+---
+project: "{PROJECT_NAME}"
+module: "root"
+track_id: "{TRACK_ID}"
+generated_by: "draft:new-track"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
+
+# Plan: {TITLE}
+
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+**Track ID:** {TRACK_ID}
+**Spec:** ./spec.md
+**Status:** [ ] Planning
+
+## Overview
+
+{One-paragraph summary of what this plan delivers, derived from spec.md}
+
+---
+
+## Phase 1: Foundation
+
+**Goal:** {What this phase establishes}
+**Verification:** {How to confirm phase is complete}
+
+### Tasks
+
+- [ ] **Task 1.1:** {Description} — `{file_path}`
+- [ ] **Task 1.2:** {Description} — `{file_path}`
+
+---
+
+## Phase 2: Core Implementation
+
+**Goal:** {What this phase delivers}
+**Verification:** {How to confirm phase is complete}
+
+### Tasks
+
+- [ ] **Task 2.1:** {Description} — `{file_path}`
+- [ ] **Task 2.2:** {Description} — `{file_path}`
+
+---
+
+## Phase 3: Integration & Polish
+
+**Goal:** {What this phase delivers}
+**Verification:** {How to confirm phase is complete — run full test suite, manual verification}
+
+### Tasks
+
+- [ ] **Task 3.1:** {Description} — `{file_path}`
+- [ ] **Task 3.2:** Verify — {Run tests, confirm all acceptance criteria met}
+
+---
+
+## Status Markers
+
+- `[ ]` Pending
+- `[~]` In Progress
+- `[x]` Completed — append commit SHA: `(abc1234)`
+- `[!]` Blocked — note reason
 
 </core-file>
 

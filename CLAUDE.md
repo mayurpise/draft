@@ -70,8 +70,9 @@ The frontmatter configures the command; the body contains step-by-step instructi
 ### Adding a New Skill
 
 1. Create `skills/<skill-name>/SKILL.md` with frontmatter
-2. Rebuild: `./scripts/build-integrations.sh`
-3. Document in README.md
+2. Add `skills/<skill-name>/SKILL.md` to the `skills` array in `.claude-plugin/plugin.json`
+3. Rebuild: `./scripts/build-integrations.sh`
+4. Document in README.md
 
 ## End-User Context
 
@@ -86,8 +87,7 @@ When users use Draft, it creates a `draft/` directory in their project:
 | `workflow.md` | TDD preferences, commit strategy, validation config |
 | `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns |
 | `tracks.md` | Master list of all tracks |
-| `tracks/<id>/` | Individual tracks with `spec.md`, `plan.md`, `metadata.json`, `validation-report.md` |
-| `validation-report.md` | Project-level validation results (architecture, security, performance) |
+| `tracks/<id>/` | Individual tracks with `spec.md`, `plan.md`, `metadata.json` |
 
 ### Key Sections
 
@@ -119,7 +119,7 @@ At phase boundaries: (1) Automated Validation, (2) Spec Compliance, (3) Code Qua
 See `core/agents/reviewer.md`.
 
 ### Validation (when enabled)
-At track completion: Systematic quality checks using Draft context (`.ai-context.md`, tech-stack.md). Non-blocking by default. Reports in `draft/tracks/<id>/validation-report.md`.
+At track completion: Systematic quality checks using Draft context (`.ai-context.md`, tech-stack.md). Non-blocking by default.
 
 ## Communication Style
 

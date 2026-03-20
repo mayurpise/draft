@@ -177,7 +177,7 @@ For each target directory:
    ```
 
 3. **Let `/draft:bughunt` run its full workflow:**
-   - Report will be generated at `<target-dir>/draft/bughunt-report.md`
+   - Report will be generated at `<target-dir>/draft/bughunt-report-<timestamp>.md`
    - Capture exit status (success/failure)
 
 4. **Record results:**
@@ -194,7 +194,7 @@ After all bughunts complete, read each generated report:
 
 ```bash
 # For each target directory
-cat <dir>/draft/bughunt-report.md
+cat <dir>/draft/bughunt-report-latest.md
 ```
 
 Extract from each report:

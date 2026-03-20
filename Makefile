@@ -24,13 +24,12 @@ build: ## Generate integration files from skills
 	./scripts/build-integrations.sh
 
 test: ## Run all tests
-	@TOTAL_PASS=0; TOTAL_FAIL=0; FAILED_SUITES=""; \
+	@FAILED_SUITES=""; \
 	for script in $(TEST_SCRIPTS); do \
 		echo ""; \
 		if $$script; then \
 			: ; \
 		else \
-			SUITE_FAILS=$$?; \
 			FAILED_SUITES="$$FAILED_SUITES $$script"; \
 		fi; \
 	done; \

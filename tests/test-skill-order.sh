@@ -21,8 +21,11 @@ echo "=== SKILL_ORDER completeness tests ==="
 echo ""
 
 # Extract SKILL_ORDER from build script
-SKILL_ORDER_RAW=$(sed -n '/^SKILL_ORDER=(/,/^)/p' "$BUILD_SCRIPT" | grep -v '^SKILL_ORDER=(' | grep -v '^)' | tr -d ' ')
-mapfile -t SKILL_ORDER <<< "$SKILL_ORDER_RAW"
+SKILL_ORDER_RAW=$(sed -n '/^SKILL_ORDER=(/,/^)/p' "$BUILD_SCRIPT" | grep -v '^SKILL_ORDER=(' | grep -v '^)' | tr -d ' ' | grep -v '^\s*$')
+SKILL_ORDER=()
+while IFS= read -r line; do
+    [[ -n "$line" ]] && SKILL_ORDER+=("$line")
+done <<< "$SKILL_ORDER_RAW"
 
 # Get actual skill directories
 DISK_SKILLS=()
@@ -45,15 +48,18 @@ assert "SKILL_ORDER count matches disk skill count" \
 echo ""
 echo "## Disk skills present in SKILL_ORDER"
 
-# Create associative array for O(1) membership check
-declare -A SKILL_ORDER_MAP
-for skill in "${SKILL_ORDER[@]}"; do
-    SKILL_ORDER_MAP["$skill"]=1
-done
-
+# Check if disk skills are in SKILL_ORDER using standard arrays
 ALL_DISK_IN_ORDER=true
 for disk_skill in "${DISK_SKILLS[@]}"; do
-    if [[ -z "${SKILL_ORDER_MAP["$disk_skill"]:-}" ]]; then
+    found_in_order=false
+    for order_skill in "${SKILL_ORDER[@]}"; do
+        if [[ "$disk_skill" == "$order_skill" ]]; then
+            found_in_order=true
+            break
+        fi
+    done
+    
+    if [[ "$found_in_order" == false ]]; then
         echo "  MISSING from SKILL_ORDER: $disk_skill"
         ALL_DISK_IN_ORDER=false
     fi

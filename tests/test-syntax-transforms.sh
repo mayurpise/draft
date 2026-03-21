@@ -18,8 +18,7 @@ source "$SCRIPT_DIR/test-helpers.sh"
 # Extract function definitions from the build script
 FUNC_FILE="$(mktemp)"
 # Extract exactly the function bodies, accounting for potential DOS line endings or trailing spaces
-sed -n '/^transform_gemini_syntax()/,/^}/p' "$BUILD_SCRIPT" | tr -d '\r' > "$FUNC_FILE"
-sed -n '/^transform_copilot_syntax()/,/^}/p' "$BUILD_SCRIPT" | tr -d '\r' >> "$FUNC_FILE"
+sed -n '/^transform_copilot_syntax()/,/^}/p' "$BUILD_SCRIPT" | tr -d '\r' > "$FUNC_FILE"
 
 # Source the functions
 if ! source "$FUNC_FILE"; then
@@ -52,47 +51,7 @@ assert_transform() {
 echo "=== Syntax transform tests ==="
 echo ""
 
-# --- Gemini transforms ---
-echo "## Gemini: /draft:cmd → @draft cmd"
-assert_transform "Simple command" \
-    transform_gemini_syntax \
-    "/draft:init" \
-    "@draft init"
-
-assert_transform "Hyphenated command" \
-    transform_gemini_syntax \
-    "/draft:new-track" \
-    "@draft new-track"
-
-assert_transform "Double-hyphenated command" \
-    transform_gemini_syntax \
-    "/draft:deep-review" \
-    "@draft deep-review"
-
-assert_transform "Mid-sentence" \
-    transform_gemini_syntax \
-    "Run /draft:init to set up the project" \
-    "Run @draft init to set up the project"
-
-assert_transform "Multiple on one line" \
-    transform_gemini_syntax \
-    "Use /draft:init then /draft:new-track to start" \
-    "Use @draft init then @draft new-track to start"
-
-assert_transform "In backticks" \
-    transform_gemini_syntax \
-    'Use `/draft:implement` to start' \
-    'Use `@draft implement` to start'
-
-assert_transform "No match - plain text unchanged" \
-    transform_gemini_syntax \
-    "This has no draft commands" \
-    "This has no draft commands"
-
-assert_transform "Preserves existing @draft" \
-    transform_gemini_syntax \
-    "@draft is already correct" \
-    "@draft is already correct"
+# (Removed Gemini transforms)
 
 # --- Copilot transforms ---
 echo ""

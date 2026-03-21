@@ -49,20 +49,34 @@ https://github.com/mayurpise/draft.git
 
 Then use: `@draft init`, `@draft new-track`, `@draft implement`
 
-### GitHub Copilot
-```bash
-mkdir -p .github
-curl -o .github/copilot-instructions.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md
+Draft integrates with your AI pair programmer by providing context-optimized instructions. These instructions tell the AI how to follow the Draft methodology and where to find the detailed skills.
+
+### Antigravity IDE
+Draft is used globally with Antigravity IDE by installing the skills to a central location.
+
+1. Clone Draft to `~/.gemini/antigravity/skills/draft`
+2. Configure `~/.gemini.md` (bootstrap) to point to the global skills:
+```markdown
+**Skill Locations:**
+The authoritative Draft implementation skills are located at:
+`/Users/mayurpise/.gemini/antigravity/skills/draft/skills`
 ```
 
-Commands use natural language: `draft init`, `draft new-track`
+### GitHub Copilot
+For Copilot in VS Code, Draft uses a `.github/copilot-instructions.md` file.
+
+```bash
+# Add bootstrap to your project
+mkdir -p .github && curl -o .github/copilot-instructions.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md
+```
 
 ### Gemini
-```bash
-curl -o GEMINI.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/GEMINI.md
-```
+For Gemini, Draft uses a `.gemini.md` file.
 
-Commands use `@draft` syntax.
+```bash
+# Add bootstrap to your project
+curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/.gemini.md
+```
 
 ---
 

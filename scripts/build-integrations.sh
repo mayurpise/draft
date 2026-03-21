@@ -21,7 +21,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 SKILLS_DIR="$ROOT_DIR/skills"
 COPILOT_OUTPUT="$ROOT_DIR/integrations/copilot/.github/copilot-instructions.md"
-GEMINI_OUTPUT="$ROOT_DIR/integrations/gemini/GEMINI.md"
 
 # ─────────────────────────────────────────────────────────
 # Shared: skill ordering and metadata
@@ -67,7 +66,7 @@ get_skill_header() {
         change)       echo "Change Command" ;;
         jira-preview) echo "Jira Preview Command" ;;
         jira-create)  echo "Jira Create Command" ;;
-        *)            echo "${skill^} Command" ;;
+        *)            echo "$(echo "${skill:0:1}" | tr '[:lower:]' '[:upper:]')${skill:1} Command" ;;
     esac
 }
 
@@ -99,9 +98,8 @@ get_trigger() {
 }
 
 # Gemini uses @draft syntax
-get_gemini_trigger() {
-    get_trigger "$1" "@"
-}
+# (Removed Gemini trigger)
+
 
 # Copilot uses natural language (no @ mentions)
 get_copilot_trigger() {
@@ -158,19 +156,17 @@ extract_body() {
 }
 
 # Gemini transform: /draft: → @draft
-transform_gemini_syntax() {
-    sed -E \
-        -e 's|/draft:([a-z-]+)|@draft \1|g'
-}
+# (Removed Gemini transform)
+
 
 # Copilot transform: /draft: → draft (no @)
 transform_copilot_syntax() {
     sed -E \
         -e 's|/draft:([a-z-]+)|draft \1|g' \
-        -e 's|@draft\b|draft|g' \
+        -e 's|@draft[[:>:]]|draft|g' \
         -e 's|`@draft`|`draft`|g' \
         -e 's|`@draft |`draft |g' \
-        -e 's#@((architect|debugger|planner|rca|reviewer)\b)#@workspace#g'
+        -e 's#@((architect|debugger|planner|rca|reviewer)[[:>:]])#@workspace#g'
 }
 
 # ─────────────────────────────────────────────────────────
@@ -574,9 +570,8 @@ build_copilot() {
 # Gemini: build GEMINI.md
 # ─────────────────────────────────────────────────────────
 
-build_gemini() {
-    build_integration "@draft" "get_gemini_trigger" "transform_gemini_syntax" "@draft"
-}
+# (Removed build_gemini)
+
 
 # ─────────────────────────────────────────────────────────
 # Verification helpers
@@ -651,7 +646,6 @@ main() {
 
     # Ensure output directories exist
     mkdir -p "$(dirname "$COPILOT_OUTPUT")"
-    mkdir -p "$(dirname "$GEMINI_OUTPUT")"
 
     local start_seconds=$SECONDS
 
@@ -664,19 +658,6 @@ main() {
         mv "$copilot_tmp" "$COPILOT_OUTPUT"
     else
         rm -f "$copilot_tmp"
-        exit 1
-    fi
-    echo ""
-
-    # Generate Gemini integration (atomic: write to temp, verify, then mv)
-    echo "── Gemini ──────────────────────────────────────"
-    local gemini_tmp="${GEMINI_OUTPUT}.tmp"
-    build_gemini > "$gemini_tmp"
-    echo "  Generated: $GEMINI_OUTPUT"
-    if verify_output "Gemini" "$gemini_tmp" "yes"; then
-        mv "$gemini_tmp" "$GEMINI_OUTPUT"
-    else
-        rm -f "$gemini_tmp"
         exit 1
     fi
     echo ""

@@ -1569,13 +1569,21 @@
                         <h4>GitHub Copilot</h4>
                         <p>Drop-in instructions file. Works in VS Code, JetBrains, Neovim — wherever Copilot runs.</p>
                     </div>
-                    <div class="problem-card" style="border-color: rgba(34, 211, 238, 0.3);">
-                        <h4>Gemini</h4>
-                        <p>Single file integration. Compatible with Gemini CLI and IDE extensions.</p>
-                    </div>
-                    <div class="problem-card" style="border-color: rgba(34, 211, 238, 0.3);">
+                </div>
+
+                <div class="doc-card">
+                    <div class="icon">✨</div>
+                    <div class="card-summary">
                         <h4>Cursor</h4>
                         <p>Add from GitHub as a Cursor rule. Works alongside your existing Cursor setup.</p>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="icon">🚀</div>
+                    <div class="card-summary">
+                        <h4>Antigravity IDE & Gemini</h4>
+                        <p>Uses a lightweight `.gemini.md` bootstrap file pointing to a global or local installation.</p>
                     </div>
                 </div>
                 <div class="callout">
@@ -1653,7 +1661,7 @@
         <!-- INSTALL TAB -->
         <div id="tab-install" class="tab-content" role="tabpanel">
             <h2>Install</h2>
-            <p>Install Draft as a Claude Code plugin, or use the integrations for Cursor, GitHub Copilot, and Gemini.
+            <p>Install Draft as a Claude Code plugin, or use the integrations for Cursor, GitHub Copilot, Antigravity IDE, and Gemini.
             </p>
 
             <h3>Claude Code (Marketplace)</h3>
@@ -1685,6 +1693,7 @@
             </div>
 
             <h3>GitHub Copilot</h3>
+            <p>Generates a comprehensive `copilot-instructions.md` context file for Copilot's specific requirements:</p>
             <div class="code-block">
                 <div class="code-header">
                     <div class="dot red"></div>
@@ -1695,7 +1704,24 @@
                 <pre><code><span class="code-keyword">mkdir</span> -p .github && <span class="code-keyword">curl</span> -o .github/copilot-instructions.md <span class="code-string">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md</span></code></pre>
             </div>
 
+            <h3>Antigravity IDE</h3>
+            <p>Install globally and set up your bootstrap configuration once:</p>
+            <div class="code-block">
+                <div class="code-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <span class="filename">antigravity setup</span>
+                </div>
+                <pre><code><span class="code-comment"># Clone skills to Antigravity global directory</span>
+<span class="code-keyword">mkdir</span> -p ~/.gemini/antigravity/skills
+<span class="code-keyword">git</span> clone https://github.com/mayurpise/draft.git ~/.gemini/antigravity/skills/draft
+<span class="code-comment"># Set up the bootstrap</span>
+<span class="code-keyword">curl</span> -o ~/.gemini.md <span class="code-string">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/.gemini.md</span></code></pre>
+            </div>
+
             <h3>Gemini</h3>
+            <p>Use the lightweight bootstrap file in your local repository:</p>
             <div class="code-block">
                 <div class="code-header">
                     <div class="dot red"></div>
@@ -1703,7 +1729,7 @@
                     <div class="dot green"></div>
                     <span class="filename">gemini setup</span>
                 </div>
-                <pre><code><span class="code-keyword">curl</span> -o GEMINI.md <span class="code-string">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/GEMINI.md</span></code></pre>
+                <pre><code><span class="code-keyword">curl</span> -o .gemini.md <span class="code-string">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/.gemini.md</span></code></pre>
             </div>
         </div>
 

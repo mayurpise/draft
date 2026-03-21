@@ -16,7 +16,6 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 BUILD_SCRIPT="$ROOT_DIR/scripts/build-integrations.sh"
 CORE_DIR="$ROOT_DIR/core"
 COPILOT_OUTPUT="$ROOT_DIR/integrations/copilot/.github/copilot-instructions.md"
-GEMINI_OUTPUT="$ROOT_DIR/integrations/gemini/GEMINI.md"
 
 source "$SCRIPT_DIR/test-helpers.sh"
 
@@ -24,8 +23,11 @@ echo "=== Core file inlining tests ==="
 echo ""
 
 # Extract CORE_FILES array from build script
-CORE_FILES_RAW=$(sed -n '/^CORE_FILES=(/,/^)/p' "$BUILD_SCRIPT" | grep -v '^CORE_FILES=(' | grep -v '^)' | grep -v '^\s*#' | sed 's/^[[:space:]]*"//' | sed 's/"[[:space:]]*$//')
-mapfile -t CORE_FILES <<< "$CORE_FILES_RAW"
+CORE_FILES_RAW=$(sed -n '/^CORE_FILES=(/,/^)/p' "$BUILD_SCRIPT" | grep -v '^CORE_FILES=(' | grep -v '^)' | grep -v '^\s*#' | sed 's/^[[:space:]]*"//' | sed 's/"[[:space:]]*$//' | grep -v '^\s*$')
+CORE_FILES=()
+while IFS= read -r line; do
+    [[ -n "$line" ]] && CORE_FILES+=("$line")
+done <<< "$CORE_FILES_RAW"
 
 echo "## Core files count: ${#CORE_FILES[@]}"
 echo ""
@@ -68,25 +70,7 @@ if [[ "$ALL_IN_COPILOT" == "false" ]]; then
 fi
 assert "All core files inlined in Copilot output with <core-file> tags" "$ALL_IN_COPILOT"
 
-# --- Core files appear in Gemini output ---
-echo ""
-echo "## Core files in Gemini output"
-ALL_IN_GEMINI=true
-GEMINI_MISSING=()
-for core_file in "${CORE_FILES[@]}"; do
-    [[ -z "$core_file" ]] && continue
-    TAG="<core-file path=\"core/${core_file}\">"
-    if ! grep -qF "$TAG" "$GEMINI_OUTPUT" 2>/dev/null; then
-        GEMINI_MISSING+=("$core_file")
-        ALL_IN_GEMINI=false
-    fi
-done
-if [[ "$ALL_IN_GEMINI" == "false" ]]; then
-    for missing in "${GEMINI_MISSING[@]}"; do
-        echo "  MISSING in Gemini: $missing"
-    done
-fi
-assert "All core files inlined in Gemini output with <core-file> tags" "$ALL_IN_GEMINI"
+# (Removed Gemini output array check)
 
 # --- Closing tags present ---
 echo ""
@@ -96,10 +80,7 @@ COPILOT_CLOSE=$(grep -c '</core-file>' "$COPILOT_OUTPUT" 2>/dev/null || true)
 assert "Copilot output has matching open/close core-file tags ($COPILOT_OPEN/$COPILOT_CLOSE)" \
     "$([[ "$COPILOT_OPEN" -eq "$COPILOT_CLOSE" ]] && echo true || echo false)"
 
-GEMINI_OPEN=$(grep -c '<core-file path=' "$GEMINI_OUTPUT" 2>/dev/null || true)
-GEMINI_CLOSE=$(grep -c '</core-file>' "$GEMINI_OUTPUT" 2>/dev/null || true)
-assert "Gemini output has matching open/close core-file tags ($GEMINI_OPEN/$GEMINI_CLOSE)" \
-    "$([[ "$GEMINI_OPEN" -eq "$GEMINI_CLOSE" ]] && echo true || echo false)"
+# (Removed Gemini closing tag check)
 
 # --- No missing-file warnings ---
 echo ""

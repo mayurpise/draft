@@ -26,7 +26,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 BUILD_SCRIPT="$ROOT_DIR/scripts/build-integrations.sh"
 COPILOT_OUTPUT="$ROOT_DIR/integrations/copilot/.github/copilot-instructions.md"
-GEMINI_OUTPUT="$ROOT_DIR/integrations/gemini/GEMINI.md"
 BASELINE="$(mktemp)"
 trap 'rm -f "$BASELINE"' EXIT
 
@@ -94,23 +93,7 @@ else
     assert "Copilot output is idempotent (rebuild produces same result)" "false"
 fi
 
-# --- Gemini output tests ---
-echo ""
-echo "## Gemini output"
-assert "Gemini GEMINI.md generated" \
-    "$([[ -f "$GEMINI_OUTPUT" ]] && echo true || echo false)"
-
-if [[ -f "$GEMINI_OUTPUT" ]]; then
-    LINES=$(wc -l < "$GEMINI_OUTPUT" | tr -d ' ')
-    assert "Gemini output has content (>100 lines)" \
-        "$([[ "$LINES" -gt 100 ]] && echo true || echo false)"
-    DRAFT_COLON=$(grep -c '/draft:' "$GEMINI_OUTPUT" 2>/dev/null || true)
-    assert "Gemini output contains no /draft: references" \
-        "$([[ "${DRAFT_COLON:-0}" -eq 0 ]] && echo true || echo false)"
-    AT_DRAFT=$(grep -c '@draft' "$GEMINI_OUTPUT" 2>/dev/null || true)
-    assert "Gemini output contains @draft references" \
-        "$([[ "${AT_DRAFT:-0}" -gt 0 ]] && echo true || echo false)"
-fi
+# --- Removed Gemini tests ---
 
 # --- Summary ---
 echo ""

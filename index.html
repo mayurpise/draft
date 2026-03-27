@@ -1606,7 +1606,7 @@
                     </div>
                     <div class="comparison-row">
                         <div><strong>Architecture Discovery</strong></div>
-                        <div>30-45 page codebase analysis with Mermaid diagrams, data state machines, consistency boundaries. No other tool generates this.</div>
+                        <div>Comprehensive codebase analysis with Mermaid diagrams, data state machines, consistency boundaries. No other tool generates this.</div>
                     </div>
                     <div class="comparison-row">
                         <div><strong>11-Dimension Bug Hunt</strong></div>
@@ -1813,7 +1813,7 @@
                         <div class="hierarchy-level">
                             <div class="num">5</div>
                             <div class="file">architecture.md</div>
-                            <div class="desc">30-45 page human-readable engineering reference (source of truth). 25
+                            <div class="desc">Comprehensive human-readable engineering reference (source of truth). 25
                                 sections + 4 appendices with Mermaid diagrams, code snippets, and prose explanations.
                                 Generated from 5-phase codebase analysis.</div>
                         </div>
@@ -2580,7 +2580,7 @@
                         </div>
                         <div class="desc">Tech lead runs <code>/draft:init</code>. For brownfield projects, Draft
                             performs deep 5-phase architecture discovery with signal classification — generating
-                            <code>architecture.md</code> (30-45 pages, 25 sections + appendices with Mermaid diagrams),
+                            <code>architecture.md</code> (comprehensive, 25 sections + appendices with Mermaid diagrams),
                             deriving <code>.ai-context.md</code> (200-400 lines, 15+ sections: invariants, interface
                             contracts, data flows, cookbooks), and persisting state for incremental refresh
                             (<code>.state/</code> with freshness hashes, signal classification, run memory). Team reviews
@@ -2600,7 +2600,7 @@
                         <div class="file">.ai-context.md + architecture.md</div>
                         <div class="desc">Lead runs <code>/draft:decompose</code>. Team reviews module boundaries, API
                             surfaces, dependency graph, and implementation order via PR. <code>architecture.md</code> is
-                            the 30-45 page source of truth; <code>.ai-context.md</code> is the machine-optimized AI
+                            the comprehensive source of truth; <code>.ai-context.md</code> is the machine-optimized AI
                             context derived from it. Senior engineers validate the
                             architecture without touching the codebase.</div>
                     </div>
@@ -3029,7 +3029,7 @@
                     <pre><code><span class="code-file">draft/</span>
 ├── <span class="code-file">product.md</span>          <span class="code-comment"># Product vision, goals, guidelines</span>
 ├── <span class="code-file">tech-stack.md</span>       <span class="code-comment"># Technical choices, accepted patterns</span>
-├── <span class="code-file">architecture.md</span>     <span class="code-comment"># Source of truth: 30-45 pages, Mermaid diagrams, code snippets</span>
+├── <span class="code-file">architecture.md</span>     <span class="code-comment"># Source of truth: comprehensive, Mermaid diagrams, code snippets</span>
 ├── <span class="code-file">.ai-context.md</span>      <span class="code-comment"># Derived: 200-400 lines, machine-optimized AI context</span>
 ├── <span class="code-file">workflow.md</span>         <span class="code-comment"># TDD, commit, validation config</span>
 ├── <span class="code-file">guardrails.md</span>       <span class="code-comment"># Hard guardrails, learned conventions, anti-patterns</span>

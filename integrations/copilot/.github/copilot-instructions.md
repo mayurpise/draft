@@ -451,7 +451,7 @@ If **Greenfield**: skip to Step 2 (Product Definition).
 Perform a **one-time, exhaustive analysis** of the existing codebase. This is NOT a summary — it is a comprehensive reference document that enables future AI agents and engineers to work without re-reading source files.
 
 **Outputs**:
-- `draft/architecture.md` — Human-readable, **30-45 page** engineering reference (PRIMARY)
+- `draft/architecture.md` — Human-readable, **comprehensive** engineering reference (PRIMARY)
 - `draft/.ai-context.md` — Token-optimized, 200-400 lines, condensed from architecture.md (DERIVED)
 
 **Target output**: A single self-contained reference document designed for **dual consumption**:
@@ -466,7 +466,7 @@ Perform a **one-time, exhaustive analysis** of the existing codebase. This is NO
 - **Generate REAL Mermaid diagrams** — every section calling for a diagram MUST have one
 - **Include ACTUAL code snippets** — from the codebase, not pseudocode
 - **Populate ALL tables** — with real data, not placeholders or examples
-- **Target 30-45 pages** — shorter output indicates incomplete analysis
+- **Target: comprehensive coverage** — shorter output indicates incomplete analysis
 
 If the codebase is large (200+ files), focus on the module boundaries but still enumerate exhaustively within each module.
 
@@ -691,7 +691,7 @@ Generate `draft/architecture.md` — a comprehensive human-readable engineering 
 
 **Output format**:
 - Markdown report with Mermaid diagrams, tables, and code blocks
-- **Target length: 30–45 pages** when rendered
+- **Target length: comprehensive** — cover all 25 sections + 4 appendices exhaustively
 - Include a **Table of Contents** with numbered sections
 - End the document with: `"End of analysis. Queries should reference the .ai-context.md file for token efficiency."`
 
@@ -718,7 +718,7 @@ synced_to_commit: "{FULL_SHA}"
 
 # Architecture: {PROJECT_NAME}
 
-> Human-readable engineering reference. 30-45 pages.
+> Comprehensive human-readable engineering reference.
 > For token-optimized AI context, see `draft/.ai-context.md`.
 
 ---
@@ -1598,7 +1598,7 @@ Before writing architecture.md, verify your output matches these expectations:
 
 | Metric | Minimum | Target |
 |--------|---------|--------|
-| **Total pages** | 25 pages | 30-45 pages |
+| **Depth** | 25 sections minimum | Comprehensive (25 sections + 4 appendices) |
 | **Mermaid diagrams** | 5 diagrams | 8-12 diagrams |
 | **Tables with data** | 15 tables | 20-30 tables |
 | **Code snippets** | 5 snippets | 10-15 snippets |
@@ -1606,7 +1606,7 @@ Before writing architecture.md, verify your output matches these expectations:
 | **Invariants documented** | 8 | 10-15 |
 | **Modules deep-dived** | 5 | 5-8 |
 
-**Page count guidance:** Minimum acceptable is 25 pages. Target is 30-45 pages. Under 25 pages indicates incomplete analysis — go back and expand HIGH-priority sections.
+**Completeness guidance:** All 25 sections + 4 appendices must be present. HIGH-priority sections require depth and diagrams. If any HIGH-priority section is thin, expand it before finalizing.
 
 ---
 
@@ -1616,7 +1616,7 @@ Before writing architecture.md, verify your output matches these expectations:
 - Mermaid diagrams must be syntactically valid.
 - Tables must have consistent column alignment.
 - Code snippets must be actual code from the codebase (with added inline comments for clarity), not pseudocode.
-- The report should be 30–45 pages when rendered.
+- The report should be comprehensive — all sections with real data, no placeholders.
 - Prefer depth over brevity — this is a reference document, not a summary.
 - Include ALL instances (handlers, endpoints, schemas, dependencies) — do not sample or abbreviate.
 - When a section does not apply (per the Adaptive Sections table), state explicitly that it is skipped and why, rather than silently omitting it.
@@ -1985,7 +1985,7 @@ After completing the 5-phase analysis:
 
    # Architecture: {PROJECT_NAME}
 
-   > Human-readable engineering reference. 30-45 pages.
+   > Comprehensive human-readable engineering reference.
    > For token-optimized AI context, see `draft/.ai-context.md`.
 
    ---
@@ -2216,7 +2216,7 @@ For **Brownfield** projects, announce:
 
 Created:
 - draft/.ai-context.md (200-400 lines — token-optimized AI context, self-contained)
-- draft/architecture.md (30-45 pages — human-readable engineering reference)
+- draft/architecture.md (comprehensive human-readable engineering reference)
 - draft/product.md
 - draft/tech-stack.md
 - draft/workflow.md
@@ -2265,7 +2265,7 @@ This is a self-contained, callable procedure for generating `draft/.ai-context.m
 
 | Input | Path | Description |
 |-------|------|-------------|
-| architecture.md | `draft/architecture.md` | Human-readable 30-45 page engineering reference (source of truth) |
+| architecture.md | `draft/architecture.md` | Comprehensive human-readable engineering reference (source of truth) |
 
 ### Outputs
 
@@ -9317,7 +9317,7 @@ Draft solves this through **Context-Driven Development**: structured documents t
 |----------|---------|----------|
 | `product.md` | Defines users, goals, success criteria, guidelines | AI building features nobody asked for |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
-| `architecture.md` | **Source of truth.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
+| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary. Auto-refreshed on mutations. | AI re-analyzing codebase every session |
 | `workflow.md` | TDD preference, commit style, review process | AI skipping tests or making giant commits |
 | `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns | AI repeating false positives or missing known-bad patterns |
@@ -9603,7 +9603,7 @@ Located in `draft/` of the target project:
 |------|---------|
 | `product.md` | Product vision, users, goals, guidelines (optional section) |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
-| `architecture.md` | **Source of truth.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices. Generated from 5-phase codebase analysis. |
+| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices. Generated from 5-phase codebase analysis. |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context with 15+ mandatory sections. Consumed by all Draft commands and external AI tools. Auto-refreshed on mutations. |
 | `workflow.md` | TDD preferences, commit strategy, validation config |
 | `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns |
@@ -9676,7 +9676,7 @@ Draft auto-classifies the project:
 
    **Phase 5: Synthesis** — Cross-reference, completeness validation, pattern identification, diagram generation.
 
-   This produces `draft/architecture.md` (30-45 page human-readable reference) and `draft/.ai-context.md` (200-400 line token-optimized context). Both become persistent context — every future track references them instead of re-analyzing the codebase.
+   This produces `draft/architecture.md` (comprehensive human-readable reference) and `draft/.ai-context.md` (200-400 line token-optimized context). Both become persistent context — every future track references them instead of re-analyzing the codebase.
 
 3. **State persistence** — Writes `draft/.state/` directory with three files:
    - `freshness.json` — SHA-256 hashes of all analyzed source files (enables file-level staleness detection on refresh)
@@ -11719,7 +11719,7 @@ synced_to_commit: "{FULL_SHA}"
 
 # Architecture: {PROJECT_NAME}
 
-> Human-readable engineering reference. 30-45 pages.
+> Comprehensive human-readable engineering reference.
 > For token-optimized AI context, see `draft/.ai-context.md`.
 
 | Field | Value |

@@ -148,7 +148,7 @@ AI tools are fast but unstructured. Draft applies Context-Driven Development to 
 ```
 product.md       →  "Build a task manager"
 tech-stack.md    →  "React, TypeScript, Tailwind"
-architecture.md  →  30-45 pages: 25 sections + appendices, Mermaid diagrams (source of truth)
+architecture.md  →  Comprehensive: 25 sections + appendices, Mermaid diagrams (source of truth)
 .ai-context.md   →  200-400 lines: condensed from architecture.md (token-optimized AI context)
 .state/          →  freshness hashes, signal classification, run memory (incremental refresh)
 spec.md          →  "Add drag-and-drop reordering"

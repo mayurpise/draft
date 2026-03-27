@@ -62,7 +62,7 @@ Draft solves this through **Context-Driven Development**: structured documents t
 |----------|---------|----------|
 | `product.md` | Defines users, goals, success criteria, guidelines | AI building features nobody asked for |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
-| `architecture.md` | **Source of truth.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
+| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary. Auto-refreshed on mutations. | AI re-analyzing codebase every session |
 | `workflow.md` | TDD preference, commit style, review process | AI skipping tests or making giant commits |
 | `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns | AI repeating false positives or missing known-bad patterns |
@@ -348,7 +348,7 @@ Located in `draft/` of the target project:
 |------|---------|
 | `product.md` | Product vision, users, goals, guidelines (optional section) |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
-| `architecture.md` | **Source of truth.** 30-45 page human-readable engineering reference with 25 sections + 4 appendices. Generated from 5-phase codebase analysis. |
+| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices. Generated from 5-phase codebase analysis. |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context with 15+ mandatory sections. Consumed by all Draft commands and external AI tools. Auto-refreshed on mutations. |
 | `workflow.md` | TDD preferences, commit strategy, validation config |
 | `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns |
@@ -421,7 +421,7 @@ Draft auto-classifies the project:
 
    **Phase 5: Synthesis** — Cross-reference, completeness validation, pattern identification, diagram generation.
 
-   This produces `draft/architecture.md` (30-45 page human-readable reference) and `draft/.ai-context.md` (200-400 line token-optimized context). Both become persistent context — every future track references them instead of re-analyzing the codebase.
+   This produces `draft/architecture.md` (comprehensive human-readable reference) and `draft/.ai-context.md` (200-400 line token-optimized context). Both become persistent context — every future track references them instead of re-analyzing the codebase.
 
 3. **State persistence** — Writes `draft/.state/` directory with three files:
    - `freshness.json` — SHA-256 hashes of all analyzed source files (enables file-level staleness detection on refresh)

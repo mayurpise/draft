@@ -81,7 +81,7 @@ Some AI tools provide built-in bug hunt agents (e.g., Claude Code's `bughunt` ag
 ## Context Files
 
 When `draft/` exists, these files guide development:
-- `draft/architecture.md` - Source of truth: human-readable engineering reference (30-45 pages)
+- `draft/architecture.md` - Source of truth: comprehensive human-readable engineering reference
 - `draft/.ai-context.md` - Derived from architecture.md: token-optimized AI context (200-400 lines)
 - `draft/product.md` - Product vision and goals
 - `draft/tech-stack.md` - Technical constraints

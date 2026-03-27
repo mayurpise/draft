@@ -163,10 +163,12 @@ extract_body() {
 transform_copilot_syntax() {
     sed -E \
         -e 's|/draft:([a-z-]+)|draft \1|g' \
-        -e 's|@draft[[:>:]]|draft|g' \
+        -e 's|@draft([^a-z0-9_-])|draft\1|g' \
+        -e 's|@draft$|draft|g' \
         -e 's|`@draft`|`draft`|g' \
         -e 's|`@draft |`draft |g' \
-        -e 's#@((architect|debugger|planner|rca|reviewer)[[:>:]])#@workspace#g'
+        -e 's#@(architect|debugger|planner|rca|reviewer)([^a-z0-9_-])#@workspace\2#g' \
+        -e 's#@(architect|debugger|planner|rca|reviewer)$#@workspace#g'
 }
 
 # ─────────────────────────────────────────────────────────

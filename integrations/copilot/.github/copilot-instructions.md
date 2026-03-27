@@ -291,9 +291,56 @@ If `draft/.ai-context.md` exists WITHOUT `draft/architecture.md`:
 
 If the user runs `draft init refresh`:
 
+**0. State-Aware Pre-Check** (before any refresh work):
+
+   **a. Check for interrupted previous run:**
+   ```bash
+   cat draft/.state/run-memory.json 2>/dev/null
+   ```
+   If `status` is `"in_progress"`, offer to resume from `resumable_checkpoint` or start fresh.
+
+   **b. Load freshness state (if available):**
+   ```bash
+   cat draft/.state/freshness.json 2>/dev/null
+   ```
+   If `freshness.json` exists, compute current file hashes and diff against stored hashes:
+   - **Changed files**: Hash differs from stored → these files need re-analysis
+   - **New files**: Present in current tree but not in stored → new modules/components to document
+   - **Deleted files**: Present in stored but not in current tree → sections to prune
+   - **Unchanged files**: Hash matches → skip re-reading these files entirely
+
+   If NO files changed (all hashes match AND no new/deleted files), announce:
+   "No source file changes detected since last init/refresh ({generated_at}). Architecture context is current. Nothing to refresh."
+   Stop here unless the user insists.
+
+   **c. Load signal state (if available):**
+   ```bash
+   cat draft/.state/signals.json 2>/dev/null
+   ```
+   If `signals.json` exists, re-run signal classification (Phase 1 step 5) and diff against stored signals:
+   - **New signal categories** (0→N): A new architectural concern appeared (e.g., auth files added for the first time). Flag these — new architecture.md sections may need to be generated.
+   - **Removed signal categories** (N→0): An architectural concern was removed. Flag for section pruning.
+   - **Signal count changes**: Significant growth (>50% increase) suggests the section needs deeper treatment.
+
+   Report signal drift:
+   ```
+   Signal drift detected:
+     NEW:     auth_files (0 → 5) — §16 Security Architecture needs generation
+     GROWN:   backend_routes (12 → 24) — §12 API Definitions needs expansion
+     REMOVED: background_jobs (3 → 0) — §8 Concurrency can be simplified
+     STABLE:  services (8 → 9), test_infra (15 → 16)
+   ```
+
+   **d. Create refresh run memory:**
+   Write `draft/.state/run-memory.json` with `run_type: "refresh"` and `status: "in_progress"`.
+
+   **e. Load previous unresolved questions:**
+   If the previous run had `unresolved_questions`, display them:
+   "Previous run flagged these unresolved questions: {list}. Keep these in mind during refresh."
+
 1. **Tech Stack Refresh**: Re-scan `package.json`, `go.mod`, etc. Compare with `draft/tech-stack.md`. Propose updates.
 
-2. **Architecture Refresh**: If `draft/architecture.md` exists, use metadata-based incremental analysis:
+2. **Architecture Refresh**: If `draft/architecture.md` exists, use metadata-based incremental analysis. If freshness state is available from step 0b, use file-level deltas to scope the refresh more precisely than git-diff alone:
 
    **a. Read synced commit from metadata:**
    ```bash
@@ -365,6 +412,12 @@ If the user runs `draft init refresh`:
    - `generated_at`: current timestamp
    - `git.*`: current git state
    - `synced_to_commit`: current HEAD SHA
+
+   **k. Refresh state files:**
+   After successful architecture refresh, regenerate all three state files:
+   - `draft/.state/freshness.json` — recompute hashes of all source files (new baseline)
+   - `draft/.state/signals.json` — re-run signal classification (update baseline)
+   - `draft/.state/run-memory.json` — set `status: "completed"`, `completed_at: "{ISO_TIMESTAMP}"`, preserve `unresolved_questions`
 
 3. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
@@ -542,6 +595,52 @@ Follow these steps in order. The specific files to look for depend on the langua
 3. **Read API definition files**: These define the module's data model and service interfaces. (See language guide above for which files.)
 
 4. **Read interface / type definition files**: Class declarations, interface definitions, and type annotations reveal the public API and design intent.
+
+5. **Classify codebase signals**: Walk the file tree from step 1 and tag every file that matches one or more signal categories. This drives adaptive section depth in later phases — sections with strong signals get deep treatment, sections with no signals get marked SKIP.
+
+   | Signal Category | Detection Patterns | Drives Section(s) |
+   |----------------|-------------------|-------------------|
+   | `backend_routes` | `routes/`, `handlers/`, `controllers/`, `**/api/**`, route decorators (`@app.route`, `@router`, `@RequestMapping`) | §12 API Definitions, §14 Cross-Module Integration |
+   | `frontend_routes` | `pages/`, `views/`, `**/routes.*`, `**/router.*`, React Router, Next.js `app/` dir | §4 Architecture (add UI topology) |
+   | `components` | `components/`, `widgets/`, `*.component.ts`, `*.tsx` in component dirs | §7 Core Modules (add component hierarchy) |
+   | `services` | `services/`, `*Service.*`, `*_service.*`, `**/service/**` | §5 Component Map, §7 Core Modules |
+   | `data_models` | `models/`, `entities/`, `schemas/`, `*.model.*`, `*.entity.*`, `migrations/` | §19 State Management, §12 API Definitions |
+   | `auth_files` | `auth/`, `**/auth/**`, `middleware/auth*`, `guards/`, JWT/OAuth imports | §16 Security Architecture |
+   | `state_management` | `store/`, `reducers/`, `**/state/**`, Redux/Vuex/Zustand/Pinia imports | §19 State Management (frontend state) |
+   | `background_jobs` | `jobs/`, `workers/`, `tasks/`, `queues/`, `**/cron/**`, Celery/Sidekiq/Bull imports | §8 Concurrency, §22 Configuration |
+   | `persistence` | `repositories/`, `dao/`, `**/db/**`, ORM config files, migration directories | §19 State Management |
+   | `test_infra` | `test/`, `tests/`, `__tests__/`, `*.test.*`, `*.spec.*`, test config files | §26 Testing Infrastructure |
+   | `config_files` | `.env*`, `config/`, `*.config.*`, `application.yml`, `settings.*` | §22 Configuration |
+
+   **Procedure:**
+
+   ```bash
+   # Count files matching each signal category
+   # Example for backend_routes:
+   find . -type f \( -path "*/routes/*" -o -path "*/handlers/*" -o -path "*/controllers/*" -o -path "*/api/*" \) \
+     ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/vendor/*" ! -path "*/draft/*" | head -50
+
+   # Repeat for each category, adapting patterns to the detected language
+   ```
+
+   **Build a signal summary** (hold in memory for Phase 5):
+
+   ```
+   Signal Classification:
+     backend_routes:    12 files  → §12, §14 HIGH
+     services:           8 files  → §5, §7 HIGH
+     data_models:        6 files  → §19, §12 HIGH
+     test_infra:        15 files  → §26 HIGH
+     auth_files:         3 files  → §16 HIGH
+     components:         0 files  → §7 (skip component hierarchy)
+     frontend_routes:    0 files  → §4 (skip UI topology)
+     state_management:   0 files  → §19 (skip frontend state)
+     background_jobs:    0 files  → §8 (simplify concurrency)
+     persistence:        4 files  → §19 HIGH
+     config_files:       5 files  → §22 HIGH
+   ```
+
+   **Integration with Adaptive Sections (§353):** Use signal counts to override the default skip rules. A signal count of 0 means the section should be skipped or simplified. A count ≥ 3 means the section warrants deep treatment. Between 1-2, include the section but keep it brief.
 
 #### Phase 2: Wiring (Trace the Graph)
 
@@ -1907,6 +2006,121 @@ After completing the 5-phase analysis:
 
 > **Note:** After generating or updating `architecture.md`, run the **Condensation Subroutine** (defined at the end of this skill) to derive `.ai-context.md`.
 
+## Step 1.7: Persist State
+
+After generating `architecture.md` and `.ai-context.md`, persist three state files to `draft/.state/` for incremental refresh and cross-session continuity.
+
+### 1.7.1 Freshness State (`draft/.state/freshness.json`)
+
+Compute SHA-256 hashes of all source files analyzed during Phases 1-5. This enables **file-level staleness detection** on subsequent refreshes — more granular than `synced_to_commit` which only detects that _some_ commits happened.
+
+```bash
+# Generate SHA-256 hashes for all analyzed source files (exclude draft/, node_modules/, .git/, vendor/)
+find . -type f \
+  ! -path "./draft/*" ! -path "./.git/*" ! -path "*/node_modules/*" ! -path "*/vendor/*" \
+  ! -path "*/__pycache__/*" ! -path "*/dist/*" ! -path "*/build/*" \
+  \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \
+     -o -name "*.py" -o -name "*.go" -o -name "*.rs" -o -name "*.java" -o -name "*.kt" \
+     -o -name "*.c" -o -name "*.cc" -o -name "*.cpp" -o -name "*.h" \
+     -o -name "*.rb" -o -name "*.php" -o -name "*.swift" -o -name "*.cs" \
+     -o -name "*.proto" -o -name "*.graphql" -o -name "*.gql" \
+     -o -name "*.yaml" -o -name "*.yml" -o -name "*.toml" -o -name "*.json" \
+     -o -name "*.sql" -o -name "*.md" -o -name "Dockerfile" -o -name "Makefile" \) \
+  -exec sha256sum {} \; 2>/dev/null | sort -k2
+```
+
+Write `draft/.state/freshness.json`:
+
+```json
+{
+  "generated_at": "{ISO_TIMESTAMP}",
+  "git_commit": "{FULL_SHA}",
+  "total_files": 0,
+  "files": {
+    "src/index.ts": "sha256:a1b2c3d4...",
+    "src/auth/login.ts": "sha256:e5f6a7b8...",
+    "package.json": "sha256:c9d0e1f2..."
+  }
+}
+```
+
+**On refresh:** Compare stored hashes against current file hashes. Files with changed/new/deleted hashes are the delta that drives targeted section updates.
+
+### 1.7.2 Signal State (`draft/.state/signals.json`)
+
+Persist the signal classification from Phase 1 step 5:
+
+```json
+{
+  "generated_at": "{ISO_TIMESTAMP}",
+  "git_commit": "{FULL_SHA}",
+  "total_files_scanned": 0,
+  "signals": {
+    "backend_routes": { "count": 12, "sample_files": ["src/routes/auth.ts", "src/routes/users.ts"] },
+    "frontend_routes": { "count": 0, "sample_files": [] },
+    "components": { "count": 0, "sample_files": [] },
+    "services": { "count": 8, "sample_files": ["src/services/auth.service.ts"] },
+    "data_models": { "count": 6, "sample_files": ["src/models/user.ts"] },
+    "auth_files": { "count": 3, "sample_files": ["src/auth/guard.ts"] },
+    "state_management": { "count": 0, "sample_files": [] },
+    "background_jobs": { "count": 0, "sample_files": [] },
+    "persistence": { "count": 4, "sample_files": ["src/db/repository.ts"] },
+    "test_infra": { "count": 15, "sample_files": ["tests/auth.test.ts"] },
+    "config_files": { "count": 5, "sample_files": [".env.example", "config/default.yml"] }
+  },
+  "section_relevance": {
+    "4_architecture_overview": "HIGH",
+    "7_core_modules": "HIGH",
+    "8_concurrency": "SKIP",
+    "9_framework_extensions": "LOW",
+    "12_api_definitions": "HIGH",
+    "16_security": "HIGH",
+    "19_state_management": "HIGH",
+    "22_configuration": "HIGH",
+    "26_testing": "HIGH"
+  }
+}
+```
+
+**On refresh:** Compare current signals against stored signals. New signal categories appearing (e.g., `auth_files` going from 0→3) indicate **structural drift** — new architecture sections may need to be generated for the first time.
+
+### 1.7.3 Run Memory (`draft/.state/run-memory.json`)
+
+Persist run state for cross-session continuity. If `draft:init` is interrupted mid-analysis, the next invocation can detect the incomplete run and offer to resume.
+
+```json
+{
+  "run_id": "{UUID}",
+  "started_at": "{ISO_TIMESTAMP}",
+  "completed_at": null,
+  "run_type": "init",
+  "status": "in_progress",
+  "phases_completed": ["phase_1", "phase_2", "phase_3"],
+  "phases_remaining": ["phase_4", "phase_5"],
+  "files_analyzed": 142,
+  "files_generated": ["draft/architecture.md", "draft/.ai-context.md"],
+  "unresolved_questions": [
+    "Could not determine if src/legacy/ is actively used or deprecated",
+    "Multiple auth patterns detected — unclear which is canonical"
+  ],
+  "active_focus_areas": ["backend_routes", "services", "data_models"],
+  "resumable_checkpoint": {
+    "last_phase": "phase_3",
+    "last_file_read": "src/services/billing.service.ts",
+    "pending_sections": ["§14 Cross-Module Integration", "§15 Critical Invariants"]
+  }
+}
+```
+
+**On completion:** Update `status` to `"completed"` and set `completed_at`. Keep `unresolved_questions` — these are surfaced to the user in the completion report and are valuable context for future refreshes.
+
+**On next invocation:** If `run-memory.json` exists with `status: "in_progress"`:
+- Announce: "Detected incomplete previous run (started {started_at}, completed phases: {list}). Resume from {last_phase} or start fresh?"
+- If resume: Skip completed phases, continue from `resumable_checkpoint`
+- If fresh: Overwrite run memory and start from Phase 1
+
+---
+
 ## Step 2: Product Definition
 
 Create `draft/product.md` using the template from `core/templates/product.md`.
@@ -1993,10 +2207,15 @@ synced_to_commit: "{FULL_SHA}"
 ## Step 6: Create Directory Structure
 
 ```bash
-mkdir -p draft/tracks
+mkdir -p draft/tracks draft/.state
 ```
 
 ## Completion
+
+**Finalize run memory:** Update `draft/.state/run-memory.json`:
+- `status`: `"completed"`
+- `completed_at`: current ISO timestamp
+- Preserve `unresolved_questions` — these are displayed in the completion report below
 
 For **Brownfield** projects, announce:
 "Draft initialized successfully with comprehensive analysis!
@@ -2009,13 +2228,20 @@ Created:
 - draft/workflow.md
 - draft/guardrails.md
 - draft/tracks.md
+- draft/.state/freshness.json (file-level hash baseline for incremental refresh)
+- draft/.state/signals.json (codebase signal classification)
+- draft/.state/run-memory.json (run metadata and unresolved questions)
+
+{If unresolved_questions is non-empty, show:}
+Unresolved questions from analysis:
+{list each question — these are areas where the AI couldn't determine the answer with confidence}
 
 Next steps:
 1. Review draft/.ai-context.md — verify the AI context is complete and accurate
 2. Review draft/architecture.md — human-friendly version for team onboarding
 3. Review and edit the other generated files as needed
 4. Run `draft new-track` to start planning a feature
-5. Run `draft init refresh` after significant codebase changes to update architecture context"
+5. Run `draft init refresh` after significant codebase changes — refresh is now incremental (only stale files re-analyzed)"
 
 For **Greenfield** projects, announce:
 "Draft initialized successfully!
@@ -2026,6 +2252,7 @@ Created:
 - draft/workflow.md
 - draft/guardrails.md
 - draft/tracks.md
+- draft/.state/run-memory.json (run metadata)
 
 Next steps:
 1. Review and edit the generated files as needed
@@ -9388,6 +9615,9 @@ Located in `draft/` of the target project:
 | `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns |
 | `jira.md` | Jira project configuration (optional) |
 | `tracks.md` | Master list of all tracks |
+| `.state/freshness.json` | SHA-256 hashes of all analyzed source files. Enables file-level staleness detection for incremental refresh. |
+| `.state/signals.json` | Codebase signal classification (11 categories). Detects structural drift on refresh. |
+| `.state/run-memory.json` | Run metadata, resumable checkpoints, unresolved questions. Enables cross-session continuity. |
 
 ### Key Sections
 
@@ -9440,22 +9670,30 @@ Draft auto-classifies the project:
 #### Initialization Sequence
 
 1. **Project discovery** — Classify as brownfield, greenfield, or monorepo
-2. **Architecture discovery (brownfield only)** — Three-phase analysis:
+2. **Architecture discovery (brownfield only)** — Five-phase analysis:
 
-   **Phase 1: Orientation** — Directory structure, entry points, tech stack inventory. Generates system architecture diagram.
+   **Phase 1: Discovery** — Directory structure, build/dependency files, API definitions, interface/type files. Includes **signal classification** — categorizes all source files into 11 signal categories (`backend_routes`, `frontend_routes`, `components`, `services`, `data_models`, `auth_files`, `state_management`, `background_jobs`, `persistence`, `test_infra`, `config_files`). Signal counts drive adaptive section depth.
 
-   **Phase 2: Logic** — Data lifecycle mapping, primary domain objects, design pattern recognition, anti-pattern/complexity hotspot flagging, convention extraction, external dependency mapping. Generates mermaid diagrams.
+   **Phase 2: Wiring** — Entry points, orchestrator/controller initialization, registry/registration code, dependency wiring (DI, module system, import graph).
 
-   **Phase 3: Module Discovery** — Reverse-engineers existing modules from import graph and directory boundaries. Documents each module's responsibility, files, API surface, dependencies, and complexity. Generates module dependency diagram, dependency table, and topological dependency order.
+   **Phase 3: Depth** — Data flows end-to-end, core module implementations, concurrency model, safety checks (invariants, validation, auth).
 
-   This document becomes persistent context — every future track references it instead of re-analyzing the codebase.
+   **Phase 4: Periphery** — External dependencies, test infrastructure, configuration mechanisms, existing documentation.
 
-3. **Product definition** — Dialogue to define product vision, users, goals, constraints, guidelines (optional) → `draft/product.md`
-4. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield. Includes accepted patterns section → `draft/tech-stack.md`
-5. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
-6. **Guardrails configuration** — Hard guardrails, learned conventions, learned anti-patterns → `draft/guardrails.md`
-7. **Tracks registry** — Empty tracks list → `draft/tracks.md`
-8. **Directory structure** — Creates `draft/tracks/` directory
+   **Phase 5: Synthesis** — Cross-reference, completeness validation, pattern identification, diagram generation.
+
+   This produces `draft/architecture.md` (30-45 page human-readable reference) and `draft/.ai-context.md` (200-400 line token-optimized context). Both become persistent context — every future track references them instead of re-analyzing the codebase.
+
+3. **State persistence** — Writes `draft/.state/` directory with three files:
+   - `freshness.json` — SHA-256 hashes of all analyzed source files (enables file-level staleness detection on refresh)
+   - `signals.json` — Signal classification with section relevance mapping (enables structural drift detection)
+   - `run-memory.json` — Run metadata, unresolved questions, resumable checkpoints (enables cross-session continuity)
+4. **Product definition** — Dialogue to define product vision, users, goals, constraints, guidelines (optional) → `draft/product.md`
+5. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield. Includes accepted patterns section → `draft/tech-stack.md`
+6. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
+7. **Guardrails configuration** — Hard guardrails, learned conventions, learned anti-patterns → `draft/guardrails.md`
+8. **Tracks registry** — Empty tracks list → `draft/tracks.md`
+9. **Directory structure** — Creates `draft/tracks/` and `draft/.state/` directories
 
 > **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `draft decompose` on a track. File-based activation — no opt-in needed.
 
@@ -9463,13 +9701,15 @@ If `draft/` already exists with context files, init reports "already initialized
 
 #### Refresh Mode (`draft init refresh`)
 
-Re-scans and updates existing context without starting from scratch.
+Re-scans and updates existing context without starting from scratch. Uses stored state for incremental, targeted refresh.
 
+0. **State-Aware Pre-Check** — Loads `draft/.state/freshness.json` and computes current file hashes. If all hashes match (no changed/new/deleted files), short-circuits: "Architecture context is current. Nothing to refresh." Also loads `draft/.state/signals.json` to detect structural drift (new signal categories appearing, e.g., auth files added for the first time). Checks `draft/.state/run-memory.json` for interrupted previous runs and offers resume.
 1. **Tech Stack Refresh** — Re-scans `package.json`, `go.mod`, etc. Compares with existing `draft/tech-stack.md`. Proposes updates.
-2. **Architecture Refresh** — Re-runs architecture discovery and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `draft decompose`. Presents changes for review before writing. After updating `architecture.md`, derives `draft/.ai-context.md` using the Condensation Subroutine (defined in `draft init`).
+2. **Architecture Refresh** — Uses file-level hash deltas (from freshness state) to scope re-analysis to only changed/new files. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `draft decompose`. Presents changes for review before writing. After updating `architecture.md`, derives `draft/.ai-context.md` using the Condensation Subroutine (defined in `draft init`).
 3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
-5. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
+5. **State Refresh** — Regenerates all three state files (`freshness.json`, `signals.json`, `run-memory.json`) with current baseline.
+6. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
 
 ---
 

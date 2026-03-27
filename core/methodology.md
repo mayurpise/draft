@@ -354,6 +354,9 @@ Located in `draft/` of the target project:
 | `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns |
 | `jira.md` | Jira project configuration (optional) |
 | `tracks.md` | Master list of all tracks |
+| `.state/freshness.json` | SHA-256 hashes of all analyzed source files. Enables file-level staleness detection for incremental refresh. |
+| `.state/signals.json` | Codebase signal classification (11 categories). Detects structural drift on refresh. |
+| `.state/run-memory.json` | Run metadata, resumable checkpoints, unresolved questions. Enables cross-session continuity. |
 
 ### Key Sections
 
@@ -406,22 +409,30 @@ Draft auto-classifies the project:
 #### Initialization Sequence
 
 1. **Project discovery** — Classify as brownfield, greenfield, or monorepo
-2. **Architecture discovery (brownfield only)** — Three-phase analysis:
+2. **Architecture discovery (brownfield only)** — Five-phase analysis:
 
-   **Phase 1: Orientation** — Directory structure, entry points, tech stack inventory. Generates system architecture diagram.
+   **Phase 1: Discovery** — Directory structure, build/dependency files, API definitions, interface/type files. Includes **signal classification** — categorizes all source files into 11 signal categories (`backend_routes`, `frontend_routes`, `components`, `services`, `data_models`, `auth_files`, `state_management`, `background_jobs`, `persistence`, `test_infra`, `config_files`). Signal counts drive adaptive section depth.
 
-   **Phase 2: Logic** — Data lifecycle mapping, primary domain objects, design pattern recognition, anti-pattern/complexity hotspot flagging, convention extraction, external dependency mapping. Generates mermaid diagrams.
+   **Phase 2: Wiring** — Entry points, orchestrator/controller initialization, registry/registration code, dependency wiring (DI, module system, import graph).
 
-   **Phase 3: Module Discovery** — Reverse-engineers existing modules from import graph and directory boundaries. Documents each module's responsibility, files, API surface, dependencies, and complexity. Generates module dependency diagram, dependency table, and topological dependency order.
+   **Phase 3: Depth** — Data flows end-to-end, core module implementations, concurrency model, safety checks (invariants, validation, auth).
 
-   This document becomes persistent context — every future track references it instead of re-analyzing the codebase.
+   **Phase 4: Periphery** — External dependencies, test infrastructure, configuration mechanisms, existing documentation.
 
-3. **Product definition** — Dialogue to define product vision, users, goals, constraints, guidelines (optional) → `draft/product.md`
-4. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield. Includes accepted patterns section → `draft/tech-stack.md`
-5. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
-6. **Guardrails configuration** — Hard guardrails, learned conventions, learned anti-patterns → `draft/guardrails.md`
-7. **Tracks registry** — Empty tracks list → `draft/tracks.md`
-8. **Directory structure** — Creates `draft/tracks/` directory
+   **Phase 5: Synthesis** — Cross-reference, completeness validation, pattern identification, diagram generation.
+
+   This produces `draft/architecture.md` (30-45 page human-readable reference) and `draft/.ai-context.md` (200-400 line token-optimized context). Both become persistent context — every future track references them instead of re-analyzing the codebase.
+
+3. **State persistence** — Writes `draft/.state/` directory with three files:
+   - `freshness.json` — SHA-256 hashes of all analyzed source files (enables file-level staleness detection on refresh)
+   - `signals.json` — Signal classification with section relevance mapping (enables structural drift detection)
+   - `run-memory.json` — Run metadata, unresolved questions, resumable checkpoints (enables cross-session continuity)
+4. **Product definition** — Dialogue to define product vision, users, goals, constraints, guidelines (optional) → `draft/product.md`
+5. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield. Includes accepted patterns section → `draft/tech-stack.md`
+6. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
+7. **Guardrails configuration** — Hard guardrails, learned conventions, learned anti-patterns → `draft/guardrails.md`
+8. **Tracks registry** — Empty tracks list → `draft/tracks.md`
+9. **Directory structure** — Creates `draft/tracks/` and `draft/.state/` directories
 
 > **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `/draft:decompose` on a track. File-based activation — no opt-in needed.
 
@@ -429,13 +440,15 @@ If `draft/` already exists with context files, init reports "already initialized
 
 #### Refresh Mode (`/draft:init refresh`)
 
-Re-scans and updates existing context without starting from scratch.
+Re-scans and updates existing context without starting from scratch. Uses stored state for incremental, targeted refresh.
 
+0. **State-Aware Pre-Check** — Loads `draft/.state/freshness.json` and computes current file hashes. If all hashes match (no changed/new/deleted files), short-circuits: "Architecture context is current. Nothing to refresh." Also loads `draft/.state/signals.json` to detect structural drift (new signal categories appearing, e.g., auth files added for the first time). Checks `draft/.state/run-memory.json` for interrupted previous runs and offers resume.
 1. **Tech Stack Refresh** — Re-scans `package.json`, `go.mod`, etc. Compares with existing `draft/tech-stack.md`. Proposes updates.
-2. **Architecture Refresh** — Re-runs architecture discovery and diffs against existing `draft/architecture.md`. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `/draft:decompose`. Presents changes for review before writing. After updating `architecture.md`, derives `draft/.ai-context.md` using the Condensation Subroutine (defined in `/draft:init`).
+2. **Architecture Refresh** — Uses file-level hash deltas (from freshness state) to scope re-analysis to only changed/new files. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `/draft:decompose`. Presents changes for review before writing. After updating `architecture.md`, derives `draft/.ai-context.md` using the Condensation Subroutine (defined in `/draft:init`).
 3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
-5. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
+5. **State Refresh** — Regenerates all three state files (`freshness.json`, `signals.json`, `run-memory.json`) with current baseline.
+6. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
 
 ---
 

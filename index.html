@@ -10,7 +10,7 @@
     <meta name="author" content="mayurpise">
     <meta name="theme-color" content="#0a0a0b">
     <meta name="keywords"
-        content="claude code plugin, ai code review, ai tdd workflow, context-driven development, spec-driven development, ai architecture documentation, ai bug hunting, claude code, github copilot plugin, gemini plugin, ai development methodology, code quality automation, ACID compliance, open source developer tools">
+        content="claude code plugin, ai code review, ai tdd workflow, context-driven development, spec-driven development, ai architecture documentation, ai bug hunting, claude code, github copilot plugin, gemini plugin, ai development methodology, code quality automation, ACID compliance, open source developer tools, incremental refresh, codebase signal detection, skill dependency graph">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="Draft — Spec-Driven Development for AI Coding Agents">
     <meta property="og:description"
@@ -63,7 +63,11 @@
         "TDD workflow enforcement",
         "Jira integration",
         "Epic qualification pipeline via MCP (Jira + Gerrit/GitHub/GitLab)",
-        "Git-aware rollback"
+        "Git-aware rollback",
+        "Incremental refresh with file-level freshness tracking",
+        "Codebase signal detection (11 categories) for adaptive analysis",
+        "Cross-session continuity with run memory and resumable checkpoints",
+        "Skill dependency graph with execution chains"
       ],
       "screenshot": "https://getdraft.dev/social-preview.png"
     }
@@ -1813,6 +1817,13 @@
                                 sections + 4 appendices with Mermaid diagrams, code snippets, and prose explanations.
                                 Generated from 5-phase codebase analysis.</div>
                         </div>
+                        <div class="hierarchy-level">
+                            <div class="num">6</div>
+                            <div class="file">.state/</div>
+                            <div class="desc">Freshness hashes, signal classification (11 categories), and run memory.
+                                Enables incremental refresh — only re-analyze files that actually changed. Detects
+                                structural drift and supports cross-session resumability.</div>
+                        </div>
                     </div>
 
                     <p>These files live in <code>draft/</code>, are git-tracked, and load automatically. AI always
@@ -2031,25 +2042,32 @@
                         context every future track references.
                     </p>
 
-                    <p><strong>Phase 1: Orientation</strong> — System map with mermaid diagrams, directory hierarchy,
-                        entry points, request/response flow, tech stack inventory</p>
-                    <p><strong>Phase 2: Logic</strong> — Data lifecycle (state machines, storage topology,
-                        transformation
-                        chains), design patterns, complexity hotspots, conventions, external dependencies, critical
-                        invariants, security architecture, concurrency model, error handling, observability</p>
-                    <p><strong>Phase 3: Module Discovery</strong> — Module dependencies, module inventory, dependency
-                        order</p>
-                    <p><strong>Phase 4: Critical Path Tracing</strong> — End-to-end write/read/async paths with
-                        consistency boundaries, failure recovery matrix, commit points</p>
-                    <p><strong>Phase 5: Schema & Contract Discovery</strong> — Protobuf, OpenAPI, GraphQL, database
-                        schemas, inter-service dependencies</p>
-                    <p><strong>Phase 6: Test, Config & Extension Points</strong> — Test mapping, config discovery,
-                        extension cookbooks</p>
+                    <p><strong>Phase 1: Discovery</strong> — Directory structure, build/dependency files, API
+                        definitions, interface/type files. Includes <strong>signal classification</strong> — categorizes
+                        all source files into 11 signal categories (routes, services, auth, models, state management,
+                        background jobs, etc.) to drive adaptive analysis depth.</p>
+                    <p><strong>Phase 2: Wiring</strong> — Entry points, orchestrator initialization, registry/registration
+                        code, dependency wiring (DI, module system, import graph).</p>
+                    <p><strong>Phase 3: Depth</strong> — Data flows end-to-end, core module implementations, concurrency
+                        model, safety checks (invariants, validation, auth).</p>
+                    <p><strong>Phase 4: Periphery</strong> — External dependencies, test infrastructure, configuration
+                        mechanisms, existing documentation.</p>
+                    <p><strong>Phase 5: Synthesis</strong> — Cross-reference, completeness validation, pattern
+                        identification, diagram generation.</p>
+
+                    <p><strong>State persistence:</strong> After analysis, Draft writes <code>.state/freshness.json</code>
+                        (SHA-256 hashes of all analyzed files), <code>.state/signals.json</code> (signal classification),
+                        and <code>.state/run-memory.json</code> (resumable checkpoints). This enables
+                        <strong>incremental refresh</strong> — <code>/draft:init refresh</code> only re-analyzes files
+                        with changed hashes, detects structural drift via signal comparison, and resumes interrupted runs.
+                    </p>
 
                     <div class="callout">
                         <div class="callout-title">Key Insight</div>
-                        <p><strong>Pay the analysis cost once, benefit on every track.</strong> Architecture discovery
+                        <p><strong>Pay the analysis cost once, refresh incrementally.</strong> Architecture discovery
                             turns your codebase into a documented system that any AI assistant can understand instantly.
+                            Subsequent refreshes use stored file hashes and signal classification to
+                            only re-analyze what actually changed.
                         </p>
                     </div>
                 </details>
@@ -2158,12 +2176,20 @@
                             <li>Detects brownfield (existing) vs greenfield (new) project</li>
                             <li><strong>Architecture discovery</strong> (brownfield): 5-phase deep analysis with mermaid
                                 diagrams, data state machines, consistency boundaries</li>
+                            <li><strong>Signal classification</strong>: Categorizes files into 11 signal types
+                                (routes, services, auth, models, etc.) to drive adaptive analysis depth</li>
                             <li>Creates <code>product.md</code>, <code>tech-stack.md</code>, <code>workflow.md</code>,
                                 <code>.ai-context.md</code>, <code>architecture.md</code>
                             </li>
+                            <li><strong>State persistence</strong>: Writes <code>.state/freshness.json</code> (file hashes),
+                                <code>.state/signals.json</code> (signal classification),
+                                <code>.state/run-memory.json</code> (resumable checkpoints)</li>
                             <li>Optionally enables Architecture Mode for module decomposition</li>
                             <li>Creates <code>tracks.md</code> master registry</li>
                         </ol>
+                        <h4>Refresh mode:</h4>
+                        <p><code>/draft:init refresh</code> uses stored file hashes to only re-analyze changed
+                            files. Detects structural drift via signal comparison. Resumes interrupted runs.</p>
                         <h4>Usage:</h4>
                         <div class="usage-examples">
                             <code>/draft:init</code>
@@ -2548,14 +2574,16 @@
                 <div class="hierarchy">
                     <div class="hierarchy-level">
                         <div class="num">1</div>
-                        <div class="file">product.md + tech-stack.md + .ai-context.md + architecture.md + workflow.md
+                        <div class="file">product.md + tech-stack.md + .ai-context.md + architecture.md + workflow.md +
+                            .state/
                         </div>
                         <div class="desc">Tech lead runs <code>/draft:init</code>. For brownfield projects, Draft
-                            performs deep 5-phase architecture discovery — generating <code>architecture.md</code>
-                            (30-45 pages, 25 sections + appendices with Mermaid diagrams) and deriving
-                            <code>.ai-context.md</code> (200-400 lines, 15+ sections: invariants, interface contracts,
-                            data flows, cookbooks). Team reviews project vision,
-                            technical choices, system architecture, and workflow preferences via PR.
+                            performs deep 5-phase architecture discovery with signal classification — generating
+                            <code>architecture.md</code> (30-45 pages, 25 sections + appendices with Mermaid diagrams),
+                            deriving <code>.ai-context.md</code> (200-400 lines, 15+ sections: invariants, interface
+                            contracts, data flows, cookbooks), and persisting state for incremental refresh
+                            (<code>.state/</code> with freshness hashes, signal classification, run memory). Team reviews
+                            project vision, technical choices, system architecture, and workflow preferences via PR.
                         </div>
                     </div>
                     <div class="hierarchy-level">

@@ -64,12 +64,12 @@ graph TD
 
     %% Implementation flow
     implement -.->|phase boundary| review
-    implement -.->|regenerates .ai-context.md| init
+    implement -.->|calls Condensation Subroutine| init
 
     %% Quality chain
-    decompose --> deep-review
+    init --> deep-review
     review -.->|with-bughunt flag| bughunt
-    coverage -.->|regenerates .ai-context.md| init
+    coverage -.->|calls Condensation Subroutine| init
 
     %% Integration chain
     jira-preview --> jira-create
@@ -89,9 +89,9 @@ graph TD
 | `implement` | init, new-track | review (triggers at phase boundaries) | Modifies source code; regenerates .ai-context.md |
 | `review` | init, new-track | implement (called at phase boundaries) | review-report-latest.md |
 | `bughunt` | init | review (optional), index (optional), jira-preview (optional) | bughunt-report-latest.md |
-| `deep-review` | init, decompose | — | deep-review audit report |
+| `deep-review` | init | — | deep-review audit report |
 | `coverage` | init, new-track | — | Regenerates .ai-context.md |
-| `decompose` | init, new-track | deep-review, implement (optional) | Updates architecture.md; regenerates .ai-context.md |
+| `decompose` | init, new-track | implement (optional) | Updates architecture.md; regenerates .ai-context.md |
 | `change` | init, new-track | — | Modifies spec.md, plan.md |
 | `revert` | init, new-track | — | Updates tracks.md, git state |
 | `status` | init | — | Read-only (tracks.md, plan.md, metadata.json) |
@@ -118,7 +118,8 @@ init (per-service) → index (at root) → aggregated context
 
 ### Quality Audit Flow
 ```
-init → decompose → deep-review
+init → deep-review
+init → decompose (optional pre-step for large modules)
 init → bughunt
 init → new-track → coverage
 ```
@@ -146,6 +147,7 @@ init → learn → (updates guardrails.md)
 | Standard File Metadata (YAML frontmatter) | `init` | All skills that generate draft/ files |
 | Three-Stage Review | `review` | implement (at phase boundaries) |
 | Signal Classification | `init` | init refresh, index (future) |
+| Pattern Learning | `core/shared/pattern-learning.md` | learn, bughunt (updates guardrails.md) |
 
 ## Artifact Flow
 

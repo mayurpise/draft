@@ -235,13 +235,14 @@ If the user runs `/draft:init refresh`:
    ```
    Signal drift detected:
      NEW:     auth_files (0 → 5) — §16 Security Architecture needs generation
-     GROWN:   backend_routes (12 → 24) — §12 API Definitions needs expansion
+     GROWN:   backend_routes (12 → 24) — §12 API Definitions, §14 Cross-Module Integration need expansion
      REMOVED: background_jobs (3 → 0) — §8 Concurrency can be simplified
      STABLE:  services (8 → 9), test_infra (15 → 16)
    ```
 
    **d. Create refresh run memory:**
-   Write `draft/.state/run-memory.json` with `run_type: "refresh"` and `status: "in_progress"`.
+   If starting fresh: write new `draft/.state/run-memory.json` with `run_type: "refresh"` and `status: "in_progress"`.
+   If resuming from a checkpoint (step 0a): preserve existing fields (`phases_completed`, `resumable_checkpoint`, `active_focus_areas`) and only update `started_at` to current timestamp.
 
    **e. Load previous unresolved questions:**
    If the previous run had `unresolved_questions`, display them:
@@ -549,47 +550,47 @@ Follow these steps in order. The specific files to look for depend on the langua
      config_files:       5 files  → §22 HIGH
    ```
 
-   **Integration with Adaptive Sections (§353):** Use signal counts to override the default skip rules. A signal count of 0 means the section should be skipped or simplified. A count ≥ 3 means the section warrants deep treatment. Between 1-2, include the section but keep it brief.
+   **Integration with Adaptive Sections table (above):** Use signal counts to override the default skip rules. A signal count of 0 means the section should be skipped or simplified. A count ≥ 3 means the section warrants deep treatment. Between 1-2, include the section but keep it brief.
 
 #### Phase 2: Wiring (Trace the Graph)
 
-5. **Find the entry point**: (See language guide above for common entry-point patterns.) Trace the initialization sequence.
+6. **Find the entry point**: (See language guide above for common entry-point patterns.) Trace the initialization sequence.
 
-6. **Follow the orchestrator**: From the top-level controller / app / server, trace how it creates, initializes, and wires all owned components.
+7. **Follow the orchestrator**: From the top-level controller / app / server, trace how it creates, initializes, and wires all owned components.
 
-7. **Find the registry / registration code**: Look for files that register handlers, plugins, routes, middleware, algorithms, etc. This reveals the full catalog.
+8. **Find the registry / registration code**: Look for files that register handlers, plugins, routes, middleware, algorithms, etc. This reveals the full catalog.
 
-8. **Map the dependency wiring**: Find the DI container, context struct, module system, or import graph that connects components.
+9. **Map the dependency wiring**: Find the DI container, context struct, module system, or import graph that connects components.
 
 #### Phase 3: Depth (Trace the Flows)
 
-9. **Trace data flows end-to-end**: For each major flow, start at the data source / entry point and follow the code through processing stages to the output.
+10. **Trace data flows end-to-end**: For each major flow, start at the data source / entry point and follow the code through processing stages to the output.
 
-10. **Read implementation files**: For core modules, read the implementation to understand algorithms, error handling, retry logic, and state management.
+11. **Read implementation files**: For core modules, read the implementation to understand algorithms, error handling, retry logic, and state management.
 
-11. **Identify concurrency model**: Find where thread pools, async executors, goroutines, or worker processes are created and what work is dispatched to each.
+12. **Identify concurrency model**: Find where thread pools, async executors, goroutines, or worker processes are created and what work is dispatched to each.
 
-12. **Find safety checks**: Look for invariant assertions, validation logic, auth checks, version checks, lock acquisitions, and transaction boundaries.
+13. **Find safety checks**: Look for invariant assertions, validation logic, auth checks, version checks, lock acquisitions, and transaction boundaries.
 
 #### Phase 4: Periphery
 
-13. **Catalog external dependencies**: Check build/dependency files and import statements to map all external library and service dependencies.
+14. **Catalog external dependencies**: Check build/dependency files and import statements to map all external library and service dependencies.
 
-14. **Examine test infrastructure**: Read test files and test utilities to understand the testing approach, mock patterns, and test harness.
+15. **Examine test infrastructure**: Read test files and test utilities to understand the testing approach, mock patterns, and test harness.
 
-15. **Scan for configuration**: Find all configuration mechanisms (flags, env vars, config files, feature gates, constants).
+16. **Scan for configuration**: Find all configuration mechanisms (flags, env vars, config files, feature gates, constants).
 
-16. **Look for documentation**: Check for existing README, docs/, architecture decision records (ADRs), or inline comments that provide architectural context.
+17. **Look for documentation**: Check for existing README, docs/, architecture decision records (ADRs), or inline comments that provide architectural context.
 
 #### Phase 5: Synthesis
 
-17. **Cross-reference**: Ensure every component mentioned in one section appears in all relevant sections (architecture, data flow, interaction matrix, etc.).
+18. **Cross-reference**: Ensure every component mentioned in one section appears in all relevant sections (architecture, data flow, interaction matrix, etc.).
 
-18. **Validate completeness**: Confirm ALL handlers / endpoints / plugins / schemas / dependencies are listed. Do not sample — enumerate exhaustively.
+19. **Validate completeness**: Confirm ALL handlers / endpoints / plugins / schemas / dependencies are listed. Do not sample — enumerate exhaustively.
 
-19. **Identify patterns**: Look for recurring design patterns and document them.
+20. **Identify patterns**: Look for recurring design patterns and document them.
 
-20. **Generate diagrams**: Create Mermaid diagrams AFTER understanding the full picture, not during exploration.
+21. **Generate diagrams**: Create Mermaid diagrams AFTER understanding the full picture, not during exploration.
 
 ---
 
@@ -1915,7 +1916,9 @@ After completing the 5-phase analysis:
 
 > **Note:** After generating or updating `architecture.md`, run the **Condensation Subroutine** (defined at the end of this skill) to derive `.ai-context.md`.
 
-## Step 1.7: Persist State
+## Step 1.7: Persist State (Brownfield Only)
+
+**Skip for Greenfield projects** — there are no source files to hash and no signals to classify. Greenfield projects only get `run-memory.json` (written during Completion).
 
 After generating `architecture.md` and `.ai-context.md`, persist three state files to `draft/.state/` for incremental refresh and cross-session continuity.
 
@@ -1976,20 +1979,11 @@ Persist the signal classification from Phase 1 step 5:
     "persistence": { "count": 4, "sample_files": ["src/db/repository.ts"] },
     "test_infra": { "count": 15, "sample_files": ["tests/auth.test.ts"] },
     "config_files": { "count": 5, "sample_files": [".env.example", "config/default.yml"] }
-  },
-  "section_relevance": {
-    "4_architecture_overview": "HIGH",
-    "7_core_modules": "HIGH",
-    "8_concurrency": "SKIP",
-    "9_framework_extensions": "LOW",
-    "12_api_definitions": "HIGH",
-    "16_security": "HIGH",
-    "19_state_management": "HIGH",
-    "22_configuration": "HIGH",
-    "26_testing": "HIGH"
   }
 }
 ```
+
+**Section relevance is derived at read-time**, not persisted. Use the signal counts and the "Drives Section(s)" column from the Phase 1 step 5 signal table to determine which architecture.md sections need deep treatment (signal count ≥ 3), brief treatment (1-2), or can be skipped (0).
 
 **On refresh:** Compare current signals against stored signals. New signal categories appearing (e.g., `auth_files` going from 0→3) indicate **structural drift** — new architecture sections may need to be generated for the first time.
 

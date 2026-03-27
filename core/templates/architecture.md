@@ -16,7 +16,7 @@ synced_to_commit: "{FULL_SHA}"
 
 # Architecture: {PROJECT_NAME}
 
-> Human-readable engineering reference. 30-45 pages.
+> Comprehensive human-readable engineering reference.
 > For token-optimized AI context, see `draft/.ai-context.md`.
 
 | Field | Value |

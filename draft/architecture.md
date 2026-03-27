@@ -16,7 +16,7 @@ synced_to_commit: "22bc5fd8f630421d6d64d621708257cc26eb5d60"
 
 # Architecture: draft
 
-> Human-readable engineering reference. 30-45 pages.
+> Comprehensive human-readable engineering reference.
 > For token-optimized AI context, see `draft/.ai-context.md`.
 
 ---
@@ -281,7 +281,7 @@ flowchart TD
     C2 --> C3["Phase 3: Depth\n(data flows, implementations, concurrency)"]
     C3 --> C4["Phase 4: Periphery\n(tests, config, docs)"]
     C4 --> C5["Phase 5: Synthesis\n(cross-reference, diagrams)"]
-    C5 --> F["Write draft/architecture.md\n(30-45 pages)"]
+    C5 --> F["Write draft/architecture.md\n(comprehensive)"]
     F --> G["Condensation Subroutine"]
     G --> H["Write draft/.ai-context.md\n(200-400 lines)"]
 
@@ -320,7 +320,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    A["draft/architecture.md\n(30-45 pages, Mermaid)"] -->|"Read"| B["Transform Sections"]
+    A["draft/architecture.md\n(comprehensive, Mermaid)"] -->|"Read"| B["Transform Sections"]
     B -->|"Mermaid → tree notation"| C["Component Graph"]
     B -->|"Mermaid → arrow notation"| D["Dependency Graph"]
     B -->|"Prose → key-value"| E["META, CONFIG"]
@@ -1043,7 +1043,7 @@ Users configure Draft behavior via `draft/workflow.md` checkboxes:
 
 ### User-Facing Performance
 
-- **Init (brownfield)**: Slow — reads entire codebase, generates 30-45 page architecture.md
+- **Init (brownfield)**: Slow — reads entire codebase, generates comprehensive architecture.md
 - **Init (greenfield)**: Fast — dialogue only, no codebase analysis
 - **New-track**: Medium — multi-phase dialogue, generates spec.md + plan.md
 - **Implement**: Variable — depends on task complexity, TDD cycle count

@@ -46,7 +46,7 @@ Draft is a Claude Code plugin that implements Context-Driven Development — a m
 ## Core Features
 
 ### Must Have (P0)
-1. **Project Initialization** (`/draft:init`): 5-phase exhaustive codebase analysis generating architecture.md (30-45 pages) and .ai-context.md (200-400 lines, token-optimized)
+1. **Project Initialization** (`/draft:init`): 5-phase exhaustive codebase analysis generating comprehensive architecture.md and .ai-context.md (200-400 lines, token-optimized)
 2. **Track Creation** (`/draft:new-track`): Collaborative 6-phase intake producing spec.md and plan.md with risk assessment, acceptance criteria, and phased task breakdown
 3. **TDD Implementation** (`/draft:implement`): Task-by-task execution following RED-GREEN-REFACTOR with phase boundary reviews
 4. **Code Review** (`/draft:review`): Three-stage review (automated validation → spec compliance → code quality) with reviewer agent protocol

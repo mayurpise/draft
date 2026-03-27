@@ -31,7 +31,8 @@ Note: Cursor integration removed - Cursor now supports `.claude/` plugin structu
 ```
 .claude-plugin/plugin.json  # Plugin manifest
 skills/                     # Slash command implementations
-  └── <command>/SKILL.md    # Frontmatter (name, description) + execution body
+  ├── <command>/SKILL.md    # Frontmatter (name, description) + execution body
+  └── GRAPH.md              # Skill dependency graph (reference artifact, not a skill)
 core/
   ├── methodology.md        # Master methodology (update first)
   ├── shared/               # Shared procedures (context loading, git metadata, pattern learning)
@@ -88,6 +89,9 @@ When users use Draft, it creates a `draft/` directory in their project:
 | `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns |
 | `tracks.md` | Master list of all tracks |
 | `tracks/<id>/` | Individual tracks with `spec.md`, `plan.md`, `metadata.json` |
+| `.state/freshness.json` | SHA-256 hashes of all analyzed source files. Enables file-level staleness detection for incremental refresh. |
+| `.state/signals.json` | Codebase signal classification (11 categories). Detects structural drift on refresh (e.g., auth files added for the first time). |
+| `.state/run-memory.json` | Run metadata: phases completed, unresolved questions, resumable checkpoints. Enables cross-session continuity. |
 
 ### Key Sections
 

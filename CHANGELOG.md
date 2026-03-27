@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Codebase Signal Detection** in `/draft:init` Phase 1:
+  - Classifies all source files into 11 signal categories: `backend_routes`, `frontend_routes`, `components`, `services`, `data_models`, `auth_files`, `state_management`, `background_jobs`, `persistence`, `test_infra`, `config_files`
+  - Signal counts drive adaptive section depth — HIGH (>=3 files), brief (1-2), SKIP (0)
+  - Integrates with existing Adaptive Sections table to override default skip rules
+  - Persisted to `draft/.state/signals.json` for structural drift detection on refresh
+
+- **Freshness State Tracking** in `/draft:init`:
+  - SHA-256 hashes of all analyzed source files stored in `draft/.state/freshness.json`
+  - Enables file-level staleness detection — more granular than `synced_to_commit` (which only detects that commits happened)
+  - On refresh: changed/new/deleted files identified by hash diff, unchanged files skipped entirely
+  - Short-circuits refresh when no source files changed: "Architecture context is current. Nothing to refresh."
+
+- **Run Memory** for cross-session continuity:
+  - Persists run state to `draft/.state/run-memory.json` with: run_id, phases completed/remaining, files analyzed, unresolved questions, resumable checkpoints
+  - Detects interrupted previous runs and offers resume from last checkpoint
+  - Surfaces unresolved questions in completion report (e.g., "Could not determine if src/legacy/ is actively used")
+  - Preserves unresolved questions across refreshes for future session context
+
+- **Enhanced Refresh Mode** (`/draft:init refresh`):
+  - New Step 0: State-Aware Pre-Check before any refresh work
+  - Loads freshness.json for file-level delta computation
+  - Loads signals.json for structural drift detection (new signal categories, removed categories, significant growth)
+  - Reports signal drift summary (e.g., "NEW: auth_files (0->5) — §16 Security Architecture needs generation")
+  - Loads previous run's unresolved questions for continuity
+  - Step k: Regenerates all three state files after successful refresh
+
+- **Skill Dependency Graph** (`skills/GRAPH.md`):
+  - Static reference artifact mapping all 17 Draft skill relationships
+  - Mermaid topology diagram with hard dependencies (solid arrows) and optional/conditional relationships (dotted arrows)
+  - Dependency matrix showing required-by, requires, and shared artifacts per skill
+  - Execution chains: standard dev flow, monorepo flow, quality audit flow, Jira integration flow, learning flow
+  - Shared subroutines table (Condensation Subroutine, Standard File Metadata, Three-Stage Review, Signal Classification)
+  - ASCII artifact flow diagram showing data flow from init through all downstream skills
+
+- **State Directory** (`draft/.state/`):
+  - New directory created alongside `draft/tracks/` during initialization
+  - Contains: `freshness.json`, `signals.json`, `run-memory.json`
+  - Purpose: Enables incremental refresh, structural drift detection, and cross-session continuity
+
 ### Fixed
 - **Cross-skill consistency audit** (29 issues fixed across 13 files):
   - `/draft:deep-review`: Added `draft/` pre-check, added missing metadata fields (project, remote, commit_message, dirty, synced_to_commit)

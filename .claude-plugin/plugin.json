@@ -1,7 +1,7 @@
 {
   "name": "draft",
   "description": "Context-Driven Development: draft specs and plans before implementation. Structured workflows for features and fixes.",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": {
     "name": "mayurpise"
   },
@@ -17,7 +17,10 @@
     "monorepo",
     "tdd",
     "validation",
-    "enterprise"
+    "enterprise",
+    "incremental-refresh",
+    "signal-detection",
+    "state-management"
   ],
   "skills": [
     "skills/adr/SKILL.md",

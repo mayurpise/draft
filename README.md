@@ -84,7 +84,7 @@ curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integr
 
 | Command | What It Does |
 |---------|--------------|
-| **`/draft:init`** | Analyze codebase, create context files |
+| **`/draft:init`** | Analyze codebase, create context files + state tracking |
 | **`/draft:index`** | Aggregate monorepo service contexts |
 | **`/draft:new-track`** | Collaborative spec + plan with AI |
 | **`/draft:decompose`** | Module decomposition with dependency mapping |
@@ -110,8 +110,9 @@ curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integr
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        /draft:init                          │
-│       Creates product.md, tech-stack.md, architecture.md    │
-│                      + .ai-context.md                       │
+│    5-phase codebase analysis + signal detection + state     │
+│  architecture.md + .ai-context.md + .state/ (freshness,    │
+│                   signals, run memory)                      │
 └────────────────────────────┬────────────────────────────────┘
                              │
                              ▼
@@ -131,6 +132,9 @@ curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integr
 │                      /draft:review                          │
 │        Three-stage review (validation + spec + quality)     │
 └─────────────────────────────────────────────────────────────┘
+
+         /draft:init refresh  ←── incremental: only re-analyze
+                                   files with changed hashes
 ```
 
 [Full workflow →](core/methodology.md#core-workflow)
@@ -146,11 +150,14 @@ product.md       →  "Build a task manager"
 tech-stack.md    →  "React, TypeScript, Tailwind"
 architecture.md  →  30-45 pages: 25 sections + appendices, Mermaid diagrams (source of truth)
 .ai-context.md   →  200-400 lines: condensed from architecture.md (token-optimized AI context)
+.state/          →  freshness hashes, signal classification, run memory (incremental refresh)
 spec.md          →  "Add drag-and-drop reordering"
 plan.md          →  "Phase 1: sortable, Phase 2: persist"
 ```
 
 Each layer narrows the solution space. By the time AI writes code, decisions are made.
+
+**Incremental refresh**: After initial setup, `/draft:init refresh` uses stored file hashes and signal classification to only re-analyze what changed — no full re-scan needed.
 
 [Read methodology →](core/methodology.md#philosophy)
 

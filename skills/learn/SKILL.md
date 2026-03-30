@@ -278,7 +278,10 @@ Follow the write procedure in `core/shared/pattern-learning.md`:
 - **Category:** error-handling | naming | architecture | concurrency | state-management | data-flow | testing | configuration
 - **Confidence:** high | medium
 - **Evidence:** Found in N files — `path/file1.ext:line`, `path/file2.ext:line`, `path/file3.ext:line`
+- **Discovered at:** YYYY-MM-DD (when Draft first observed this pattern)
+- **Established at:** ~YYYY-MM-DD (when this pattern was introduced, via git blame)
 - **Last verified:** YYYY-MM-DD
+- **Last active:** YYYY-MM-DD (when source files using this pattern were last modified)
 - **Discovered by:** draft:learn on YYYY-MM-DD
 - **Description:** [What the pattern is and why it's intentional]
 ```
@@ -290,11 +293,25 @@ Follow the write procedure in `core/shared/pattern-learning.md`:
 - **Category:** security | reliability | performance | correctness | concurrency
 - **Severity:** critical | high | medium
 - **Evidence:** Found in N files — `path/file1.ext:line`, `path/file2.ext:line`
+- **Discovered at:** YYYY-MM-DD (when Draft first observed this pattern)
+- **Established at:** ~YYYY-MM-DD (when this pattern was introduced, via git blame)
 - **Last verified:** YYYY-MM-DD
+- **Last active:** YYYY-MM-DD (when source files using this pattern were last modified)
 - **Discovered by:** draft:learn on YYYY-MM-DD
 - **Description:** [What the pattern is and why it's problematic]
 - **Suggested fix:** [Brief description of the correct approach]
 ```
+
+### Determining Temporal Metadata
+
+When writing entries, gather dual-layer timestamps:
+
+1. **Discovered at**: Today's date (when the pattern scan runs)
+2. **Established at**: Run `git blame` on one of the evidence files and find the oldest commit date for the pattern-relevant lines. Use approximate date (`~YYYY-MM-DD`).
+3. **Last verified**: Today's date
+4. **Last active**: Run `git log -1 --format="%ad" --date=short -- {evidence_file}` on each evidence file and take the most recent date
+
+This enables temporal reasoning: if `established_at` is old but `last_active` is recent, the pattern is well-established and actively used. If `last_active` is >6 months old, the pattern may be declining (cross-reference with Step 2.3 temporal analysis).
 
 ---
 

@@ -63,9 +63,10 @@ Draft solves this through **Context-Driven Development**: structured documents t
 | `product.md` | Defines users, goals, success criteria, guidelines | AI building features nobody asked for |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
 | `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
+| `.ai-profile.md` | **Derived from .ai-context.md.** 20-50 lines, ultra-compact always-injected project profile. Contains: language, framework, database, auth, API style, critical invariants, safety rules, active tracks, recent changes. Auto-refreshed on mutations. | AI needing full context for simple tasks |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary. Auto-refreshed on mutations. | AI re-analyzing codebase every session |
 | `workflow.md` | TDD preference, commit style, review process | AI skipping tests or making giant commits |
-| `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns | AI repeating false positives or missing known-bad patterns |
+| `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns. Entries include dual-layer timestamps (discovered_at, established_at, last_verified, last_active) for temporal reasoning. | AI repeating false positives or missing known-bad patterns |
 | `spec.md` | Acceptance criteria for a specific track | Scope creep, gold-plating |
 | `plan.md` | Ordered phases with verification steps | AI attempting everything at once |
 
@@ -78,12 +79,27 @@ tech-stack.md       →  "Use React, TypeScript, Tailwind"
   ↓
 architecture.md     →  "Express API → Service layer → Prisma ORM → PostgreSQL"
   ↓                     (.ai-context.md condensed for AI consumption)
+  ↓                     (.ai-profile.md ultra-compact 20-50 line always-on profile)
+  ↓                     (.state/facts.json atomic fact registry with knowledge graph)
 spec.md             →  "Add drag-and-drop reordering"
   ↓
 plan.md             →  "Phase 1: sortable list, Phase 2: persistence"
 ```
 
 Each layer narrows the solution space. By the time AI writes code, most decisions are already made.
+
+### Context Tiering
+
+Draft uses a three-tier context system inspired by memory architecture:
+
+```
+Tier 0: .ai-profile.md     (20-50 lines)   — Always loaded. RAM-equivalent.
+Tier 1: .ai-context.md     (200-400 lines) — Loaded for most tasks. Working memory.
+Tier 2: architecture.md    (full document)  — Loaded for deep analysis. Long-term storage.
+        .state/facts.json  (atomic facts)   — Queried by relevance. Fact-level precision.
+```
+
+Simple tasks only need Tier 0. Implementation tasks load Tier 0 + relevant sections of Tier 1. Deep reviews and architecture refreshes access all tiers. This relevance-scored loading ensures the right context for each task without wasting tokens.
 
 ### Draft Command Workflow
 
@@ -421,18 +437,20 @@ Draft auto-classifies the project:
 
    **Phase 5: Synthesis** — Cross-reference, completeness validation, pattern identification, diagram generation.
 
-   This produces `draft/architecture.md` (comprehensive human-readable reference) and `draft/.ai-context.md` (200-400 line token-optimized context). Both become persistent context — every future track references them instead of re-analyzing the codebase.
+   This produces `draft/architecture.md` (comprehensive human-readable reference), `draft/.ai-context.md` (200-400 line token-optimized context), and `draft/.ai-profile.md` (20-50 line ultra-compact always-on profile). All three become persistent context — every future track references them instead of re-analyzing the codebase.
 
-3. **State persistence** — Writes `draft/.state/` directory with three files:
+3. **Fact extraction** — Extracts atomic architectural facts into `draft/.state/facts.json` with dual-layer timestamps (`discovered_at`, `established_at`, `last_verified_at`, `last_active_at`), relationship edges (`updates`, `extends`, `derives`), and per-fact confidence scoring. Enables granular change tracking and contradiction detection on refresh.
+4. **State persistence** — Writes `draft/.state/` directory with four files:
+   - `facts.json` — Atomic fact registry with temporal metadata and knowledge graph edges (enables fact-level contradiction detection on refresh)
    - `freshness.json` — SHA-256 hashes of all analyzed source files (enables file-level staleness detection on refresh)
    - `signals.json` — Signal classification with section relevance mapping (enables structural drift detection)
    - `run-memory.json` — Run metadata, unresolved questions, resumable checkpoints (enables cross-session continuity)
-4. **Product definition** — Dialogue to define product vision, users, goals, constraints, guidelines (optional) → `draft/product.md`
-5. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield. Includes accepted patterns section → `draft/tech-stack.md`
-6. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
-7. **Guardrails configuration** — Hard guardrails, learned conventions, learned anti-patterns → `draft/guardrails.md`
-8. **Tracks registry** — Empty tracks list → `draft/tracks.md`
-9. **Directory structure** — Creates `draft/tracks/` and `draft/.state/` directories
+5. **Product definition** — Dialogue to define product vision, users, goals, constraints, guidelines (optional) → `draft/product.md`
+6. **Tech stack** — Auto-detected for brownfield (cross-referenced with architecture discovery); manual for greenfield. Includes accepted patterns section → `draft/tech-stack.md`
+7. **Workflow configuration** — TDD preference (strict/flexible/none), commit style, review process → `draft/workflow.md`
+8. **Guardrails configuration** — Hard guardrails, learned conventions, learned anti-patterns → `draft/guardrails.md`
+9. **Tracks registry** — Empty tracks list → `draft/tracks.md`
+10. **Directory structure** — Creates `draft/tracks/` and `draft/.state/` directories
 
 > **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `/draft:decompose` on a track. File-based activation — no opt-in needed.
 
@@ -444,11 +462,12 @@ Re-scans and updates existing context without starting from scratch. Uses stored
 
 0. **State-Aware Pre-Check** — Loads `draft/.state/freshness.json` and computes current file hashes. If all hashes match (no changed/new/deleted files), short-circuits: "Architecture context is current. Nothing to refresh." Also loads `draft/.state/signals.json` to detect structural drift (new signal categories appearing, e.g., auth files added for the first time). Checks `draft/.state/run-memory.json` for interrupted previous runs and offers resume.
 1. **Tech Stack Refresh** — Re-scans `package.json`, `go.mod`, etc. Compares with existing `draft/tech-stack.md`. Proposes updates.
-2. **Architecture Refresh** — Uses file-level hash deltas (from freshness state) to scope re-analysis to only changed/new files. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `/draft:decompose`. Presents changes for review before writing. After updating `architecture.md`, derives `draft/.ai-context.md` using the Condensation Subroutine (defined in `/draft:init`).
-3. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
-4. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
-5. **State Refresh** — Regenerates all three state files (`freshness.json`, `signals.json`, `run-memory.json`) with current baseline.
-6. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
+2. **Architecture Refresh** — Uses file-level hash deltas (from freshness state) to scope re-analysis to only changed/new files. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `/draft:decompose`. Presents changes for review before writing. After updating `architecture.md`, derives `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine.
+3. **Contradiction Detection** — If `facts.json` exists, performs fact-level diff against changed files. Detects superseded facts (contradictions), extended facts (refinements), and new facts. Generates a Fact Evolution Report showing confirmed/updated/extended/new/stale facts. Updates relationship edges in the knowledge graph.
+4. **Product Refinement** — Asks if product vision/goals in `draft/product.md` need updates.
+5. **Workflow Review** — Asks if `draft/workflow.md` settings (TDD, commits) need changing.
+6. **State Refresh** — Regenerates all state files (`facts.json`, `freshness.json`, `signals.json`, `run-memory.json`) with current baseline. Updates profile.
+7. **Preserve** — Does NOT modify `draft/tracks.md` unless explicitly requested.
 
 ---
 

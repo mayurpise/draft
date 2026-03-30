@@ -82,7 +82,10 @@ Append under `## Learned Conventions`:
 - **Category:** error-handling | naming | architecture | concurrency | state-management | data-flow | testing | configuration
 - **Confidence:** high | medium
 - **Evidence:** Found in N files — `path/file1.ext:line`, `path/file2.ext:line`, `path/file3.ext:line`
+- **Discovered at:** YYYY-MM-DD (when Draft first observed this pattern)
+- **Established at:** ~YYYY-MM-DD (when this pattern was introduced in the codebase, via git blame)
 - **Last verified:** YYYY-MM-DD
+- **Last active:** YYYY-MM-DD (when source files using this pattern were last modified)
 - **Discovered by:** draft:[command] on YYYY-MM-DD
 - **Description:** [What the pattern is and why it's intentional]
 ```
@@ -96,11 +99,31 @@ Append under `## Learned Anti-Patterns`:
 - **Category:** security | reliability | performance | correctness | concurrency
 - **Severity:** critical | high | medium
 - **Evidence:** Found in N files — `path/file1.ext:line`, `path/file2.ext:line`
+- **Discovered at:** YYYY-MM-DD (when Draft first observed this pattern)
+- **Established at:** ~YYYY-MM-DD (when this pattern was introduced in the codebase, via git blame)
 - **Last verified:** YYYY-MM-DD
+- **Last active:** YYYY-MM-DD (when source files using this pattern were last modified)
 - **Discovered by:** draft:[command] on YYYY-MM-DD
 - **Description:** [What the pattern is and why it's problematic]
 - **Suggested fix:** [Brief description of the correct approach]
 ```
+
+### Temporal Metadata (Dual-Layer Timestamps)
+
+Every learned pattern entry includes dual-layer timestamps inspired by Supermemory's temporal reasoning:
+
+| Timestamp | Purpose | How to Determine |
+|-----------|---------|-----------------|
+| `Discovered at` | When Draft first observed this pattern | Current date when pattern is first learned |
+| `Established at` | When this pattern was actually introduced in the codebase | Use `git blame` on evidence files to find oldest occurrence, take the approximate date |
+| `Last verified` | When this pattern was last confirmed still present | Updated on each re-verification |
+| `Last active` | When source files using this pattern were last modified | `git log -1 --format="%ci" -- {evidence_file}` on evidence files, take most recent |
+
+**Temporal reasoning enabled by these timestamps:**
+- Pattern discovered recently but established long ago → well-established convention
+- Pattern established recently and actively used → emerging convention
+- Pattern established long ago but `last_active` is old → potentially declining (cross-reference with Step 2.3 temporal analysis in `/draft:learn`)
+- Pattern where `last_active` is >6 months old → candidate for deprecation review
 
 ---
 

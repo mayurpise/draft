@@ -293,6 +293,45 @@ If the user runs `/draft:init refresh`:
    - Preserve unchanged sections exactly as-is
    - Preserve modules added by `/draft:decompose` (planned modules)
 
+   **e.5. Contradiction Detection (Fact-Level Diff):**
+
+   If `draft/.state/facts.json` exists, perform fact-level contradiction analysis:
+
+   1. **Load existing facts** sourced from changed files:
+      ```bash
+      # Identify facts referencing changed files
+      # For each changed file, find facts with matching source_files entries
+      ```
+
+   2. **Re-extract facts** from the changed files using the same extraction procedure from Step 1.65.
+
+   3. **Compare new facts against existing facts** for each changed file:
+
+      | Comparison Result | Action |
+      |-------------------|--------|
+      | New fact matches existing fact | Update `last_verified_at` and `last_active_at` timestamps |
+      | New fact contradicts existing fact | Mark old fact with `superseded_by: "{new_fact_id}"`, mark new fact with `supersedes: "{old_fact_id}"`, add `updates` relationship |
+      | New fact extends existing fact | Add `extends` relationship, keep both facts active |
+      | Existing fact has no matching new fact | Check if source file still exists. If deleted: mark fact as `superseded_by: "deleted"`. If file exists but fact is gone: lower confidence to `medium`, add note |
+      | Entirely new fact (no existing match) | Add as new fact with current timestamps |
+
+   4. **Generate contradiction report** (shown to user during refresh):
+      ```
+      Fact Evolution Report:
+        CONFIRMED:    12 facts verified unchanged
+        UPDATED:       3 facts superseded by new information
+          - f-008: "Auth uses session cookies" → NOW: "Auth uses JWT tokens" (src/auth/middleware.ts changed)
+          - f-015: "Redis used for caching only" → NOW: "Redis used for caching and session storage"
+          - f-023: "API uses REST exclusively" → NOW: "API uses REST + WebSocket for real-time"
+        EXTENDED:      2 facts gained additional detail
+        NEW:           5 new facts discovered
+        STALE:         1 fact could not be re-verified (confidence lowered)
+      ```
+
+   5. **Update fact registry**: Write updated `draft/.state/facts.json` with all changes.
+
+   **Inspired by:** Supermemory's three relationship types (updates/extends/derives) for tracking knowledge evolution, and their contradiction resolution that marks old memories with `isLatest: false`.
+
    **f. Present incremental diff:**
    Show user:
    - Files analyzed: `N changed files since <date>`
@@ -324,10 +363,14 @@ If the user runs `/draft:init refresh`:
    - `synced_to_commit`: current HEAD SHA
 
    **k. Refresh state files:**
-   After successful architecture refresh, regenerate all three state files:
+   After successful architecture refresh, regenerate all state files:
    - `draft/.state/freshness.json` — recompute hashes of all source files (new baseline)
    - `draft/.state/signals.json` — re-run signal classification (update baseline)
+   - `draft/.state/facts.json` — update fact registry with contradiction detection results from step e.5 (if facts.json exists; if not, run Step 1.65 to generate initial registry)
    - `draft/.state/run-memory.json` — set `status: "completed"`, `completed_at: "{ISO_TIMESTAMP}"`, preserve `unresolved_questions`
+
+   **l. Refresh profile:**
+   Regenerate `draft/.ai-profile.md` using Step 1.6 (Profile Generation). Update dynamic context (active tracks, recent changes).
 
 3. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
@@ -1916,6 +1959,182 @@ After completing the 5-phase analysis:
 
 > **Note:** After generating or updating `architecture.md`, run the **Condensation Subroutine** (defined at the end of this skill) to derive `.ai-context.md`.
 
+## Step 1.6: Generate Project Profile (Brownfield Only)
+
+After generating `.ai-context.md`, derive `draft/.ai-profile.md` — a compact, always-injected "RAM layer" of the most critical project facts. This file provides the minimum context every Draft command needs, reducing token usage for simple tasks while `.ai-context.md` provides deeper context on demand.
+
+**Inspired by:** Supermemory's User Profiles — static facts + dynamic context, always fresh, ~50ms retrieval.
+
+### Design Principles
+
+- **Ultra-compact**: 20-50 lines maximum
+- **Always injected**: Every Draft command loads this first, before deciding if deeper context is needed
+- **Auto-refreshed**: Regenerated whenever `.ai-context.md` changes
+- **Two layers**: Static facts (change rarely) + dynamic context (changes frequently)
+
+### Procedure
+
+#### Step 1: Extract Static Facts from `.ai-context.md`
+
+Read `draft/.ai-context.md` and extract:
+
+| Field | Source Section | Example |
+|-------|--------------|---------|
+| `LANG` | `## META` → `lang` | `TypeScript 5.3` |
+| `FRAMEWORK` | `## META` → detected from deps | `Next.js 14 (app router)` |
+| `DB` | `## GRAPH:DEPENDENCIES` → database deps | `PostgreSQL + Prisma` |
+| `AUTH` | `## INVARIANTS` → security invariants | `NextAuth v5, JWT` |
+| `API` | `## META` → `type` + route patterns | `REST, /api/** routes` |
+| `TEST` | `## TEST` → test commands | `Vitest + React Testing Library` |
+| `DEPLOY` | `## CONFIG` → deployment config | `Vercel` |
+| `BUILD` | `## META` → `build` | `npm run build` |
+| `ENTRY` | `## META` → `entry` | `src/index.ts -> main()` |
+
+#### Step 2: Extract Critical Invariants
+
+From `## INVARIANTS`, extract the top 3-5 most critical invariants (prioritize `[DATA]` and `[SEC]` categories). Write as single-line rules.
+
+#### Step 3: Extract Safety Rules
+
+From `## INVARIANTS` or Section 2 of `architecture.md` ("Never" rules), extract 2-3 absolute prohibitions.
+
+#### Step 4: Gather Dynamic Context
+
+```bash
+# Active tracks
+grep -E "^\s*-\s*\[~\]" draft/tracks.md 2>/dev/null | head -5
+
+# Recent changes (last 5 commits, excluding draft/ changes)
+git log --oneline -5 --no-merges -- . ':!draft/' 2>/dev/null
+```
+
+#### Step 5: Write Profile
+
+Write `draft/.ai-profile.md` using the template from `core/templates/ai-profile.md`. The file should be 20-50 lines.
+
+**Called by:** `/draft:init`, `/draft:init refresh`, Condensation Subroutine, `/draft:implement`
+
+---
+
+## Step 1.65: Extract Fact Registry (Brownfield Only)
+
+After generating `architecture.md` and `.ai-context.md`, extract atomic facts into `draft/.state/facts.json` — a structured registry of individual architectural facts that enables granular change tracking, contradiction detection, and knowledge evolution.
+
+**Inspired by:** Supermemory's Atomic Memories — singular facts with high signal-to-noise ratio, connected via relationship edges, with temporal metadata.
+
+### Design Principles
+
+- **Atomic**: Each fact is a single, verifiable statement about the codebase
+- **Traceable**: Every fact links to source files and the commit where it was observed
+- **Temporal**: Dual-layer timestamps track when facts were discovered vs. when patterns were established
+- **Relational**: Facts connect via `updates`, `extends`, and `derives` relationship edges
+- **Evolvable**: Contradictions are tracked, not overwritten — old facts marked as superseded
+
+### Fact Categories
+
+| Category | What It Captures | Example |
+|----------|-----------------|---------|
+| `data-flow` | How data moves through the system | "All API responses pass through ResponseSerializer" |
+| `architecture` | Structural decisions and boundaries | "Auth module has no direct database access" |
+| `invariant` | Safety rules and constraints | "All DB writes must be in transactions" |
+| `dependency` | External service/library relationships | "Payment service depends on Stripe SDK v12" |
+| `concurrency` | Threading, async, locking rules | "Redis operations use connection pooling with max 10" |
+| `api-contract` | Interface definitions and protocols | "POST /users returns 201 with {id, email}" |
+| `configuration` | Config mechanisms and critical settings | "Feature flags loaded from LaunchDarkly at startup" |
+| `testing` | Test infrastructure and conventions | "Integration tests use testcontainers for PostgreSQL" |
+| `security` | Auth, authz, input validation patterns | "JWT tokens validated by middleware on all /api routes" |
+| `pattern` | Recurring design patterns | "Repository pattern used for all database access" |
+
+### Extraction Procedure
+
+#### Step 1: Parse Architecture Sections
+
+For each section of `architecture.md`, extract atomic facts:
+
+| Section(s) | Target Facts |
+|------------|-------------|
+| §4 Architecture Overview | Component topology facts |
+| §5 Component Map | Ownership and interaction facts |
+| §6 Data Flow | Pipeline and flow facts |
+| §7 Core Modules | Module responsibility and interface facts |
+| §8 Concurrency | Threading and safety rule facts |
+| §12 API Definitions | Endpoint and schema facts |
+| §13 External Dependencies | Dependency relationship facts |
+| §15 Critical Invariants | Invariant facts (highest priority) |
+| §18 Error Handling | Error recovery and retry facts |
+| §19 State Management | Persistence and state facts |
+| §21 Design Patterns | Pattern usage facts |
+| §22 Configuration | Configuration mechanism facts |
+
+#### Step 2: Assign Temporal Metadata
+
+For each extracted fact, determine two timestamps:
+
+| Timestamp | Meaning | How to Determine |
+|-----------|---------|-----------------|
+| `discovered_at` | When Draft first observed this fact | Current timestamp (ISO 8601) |
+| `established_at` | When this pattern/fact was actually introduced in the codebase | Use `git log --follow -1 --format="%ci"` on the primary source file, or `git blame` on the specific line referenced in the fact |
+| `last_verified_at` | When this fact was last confirmed still true | Current timestamp (ISO 8601) |
+| `last_active_at` | When source files containing this fact were last modified | `git log -1 --format="%ci" -- {source_file}` |
+
+#### Step 3: Detect Relationships Between Facts
+
+For each new fact, check if it relates to existing facts:
+
+| Relationship | Meaning | Detection |
+|-------------|---------|-----------|
+| `updates` | New fact supersedes an old fact (contradiction) | Same category + same source files + different statement |
+| `extends` | New fact adds detail to an existing fact | Same category + overlapping source files + compatible statement |
+| `derives` | New fact is inferred from combining other facts | Cross-category inference (e.g., auth middleware + rate limiting = API security posture) |
+
+#### Step 4: Write Fact Registry
+
+Write `draft/.state/facts.json`:
+
+```json
+{
+  "version": 1,
+  "generated_at": "{ISO_TIMESTAMP}",
+  "git_commit": "{FULL_SHA}",
+  "total_facts": 0,
+  "facts": [
+    {
+      "id": "f-001",
+      "category": "invariant",
+      "statement": "All database writes must be wrapped in transactions",
+      "source_files": ["src/db/repository.ts:45", "src/db/transaction.ts:12"],
+      "source_commit": "{FULL_SHA}",
+      "discovered_at": "{ISO_TIMESTAMP}",
+      "established_at": "2024-06-15T10:00:00Z",
+      "last_verified_at": "{ISO_TIMESTAMP}",
+      "last_active_at": "2025-03-28T14:00:00Z",
+      "confidence": "high",
+      "access_count": 0,
+      "supersedes": null,
+      "superseded_by": null
+    }
+  ],
+  "relationships": [
+    {
+      "from": "f-001",
+      "to": "f-015",
+      "type": "extends",
+      "reason": "Added connection pooling details to database access pattern"
+    }
+  ]
+}
+```
+
+### Fact Registry Constraints
+
+- **Target**: 50-150 facts for a typical project (fewer for small projects, more for large)
+- **Priority extraction order**: invariants > architecture > data-flow > api-contract > security > concurrency > dependency > pattern > configuration > testing
+- **Maximum per category**: 20 facts (focus on the most significant)
+- **Minimum evidence**: Each fact must reference at least one source file
+- **No duplicates**: Check `statement` similarity before adding — if >90% similar to existing fact, update the existing fact instead
+
+---
+
 ## Step 1.7: Persist State (Brownfield Only)
 
 **Skip for Greenfield projects** — there are no source files to hash and no signals to classify. Greenfield projects only get `run-memory.json` (written during Completion).
@@ -2124,6 +2343,7 @@ For **Brownfield** projects, announce:
 "Draft initialized successfully with comprehensive analysis!
 
 Created:
+- draft/.ai-profile.md (20-50 lines — always-injected compact project profile)
 - draft/.ai-context.md (200-400 lines — token-optimized AI context, self-contained)
 - draft/architecture.md (comprehensive human-readable engineering reference)
 - draft/product.md
@@ -2131,6 +2351,7 @@ Created:
 - draft/workflow.md
 - draft/guardrails.md
 - draft/tracks.md
+- draft/.state/facts.json (atomic fact registry with temporal metadata and relationship graph)
 - draft/.state/freshness.json (file-level hash baseline for incremental refresh)
 - draft/.state/signals.json (codebase signal classification)
 - draft/.state/run-memory.json (run metadata and unresolved questions)
@@ -2140,11 +2361,12 @@ Unresolved questions from analysis:
 {list each question — these are areas where the AI couldn't determine the answer with confidence}
 
 Next steps:
-1. Review draft/.ai-context.md — verify the AI context is complete and accurate
-2. Review draft/architecture.md — human-friendly version for team onboarding
-3. Review and edit the other generated files as needed
-4. Run `/draft:new-track` to start planning a feature
-5. Run `/draft:init refresh` after significant codebase changes — refresh is now incremental (only stale files re-analyzed)"
+1. Review draft/.ai-profile.md — verify the compact profile captures your project accurately
+2. Review draft/.ai-context.md — verify the AI context is complete and accurate
+3. Review draft/architecture.md — human-friendly version for team onboarding
+4. Review and edit the other generated files as needed
+5. Run `/draft:new-track` to start planning a feature
+6. Run `/draft:init refresh` after significant codebase changes — refresh is now incremental with fact-level contradiction detection"
 
 For **Greenfield** projects, announce:
 "Draft initialized successfully!
@@ -2181,6 +2403,7 @@ This is a self-contained, callable procedure for generating `draft/.ai-context.m
 | Output | Path | Description |
 |--------|------|-------------|
 | .ai-context.md | `draft/.ai-context.md` | Token-optimized, machine-readable AI context (200-400 lines) |
+| .ai-profile.md | `draft/.ai-profile.md` | Ultra-compact always-injected project profile (20-50 lines) |
 
 ### Target Size
 
@@ -2261,6 +2484,14 @@ Before writing `draft/.ai-context.md`, verify:
 
 Write the completed content to `draft/.ai-context.md`.
 
+#### Step 8: Regenerate Profile
+
+After writing `.ai-context.md`, regenerate `draft/.ai-profile.md` using Step 1.6 (Profile Generation). This ensures the profile always reflects the latest condensed context.
+
+#### Step 9: Update Fact Registry (if exists)
+
+If `draft/.state/facts.json` exists, update `last_verified_at` timestamps for facts whose source sections in `architecture.md` were modified. This keeps the fact registry in sync with architecture changes without requiring full re-extraction.
+
 ### Example Transformation
 
 **architecture.md input:**
@@ -2294,4 +2525,4 @@ AuthService.Logic -[PostgreSQL]-> UserDB
 ### Reference for Other Skills
 
 Other skills that mutate `draft/architecture.md` should invoke this subroutine with:
-> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` using the Condensation Subroutine defined in `/draft:init`."
+> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine defined in `/draft:init`."

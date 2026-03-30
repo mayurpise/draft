@@ -84,11 +84,13 @@ When users use Draft, it creates a `draft/` directory in their project:
 | `product.md` | Product vision, users, goals, guidelines (optional section) |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
 | `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. |
-| `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ sections covering architecture, invariants, interfaces, data flows, concurrency, error handling, catalogs, cookbooks, testing, glossary. Consumed by all Draft commands and external AI tools. Auto-refreshed on mutations. |
+| `.ai-profile.md` | **Derived from .ai-context.md.** 20-50 lines, ultra-compact always-injected project profile. Contains: language, framework, database, auth, API style, critical invariants, safety rules, active tracks, recent changes. Tier 0 context — loaded by every command. |
+| `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ sections covering architecture, invariants, interfaces, data flows, concurrency, error handling, catalogs, cookbooks, testing, glossary. Tier 1 context — loaded for most tasks. Auto-refreshed on mutations. |
 | `workflow.md` | TDD preferences, commit strategy, validation config |
-| `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns |
+| `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns. Entries include dual-layer timestamps (discovered_at, established_at, last_verified, last_active) for temporal reasoning. |
 | `tracks.md` | Master list of all tracks |
 | `tracks/<id>/` | Individual tracks with `spec.md`, `plan.md`, `metadata.json` |
+| `.state/facts.json` | Atomic fact registry with dual-layer timestamps, confidence scoring, and knowledge graph edges (updates/extends/derives). Enables fact-level contradiction detection on refresh and relevance-scored context loading. |
 | `.state/freshness.json` | SHA-256 hashes of all analyzed source files. Enables file-level staleness detection for incremental refresh. |
 | `.state/signals.json` | Codebase signal classification (11 categories). Detects structural drift on refresh (e.g., auth files added for the first time). |
 | `.state/run-memory.json` | Run metadata: phases completed, unresolved questions, resumable checkpoints. Enables cross-session continuity. |

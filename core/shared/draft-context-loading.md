@@ -4,7 +4,19 @@ Standard procedure for loading Draft project context. All Draft commands that re
 
 Referenced by: `/draft:bughunt`, `/draft:deep-review`, `/draft:review`, `/draft:learn`, `/draft:new-track`, `/draft:implement`, `/draft:init` (refresh), and others
 
-## Base Context Files
+## Context Loading Layers
+
+Draft uses a layered context system inspired by memory tiering — compact, always-available context at the top, with progressively deeper context loaded on demand.
+
+### Layer 0: Project Profile (Always Loaded)
+
+If `draft/.ai-profile.md` exists, **always** read it first. This ultra-compact file (20-50 lines) provides the minimum context every command needs: language, framework, database, auth, API style, critical invariants, safety rules, active tracks, and recent changes.
+
+- **Always loaded** regardless of task complexity
+- **Purpose**: Enables simple tasks (quick edits, config changes, small fixes) without loading full context
+- **Fallback**: If `.ai-profile.md` does not exist, proceed to Layer 1
+
+### Layer 1: Base Context Files
 
 If `draft/` directory exists, read and internalize these files in order:
 
@@ -15,6 +27,69 @@ If `draft/` directory exists, read and internalize these files in order:
 | 3 | `draft/product.md` | Product vision, user flows, requirements, **Guidelines** | — |
 | 4 | `draft/workflow.md` | Team conventions, testing preferences | — |
 | 5 | `draft/guardrails.md` | Hard guardrails, **Learned Conventions**, **Learned Anti-Patterns** | `draft/workflow.md` `## Guardrails` (legacy) |
+
+### Layer 2: Fact Registry (When Available)
+
+If `draft/.state/facts.json` exists, it provides granular fact-level context:
+
+- **For refresh operations**: Load facts sourced from changed files to enable contradiction detection
+- **For quality commands**: Load facts by category relevant to the current analysis dimension
+- **For implementation**: Load facts related to files being modified (match via `source_files`)
+
+Facts are NOT loaded in full for every command — use relevance filtering (see below).
+
+## Relevance-Scored Context Loading
+
+Not all context is equally relevant to every task. When a specific track or task is active, apply relevance scoring to prioritize which context sections are most useful.
+
+### When to Apply
+
+Apply relevance scoring when ALL of these conditions are true:
+1. A specific track or task is active (has `spec.md` and/or `plan.md`)
+2. `draft/.ai-context.md` exists and is >200 lines
+3. The command benefits from focused context (`/draft:implement`, `/draft:bughunt`, `/draft:review`)
+
+Do NOT apply relevance scoring for commands that need full context (`/draft:init`, `/draft:deep-review`, `/draft:decompose`).
+
+### Scoring Procedure
+
+1. **Extract key concepts** from the active task:
+   - Read `spec.md` acceptance criteria and extract domain terms
+   - Read `plan.md` current task description and extract file paths, module names, technology terms
+   - Identify the primary concern: data flow, UI, API, security, performance, configuration, etc.
+
+2. **Score `.ai-context.md` sections** against the task concepts:
+
+   | Section | Load When Task Involves... |
+   |---------|--------------------------|
+   | `## META` | Always (baseline) |
+   | `## GRAPH:COMPONENTS` | Module boundary changes, new components |
+   | `## GRAPH:DEPENDENCIES` | Integration work, new external dependencies |
+   | `## GRAPH:DATAFLOW` | Data pipeline changes, new flows |
+   | `## INVARIANTS` | Always (safety critical) |
+   | `## INTERFACES` | API changes, new implementations |
+   | `## CATALOG:*` | Implementation work matching the category |
+   | `## THREADS` | Concurrency-related tasks |
+   | `## CONFIG` | Configuration changes |
+   | `## ERRORS` | Error handling tasks |
+   | `## CONCURRENCY` | Any async/parallel work |
+   | `## EXTEND:*` | Adding new implementations of existing patterns |
+   | `## TEST` | Always (need test commands) |
+   | `## FILES` | Always (need file locations) |
+   | `## VOCAB` | Domain-specific tasks |
+
+3. **Always include**: `META`, `INVARIANTS`, `TEST`, `FILES` (minimum context floor)
+4. **Include if relevant**: All other sections scored against task concepts
+5. **Result**: A focused subset of `.ai-context.md` that maximizes signal-to-noise for the current task
+
+### Fact Registry Relevance
+
+When `draft/.state/facts.json` exists, also load relevant facts:
+
+1. **By file overlap**: Facts whose `source_files` overlap with files the current task will modify
+2. **By category**: Facts in categories matching the task's primary concern
+3. **By recency**: Prefer facts with recent `last_active_at` timestamps (active code areas)
+4. **Limit**: Load at most 20 relevant facts per task to stay within token budget
 
 ## Special Sections to Honor
 
@@ -58,11 +133,13 @@ Use track context to:
 | Scenario | Behavior |
 |----------|----------|
 | No `draft/` directory | Proceed with code-only analysis (no context enrichment) |
+| `.ai-profile.md` missing | Skip Layer 0; proceed directly to Layer 1 context loading |
 | `.ai-context.md` missing | Fall back to `draft/architecture.md` if it exists |
 | `tech-stack.md` missing | Skip framework-specific checks |
 | `product.md` missing | Skip product requirement verification |
 | `workflow.md` missing | Skip workflow preferences |
 | `guardrails.md` missing | Fall back to `workflow.md ## Guardrails`; if neither exists, skip guardrail enforcement |
+| `facts.json` missing | Skip Layer 2; no fact-level context available |
 | Track files missing | Warn and proceed with project-level scope |
 
 ## Context-Enriched Analysis

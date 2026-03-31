@@ -5,6 +5,41 @@
 
     <p class="chapter-intro">The code is written. Tests pass. The plan shows every task marked <code>[x]</code>. You could merge now and move on. But "tests pass" is a low bar &mdash; it tells you the code does what the tests check, not that it does what the specification requires, not that it's secure, not that it follows your architecture, and not that it handles the edge cases nobody thought to test. Draft's review pipeline exists to close these gaps systematically.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+                <defs>
+                    <filter id="sh10" x="-2%" y="-8%" width="104%" height="120%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                    <marker id="arr10" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/></marker>
+                </defs>
+                <!-- Stage 1 -->
+                <rect x="10" y="18" width="170" height="60" rx="10" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5" filter="url(#sh10)"/>
+                <text x="95" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#e11d48" font-weight="bold">Stage 1</text>
+                <text x="95" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="#1a1a2e">Automated Validation</text>
+                <text x="95" y="72" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#718096">Security, structure, perf</text>
+                <!-- Gate 1 -->
+                <rect x="192" y="34" width="30" height="28" rx="4" fill="#2563eb"/>
+                <text x="207" y="53" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#fff">GATE</text>
+                <path d="M222 48 L248 48" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#arr10)"/>
+                <!-- Stage 2 -->
+                <rect x="255" y="18" width="170" height="60" rx="10" fill="#fef9c3" stroke="#d97706" stroke-width="1.5" filter="url(#sh10)"/>
+                <text x="340" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#d97706" font-weight="bold">Stage 2</text>
+                <text x="340" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="#1a1a2e">Spec Compliance</text>
+                <text x="340" y="72" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#718096">Requirements, acceptance</text>
+                <!-- Gate 2 -->
+                <rect x="437" y="34" width="30" height="28" rx="4" fill="#2563eb"/>
+                <text x="452" y="53" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#fff">GATE</text>
+                <path d="M467 48 L493 48" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#arr10)"/>
+                <!-- Stage 3 -->
+                <rect x="500" y="18" width="170" height="60" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5" filter="url(#sh10)"/>
+                <text x="585" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#059669" font-weight="bold">Stage 3</text>
+                <text x="585" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="#1a1a2e">Code Quality</text>
+                <text x="585" y="72" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#718096">Patterns, errors, testing</text>
+            </svg>
+        </div>
+        <div class="figure-caption">The three-stage review pipeline: each stage acts as a gate. Failures stop the pipeline early — no point checking code quality on structurally broken code.</div>
+    </div>
+
     <h2>The Three Stages</h2>
     <p><code>/draft:review</code> runs a sequential, three-stage review process. Each stage acts as a gate &mdash; if it fails, the review stops and sends you back to fix the structural problem before wasting effort on higher-order concerns. You don't check code quality on structurally broken code, and you don't check structure on code that doesn't meet the spec.</p>
 

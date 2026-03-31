@@ -5,6 +5,48 @@
 
     <p class="chapter-intro">You asked your AI assistant to debug a failing test. It immediately changed the code, broke two other tests, reverted, tried something else, broke three more, and eventually produced a "fix" that suppressed the error without understanding it. This is what happens when an AI has capability without protocol. Draft's agent system gives each specialized role a defined process that prevents freelancing.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;" font-family="Arial, sans-serif">
+                <defs>
+                    <filter id="shadow5" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- Central hub -->
+                <circle cx="360" cy="140" r="52" fill="#2563eb" filter="url(#shadow5)"/>
+                <text x="360" y="136" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Draft</text>
+                <text x="360" y="152" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="10">Core</text>
+                <!-- Architect (top) -->
+                <rect x="310" y="10" width="100" height="44" rx="10" fill="#7c3aed" filter="url(#shadow5)"/>
+                <text x="360" y="30" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Architect</text>
+                <text x="360" y="44" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Decomposition</text>
+                <line x1="360" y1="54" x2="360" y2="88" stroke="#7c3aed" stroke-width="2"/>
+                <!-- Planner (top-right) -->
+                <rect x="530" y="50" width="100" height="44" rx="10" fill="#059669" filter="url(#shadow5)"/>
+                <text x="580" y="70" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Planner</text>
+                <text x="580" y="84" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Specs &amp; Plans</text>
+                <line x1="530" y1="80" x2="412" y2="120" stroke="#059669" stroke-width="2"/>
+                <!-- Reviewer (bottom-right) -->
+                <rect x="530" y="185" width="100" height="44" rx="10" fill="#7c3aed" filter="url(#shadow5)"/>
+                <text x="580" y="205" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Reviewer</text>
+                <text x="580" y="219" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">3-stage review</text>
+                <line x1="530" y1="200" x2="412" y2="160" stroke="#7c3aed" stroke-width="2"/>
+                <!-- Debugger (bottom-left) -->
+                <rect x="90" y="185" width="100" height="44" rx="10" fill="#059669" filter="url(#shadow5)"/>
+                <text x="140" y="205" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Debugger</text>
+                <text x="140" y="219" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Root cause first</text>
+                <line x1="190" y1="200" x2="308" y2="160" stroke="#059669" stroke-width="2"/>
+                <!-- RCA (top-left) -->
+                <rect x="90" y="50" width="100" height="44" rx="10" fill="#7c3aed" filter="url(#shadow5)"/>
+                <text x="140" y="70" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">RCA</text>
+                <text x="140" y="84" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Incident analysis</text>
+                <line x1="190" y1="80" x2="308" y2="120" stroke="#7c3aed" stroke-width="2"/>
+                <!-- Bottom label -->
+                <text x="360" y="268" text-anchor="middle" fill="#718096" font-size="11">Each agent loads a behavioral protocol that constrains AI behavior for its domain</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Five specialized agents connect to Draft Core, each with a defined protocol: Architect decomposes, Planner specs, Reviewer validates, Debugger investigates, RCA analyzes incidents.</div>
+    </div>
+
     <h2>Why Agents Exist</h2>
     <p>A general-purpose AI assistant has one mode: do whatever seems helpful. That is fine for answering questions. It is dangerous for structured engineering work. Architecture decomposition requires different thinking than debugging. Code review requires different discipline than planning. When a single AI operates without role boundaries, it blends these concerns &mdash; reviewing code while simultaneously refactoring it, or planning while already implementing.</p>
 

@@ -5,6 +5,48 @@
 
     <p class="chapter-intro">A senior engineer opens their AI coding assistant and types: "Add user authentication to the app." Thirty seconds later, they have 400 lines of code. It uses Passport.js &mdash; but the team standardized on Auth0. It stores sessions in Redis &mdash; but the project uses PostgreSQL for everything. It creates a new middleware pattern &mdash; but the codebase already has one. The code works. It's also wrong in every way that matters to the team that has to maintain it.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;" font-family="Arial, sans-serif">
+                <defs>
+                    <filter id="shadow1" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- Left: Without Draft -->
+                <rect x="10" y="10" width="330" height="180" rx="14" fill="#fff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow1)"/>
+                <text x="175" y="36" text-anchor="middle" fill="#e53e3e" font-size="13" font-weight="700">Without Draft</text>
+                <rect x="40" y="55" width="80" height="40" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1"/>
+                <text x="80" y="79" text-anchor="middle" fill="#1a1a2e" font-size="11">Prompt</text>
+                <!-- Chaotic arrows -->
+                <line x1="120" y1="65" x2="200" y2="50" stroke="#e53e3e" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <line x1="120" y1="75" x2="210" y2="90" stroke="#e53e3e" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <line x1="120" y1="85" x2="195" y2="130" stroke="#e53e3e" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <line x1="120" y1="70" x2="205" y2="160" stroke="#e53e3e" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <text x="200" y="50" fill="#718096" font-size="9">Wrong framework</text>
+                <text x="210" y="93" fill="#718096" font-size="9">Wrong pattern</text>
+                <text x="195" y="133" fill="#718096" font-size="9">Wrong conventions</text>
+                <text x="205" y="163" fill="#718096" font-size="9">Missing guardrails</text>
+                <!-- Right: With Draft -->
+                <rect x="380" y="10" width="330" height="180" rx="14" fill="#fff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow1)"/>
+                <text x="545" y="36" text-anchor="middle" fill="#059669" font-size="13" font-weight="700">With Draft</text>
+                <rect x="400" y="60" width="72" height="36" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1"/>
+                <text x="436" y="82" text-anchor="middle" fill="#1a1a2e" font-size="10">Spec</text>
+                <line x1="472" y1="78" x2="500" y2="78" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrowB1)"/>
+                <rect x="500" y="60" width="72" height="36" rx="8" fill="#2563eb"/>
+                <text x="536" y="82" text-anchor="middle" fill="#fff" font-size="10">Plan</text>
+                <line x1="572" y1="78" x2="600" y2="78" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrowB1)"/>
+                <rect x="600" y="60" width="72" height="36" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1"/>
+                <text x="636" y="82" text-anchor="middle" fill="#1a1a2e" font-size="10">Review</text>
+                <defs><marker id="arrowB1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#2563eb"/></marker></defs>
+                <!-- Down arrow to code -->
+                <line x1="536" y1="96" x2="536" y2="130" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowG1)"/>
+                <defs><marker id="arrowG1" viewBox="0 0 10 10" refX="5" refY="9" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#059669"/></marker></defs>
+                <rect x="495" y="132" width="82" height="36" rx="8" fill="#059669"/>
+                <text x="536" y="155" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Correct Code</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Without Draft, AI output scatters across wrong assumptions. With Draft, a structured pipeline funnels output toward the right solution.</div>
+    </div>
+
     <h2>The Power Without Direction</h2>
     <p>AI coding assistants are the most significant productivity tool software engineering has seen in decades. They can generate working code in seconds, refactor entire modules, write comprehensive test suites, and explain complex systems with clarity. The capability is real.</p>
 

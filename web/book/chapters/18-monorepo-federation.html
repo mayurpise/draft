@@ -5,6 +5,54 @@
 
     <p class="chapter-intro">A monorepo with twelve services has twelve <code>draft/</code> directories after initialization. Each service has its own architecture documentation, its own tech stack, its own context files. But nobody has a unified view of the whole system &mdash; which services depend on which, what technologies are used where, or how the pieces fit together. <code>/draft:index</code> builds that view.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:560px;display:block;margin:0 auto">
+                <defs>
+                    <filter id="mono-shadow" x="-4%" y="-4%" width="108%" height="112%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a1a2e" flood-opacity="0.08"/>
+                    </filter>
+                </defs>
+                <!-- Root context -->
+                <rect x="150" y="10" width="260" height="56" rx="8" fill="#2563eb" filter="url(#mono-shadow)"/>
+                <text x="280" y="33" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="13" font-weight="bold">Root draft/</text>
+                <text x="280" y="52" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="11">service-index &#183; dependency-graph &#183; tech-matrix</text>
+                <!-- Connectors -->
+                <line x1="200" y1="66" x2="100" y2="110" stroke="#e2e8f0" stroke-width="2"/>
+                <line x1="280" y1="66" x2="280" y2="110" stroke="#e2e8f0" stroke-width="2"/>
+                <line x1="360" y1="66" x2="460" y2="110" stroke="#e2e8f0" stroke-width="2"/>
+                <!-- Service A -->
+                <rect x="20" y="110" width="160" height="90" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#mono-shadow)"/>
+                <rect x="20" y="110" width="160" height="28" rx="8" fill="#7c3aed"/>
+                <rect x="20" y="126" width="160" height="12" fill="#7c3aed"/>
+                <text x="100" y="131" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12" font-weight="bold">auth-service/</text>
+                <text x="100" y="157" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="11">draft/</text>
+                <text x="100" y="173" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">architecture.md</text>
+                <text x="100" y="187" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">.ai-context.md</text>
+                <!-- Service B -->
+                <rect x="200" y="110" width="160" height="90" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#mono-shadow)"/>
+                <rect x="200" y="110" width="160" height="28" rx="8" fill="#059669"/>
+                <rect x="200" y="126" width="160" height="12" fill="#059669"/>
+                <text x="280" y="131" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12" font-weight="bold">billing-service/</text>
+                <text x="280" y="157" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="11">draft/</text>
+                <text x="280" y="173" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">architecture.md</text>
+                <text x="280" y="187" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">.ai-context.md</text>
+                <!-- Service C -->
+                <rect x="380" y="110" width="160" height="90" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#mono-shadow)"/>
+                <rect x="380" y="110" width="160" height="28" rx="8" fill="#d97706"/>
+                <rect x="380" y="126" width="160" height="12" fill="#d97706"/>
+                <text x="460" y="131" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12" font-weight="bold">api-gateway/</text>
+                <text x="460" y="157" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="11">draft/</text>
+                <text x="460" y="173" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">architecture.md</text>
+                <text x="460" y="187" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">.ai-context.md</text>
+                <!-- /draft:index arrow -->
+                <text x="280" y="235" text-anchor="middle" fill="#2563eb" font-family="Arial,sans-serif" font-size="12" font-weight="bold">/draft:index</text>
+                <text x="280" y="252" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="11">aggregates service contexts into unified root view</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Monorepo federation: each service maintains its own draft/ context, while /draft:index aggregates them into a shared root-level system view.</div>
+    </div>
+
     <h2>The Monorepo Context Problem</h2>
     <p>Running <code>/draft:init</code> on each service in a monorepo produces excellent per-service context. The auth service has a detailed <code>.ai-context.md</code> explaining its JWT validation flow. The billing service documents its Stripe integration. But cross-service questions remain unanswered: what happens when auth goes down? Which services share PostgreSQL? Is anyone still using the deprecated notification API?</p>
 

@@ -4,6 +4,92 @@
 
     <p class="chapter-intro">Every file Draft generates, organized by directory. For each file: name, purpose, typical size, audience, and lifecycle.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 480 400" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:480px;display:block;margin:0 auto">
+                <defs>
+                    <filter id="file-shadow" x="-4%" y="-4%" width="108%" height="112%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a1a2e" flood-opacity="0.08"/>
+                    </filter>
+                </defs>
+                <style>
+                    .dir { fill: #2563eb; font-family: Arial,sans-serif; font-size: 13px; font-weight: bold; }
+                    .file-ctx { fill: #059669; font-family: Arial,sans-serif; font-size: 11px; }
+                    .file-cfg { fill: #7c3aed; font-family: Arial,sans-serif; font-size: 11px; }
+                    .file-state { fill: #d97706; font-family: Arial,sans-serif; font-size: 11px; }
+                    .file-track { fill: #2563eb; font-family: Arial,sans-serif; font-size: 11px; }
+                    .tree-line { stroke: #e2e8f0; stroke-width: 1.5; fill: none; }
+                </style>
+                <!-- Root -->
+                <text x="24" y="24" class="dir">draft/</text>
+                <!-- Vertical trunk -->
+                <line x1="36" y1="32" x2="36" y2="230" class="tree-line"/>
+                <!-- Context files -->
+                <line x1="36" y1="48" x2="56" y2="48" class="tree-line"/>
+                <rect x="58" y="36" width="160" height="20" rx="4" fill="#e6f4ea"/>
+                <text x="66" y="50" class="file-ctx">architecture.md</text>
+                <line x1="36" y1="68" x2="56" y2="68" class="tree-line"/>
+                <rect x="58" y="56" width="160" height="20" rx="4" fill="#e6f4ea"/>
+                <text x="66" y="70" class="file-ctx">.ai-context.md</text>
+                <line x1="36" y1="88" x2="56" y2="88" class="tree-line"/>
+                <rect x="58" y="76" width="160" height="20" rx="4" fill="#e6f4ea"/>
+                <text x="66" y="90" class="file-ctx">.ai-profile.md</text>
+                <!-- Config files -->
+                <line x1="36" y1="112" x2="56" y2="112" class="tree-line"/>
+                <rect x="58" y="100" width="120" height="20" rx="4" fill="#ede9fe"/>
+                <text x="66" y="114" class="file-cfg">product.md</text>
+                <line x1="36" y1="132" x2="56" y2="132" class="tree-line"/>
+                <rect x="58" y="120" width="120" height="20" rx="4" fill="#ede9fe"/>
+                <text x="66" y="134" class="file-cfg">tech-stack.md</text>
+                <line x1="36" y1="152" x2="56" y2="152" class="tree-line"/>
+                <rect x="58" y="140" width="120" height="20" rx="4" fill="#ede9fe"/>
+                <text x="66" y="154" class="file-cfg">workflow.md</text>
+                <line x1="36" y1="172" x2="56" y2="172" class="tree-line"/>
+                <rect x="58" y="160" width="120" height="20" rx="4" fill="#ede9fe"/>
+                <text x="66" y="174" class="file-cfg">guardrails.md</text>
+                <!-- .state/ -->
+                <line x1="36" y1="200" x2="56" y2="200" class="tree-line"/>
+                <text x="58" y="204" class="dir">.state/</text>
+                <line x1="72" y1="210" x2="72" y2="262" class="tree-line"/>
+                <line x1="72" y1="220" x2="92" y2="220" class="tree-line"/>
+                <rect x="94" y="208" width="140" height="20" rx="4" fill="#fef3c7"/>
+                <text x="102" y="222" class="file-state">freshness.json</text>
+                <line x1="72" y1="240" x2="92" y2="240" class="tree-line"/>
+                <rect x="94" y="228" width="140" height="20" rx="4" fill="#fef3c7"/>
+                <text x="102" y="242" class="file-state">signals.json</text>
+                <line x1="72" y1="260" x2="92" y2="260" class="tree-line"/>
+                <rect x="94" y="248" width="140" height="20" rx="4" fill="#fef3c7"/>
+                <text x="102" y="262" class="file-state">run-memory.json</text>
+                <!-- tracks/ -->
+                <line x1="36" y1="230" x2="56" y2="290" class="tree-line"/>
+                <text x="58" y="294" class="dir">tracks/&lt;name&gt;/</text>
+                <line x1="72" y1="300" x2="72" y2="372" class="tree-line"/>
+                <line x1="72" y1="312" x2="92" y2="312" class="tree-line"/>
+                <rect x="94" y="300" width="120" height="20" rx="4" fill="#dbeafe"/>
+                <text x="102" y="314" class="file-track">spec.md</text>
+                <line x1="72" y1="332" x2="92" y2="332" class="tree-line"/>
+                <rect x="94" y="320" width="120" height="20" rx="4" fill="#dbeafe"/>
+                <text x="102" y="334" class="file-track">plan.md</text>
+                <line x1="72" y1="352" x2="92" y2="352" class="tree-line"/>
+                <rect x="94" y="340" width="140" height="20" rx="4" fill="#dbeafe"/>
+                <text x="102" y="354" class="file-track">metadata.json</text>
+                <line x1="72" y1="372" x2="92" y2="372" class="tree-line"/>
+                <rect x="94" y="360" width="140" height="20" rx="4" fill="#dbeafe"/>
+                <text x="102" y="374" class="file-track">review-report.md</text>
+                <!-- Legend -->
+                <rect x="290" y="36" width="12" height="12" rx="2" fill="#e6f4ea"/>
+                <text x="308" y="47" fill="#059669" font-family="Arial,sans-serif" font-size="10">Context (AI-facing)</text>
+                <rect x="290" y="56" width="12" height="12" rx="2" fill="#ede9fe"/>
+                <text x="308" y="67" fill="#7c3aed" font-family="Arial,sans-serif" font-size="10">Config (human-editable)</text>
+                <rect x="290" y="76" width="12" height="12" rx="2" fill="#fef3c7"/>
+                <text x="308" y="87" fill="#d97706" font-family="Arial,sans-serif" font-size="10">State (internal)</text>
+                <rect x="290" y="96" width="12" height="12" rx="2" fill="#dbeafe"/>
+                <text x="308" y="107" fill="#2563eb" font-family="Arial,sans-serif" font-size="10">Track (per-feature)</text>
+            </svg>
+        </div>
+        <div class="figure-caption">The draft/ directory structure, color-coded by file type: AI-facing context files, human-editable config, internal state tracking, and per-feature track files.</div>
+    </div>
+
     <h2>draft/ (Root)</h2>
 
     <table>

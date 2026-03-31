@@ -1,6 +1,6 @@
 /* ============================================================
    DRAFT EBOOK — Styles
-   Design: Dark theme matching getdraft.dev, optimized for reading
+   Design: Light theme matching getdraft.dev, optimized for reading
    ============================================================ */
 
 /* ============================================================
@@ -8,32 +8,32 @@
    ============================================================ */
 :root {
     /* Backgrounds */
-    --bg-primary: #0a0a0b;
-    --bg-secondary: #111113;
-    --bg-tertiary: #18181b;
-    --bg-sidebar: #0e0e11;
-    --bg-code: #131316;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #f1f3f5;
+    --bg-sidebar: #f8f9fa;
+    --bg-code: #f5f7f9;
 
     /* Accents */
-    --accent-cyan: #22d3ee;
-    --accent-amber: #fbbf24;
-    --accent-rose: #fb7185;
-    --accent-emerald: #34d399;
-    --accent-violet: #a78bfa;
+    --accent-cyan: #2563eb;
+    --accent-amber: #d97706;
+    --accent-rose: #e11d48;
+    --accent-emerald: #059669;
+    --accent-violet: #7c3aed;
 
     /* Text */
-    --text-primary: #fafafa;
-    --text-secondary: #a1a1aa;
-    --text-muted: #71717a;
-    --text-reading: #d4d4d8;
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a5568;
+    --text-muted: #718096;
+    --text-reading: #374151;
 
     /* Borders */
-    --border: #27272a;
-    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border: #e2e8f0;
+    --border-subtle: rgba(0, 0, 0, 0.06);
 
     /* Glass */
-    --glass-bg: rgba(17, 17, 19, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(0, 0, 0, 0.06);
 
     /* Sidebar */
     --sidebar-width: 300px;
@@ -66,14 +66,14 @@ body {
 }
 
 ::selection {
-    background: rgba(34, 211, 238, 0.3);
+    background: rgba(37, 99, 235, 0.2);
     color: var(--text-primary);
 }
 
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-primary); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 a { color: inherit; text-decoration: none; }
 
@@ -86,7 +86,7 @@ a { color: inherit; text-decoration: none; }
     left: 0;
     width: 0%;
     height: 3px;
-    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet));
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
     z-index: 200;
     transition: width 0.15s ease-out;
 }
@@ -107,10 +107,11 @@ a { color: inherit; text-decoration: none; }
     left: 0;
     right: 0;
     height: 56px;
-    background: rgba(10, 10, 11, 0.9);
+    background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -224,12 +225,12 @@ a { color: inherit; text-decoration: none; }
     padding: 1.5rem 0;
     z-index: 100;
     scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
+    scrollbar-color: #cbd5e1 transparent;
 }
 
 .book-sidebar::-webkit-scrollbar { width: 4px; }
 .book-sidebar::-webkit-scrollbar-track { background: transparent; }
-.book-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.book-sidebar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
 
 /* Sidebar search */
 .sidebar-search {
@@ -240,7 +241,7 @@ a { color: inherit; text-decoration: none; }
 .sidebar-search input {
     width: 100%;
     padding: 0.5rem 0.75rem 0.5rem 2rem;
-    background: var(--bg-tertiary);
+    background: var(--bg-primary);
     border: 1px solid var(--border);
     border-radius: 8px;
     color: var(--text-primary);
@@ -252,6 +253,7 @@ a { color: inherit; text-decoration: none; }
 
 .sidebar-search input:focus {
     border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .sidebar-search input::placeholder {
@@ -308,12 +310,12 @@ a { color: inherit; text-decoration: none; }
 
 .sidebar-chapter:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(0, 0, 0, 0.04);
 }
 
 .sidebar-chapter.active {
     color: var(--accent-cyan);
-    background: rgba(34, 211, 238, 0.08);
+    background: rgba(37, 99, 235, 0.08);
     font-weight: 500;
 }
 
@@ -337,6 +339,7 @@ a { color: inherit; text-decoration: none; }
 .book-content {
     margin-left: var(--sidebar-width);
     padding-top: 56px;
+    padding-right: 240px; /* reserve space for the fixed page-toc (200px + 2rem gap) */
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -481,7 +484,7 @@ a { color: inherit; text-decoration: none; }
     border-left: 3px solid var(--accent-violet);
     padding: 0.75rem 1.25rem;
     margin: 1.5rem 0;
-    background: rgba(167, 139, 250, 0.05);
+    background: rgba(124, 58, 237, 0.04);
     border-radius: 0 8px 8px 0;
 }
 
@@ -504,7 +507,7 @@ a { color: inherit; text-decoration: none; }
     color: var(--accent-cyan);
     text-decoration: underline;
     text-underline-offset: 3px;
-    text-decoration-color: rgba(34, 211, 238, 0.3);
+    text-decoration-color: rgba(37, 99, 235, 0.3);
     transition: text-decoration-color 0.2s;
 }
 
@@ -517,11 +520,11 @@ a { color: inherit; text-decoration: none; }
    ============================================================ */
 .chapter-wrapper code {
     font-family: 'JetBrains Mono', monospace;
-    background: var(--bg-tertiary);
+    background: var(--bg-code);
     padding: 0.15rem 0.4rem;
     border-radius: 4px;
     font-size: 0.85em;
-    color: var(--accent-amber);
+    color: #b35900;
     border: 1px solid var(--border);
 }
 
@@ -546,8 +549,8 @@ a { color: inherit; text-decoration: none; }
 
 /* Terminal-style code block */
 .chapter-wrapper pre.terminal {
-    background: #0c0c0e;
-    border-color: rgba(34, 211, 238, 0.15);
+    background: #eef0f4;
+    border-color: rgba(37, 99, 235, 0.15);
 }
 
 .chapter-wrapper pre.terminal::before {
@@ -560,7 +563,7 @@ a { color: inherit; text-decoration: none; }
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    background: #0c0c0e;
+    background: #eef0f4;
     padding: 0 0.5rem;
     transform: translateY(-50%);
 }
@@ -617,8 +620,8 @@ a { color: inherit; text-decoration: none; }
 
 /* Concept callout */
 .callout-concept {
-    background: rgba(34, 211, 238, 0.04);
-    border-color: rgba(34, 211, 238, 0.15);
+    background: rgba(37, 99, 235, 0.04);
+    border-color: rgba(37, 99, 235, 0.15);
 }
 
 .callout-concept .callout-title {
@@ -627,8 +630,8 @@ a { color: inherit; text-decoration: none; }
 
 /* Example callout */
 .callout-example {
-    background: rgba(167, 139, 250, 0.04);
-    border-color: rgba(167, 139, 250, 0.15);
+    background: rgba(124, 58, 237, 0.04);
+    border-color: rgba(124, 58, 237, 0.15);
 }
 
 .callout-example .callout-title {
@@ -637,8 +640,8 @@ a { color: inherit; text-decoration: none; }
 
 /* Tip callout */
 .callout-tip {
-    background: rgba(52, 211, 153, 0.04);
-    border-color: rgba(52, 211, 153, 0.15);
+    background: rgba(5, 150, 105, 0.04);
+    border-color: rgba(5, 150, 105, 0.15);
 }
 
 .callout-tip .callout-title {
@@ -647,8 +650,8 @@ a { color: inherit; text-decoration: none; }
 
 /* Warning callout */
 .callout-warning {
-    background: rgba(251, 191, 36, 0.04);
-    border-color: rgba(251, 191, 36, 0.15);
+    background: rgba(217, 119, 6, 0.04);
+    border-color: rgba(217, 119, 6, 0.15);
 }
 
 .callout-warning .callout-title {
@@ -657,8 +660,8 @@ a { color: inherit; text-decoration: none; }
 
 /* Insight callout */
 .callout-insight {
-    background: rgba(251, 113, 133, 0.04);
-    border-color: rgba(251, 113, 133, 0.15);
+    background: rgba(225, 29, 72, 0.04);
+    border-color: rgba(225, 29, 72, 0.15);
 }
 
 .callout-insight .callout-title {
@@ -695,7 +698,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .chapter-wrapper tbody tr:hover {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(0, 0, 0, 0.02);
 }
 
 /* ============================================================
@@ -754,15 +757,17 @@ a { color: inherit; text-decoration: none; }
     flex-direction: column;
     gap: 0.25rem;
     padding: 1.25rem;
-    background: var(--bg-secondary);
+    background: var(--bg-primary);
     border: 1px solid var(--border);
     border-radius: 12px;
-    transition: border-color 0.2s, transform 0.2s var(--ease-out);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: border-color 0.2s, transform 0.2s var(--ease-out), box-shadow 0.2s;
     text-decoration: none !important;
 }
 
 .chapter-nav-link:hover {
-    border-color: rgba(34, 211, 238, 0.3);
+    border-color: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
     transform: translateY(-2px);
 }
 
@@ -908,7 +913,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .book-toc-entry:hover {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .book-toc-num {
@@ -954,6 +959,7 @@ a { color: inherit; text-decoration: none; }
 /* Hide page-toc below 1280px */
 @media (max-width: 1280px) {
     .page-toc { display: none; }
+    .book-content { padding-right: 0; }
 }
 
 /* Tablet */
@@ -985,7 +991,7 @@ a { color: inherit; text-decoration: none; }
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.3);
         z-index: 130;
     }
 

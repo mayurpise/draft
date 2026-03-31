@@ -5,6 +5,48 @@
 
     <p class="chapter-intro">Draft is built on a premise: AI coding assistants are powerful but undirected, and structure is the missing piece. This chapter traces that premise to its foundations &mdash; the philosophy that drives Draft's design, the production robustness patterns it enforces, and the vetted knowledge base that informs its recommendations.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 520 280" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:520px;display:block;margin:0 auto">
+                <defs>
+                    <filter id="phil-shadow" x="-4%" y="-4%" width="108%" height="112%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a1a2e" flood-opacity="0.08"/>
+                    </filter>
+                </defs>
+                <!-- Center node -->
+                <rect x="170" y="100" width="180" height="48" rx="24" fill="#2563eb" filter="url(#phil-shadow)"/>
+                <text x="260" y="129" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="13" font-weight="bold">Context-Driven Dev</text>
+                <!-- Top: Structured Development -->
+                <line x1="260" y1="100" x2="260" y2="56" stroke="#7c3aed" stroke-width="2"/>
+                <rect x="168" y="16" width="184" height="40" rx="20" fill="#7c3aed" filter="url(#phil-shadow)"/>
+                <text x="260" y="41" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">Structured Development</text>
+                <!-- Left: Context-Awareness -->
+                <line x1="170" y1="124" x2="28" y2="124" stroke="#059669" stroke-width="2"/>
+                <rect x="4" y="104" width="160" height="40" rx="20" fill="#059669" filter="url(#phil-shadow)"/>
+                <text x="84" y="129" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">Context-Awareness</text>
+                <!-- Right: Quality Gates -->
+                <line x1="350" y1="124" x2="370" y2="124" stroke="#d97706" stroke-width="2"/>
+                <rect x="370" y="104" width="140" height="40" rx="20" fill="#d97706" filter="url(#phil-shadow)"/>
+                <text x="440" y="129" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">Quality Gates</text>
+                <!-- Bottom: Incremental Refinement -->
+                <line x1="260" y1="148" x2="260" y2="184" stroke="#7c3aed" stroke-width="2"/>
+                <rect x="156" y="184" width="208" height="40" rx="20" fill="#7c3aed" filter="url(#phil-shadow)"/>
+                <text x="260" y="209" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">Incremental Refinement</text>
+                <!-- Bottom-left: Production Robustness -->
+                <line x1="84" y1="144" x2="114" y2="184" stroke="#e2e8f0" stroke-width="1.5"/>
+                <rect x="20" y="184" width="180" height="36" rx="18" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5"/>
+                <text x="110" y="207" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="11">Production Robustness</text>
+                <!-- Bottom-right: Vetted Knowledge -->
+                <line x1="440" y1="144" x2="410" y2="184" stroke="#e2e8f0" stroke-width="1.5"/>
+                <rect x="324" y="184" width="176" height="36" rx="18" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5"/>
+                <text x="412" y="207" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="11">Vetted Knowledge Base</text>
+                <!-- Subtitle -->
+                <text x="260" y="260" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="11">Structure over prompts &mdash; explicit, managed, versioned context</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Draft's philosophical foundations: Context-Driven Development at the center, supported by structured workflows, quality gates, incremental refinement, production robustness, and a vetted knowledge base.</div>
+    </div>
+
     <h2>The Core Philosophy</h2>
     <p>The gap between what AI can generate and what production systems require is not a capability gap. It is a direction gap. An AI assistant can write a complete authentication system in thirty seconds. It can also write the wrong authentication system in thirty seconds. The difference is not in the model's ability but in the constraints it operates under.</p>
 

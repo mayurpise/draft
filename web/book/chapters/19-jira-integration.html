@@ -5,6 +5,60 @@
 
     <p class="chapter-intro">Draft produces specs and plans. Jira tracks issues and assigns work. The gap between them is manual: someone reads the plan, creates an epic, writes stories for each phase, adds sub-tasks for each task. This is tedious, error-prone, and inevitably drifts from the source document. Draft's Jira integration closes the gap with two commands: <code>/draft:jira-preview</code> to generate the export, and <code>/draft:jira-create</code> to push it.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 600 210" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:600px;display:block;margin:0 auto">
+                <defs>
+                    <filter id="jira-shadow" x="-4%" y="-4%" width="108%" height="112%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a1a2e" flood-opacity="0.08"/>
+                    </filter>
+                    <marker id="jira-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+                    </marker>
+                </defs>
+                <!-- Draft Track column -->
+                <rect x="16" y="16" width="150" height="180" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5"/>
+                <text x="91" y="38" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12" font-weight="bold">Draft Track</text>
+                <rect x="28" y="48" width="126" height="28" rx="5" fill="#2563eb" filter="url(#jira-shadow)"/>
+                <text x="91" y="67" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">spec.md</text>
+                <rect x="28" y="84" width="126" height="28" rx="5" fill="#7c3aed" filter="url(#jira-shadow)"/>
+                <text x="91" y="103" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">plan.md (phases)</text>
+                <rect x="28" y="120" width="126" height="28" rx="5" fill="#059669" filter="url(#jira-shadow)"/>
+                <text x="91" y="139" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">tasks [ ] [x] [~]</text>
+                <rect x="28" y="156" width="126" height="28" rx="5" fill="#d97706" filter="url(#jira-shadow)"/>
+                <text x="91" y="175" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">bughunt findings</text>
+                <!-- Arrow 1 -->
+                <line x1="166" y1="106" x2="218" y2="106" stroke="#2563eb" stroke-width="2" marker-end="url(#jira-arrow)"/>
+                <text x="192" y="98" text-anchor="middle" fill="#2563eb" font-family="Arial,sans-serif" font-size="9" font-weight="bold">preview</text>
+                <!-- Jira Preview column -->
+                <rect x="222" y="16" width="150" height="180" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5"/>
+                <text x="297" y="38" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12" font-weight="bold">Jira Preview</text>
+                <rect x="234" y="48" width="126" height="44" rx="5" fill="#fff" stroke="#2563eb" stroke-width="1.5"/>
+                <text x="297" y="66" text-anchor="middle" fill="#2563eb" font-family="Arial,sans-serif" font-size="11" font-weight="bold">jira-export.md</text>
+                <text x="297" y="82" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">editable before push</text>
+                <text x="297" y="118" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">Track &rarr; Epic</text>
+                <text x="297" y="134" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">Phase &rarr; Story</text>
+                <text x="297" y="150" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">Task &rarr; Sub-task</text>
+                <text x="297" y="166" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">Finding &rarr; Bug</text>
+                <!-- Arrow 2 -->
+                <line x1="372" y1="106" x2="424" y2="106" stroke="#2563eb" stroke-width="2" marker-end="url(#jira-arrow)"/>
+                <text x="398" y="98" text-anchor="middle" fill="#2563eb" font-family="Arial,sans-serif" font-size="9" font-weight="bold">create</text>
+                <!-- Jira column -->
+                <rect x="428" y="16" width="156" height="180" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5"/>
+                <text x="506" y="38" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12" font-weight="bold">Jira</text>
+                <rect x="440" y="48" width="132" height="28" rx="5" fill="#2563eb" filter="url(#jira-shadow)"/>
+                <text x="506" y="67" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">Epic (PROJ-100)</text>
+                <rect x="440" y="84" width="132" height="28" rx="5" fill="#7c3aed" filter="url(#jira-shadow)"/>
+                <text x="506" y="103" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">Stories (PROJ-101...)</text>
+                <rect x="440" y="120" width="132" height="28" rx="5" fill="#059669" filter="url(#jira-shadow)"/>
+                <text x="506" y="139" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">Sub-tasks</text>
+                <rect x="440" y="156" width="132" height="28" rx="5" fill="#d97706" filter="url(#jira-shadow)"/>
+                <text x="506" y="175" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">Bug issues</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Jira integration flow: Draft's track structure maps directly to Jira's issue hierarchy through an editable preview step.</div>
+    </div>
+
     <h2>The Mapping</h2>
     <p>Draft's plan structure maps naturally to Jira's issue hierarchy:</p>
 

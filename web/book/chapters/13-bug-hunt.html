@@ -5,6 +5,65 @@
 
     <p class="chapter-intro">A developer runs the test suite. Everything passes. They open a pull request. The reviewer approves it. The code ships to production. Three days later, a user in Germany discovers that entering an umlaut in the search field crashes the application. The test suite tested ASCII inputs. The reviewer checked logic flow. Nobody traced untrusted input from the search box through the URL encoder, into the database query, and back to the response renderer. Nobody checked all fourteen places where bugs hide. <code>/draft:bughunt</code> does.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 460 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:480px;height:auto;display:block;margin:0 auto;">
+                <defs>
+                    <filter id="sh13" x="-4%" y="-4%" width="108%" height="108%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- Center target -->
+                <circle cx="230" cy="170" r="30" fill="#fff1f2" stroke="#e11d48" stroke-width="2" filter="url(#sh13)"/>
+                <circle cx="230" cy="170" r="14" fill="#e11d48"/>
+                <text x="230" y="175" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#fff">Defect</text>
+                <!-- Dimension dots and labels radiating outward (14 dimensions) -->
+                <!-- Using polar coordinates: radius=120, center=(230,170) -->
+                <!-- 1: Correctness (0 deg = right) -->
+                <circle cx="350" cy="170" r="4" fill="#2563eb"/><line x1="260" y1="170" x2="346" y2="170" stroke="#2563eb" stroke-width="1" opacity="0.4"/>
+                <text x="358" y="174" font-family="Arial,sans-serif" font-size="10" fill="#1a1a2e">Correctness</text>
+                <!-- 2: Reliability (~25.7 deg) -->
+                <circle cx="338" cy="118" r="4" fill="#2563eb"/><line x1="256" y1="151" x2="334" y2="118" stroke="#2563eb" stroke-width="1" opacity="0.4"/>
+                <text x="346" y="118" font-family="Arial,sans-serif" font-size="10" fill="#1a1a2e">Reliability</text>
+                <!-- 3: Security (~51.4 deg) -->
+                <circle cx="305" cy="76" r="4" fill="#e11d48"/><line x1="248" y1="139" x2="301" y2="76" stroke="#e11d48" stroke-width="1" opacity="0.4"/>
+                <text x="313" y="76" font-family="Arial,sans-serif" font-size="10" fill="#e11d48" font-weight="bold">Security</text>
+                <!-- 4: Performance (~77.1 deg) -->
+                <circle cx="257" cy="51" r="4" fill="#d97706"/><line x1="235" y1="140" x2="257" y2="55" stroke="#d97706" stroke-width="1" opacity="0.4"/>
+                <text x="218" y="42" font-family="Arial,sans-serif" font-size="10" fill="#1a1a2e">Performance</text>
+                <!-- 5: UI Responsiveness (~102.8 deg) -->
+                <circle cx="203" cy="51" r="4" fill="#7c3aed"/><line x1="225" y1="140" x2="203" y2="55" stroke="#7c3aed" stroke-width="1" opacity="0.4"/>
+                <text x="135" y="48" font-family="Arial,sans-serif" font-size="10" fill="#1a1a2e">UI Resp.</text>
+                <!-- 6: Concurrency (~128.5 deg) -->
+                <circle cx="155" cy="76" r="4" fill="#e11d48"/><line x1="212" y1="139" x2="159" y2="76" stroke="#e11d48" stroke-width="1" opacity="0.4"/>
+                <text x="80" y="76" font-family="Arial,sans-serif" font-size="10" fill="#e11d48" font-weight="bold">Concurrency</text>
+                <!-- 7: State Mgmt (~154.2 deg) -->
+                <circle cx="122" cy="118" r="4" fill="#059669"/><line x1="204" y1="151" x2="126" y2="118" stroke="#059669" stroke-width="1" opacity="0.4"/>
+                <text x="45" y="122" font-family="Arial,sans-serif" font-size="10" fill="#1a1a2e">State Mgmt</text>
+                <!-- 8: API Contracts (180 deg) -->
+                <circle cx="110" cy="170" r="4" fill="#2563eb"/><line x1="200" y1="170" x2="114" y2="170" stroke="#2563eb" stroke-width="1" opacity="0.4"/>
+                <text x="25" y="174" font-family="Arial,sans-serif" font-size="10" fill="#1a1a2e">API Contracts</text>
+                <!-- 9: Accessibility (~205.7 deg) -->
+                <circle cx="122" cy="222" r="4" fill="#7c3aed"/><line x1="204" y1="189" x2="126" y2="222" stroke="#7c3aed" stroke-width="1" opacity="0.4"/>
+                <text x="34" y="230" font-family="Arial,sans-serif" font-size="10" fill="#1a1a2e">Accessibility</text>
+                <!-- 10: Configuration (~231.4 deg) -->
+                <circle cx="155" cy="264" r="4" fill="#d97706"/><line x1="212" y1="201" x2="159" y2="264" stroke="#d97706" stroke-width="1" opacity="0.4"/>
+                <text x="85" y="278" font-family="Arial,sans-serif" font-size="10" fill="#1a1a2e">Configuration</text>
+                <!-- 11: Tests (~257.1 deg) -->
+                <circle cx="203" cy="289" r="4" fill="#059669"/><line x1="225" y1="200" x2="203" y2="285" stroke="#059669" stroke-width="1" opacity="0.4"/>
+                <text x="175" y="310" font-family="Arial,sans-serif" font-size="10" fill="#1a1a2e">Tests</text>
+                <!-- 12: Dependencies (~282.8 deg) -->
+                <circle cx="257" cy="289" r="4" fill="#e11d48"/><line x1="235" y1="200" x2="257" y2="285" stroke="#e11d48" stroke-width="1" opacity="0.4"/>
+                <text x="245" y="310" font-family="Arial,sans-serif" font-size="10" fill="#1a1a2e">Dependencies</text>
+                <!-- 13: Algorithmic (~308.5 deg) -->
+                <circle cx="305" cy="264" r="4" fill="#d97706"/><line x1="248" y1="201" x2="301" y2="264" stroke="#d97706" stroke-width="1" opacity="0.4"/>
+                <text x="313" y="272" font-family="Arial,sans-serif" font-size="10" fill="#1a1a2e">Algorithmic</text>
+                <!-- 14: i18n/l10n (~334.2 deg) -->
+                <circle cx="338" cy="222" r="4" fill="#7c3aed"/><line x1="256" y1="189" x2="334" y2="222" stroke="#7c3aed" stroke-width="1" opacity="0.4"/>
+                <text x="346" y="226" font-family="Arial,sans-serif" font-size="10" fill="#1a1a2e">i18n/l10n</text>
+            </svg>
+        </div>
+        <div class="figure-caption">The 14-dimension bug sweep: each dimension converges on the central defect target. Bugs cluster at the intersections between dimensions, in the places where no single reviewer has expertise.</div>
+    </div>
+
     <h2>Why Fourteen Dimensions</h2>
     <p>Bugs do not confine themselves to a single category. A race condition in state management creates a security vulnerability when stale auth tokens are used for requests. A performance issue in an algorithm becomes a reliability issue under load. An accessibility gap becomes a legal liability in regulated industries.</p>
 

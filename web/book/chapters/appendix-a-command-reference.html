@@ -4,6 +4,55 @@
 
     <p class="chapter-intro">Quick-reference for all 17 Draft commands. Syntax shown is for Claude Code; Copilot uses <code>draft command</code> (no slash), Cursor uses <code>@draft command</code>.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 620 310" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:620px;display:block;margin:0 auto">
+                <defs>
+                    <filter id="cmd-shadow" x="-4%" y="-4%" width="108%" height="112%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a1a2e" flood-opacity="0.08"/>
+                    </filter>
+                </defs>
+                <!-- Context category -->
+                <rect x="10" y="10" width="140" height="68" rx="8" fill="#2563eb" filter="url(#cmd-shadow)"/>
+                <text x="80" y="30" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">CONTEXT</text>
+                <text x="80" y="48" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">draft</text>
+                <text x="80" y="64" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">init</text>
+                <!-- Planning category -->
+                <rect x="164" y="10" width="140" height="84" rx="8" fill="#7c3aed" filter="url(#cmd-shadow)"/>
+                <text x="234" y="30" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">PLANNING</text>
+                <text x="234" y="48" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">new-track</text>
+                <text x="234" y="64" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">decompose</text>
+                <text x="234" y="80" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">change</text>
+                <!-- Execution category -->
+                <rect x="318" y="10" width="140" height="84" rx="8" fill="#059669" filter="url(#cmd-shadow)"/>
+                <text x="388" y="30" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">EXECUTION</text>
+                <text x="388" y="48" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">implement</text>
+                <text x="388" y="64" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">status</text>
+                <text x="388" y="80" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">revert</text>
+                <!-- Quality category -->
+                <rect x="472" y="10" width="140" height="100" rx="8" fill="#d97706" filter="url(#cmd-shadow)"/>
+                <text x="542" y="30" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">QUALITY</text>
+                <text x="542" y="48" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">review</text>
+                <text x="542" y="64" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">deep-review</text>
+                <text x="542" y="80" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">bughunt</text>
+                <text x="542" y="96" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">coverage</text>
+                <!-- Knowledge category -->
+                <rect x="10" y="130" width="296" height="68" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#cmd-shadow)"/>
+                <text x="158" y="150" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10" font-weight="bold">KNOWLEDGE &amp; GOVERNANCE</text>
+                <text x="82" y="172" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">learn</text>
+                <text x="158" y="172" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">adr</text>
+                <text x="234" y="172" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">index</text>
+                <!-- Integration category -->
+                <rect x="320" y="130" width="292" height="68" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#cmd-shadow)"/>
+                <text x="466" y="150" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10" font-weight="bold">INTEGRATION</text>
+                <text x="466" y="172" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">jira-preview &middot; jira-create</text>
+                <!-- Flow arrow -->
+                <text x="310" y="240" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="11">Context &rarr; Planning &rarr; Execution &rarr; Quality &rarr; Knowledge &rarr; Integration</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Command map: Draft's 17 commands organized by workflow category, reflecting the natural development lifecycle from context setup through quality assurance and external integration.</div>
+    </div>
+
     <table class="command-reference">
         <thead>
             <tr>

@@ -5,6 +5,48 @@
 
     <p class="chapter-intro">Your project has been running Draft for three months. The codebase has gained two new modules, migrated from REST to GraphQL on one service, and swapped Redis for Memcached. The architecture document is now lying to the AI. You could re-run <code>/draft:init</code> from scratch &mdash; a full 5-phase analysis that re-reads every source file. Or you could run <code>/draft:init refresh</code> and let Draft figure out what actually changed, re-analyze only those files, and patch the existing documents. That is incremental refresh.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;" font-family="Arial, sans-serif">
+                <defs>
+                    <filter id="shadow7" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+                    <marker id="arrowB7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#2563eb"/></marker>
+                </defs>
+                <!-- Stage 1: Old State -->
+                <rect x="15" y="35" width="130" height="90" rx="12" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow7)"/>
+                <text x="80" y="60" text-anchor="middle" fill="#1a1a2e" font-size="12" font-weight="700">Old State</text>
+                <text x="80" y="78" text-anchor="middle" fill="#718096" font-size="10">architecture.md</text>
+                <text x="80" y="93" text-anchor="middle" fill="#718096" font-size="10">freshness.json</text>
+                <text x="80" y="108" text-anchor="middle" fill="#718096" font-size="10">signals.json</text>
+                <!-- Arrow -->
+                <line x1="145" y1="80" x2="190" y2="80" stroke="#2563eb" stroke-width="2" marker-end="url(#arrowB7)"/>
+                <!-- Stage 2: Change Detection -->
+                <rect x="195" y="35" width="140" height="90" rx="12" fill="#2563eb" filter="url(#shadow7)"/>
+                <text x="265" y="58" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Change Detection</text>
+                <text x="265" y="76" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="10">SHA-256 hash diff</text>
+                <text x="265" y="92" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="10">git commit delta</text>
+                <text x="265" y="108" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="10">Signal drift check</text>
+                <!-- Arrow -->
+                <line x1="335" y1="80" x2="380" y2="80" stroke="#2563eb" stroke-width="2" marker-end="url(#arrowB7)"/>
+                <!-- Stage 3: Delta Analysis -->
+                <rect x="385" y="35" width="140" height="90" rx="12" fill="#7c3aed" filter="url(#shadow7)"/>
+                <text x="455" y="58" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Delta Analysis</text>
+                <text x="455" y="76" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="10">Re-analyze changed</text>
+                <text x="455" y="92" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="10">Map to sections</text>
+                <text x="455" y="108" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="10">Detect contradictions</text>
+                <!-- Arrow -->
+                <line x1="525" y1="80" x2="570" y2="80" stroke="#2563eb" stroke-width="2" marker-end="url(#arrowB7)"/>
+                <!-- Stage 4: Updated Docs -->
+                <rect x="575" y="35" width="130" height="90" rx="12" fill="#059669" filter="url(#shadow7)"/>
+                <text x="640" y="58" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Updated Docs</text>
+                <text x="640" y="76" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="10">Patched sections</text>
+                <text x="640" y="92" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="10">New hash baseline</text>
+                <text x="640" y="108" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="10">Updated signals</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Incremental refresh pipeline: existing state is compared against current code, only changed files are re-analyzed, and documentation is patched rather than regenerated.</div>
+    </div>
+
     <h2>The Problem: Context Goes Stale</h2>
     <p>Every document Draft generates is a snapshot. It reflects the codebase at the moment of generation, down to a specific git commit SHA recorded in the YAML frontmatter. The moment code changes after that commit, the documents start drifting from reality. A new module appears that is not in the component map. An API endpoint changes its request shape but the interface catalog still shows the old one. A dependency is removed but the dependency graph still references it.</p>
 

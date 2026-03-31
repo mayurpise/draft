@@ -5,6 +5,34 @@
 
     <p class="chapter-intro">Your AI assistant just rewrote a utility function. Harmless change, two lines of code. But it violated a concurrency invariant documented three months ago in a 400-line architecture file that the assistant never loaded because it was "just a quick fix." Draft prevents this by treating context like memory architecture: always-available registers at the top, deep storage on demand, and a scoring system that loads exactly what each task needs.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 230" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;" font-family="Arial, sans-serif">
+                <defs>
+                    <filter id="shadow4" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- Tier 0 (top, smallest) -->
+                <polygon points="360,10 440,70 280,70" fill="#2563eb" filter="url(#shadow4)"/>
+                <text x="360" y="52" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Tier 0</text>
+                <text x="460" y="50" fill="#2563eb" font-size="11" font-weight="600">.ai-profile.md</text>
+                <text x="460" y="65" fill="#718096" font-size="10">20-50 lines | Always loaded</text>
+                <!-- Tier 1 (middle) -->
+                <polygon points="280,75 440,75 500,145 220,145" fill="#7c3aed" filter="url(#shadow4)"/>
+                <text x="360" y="117" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Tier 1</text>
+                <text x="520" y="105" fill="#7c3aed" font-size="11" font-weight="600">.ai-context.md</text>
+                <text x="520" y="120" fill="#718096" font-size="10">200-400 lines | Most tasks</text>
+                <text x="520" y="135" fill="#718096" font-size="10">Relevance-scored sections</text>
+                <!-- Tier 2 (bottom, largest) -->
+                <polygon points="220,150 500,150 570,220 150,220" fill="#059669" filter="url(#shadow4)"/>
+                <text x="360" y="192" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Tier 2</text>
+                <text x="590" y="175" fill="#059669" font-size="11" font-weight="600">architecture.md</text>
+                <text x="590" y="190" fill="#718096" font-size="10">Full document | Deep analysis</text>
+                <text x="590" y="205" fill="#718096" font-size="10">25 sections + appendices</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Context tiering pyramid: smaller tiers load faster and are used more frequently. Each tier adds depth for tasks that need it.</div>
+    </div>
+
     <h2>The Memory Analogy</h2>
     <p>Every computer has a memory hierarchy: CPU registers are tiny and instant, RAM is larger and fast, disk is massive and slow. Draft applies the same principle to project context. Not every task needs the full engineering reference. A config change needs 20 lines of project identity. A feature implementation needs module boundaries and interface contracts. A deep architecture review needs everything.</p>
 

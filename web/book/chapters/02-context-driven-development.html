@@ -5,6 +5,49 @@
 
     <p class="chapter-intro">Consider a funnel. At the top, every possible implementation exists &mdash; every framework, every pattern, every architectural choice. With each layer of context you add, the funnel narrows. By the time AI writes code at the bottom, most decisions are already made. The code almost writes itself &mdash; because there's only one right way to write it given all the constraints above. That is Context-Driven Development.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;" font-family="Arial, sans-serif">
+                <defs>
+                    <filter id="shadow2" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- Circular flow: Context → Spec → Plan → Implement → Review → Learn -->
+                <!-- Center label -->
+                <circle cx="360" cy="130" r="42" fill="#2563eb" filter="url(#shadow2)"/>
+                <text x="360" y="126" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">CDD</text>
+                <text x="360" y="140" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Methodology</text>
+                <!-- Nodes around the circle -->
+                <!-- Context (top) -->
+                <rect x="310" y="10" width="100" height="38" rx="10" fill="#2563eb" filter="url(#shadow2)"/>
+                <text x="360" y="34" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Context</text>
+                <!-- Spec (top-right) -->
+                <rect x="500" y="40" width="100" height="38" rx="10" fill="#7c3aed" filter="url(#shadow2)"/>
+                <text x="550" y="64" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Spec</text>
+                <!-- Plan (bottom-right) -->
+                <rect x="500" y="170" width="100" height="38" rx="10" fill="#7c3aed" filter="url(#shadow2)"/>
+                <text x="550" y="194" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Plan</text>
+                <!-- Implement (bottom) -->
+                <rect x="310" y="210" width="100" height="38" rx="10" fill="#059669" filter="url(#shadow2)"/>
+                <text x="360" y="234" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Implement</text>
+                <!-- Review (bottom-left) -->
+                <rect x="120" y="170" width="100" height="38" rx="10" fill="#7c3aed" filter="url(#shadow2)"/>
+                <text x="170" y="194" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Review</text>
+                <!-- Learn (top-left) -->
+                <rect x="120" y="40" width="100" height="38" rx="10" fill="#2563eb" filter="url(#shadow2)"/>
+                <text x="170" y="64" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Learn</text>
+                <!-- Connecting arrows (clockwise) -->
+                <defs><marker id="arrowC2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#718096"/></marker></defs>
+                <path d="M410,30 Q460,20 500,50" fill="none" stroke="#718096" stroke-width="1.5" marker-end="url(#arrowC2)"/>
+                <path d="M570,78 Q590,120 570,170" fill="none" stroke="#718096" stroke-width="1.5" marker-end="url(#arrowC2)"/>
+                <path d="M500,195 Q460,220 410,230" fill="none" stroke="#718096" stroke-width="1.5" marker-end="url(#arrowC2)"/>
+                <path d="M310,230 Q260,220 220,195" fill="none" stroke="#718096" stroke-width="1.5" marker-end="url(#arrowC2)"/>
+                <path d="M150,170 Q130,120 150,78" fill="none" stroke="#718096" stroke-width="1.5" marker-end="url(#arrowC2)"/>
+                <path d="M220,48 Q260,25 310,28" fill="none" stroke="#718096" stroke-width="1.5" marker-end="url(#arrowC2)"/>
+            </svg>
+        </div>
+        <div class="figure-caption">The CDD cycle: each phase feeds the next. Context informs specs, specs shape plans, plans guide implementation, reviews validate output, and learnings refine context.</div>
+    </div>
+
     <h2>The Core Insight</h2>
     <p>Draft's methodology rests on a single observation: <strong>each layer of context narrows the solution space</strong>. When you tell an AI "build a task manager," it has infinite choices. When you tell it "build a task manager with React, TypeScript, and Tailwind," the choices shrink. When you add "using our existing Express API with Prisma ORM and PostgreSQL," they shrink further. When you provide a specification with acceptance criteria, a phased plan with verification steps, and architecture documentation showing every module boundary and data flow &mdash; the AI is no longer choosing. It is executing.</p>
 

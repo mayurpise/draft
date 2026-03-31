@@ -5,6 +5,42 @@
 
     <p class="chapter-intro">You have a specification your team approved and a plan broken into phases and tasks. In a conventional AI workflow, you'd paste the spec into a chat window and say "build it." The AI would generate everything at once &mdash; a single, massive, unreviewable code drop. Draft takes a fundamentally different approach. <code>/draft:implement</code> executes the plan one task at a time, each task producing a single commit, each commit verified before the next task begins.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:420px;height:auto;display:block;margin:0 auto;">
+                <defs>
+                    <filter id="sh09" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                    <marker id="arr09" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#718096"/></marker>
+                </defs>
+                <!-- RED circle -->
+                <circle cx="200" cy="60" r="46" fill="#fff1f2" stroke="#e11d48" stroke-width="2.5" filter="url(#sh09)"/>
+                <text x="200" y="55" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#e11d48">RED</text>
+                <text x="200" y="72" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#718096">Write failing test</text>
+                <!-- GREEN circle -->
+                <circle cx="315" cy="185" r="46" fill="#ecfdf5" stroke="#059669" stroke-width="2.5" filter="url(#sh09)"/>
+                <text x="315" y="180" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#059669">GREEN</text>
+                <text x="315" y="197" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#718096">Make it pass</text>
+                <!-- REFACTOR circle -->
+                <circle cx="85" cy="185" r="46" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5" filter="url(#sh09)"/>
+                <text x="85" y="177" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#2563eb">REFACTOR</text>
+                <text x="85" y="194" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#718096">Clean up</text>
+                <!-- Curved arrows: RED -> GREEN -->
+                <path d="M240 88 C290 110, 330 140, 325 135" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr09)"/>
+                <!-- GREEN -> REFACTOR -->
+                <path d="M270 200 C220 220, 150 220, 135 200" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr09)"/>
+                <!-- REFACTOR -> RED -->
+                <path d="M75 138 C70 110, 120 60, 150 55" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr09)"/>
+                <!-- COMMIT badge -->
+                <rect x="155" y="220" width="90" height="30" rx="15" fill="#1a1a2e" filter="url(#sh09)"/>
+                <text x="200" y="240" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#ffffff">COMMIT</text>
+                <!-- Arrow from refactor to commit -->
+                <path d="M105 228 L152 237" stroke="#1a1a2e" stroke-width="1.5" fill="none" marker-end="url(#arr09c)"/>
+                <defs><marker id="arr09c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1a1a2e"/></marker></defs>
+            </svg>
+        </div>
+        <div class="figure-caption">The TDD cycle: write a failing test (Red), write minimum code to pass (Green), clean up while tests stay green (Refactor), then commit. Repeat for each task.</div>
+    </div>
+
     <h2>How Implementation Works</h2>
     <p>When you run <code>/draft:implement</code>, the AI loads the track's specification and plan, reads your workflow preferences, and finds the first uncompleted task. It does not ask what to build &mdash; the plan already answered that. It does not choose an approach &mdash; the specification already decided. Implementation is pure execution against pre-approved constraints.</p>
 

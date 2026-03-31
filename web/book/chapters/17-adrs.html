@@ -5,6 +5,45 @@
 
     <p class="chapter-intro">Code captures what you built. Tests capture what it should do. But neither captures why you built it that way. Why PostgreSQL instead of MongoDB? Why event-driven instead of synchronous? Why this pattern over that one? These decisions have context that evaporates the moment the conversation ends. Architecture Decision Records preserve it.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:560px;display:block;margin:0 auto">
+                <defs>
+                    <filter id="adr-shadow" x="-4%" y="-4%" width="108%" height="112%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a1a2e" flood-opacity="0.08"/>
+                    </filter>
+                    <marker id="adr-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#718096"/>
+                    </marker>
+                </defs>
+                <!-- Proposed -->
+                <rect x="20" y="50" width="130" height="48" rx="8" fill="#d97706" filter="url(#adr-shadow)"/>
+                <text x="85" y="79" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="14" font-weight="bold">Proposed</text>
+                <!-- Arrow Proposed -> Accepted -->
+                <line x1="150" y1="74" x2="210" y2="74" stroke="#718096" stroke-width="2" marker-end="url(#adr-arrow)"/>
+                <text x="180" y="64" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">Review</text>
+                <!-- Accepted -->
+                <rect x="215" y="50" width="130" height="48" rx="8" fill="#059669" filter="url(#adr-shadow)"/>
+                <text x="280" y="79" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="14" font-weight="bold">Accepted</text>
+                <!-- Arrow Accepted -> Deprecated -->
+                <line x1="345" y1="60" x2="405" y2="40" stroke="#718096" stroke-width="2" marker-end="url(#adr-arrow)"/>
+                <text x="390" y="38" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">Context changed</text>
+                <!-- Arrow Accepted -> Superseded -->
+                <line x1="345" y1="88" x2="405" y2="120" stroke="#718096" stroke-width="2" marker-end="url(#adr-arrow)"/>
+                <text x="385" y="116" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">New decision</text>
+                <!-- Deprecated -->
+                <rect x="410" y="16" width="130" height="44" rx="8" fill="#718096" filter="url(#adr-shadow)"/>
+                <text x="475" y="43" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="13" font-weight="bold">Deprecated</text>
+                <!-- Superseded -->
+                <rect x="410" y="104" width="130" height="44" rx="8" fill="#7c3aed" filter="url(#adr-shadow)"/>
+                <text x="475" y="131" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="13" font-weight="bold">Superseded</text>
+                <!-- Superseded link -->
+                <text x="475" y="166" text-anchor="middle" fill="#7c3aed" font-family="Arial,sans-serif" font-size="11" font-style="italic">links to ADR-xxx</text>
+            </svg>
+        </div>
+        <div class="figure-caption">ADR lifecycle: decisions move from Proposed through Accepted, and eventually to Deprecated (context changed) or Superseded (replaced by a newer ADR).</div>
+    </div>
+
     <h2>Why ADRs Matter</h2>
     <p>Every project accumulates decisions. Some are deliberate: the team evaluated three message brokers and chose RabbitMQ. Some are accidental: someone picked a library in a rush and it stuck. Without documentation, both look the same six months later &mdash; unexplained choices baked into the codebase.</p>
 

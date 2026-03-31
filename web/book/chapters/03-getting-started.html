@@ -5,6 +5,34 @@
 
     <p class="chapter-intro">You have a codebase. Maybe it's a React app with 200 components. Maybe it's a Go microservice with 50 endpoints. Maybe it's a Python ML pipeline that three people understand and two of them left. In five minutes, Draft will analyze that codebase, generate comprehensive architecture documentation, and create the context files that turn your AI assistant into a developer who actually knows your project.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;" font-family="Arial, sans-serif">
+                <defs>
+                    <filter id="shadow3" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- File tree visual -->
+                <rect x="160" y="5" width="400" height="270" rx="12" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow3)"/>
+                <text x="180" y="30" fill="#2563eb" font-size="14" font-weight="700">draft/</text>
+                <!-- Main files -->
+                <text x="200" y="52" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="52" fill="#1a1a2e" font-size="12" font-weight="600">architecture.md</text><text x="395" y="52" fill="#718096" font-size="10">Source of truth (25 sections)</text>
+                <text x="200" y="72" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="72" fill="#1a1a2e" font-size="12">.ai-context.md</text><text x="395" y="72" fill="#718096" font-size="10">Token-optimized (200-400 lines)</text>
+                <text x="200" y="92" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="92" fill="#1a1a2e" font-size="12">.ai-profile.md</text><text x="395" y="92" fill="#718096" font-size="10">Always loaded (20-50 lines)</text>
+                <text x="200" y="112" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="112" fill="#1a1a2e" font-size="12">product.md</text><text x="395" y="112" fill="#718096" font-size="10">Vision, users, goals</text>
+                <text x="200" y="132" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="132" fill="#1a1a2e" font-size="12">tech-stack.md</text><text x="395" y="132" fill="#718096" font-size="10">Languages, frameworks, patterns</text>
+                <text x="200" y="152" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="152" fill="#1a1a2e" font-size="12">workflow.md</text><text x="395" y="152" fill="#718096" font-size="10">TDD, commits, reviews</text>
+                <text x="200" y="172" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="172" fill="#1a1a2e" font-size="12">guardrails.md</text><text x="395" y="172" fill="#718096" font-size="10">Constraints, anti-patterns</text>
+                <!-- Tracks -->
+                <text x="200" y="192" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="192" fill="#2563eb" font-size="12" font-weight="600">tracks/</text>
+                <text x="230" y="212" fill="#718096" font-size="12">&#9492;&#9472;</text><text x="250" y="212" fill="#1a1a2e" font-size="11">feature-name/</text><text x="395" y="212" fill="#718096" font-size="10">spec.md, plan.md, metadata.json</text>
+                <!-- State -->
+                <text x="200" y="237" fill="#718096" font-size="12">&#9492;&#9472;</text><text x="220" y="237" fill="#7c3aed" font-size="12" font-weight="600">.state/</text>
+                <text x="240" y="257" fill="#718096" font-size="11">freshness.json  signals.json  run-memory.json  facts.json</text>
+            </svg>
+        </div>
+        <div class="figure-caption">The draft/ directory structure created by /draft:init. Every file serves a specific role in the context hierarchy.</div>
+    </div>
+
     <h2>Installation</h2>
     <p>Draft installs with a single command. No API keys, no accounts, no hosted services.</p>
 

@@ -5,6 +5,45 @@
 
     <p class="chapter-intro">A new developer joins the team and notices that every database call in the codebase is wrapped in a transaction, even single reads. "Is this intentional?" she asks. Nobody remembers who started the pattern or why, but it has been that way for two years and nothing has broken. Three months later, an AI coding agent generates a database module without transaction wrappers. The code review catches it, but only because a human happened to know the convention. <code>/draft:learn</code> catches it automatically &mdash; because it already discovered that pattern, recorded it, and taught the AI to enforce it.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 440 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:460px;height:auto;display:block;margin:0 auto;">
+                <defs>
+                    <filter id="sh15" x="-4%" y="-6%" width="108%" height="116%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                    <marker id="arr15" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#718096"/></marker>
+                </defs>
+                <!-- Codebase -->
+                <rect x="140" y="10" width="160" height="50" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" filter="url(#sh15)"/>
+                <text x="220" y="41" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#2563eb">Codebase</text>
+                <!-- Arrow down -->
+                <path d="M220 62 L220 90" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr15)"/>
+                <!-- Detect Patterns -->
+                <rect x="310" y="96" width="120" height="50" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh15)"/>
+                <text x="370" y="118" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#718096">draft:learn</text>
+                <text x="370" y="135" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#7c3aed">Detect Patterns</text>
+                <!-- Arrow from codebase to detect -->
+                <path d="M300 55 L370 92" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr15)"/>
+                <!-- Learn / guardrails.md -->
+                <rect x="140" y="190" width="160" height="50" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5" filter="url(#sh15)"/>
+                <text x="220" y="212" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#718096">guardrails.md</text>
+                <text x="220" y="230" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#059669">Learn &amp; Record</text>
+                <!-- Arrow from detect to learn -->
+                <path d="M370 148 L290 190" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr15)"/>
+                <!-- Apply to Future Work -->
+                <rect x="10" y="96" width="120" height="50" rx="10" fill="#fef9c3" stroke="#d97706" stroke-width="1.5" filter="url(#sh15)"/>
+                <text x="70" y="118" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#718096">draft:implement</text>
+                <text x="70" y="135" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#d97706">Apply Rules</text>
+                <!-- Arrow from learn to apply -->
+                <path d="M150 210 L70 148" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr15)"/>
+                <!-- Arrow from apply back to codebase -->
+                <path d="M70 96 L150 55" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr15)"/>
+                <!-- Center cycle indicator -->
+                <text x="220" y="155" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" fill="#e2e8f0">&#x21bb;</text>
+            </svg>
+        </div>
+        <div class="figure-caption">The pattern learning feedback loop: scan the codebase, detect recurring patterns, record them as guardrails, apply rules to future implementations, producing code that feeds the next scan.</div>
+    </div>
+
     <h2>How Pattern Learning Works</h2>
     <p><code>/draft:learn</code> scans the codebase for recurring patterns &mdash; code structures that appear three or more times consistently. It distinguishes between <strong>conventions</strong> (patterns the team intentionally follows) and <strong>anti-patterns</strong> (patterns that cause bugs, security issues, or performance problems). Both are recorded in <code>draft/guardrails.md</code>, where they feed into every subsequent quality command.</p>
 

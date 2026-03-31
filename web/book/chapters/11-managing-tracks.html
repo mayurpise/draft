@@ -5,6 +5,39 @@
 
     <p class="chapter-intro">Specs get written. Plans get approved. Implementation begins. And then the requirements change. Or a task gets blocked by an external dependency. Or you realize phase 2 introduced a regression and need to undo it without losing phase 1's work. Draft provides three operational commands for exactly these situations: <code>/draft:status</code> for visibility, <code>/draft:change</code> for mid-track adjustments, and <code>/draft:revert</code> for git-aware rollback.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 600 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+                <defs>
+                    <filter id="sh11" x="-3%" y="-8%" width="106%" height="120%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                    <marker id="arr11" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#718096"/></marker>
+                </defs>
+                <!-- Pending -->
+                <rect x="30" y="25" width="130" height="54" rx="10" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#sh11)"/>
+                <text x="95" y="48" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#718096" font-weight="bold">[ ]</text>
+                <text x="95" y="68" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#1a1a2e">Pending</text>
+                <!-- Arrow -->
+                <path d="M165 52 L210 52" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr11)"/>
+                <!-- In Progress -->
+                <rect x="218" y="25" width="130" height="54" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" filter="url(#sh11)"/>
+                <text x="283" y="48" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#2563eb" font-weight="bold">[~]</text>
+                <text x="283" y="68" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#1a1a2e">In Progress</text>
+                <!-- Arrow -->
+                <path d="M353 52 L398 52" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr11)"/>
+                <!-- Completed -->
+                <rect x="406" y="25" width="130" height="54" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5" filter="url(#sh11)"/>
+                <text x="471" y="48" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#059669" font-weight="bold">[x]</text>
+                <text x="471" y="68" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#1a1a2e">Completed</text>
+                <!-- Blocked branch from In Progress -->
+                <path d="M283 82 L283 100 L410 100" stroke="#e11d48" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#arr11b)"/>
+                <defs><marker id="arr11b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e11d48"/></marker></defs>
+                <rect x="415" y="84" width="120" height="32" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5" filter="url(#sh11)"/>
+                <text x="475" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#e11d48" font-weight="bold">[!] Blocked</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Track status flow: tasks move from Pending to In Progress to Completed. At any point, a task can branch to Blocked, requiring manual intervention before it can resume.</div>
+    </div>
+
     <h2>Status: Project Visibility</h2>
     <p><code>/draft:status</code> reads every active track's plan and metadata, then produces a comprehensive dashboard showing exactly where everything stands.</p>
 

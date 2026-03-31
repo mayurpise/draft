@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides slash commands for structured software development through specifications and plans before implementation. Commands: `/draft:init`, `/draft:index`, `/draft:new-track`, `/draft:implement`, `/draft:status`, `/draft:revert`, `/draft:decompose`, `/draft:coverage`, `/draft:review`, `/draft:deep-review`, `/draft:bughunt`, `/draft:learn`, `/draft:adr`, `/draft:change`, `/draft:jira-preview`, `/draft:jira-create`. Run `/draft` for overview.
+Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides slash commands for structured software development through specifications and plans before implementation. Commands: `/draft`, `/draft:init`, `/draft:index`, `/draft:new-track`, `/draft:implement`, `/draft:status`, `/draft:revert`, `/draft:decompose`, `/draft:coverage`, `/draft:review`, `/draft:deep-review`, `/draft:bughunt`, `/draft:learn`, `/draft:adr`, `/draft:change`, `/draft:jira-preview`, `/draft:jira-create`. Run `/draft` for overview.
 
 ## Build Commands
 
@@ -113,19 +113,16 @@ When users use Draft, it creates a `draft/` directory in their project:
 ### Verification Before Completion
 **Iron Law:** No completion claims without fresh verification evidence.
 
-### Strict TDD (when enabled)
-**Iron Law:** RED → GREEN → REFACTOR. No production code without a failing test first.
-
 ### Systematic Debugging
 **Iron Law:** Investigate → Analyze → Hypothesize → Implement. No fixes without root cause first.
 See `core/agents/debugger.md`.
 
+### Root Cause Analysis (Bug Tracks)
+**Iron Law:** Reproduce → Trace → Hypothesize → Fix. Blast radius scoping before investigation. Detection lag analysis. 5 Whys chain. See `core/agents/rca.md`.
+
 ### Three-Stage Review
 At phase boundaries: (1) Automated Validation, (2) Spec Compliance, (3) Code Quality.
 See `core/agents/reviewer.md`.
-
-### Validation (when enabled)
-At track completion: Systematic quality checks using Draft context (`.ai-context.md`, tech-stack.md). Non-blocking by default.
 
 ## Communication Style
 

@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draft — Context-Driven Development Plugin for Claude Code, Copilot &amp; Gemini</title>
+    <meta name="description" content="Free, open-source plugin that adds spec-driven development, TDD enforcement, 14-dimension bug hunting, ACID audits, and architecture discovery to Claude Code, GitHub Copilot, and Gemini. Ship fast. Ship right.">
+    <meta name="author" content="mayurpise">
+    <meta name="theme-color" content="#0a0a0b">
+    <meta name="keywords" content="claude code plugin, ai code review, ai tdd workflow, context-driven development, spec-driven development, ai architecture documentation, ai bug hunting, claude code, github copilot plugin, gemini plugin, ai development methodology, code quality automation, ACID compliance, open source developer tools">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Draft — Spec-Driven Development for AI Coding Agents">
+    <meta property="og:description" content="Free plugin for Claude Code, Copilot &amp; Gemini. Adds specs, plans, TDD, 3-stage code review, 14-dimension bug hunting, and ACID audits. Stop AI from guessing — make it execute pre-approved work.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://getdraft.dev">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="Draft: Context-Driven Development Plugin for AI Coding Agents">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Draft — Spec-Driven Development for AI Coding Agents">
+    <meta name="twitter:description" content="Free plugin for Claude Code, Copilot &amp; Gemini. Specs before code, TDD enforcement, 14-dimension bug hunting, ACID audits. Open source.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="Draft: Context-Driven Development Plugin for AI Coding Agents">
+    <link rel="canonical" href="https://getdraft.dev">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Draft",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows",
+      "description": "Free, open-source plugin that adds spec-driven development, TDD enforcement, 14-dimension bug hunting, ACID audits, and architecture discovery to Claude Code, GitHub Copilot, and Gemini.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "author": {
+        "@type": "Person",
+        "name": "Mayur Pise",
+        "url": "https://www.linkedin.com/in/mayurpise/",
+        "sameAs": ["https://github.com/mayurpise"]
+      },
+      "url": "https://getdraft.dev",
+      "applicationSubCategory": "Development Tools",
+      "featureList": [
+        "Context-driven development methodology",
+        "AI-assisted code generation with quality gates",
+        "Three-stage code review",
+        "Enterprise-grade ACID compliance audits",
+        "Exhaustive 14-dimension bug hunting",
+        "Monorepo federation and service aggregation",
+        "Architecture Decision Records",
+        "Test coverage reporting (95%+ target)",
+        "TDD workflow enforcement",
+        "Jira integration",
+        "Git-aware rollback",
+        "Incremental refresh with freshness tracking",
+        "Codebase signal detection (11 categories)",
+        "Cross-session continuity with run memory",
+        "Skill dependency graph"
+      ],
+      "screenshot": "https://getdraft.dev/social-preview.png"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+    <!-- Cursor glow orb -->
+    <div id="cursor-glow" aria-hidden="true"></div>
+
+    <!-- Top navigation -->
+    <nav class="top-nav" id="top-nav">
+        <a href="#hero" class="nav-logo">Draft</a>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#commands">Commands</a>
+            <a href="#install">Install</a>
+            <a href="#audience">Who It's For</a>
+        </div>
+        <div class="nav-actions">
+            <span class="nav-badge">Free &amp; Open Source</span>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="nav-github">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                Star on GitHub
+            </a>
+        </div>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <!-- Side navigation dots -->
+    <nav class="side-nav" id="side-nav" aria-label="Section navigation">
+        <a href="#hero" class="side-dot active" data-label="Home"><span></span></a>
+        <a href="#problem" class="side-dot" data-label="Problem"><span></span></a>
+        <a href="#how-it-works" class="side-dot" data-label="Workflow"><span></span></a>
+        <a href="#features" class="side-dot" data-label="Features"><span></span></a>
+        <a href="#commands" class="side-dot" data-label="Commands"><span></span></a>
+        <a href="#team" class="side-dot" data-label="Team"><span></span></a>
+        <a href="#install" class="side-dot" data-label="Install"><span></span></a>
+        <a href="#architecture" class="side-dot" data-label="Research"><span></span></a>
+        <a href="#audience" class="side-dot" data-label="Audience"><span></span></a>
+        <a href="#industry" class="side-dot" data-label="Standards"><span></span></a>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 1: HERO                                              -->
+    <!-- ============================================================ -->
+    <section id="hero" class="section hero-section">
+        <canvas id="hero-canvas" aria-hidden="true"></canvas>
+        <div class="hero-content">
+            <div class="badge">
+                <span class="badge-dot"></span>
+                Context-Driven Development
+            </div>
+            <h1>Ship fast.<br><span class="gradient-text">Ship right.</span></h1>
+            <p class="tagline">AI coding agents guess at requirements, pick arbitrary approaches, and skip verification. Draft makes them <strong>execute pre-approved work</strong> — clear specifications, phased plans, TDD enforcement, and 3-stage code review.</p>
+            <div class="hero-actions">
+                <a href="#install" class="btn btn-primary">Get Started</a>
+                <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    Star on GitHub
+                </a>
+                <span class="hero-badge-free">Free &amp; Open Source</span>
+            </div>
+            <!-- Hero stats strip -->
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-num">17</span>
+                    <span class="hero-stat-label">Commands</span>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hero-stat-num">5</span>
+                    <span class="hero-stat-label">Agents</span>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hero-stat-num">14</span>
+                    <span class="hero-stat-label">Bug Dimensions</span>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hero-stat-num">5</span>
+                    <span class="hero-stat-label">IDE Integrations</span>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hero-stat-num">$0</span>
+                    <span class="hero-stat-label">Forever</span>
+                </div>
+            </div>
+            <p class="hero-sub">Works with <strong>Claude Code</strong>, <strong>Cursor</strong>, <strong>GitHub Copilot</strong>, <strong>Antigravity IDE</strong> &amp; <strong>Gemini</strong></p>
+        </div>
+        <div class="scroll-indicator">
+            <div class="scroll-arrow"></div>
+            <span>Explore</span>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 2: PROBLEM                                           -->
+    <!-- ============================================================ -->
+    <section id="problem" class="section">
+        <div class="section-glow section-glow--rose"></div>
+        <div class="section-inner">
+            <span class="section-label">The Problem</span>
+            <h2>AI tools ship fast<br>but create <span class="text-rose">chaos</span></h2>
+            <p class="section-subtitle">Without structure, AI makes assumptions, chooses arbitrary approaches, and produces code that doesn't fit your architecture.</p>
+
+            <div class="problem-grid">
+                <div class="glass-card problem-card">
+                    <div class="card-icon card-icon--rose">01</div>
+                    <h3>Assumption-Driven</h3>
+                    <p>Guesses at requirements instead of asking clarifying questions</p>
+                </div>
+                <div class="glass-card problem-card">
+                    <div class="card-icon card-icon--amber">02</div>
+                    <h3>Arbitrary Choices</h3>
+                    <p>Picks random technical approaches without considering your stack</p>
+                </div>
+                <div class="glass-card problem-card">
+                    <div class="card-icon card-icon--violet">03</div>
+                    <h3>Poor Fit</h3>
+                    <p>Produces code that doesn't match existing patterns or conventions</p>
+                </div>
+                <div class="glass-card problem-card">
+                    <div class="card-icon card-icon--cyan">04</div>
+                    <h3>No Checkpoints</h3>
+                    <p>Skips verification and claims completion without proof</p>
+                </div>
+            </div>
+
+            <!-- Before/After comparison -->
+            <div class="comparison">
+                <div class="comparison-col comparison-col--before">
+                    <h4>Without Draft</h4>
+                    <ul>
+                        <li>Context in ephemeral chat</li>
+                        <li>No version history for decisions</li>
+                        <li>Loads entire project every session</li>
+                        <li>Unsearchable conversations</li>
+                        <li>Invisible to teammates</li>
+                    </ul>
+                </div>
+                <div class="comparison-col comparison-col--after">
+                    <h4>With Draft</h4>
+                    <ul>
+                        <li>File-based persistent memory</li>
+                        <li>Git-tracked specs with diffs and blame</li>
+                        <li>Scoped context per track</li>
+                        <li>Grep-able specs and plans</li>
+                        <li>PR-reviewable planning artifacts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 3: HOW IT WORKS — /draft:init Deep Dive              -->
+    <!-- ============================================================ -->
+    <section id="how-it-works" class="section">
+        <div class="section-glow section-glow--cyan"></div>
+        <div class="section-inner">
+            <span class="section-label">The Foundation</span>
+            <h2><code>/draft:init</code> — your codebase, <span class="text-cyan">fully mapped</span></h2>
+            <p class="section-subtitle">One command performs a 5-phase deep analysis of your entire codebase. Every future interaction is grounded in this understanding.</p>
+
+            <!-- Init phases showcase -->
+            <div class="init-phases">
+                <div class="glass-card init-phase">
+                    <div class="init-phase-num init-phase-num--cyan">1</div>
+                    <h3>Discovery</h3>
+                    <p>Directory structure, build files, API definitions, interface/type files. <strong>Signal classification</strong> categorizes every source file into 11 categories (routes, services, auth, models, state, jobs, persistence, tests, config...) to drive adaptive analysis depth.</p>
+                </div>
+                <div class="glass-card init-phase">
+                    <div class="init-phase-num init-phase-num--amber">2</div>
+                    <h3>Wiring</h3>
+                    <p>Entry points, orchestrator initialization, registry/registration code, dependency injection, module system, import graph. Maps how components find and connect to each other.</p>
+                </div>
+                <div class="glass-card init-phase">
+                    <div class="init-phase-num init-phase-num--rose">3</div>
+                    <h3>Depth</h3>
+                    <p>End-to-end data flows, core module implementations, concurrency model, safety checks. Traces invariants, validation, auth gates. Identifies state machines and consistency boundaries.</p>
+                </div>
+                <div class="glass-card init-phase">
+                    <div class="init-phase-num init-phase-num--emerald">4</div>
+                    <h3>Periphery</h3>
+                    <p>External dependencies, test infrastructure, configuration mechanisms, existing documentation. Maps the full operational envelope of your system.</p>
+                </div>
+                <div class="glass-card init-phase">
+                    <div class="init-phase-num init-phase-num--violet">5</div>
+                    <h3>Synthesis</h3>
+                    <p>Cross-reference, completeness validation, pattern identification, Mermaid diagram generation. Produces <strong>architecture.md</strong> (25 sections + 4 appendices) and derives <strong>.ai-context.md</strong> (200-400 lines, token-optimized).</p>
+                </div>
+            </div>
+
+            <!-- State persistence callout -->
+            <div class="init-state glass-card">
+                <h4>State Persistence &mdash; Pay the cost once</h4>
+                <div class="init-state-grid">
+                    <div class="init-state-item">
+                        <span class="init-state-file">freshness.json</span>
+                        <p>SHA-256 hashes of every analyzed file. <code>/draft:init refresh</code> only re-analyzes files with changed hashes — no full re-scan.</p>
+                    </div>
+                    <div class="init-state-item">
+                        <span class="init-state-file">signals.json</span>
+                        <p>11-category signal classification. Detects structural drift on refresh (e.g., auth files added for the first time).</p>
+                    </div>
+                    <div class="init-state-item">
+                        <span class="init-state-file">run-memory.json</span>
+                        <p>Phases completed, unresolved questions, resumable checkpoints. Interrupted runs resume where they left off.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pipeline (remaining steps compressed) -->
+            <h3 class="pipeline-heading">Then: Spec &rarr; Implement &rarr; Verify</h3>
+            <div class="pipeline">
+                <div class="pipeline-step" data-step="2">
+                    <div class="pipeline-icon pipeline-icon--amber">
+                        <span>02</span>
+                    </div>
+                    <div class="pipeline-connector"></div>
+                    <h3>Spec &amp; Plan</h3>
+                    <p class="pipeline-cmd">/draft:new-track</p>
+                    <p>Collaborative intake — AI asks one question at a time, contributes expertise, surfaces risks. Builds spec progressively with citations from DDD, Clean Architecture, OWASP.</p>
+                </div>
+                <div class="pipeline-step" data-step="3">
+                    <div class="pipeline-icon pipeline-icon--rose">
+                        <span>03</span>
+                    </div>
+                    <div class="pipeline-connector"></div>
+                    <h3>Implement</h3>
+                    <p class="pipeline-cmd">/draft:implement</p>
+                    <p>RED &rarr; GREEN &rarr; REFACTOR. Production robustness patterns enforced (atomicity, isolation, durability, idempotency, fail-closed, resilience). Property-based testing, observability prompts, contract testing at service boundaries.</p>
+                </div>
+                <div class="pipeline-step" data-step="4">
+                    <div class="pipeline-icon pipeline-icon--emerald">
+                        <span>04</span>
+                    </div>
+                    <div class="pipeline-connector"></div>
+                    <h3>Review</h3>
+                    <p class="pipeline-cmd">/draft:review</p>
+                    <p>3-stage review with STRIDE threat modeling, SAST tool integration, breaking change detection, context-specific checks (crypto, DB, API, config, UI).</p>
+                </div>
+                <div class="pipeline-step" data-step="5">
+                    <div class="pipeline-icon pipeline-icon--violet">
+                        <span>05</span>
+                    </div>
+                    <h3>Bug Hunt</h3>
+                    <p class="pipeline-cmd">/draft:bughunt</p>
+                    <p>14-dimension sweep with taint tracking, dependency/supply chain security, algorithmic complexity analysis, mutation testing awareness. Only HIGH/CONFIRMED confidence reported.</p>
+                </div>
+            </div>
+
+            <div class="callout">
+                <strong>Each layer narrows the solution space.</strong> By the time AI writes code, most decisions are already made. product.md &rarr; tech-stack.md &rarr; .ai-context.md &rarr; spec.md &rarr; plan.md. <strong>5 specialized agents</strong> (Planner, Architect, Reviewer, Debugger, RCA) enforce this at every step.
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 4: FEATURES (Bento Grid)                             -->
+    <!-- ============================================================ -->
+    <section id="features" class="section">
+        <div class="section-glow section-glow--violet"></div>
+        <div class="section-inner">
+            <span class="section-label">Capabilities</span>
+            <h2>Enterprise-grade methodology,<br><span class="text-violet">zero cost</span></h2>
+
+            <div class="bento-grid">
+                <!-- Card 1: Architecture Discovery (wide) -->
+                <div class="glass-card bento-card bento-wide" data-accent="cyan">
+                    <div class="bento-header">
+                        <div class="bento-icon bento-icon--cyan">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+                        </div>
+                        <span class="bento-tag">5-Phase Analysis</span>
+                    </div>
+                    <h3>Architecture Discovery</h3>
+                    <p>Deep codebase analysis generating a comprehensive engineering reference with 25 sections, Mermaid diagrams, data state machines, and consistency boundaries. Derives a 200-400 line machine-optimized .ai-context.md for all AI agents. Classifies files into 11 signal categories for adaptive analysis depth.</p>
+                    <div class="bento-stats">
+                        <span>25 sections</span><span>11 signals</span><span>Incremental refresh</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: TDD Enforcement -->
+                <div class="glass-card bento-card" data-accent="emerald">
+                    <div class="bento-header">
+                        <div class="bento-icon bento-icon--emerald">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                        </div>
+                    </div>
+                    <h3>TDD Enforcement</h3>
+                    <p>RED &rarr; GREEN &rarr; REFACTOR cycle. Production robustness patterns enforced: atomicity, isolation, durability, idempotency, fail-closed, resilience. Property-based testing, observability prompts, contract testing at service boundaries.</p>
+                    <div class="bento-stats"><span>95%+ target</span><span>7 robustness patterns</span></div>
+                </div>
+
+                <!-- Card 3: 3-Stage Code Review -->
+                <div class="glass-card bento-card" data-accent="rose">
+                    <div class="bento-header">
+                        <div class="bento-icon bento-icon--rose">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        </div>
+                    </div>
+                    <h3>3-Stage Code Review</h3>
+                    <p>Automated validation + spec compliance + code quality. STRIDE threat modeling for new endpoints. Context-specific checks (crypto, DB, API, config, UI). SAST tool integration. Adversarial pass on zero findings.</p>
+                    <div class="bento-stats"><span>3 stages</span><span>STRIDE</span><span>SAST</span></div>
+                </div>
+
+                <!-- Card 4: Collaborative Intake -->
+                <div class="glass-card bento-card" data-accent="amber">
+                    <div class="bento-header">
+                        <div class="bento-icon bento-icon--amber">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </div>
+                    </div>
+                    <h3>Collaborative Intake</h3>
+                    <p>AI as expert partner — asks one question at a time, contributes patterns, risks, trade-offs. Builds spec progressively with citations from DDD, Clean Architecture, OWASP.</p>
+                    <div class="bento-stats"><span>AI as partner</span></div>
+                </div>
+
+                <!-- Card 5: Bug Hunt (wide) -->
+                <div class="glass-card bento-card bento-wide" data-accent="violet">
+                    <div class="bento-header">
+                        <div class="bento-icon bento-icon--violet">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        </div>
+                        <span class="bento-tag">Exhaustive Sweep</span>
+                    </div>
+                    <h3>14-Dimension Bug Hunt</h3>
+                    <p>Systematic defect discovery across 14 dimensions: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, tests, dependency/supply chain security, algorithmic complexity, and i18n/l10n. Severity-ranked with file:line locations. Only HIGH/CONFIRMED confidence — false-positive elimination and taint tracking built in.</p>
+                    <div class="bento-stats">
+                        <span>14 dimensions</span><span>Taint tracking</span><span>Confidence filtering</span><span>Regression tests</span>
+                    </div>
+                </div>
+
+                <!-- Card 6: ACID Deep Review -->
+                <div class="glass-card bento-card" data-accent="emerald">
+                    <div class="bento-header">
+                        <div class="bento-icon bento-icon--emerald">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                    </div>
+                    <h3>ACID Deep Review</h3>
+                    <p>Module lifecycle audit evaluating atomicity, isolation, durability, fail-closed behavior, and idempotency. Enterprise-grade production pattern enforcement.</p>
+                    <div class="bento-stats"><span>ACID compliant</span></div>
+                </div>
+
+                <!-- Card 7: Pattern Learning -->
+                <div class="glass-card bento-card" data-accent="amber">
+                    <div class="bento-header">
+                        <div class="bento-icon bento-icon--amber">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        </div>
+                    </div>
+                    <h3>Pattern Learning</h3>
+                    <p>Scans your codebase for recurring patterns (3+ occurrences). Temporal analysis detects declining patterns. Learns conventions to skip and anti-patterns to always flag. Continuous learning loop — quality commands auto-update guardrails after each run.</p>
+                    <div class="bento-stats"><span>Auto-learning</span><span>Temporal analysis</span></div>
+                </div>
+
+                <!-- Card 8: Enterprise Ready (wide) -->
+                <div class="glass-card bento-card bento-wide" data-accent="cyan">
+                    <div class="bento-header">
+                        <div class="bento-icon bento-icon--cyan">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                        </div>
+                        <span class="bento-tag">Enterprise</span>
+                    </div>
+                    <h3>Enterprise Ready</h3>
+                    <p>Monorepo federation with service discovery and dependency graphs. Jira integration (Track &rarr; Epic, Phase &rarr; Story, Task &rarr; Sub-task). Architecture Decision Records with full lifecycle. Git-aware task/phase/track-level revert. Mid-track change management with impact analysis.</p>
+                    <div class="bento-stats">
+                        <span>Monorepo</span><span>Jira</span><span>ADRs</span><span>Revert</span><span>Change mgmt</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 5: COMMANDS                                          -->
+    <!-- ============================================================ -->
+    <section id="commands" class="section">
+        <div class="section-glow section-glow--emerald"></div>
+        <div class="section-inner">
+            <span class="section-label">17 Commands &middot; 5 Specialized Agents</span>
+            <h2>Full development <span class="text-emerald">lifecycle</span></h2>
+
+            <!-- Interactive terminal -->
+            <div class="terminal glass-card">
+                <div class="terminal-header">
+                    <div class="terminal-dots">
+                        <span class="dot-red"></span>
+                        <span class="dot-yellow"></span>
+                        <span class="dot-green"></span>
+                    </div>
+                    <span class="terminal-title">draft-terminal</span>
+                </div>
+                <div class="terminal-body" id="terminal-body">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">$</span>
+                        <span class="terminal-cmd" id="terminal-cmd"></span>
+                        <span class="terminal-cursor">|</span>
+                    </div>
+                    <div class="terminal-output" id="terminal-output"></div>
+                </div>
+            </div>
+
+            <!-- Command grid -->
+            <div class="commands-grid">
+                <div class="cmd-card" data-category="setup">
+                    <span class="cmd-name">/draft</span>
+                    <span class="cmd-desc">Overview and intent mapping</span>
+                </div>
+                <div class="cmd-card" data-category="setup">
+                    <span class="cmd-name">/draft:init</span>
+                    <span class="cmd-desc">Initialize project context</span>
+                </div>
+                <div class="cmd-card" data-category="setup">
+                    <span class="cmd-name">/draft:index</span>
+                    <span class="cmd-desc">Monorepo federation</span>
+                </div>
+                <div class="cmd-card" data-category="lifecycle">
+                    <span class="cmd-name">/draft:new-track</span>
+                    <span class="cmd-desc">Collaborative spec + plan</span>
+                </div>
+                <div class="cmd-card" data-category="lifecycle">
+                    <span class="cmd-name">/draft:implement</span>
+                    <span class="cmd-desc">TDD workflow execution</span>
+                </div>
+                <div class="cmd-card" data-category="lifecycle">
+                    <span class="cmd-name">/draft:status</span>
+                    <span class="cmd-desc">Progress overview</span>
+                </div>
+                <div class="cmd-card" data-category="lifecycle">
+                    <span class="cmd-name">/draft:change</span>
+                    <span class="cmd-desc">Mid-track amendments</span>
+                </div>
+                <div class="cmd-card" data-category="lifecycle">
+                    <span class="cmd-name">/draft:revert</span>
+                    <span class="cmd-desc">Git-aware rollback</span>
+                </div>
+                <div class="cmd-card" data-category="quality">
+                    <span class="cmd-name">/draft:review</span>
+                    <span class="cmd-desc">3-stage code review</span>
+                </div>
+                <div class="cmd-card" data-category="quality">
+                    <span class="cmd-name">/draft:deep-review</span>
+                    <span class="cmd-desc">ACID module audit</span>
+                </div>
+                <div class="cmd-card" data-category="quality">
+                    <span class="cmd-name">/draft:bughunt</span>
+                    <span class="cmd-desc">14-dimension sweep</span>
+                </div>
+                <div class="cmd-card" data-category="quality">
+                    <span class="cmd-name">/draft:coverage</span>
+                    <span class="cmd-desc">Coverage report (95%+)</span>
+                </div>
+                <div class="cmd-card" data-category="quality">
+                    <span class="cmd-name">/draft:learn</span>
+                    <span class="cmd-desc">Pattern discovery</span>
+                </div>
+                <div class="cmd-card" data-category="architecture">
+                    <span class="cmd-name">/draft:decompose</span>
+                    <span class="cmd-desc">Module decomposition</span>
+                </div>
+                <div class="cmd-card" data-category="architecture">
+                    <span class="cmd-name">/draft:adr</span>
+                    <span class="cmd-desc">Architecture Decision Records</span>
+                </div>
+                <div class="cmd-card" data-category="enterprise">
+                    <span class="cmd-name">/draft:jira-preview</span>
+                    <span class="cmd-desc">Generate Jira export</span>
+                </div>
+                <div class="cmd-card" data-category="enterprise">
+                    <span class="cmd-name">/draft:jira-create</span>
+                    <span class="cmd-desc">Push to Jira via MCP</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 6: TEAM COLLABORATION                                -->
+    <!-- ============================================================ -->
+    <section id="team" class="section">
+        <div class="section-glow section-glow--amber"></div>
+        <div class="section-inner">
+            <span class="section-label">Collaboration</span>
+            <h2>Review specs, <span class="text-amber">not surprises</span></h2>
+            <p class="section-subtitle">Every markdown file goes through commit &rarr; review &rarr; merge before a single line of code is written. By the time implementation starts, the entire team has already agreed on what to build.</p>
+
+            <div class="team-flow">
+                <div class="team-step glass-card">
+                    <div class="team-num">1</div>
+                    <h3>Initialize</h3>
+                    <p>Tech lead runs <code>/draft:init</code>. Team reviews architecture, tech stack, and workflow via PR.</p>
+                </div>
+                <div class="team-step glass-card">
+                    <div class="team-num">2</div>
+                    <h3>Spec &amp; Plan</h3>
+                    <p>Lead runs <code>/draft:new-track</code>. Team reviews requirements and task breakdown via PR.</p>
+                </div>
+                <div class="team-step glass-card">
+                    <div class="team-num">3</div>
+                    <h3>Decompose</h3>
+                    <p>Lead runs <code>/draft:decompose</code>. Team reviews module boundaries and API surfaces via PR.</p>
+                </div>
+                <div class="team-step glass-card">
+                    <div class="team-num">4</div>
+                    <h3>Distribute</h3>
+                    <p><code>/draft:jira-create</code> pushes epics and stories to Jira. Developers pick up stories with full context.</p>
+                </div>
+                <div class="team-step glass-card">
+                    <div class="team-num">5</div>
+                    <h3>Implement</h3>
+                    <p>Every developer has spec.md, plan.md, and .ai-context.md. Quality tools verify completeness.</p>
+                </div>
+            </div>
+
+            <div class="callout callout--amber">
+                <strong>Changing a sentence in spec.md takes seconds. Changing an architectural decision after 2,000 lines of code takes days.</strong>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 7: INSTALL                                           -->
+    <!-- ============================================================ -->
+    <section id="install" class="section">
+        <div class="section-glow section-glow--cyan"></div>
+        <div class="section-inner">
+            <span class="section-label">Get Started</span>
+            <h2>Install in <span class="text-cyan">30 seconds</span></h2>
+            <p class="section-subtitle">Works with your existing tools. Zero switching cost.</p>
+
+            <div class="install-tabs">
+                <button class="install-tab active" data-target="claude-code">Claude Code</button>
+                <button class="install-tab" data-target="cursor">Cursor</button>
+                <button class="install-tab" data-target="copilot">GitHub Copilot</button>
+                <button class="install-tab" data-target="antigravity">Antigravity IDE</button>
+                <button class="install-tab" data-target="gemini">Gemini</button>
+            </div>
+
+            <div class="install-panels">
+                <div class="install-panel active" id="panel-claude-code">
+                    <div class="code-block glass-card">
+                        <div class="code-header">
+                            <div class="terminal-dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>
+                            <span class="code-filename">Claude Code CLI</span>
+                        </div>
+                        <pre><code><span class="c-comment"># Install from marketplace</span>
+<span class="c-cmd">/plugin marketplace add</span> <span class="c-str">mayurpise/draft</span>
+<span class="c-cmd">/plugin install</span> <span class="c-str">draft</span>
+
+<span class="c-comment"># Start using</span>
+<span class="c-cmd">/draft:init</span></code></pre>
+                    </div>
+                    <p class="install-note">Prerequisites: Claude Code CLI, Git, Node.js 18+</p>
+                </div>
+                <div class="install-panel" id="panel-cursor">
+                    <div class="code-block glass-card">
+                        <div class="code-header">
+                            <div class="terminal-dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>
+                            <span class="code-filename">Cursor Setup</span>
+                        </div>
+                        <pre><code><span class="c-comment"># Cursor > Settings > Rules > New > Add from Github:</span>
+<span class="c-str">https://github.com/mayurpise/draft.git</span>
+
+<span class="c-comment"># Then use:</span>
+<span class="c-cmd">@draft init</span>
+<span class="c-cmd">@draft new-track</span></code></pre>
+                    </div>
+                    <p class="install-note">Cursor natively supports .claude/ plugin structure</p>
+                </div>
+                <div class="install-panel" id="panel-copilot">
+                    <div class="code-block glass-card">
+                        <div class="code-header">
+                            <div class="terminal-dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>
+                            <span class="code-filename">GitHub Copilot</span>
+                        </div>
+                        <pre><code><span class="c-comment"># Download copilot-instructions.md</span>
+<span class="c-cmd">mkdir</span> -p .github && <span class="c-cmd">curl</span> -o .github/copilot-instructions.md \
+  <span class="c-str">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md</span></code></pre>
+                    </div>
+                    <p class="install-note">Works in VS Code, JetBrains, Neovim</p>
+                </div>
+                <div class="install-panel" id="panel-antigravity">
+                    <div class="code-block glass-card">
+                        <div class="code-header">
+                            <div class="terminal-dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>
+                            <span class="code-filename">Antigravity IDE</span>
+                        </div>
+                        <pre><code><span class="c-comment"># Install globally</span>
+<span class="c-cmd">mkdir</span> -p ~/.gemini/antigravity/skills
+<span class="c-cmd">git clone</span> <span class="c-str">https://github.com/mayurpise/draft.git</span> ~/.gemini/antigravity/skills/draft
+
+<span class="c-comment"># Bootstrap</span>
+<span class="c-cmd">curl</span> -o ~/.gemini.md <span class="c-str">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/.gemini.md</span></code></pre>
+                    </div>
+                </div>
+                <div class="install-panel" id="panel-gemini">
+                    <div class="code-block glass-card">
+                        <div class="code-header">
+                            <div class="terminal-dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>
+                            <span class="code-filename">Gemini</span>
+                        </div>
+                        <pre><code><span class="c-comment"># Add bootstrap to your project</span>
+<span class="c-cmd">curl</span> -o .gemini.md <span class="c-str">https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/.gemini.md</span></code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout">
+                <strong>No vendor lock-in.</strong> Your specs, plans, and architecture docs are plain markdown files in your repo. Switch tools any time — your project knowledge stays with you.
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 8: CODEBASE RESEARCH / ARCHITECTURE                  -->
+    <!-- ============================================================ -->
+    <section id="architecture" class="section">
+        <div class="section-glow section-glow--violet"></div>
+        <div class="section-inner">
+            <span class="section-label">Deep Analysis</span>
+            <h2>Your codebase, <span class="text-violet">fully understood</span></h2>
+            <p class="section-subtitle">/draft:init performs a 5-phase codebase analysis — not a diagram of intent, a map of reality.</p>
+
+            <div class="arch-grid">
+                <div class="glass-card arch-card">
+                    <div class="arch-num">1</div>
+                    <h3>System Map</h3>
+                    <p>Directory structure, entry points, request/response flows with actual file:line references.</p>
+                </div>
+                <div class="glass-card arch-card">
+                    <div class="arch-num">2</div>
+                    <h3>Data Lifecycle</h3>
+                    <p>State machines per domain object. Storage topology across cache, DB, event log, archive.</p>
+                </div>
+                <div class="glass-card arch-card">
+                    <div class="arch-num">3</div>
+                    <h3>Critical Paths</h3>
+                    <p>End-to-end write/read paths with consistency boundaries and failure recovery matrix.</p>
+                </div>
+                <div class="glass-card arch-card">
+                    <div class="arch-num">4</div>
+                    <h3>System Constraints</h3>
+                    <p>Critical invariants: data safety, security, concurrency, ordering, idempotency.</p>
+                </div>
+                <div class="glass-card arch-card">
+                    <div class="arch-num">5</div>
+                    <h3>Extension Cookbooks</h3>
+                    <p>Step-by-step guides: "Add a new endpoint", "Add a new model" — file-by-file instructions.</p>
+                </div>
+                <div class="glass-card arch-card">
+                    <div class="arch-num">S</div>
+                    <h3>State Persistence</h3>
+                    <p>SHA-256 freshness hashes, 11-category signal classification, resumable run memory. Incremental refresh only re-analyzes what changed.</p>
+                </div>
+            </div>
+
+            <!-- Dual output comparison -->
+            <div class="dual-output">
+                <div class="glass-card dual-card">
+                    <h4>.ai-context.md</h4>
+                    <p class="dual-meta">Machine-optimized &middot; 200-400 lines</p>
+                    <p>Dense tables, YAML frontmatter, flat sections. Token-efficient — minimal prose, maximum signal. Consumed by all Draft commands and external AI tools.</p>
+                </div>
+                <div class="dual-divider"></div>
+                <div class="glass-card dual-card">
+                    <h4>architecture.md</h4>
+                    <p class="dual-meta">Human-readable &middot; 25 sections + appendices</p>
+                    <p>Prose paragraphs, annotated Mermaid diagrams, onboarding framing. Source of truth — all mutations happen here. For engineers, leads, and PR reviewers.</p>
+                </div>
+            </div>
+
+            <div class="callout">
+                <strong>Pay the analysis cost once, benefit on every interaction.</strong> Reduces token cost, eliminates hallucinations, improves accuracy. The AI writes code that fits your system because it knows your system.
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 9: WHO IT'S FOR                                      -->
+    <!-- ============================================================ -->
+    <section id="audience" class="section">
+        <div class="section-glow section-glow--cyan"></div>
+        <div class="section-inner">
+            <span class="section-label">Built For Your Role</span>
+            <h2>Who it's <span class="text-cyan">for</span></h2>
+            <p class="section-subtitle">Draft speaks different languages to different roles — but the value compounds across your entire organization.</p>
+
+            <div class="audience-grid">
+                <div class="glass-card audience-card" data-accent="cyan">
+                    <div class="audience-icon audience-icon--cyan">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    </div>
+                    <h3>Engineers</h3>
+                    <p class="audience-role">IC / Senior / Staff</p>
+                    <p>TDD enforcement, 14-dimension bug hunting, architecture discovery with Mermaid diagrams, pattern learning. Write code that fits your system because Draft <em>knows</em> your system.</p>
+                    <div class="audience-cta">/draft:implement + /draft:bughunt</div>
+                </div>
+
+                <div class="glass-card audience-card" data-accent="amber">
+                    <div class="audience-icon audience-icon--amber">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <h3>Engineering Managers</h3>
+                    <p class="audience-role">EM / Director</p>
+                    <p>Review specs before code exists. PR-reviewable planning artifacts. Team alignment through documents, not meetings. Quality gates at every phase boundary.</p>
+                    <div class="audience-cta">Specs are 10x cheaper to change than code</div>
+                </div>
+
+                <div class="glass-card audience-card" data-accent="violet">
+                    <div class="audience-icon audience-icon--violet">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    </div>
+                    <h3>Product Managers</h3>
+                    <p class="audience-role">PM / TPM</p>
+                    <p>Readable specs anyone can review. Jira integration with auto story points. Status tracking across tracks. Know what's being built before it's built.</p>
+                    <div class="audience-cta">/draft:jira-preview + /draft:status</div>
+                </div>
+
+                <div class="glass-card audience-card" data-accent="emerald">
+                    <div class="audience-icon audience-icon--emerald">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    </div>
+                    <h3>CXOs &amp; VPs</h3>
+                    <p class="audience-role">CTO / VP Eng / CISO</p>
+                    <p>FAANG-level engineering practices at zero cost. ACID compliance audits, Architecture Decision Records, monorepo federation. Maturity Level 4/5. MIT licensed, no vendor lock-in.</p>
+                    <div class="audience-cta">Enterprise-grade methodology, free forever</div>
+                </div>
+
+                <div class="glass-card audience-card" data-accent="rose">
+                    <div class="audience-icon audience-icon--rose">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </div>
+                    <h3>Open Source &amp; Enthusiasts</h3>
+                    <p class="audience-role">Hobbyist / Indie / Student</p>
+                    <p>Architecture discovery turns any project into a documented system. Bug hunting catches what you'd never find manually. Free, open source, MIT license.</p>
+                    <div class="audience-cta">/draft:init + /draft:bughunt = instant quality</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 10: INDUSTRY STANDARDS                               -->
+    <!-- ============================================================ -->
+    <section id="industry" class="section">
+        <div class="section-glow section-glow--emerald"></div>
+        <div class="section-inner">
+            <span class="section-label">Enterprise Grade</span>
+            <h2>FAANG-level <span class="text-emerald">practices</span>, free</h2>
+            <p class="section-subtitle">Draft codifies the engineering culture of Google, Amazon, and Stripe into an AI-assisted workflow.</p>
+
+            <div class="industry-table-wrap glass-card">
+                <table class="industry-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Practice</th>
+                            <th>Draft Implementation</th>
+                            <th>Industry Equivalent</th>
+                            <th>Companies</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1</strong></td>
+                            <td>Design-First Engineering</td>
+                            <td>spec.md &amp; plan.md per track</td>
+                            <td>Amazon PR/FAQ, Google Design Docs</td>
+                            <td>Google, Amazon, Stripe, Uber</td>
+                        </tr>
+                        <tr>
+                            <td><strong>1</strong></td>
+                            <td>Monorepo / Shared Context</td>
+                            <td>/draft:index federation</td>
+                            <td>Unified codebase, dependency graphing</td>
+                            <td>Google, Meta, Twitter</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2</strong></td>
+                            <td>Test-Driven Development</td>
+                            <td>/draft:implement RED-GREEN-REFACTOR</td>
+                            <td>TDD / CI Gates</td>
+                            <td>Netflix, Pivotal</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3</strong></td>
+                            <td>Structured Code Review</td>
+                            <td>/draft:review 3-stage</td>
+                            <td>Google Critique system</td>
+                            <td>Google, Meta</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3</strong></td>
+                            <td>Architecture Decision Records</td>
+                            <td>/draft:adr + architecture.md</td>
+                            <td>Immutable ADRs</td>
+                            <td>Spotify, AWS, GitHub</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4</strong></td>
+                            <td>Bug Bashes</td>
+                            <td>/draft:bughunt 14 dimensions</td>
+                            <td>Scheduled team testing sessions</td>
+                            <td>Microsoft, Game Studios</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5</strong></td>
+                            <td>Service Catalog</td>
+                            <td>product.md + tech-stack.md</td>
+                            <td>Internal Developer Platform</td>
+                            <td>Spotify, Lyft</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pricing comparison -->
+            <div class="pricing-comparison">
+                <div class="glass-card pricing-card pricing-card--highlight">
+                    <h4>Draft</h4>
+                    <div class="pricing-amount">$0</div>
+                    <p>Free forever. Open source, MIT licensed.</p>
+                    <p class="pricing-note">Host tool costs apply (Claude Code, Copilot, etc.)</p>
+                </div>
+                <div class="glass-card pricing-card">
+                    <h4>Kiro (AWS)</h4>
+                    <div class="pricing-amount">$19-39/mo</div>
+                    <p>Free preview, then paid tiers</p>
+                </div>
+                <div class="glass-card pricing-card">
+                    <h4>Cursor</h4>
+                    <div class="pricing-amount">$20-40/mo</div>
+                    <p>Free tier, then Pro/Business</p>
+                </div>
+                <div class="glass-card pricing-card">
+                    <h4>Windsurf</h4>
+                    <div class="pricing-amount">$15+/mo</div>
+                    <p>Free tier, then paid</p>
+                </div>
+            </div>
+
+            <div class="callout callout--emerald">
+                <strong>Maturity Level 4/5 (High).</strong> Adopting Draft puts your workflow on par with Staff Engineer practices at FAANG companies: proposing implementations of specs, performing systematic bughunts, and maintaining architectural documents.
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- FOOTER                                                       -->
+    <!-- ============================================================ -->
+    <footer id="footer" class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="footer-logo">Draft</span>
+                <p>Context-Driven Development for AI-powered software engineering.</p>
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="https://github.com/mayurpise/draft/blob/main/core/methodology.md" target="_blank" rel="noopener noreferrer">Methodology</a>
+                <a href="https://www.youtube.com/playlist?list=PLoN73NRJ_HQPdnR5Su4WkWK-O_7IOrOg_" target="_blank" rel="noopener noreferrer">Videos</a>
+                <a href="https://www.linkedin.com/in/mayurpise/" target="_blank" rel="noopener noreferrer">Mayur Pise</a>
+            </div>
+            <div class="footer-social">
+                <span class="footer-social-label">Share</span>
+                <a href="https://api.whatsapp.com/send?text=Free%20plugin%20that%20adds%20spec-driven%20development%2C%20TDD%2C%20and%2014-dimension%20bug%20hunting%20to%20Claude%20Code%2C%20Copilot%20%26%20Gemini.%20https%3A%2F%2Fgetdraft.dev" target="_blank" rel="noopener noreferrer" class="social-btn" title="WhatsApp">
+                    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                </a>
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fgetdraft.dev" target="_blank" rel="noopener noreferrer" class="social-btn" title="LinkedIn">
+                    <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                </a>
+                <a href="https://reddit.com/submit?url=https%3A%2F%2Fgetdraft.dev&title=Draft%3A%20Free%20spec-driven%20dev%20plugin%20for%20Claude%20Code%2C%20Copilot%20%26%20Gemini" target="_blank" rel="noopener noreferrer" class="social-btn" title="Reddit">
+                    <svg viewBox="0 0 24 24"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+                </a>
+                <a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fgetdraft.dev&text=Free%20plugin%20for%20Claude%20Code%2C%20Copilot%20%26%20Gemini.%20Adds%20specs%2C%20TDD%2C%2014-dimension%20bug%20hunting%2C%20and%20ACID%20audits." target="_blank" rel="noopener noreferrer" class="social-btn" title="X">
+                    <svg viewBox="0 0 24 24"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
+                </a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>MIT License &middot; Made by <a href="https://www.linkedin.com/in/mayurpise/" target="_blank" rel="noopener noreferrer">Mayur Pise</a></p>
+        </div>
+    </footer>
+
+    <script src="js/canvas.js"></script>
+    <script src="js/terminal.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

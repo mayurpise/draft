@@ -84,6 +84,7 @@ curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integr
 
 | Command | What It Does |
 |---------|--------------|
+| **`/draft`** | Overview, intent mapping, and command reference |
 | **`/draft:init`** | Analyze codebase, create context files + state tracking |
 | **`/draft:index`** | Aggregate monorepo service contexts |
 | **`/draft:new-track`** | Collaborative spec + plan with AI |
@@ -92,7 +93,7 @@ curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integr
 | **`/draft:coverage`** | Code coverage report (target 95%+) |
 | **`/draft:review`** | 3-stage review (validation + spec compliance + code quality) |
 | **`/draft:deep-review`** | Enterprise-grade module lifecycle and ACID audit |
-| **`/draft:bughunt`** | Exhaustive defect discovery |
+| **`/draft:bughunt`** | Exhaustive 14-dimension defect discovery with taint tracking |
 | **`/draft:learn`** | Discover coding patterns, update guardrails |
 | **`/draft:adr`** | Architecture Decision Records |
 | **`/draft:status`** | Show progress overview |

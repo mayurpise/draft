@@ -147,7 +147,7 @@ After updating guardrails.md, append a brief learning summary to the end of the 
 ## Constraints
 
 - **Never auto-promote** learned patterns to Hard Guardrails — that requires human decision via `/draft:learn promote`
-- **Never remove** existing entries — only update evidence/confidence/dates
-- **Cap at 50 learned entries** per section — if at capacity, replace the oldest `medium` confidence entry that hasn't been re-verified in 90+ days
+- **Never remove** existing entries manually — only update evidence/confidence/dates. Exception: automated eviction (see below)
+- **Cap at 50 learned entries** per section — if at capacity, evict the oldest `medium` confidence entry that hasn't been re-verified in 90+ days to make room for new entries
 - **Human-curated always wins** — Hard Guardrails and `tech-stack.md ## Accepted Patterns` take precedence over learned patterns if there's a conflict
 - **Preserve file metadata** — update `synced_to_commit` in the YAML frontmatter when modifying guardrails.md

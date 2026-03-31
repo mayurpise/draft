@@ -9692,7 +9692,7 @@ Draft's artifacts are designed for team collaboration through standard git workf
 
 1. **Project context** — Tech lead runs `draft init`. Team reviews `product.md`, `tech-stack.md`, and `workflow.md` via PR. Product managers review vision without reading code. Engineers review technical choices without context-switching into implementation.
 2. **Spec & plan** — Lead runs `draft new-track`. Team reviews `spec.md` (requirements, acceptance criteria) and `plan.md` (phased task breakdown, dependencies) via PR. Disagreements surface as markdown comments — resolved by editing a paragraph, not rewriting a module.
-3. **Architecture** — Lead runs `draft decompose`. Team reviews `architecture.md` (derived human-readable guide with module boundaries, API surfaces, dependency graph, implementation order) via PR. Senior engineers validate architecture without touching the codebase. The machine-optimized `.ai-context.md` is the source of truth.
+3. **Architecture** — Lead runs `draft decompose`. Team reviews `architecture.md` (derived human-readable guide with module boundaries, API surfaces, dependency graph, implementation order) via PR. Senior engineers validate architecture without touching the codebase. `architecture.md` is the source of truth; `.ai-context.md` is derived from it for AI consumption.
 4. **Work distribution** — Lead runs `draft jira-preview` and `draft jira-create`. Epics, stories, and sub-tasks are created from the approved plan. Individual team members pick up Jira stories and implement — with or without `draft implement`.
 5. **Implementation** — Only after all documents are merged does coding start. Every developer has full context: what to build (`spec.md`), in what order (`plan.md`), with what boundaries (`.ai-context.md` / `architecture.md`).
 
@@ -10276,19 +10276,19 @@ Perform an exhaustive end-to-end lifecycle review of a service, component, or mo
 
 - **Module-level only:** `draft deep-review src/auth`
 
-Unlike standard review, this tool performs structural analysis and flags deep architectural flaws. It maintains a history file at `draft/deep-review-history.json` and generates an actionable specification for fixes at `draft/deep-review-report.md`. It does NOT auto-fix code.
+Unlike standard review, this tool performs structural analysis and flags deep architectural flaws. It maintains a history file at `draft/deep-review-history.json` and generates per-module reports at `draft/deep-review-reports/<module-name>.md`. It does NOT auto-fix code.
 
 ---
 
 ### `draft bughunt` — Exhaustive Bug Discovery
 
-Systematic bug hunt across 11 dimensions: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, and tests.
+Systematic bug hunt across 14 dimensions: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, tests, dependency & supply chain security, algorithmic complexity, and internationalization & localization.
 
 #### Process
 
 1. Load Draft context (architecture, tech-stack, product)
 2. For tracks: verify implementation matches spec requirements
-3. Analyze code across all 11 dimensions
+3. Analyze code across all 14 dimensions
 4. Verify each finding (trace code paths, check for mitigations, eliminate false positives)
 5. Generate severity-ranked report with fix recommendations
 6. Detect language and test framework (GTest, pytest, go test, Jest/Vitest, cargo test, JUnit)
@@ -10408,7 +10408,7 @@ draft change track add-export-feature also require a progress indicator for expo
 
 ## Architecture Mode
 
-Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `architecture.md` exists** - no manual configuration needed.
+Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `.ai-context.md` or `architecture.md` exists** - no manual configuration needed.
 
 **How it works:**
 1. Run `draft decompose` on a track → Creates `draft/tracks/<id>/architecture.md` (and derived `.ai-context.md`)
@@ -10529,7 +10529,7 @@ draft coverage → coverage report → CHECKPOINT
 
 ## Jira Integration (Optional)
 
-Sync tracks to Jira with a two-step workflow:
+Sync tracks to Jira with a three-step workflow:
 
 1. **Preview** (`draft jira-preview`) - Generate `jira-export.md` with epic and stories
 2. **Review** - Adjust story points, descriptions, acceptance criteria as needed
@@ -11329,8 +11329,8 @@ After updating guardrails.md, append a brief learning summary to the end of the 
 ## Constraints
 
 - **Never auto-promote** learned patterns to Hard Guardrails — that requires human decision via `draft learn promote`
-- **Never remove** existing entries — only update evidence/confidence/dates
-- **Cap at 50 learned entries** per section — if at capacity, replace the oldest `medium` confidence entry that hasn't been re-verified in 90+ days
+- **Never remove** existing entries manually — only update evidence/confidence/dates. Exception: automated eviction (see below)
+- **Cap at 50 learned entries** per section — if at capacity, evict the oldest `medium` confidence entry that hasn't been re-verified in 90+ days to make room for new entries
 - **Human-curated always wins** — Hard Guardrails and `tech-stack.md ## Accepted Patterns` take precedence over learned patterns if there's a conflict
 - **Preserve file metadata** — update `synced_to_commit` in the YAML frontmatter when modifying guardrails.md
 
@@ -13558,7 +13558,7 @@ synced_to_commit: "{FULL_SHA}"
 
 | Field | Value |
 |-------|-------|
-| **Branch** | `{LOCAL_BRANCH}` |
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
 | **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
 | **Generated** | {ISO_TIMESTAMP} |
 | **Synced To** | `{FULL_SHA}` |
@@ -15438,7 +15438,7 @@ Check against the track's `spec.md`:
 
 ### Adversarial Pass (When Zero Findings)
 
-If Stage 3 produces zero findings across all four dimensions, do NOT accept "clean" without one more look. Ask these 5 questions explicitly:
+If Stage 3 produces zero findings across all four dimensions, do NOT accept "clean" without one more look. Ask these 7 questions explicitly:
 
 1. **Error paths** — Is every error/exception handled? Are any failure modes silently swallowed?
 2. **Edge cases** — Are there boundary conditions (empty input, max values, concurrent access) not covered by tests?
@@ -15571,3 +15571,5 @@ At phase boundary in `draft implement`:
 6. Only proceed to next phase if review passes
 
 </core-file>
+
+<!-- DRAFT_BUILD_COMPLETE -->

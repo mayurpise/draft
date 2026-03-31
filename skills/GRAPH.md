@@ -147,7 +147,7 @@ init → learn → (updates guardrails.md)
 | Standard File Metadata (YAML frontmatter) | `init` | All skills that generate draft/ files |
 | Three-Stage Review | `review` | implement (at phase boundaries) |
 | Signal Classification | `init` | init refresh, index (future) |
-| Pattern Learning | `core/shared/pattern-learning.md` | learn, bughunt (updates guardrails.md) |
+| Pattern Learning | `core/shared/pattern-learning.md` | learn, bughunt, review, deep-review (updates guardrails.md) |
 
 ## Artifact Flow
 

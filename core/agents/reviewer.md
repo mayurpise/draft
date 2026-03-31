@@ -121,7 +121,7 @@ Check against the track's `spec.md`:
 
 ### Adversarial Pass (When Zero Findings)
 
-If Stage 3 produces zero findings across all four dimensions, do NOT accept "clean" without one more look. Ask these 5 questions explicitly:
+If Stage 3 produces zero findings across all four dimensions, do NOT accept "clean" without one more look. Ask these 7 questions explicitly:
 
 1. **Error paths** — Is every error/exception handled? Are any failure modes silently swallowed?
 2. **Edge cases** — Are there boundary conditions (empty input, max values, concurrent access) not covered by tests?

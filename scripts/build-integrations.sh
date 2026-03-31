@@ -92,7 +92,6 @@ get_trigger() {
         change)       echo "\"handle change\" or \"${prefix}draft change <description>\"" ;;
         jira-preview) echo "\"preview jira\" or \"${prefix}draft jira-preview [track-id]\"" ;;
         jira-create)  echo "\"create jira\" or \"${prefix}draft jira-create [track-id]\"" ;;
-        epic-status)  echo "\"qualify epic\" or \"${prefix}draft epic-status <EPIC_ID>\"" ;;
         *)            echo "\"${prefix}draft $skill\"" ;;
     esac
 }
@@ -114,10 +113,10 @@ get_copilot_trigger() {
 extract_body() {
     local file="$1"
 
-    # Check for frontmatter delimiters
-    if ! grep -q "^---$" "$file"; then
+    # Check that file starts with frontmatter delimiter
+    if [[ "$(head -1 "$file")" != "---" ]]; then
         echo "ERROR: Missing YAML frontmatter in $file" >&2
-        echo "  Skill files must start with --- delimiter" >&2
+        echo "  Skill files must start with --- delimiter on line 1" >&2
         return 1
     fi
 
@@ -162,7 +161,7 @@ extract_body() {
 # Copilot transform: /draft: → draft (no @)
 transform_copilot_syntax() {
     sed -E \
-        -e 's|/draft:([a-z-]+)|draft \1|g' \
+        -e 's|/draft:([a-z0-9-]+)|draft \1|g' \
         -e 's|@draft([^a-z0-9_-])|draft\1|g' \
         -e 's|@draft$|draft|g' \
         -e 's|`@draft`|`draft`|g' \
@@ -500,13 +499,15 @@ COMMON_HEADER2
 
         local skill_file="$SKILLS_DIR/$skill/SKILL.md"
         if [[ -f "$skill_file" ]]; then
+            # Extract body once and cache (avoids double file read + inconsistent error handling)
+            local skill_body
+            skill_body=$(extract_body "$skill_file")
+
             # Validate body format: line 1 blank, line 2 starts with #, line 3 blank
-            local body_head
-            body_head=$(extract_body "$skill_file" | head -3 || true)
             local line1 line2 line3
-            line1=$(echo "$body_head" | sed -n '1p')
-            line2=$(echo "$body_head" | sed -n '2p')
-            line3=$(echo "$body_head" | sed -n '3p')
+            line1=$(echo "$skill_body" | sed -n '1p')
+            line2=$(echo "$skill_body" | sed -n '2p')
+            line3=$(echo "$skill_body" | sed -n '3p')
             if [[ -n "$line1" ]] || [[ ! "$line2" =~ ^#\  ]] || [[ -n "$line3" ]]; then
                 echo "ERROR: Skill '$skill' body format invalid (expected: blank, '# Title', blank). Got:" >&2
                 echo "  Line 1: '${line1}'" >&2
@@ -522,7 +523,7 @@ COMMON_HEADER2
             echo ""
             echo "When user says $($get_trigger_fn "$skill"):"
             echo ""
-            extract_body "$skill_file" | "$transform_fn" | tail -n +4
+            echo "$skill_body" | "$transform_fn" | tail -n +4
         else
             echo "" >&2
             echo "ERROR: Skill file not found: $skill_file" >&2
@@ -558,6 +559,10 @@ COMMON_HEADER2
 
     # Inline core files for integrations that can't access core/ at runtime
     emit_core_files "$transform_fn"
+
+    # Completeness sentinel — verified by verify_output
+    echo ""
+    echo "<!-- DRAFT_BUILD_COMPLETE -->"
 }
 
 # ─────────────────────────────────────────────────────────
@@ -598,6 +603,18 @@ verify_output() {
     ' "$output_file")
 
     echo "  Lines: $line_count"
+
+    # Verify completeness sentinel (catches truncated output from disk-full etc.)
+    if ! tail -5 "$output_file" | grep -q "DRAFT_BUILD_COMPLETE"; then
+        echo "  FAIL: Missing completeness sentinel — output may be truncated" >&2
+        return 1
+    fi
+
+    # Verify minimum line count (a valid build is always >1000 lines)
+    if [[ "$line_count" -lt 1000 ]]; then
+        echo "  FAIL: Output too small ($line_count lines, expected >1000) — likely truncated or incomplete" >&2
+        return 1
+    fi
 
     # Count skills included
     local skill_count=0
@@ -653,13 +670,17 @@ main() {
 
     # Generate Copilot integration (atomic: write to temp, verify, then mv)
     echo "── Copilot ─────────────────────────────────────"
-    local copilot_tmp="${COPILOT_OUTPUT}.tmp"
+    local copilot_tmp
+    copilot_tmp=$(mktemp "${COPILOT_OUTPUT}.XXXXXX")
+    trap 'rm -f "$copilot_tmp"' EXIT
     build_copilot > "$copilot_tmp"
     echo "  Generated: $COPILOT_OUTPUT"
     if verify_output "Copilot" "$copilot_tmp" "no"; then
         mv "$copilot_tmp" "$COPILOT_OUTPUT"
+        trap - EXIT
     else
         rm -f "$copilot_tmp"
+        trap - EXIT
         exit 1
     fi
     echo ""

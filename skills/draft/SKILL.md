@@ -70,7 +70,7 @@ Three commands form an **audit spectrum** from narrow to broad to deep:
 ### Decision Guide
 
 - **Just finished a track?** → `/draft:review` — validates against spec, checks quality gates
-- **Suspicious of bugs across the codebase?** → `/draft:bughunt` — 11-dimension sweep with verification protocol
+- **Suspicious of bugs across the codebase?** → `/draft:bughunt` — 14-dimension sweep with verification protocol
 - **Shipping a module to production?** → `/draft:deep-review` — ACID compliance, resilience, observability audit
 - **Want everything?** → `/draft:review full` (includes bughunt), then `/draft:deep-review` for critical modules
 

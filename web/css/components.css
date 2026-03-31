@@ -56,16 +56,6 @@
     gap: 1rem;
 }
 
-.nav-badge {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--accent-emerald);
-    padding: 0.35rem 0.75rem;
-    border: 1px solid rgba(52, 211, 153, 0.3);
-    border-radius: 100px;
-    background: rgba(52, 211, 153, 0.08);
-}
-
 .nav-github {
     display: inline-flex;
     align-items: center;
@@ -255,16 +245,6 @@
     color: var(--text-secondary);
     max-width: 650px;
     margin: 1.5rem auto 0;
-}
-
-.hero-badge-free {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--accent-emerald);
-    padding: 0.5rem 1.25rem;
-    border: 1px solid rgba(52, 211, 153, 0.3);
-    border-radius: 100px;
-    background: rgba(52, 211, 153, 0.08);
 }
 
 /* Hero video play button removed — replaced by stats strip */

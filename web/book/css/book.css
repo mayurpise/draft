@@ -95,8 +95,6 @@ a { color: inherit; text-decoration: none; }
    BOOK LAYOUT
    ============================================================ */
 .book-layout {
-    display: grid;
-    grid-template-columns: var(--sidebar-width) 1fr;
     min-height: 100vh;
 }
 
@@ -971,10 +969,6 @@ a { color: inherit; text-decoration: none; }
 
 /* Mobile */
 @media (max-width: 768px) {
-    .book-layout {
-        grid-template-columns: 1fr;
-    }
-
     .book-sidebar {
         transform: translateX(-100%);
         transition: transform 0.3s var(--ease-out);

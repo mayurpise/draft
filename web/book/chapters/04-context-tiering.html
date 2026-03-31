@@ -1,0 +1,177 @@
+<div class="chapter-wrapper">
+    <h1>Context Tiering</h1>
+    <p class="chapter-meta"><span class="part-name">Part II: How Draft Thinks</span> &middot; Chapter 4</p>
+    <p class="read-time">6 min read</p>
+
+    <p class="chapter-intro">Your AI assistant just rewrote a utility function. Harmless change, two lines of code. But it violated a concurrency invariant documented three months ago in a 400-line architecture file that the assistant never loaded because it was "just a quick fix." Draft prevents this by treating context like memory architecture: always-available registers at the top, deep storage on demand, and a scoring system that loads exactly what each task needs.</p>
+
+    <h2>The Memory Analogy</h2>
+    <p>Every computer has a memory hierarchy: CPU registers are tiny and instant, RAM is larger and fast, disk is massive and slow. Draft applies the same principle to project context. Not every task needs the full engineering reference. A config change needs 20 lines of project identity. A feature implementation needs module boundaries and interface contracts. A deep architecture review needs everything.</p>
+
+    <p>Draft organizes your project context into three tiers, each optimized for a different level of task complexity:</p>
+
+    <pre><code>Tier 0: .ai-profile.md     (20-50 lines)   — Always loaded. RAM-equivalent.
+Tier 1: .ai-context.md     (200-400 lines) — Loaded for most tasks. Working memory.
+Tier 2: architecture.md    (full document)  — Loaded for deep analysis. Long-term storage.
+        .state/facts.json  (atomic facts)   — Queried by relevance. Fact-level precision.</code></pre>
+
+    <p>Simple tasks only need Tier 0. Implementation tasks load Tier 0 plus relevant sections of Tier 1. Deep reviews and architecture refreshes access all tiers. This layered approach ensures the right context for each task without burning tokens on irrelevant information.</p>
+
+    <h2>Tier 0: The Project Profile</h2>
+    <p>The file <code>draft/.ai-profile.md</code> is the smallest, most critical context artifact. At 20 to 50 lines, it contains the absolute minimum every Draft command needs: language, framework, database, auth method, API style, critical invariants, safety rules, active tracks, and recent changes. It is <strong>always loaded</strong>, regardless of task complexity.</p>
+
+    <p>Think of it as the project's elevator pitch to the AI. When someone asks "fix this typo in the config file," the AI does not need to know your module dependency graph. It needs to know you use TypeScript, PostgreSQL, and that you never commit secrets to environment files.</p>
+
+    <pre data-file="draft/.ai-profile.md"><code>## META
+Language: TypeScript 5.3 | Framework: Express 4.18 | DB: PostgreSQL 15
+Auth: JWT (access + refresh tokens) | API: REST, OpenAPI 3.0
+Build: `npm run build` | Test: `npm test` | Lint: `npm run lint`
+
+## INVARIANTS
+- All database writes use transactions
+- Auth middleware required on every non-public route
+- Never store plaintext passwords
+
+## SAFETY
+- No `eval()` or dynamic code execution
+- No `any` types in service layer
+- All user input validated at API boundary
+
+## ACTIVE
+- track/user-preferences: Phase 2 (implementation)
+- track/billing-v2: Phase 1 (foundation)
+
+## RECENT
+- Added WebSocket support for real-time notifications
+- Migrated from Sequelize to Prisma ORM</code></pre>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Brutal Conciseness</div>
+        <p>The profile must be brutally concise. Every line competes for space in the AI's always-loaded context window. If a fact does not change how the AI writes code on a daily basis, it does not belong in Tier 0. Push it to Tier 1 or Tier 2.</p>
+    </div>
+
+    <p>When <code>.ai-profile.md</code> does not exist, Draft skips Tier 0 and proceeds directly to loading Tier 1 context. No crash, no error &mdash; graceful degradation.</p>
+
+    <h2>Tier 1: The AI Context</h2>
+    <p>The file <code>draft/.ai-context.md</code> is the working memory of the system. At 200 to 400 lines, it is token-optimized and self-contained: module boundaries, dependencies, invariants, interface contracts, data flows, error handling patterns, concurrency rules, implementation catalogs, extension cookbooks, testing strategy, and a project glossary. It is loaded for most tasks &mdash; any command that modifies code or analyzes quality.</p>
+
+    <p>This file is <strong>derived</strong> from <code>architecture.md</code>, not written directly. Draft's condensation subroutine compresses the full engineering reference into a format designed for AI consumption: terse headings, structured sections, no prose where a table will do.</p>
+
+    <pre data-file="draft/.ai-context.md"><code>## META
+project: payment-gateway | lang: TypeScript 5.3 | framework: Express 4.18
+db: PostgreSQL 15 (Prisma) | cache: Redis 7 | queue: BullMQ
+build: `npm run build` | test: `npm test` | entry: src/server.ts → bootstrap()
+
+## GRAPH:COMPONENTS
+| Module       | Files              | Responsibility              |
+|-------------|--------------------|-----------------------------|
+| auth        | src/auth/*         | JWT validation, RBAC        |
+| billing     | src/billing/*      | Stripe integration, invoices|
+| users       | src/users/*        | Profile CRUD, preferences   |
+| notify      | src/notifications/*| Email, SMS, push dispatch   |
+
+## GRAPH:DEPENDENCIES
+auth → users (getUserPermissions)
+billing → auth (validateSession), users (getBillingProfile)
+notify → users (getNotificationPrefs), billing (invoiceCreated event)
+
+## INVARIANTS
+1. All DB writes wrapped in Prisma.$transaction()
+2. Auth middleware on every route except /health and /auth/login
+3. Billing amounts stored as integers (cents), never floats
+4. Notification dispatch is async — never block request thread
+
+## INTERFACES
+POST /api/users → CreateUserInput → User (201)
+GET  /api/users/:id → void → User (200) | NotFound (404)
+POST /api/billing/charge → ChargeInput → Invoice (201) | PaymentFailed (402)
+
+## ERRORS
+| Error Class       | HTTP | Recovery                    |
+|-------------------|------|-----------------------------|
+| ValidationError   | 400  | Return field-level errors   |
+| AuthError         | 401  | Clear token, redirect login |
+| PaymentError      | 402  | Retry with backoff (3x)     |
+| NotFoundError     | 404  | Return null result          |
+
+## TEST
+unit: `npm test -- --grep "unit"` | integration: `npm test -- --grep "integration"`
+coverage: `npm run coverage` | target: 80% line coverage</code></pre>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Sections You Will Find</div>
+        <p><code>.ai-context.md</code> uses structured section headers: <code>META</code>, <code>GRAPH:COMPONENTS</code>, <code>GRAPH:DEPENDENCIES</code>, <code>GRAPH:DATAFLOW</code>, <code>INVARIANTS</code>, <code>INTERFACES</code>, <code>CATALOG:*</code>, <code>THREADS</code>, <code>CONFIG</code>, <code>ERRORS</code>, <code>CONCURRENCY</code>, <code>EXTEND:*</code>, <code>TEST</code>, <code>FILES</code>, <code>VOCAB</code>. These headers enable relevance scoring &mdash; Draft loads only the sections that match your current task.</p>
+    </div>
+
+    <h2>Tier 2: The Full Architecture</h2>
+    <p>The file <code>draft/architecture.md</code> is the source of truth. It is a comprehensive, human-readable engineering reference with 25 sections and 4 appendices, complete with Mermaid diagrams, code snippets, interaction matrices, and state machine definitions. It exists for two audiences: AI agents performing deep analysis, and engineers who need to understand a module without reading source code.</p>
+
+    <p>Tier 2 is loaded only for deep analysis: <code>/draft:init</code> refresh, <code>/draft:deep-review</code>, <code>/draft:decompose</code>, and full architecture refreshes. Most day-to-day development never touches it. When it is loaded, it provides exhaustive context that Tier 1 intentionally omits: per-module state machines, thread safety annotations, the full implementation catalog, concurrency model details, and configuration reference tables.</p>
+
+    <p>Alongside <code>architecture.md</code>, Tier 2 includes <code>draft/.state/facts.json</code> &mdash; an atomic fact registry that stores individual architectural facts with source file references, confidence scores, and relationship tracking. Facts are queried by relevance, not loaded in bulk. A task modifying <code>src/auth/middleware.ts</code> loads facts sourced from that file and related auth module facts, not facts about the billing system.</p>
+
+    <h2>Relevance-Scored Context Loading</h2>
+    <p>Loading all of Tier 1 for every task wastes tokens. Loading none of it is reckless. Draft solves this with relevance scoring: it extracts key concepts from the active task (domain terms from <code>spec.md</code>, file paths and module names from <code>plan.md</code>) and scores each section of <code>.ai-context.md</code> against those concepts.</p>
+
+    <p>Four sections are always loaded regardless of task &mdash; the <strong>context floor</strong>:</p>
+    <ul>
+        <li><code>META</code> &mdash; project identity and build commands</li>
+        <li><code>INVARIANTS</code> &mdash; safety-critical rules that apply everywhere</li>
+        <li><code>TEST</code> &mdash; how to run and verify tests</li>
+        <li><code>FILES</code> &mdash; where things live in the codebase</li>
+    </ul>
+
+    <p>Everything else is loaded conditionally. Working on an API change? Load <code>INTERFACES</code>. Adding a new module? Load <code>GRAPH:COMPONENTS</code> and <code>GRAPH:DEPENDENCIES</code>. Fixing a race condition? Load <code>CONCURRENCY</code> and <code>THREADS</code>. The scoring is not magic &mdash; it is a lookup table matching task characteristics to section relevance:</p>
+
+    <pre><code>| Section              | Load When Task Involves...                     |
+|----------------------|------------------------------------------------|
+| GRAPH:COMPONENTS     | Module boundary changes, new components         |
+| GRAPH:DEPENDENCIES   | Integration work, new external dependencies     |
+| GRAPH:DATAFLOW       | Data pipeline changes, new flows                |
+| INTERFACES           | API changes, new implementations                |
+| CATALOG:*            | Implementation work matching the category       |
+| THREADS              | Concurrency-related tasks                       |
+| CONFIG               | Configuration changes                           |
+| ERRORS               | Error handling tasks                            |
+| CONCURRENCY          | Any async/parallel work                         |
+| EXTEND:*             | Adding new implementations of existing patterns |
+| VOCAB                | Domain-specific tasks                           |</code></pre>
+
+    <p>Relevance scoring activates when three conditions hold: a specific track is active (has <code>spec.md</code> and/or <code>plan.md</code>), <code>.ai-context.md</code> exists and exceeds 200 lines, and the command benefits from focused context (<code>/draft:implement</code>, <code>/draft:bughunt</code>, <code>/draft:review</code>). Commands that need the full picture &mdash; <code>/draft:init</code>, <code>/draft:deep-review</code>, <code>/draft:decompose</code> &mdash; bypass scoring and load everything.</p>
+
+    <h2>The Fact Registry</h2>
+    <p>Beyond the three-tier document hierarchy, Draft maintains a fact registry at <code>draft/.state/facts.json</code>. Each fact is an atomic, verifiable statement about the codebase with source file references, a confidence level, a category, and relationship links to other facts.</p>
+
+    <p>Facts are loaded through relevance filtering, not wholesale. When a task will modify <code>src/billing/charge.ts</code>, Draft loads facts whose <code>source_files</code> overlap with that file. It also loads facts by category matching the task's primary concern, and prefers facts with recent <code>last_active_at</code> timestamps. The limit is 20 relevant facts per task &mdash; enough for precision without flooding the context window.</p>
+
+    <p>During refresh, the fact registry supports contradiction detection. If a previously recorded fact ("Auth uses session cookies") is contradicted by new code analysis ("Auth uses JWT tokens"), Draft marks the old fact as superseded and records the evolution. This prevents stale facts from silently corrupting future analysis.</p>
+
+    <h2>Degradation Behavior</h2>
+    <p>Draft never crashes because a file is missing. Every tier degrades gracefully:</p>
+
+    <pre><code>| Scenario                  | Behavior                                          |
+|---------------------------|---------------------------------------------------|
+| No draft/ directory       | Code-only analysis (no context enrichment)         |
+| .ai-profile.md missing    | Skip Tier 0, proceed to Tier 1                     |
+| .ai-context.md missing    | Fall back to architecture.md if it exists           |
+| architecture.md missing   | No Tier 2 available, proceed with what exists       |
+| tech-stack.md missing     | Skip framework-specific checks                     |
+| product.md missing        | Skip product requirement verification               |
+| guardrails.md missing     | Fall back to workflow.md Guardrails section          |
+| facts.json missing        | Skip fact-level context, no contradiction detection  |
+| Track files missing       | Warn and proceed with project-level scope            |</code></pre>
+
+    <p>This cascade means Draft works on projects at any stage of context maturity. A project with only <code>.ai-profile.md</code> gets basic constraint enforcement. A project with the full stack &mdash; profile, context, architecture, facts, guardrails &mdash; gets deep architectural reasoning, invariant checking, and contradiction detection.</p>
+
+    <div class="callout callout-example">
+        <div class="callout-title">Practical Example: A Day in Three Tiers</div>
+        <p>Morning: you fix a typo in an error message. Draft loads <strong>Tier 0 only</strong> &mdash; 30 lines. It knows your language, your test command, your safety rules. That is enough. Total context cost: minimal.</p>
+        <p>Afternoon: you implement a new API endpoint for user preferences. Draft loads <strong>Tier 0 + relevant Tier 1 sections</strong>: META, INVARIANTS, INTERFACES, GRAPH:COMPONENTS, ERRORS, TEST, FILES. It knows your module boundaries, your existing API contracts, your error handling patterns. It skips CONCURRENCY and CONFIG because this task does not touch them. Total context: roughly 120 lines out of the full 350.</p>
+        <p>Evening: you run <code>/draft:deep-review</code> on the auth module after a security concern. Draft loads <strong>all three tiers</strong>: profile, full .ai-context.md, complete architecture.md, and relevant facts from the registry. It has the complete picture: state machines, thread safety annotations, the full interaction matrix, every invariant. This is the only scenario where the full cost is justified.</p>
+    </div>
+
+    <h2>Why Not Just Load Everything?</h2>
+    <p>Token budgets are finite. A 400-line <code>.ai-context.md</code> plus a 2000-line <code>architecture.md</code> plus 150 facts consumes significant context window space &mdash; space that competes with the actual code being analyzed, the spec being checked, and the plan being followed. Tiering is not an optimization. It is a necessity. Without it, large projects would hit context limits before the AI could even begin working.</p>
+
+    <p>The three-tier system also reflects a truth about information relevance: most of your project's architectural knowledge is irrelevant to any single task. Loading it anyway does not make the AI smarter. It makes it noisier. Focused context produces focused output.</p>
+</div>

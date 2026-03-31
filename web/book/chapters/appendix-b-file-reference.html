@@ -1,0 +1,288 @@
+<div class="chapter-wrapper">
+    <h1>Appendix B: File Reference</h1>
+    <p class="chapter-meta"><span class="part-name">Appendix</span></p>
+
+    <p class="chapter-intro">Every file Draft generates, organized by directory. For each file: name, purpose, typical size, audience, and lifecycle.</p>
+
+    <h2>draft/ (Root)</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Purpose</th>
+                <th>Size</th>
+                <th>Audience</th>
+                <th>Created</th>
+                <th>Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>architecture.md</code></td>
+                <td>Comprehensive engineering reference with 25 sections. Source of truth for project architecture. Includes Mermaid diagrams, code snippets, module boundaries, data flows, and critical invariants.</td>
+                <td>1000-3000 lines</td>
+                <td>Human &amp; AI</td>
+                <td><code>/draft:init</code></td>
+                <td><code>/draft:init refresh</code>, <code>/draft:decompose</code></td>
+            </tr>
+            <tr>
+                <td><code>.ai-context.md</code></td>
+                <td>Token-optimized AI context derived from <code>architecture.md</code> via Condensation Subroutine. Self-contained with 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, testing strategy, glossary.</td>
+                <td>200-400 lines</td>
+                <td>AI</td>
+                <td><code>/draft:init</code></td>
+                <td>Auto-refreshed when <code>architecture.md</code> changes</td>
+            </tr>
+            <tr>
+                <td><code>.ai-profile.md</code></td>
+                <td>Ultra-compact always-injected project profile. Contains: language, framework, database, auth, API style, critical invariants, safety rules, active tracks, recent changes.</td>
+                <td>20-50 lines</td>
+                <td>AI</td>
+                <td><code>/draft:init</code></td>
+                <td>Auto-refreshed on mutations</td>
+            </tr>
+            <tr>
+                <td><code>product.md</code></td>
+                <td>Product vision, target users, success criteria, and guidelines. Defines what the product does and for whom.</td>
+                <td>50-150 lines</td>
+                <td>Human &amp; AI</td>
+                <td><code>/draft:init</code></td>
+                <td>Manual edits, <code>/draft:init refresh</code></td>
+            </tr>
+            <tr>
+                <td><code>tech-stack.md</code></td>
+                <td>Technology choices: languages, frameworks, databases, key dependencies, and accepted patterns.</td>
+                <td>30-100 lines</td>
+                <td>Human &amp; AI</td>
+                <td><code>/draft:init</code></td>
+                <td>Manual edits, <code>/draft:adr</code> (when tech changes)</td>
+            </tr>
+            <tr>
+                <td><code>workflow.md</code></td>
+                <td>TDD preferences, commit conventions, review process, Jira project key.</td>
+                <td>20-60 lines</td>
+                <td>Human &amp; AI</td>
+                <td><code>/draft:init</code></td>
+                <td>Manual edits, <code>/draft:jira-create</code> (adds Jira config)</td>
+            </tr>
+            <tr>
+                <td><code>guardrails.md</code></td>
+                <td>Hard guardrails, learned conventions, and learned anti-patterns. Entries include dual-layer timestamps for temporal reasoning (discovered_at, established_at, last_verified, last_active).</td>
+                <td>30-200 lines</td>
+                <td>AI</td>
+                <td><code>/draft:init</code></td>
+                <td><code>/draft:learn</code></td>
+            </tr>
+            <tr>
+                <td><code>tracks.md</code></td>
+                <td>Registry of all tracks with their status, type, and phase progress.</td>
+                <td>10-100 lines</td>
+                <td>Human &amp; AI</td>
+                <td><code>/draft:new-track</code></td>
+                <td><code>/draft:new-track</code>, <code>/draft:implement</code>, <code>/draft:revert</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>draft/.state/</h2>
+    <p>Internal state files for incremental refresh, signal classification, and cross-session continuity. Not intended for direct editing.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Purpose</th>
+                <th>Size</th>
+                <th>Audience</th>
+                <th>Created</th>
+                <th>Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>freshness.json</code></td>
+                <td>SHA fingerprints of source files. Used to detect changes since last <code>/draft:init</code> run, enabling incremental refresh instead of full re-analysis.</td>
+                <td>1-5 KB</td>
+                <td>AI (internal)</td>
+                <td><code>/draft:init</code></td>
+                <td><code>/draft:init refresh</code></td>
+            </tr>
+            <tr>
+                <td><code>signals.json</code></td>
+                <td>Detected signal categories from codebase analysis. Classifies what types of patterns, frameworks, and conventions are present.</td>
+                <td>1-5 KB</td>
+                <td>AI (internal)</td>
+                <td><code>/draft:init</code></td>
+                <td><code>/draft:init refresh</code></td>
+            </tr>
+            <tr>
+                <td><code>run-memory.json</code></td>
+                <td>Cross-session continuity data. Records what happened in previous sessions to enable context persistence across agent invocations.</td>
+                <td>1-10 KB</td>
+                <td>AI (internal)</td>
+                <td>First agent invocation</td>
+                <td>Each session</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>draft/tracks/&lt;track-name&gt;/</h2>
+    <p>Each track (feature, fix, or refactor) gets its own directory with these files:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Purpose</th>
+                <th>Size</th>
+                <th>Audience</th>
+                <th>Created</th>
+                <th>Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>spec.md</code></td>
+                <td>Requirements and acceptance criteria for this track. Defines what "done" looks like. Includes functional requirements, edge cases, error scenarios, and explicit non-goals.</td>
+                <td>50-200 lines</td>
+                <td>Human &amp; AI</td>
+                <td><code>/draft:new-track</code></td>
+                <td><code>/draft:change</code>, manual edits</td>
+            </tr>
+            <tr>
+                <td><code>plan.md</code></td>
+                <td>Phased implementation plan with ordered tasks, verification steps, and status markers (<code>[ ]</code> Pending, <code>[~]</code> In Progress, <code>[x]</code> Completed, <code>[!]</code> Blocked). Each phase has a goal and verification criteria.</td>
+                <td>50-300 lines</td>
+                <td>Human &amp; AI</td>
+                <td><code>/draft:new-track</code></td>
+                <td><code>/draft:implement</code>, <code>/draft:change</code>, <code>/draft:decompose</code>, <code>/draft:revert</code></td>
+            </tr>
+            <tr>
+                <td><code>metadata.json</code></td>
+                <td>Track metadata: type (feature/bugfix/refactor), priority, timestamps (created, started, completed), branch name, phase and task counts, progress counters.</td>
+                <td>0.5-2 KB</td>
+                <td>AI</td>
+                <td><code>/draft:new-track</code></td>
+                <td><code>/draft:implement</code> (after each task), <code>/draft:decompose</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Optional Track Files</h2>
+    <p>These files are created by specific commands when run against a track:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Purpose</th>
+                <th>Created By</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>architecture.md</code></td>
+                <td>Track-scoped module decomposition with dependency mapping and implementation order</td>
+                <td><code>/draft:decompose</code></td>
+            </tr>
+            <tr>
+                <td><code>review-report-&lt;timestamp&gt;.md</code></td>
+                <td>Three-stage review findings (validation, spec compliance, code quality)</td>
+                <td><code>/draft:review</code></td>
+            </tr>
+            <tr>
+                <td><code>bughunt-report-&lt;timestamp&gt;.md</code></td>
+                <td>14-dimension bug discovery results with evidence and fix recommendations</td>
+                <td><code>/draft:bughunt</code></td>
+            </tr>
+            <tr>
+                <td><code>jira-export-&lt;timestamp&gt;.md</code></td>
+                <td>Jira issue definitions (epic, stories, sub-tasks, bugs) for review and creation</td>
+                <td><code>/draft:jira-preview</code></td>
+            </tr>
+            <tr>
+                <td><code>jira-export-latest.md</code></td>
+                <td>Symlink to the most recent Jira export file</td>
+                <td><code>/draft:jira-preview</code></td>
+            </tr>
+            <tr>
+                <td><code>review-report-latest.md</code></td>
+                <td>Symlink to the most recent review report</td>
+                <td><code>/draft:review</code></td>
+            </tr>
+            <tr>
+                <td><code>bughunt-report-latest.md</code></td>
+                <td>Symlink to the most recent bughunt report</td>
+                <td><code>/draft:bughunt</code></td>
+            </tr>
+            <tr>
+                <td><code>validation-report.md</code></td>
+                <td>Track validation results when validation is enabled</td>
+                <td><code>/draft:implement</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>draft/adrs/</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Purpose</th>
+                <th>Created By</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>&lt;NNN&gt;-&lt;kebab-case-title&gt;.md</code></td>
+                <td>Architecture Decision Record capturing context, decision, alternatives, and consequences. Numbered sequentially (001, 002, ...). Lifecycle: Proposed &rarr; Accepted &rarr; Deprecated/Superseded.</td>
+                <td><code>/draft:adr</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Monorepo Root Files (from /draft:index)</h2>
+    <p>Generated at the monorepo root level when <code>/draft:index</code> aggregates service contexts:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Purpose</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>draft/service-index.md</code></td>
+                <td>Directory of all detected services with status, tech stack, dependencies, and team ownership</td>
+            </tr>
+            <tr>
+                <td><code>draft/dependency-graph.md</code></td>
+                <td>Inter-service dependency mapping with Mermaid topology and topological ordering</td>
+            </tr>
+            <tr>
+                <td><code>draft/tech-matrix.md</code></td>
+                <td>Technology distribution across services with organizational standards and variances</td>
+            </tr>
+            <tr>
+                <td><code>draft/config.yaml</code></td>
+                <td>Index configuration: service detection patterns, exclusions, re-index triggers</td>
+            </tr>
+            <tr>
+                <td><code>draft/bughunt-summary.md</code></td>
+                <td>Aggregate bughunt results across services (created by <code>/draft:index bughunt</code>)</td>
+            </tr>
+            <tr>
+                <td><code>&lt;service&gt;/draft/manifest.json</code></td>
+                <td>Per-service metadata: name, type, summary, primary tech, dependencies, dependents, team, timestamps</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Source of Truth Hierarchy</div>
+        <p><code>architecture.md</code> is the source of truth. <code>.ai-context.md</code> is derived from it (token-optimized for AI). <code>.ai-profile.md</code> is derived from <code>.ai-context.md</code> (ultra-compact, always loaded). Edits flow downward: update <code>architecture.md</code>, then the derived files are regenerated automatically via the Condensation Subroutine.</p>
+    </div>
+</div>

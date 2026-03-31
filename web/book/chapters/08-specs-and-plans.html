@@ -1,0 +1,191 @@
+<div class="chapter-wrapper">
+    <h1>Specs &amp; Plans</h1>
+    <p class="chapter-meta"><span class="part-name">Part III: Track Lifecycle</span> &middot; Chapter 8</p>
+    <p class="read-time">6 min read</p>
+
+    <p class="chapter-intro">Your team just decided to redesign the authentication system. Someone opens a chat window, types "add OAuth2 support," and the AI starts generating code. Forty minutes later you have 2,000 lines across 15 files, none of which match your existing auth patterns, half of which introduce dependencies your team has never approved. The code works in isolation. It is completely unusable. Draft's track creation process exists to make this scenario structurally impossible.</p>
+
+    <h2>Starting a Track</h2>
+    <p>Every unit of work in Draft &mdash; a feature, a bug fix, a refactor &mdash; begins with <code>/draft:new-track</code>. This command does not generate code. It starts a <strong>collaborative intake process</strong> between you and the AI, producing two artifacts that govern everything that follows: a specification and a plan.</p>
+
+    <pre class="terminal"><code>$ /draft:new-track Add OAuth2 support for third-party login</code></pre>
+
+    <p>The AI reads your project's <code>product.md</code>, <code>tech-stack.md</code>, <code>.ai-context.md</code>, and <code>workflow.md</code> before asking a single question. It arrives at the conversation already understanding your architecture, your constraints, and your conventions. Then the intake begins.</p>
+
+    <h2>The Intake Conversation</h2>
+    <p>Draft's intake is not a form. It is a structured dialogue where the AI acts as an <strong>expert partner</strong>, not a passive recorder. For each question, the AI asks, listens, and then contributes &mdash; surfacing patterns you might not have considered, risks you haven't named, and trade-offs between approaches.</p>
+
+    <p>The conversation moves through five phases:</p>
+
+    <ol>
+        <li><strong>Existing Documentation</strong> &mdash; Do you have a PRD, RFC, or design doc? The AI ingests it, extracts key points, and identifies gaps: "I've extracted the authentication flow and token lifecycle. I notice the doc doesn't cover token revocation."</li>
+        <li><strong>Problem Space</strong> &mdash; What problem are we solving? Why now? Who experiences the pain? What's the scope boundary? After each answer, the AI challenges assumptions with "why" questions and contributes domain knowledge.</li>
+        <li><strong>Solution Space</strong> &mdash; What's the simplest version? Why this approach over alternatives? The AI presents 2&ndash;3 alternative approaches with trade-offs, cross-references your architecture document for integration points, and suggests patterns from your tech stack to leverage.</li>
+        <li><strong>Risk &amp; Constraints</strong> &mdash; What could go wrong? What dependencies exist? The AI surfaces risks you may not have considered, referencing OWASP guidelines, distributed systems fallacies, and known failure modes.</li>
+        <li><strong>Success Criteria</strong> &mdash; How do we know this is complete? The AI suggests measurable, testable acceptance criteria aligned with your product goals.</li>
+    </ol>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">One Question at a Time</div>
+        <p>The AI never dumps a questionnaire. It asks one question, processes the answer, contributes its expertise, updates the draft specification, and then moves on. Each exchange builds on the last. This is a conversation, not a form submission.</p>
+    </div>
+
+    <p>Throughout the intake, the AI grounds its advice in vetted sources. When it recommends CQRS, it cites "DDIA, Ch. 11." When it warns about access control, it references "OWASP A01:2021." When it suggests a circuit breaker, it cites "Release It!" This is not decoration &mdash; it gives you a reference to evaluate the advice independently.</p>
+
+    <h2>Bug and RCA Intake</h2>
+    <p>Bug tracks use a different intake flow, tighter in scope and focused on investigation. The AI walks through four phases: <strong>Symptoms &amp; Context</strong> (exact error, who's affected, when it started), <strong>Reproduction</strong> (exact steps, environment, expected vs. actual), <strong>Blast Radius</strong> (what still works, where the failure boundary lies), and <strong>Code Locality</strong> (suspected location, entry and failure points). The result is a bug specification with reproduction steps, blast radius assessment, and a root cause hypothesis.</p>
+
+    <h2>The Elicitation Pass</h2>
+    <p>Before the specification is finalized, the AI offers a quick stress-test &mdash; three challenge techniques selected based on the track type. For feature tracks, you can choose a <strong>Pre-mortem</strong> ("It's six months later and this feature failed &mdash; what went wrong?"), a <strong>Scope Boundary</strong> check ("What's the smallest version that still achieves the core goal?"), or an <strong>Edge Case Storm</strong> that surfaces five boundary conditions not yet in the acceptance criteria. This takes two minutes and often catches blind spots that would otherwise surface during implementation.</p>
+
+    <h2>What Gets Generated</h2>
+    <p>The intake conversation produces two files and one metadata record, all stored in <code>draft/tracks/&lt;track-id&gt;/</code>.</p>
+
+    <h3>spec.md</h3>
+    <p>The specification captures everything decided during intake: problem statement, background, functional and non-functional requirements, acceptance criteria, non-goals, technical approach, success metrics, stakeholder approvals, risk assessment, and deployment strategy. It includes YAML frontmatter linking the spec to the exact git commit at which it was created.</p>
+
+    <pre data-file="draft/tracks/add-oauth2/spec.md"><code># Specification: Add OAuth2 Support
+
+| Field | Value |
+|-------|-------|
+| **Branch** | `main` → `origin/main` |
+| **Commit** | `a1b2c3d` — feat: add user profile page |
+| **Generated** | 2026-03-30T14:22:00Z |
+
+**Track ID:** add-oauth2
+**Status:** [x] Complete
+
+## Problem Statement
+Users must create a new account to use the platform. Third-party
+login via Google and GitHub would reduce onboarding friction.
+
+## Requirements
+### Functional
+1. Users can authenticate via Google OAuth2
+2. Users can authenticate via GitHub OAuth2
+3. Linked accounts are visible in user profile settings
+
+### Non-Functional
+1. Token refresh must complete in &lt;100ms at p95
+2. Authentication failure must never expose internal errors
+
+## Acceptance Criteria
+- [ ] Google OAuth2 login flow completes end-to-end
+- [ ] GitHub OAuth2 login flow completes end-to-end
+- [ ] Existing email/password login remains unaffected
+- [ ] Token revocation removes all associated sessions
+- [ ] Rate limiting applied to OAuth callback endpoint
+
+## Non-Goals
+- No Apple Sign-In (future track)
+- No SAML/enterprise SSO
+- No migration of existing accounts to OAuth-only</code></pre>
+
+    <h3>plan.md</h3>
+    <p>The plan breaks the specification into <strong>phases</strong>, and each phase into <strong>tasks</strong>. Tasks are ordered by dependency &mdash; the AI uses topological sorting to determine implementation order, placing leaf dependencies first.</p>
+
+    <pre data-file="draft/tracks/add-oauth2/plan.md"><code># Plan: Add OAuth2 Support
+
+**Track ID:** add-oauth2
+**Spec:** ./spec.md
+
+## Phase 1: Foundation
+
+**Goal:** Core OAuth2 infrastructure and data model
+**Verification:** Unit tests pass for token handling and user linking
+
+### Tasks
+
+- [ ] **Task 1.1:** Create OAuth provider configuration schema
+- [ ] **Task 1.2:** Add `linked_accounts` table migration
+- [ ] **Task 1.3:** Implement token exchange service with refresh logic
+- [ ] **Task 1.4:** Write unit tests for token exchange
+
+## Phase 2: Provider Integration
+
+**Goal:** Working Google and GitHub login flows
+**Verification:** Integration tests pass for both providers
+
+### Tasks
+
+- [ ] **Task 2.1:** Implement Google OAuth2 callback handler
+- [ ] **Task 2.2:** Implement GitHub OAuth2 callback handler
+- [ ] **Task 2.3:** Add rate limiting to callback endpoints
+- [ ] **Task 2.4:** Write integration tests for both providers
+
+## Phase 3: User Experience
+
+**Goal:** Profile UI and session management
+**Verification:** End-to-end tests pass, manual QA complete
+
+### Tasks
+
+- [ ] **Task 3.1:** Add linked accounts section to profile settings
+- [ ] **Task 3.2:** Implement token revocation and session cleanup
+- [ ] **Task 3.3:** Write end-to-end tests for login and revocation</code></pre>
+
+    <p>Each task is designed to be completable in a focused session, produce testable output, and fit in a single commit. The Planner Agent explicitly rejects vague tasks like "implement the feature" &mdash; every task must have clear success criteria.</p>
+
+    <h3>metadata.json</h3>
+    <p>The metadata file tracks machine-readable state: track type, status, timestamps, and progress counters.</p>
+
+    <pre data-file="draft/tracks/add-oauth2/metadata.json"><code>{
+  "id": "add-oauth2",
+  "title": "Add OAuth2 Support",
+  "type": "feature",
+  "status": "planning",
+  "created": "2026-03-30T14:22:00Z",
+  "updated": "2026-03-30T14:45:00Z",
+  "phases": {
+    "total": 3,
+    "completed": 0
+  },
+  "tasks": {
+    "total": 11,
+    "completed": 0
+  }
+}</code></pre>
+
+    <h2>Status Markers</h2>
+    <p>Every task in a plan carries a status marker that tracks its lifecycle:</p>
+    <ul>
+        <li><code>[ ]</code> <strong>Pending</strong> &mdash; not yet started</li>
+        <li><code>[~]</code> <strong>In Progress</strong> &mdash; currently being implemented</li>
+        <li><code>[x]</code> <strong>Completed</strong> &mdash; implemented, tested, and committed</li>
+        <li><code>[!]</code> <strong>Blocked</strong> &mdash; cannot proceed, requires manual intervention</li>
+    </ul>
+    <p>These markers are the source of truth for progress tracking. When a task completes, its commit SHA is recorded inline: <code>[x] Task 1.1: Create OAuth provider schema (a1b2c3d)</code>. This creates a direct link between the plan and the git history.</p>
+
+    <h2>Quick Mode</h2>
+    <p>Not every change needs a full intake ceremony. For hotfixes and small, isolated changes scoped to 1&ndash;3 hours, the <code>--quick</code> flag skips the collaborative conversation entirely.</p>
+
+    <pre class="terminal"><code>$ /draft:new-track --quick Fix null pointer in email validation</code></pre>
+
+    <p>Quick mode asks exactly two questions: "What exactly needs to change?" and "How will you know it's done?" It then generates a minimal <code>spec.md</code> and a flat <code>plan.md</code> with a single phase. The metadata records <code>"type": "quick"</code> so the status display adjusts accordingly &mdash; no phase progress, just a flat task list.</p>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">When to Use Quick Mode</div>
+        <p>Quick mode is appropriate for changes where the scope is already obvious: a one-line bug fix, a configuration update, a typo correction. If you find yourself wanting to explain context, trade-offs, or alternative approaches, use the full intake &mdash; those are signals that the work has hidden complexity.</p>
+    </div>
+
+    <h2>The Planner Agent</h2>
+    <p>Behind the intake conversation is the Planner Agent, a specialized behavioral protocol tuned for requirement analysis and task decomposition. The Planner organizes work into phases following a consistent pattern: <strong>Foundation</strong> (data models, types, interfaces), <strong>Implementation</strong> (business logic, core features), <strong>Integration</strong> (wiring components, external APIs), and <strong>Polish</strong> (error handling, edge cases, documentation).</p>
+
+    <p>The Planner identifies dependencies between tasks and flags parallel execution opportunities. It writes acceptance criteria that are specific (one testable condition per criterion), observable (verifiable without reading implementation), and independent (no "after criterion 3 passes" dependencies). It rejects vague criteria like "system works correctly" or "code is clean" and demands measurable targets: "Response time under 200ms at p95," not "performance is good."</p>
+
+    <h2>Constraints from Project Context</h2>
+    <p>The specification and plan are not created in a vacuum. During intake, the AI continuously references three project files that act as constraints:</p>
+
+    <ul>
+        <li><strong>product.md</strong> &mdash; Product vision, user personas, goals, and guidelines. The AI aligns acceptance criteria with documented product goals and flags when proposed work contradicts the product direction.</li>
+        <li><strong>tech-stack.md</strong> &mdash; Languages, frameworks, accepted patterns, and code style. The AI suggests implementation approaches consistent with the stack and warns when a proposal would introduce an unapproved dependency.</li>
+        <li><strong>guardrails.md</strong> &mdash; Hard constraints, learned conventions, and known anti-patterns accumulated from previous tracks. The AI checks proposed work against these guardrails and flags violations before they enter the plan.</li>
+    </ul>
+
+    <div class="callout callout-warning">
+        <div class="callout-title">Specs Are Not Optional</div>
+        <p>Draft refuses to implement without an approved specification and plan. This is by design. The most expensive bugs are not logic errors &mdash; they are building the wrong thing. A 30-minute intake conversation is cheap compared to a week of implementing the wrong feature.</p>
+    </div>
+
+    <p>With the specification finalized and the plan approved, the track is ready for implementation. The next chapter covers how <code>/draft:implement</code> executes the plan, one task at a time, with the same discipline that created it.</p>
+</div>

@@ -1,0 +1,144 @@
+<div class="chapter-wrapper">
+    <h1>Appendix A: Command Reference</h1>
+    <p class="chapter-meta"><span class="part-name">Appendix</span></p>
+
+    <p class="chapter-intro">Quick-reference for all 17 Draft commands. Syntax shown is for Claude Code; Copilot uses <code>draft command</code> (no slash), Cursor uses <code>@draft command</code>.</p>
+
+    <table class="command-reference">
+        <thead>
+            <tr>
+                <th>Command</th>
+                <th>Purpose</th>
+                <th>Key Flags / Modifiers</th>
+                <th>Prerequisite</th>
+                <th>Chapters</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>/draft</code></td>
+                <td>Show overview, available commands, and intent mapping</td>
+                <td>&mdash;</td>
+                <td>None</td>
+                <td>0, 2</td>
+            </tr>
+            <tr>
+                <td><code>/draft:init</code></td>
+                <td>Analyze codebase and generate context files, architecture docs, and state tracking</td>
+                <td><code>refresh</code> &mdash; re-analyze and update existing context</td>
+                <td>None (run once per project)</td>
+                <td>3, 4, 5</td>
+            </tr>
+            <tr>
+                <td><code>/draft:index</code></td>
+                <td>Aggregate monorepo service contexts into root-level knowledge</td>
+                <td><code>--init-missing</code> &mdash; initialize uninitialized services; <code>bughunt [dirs]</code> &mdash; run bughunt across services</td>
+                <td><code>/draft:init</code> at root and at least one service</td>
+                <td>18</td>
+            </tr>
+            <tr>
+                <td><code>/draft:new-track</code></td>
+                <td>Create a feature/fix track with spec and phased plan through collaborative dialogue</td>
+                <td><code>--quick</code> &mdash; streamlined mode with fewer questions; <code>&lt;description&gt;</code> &mdash; initial feature description</td>
+                <td><code>/draft:init</code></td>
+                <td>6, 7, 8</td>
+            </tr>
+            <tr>
+                <td><code>/draft:implement</code></td>
+                <td>Execute tasks from plan with TDD workflow and architecture checkpoints</td>
+                <td>Resumes in-progress tasks automatically</td>
+                <td><code>/draft:new-track</code> (requires plan.md)</td>
+                <td>9, 10, 11</td>
+            </tr>
+            <tr>
+                <td><code>/draft:status</code></td>
+                <td>Show progress overview: active tracks, phase/task counts, blocked items</td>
+                <td>&mdash;</td>
+                <td><code>/draft:init</code></td>
+                <td>9</td>
+            </tr>
+            <tr>
+                <td><code>/draft:review</code></td>
+                <td>Three-stage code review: automated validation, spec compliance, code quality</td>
+                <td><code>--track &lt;id&gt;</code> &mdash; specific track; <code>--full</code> &mdash; full review; <code>with-bughunt</code> &mdash; add bughunt pass</td>
+                <td><code>/draft:init</code></td>
+                <td>12, 13</td>
+            </tr>
+            <tr>
+                <td><code>/draft:deep-review</code></td>
+                <td>Module lifecycle audit covering ACID properties and production robustness</td>
+                <td><code>[module]</code> &mdash; specific module to audit</td>
+                <td><code>/draft:init</code></td>
+                <td>14</td>
+            </tr>
+            <tr>
+                <td><code>/draft:bughunt</code></td>
+                <td>14-dimension exhaustive bug discovery with taint tracking and evidence</td>
+                <td><code>--track &lt;id&gt;</code> &mdash; scope to a specific track</td>
+                <td><code>/draft:init</code></td>
+                <td>13</td>
+            </tr>
+            <tr>
+                <td><code>/draft:coverage</code></td>
+                <td>Code coverage analysis targeting 95%+ with gap identification</td>
+                <td>&mdash;</td>
+                <td><code>/draft:init</code>, tests exist</td>
+                <td>11</td>
+            </tr>
+            <tr>
+                <td><code>/draft:learn</code></td>
+                <td>Discover coding patterns in the codebase and update guardrails</td>
+                <td><code>promote</code> &mdash; promote pattern to guardrail; <code>migrate</code> &mdash; migrate patterns; <code>path</code> &mdash; specific path</td>
+                <td><code>/draft:init</code></td>
+                <td>15</td>
+            </tr>
+            <tr>
+                <td><code>/draft:decompose</code></td>
+                <td>Module decomposition with dependency mapping and implementation ordering</td>
+                <td><code>project</code> &mdash; project-wide; <code>&lt;track-id&gt;</code> &mdash; track-scoped</td>
+                <td><code>/draft:init</code></td>
+                <td>16</td>
+            </tr>
+            <tr>
+                <td><code>/draft:adr</code></td>
+                <td>Create and manage Architecture Decision Records</td>
+                <td><code>"title"</code> &mdash; create with title; <code>list</code> &mdash; list all; <code>supersede &lt;n&gt;</code> &mdash; supersede existing ADR</td>
+                <td><code>/draft:init</code></td>
+                <td>17</td>
+            </tr>
+            <tr>
+                <td><code>/draft:change</code></td>
+                <td>Handle mid-track requirement changes with impact analysis</td>
+                <td><code>&lt;description&gt;</code> &mdash; description of the change</td>
+                <td>Active track</td>
+                <td>8</td>
+            </tr>
+            <tr>
+                <td><code>/draft:revert</code></td>
+                <td>Git-aware rollback at task, phase, or track level</td>
+                <td>Interactive &mdash; prompts for revert level and target</td>
+                <td>Active track with commits</td>
+                <td>9</td>
+            </tr>
+            <tr>
+                <td><code>/draft:jira-preview</code></td>
+                <td>Generate Jira export file from track plan for review before creating issues</td>
+                <td><code>[track-id]</code> &mdash; specific track</td>
+                <td><code>/draft:new-track</code> (requires plan.md)</td>
+                <td>19</td>
+            </tr>
+            <tr>
+                <td><code>/draft:jira-create</code></td>
+                <td>Create Jira issues from export file via MCP</td>
+                <td><code>[track-id]</code> &mdash; specific track; auto-generates export if missing</td>
+                <td><code>/draft:jira-preview</code> (or auto-generates), MCP-Jira configured</td>
+                <td>19</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Intent Mapping</div>
+        <p>Draft recognizes natural language equivalents for all commands. Saying "set up the project" triggers <code>/draft:init</code>. "Hunt bugs" triggers <code>/draft:bughunt</code>. "What's the status?" triggers <code>/draft:status</code>. See the Draft overview (<code>/draft</code>) for the full intent mapping table.</p>
+    </div>
+</div>

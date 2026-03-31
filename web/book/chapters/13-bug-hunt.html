@@ -1,0 +1,152 @@
+<div class="chapter-wrapper">
+    <h1>Bug Hunt</h1>
+    <p class="chapter-meta"><span class="part-name">Part IV: Quality</span> &middot; Chapter 13</p>
+    <p class="read-time">6 min read</p>
+
+    <p class="chapter-intro">A developer runs the test suite. Everything passes. They open a pull request. The reviewer approves it. The code ships to production. Three days later, a user in Germany discovers that entering an umlaut in the search field crashes the application. The test suite tested ASCII inputs. The reviewer checked logic flow. Nobody traced untrusted input from the search box through the URL encoder, into the database query, and back to the response renderer. Nobody checked all fourteen places where bugs hide. <code>/draft:bughunt</code> does.</p>
+
+    <h2>Why Fourteen Dimensions</h2>
+    <p>Bugs do not confine themselves to a single category. A race condition in state management creates a security vulnerability when stale auth tokens are used for requests. A performance issue in an algorithm becomes a reliability issue under load. An accessibility gap becomes a legal liability in regulated industries.</p>
+
+    <p>Most code review catches bugs in one or two dimensions &mdash; usually correctness and style. <code>/draft:bughunt</code> systematically analyzes code across fourteen dimensions because bugs cluster at the intersections between concerns, in the places where no single reviewer has expertise.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">The Primary Deliverable</div>
+        <p>The bug report is the primary deliverable. Every verified bug appears in the final report regardless of whether a regression test can be written. Tests are supplementary output. Bughunt does not fix code &mdash; it finds defects, verifies them with evidence, and reports them with severity rankings and actionable fix descriptions.</p>
+    </div>
+
+    <h2>The Fourteen Dimensions</h2>
+    <p>Each dimension targets a distinct class of defect. Before analysis, <code>/draft:bughunt</code> determines which dimensions apply to the codebase &mdash; a CLI tool skips UI Responsiveness and Accessibility, a frontend-only repo skips API Contracts and Configuration. Skipped dimensions are documented with reasons, not silently omitted.</p>
+
+    <table>
+        <thead><tr><th>#</th><th>Dimension</th><th>What It Catches</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td><strong>Correctness</strong></td><td>Logic errors, off-by-one, boundary conditions, invalid state transitions, silent failures</td></tr>
+            <tr><td>2</td><td><strong>Reliability</strong></td><td>Crash paths, unhandled exceptions, broken recovery after errors, resource leaks, timeout handling</td></tr>
+            <tr><td>3</td><td><strong>Security</strong></td><td>XSS, injection, CSRF, auth bypass, secrets exposure, path traversal, insecure deserialization</td></tr>
+            <tr><td>4</td><td><strong>Performance</strong></td><td>O(n^2) in hot paths, memory leaks, blocking main thread, unnecessary allocations, unbounded growth</td></tr>
+            <tr><td>5</td><td><strong>UI Responsiveness</strong></td><td>Blocking operations, janky animations, layout shifts, forced reflows, poor loading states</td></tr>
+            <tr><td>6</td><td><strong>Concurrency</strong></td><td>Race conditions, deadlocks, lost updates, stale responses overwriting newer state, event ordering</td></tr>
+            <tr><td>7</td><td><strong>State Management</strong></td><td>Stale state, inconsistent state across components, source-of-truth violations, subscription leaks</td></tr>
+            <tr><td>8</td><td><strong>API Contracts</strong></td><td>Breaking changes, missing validation, schema drift, undocumented behavior dependencies</td></tr>
+            <tr><td>9</td><td><strong>Accessibility</strong></td><td>Missing ARIA labels, keyboard navigation gaps, broken tab order, color contrast, screen reader issues</td></tr>
+            <tr><td>10</td><td><strong>Configuration</strong></td><td>Missing defaults, environment-specific bugs, dev-only code in production, missing env var validation</td></tr>
+            <tr><td>11</td><td><strong>Tests</strong></td><td>Flaky tests, snapshot misuse, assertion density problems, tests that pass for wrong reasons</td></tr>
+            <tr><td>12</td><td><strong>Dependencies</strong></td><td>Known CVEs, unpinned versions, deprecated packages, license conflicts, typosquatting risk</td></tr>
+            <tr><td>13</td><td><strong>Algorithmic Complexity</strong></td><td>Exponential blowup, unbounded recursion, cache stampede, regex catastrophic backtracking</td></tr>
+            <tr><td>14</td><td><strong>i18n/l10n</strong></td><td>Hardcoded strings, locale-sensitive operations without locale, RTL issues, Unicode handling bugs</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Taint Tracking</h2>
+    <p>Dimension 3 (Security) includes end-to-end taint tracking &mdash; following untrusted input from its entry point through the entire codebase to every dangerous sink. This is not a surface-level check for <code>innerHTML</code> usage. It is a systematic trace of data flow.</p>
+
+    <p>Bughunt identifies all entry points: HTTP parameters, form data, file uploads, environment variables, CLI arguments, message queue payloads, webhook bodies. For each entry point, it traces the data through every function call, transformation, and storage operation until it reaches a dangerous sink &mdash; SQL queries, shell execution, <code>eval</code>, <code>innerHTML</code>, file path construction, URL construction, deserialization, or template rendering.</p>
+
+    <pre><code>Entry point: req.query.search (HTTP GET parameter)
+  → passed to buildQuery(search) at src/api/handler.ts:34
+  → buildQuery concatenates into SQL string at src/db/queries.ts:78
+  → NO sanitization, NO parameterized query
+  → Sink: raw SQL execution at src/db/queries.ts:82
+  Verdict: SQL injection — user input reaches query without parameterization</code></pre>
+
+    <p>For each sink, bughunt verifies whether sanitization or validation exists on <strong>every path</strong> from source to sink. A single unsanitized path is sufficient for exploitation, even if nine other paths are properly guarded.</p>
+
+    <h2>The Verification Protocol</h2>
+    <p>The difference between bughunt and a static analysis tool is the verification protocol. Static analysis tools produce hundreds of findings, most of them false positives. Bughunt applies a multi-step verification process to every candidate finding before it enters the report.</p>
+
+    <h3>Six Verification Steps</h3>
+    <ol>
+        <li><strong>Code path verification</strong> &mdash; Read the actual code, trace the data flow, check for upstream guards and validators, verify the path is reachable in production</li>
+        <li><strong>Context cross-reference</strong> &mdash; Check <code>.ai-context.md</code> (is this behavior intentional?), <code>tech-stack.md</code> (does the framework handle it?), <code>product.md</code> (is this a requirement violation?), existing tests (is this expected behavior?)</li>
+        <li><strong>Framework verification</strong> &mdash; Read the official documentation for the specific method or pattern, quote the relevant section, check framework version for behavior differences</li>
+        <li><strong>Codebase pattern check</strong> &mdash; Search for the same pattern elsewhere. If it appears consistently and works, investigate what makes this instance different</li>
+        <li><strong>False positive elimination</strong> &mdash; Is this dead code? Test-only code? Intentionally disabled? Explained by a comment?</li>
+        <li><strong>Pattern prevalence check</strong> &mdash; If the pattern appears 5+ times, sample three instances. If they all work correctly, do not report. If all are buggy, report the total count</li>
+    </ol>
+
+    <div class="callout callout-warning">
+        <div class="callout-title">Evidence Over Assumptions</div>
+        <p>Every reported bug must include: the actual problematic code snippet, the trace showing how data reaches the bug, which verification checks were completed, and an explicit statement of why this is not a false positive. A finding without evidence is not a finding &mdash; it is speculation.</p>
+    </div>
+
+    <h2>Confidence Filtering</h2>
+    <p>Bughunt uses a strict confidence threshold. Only <strong>HIGH</strong> and <strong>CONFIRMED</strong> findings are included in the report. This is a deliberate design choice &mdash; a report with 50 findings where half are false positives teaches the team to ignore the report. A report with 8 verified findings, all actionable, teaches the team to trust it.</p>
+
+    <table>
+        <thead><tr><th>Confidence</th><th>Criteria</th><th>Action</th></tr></thead>
+        <tbody>
+            <tr><td><strong>CONFIRMED</strong></td><td>Verified through code trace, no mitigating factors, optionally confirmed by a failing test</td><td>Report</td></tr>
+            <tr><td><strong>HIGH</strong></td><td>Strong evidence, checked context, no obvious mitigation found</td><td>Report</td></tr>
+            <tr><td><strong>MEDIUM</strong></td><td>Suspicious but not fully verified</td><td>Ask user to confirm before including</td></tr>
+            <tr><td><strong>LOW</strong></td><td>Possible issue, likely handled elsewhere</td><td>Do not report</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Context-Driven Analysis</h2>
+    <p>What separates <code>/draft:bughunt</code> from generic static analysis is its use of Draft context. When <code>draft/.ai-context.md</code> exists, bughunt leverages every documented architectural decision to find bugs that tools without context cannot detect:</p>
+
+    <ul>
+        <li><strong>Critical invariants</strong> &mdash; The architecture documents that "user IDs are always UUIDs" or "all monetary values use integer cents." Bughunt checks for violations</li>
+        <li><strong>Concurrency model</strong> &mdash; The architecture specifies the threading model. Bughunt uses this to identify race conditions specific to that model</li>
+        <li><strong>Data state machines</strong> &mdash; If the architecture defines valid state transitions (e.g., Order: pending &rarr; confirmed &rarr; shipped), bughunt checks for code that allows invalid transitions</li>
+        <li><strong>Failure recovery matrix</strong> &mdash; If the architecture claims operations are idempotent, bughunt verifies those claims by tracing retry paths</li>
+        <li><strong>Consistency boundaries</strong> &mdash; Where eventual consistency is documented, bughunt looks for stale reads, lost events, and missing reconciliation at those seams</li>
+    </ul>
+
+    <h2>Regression Test Generation</h2>
+    <p>For each verified bug, bughunt generates a regression test in the project's native test framework. The test is designed to <strong>fail against the current buggy code</strong> and pass after the fix &mdash; serving as both proof of the bug and protection against regression.</p>
+
+    <p>Before generating any test, bughunt discovers existing test coverage for the buggy code path. Each bug is classified as COVERED (existing test catches it), PARTIAL (test exists but misses this case), WRONG_ASSERTION (test asserts buggy behavior as correct), NO_COVERAGE (no test exists), or N/A (untestable code).</p>
+
+    <pre><code>Bug: [HIGH] Security: Unsanitized input in comment renderer
+File: src/components/Comment.tsx:88
+Status: PARTIAL — Comment.test.tsx exists but only tests ASCII input
+
+Existing test: Comment.test.tsx:23 — "renders comment text"
+  → Tests basic string rendering, does not test HTML injection
+
+New test case (add to Comment.test.tsx):
+  describe('Comment XSS prevention', () => {
+    it('should sanitize HTML in user-submitted comments', () => {
+      const malicious = '&lt;img src=x onerror=alert(1)&gt;';
+      render(&lt;Comment text={malicious} /&gt;);
+      expect(screen.queryByRole('img')).toBeNull();
+    });
+  });</code></pre>
+
+    <p>If no test framework is detected, bugs are still reported in full &mdash; the test section is marked N/A. The bug report is the primary deliverable; tests are supplementary.</p>
+
+    <h2>Bughunt vs. Review</h2>
+    <p>These commands serve different purposes and are designed to work together:</p>
+
+    <table>
+        <thead><tr><th>Aspect</th><th><code>/draft:review</code></th><th><code>/draft:bughunt</code></th></tr></thead>
+        <tbody>
+            <tr><td><strong>Question</strong></td><td>Does this code match the spec and follow conventions?</td><td>Does this code contain defects?</td></tr>
+            <tr><td><strong>Scope</strong></td><td>Changed files in a track</td><td>Entire repo, specific paths, or track files</td></tr>
+            <tr><td><strong>Focus</strong></td><td>Compliance, style, spec accuracy</td><td>Bugs across 14 dimensions</td></tr>
+            <tr><td><strong>Output</strong></td><td>Pass/fail with review comments</td><td>Severity-ranked bug report with evidence</td></tr>
+            <tr><td><strong>Modifies code</strong></td><td>No</td><td>No (report and regression tests only)</td></tr>
+        </tbody>
+    </table>
+
+    <p>The <code>with-bughunt</code> modifier on <code>/draft:review</code> runs both in sequence &mdash; first the review checks spec compliance and conventions, then bughunt sweeps for defects across all fourteen dimensions. This combined run inherits the scope from the review command, so there is no redundant scope confirmation.</p>
+
+    <div class="callout callout-insight">
+        <div class="callout-title">The Intersection Problem</div>
+        <p>The most dangerous bugs live at the intersection of two dimensions. A performance issue (Dimension 4) in an algorithm becomes a denial-of-service vulnerability (Dimension 3) when the input is user-controlled. A state management bug (Dimension 7) becomes a data loss issue (Dimension 2) when the stale state is persisted. Fourteen dimensions is not about being exhaustive for its own sake &mdash; it is about covering the cross-cutting spaces where single-dimension reviews have blind spots.</p>
+    </div>
+
+    <h2>Dimension Deep Dives</h2>
+    <p>Three of the fourteen dimensions deserve special attention because they catch bug classes that are commonly missed:</p>
+
+    <h3>Dimension 11: Tests</h3>
+    <p>Bughunt analyzes tests themselves for defects. This includes <strong>assertion density</strong> problems &mdash; tests with zero or weak assertions like <code>expect(result).toBeDefined()</code> that pass without actually verifying behavior. It catches <strong>test isolation violations</strong> where shared mutable state between test cases creates ordering dependencies. And it identifies <strong>test double misuse</strong> where mocks diverge from real implementation behavior, giving false confidence.</p>
+
+    <h3>Dimension 12: Dependencies</h3>
+    <p>Beyond checking for known CVEs, bughunt examines <strong>typosquatting risk</strong> (packages with names suspiciously similar to popular ones), <strong>transitive dependency depth</strong> (deeply nested chains that increase supply chain attack surface), and <strong>license conflicts</strong> (GPL dependencies in MIT projects, AGPL in proprietary code).</p>
+
+    <h3>Dimension 13: Algorithmic Complexity</h3>
+    <p>This dimension goes beyond obvious O(n^2) loops. Bughunt identifies <strong>regex catastrophic backtracking</strong> &mdash; nested quantifiers like <code>(a+)+</code> applied to user-controlled input that can lock a CPU for minutes. It finds <strong>cache invalidation storms</strong> where a cache miss triggers recomputation that itself invalidates caches, creating a thundering herd. And it catches <strong>hot path inefficiency</strong> where linear scans are used where hash maps would suffice, or the same collection is sorted repeatedly.</p>
+</div>

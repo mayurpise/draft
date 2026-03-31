@@ -1,0 +1,115 @@
+<div class="chapter-wrapper">
+    <h1>Decomposition</h1>
+    <p class="chapter-meta"><span class="part-name">Part V: Architecture</span> &middot; Chapter 16</p>
+    <p class="read-time">4 min read</p>
+
+    <p class="chapter-intro">A feature starts as a paragraph in a spec. Implementation starts as a list of tasks in a plan. But between the two lies a structural question that determines whether the code will be maintainable or not: how do you divide the work into modules? <code>/draft:decompose</code> answers this question systematically &mdash; mapping responsibilities to modules, dependencies between them, and the order in which they should be built.</p>
+
+    <h2>The Problem With Ad-Hoc Boundaries</h2>
+    <p>Without explicit decomposition, module boundaries emerge accidentally. A developer creates a file, another developer creates a related file in a different directory, a third adds a utility that both use. Six months later, nobody can explain why the authentication logic spans three directories and imports from the billing module.</p>
+
+    <p>Decomposition is the act of making module boundaries intentional. Draft's <code>/draft:decompose</code> command forces this intentionality by requiring explicit definitions for every module &mdash; what it owns, what it exposes, what it depends on, and how complex it is.</p>
+
+    <h2>Two Scopes of Decomposition</h2>
+    <p><code>/draft:decompose</code> operates at two levels, depending on context:</p>
+
+    <table>
+        <thead>
+            <tr><th>Scope</th><th>Trigger</th><th>Output</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Project-wide</td><td>No active track, or explicit <code>project</code> argument</td><td>Updates <code>draft/architecture.md</code>, regenerates <code>.ai-context.md</code></td></tr>
+            <tr><td>Track-scoped</td><td>Active track or track ID argument</td><td>Creates <code>draft/tracks/&lt;id&gt;/architecture.md</code></td></tr>
+        </tbody>
+    </table>
+
+    <p>Project-wide decomposition defines the system's module structure. Track-scoped decomposition defines the module structure for a specific feature or fix, which may introduce new modules or refine existing ones.</p>
+
+    <h2>SRP Enforcement</h2>
+    <p>The Architect Agent enforces a strict single responsibility principle during decomposition. Each module must have exactly one responsibility, expressed in one sentence. If the sentence contains "and" &mdash; if a module "handles authentication <em>and</em> manages user sessions" &mdash; it gets split.</p>
+
+    <p>This is not a style preference. It is a structural constraint. The one-sentence responsibility becomes the module's contract: everything inside the module serves that sentence, and nothing outside the module does that job.</p>
+
+    <h2>The 1-3 File Constraint</h2>
+    <p>Draft enforces a hard size constraint: each module contains 1 to 3 source files (excluding test files). This constraint is deliberately tight. If a module needs 4 files, it is doing too much and must be split further. If a module needs only a single function, it is too granular and should be absorbed into an adjacent module.</p>
+
+    <p>The constraint forces real decomposition. Teams that define modules as "the auth directory" with 15 files in it have not decomposed anything &mdash; they have named a directory. Draft's constraint means a module named <code>auth</code> might actually become <code>auth-token</code>, <code>auth-session</code>, and <code>auth-middleware</code>, each with 1-3 files and a clear boundary.</p>
+
+    <h2>Module Definition</h2>
+    <p>For each module, decomposition produces six fields:</p>
+    <ul>
+        <li><strong>Name</strong> &mdash; Short, descriptive identifier (<code>auth-token</code>, <code>scheduler</code>, <code>parser</code>)</li>
+        <li><strong>Responsibility</strong> &mdash; One sentence describing what this module owns</li>
+        <li><strong>Files</strong> &mdash; Expected source files (existing or to be created)</li>
+        <li><strong>API Surface</strong> &mdash; Public functions, classes, or interfaces using the project's language conventions</li>
+        <li><strong>Dependencies</strong> &mdash; Which other modules it imports from</li>
+        <li><strong>Complexity</strong> &mdash; Low, Medium, or High</li>
+    </ul>
+
+    <p>The API surface is especially important. It defines the only way other modules may interact with this one. Anything not in the API surface is internal and may change without affecting dependents.</p>
+
+    <h2>Dependency Analysis</h2>
+    <p>After modules are defined and approved, Draft maps dependencies between them. The process has three outputs:</p>
+
+    <p><strong>A dependency diagram</strong> &mdash; ASCII art showing which modules depend on which:</p>
+
+    <pre><code>[auth] ──&gt; [database]
+   │            │
+   └──&gt; [config] &lt;──┘
+            │
+      [logging] (no deps)</code></pre>
+
+    <p><strong>A dependency table</strong> &mdash; showing both directions of every relationship:</p>
+
+    <table>
+        <thead>
+            <tr><th>Module</th><th>Depends On</th><th>Depended By</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>logging</td><td>&mdash;</td><td>auth, database, config</td></tr>
+            <tr><td>config</td><td>logging</td><td>auth, database</td></tr>
+            <tr><td>database</td><td>config, logging</td><td>auth</td></tr>
+            <tr><td>auth</td><td>database, config</td><td>&mdash;</td></tr>
+        </tbody>
+    </table>
+
+    <p><strong>An implementation order</strong> &mdash; a topological sort that determines which modules to build first. Leaf modules (no dependencies) come first. Modules that depend on them come next. This ensures that when you start coding a module, everything it imports already exists.</p>
+
+    <h2>Breaking Circular Dependencies</h2>
+    <p>Cycles in the dependency graph are structural defects. If module A depends on module B and module B depends on module A, their boundaries are wrong. Draft's Architect Agent applies a cycle-breaking framework with three strategies:</p>
+
+    <table>
+        <thead>
+            <tr><th>Strategy</th><th>When to Use</th><th>Result</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Extract shared interface</strong></td><td>Both modules need the same abstraction</td><td>New <code>&lt;concern&gt;-types</code> module with only interfaces/types</td></tr>
+            <tr><td><strong>Invert dependency</strong></td><td>One module only needs a callback or event</td><td>Accept a function/interface instead of importing directly</td></tr>
+            <tr><td><strong>Merge modules</strong></td><td>The two modules are actually one concern</td><td>Combined module with single responsibility</td></tr>
+        </tbody>
+    </table>
+
+    <p>The first strategy is most common. When <code>user-service</code> imports from <code>notification-service</code> and vice versa, the shared concern &mdash; user preferences &mdash; gets extracted into a new <code>user-preferences</code> module that both can depend on without creating a cycle.</p>
+
+    <h2>The Architect Agent's Role</h2>
+    <p>Decomposition is guided by Draft's Architect Agent, a specialized behavioral protocol defined in <code>core/agents/architect.md</code>. The agent brings four capabilities to decomposition:</p>
+
+    <ul>
+        <li><strong>Module identification</strong> &mdash; Scans existing code for directory-per-feature patterns, barrel exports, package files, and import graphs to propose initial boundaries</li>
+        <li><strong>Story writing</strong> &mdash; Each module gets a placeholder story field during decomposition, filled in during <code>/draft:implement</code> with a natural-language algorithm description</li>
+        <li><strong>Execution state design</strong> &mdash; Defines intermediate state variables between input and output for each module</li>
+        <li><strong>Function skeleton generation</strong> &mdash; Creates function stubs with complete signatures before TDD begins</li>
+    </ul>
+
+    <p>The agent is not autonomous. Decomposition includes mandatory checkpoints where the developer reviews and approves the module breakdown, the dependency analysis, and any plan restructuring before changes are written.</p>
+
+    <h2>Plan Restructuring</h2>
+    <p>For track-scoped decomposition, Draft can restructure an existing <code>plan.md</code> to align phases with module boundaries. Each module becomes a phase (or maps to an existing phase), and the implementation order from the dependency graph determines the phase sequence.</p>
+
+    <p>Existing task statuses are preserved during restructuring: completed tasks stay completed, in-progress tasks get flagged if they span multiple modules, pending tasks are remapped freely. Tasks that don't map cleanly to any module are collected in an "Unmapped Tasks" section for developer decision &mdash; nothing is silently dropped.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Source of Truth</div>
+        <p><code>draft/architecture.md</code> is the source of truth for project-wide decomposition. <code>draft/.ai-context.md</code> is derived from it via the Condensation Subroutine. Always update <code>architecture.md</code> first, then regenerate <code>.ai-context.md</code>. Completed modules are never removed or modified during re-decomposition.</p>
+    </div>
+</div>

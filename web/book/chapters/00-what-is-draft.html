@@ -1,0 +1,52 @@
+<div class="chapter-wrapper">
+    <h1>What is Draft?</h1>
+    <p class="chapter-meta">Chapter 0</p>
+    <p class="read-time">2 min read</p>
+
+    <p class="chapter-intro">You installed an AI coding assistant. It writes code fast. But it also picks the wrong framework, ignores your project conventions, invents requirements you never asked for, and produces code that no one on your team would have approved. Draft exists because speed without direction is just expensive chaos.</p>
+
+    <h2>What Draft Is</h2>
+    <p>Draft is a free, open-source plugin that adds structured development methodology to AI coding agents. It provides 17 slash commands and 5 specialized agents that turn your AI assistant from an autonomous guessing machine into a disciplined executor of pre-approved work.</p>
+
+    <p>The core idea: before AI writes a single line of code, it analyzes your codebase, generates a specification, builds a phased plan, and waits for your approval. Only then does implementation begin &mdash; constrained by your architecture, your conventions, and your acceptance criteria.</p>
+
+    <p>Draft calls this <strong>Context-Driven Development</strong>. Every decision is grounded in explicit, versioned, reviewable documents rather than implicit assumptions buried in a chat window.</p>
+
+    <h2>What Draft Is Not</h2>
+    <ul>
+        <li><strong>Not a code generator</strong> &mdash; Draft does not write code itself. It structures and constrains the AI that does.</li>
+        <li><strong>Not an IDE</strong> &mdash; Draft is a plugin that works inside your existing tools.</li>
+        <li><strong>Not a replacement for thinking</strong> &mdash; Draft makes the thinking explicit and reviewable. You still make the decisions; Draft ensures they happen before code exists.</li>
+        <li><strong>Not another AI wrapper</strong> &mdash; There is no API key, no hosted service, no vendor lock-in. Draft is markdown files and bash scripts.</li>
+    </ul>
+
+    <h2>Who It's For</h2>
+    <p>Draft is for developers and teams who use AI coding assistants and have experienced the gap between "it generated code" and "it generated the right code." If you've ever had an AI assistant introduce a dependency your team doesn't use, violate your project's naming conventions, or build a feature that doesn't match what was actually needed &mdash; Draft addresses that gap structurally.</p>
+
+    <h2>What You Get</h2>
+    <p><strong>17 commands</strong> covering the full development lifecycle:</p>
+    <ul>
+        <li><strong>Context</strong> &mdash; <code>/draft:init</code> analyzes your codebase and generates architecture documentation, AI context files, and state tracking</li>
+        <li><strong>Planning</strong> &mdash; <code>/draft:new-track</code> creates specifications and phased plans through collaborative dialogue</li>
+        <li><strong>Execution</strong> &mdash; <code>/draft:implement</code> builds features task-by-task with TDD cycles and architecture checkpoints</li>
+        <li><strong>Quality</strong> &mdash; <code>/draft:review</code>, <code>/draft:deep-review</code>, and <code>/draft:bughunt</code> provide three tiers of code review and defect discovery</li>
+        <li><strong>Operations</strong> &mdash; <code>/draft:status</code>, <code>/draft:revert</code>, <code>/draft:change</code>, <code>/draft:coverage</code>, <code>/draft:adr</code>, <code>/draft:learn</code>, <code>/draft:decompose</code>, <code>/draft:index</code>, <code>/draft:jira-preview</code>, <code>/draft:jira-create</code></li>
+    </ul>
+
+    <p><strong>5 specialized agents</strong> &mdash; Architect, Debugger, Planner, RCA (Root Cause Analysis), and Reviewer &mdash; each with behavioral protocols tuned for their domain.</p>
+
+    <h2>Platform Support</h2>
+    <p>Draft works with the AI coding tools you already use:</p>
+    <ul>
+        <li><strong>Claude Code</strong> &mdash; Native plugin installation via <code>/plugin install</code></li>
+        <li><strong>Cursor</strong> &mdash; Native support for the <code>.claude/</code> plugin structure</li>
+        <li><strong>GitHub Copilot</strong> &mdash; Via <code>.github/copilot-instructions.md</code></li>
+        <li><strong>Gemini</strong> &mdash; Via <code>.gemini.md</code> bootstrap file</li>
+        <li><strong>Antigravity IDE</strong> &mdash; Via global skill installation</li>
+    </ul>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Start Reading</div>
+        <p>Chapter 1 explains the problem Draft solves &mdash; and why better prompting isn't the answer. Chapter 2 introduces the methodology. Chapter 3 gets you running in five minutes.</p>
+    </div>
+</div>

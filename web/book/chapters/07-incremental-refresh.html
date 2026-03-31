@@ -1,0 +1,133 @@
+<div class="chapter-wrapper">
+    <h1>Incremental Refresh</h1>
+    <p class="chapter-meta"><span class="part-name">Part II: How Draft Thinks</span> &middot; Chapter 7</p>
+    <p class="read-time">4 min read</p>
+
+    <p class="chapter-intro">Your project has been running Draft for three months. The codebase has gained two new modules, migrated from REST to GraphQL on one service, and swapped Redis for Memcached. The architecture document is now lying to the AI. You could re-run <code>/draft:init</code> from scratch &mdash; a full 5-phase analysis that re-reads every source file. Or you could run <code>/draft:init refresh</code> and let Draft figure out what actually changed, re-analyze only those files, and patch the existing documents. That is incremental refresh.</p>
+
+    <h2>The Problem: Context Goes Stale</h2>
+    <p>Every document Draft generates is a snapshot. It reflects the codebase at the moment of generation, down to a specific git commit SHA recorded in the YAML frontmatter. The moment code changes after that commit, the documents start drifting from reality. A new module appears that is not in the component map. An API endpoint changes its request shape but the interface catalog still shows the old one. A dependency is removed but the dependency graph still references it.</p>
+
+    <p>Stale context is worse than no context. An AI operating with no context will at least read the actual code. An AI operating with stale context trusts the documentation and makes decisions based on information that is no longer true. Draft's incremental refresh exists to keep the cost of freshness low enough that teams actually do it.</p>
+
+    <h2>Hash-Based Change Detection</h2>
+    <p>The foundation of incremental refresh is <code>draft/.state/freshness.json</code> &mdash; a file containing SHA-256 hashes of every source file analyzed during the last initialization or refresh. When you run <code>/draft:init refresh</code>, Draft recomputes hashes of current source files and diffs against the stored baseline.</p>
+
+    <pre data-file="draft/.state/freshness.json"><code>{
+  "generated_at": "2024-01-15T14:30:00Z",
+  "git_commit": "a1b2c3d4e5f6789012345678901234567890abcd",
+  "total_files": 142,
+  "files": {
+    "src/index.ts": "sha256:a1b2c3d4...",
+    "src/auth/login.ts": "sha256:e5f6a7b8...",
+    "src/auth/middleware.ts": "sha256:f9a0b1c2...",
+    "src/billing/charge.ts": "sha256:d3e4f5a6...",
+    "package.json": "sha256:c9d0e1f2..."
+  }
+}</code></pre>
+
+    <p>The diff produces four categories:</p>
+    <ul>
+        <li><strong>Changed files</strong> &mdash; hash differs from stored. These need re-analysis.</li>
+        <li><strong>New files</strong> &mdash; present in current tree but not in stored baseline. New modules or components to document.</li>
+        <li><strong>Deleted files</strong> &mdash; present in stored baseline but not in current tree. Sections to prune.</li>
+        <li><strong>Unchanged files</strong> &mdash; hash matches. Skip entirely.</li>
+    </ul>
+
+    <p>If all hashes match and no files were added or deleted, Draft announces that context is current and stops. No wasted analysis, no unnecessary regeneration.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Two Layers of Change Detection</div>
+        <p>File hashes provide more granularity than git diffs alone. The <code>synced_to_commit</code> field in each document's YAML frontmatter tracks which git commit the document was last synced to. Draft uses <code>git diff --name-only &lt;synced_sha&gt; HEAD</code> to find changed files since that commit. But git diff only tells you that files changed &mdash; not whether the changes are meaningful. A file could be reformatted (content change, no semantic change) or modified in a way that does not affect architecture. File hashes provide the precise delta, while git diff provides the broader scope.</p>
+    </div>
+
+    <h2>Cross-Session Continuity</h2>
+    <p>The second state file is <code>draft/.state/run-memory.json</code>. It tracks what happened during the last Draft run: which phases completed, which files were analyzed, which questions remained unresolved, and where to resume if the run was interrupted.</p>
+
+    <pre data-file="draft/.state/run-memory.json"><code>{
+  "run_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "started_at": "2024-03-15T09:00:00Z",
+  "completed_at": "2024-03-15T09:02:34Z",
+  "run_type": "refresh",
+  "status": "completed",
+  "phases_completed": ["phase_1", "phase_2", "phase_3", "phase_4", "phase_5"],
+  "files_analyzed": 142,
+  "files_generated": ["draft/architecture.md", "draft/.ai-context.md"],
+  "unresolved_questions": [
+    "Could not determine if src/legacy/ is actively used or deprecated",
+    "Multiple auth patterns detected — unclear which is canonical"
+  ],
+  "active_focus_areas": ["backend_routes", "services", "data_models"],
+  "resumable_checkpoint": null
+}</code></pre>
+
+    <p>If a previous run has <code>status: "in_progress"</code>, the next invocation detects the incomplete state and offers to resume from the last checkpoint or start fresh. This prevents partial analysis from being silently treated as complete. Unresolved questions from previous runs are surfaced again &mdash; they persist until answered.</p>
+
+    <h2>How Incremental Refresh Works</h2>
+    <p>When you run <code>/draft:init refresh</code>, Draft executes this sequence:</p>
+
+    <ol>
+        <li><strong>State-aware pre-check</strong> &mdash; Load <code>run-memory.json</code> to detect interrupted runs. Load <code>freshness.json</code> to compute file-level deltas. Load <code>signals.json</code> to detect signal drift (new or removed architectural concerns).</li>
+        <li><strong>Tech stack refresh</strong> &mdash; Re-scan <code>package.json</code>, <code>go.mod</code>, and other manifest files. Compare with <code>draft/tech-stack.md</code> and propose updates.</li>
+        <li><strong>Architecture refresh</strong> &mdash; Read the <code>synced_to_commit</code> SHA from the existing <code>architecture.md</code> frontmatter. Get changed files since that commit. Categorize changes (added, modified, deleted, renamed). Perform targeted analysis on only the changed files.</li>
+        <li><strong>Section mapping</strong> &mdash; Map changed files to affected architecture sections. New files affect Component Map, Implementation Catalog, and File Structure. Modified interfaces affect API Definitions and Interface Contracts. Changed dependencies affect the Dependency Graph. New tests affect Testing Infrastructure.</li>
+        <li><strong>Contradiction detection</strong> &mdash; If <code>facts.json</code> exists, re-extract facts from changed files and compare against stored facts. Confirmed facts get updated timestamps. Contradicted facts get marked as superseded. New facts are added.</li>
+        <li><strong>Present diff</strong> &mdash; Show the developer which files were analyzed, which sections will be updated, and a summary of changes per section. Wait for approval.</li>
+        <li><strong>Apply updates</strong> &mdash; On approval, update only the affected sections. Preserve unchanged sections exactly. Regenerate <code>.ai-context.md</code> from the updated architecture. Regenerate <code>.ai-profile.md</code> with current dynamic context.</li>
+        <li><strong>Persist state</strong> &mdash; Recompute and write <code>freshness.json</code> (new hash baseline), <code>signals.json</code> (updated classification), <code>facts.json</code> (updated registry), and <code>run-memory.json</code> (completed status).</li>
+    </ol>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">The 100-File Guardrail</div>
+        <p>If more than 100 files changed since the last sync, Draft recommends a full 5-phase refresh instead of incremental analysis. Too many changes mean the incremental approach loses its token-efficiency advantage &mdash; you are essentially re-analyzing most of the codebase anyway. This threshold also catches scenarios where the <code>synced_to_commit</code> is far behind HEAD, such as after a major merge or long period without refresh.</p>
+    </div>
+
+    <h2>The Delta-Only Approach</h2>
+    <p>The key design decision in incremental refresh is that Draft patches existing documents rather than regenerating them. Unchanged sections are preserved exactly as written. Only sections affected by changed files are rewritten. This has three benefits:</p>
+
+    <ul>
+        <li><strong>Speed</strong> &mdash; Re-analyzing 8 changed files is dramatically faster than re-analyzing 142 files.</li>
+        <li><strong>Stability</strong> &mdash; Sections you have manually refined (added notes, corrected descriptions) are not overwritten by regeneration.</li>
+        <li><strong>Precision</strong> &mdash; Modules added by <code>/draft:decompose</code> (planned but not yet implemented) are preserved. They would be lost in a full regeneration that only sees what currently exists in code.</li>
+    </ul>
+
+    <p>Deleted files trigger section pruning &mdash; components are removed from the map, endpoints are removed from the API catalog, dependencies are removed from the graph. Renamed files trigger reference updates. The architecture document evolves with the codebase without losing accumulated context.</p>
+
+    <h2>When to Run Full vs. Incremental</h2>
+    <p>Incremental refresh handles day-to-day evolution: new endpoints, modified services, added tests, updated dependencies. But some changes are too structural for incremental patching:</p>
+
+    <pre><code>| Scenario                         | Use                  |
+|----------------------------------|----------------------|
+| Added a few files, fixed bugs    | /draft:init refresh  |
+| New module, updated dependencies | /draft:init refresh  |
+| Major framework migration        | Full /draft:init     |
+| Monolith → microservice split    | Full /draft:init     |
+| Changed database technology      | Full /draft:init     |
+| Rewrote authentication system    | Full /draft:init     |</code></pre>
+
+    <p>The heuristic is straightforward: if the change affects the fundamental architecture (new paradigm, new database, new auth system), run a full init. If the change extends or modifies existing architecture, refresh is sufficient.</p>
+
+    <div class="callout callout-example">
+        <div class="callout-title">Practical Impact</div>
+        <p>A 100,000-line codebase with 400 source files. Full <code>/draft:init</code> reads all 400 files, runs 5-phase analysis, generates a complete <code>architecture.md</code> and <code>.ai-context.md</code>. Time: roughly 2 minutes.</p>
+        <p>Two weeks later, 12 files have changed: 3 new API endpoints, 2 modified services, 4 new tests, 2 config updates, 1 deleted utility. <code>/draft:init refresh</code> computes file hashes (instant), identifies the 12-file delta, re-analyzes only those files, maps them to 4 affected sections, and patches the existing documents. Time: roughly 10 seconds.</p>
+        <p>Same result quality. One-twelfth the cost. That difference is what makes teams actually keep their context current instead of letting it rot.</p>
+    </div>
+
+    <h2>Signal Drift Detection</h2>
+    <p>Beyond file-level changes, incremental refresh also tracks structural drift through signal re-classification. If your project had zero authentication files last month and now has five, that is not just "new files" &mdash; it is a new architectural concern. Draft flags signal drift separately from file changes because it has different implications: new signal categories may require generating entirely new sections of <code>architecture.md</code>, not just updating existing ones.</p>
+
+    <pre class="terminal"><code>$ /draft:init refresh
+
+Signal drift detected:
+  NEW:     auth_files (0 → 5) — Security Architecture needs generation
+  GROWN:   backend_routes (12 → 24) — API Definitions needs expansion
+  REMOVED: background_jobs (3 → 0) — Concurrency can be simplified
+  STABLE:  services (8 → 9), test_infra (15 → 16)
+
+8 files changed since last sync (2024-01-15).
+Sections to update: API Definitions, Security Architecture, Concurrency, Testing.
+Approve refresh? [y/n]</code></pre>
+
+    <p>The combination of file-level freshness tracking, git commit anchoring, signal drift detection, and fact contradiction analysis gives Draft a multi-layered understanding of what changed, why it matters, and exactly which parts of the documentation need updating. No more stale context. No more full regeneration. Just precise, incremental evolution.</p>
+</div>

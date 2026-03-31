@@ -1,0 +1,134 @@
+<div class="chapter-wrapper">
+    <h1>Philosophy &amp; References</h1>
+    <p class="chapter-meta"><span class="part-name">Part VII: Closing</span> &middot; Chapter 21</p>
+    <p class="read-time">6 min read</p>
+
+    <p class="chapter-intro">Draft is built on a premise: AI coding assistants are powerful but undirected, and structure is the missing piece. This chapter traces that premise to its foundations &mdash; the philosophy that drives Draft's design, the production robustness patterns it enforces, and the vetted knowledge base that informs its recommendations.</p>
+
+    <h2>The Core Philosophy</h2>
+    <p>The gap between what AI can generate and what production systems require is not a capability gap. It is a direction gap. An AI assistant can write a complete authentication system in thirty seconds. It can also write the wrong authentication system in thirty seconds. The difference is not in the model's ability but in the constraints it operates under.</p>
+
+    <p>Draft's philosophy follows from this observation: <strong>if you want better output from AI, don't write better prompts &mdash; build better structure.</strong></p>
+
+    <p>Prompt engineering is fragile. It depends on phrasing, context window position, model version, and conversational state. A prompt that works today may not work tomorrow. Structural constraints are durable. A <code>tech-stack.md</code> file that says "PostgreSQL, not MongoDB" constrains every interaction, every session, every model version. The constraint is not a suggestion embedded in natural language &mdash; it is a versioned, reviewable artifact in the repository.</p>
+
+    <p>This is what Draft means by Context-Driven Development: making the context that shapes AI behavior explicit, managed, and permanent. Every decision captured in a Draft document is a decision the AI doesn't have to guess at.</p>
+
+    <h2>Production Robustness as a First-Class Concern</h2>
+    <p>Most AI-generated code works. It passes the tests the AI also wrote. It handles the happy path. What it frequently lacks is production robustness &mdash; the defensive patterns that keep systems running when things go wrong.</p>
+
+    <p>Draft treats robustness not as an afterthought but as a mandatory dimension of code generation. During <code>/draft:implement</code>, six production robustness patterns are always active, triggered automatically by code patterns without manual opt-in:</p>
+
+    <h3>1. Atomicity</h3>
+    <p>All-or-nothing mutations. Atomic file writes (write to temp, then rename). Database-first state updates. If an operation produces multiple side effects, either all succeed or none do. The AI does not generate code that can leave the system in a half-updated state.</p>
+
+    <h3>2. Isolation</h3>
+    <p>Lock-guarded shared state. Deep-copy returns to prevent callers from mutating internal data. No database I/O while holding locks. Each component's failure boundary is contained &mdash; a crash in one operation does not corrupt another's state.</p>
+
+    <h3>3. Durability</h3>
+    <p>Crash-recoverable state. No fire-and-forget writes. If the process dies between two operations, the system must be recoverable. State that matters is persisted before the operation is acknowledged.</p>
+
+    <h3>4. Defensive Boundaries</h3>
+    <p>Numeric validation on all user inputs. API response validation before processing. Parameterized SQL without exception. Every boundary where data enters the system is treated as hostile &mdash; validated, sanitized, and constrained before it reaches business logic.</p>
+
+    <h3>5. Idempotency</h3>
+    <p>Deduplication keys on operations that might be retried. Legal state transitions only (no invalid state jumps). Alert deduplication to prevent notification storms. If an operation is executed twice with the same input, the system state is identical to executing it once.</p>
+
+    <h3>6. Fail-Closed</h3>
+    <p>Deny on error. Deny on missing data. When the system cannot determine whether an operation is safe, it refuses rather than guessing. This is the opposite of fail-open, where errors are swallowed and execution continues with potentially corrupt state.</p>
+
+    <p>When project-specific invariants exist in <code>.ai-context.md</code> &mdash; lock ordering, concurrency models, consistency boundaries &mdash; they take precedence over the general patterns. The robustness framework adapts to each project's constraints rather than applying a one-size-fits-all ruleset.</p>
+
+    <h2>Why Explicit Context Beats Prompt Engineering</h2>
+    <p>Prompt engineering and structural context both aim to improve AI output. They differ fundamentally in durability and reliability:</p>
+
+    <table>
+        <thead>
+            <tr><th>Dimension</th><th>Prompt Engineering</th><th>Structural Context (Draft)</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Persistence</td><td>Lost when session ends</td><td>Versioned in the repository</td></tr>
+            <tr><td>Reviewability</td><td>Buried in chat history</td><td>PR-reviewable markdown files</td></tr>
+            <tr><td>Consistency</td><td>Varies by phrasing and session</td><td>Same constraints every time</td></tr>
+            <tr><td>Team alignment</td><td>Personal to one developer</td><td>Shared by the entire team</td></tr>
+            <tr><td>Model independence</td><td>May break across model versions</td><td>Model-agnostic document format</td></tr>
+            <tr><td>Accountability</td><td>No record of what was instructed</td><td>Full git history of every constraint</td></tr>
+        </tbody>
+    </table>
+
+    <p>A prompt says "remember to use PostgreSQL." A context file says "PostgreSQL is the primary datastore, connection pooling via PgBouncer, migrations via Prisma." The first is a verbal instruction that might be forgotten. The second is a structural constraint that is loaded every time.</p>
+
+    <h2>The Knowledge Base</h2>
+    <p>Draft's agents do not operate from general training data alone. They draw on a curated knowledge base (<code>core/knowledge-base.md</code>) of vetted sources across architecture, reliability, craft, and security. When an agent makes a recommendation during planning or review, it cites the source.</p>
+
+    <h3>Architecture &amp; Design</h3>
+    <ul>
+        <li><strong>Designing Data-Intensive Applications</strong> (Martin Kleppmann) &mdash; Data models, replication, partitioning, consistency, stream processing. Cited for distributed systems decisions: "Consider CQRS here (DDIA, Ch. 11) &mdash; separates read/write concerns which fits your high-read workload."</li>
+        <li><strong>Clean Architecture</strong> (Robert Martin) &mdash; Dependency rule, boundaries, use cases, separation of concerns. Cited for module boundary violations: "This violates the Dependency Rule (Clean Architecture) &mdash; domain shouldn't know about infrastructure."</li>
+        <li><strong>Domain-Driven Design</strong> (Eric Evans) &mdash; Bounded contexts, ubiquitous language, aggregates, strategic design</li>
+        <li><strong>Building Evolutionary Architectures</strong> (Ford, Parsons, Kua) &mdash; Fitness functions, incremental change, architectural governance</li>
+    </ul>
+
+    <h3>Reliability &amp; Operations</h3>
+    <ul>
+        <li><strong>Release It!</strong> (Michael Nygard) &mdash; Stability patterns, circuit breakers, bulkheads, timeouts, failure modes. Cited for resilience recommendations: "Circuit breaker pattern (Release It!) would help here &mdash; fail fast instead of cascading timeouts."</li>
+        <li><strong>Site Reliability Engineering</strong> (Google SRE Book) &mdash; SLOs, error budgets, toil reduction, incident response. The operational mindset that informs Draft's emphasis on production robustness.</li>
+        <li><strong>The Phoenix Project</strong> (Kim, Behr, Spafford) &mdash; Flow, feedback, continuous improvement</li>
+    </ul>
+
+    <h3>Craft &amp; Practice</h3>
+    <ul>
+        <li><strong>Working Effectively with Legacy Code</strong> (Michael Feathers) &mdash; Seams, characterization tests, breaking dependencies. Essential for brownfield projects where Draft analyzes existing code before proposing changes.</li>
+        <li><strong>The Pragmatic Programmer</strong> (Hunt, Thomas) &mdash; Tracer bullets, DRY, orthogonality, good enough software</li>
+        <li><strong>Refactoring</strong> (Martin Fowler) &mdash; Code smells, refactoring patterns, incremental improvement</li>
+    </ul>
+
+    <h3>Testing</h3>
+    <ul>
+        <li><strong>Growing Object-Oriented Software, Guided by Tests</strong> (Freeman, Pryce) &mdash; TDD outside-in, mock objects. Informs Draft's TDD workflow and the test-first cycle in <code>/draft:implement</code>.</li>
+        <li><strong>Unit Testing Principles, Practices, and Patterns</strong> (Khorikov) &mdash; Test pyramid, test doubles, maintainable tests</li>
+    </ul>
+
+    <h3>Security</h3>
+    <ul>
+        <li><strong>OWASP Top 10</strong> &mdash; Injection, broken auth, XSS, insecure deserialization, security misconfiguration. Referenced during review and bughunt for security-dimension findings.</li>
+        <li><strong>OWASP ASVS</strong> &mdash; Application Security Verification Standard for security requirements</li>
+        <li><strong>OWASP Cheat Sheets</strong> &mdash; Specific guidance for auth, session management, input validation</li>
+    </ul>
+
+    <h3>Resilience &amp; Chaos</h3>
+    <ul>
+        <li><strong>Netflix chaos engineering</strong> &mdash; Principles of deliberately injecting failures to build confidence in system resilience. Informs Draft's emphasis on failure-mode analysis during planning and review.</li>
+    </ul>
+
+    <h2>How References Are Cited</h2>
+    <p>Draft's agents cite sources naturally during planning and review, not as footnotes but as inline reasoning:</p>
+
+    <blockquote>
+        <p>"Consider CQRS here (DDIA, Ch. 11) &mdash; separates read/write concerns which fits your high-read workload."</p>
+    </blockquote>
+    <blockquote>
+        <p>"This violates the Dependency Rule (Clean Architecture) &mdash; domain shouldn't know about infrastructure."</p>
+    </blockquote>
+    <blockquote>
+        <p>"Circuit breaker pattern (Release It!) would help here &mdash; fail fast instead of cascading timeouts."</p>
+    </blockquote>
+
+    <p>Citations serve two purposes. They make recommendations credible by grounding them in established practice rather than model opinion. And they give developers a trail to follow &mdash; if the recommendation seems wrong, the developer can read the source and decide for themselves.</p>
+
+    <h2>The Future of Context-Driven Development</h2>
+    <p>Draft's current architecture treats context as static documents that are loaded at invocation time. The methodology works because those documents are comprehensive enough to constrain most decisions. But the trajectory points toward richer context systems:</p>
+
+    <ul>
+        <li><strong>Tiered context loading</strong> &mdash; Draft already implements three tiers (<code>.ai-profile.md</code> at 20-50 lines, <code>.ai-context.md</code> at 200-400 lines, <code>architecture.md</code> at full size). Future iterations may add relevance scoring that loads only the sections needed for a specific task.</li>
+        <li><strong>Cross-session memory</strong> &mdash; Draft's <code>.state/run-memory.json</code> already provides continuity data across sessions. The natural extension is richer state that captures what was tried, what failed, and what patterns were learned during development.</li>
+        <li><strong>Team-scale context</strong> &mdash; <code>/draft:index</code> aggregates service-level context into a system view. Future work may extend this to team-level conventions, cross-team dependency negotiation, and organizational standards enforcement.</li>
+    </ul>
+
+    <p>The underlying principle will remain constant: better structure produces better AI output. The documents may evolve. The methodology may expand. But the insight &mdash; that explicit, managed, versioned context is the most reliable way to direct AI behavior &mdash; is the foundation everything else builds on.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Anti-Patterns in the Knowledge Base</div>
+        <p>The knowledge base does not only catalog good patterns. It also catalogs anti-patterns that agents actively watch for: distributed monoliths, shared databases between services, God classes, leaky abstractions, security by obscurity, hardcoded secrets, and the eight fallacies of distributed computing. These anti-patterns are flagged during review and bughunt when detected in the codebase.</p>
+    </div>
+</div>

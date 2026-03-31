@@ -1,0 +1,170 @@
+<div class="chapter-wrapper">
+    <h1>Managing Tracks</h1>
+    <p class="chapter-meta"><span class="part-name">Part III: Track Lifecycle</span> &middot; Chapter 11</p>
+    <p class="read-time">4 min read</p>
+
+    <p class="chapter-intro">Specs get written. Plans get approved. Implementation begins. And then the requirements change. Or a task gets blocked by an external dependency. Or you realize phase 2 introduced a regression and need to undo it without losing phase 1's work. Draft provides three operational commands for exactly these situations: <code>/draft:status</code> for visibility, <code>/draft:change</code> for mid-track adjustments, and <code>/draft:revert</code> for git-aware rollback.</p>
+
+    <h2>Status: Project Visibility</h2>
+    <p><code>/draft:status</code> reads every active track's plan and metadata, then produces a comprehensive dashboard showing exactly where everything stands.</p>
+
+    <pre class="terminal"><code>$ /draft:status
+
+═══════════════════════════════════════════════════════════
+                      DRAFT STATUS
+═══════════════════════════════════════════════════════════
+
+PROJECT: Acme Platform
+
+ACTIVE TRACKS
+─────────────────────────────────────────────────────────
+[add-oauth2] Add OAuth2 Support
+  Status: [~] In Progress
+  Phase:  2/3 (Phase 2: Provider Integration)
+  Tasks:  6/11 complete
+  ├─ [x] Task 1.1: Create OAuth provider config (a1b2c3d)
+  ├─ [x] Task 1.2: Add linked_accounts migration (b2c3d4e)
+  ├─ [x] Task 1.3: Implement token exchange (c3d4e5f)
+  ├─ [x] Task 1.4: Write token exchange tests (d4e5f6a)
+  ├─ [x] Task 2.1: Google OAuth callback (e5f6a7b)
+  ├─ [x] Task 2.2: GitHub OAuth callback (f6a7b8c)
+  ├─ [~] Task 2.3: Rate limiting on callbacks  ← CURRENT
+  ├─ [ ] Task 2.4: Integration tests
+  ├─ [ ] Task 3.1: Linked accounts UI
+  ├─ [ ] Task 3.2: Token revocation
+  └─ [ ] Task 3.3: End-to-end tests
+
+[fix-email-null] Fix Null Pointer in Email Validation
+  Status: [~] In Progress
+  Type:   quick
+  Tasks:  1/3 complete
+  ├─ [x] Task 1: Add null check (g7h8i9j)
+  ├─ [~] Task 2: Write regression test  ← CURRENT
+  └─ [ ] Task 3: Verify fix in staging
+
+BLOCKED ITEMS
+─────────────────────────────────────────────────────────
+  (none)
+
+QUICK STATS
+─────────────────────────────────────────────────────────
+Active Tracks:    2
+Total Tasks:      14
+Completed:        7 (50%)
+Blocked:          0
+═══════════════════════════════════════════════════════════</code></pre>
+
+    <p>The status display adapts to track type. Multi-phase tracks show phase progress with nested task trees. Quick-mode tracks show a flat task list without phase grouping. Both use the same status markers: <code>[ ]</code> Pending, <code>[~]</code> In Progress, <code>[x]</code> Completed, <code>[!]</code> Blocked.</p>
+
+    <h3>Orphaned Track Detection</h3>
+    <p>The status command also scans for orphaned tracks &mdash; directories in <code>draft/tracks/</code> that have a <code>metadata.json</code> but no corresponding entry in <code>tracks.md</code>. These can occur when a track creation was interrupted between directory creation and registry update. The status output flags them with recovery options: add the entry to <code>tracks.md</code> manually, or remove the orphaned directory.</p>
+
+    <h3>Module Reporting</h3>
+    <p>When <code>.ai-context.md</code> or <code>architecture.md</code> exists, the status output includes a module-level view &mdash; which modules are complete, which are in progress with task counts, and which are blocked. This gives architectural visibility alongside task-level progress.</p>
+
+    <h2>Change: Mid-Track Adjustments</h2>
+    <p>Requirements change. A stakeholder wants JSON export added to a feature that was specced for CSV only. A security review reveals a new constraint. A dependency you planned to use is deprecated. <code>/draft:change</code> handles these mid-stream adjustments without losing completed work.</p>
+
+    <pre class="terminal"><code>$ /draft:change the export format should support JSON in addition to CSV</code></pre>
+
+    <p>The command follows a structured process:</p>
+
+    <ol>
+        <li><strong>Impact Analysis</strong> &mdash; The AI classifies every requirement and acceptance criterion in <code>spec.md</code> as Added, Modified, Removed, or Unaffected by the change.</li>
+        <li><strong>Plan Mapping</strong> &mdash; Each task in <code>plan.md</code> is evaluated against the spec change. Completed tasks that are now invalidated get flagged for potential rework. In-progress tasks get flagged for review. Pending tasks get proposed new text.</li>
+        <li><strong>Preview</strong> &mdash; The full impact is displayed before any file is modified: how many completed tasks may need rework, how many pending tasks need updating, the exact before/after diffs for each affected section.</li>
+        <li><strong>Confirmation</strong> &mdash; You approve, reject, or request edits to the proposed changes. The edit loop continues until you say "yes" or "no."</li>
+        <li><strong>Application</strong> &mdash; On approval, amendments are applied to <code>spec.md</code> and <code>plan.md</code>, metadata timestamps are updated, and a Change Log entry is appended to the plan with the current git SHA and timestamp.</li>
+    </ol>
+
+    <pre><code>Change: Add JSON export format
+Track:  add-export-feature
+
+Spec impact:
+  - Modified: AC #2 "User can export to CSV" → now also requires JSON
+  - Removed:  AC #5 "Export limited to 1000 rows"
+  - Added:    AC #6 "Export progress indicator for large datasets"
+
+Plan impact:
+  - 1 completed task may need rework
+  - 2 pending tasks need updating
+  - 0 blocked tasks affected
+
+Completed tasks that may need rework:
+  - [x] Task 1.3: Implement CSV serializer (abc1234)
+
+Apply these changes to spec.md and plan.md? [yes / no / edit]</code></pre>
+
+    <div class="callout callout-warning">
+        <div class="callout-title">Completed Work Is Flagged, Not Destroyed</div>
+        <p><code>/draft:change</code> never silently invalidates completed tasks. When a requirement change affects work that's already done, the task is flagged explicitly and the developer decides whether rework is needed. The commit history is preserved &mdash; you can inspect exactly what was built and decide how much needs to change.</p>
+    </div>
+
+    <h2>Revert: Git-Aware Rollback</h2>
+    <p>Sometimes you need to undo work. A phase introduced a subtle regression. An approach turned out to be a dead end. A task's implementation conflicts with a concurrent change on another branch. <code>/draft:revert</code> provides git-aware rollback that understands Draft's logical units of work.</p>
+
+    <p>The command supports three granularity levels:</p>
+
+    <ul>
+        <li><strong>Task-level revert</strong> &mdash; Undo a single task's commits. The most surgical option.</li>
+        <li><strong>Phase-level revert</strong> &mdash; Undo all commits in an entire phase. Useful when the approach for a phase was wrong.</li>
+        <li><strong>Track-level revert</strong> &mdash; Undo everything in the track. The nuclear option.</li>
+    </ul>
+
+    <p>Every revert follows the same safety protocol:</p>
+
+    <ol>
+        <li><strong>Pre-flight check</strong> &mdash; Verifies the working tree is clean. Uncommitted changes must be stashed or committed first.</li>
+        <li><strong>Commit identification</strong> &mdash; Reads commit SHAs from the <code>[x]</code> task markers in <code>plan.md</code>. Falls back to searching git log by track ID pattern if SHAs are missing.</li>
+        <li><strong>Preview</strong> &mdash; Shows exactly which commits will be reverted, which files are affected, and how <code>plan.md</code> will change. Nothing happens without your confirmation.</li>
+        <li><strong>Execution</strong> &mdash; Reverts commits in reverse chronological order using <code>git revert --no-commit</code>, then creates a single revert commit: <code>revert(add-oauth2): Revert Phase 2 provider integration</code>.</li>
+        <li><strong>State update</strong> &mdash; Reverted tasks change from <code>[x]</code> to <code>[ ]</code> in <code>plan.md</code>. The commit SHA is removed. <code>metadata.json</code> counters are decremented. Phase status markers are adjusted &mdash; if any task in a completed phase is reverted, the phase returns to In Progress.</li>
+    </ol>
+
+    <pre class="terminal"><code>$ /draft:revert
+
+Reverting: Phase 2 "Provider Integration"
+
+Commits to revert (newest first):
+  f6a7b8c feat(add-oauth2): GitHub OAuth callback
+  e5f6a7b feat(add-oauth2): Google OAuth callback
+
+Files affected:
+  src/auth/google.ts
+  src/auth/github.ts
+  tests/auth/google.test.ts
+  tests/auth/github.test.ts
+
+Plan.md changes:
+  Task 2.1: [x] (e5f6a7b) → [ ]
+  Task 2.2: [x] (f6a7b8c) → [ ]
+
+Proceed with revert? (yes/no)</code></pre>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Stale Report Handling</div>
+        <p>After a revert, any existing review or bughunt reports for the track are stale &mdash; they analyzed code that no longer exists. Draft adds a warning header to these reports or deletes them if the revert is substantial, preventing anyone from relying on outdated analysis.</p>
+    </div>
+
+    <h2>Handling Blocked Tasks</h2>
+    <p>When a task cannot proceed, it is marked <code>[!]</code> Blocked with a reason recorded in <code>plan.md</code>. The implementation command skips blocked tasks and notifies you, but it never attempts to implement them. Blocked tasks require manual intervention &mdash; resolving an external dependency, getting an API key provisioned, waiting for a team member's input.</p>
+
+    <p><code>/draft:status</code> surfaces all blocked items in a dedicated section, making them visible even if you're focused on a different part of the project. When the blocker is resolved, you manually change the marker from <code>[!]</code> to <code>[ ]</code> and resume implementation.</p>
+
+    <h2>Track Completion</h2>
+    <p>When all tasks in all phases are marked <code>[x]</code>, the implementation command runs a final review (if auto-review is enabled in <code>workflow.md</code>), updates <code>plan.md</code> status to Completed, sets <code>metadata.json</code> status to <code>"completed"</code>, and moves the track from the Active section to the Completed section in <code>tracks.md</code> with a completion date. The AI verifies all three files are consistent before announcing completion &mdash; if any file shows inconsistent state, it halts and reports exactly what needs manual correction.</p>
+
+    <pre class="terminal"><code>Track add-oauth2 completed!
+
+Summary:
+- Phases: 3/3
+- Tasks: 11/11
+
+Review: PASS
+Report: draft/tracks/add-oauth2/review-report-latest.md
+
+All acceptance criteria from spec.md verified.
+Next: Run /draft:status to see project overview.</code></pre>
+
+    <p>The completed track remains in the project history. Its specification, plan, and review reports are preserved as a permanent record of what was built, why it was built, and how it was verified. This trail becomes valuable context for future tracks that touch the same areas of the codebase.</p>
+</div>

@@ -1,0 +1,108 @@
+<div class="chapter-wrapper">
+    <h1>Multi-IDE Support</h1>
+    <p class="chapter-meta"><span class="part-name">Part VI: Enterprise</span> &middot; Chapter 20</p>
+    <p class="read-time">4 min read</p>
+
+    <p class="chapter-intro">Draft is not locked to a single AI coding tool. The methodology &mdash; the skills, agents, templates, and procedures &mdash; exists as markdown and bash, independent of any platform. A build pipeline transforms these source files into platform-specific integration formats. The result: every supported IDE gets the same methodology, with minor syntax adaptations.</p>
+
+    <h2>Claude Code (Native)</h2>
+    <p>Claude Code is Draft's native environment. The plugin is installed directly via the marketplace:</p>
+
+    <pre><code>/plugin marketplace add mayurpise/draft
+/plugin install draft</code></pre>
+
+    <p>All 17 commands are available as <code>/draft:*</code> slash commands. Skills are loaded from the <code>.claude-plugin/plugin.json</code> manifest, which points to the <code>skills/</code> directory. Each skill's <code>SKILL.md</code> file is read at invocation time, giving Claude Code direct access to the full methodology without any transformation.</p>
+
+    <p>The 5 specialized agents (Architect, Debugger, Planner, RCA, Reviewer) are referenced as <code>@architect</code>, <code>@debugger</code>, etc., and resolved from <code>core/agents/</code>.</p>
+
+    <h2>Cursor</h2>
+    <p>Cursor natively supports the <code>.claude/</code> plugin structure, making it a near-identical experience to Claude Code. Installation is through Cursor's settings:</p>
+
+    <pre><code>Cursor &gt; Settings &gt; Rules, Skills, Subagents &gt; Rules &gt; New &gt; Add from Github
+https://github.com/mayurpise/draft.git</code></pre>
+
+    <p>Commands use <code>@draft</code> syntax: <code>@draft init</code>, <code>@draft new-track</code>, <code>@draft implement</code>. The same plugin.json, the same skill files, the same agent definitions &mdash; no separate build step required.</p>
+
+    <h2>GitHub Copilot</h2>
+    <p>Copilot does not have a plugin system that can read skill files at runtime. Instead, Draft uses a <code>.github/copilot-instructions.md</code> file &mdash; a single, large generated file (15,000+ lines) that encodes the entire Draft methodology inline.</p>
+
+    <p>This file is produced by the build pipeline (<code>scripts/build-integrations.sh</code>) and includes:</p>
+    <ul>
+        <li>All 17 skill definitions (minus frontmatter, plus syntax transforms)</li>
+        <li>All core reference files (methodology, knowledge base, shared procedures, templates, agent definitions)</li>
+        <li>Quality disciplines, communication style, and proactive behaviors</li>
+        <li>Intent mapping for natural language triggers</li>
+    </ul>
+
+    <p>Two key syntax transformations apply:</p>
+    <table>
+        <thead>
+            <tr><th>Source Syntax</th><th>Copilot Syntax</th><th>Example</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>/draft:command</code></td><td><code>draft command</code></td><td><code>/draft:implement</code> becomes <code>draft implement</code></td></tr>
+            <tr><td><code>@architect</code>, <code>@debugger</code>, etc.</td><td><code>@workspace</code></td><td>All agent references become <code>@workspace</code></td></tr>
+        </tbody>
+    </table>
+
+    <p>Installation is a single curl command that drops the generated file into the project:</p>
+    <pre><code>mkdir -p .github &amp;&amp; curl -o .github/copilot-instructions.md \
+  https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md</code></pre>
+
+    <h2>Gemini</h2>
+    <p>Gemini uses a <code>.gemini.md</code> bootstrap file that instructs Gemini where to find Draft's skill files. Rather than inlining all content (as Copilot requires), the bootstrap points to the skills directory and lets Gemini read files as needed.</p>
+
+    <pre><code>curl -o .gemini.md \
+  https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/.gemini.md</code></pre>
+
+    <h2>Antigravity IDE</h2>
+    <p>Antigravity IDE supports global skill installation. Draft is cloned to a central location and configured via a global <code>.gemini.md</code> bootstrap:</p>
+
+    <pre><code># Clone to global skills directory
+git clone https://github.com/mayurpise/draft.git \
+  ~/.gemini/antigravity/skills/draft
+
+# Configure bootstrap
+echo 'Skill Locations:
+/Users/you/.gemini/antigravity/skills/draft/skills' &gt;&gt; ~/.gemini.md</code></pre>
+
+    <p>This makes Draft available across all projects without per-project setup.</p>
+
+    <h2>The Build Pipeline</h2>
+    <p>The transformation from source skills to platform-specific integrations is handled by <code>scripts/build-integrations.sh</code>, a ~700-line bash script that is the critical path for multi-IDE support.</p>
+
+    <p>The pipeline works as follows:</p>
+    <ol>
+        <li><strong>Skill ordering</strong> &mdash; A <code>SKILL_ORDER</code> array defines the 17 skills and their generation order. This order is independent of the alphabetical order in <code>plugin.json</code>.</li>
+        <li><strong>Frontmatter extraction</strong> &mdash; Each skill's YAML frontmatter (<code>name:</code> and <code>description:</code>) is validated. The body is extracted via <code>extract_body()</code>, which strips the frontmatter delimiters.</li>
+        <li><strong>Body format validation</strong> &mdash; The body must follow a strict format: blank line, <code># Title</code> heading, blank line, then content. The build skips the first 3 body lines when inlining (the title is replaced by the integration's section header).</li>
+        <li><strong>Syntax transformation</strong> &mdash; Platform-specific transforms are applied: <code>/draft:command</code> becomes <code>draft command</code> for Copilot, agent references become <code>@workspace</code>.</li>
+        <li><strong>Core file inlining</strong> &mdash; 22 core reference files (methodology, shared procedures, templates, agents) are inlined into the output, each wrapped in <code>&lt;core-file&gt;</code> tags.</li>
+        <li><strong>Verification</strong> &mdash; <code>verify_output()</code> checks minimum line count (&gt;1000), completeness sentinel (<code>DRAFT_BUILD_COMPLETE</code>), and that no untransformed syntax remains.</li>
+    </ol>
+
+    <p>The build is atomic: output is written to a temporary file, verified, then moved to the final location. A failed verification deletes the temp file and exits with an error, leaving the previous output intact.</p>
+
+    <h2>Choosing Your IDE</h2>
+    <p>All supported IDEs receive the same Draft methodology. The differences are operational, not functional:</p>
+
+    <table>
+        <thead>
+            <tr><th>Factor</th><th>Claude Code / Cursor</th><th>Copilot</th><th>Gemini / Antigravity</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Setup</td><td>Plugin install</td><td>Copy one file</td><td>Bootstrap file or global clone</td></tr>
+            <tr><td>Command syntax</td><td><code>/draft:command</code></td><td><code>draft command</code></td><td>Natural language</td></tr>
+            <tr><td>Agent references</td><td><code>@architect</code>, etc.</td><td><code>@workspace</code></td><td>As configured</td></tr>
+            <tr><td>Skill loading</td><td>On-demand from files</td><td>Pre-inlined in one file</td><td>Bootstrap + file read</td></tr>
+            <tr><td>Updates</td><td><code>/plugin update</code></td><td>Re-download file</td><td><code>git pull</code></td></tr>
+        </tbody>
+    </table>
+
+    <p>The methodology is identical. The context files are identical. The plans, specs, architecture documents, and tracks are identical regardless of which IDE produced them. A team can have one developer using Claude Code and another using Copilot &mdash; both work on the same <code>draft/</code> directory with full compatibility.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Single Source of Truth</div>
+        <p>Skills (<code>skills/&lt;name&gt;/SKILL.md</code>) are the source of truth. Integration files are generated artifacts. Never edit <code>.github/copilot-instructions.md</code> directly &mdash; edit the skill, run <code>make build</code>, and the integration files are regenerated. This ensures all platforms stay in sync.</p>
+    </div>
+</div>

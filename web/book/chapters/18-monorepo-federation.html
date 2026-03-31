@@ -1,0 +1,89 @@
+<div class="chapter-wrapper">
+    <h1>Monorepo Federation</h1>
+    <p class="chapter-meta"><span class="part-name">Part VI: Enterprise</span> &middot; Chapter 18</p>
+    <p class="read-time">4 min read</p>
+
+    <p class="chapter-intro">A monorepo with twelve services has twelve <code>draft/</code> directories after initialization. Each service has its own architecture documentation, its own tech stack, its own context files. But nobody has a unified view of the whole system &mdash; which services depend on which, what technologies are used where, or how the pieces fit together. <code>/draft:index</code> builds that view.</p>
+
+    <h2>The Monorepo Context Problem</h2>
+    <p>Running <code>/draft:init</code> on each service in a monorepo produces excellent per-service context. The auth service has a detailed <code>.ai-context.md</code> explaining its JWT validation flow. The billing service documents its Stripe integration. But cross-service questions remain unanswered: what happens when auth goes down? Which services share PostgreSQL? Is anyone still using the deprecated notification API?</p>
+
+    <p><code>/draft:index</code> answers these questions by aggregating service-level context into root-level knowledge files, without deep code analysis. It reads what <code>/draft:init</code> already produced and synthesizes a system-of-systems view.</p>
+
+    <h2>Auto-Detection</h2>
+    <p>Draft detects services by scanning immediate child directories (depth=1 only, never recursive) for standard project markers:</p>
+
+    <ul>
+        <li><code>package.json</code> &mdash; Node.js services</li>
+        <li><code>go.mod</code> &mdash; Go services</li>
+        <li><code>Cargo.toml</code> &mdash; Rust services</li>
+        <li><code>pom.xml</code> / <code>build.gradle</code> &mdash; Java services</li>
+        <li><code>pyproject.toml</code> / <code>requirements.txt</code> &mdash; Python services</li>
+        <li><code>Dockerfile</code> &mdash; Containerized services</li>
+        <li><code>src/</code> directory with code files</li>
+    </ul>
+
+    <p>It excludes <code>node_modules/</code>, <code>vendor/</code>, <code>.git/</code>, and hidden directories. Each detected directory is categorized as initialized (has a <code>draft/</code> subdirectory) or uninitialized. Only initialized services contribute to the index.</p>
+
+    <h2>What Gets Generated</h2>
+    <p><code>/draft:index</code> produces six root-level files that together form a complete system map:</p>
+
+    <h3>service-index.md</h3>
+    <p>A directory of all detected services with their status, tech stack, dependencies, team ownership, and links to their individual context files. This is the entry point &mdash; the table of contents for the entire monorepo.</p>
+
+    <table>
+        <thead>
+            <tr><th>Service</th><th>Status</th><th>Tech Stack</th><th>Dependencies</th><th>Team</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>auth</td><td>Initialized</td><td>Go, Postgres</td><td>&mdash;</td><td>@auth-team</td></tr>
+            <tr><td>billing</td><td>Initialized</td><td>Node, Stripe</td><td>auth</td><td>@billing</td></tr>
+            <tr><td>legacy-reports</td><td>Not initialized</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+        </tbody>
+    </table>
+
+    <h3>dependency-graph.md</h3>
+    <p>Cross-service dependency mapping with a Mermaid topology diagram, a dependency matrix (depends-on and depended-by for every service), and a topological implementation order. This file answers "what breaks if this service changes?" and "what must exist before this service can function?"</p>
+
+    <h3>tech-matrix.md</h3>
+    <p>A technology distribution report showing which languages, databases, frameworks, and infrastructure components are used across which services. It identifies organizational standards (technologies used by the majority of services) and variances (services that deviate, with documented justifications).</p>
+
+    <h3>Synthesized Root Context</h3>
+    <p>If the root-level <code>draft/product.md</code>, <code>draft/architecture.md</code>, and <code>draft/tech-stack.md</code> are missing or are placeholders, <code>/draft:index</code> synthesizes them from service-level data:</p>
+    <ul>
+        <li><strong>product.md</strong> &mdash; Aggregated product vision from all service visions, deduplicated target users, capability matrix mapping features to services</li>
+        <li><strong>architecture.md</strong> &mdash; System-of-systems view with topology diagram, service directory, shared infrastructure, and cross-cutting patterns</li>
+        <li><strong>tech-stack.md</strong> &mdash; Organizational standards derived from majority usage, approved variances, shared libraries</li>
+    </ul>
+
+    <p>After generating <code>architecture.md</code>, the Condensation Subroutine runs to produce a root-level <code>.ai-context.md</code> &mdash; a token-optimized aggregate of all service knowledge.</p>
+
+    <h2>Root-Level vs. Service-Level Context</h2>
+    <p>After indexing, the monorepo has two layers of context:</p>
+
+    <table>
+        <thead>
+            <tr><th>Layer</th><th>Location</th><th>Contains</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Root</td><td><code>draft/</code></td><td>Service index, dependency graph, tech matrix, synthesized product/architecture/tech-stack, aggregated <code>.ai-context.md</code></td><td>Cross-service decisions, system topology, organizational standards</td></tr>
+            <tr><td>Service</td><td><code>&lt;service&gt;/draft/</code></td><td>Service-specific architecture, product, tech-stack, tracks, guardrails</td><td>Per-service implementation, feature work within a service</td></tr>
+        </tbody>
+    </table>
+
+    <p>When working within a single service, the AI loads that service's context. When making cross-service decisions &mdash; adding a new API dependency, changing a shared schema, planning a migration &mdash; the AI loads root-level context.</p>
+
+    <h2>Service Manifests</h2>
+    <p>For each initialized service, <code>/draft:index</code> creates or updates a <code>manifest.json</code> inside the service's <code>draft/</code> directory. This manifest contains the service name, type, summary, primary technology, dependencies on other services, dependents (reverse lookup), team ownership, and indexing timestamps. Manifests enable fast re-indexing without re-reading all markdown files.</p>
+
+    <h2>Initializing Missing Services</h2>
+    <p>Running <code>/draft:index --init-missing</code> offers to initialize uninitialized services. For each one, Draft prompts with four options: <strong>y</strong> (initialize this service), <strong>n</strong> (skip), <strong>all</strong> (initialize all remaining), or <strong>skip-rest</strong> (skip all remaining). This makes it practical to bring an entire monorepo under Draft management incrementally.</p>
+
+    <h2>Bughunt Mode</h2>
+    <p><code>/draft:index</code> also supports a bughunt aggregation mode. Running <code>/draft:index bughunt</code> executes <code>/draft:bughunt</code> sequentially across all initialized services (or a specified subset), then generates <code>draft/bughunt-summary.md</code> &mdash; an aggregate report showing bug counts by severity across all services, directories requiring immediate attention, and links to individual service reports.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">When to Re-Index</div>
+        <p>Re-run <code>/draft:index</code> after initializing a new service, after significant architecture changes to any service, before major cross-service planning, or as part of weekly documentation hygiene. The command preserves manual edits in sections marked with <code>&lt;!-- MANUAL START --&gt;</code> and <code>&lt;!-- MANUAL END --&gt;</code> comments.</p>
+    </div>
+</div>

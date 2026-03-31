@@ -1,0 +1,84 @@
+<div class="chapter-wrapper">
+    <h1>Architecture Decision Records</h1>
+    <p class="chapter-meta"><span class="part-name">Part V: Architecture</span> &middot; Chapter 17</p>
+    <p class="read-time">3 min read</p>
+
+    <p class="chapter-intro">Code captures what you built. Tests capture what it should do. But neither captures why you built it that way. Why PostgreSQL instead of MongoDB? Why event-driven instead of synchronous? Why this pattern over that one? These decisions have context that evaporates the moment the conversation ends. Architecture Decision Records preserve it.</p>
+
+    <h2>Why ADRs Matter</h2>
+    <p>Every project accumulates decisions. Some are deliberate: the team evaluated three message brokers and chose RabbitMQ. Some are accidental: someone picked a library in a rush and it stuck. Without documentation, both look the same six months later &mdash; unexplained choices baked into the codebase.</p>
+
+    <p>ADRs solve this by capturing the decision, the context that drove it, the alternatives that were rejected, and the consequences of the choice. When a new team member asks "why don't we use GraphQL?", the answer is not a Slack archaeology expedition &mdash; it is ADR-003, which documents that REST was chosen because the client team needed cacheable endpoints and the read patterns were simple enough not to justify the schema overhead.</p>
+
+    <h2>The /draft:adr Command</h2>
+    <p>Draft's <code>/draft:adr</code> command creates and manages ADRs as markdown files in <code>draft/adrs/</code>. It supports four modes:</p>
+
+    <table>
+        <thead>
+            <tr><th>Usage</th><th>Behavior</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>/draft:adr</code></td><td>Interactive mode &mdash; asks about the decision context</td></tr>
+            <tr><td><code>/draft:adr "decision title"</code></td><td>Creates an ADR with the given title</td></tr>
+            <tr><td><code>/draft:adr list</code></td><td>Lists all existing ADRs with status and date</td></tr>
+            <tr><td><code>/draft:adr supersede &lt;number&gt;</code></td><td>Marks an ADR as superseded and links to its replacement</td></tr>
+        </tbody>
+    </table>
+
+    <p>Each ADR is saved as <code>draft/adrs/&lt;number&gt;-&lt;kebab-case-title&gt;.md</code> with auto-incremented, zero-padded numbers (001, 002, 003).</p>
+
+    <h2>ADR Structure</h2>
+    <p>Every ADR follows a consistent structure designed to capture the full decision context:</p>
+
+    <ul>
+        <li><strong>Title and Number</strong> &mdash; <code>ADR-003: Use RabbitMQ for async messaging</code></li>
+        <li><strong>Status</strong> &mdash; Current lifecycle state (Proposed, Accepted, Deprecated, Superseded)</li>
+        <li><strong>Context</strong> &mdash; What forces are driving this decision? Technical constraints, business requirements, organizational factors</li>
+        <li><strong>Decision</strong> &mdash; The actual decision, stated in active voice: "We will use RabbitMQ for all asynchronous message passing between services"</li>
+        <li><strong>Alternatives Considered</strong> &mdash; Each alternative with explicit pros, cons, and the specific reason it was rejected</li>
+        <li><strong>Consequences</strong> &mdash; Positive outcomes, negative trade-offs, and risks with mitigations</li>
+        <li><strong>References</strong> &mdash; Links to related discussions, RFCs, documentation, and other ADRs</li>
+    </ul>
+
+    <p>The Consequences section is the most valuable part. Decisions without documented consequences are just announcements. Consequences force the author to think through the second-order effects: "We gain message durability, but we add an infrastructure dependency that requires ops knowledge to maintain."</p>
+
+    <h2>The ADR Lifecycle</h2>
+    <p>ADRs move through a defined lifecycle:</p>
+
+    <pre><code>Proposed  &rarr;  Accepted  &rarr;  Deprecated
+                        &rarr;  Superseded by ADR-xxx</code></pre>
+
+    <ul>
+        <li><strong>Proposed</strong> &mdash; The decision is documented and awaiting review. This is the initial state for every new ADR.</li>
+        <li><strong>Accepted</strong> &mdash; The decision has been approved and is in effect. The team is expected to follow it.</li>
+        <li><strong>Deprecated</strong> &mdash; The decision is no longer relevant because the context has changed. The original reasoning is preserved for historical reference.</li>
+        <li><strong>Superseded</strong> &mdash; A newer decision has replaced this one. The old ADR links to the new one, and the new ADR links back, creating a traceable chain of evolving decisions.</li>
+    </ul>
+
+    <h2>When to Create an ADR</h2>
+    <p>Not every decision warrants an ADR. Variable naming and code formatting do not. The threshold is: would a new team member reasonably ask "why?" and would the answer require more than one sentence?</p>
+
+    <p>Good candidates for ADRs:</p>
+    <ul>
+        <li><strong>Technology choices</strong> &mdash; Selecting a database, message broker, framework, or library</li>
+        <li><strong>Pattern decisions</strong> &mdash; Choosing CQRS over simple CRUD, event sourcing over state mutation, REST over GraphQL</li>
+        <li><strong>Trade-off resolutions</strong> &mdash; Accepting eventual consistency for performance, choosing simplicity over extensibility</li>
+        <li><strong>Architectural boundaries</strong> &mdash; Defining module ownership, API contracts between services, data flow directions</li>
+        <li><strong>Security decisions</strong> &mdash; Authentication strategy, encryption approach, secret management</li>
+    </ul>
+
+    <h2>ADRs and Tracks</h2>
+    <p>A track (a feature, fix, or refactor managed by Draft) may generate one or more ADRs during its lifecycle. When <code>/draft:new-track</code> surfaces a technology choice or <code>/draft:decompose</code> reveals an architectural trade-off, those decisions are ADR candidates.</p>
+
+    <p>ADRs created during a track reference the track in their context section. This creates bidirectional traceability: the ADR explains why a decision was made, and the track's spec or plan references the ADR number for any reader who wants the full context.</p>
+
+    <h2>Superseding Decisions</h2>
+    <p>Decisions change. What was correct six months ago may be wrong today because the constraints have shifted. Draft handles this through explicit supersession rather than silent overwriting.</p>
+
+    <p>When you run <code>/draft:adr supersede 3</code>, Draft updates ADR-003's status to "Superseded by ADR-007" and adds a reference link. The new ADR-007 includes "Supersedes ADR-003" in its references. Both documents are preserved. The old reasoning is not lost &mdash; it becomes historical context that explains the evolution of the system's architecture.</p>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Integration With Other Context Files</div>
+        <p>When an ADR introduces a new technology, Draft suggests updating <code>draft/tech-stack.md</code>. When an ADR changes architectural patterns, Draft suggests updating <code>draft/architecture.md</code> (which triggers regeneration of <code>.ai-context.md</code> via the Condensation Subroutine). ADRs feed back into the living context that constrains future AI interactions.</p>
+    </div>
+</div>

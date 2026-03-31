@@ -1,0 +1,169 @@
+<div class="chapter-wrapper">
+    <h1>Context-Driven Development</h1>
+    <p class="chapter-meta"><span class="part-name">Part I: Foundation</span> &middot; Chapter 2</p>
+    <p class="read-time">10 min read</p>
+
+    <p class="chapter-intro">Consider a funnel. At the top, every possible implementation exists &mdash; every framework, every pattern, every architectural choice. With each layer of context you add, the funnel narrows. By the time AI writes code at the bottom, most decisions are already made. The code almost writes itself &mdash; because there's only one right way to write it given all the constraints above. That is Context-Driven Development.</p>
+
+    <h2>The Core Insight</h2>
+    <p>Draft's methodology rests on a single observation: <strong>each layer of context narrows the solution space</strong>. When you tell an AI "build a task manager," it has infinite choices. When you tell it "build a task manager with React, TypeScript, and Tailwind," the choices shrink. When you add "using our existing Express API with Prisma ORM and PostgreSQL," they shrink further. When you provide a specification with acceptance criteria, a phased plan with verification steps, and architecture documentation showing every module boundary and data flow &mdash; the AI is no longer choosing. It is executing.</p>
+
+    <p>This is not about constraining AI's creativity. It is about giving it the same constraints that make experienced human developers productive: deep knowledge of the system, clear requirements, and explicit conventions.</p>
+
+    <h2>The Constraint Hierarchy</h2>
+    <p>Draft organizes context into a layered hierarchy. Each layer builds on the previous one, progressively narrowing the set of valid implementations:</p>
+
+    <pre><code>product.md          &rarr;  "Build a task manager for developers"
+  &darr;
+tech-stack.md       &rarr;  "Use React, TypeScript, Tailwind"
+  &darr;
+architecture.md     &rarr;  "Express API &rarr; Service layer &rarr; Prisma ORM &rarr; PostgreSQL"
+  &darr;                     (.ai-context.md condensed for AI consumption)
+  &darr;                     (.ai-profile.md ultra-compact always-on profile)
+spec.md             &rarr;  "Add drag-and-drop reordering"
+  &darr;
+plan.md             &rarr;  "Phase 1: sortable list, Phase 2: persistence"</code></pre>
+
+    <p>Each layer locks in a different class of decisions:</p>
+
+    <h3>product.md &mdash; What and Why</h3>
+    <p>Defines the product vision, target users, goals, success criteria, and guidelines. This is the widest layer of the funnel. It answers "what are we building and for whom?" without specifying how.</p>
+    <p><strong>What it locks in:</strong> scope boundaries, user personas, business constraints, UX standards. The AI cannot build features nobody asked for because the product definition makes "asked for" explicit.</p>
+
+    <h3>tech-stack.md &mdash; How (Tools)</h3>
+    <p>Languages, frameworks, libraries, patterns, and accepted design decisions. For brownfield projects, this is auto-detected from your codebase and cross-referenced with your dependency files.</p>
+    <p><strong>What it locks in:</strong> technology choices, dependency constraints, accepted patterns. The AI cannot introduce random dependencies because the allowed set is defined. It includes an "Accepted Patterns" section for intentional design decisions that analysis tools should honor rather than flag.</p>
+
+    <h3>architecture.md &mdash; How (Structure)</h3>
+    <p>The source of truth. A comprehensive 25-section engineering reference generated from exhaustive codebase analysis. It includes module boundaries, dependency graphs, data flows, API definitions, concurrency models, security architecture, and testing infrastructure &mdash; all with real Mermaid diagrams and actual code snippets from your codebase.</p>
+    <p><strong>What it locks in:</strong> module boundaries, interaction contracts, data flow patterns, invariants. The AI cannot violate your architecture because the architecture is explicitly documented with every component, every interface, and every constraint.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Source of Truth vs. Derived Documents</div>
+        <p><code>architecture.md</code> is the primary artifact &mdash; comprehensive, human-readable, designed for engineers. From it, Draft derives two token-optimized documents: <code>.ai-context.md</code> (200-400 lines for AI consumption) and <code>.ai-profile.md</code> (20-50 lines, always loaded). The source of truth is never the condensed version.</p>
+    </div>
+
+    <h3>spec.md &mdash; What (Specific)</h3>
+    <p>The specification for a single unit of work. Acceptance criteria, non-goals, technical approach, and explicit scope boundaries. Created through collaborative dialogue &mdash; Draft asks probing questions about what you want before generating the spec, not after.</p>
+    <p><strong>What it locks in:</strong> feature scope, acceptance criteria, what's explicitly out of scope. The AI cannot gold-plate or scope-creep because the boundaries are documented and reviewable.</p>
+
+    <h3>plan.md &mdash; When and Order</h3>
+    <p>A phased task breakdown with dependencies and verification steps. Each task specifies target files and test files. Each phase has completion criteria.</p>
+    <p><strong>What it locks in:</strong> implementation order, task granularity, verification gates. The AI cannot attempt everything at once because the plan enforces sequential, verifiable progress.</p>
+
+    <h2>Context Tiering</h2>
+    <p>Not every task needs every document. Loading full architecture documentation to fix a typo wastes tokens and increases the chance of hallucination. Draft uses a three-tier context system inspired by computer memory architecture:</p>
+
+    <pre><code>Tier 0: .ai-profile.md     (20-50 lines)    &mdash; Always loaded. RAM equivalent.
+Tier 1: .ai-context.md     (200-400 lines)  &mdash; Loaded for most tasks. Working memory.
+Tier 2: architecture.md    (full document)   &mdash; Loaded for deep analysis. Long-term storage.</code></pre>
+
+    <h3>Tier 0: The Always-On Profile</h3>
+    <p><code>.ai-profile.md</code> is an ultra-compact 20-50 line file that contains the essential facts about your project: language, framework, database, auth mechanism, API style, critical invariants, safety rules, active tracks, and recent changes. It is injected into every AI interaction, ensuring that even the simplest task has basic project awareness.</p>
+    <p>Think of it as the AI equivalent of a developer's muscle memory &mdash; the things you know about a project without having to look them up.</p>
+
+    <h3>Tier 1: Working Memory</h3>
+    <p><code>.ai-context.md</code> is a 200-400 line token-optimized document derived from <code>architecture.md</code>. It contains 15+ mandatory sections: architecture overview, invariants, interface contracts, data flows, concurrency rules, error handling patterns, implementation catalogs, extension cookbooks, testing strategy, and a glossary. It is loaded for any task that involves writing or modifying code.</p>
+    <p>This is where the AI gets enough context to make correct decisions without the full weight of the architecture document.</p>
+
+    <h3>Tier 2: Long-Term Storage</h3>
+    <p><code>architecture.md</code> is the full, comprehensive reference &mdash; 25 sections plus appendices, with Mermaid diagrams and code snippets. It is loaded for deep reviews, architecture refreshes, and complex analysis tasks. Most day-to-day development never touches this tier directly.</p>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Why Tiering Matters</div>
+        <p>Smaller context windows produce better AI decisions. By loading only what's needed, Draft reduces token consumption, decreases hallucination risk, and keeps the AI focused on the relevant subset of your architecture. The right context for the task &mdash; not all the context, all the time.</p>
+    </div>
+
+    <h2>Tracks: The Unit of Work</h2>
+    <p>A <strong>track</strong> is Draft's unit of work. It can be a feature, a bug fix, a refactor, or any cohesive piece of development. Each track gets its own directory with its own specification, plan, and implementation state:</p>
+
+    <pre><code>draft/tracks/add-drag-drop-reordering/
+&boxvr;&boxh; spec.md          # Requirements and acceptance criteria
+&boxvr;&boxh; plan.md          # Phased task breakdown
+&boxvr;&boxh; metadata.json    # Status and timestamps
+&boxur;&boxh; jira-export.md   # Jira stories for export (optional)</code></pre>
+
+    <p>Tracks are isolated. Working on one track does not affect another. Each track references the project context (product, tech stack, architecture) but has its own scope, its own plan, and its own progress markers.</p>
+
+    <h3>Track Types</h3>
+    <p>Draft auto-detects the track type from the description:</p>
+    <ul>
+        <li><strong>Feature / Refactor</strong> &mdash; Detected by keywords like "add," "implement," "refactor," "improve." Gets a standard spec template and flexible phased plan.</li>
+        <li><strong>Bug / RCA</strong> &mdash; Detected by "fix," "bug," "investigate," or references to production incidents. Gets a focused bug spec with Code Locality and Blast Radius sections, and a fixed three-phase plan: Investigate &rarr; Root Cause Analysis &rarr; Fix &amp; Verify.</li>
+    </ul>
+
+    <h3>Track Lifecycle</h3>
+    <p>Every track follows the same lifecycle:</p>
+
+    <ol>
+        <li><strong>Create</strong> &mdash; <code>/draft:new-track "Add drag-and-drop reordering"</code> initiates collaborative spec creation</li>
+        <li><strong>Plan</strong> &mdash; After spec approval, Draft generates a phased plan with task-level granularity</li>
+        <li><strong>Review</strong> &mdash; The developer reviews spec and plan, edits them, commits them for peer review</li>
+        <li><strong>Implement</strong> &mdash; <code>/draft:implement</code> executes tasks one at a time, following TDD cycles when enabled</li>
+        <li><strong>Verify</strong> &mdash; Three-stage review validates the implementation against the spec</li>
+        <li><strong>Complete</strong> &mdash; All acceptance criteria met, track marked complete</li>
+    </ol>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Human Review Before AI Codes</div>
+        <p>This is Draft's most important feature. The AI creates the spec and plan. The developer reviews and edits them. The team approves the approach via PR. Only then does implementation begin. Disagreements are resolved by editing a paragraph, not rewriting a module. This is cheaper, faster, and produces better outcomes than reviewing AI-generated code after the fact.</p>
+    </div>
+
+    <h2>Status Markers</h2>
+    <p>Draft uses four status markers throughout specs and plans to track progress at the task level:</p>
+
+    <ul>
+        <li><code>[ ]</code> <strong>Pending</strong> &mdash; Not yet started</li>
+        <li><code>[~]</code> <strong>In Progress</strong> &mdash; Currently being implemented</li>
+        <li><code>[x]</code> <strong>Completed</strong> &mdash; Done and verified</li>
+        <li><code>[!]</code> <strong>Blocked</strong> &mdash; Cannot proceed, requires attention</li>
+    </ul>
+
+    <p>These markers are not cosmetic. <code>/draft:implement</code> scans the plan for the first <code>[ ]</code> or <code>[~]</code> task and works on that. <code>/draft:status</code> reads these markers to generate progress reports. They are the control mechanism that keeps implementation sequential and verifiable.</p>
+
+    <h2>How This Differs from "Better Prompting"</h2>
+    <p>The most common response to "AI generates wrong code" is "write better prompts." Draft takes a fundamentally different approach:</p>
+
+    <ul>
+        <li><strong>Prompts are ephemeral; context files are persistent</strong> &mdash; Draft's documents live on the filesystem, tracked in git, surviving across sessions and team members. A prompt dies when the chat window closes.</li>
+        <li><strong>Prompts are verbal; specs are structural</strong> &mdash; Telling an AI "follow the repository pattern" is weaker than providing a document that defines every module, its boundaries, and its interaction contracts. Structure constrains behavior more reliably than instructions.</li>
+        <li><strong>Prompts are individual; context is shared</strong> &mdash; Ten developers write ten different prompts. One <code>.ai-context.md</code> gives all of them &mdash; and all their AI assistants &mdash; the same ground truth.</li>
+        <li><strong>Prompts don't have verification; plans have gates</strong> &mdash; A prompt says "make sure it works." A plan says "Phase 1 is complete when these three tests pass and this acceptance criterion is met."</li>
+    </ul>
+
+    <div class="callout callout-example">
+        <div class="callout-title">Prompt vs. Structure</div>
+        <p><strong>Prompt approach:</strong> "Add user authentication. Use JWT. Make sure to follow our existing patterns. Don't forget error handling. Use the same middleware pattern as the other routes."</p>
+        <p><strong>Draft approach:</strong> <code>spec.md</code> defines exactly what authentication means for this project. <code>.ai-context.md</code> documents the existing middleware pattern, error handling strategy, and module boundaries. <code>plan.md</code> breaks the work into phases with verification steps. The AI doesn't need to be told to follow patterns &mdash; the patterns are in the context it loads before writing any code.</p>
+    </div>
+
+    <h2>The Key Principle</h2>
+    <p><strong>Explicit context beats implicit assumptions.</strong></p>
+
+    <p>Every time an AI makes an assumption, it has a chance of being wrong. Every time that assumption is replaced with an explicit document &mdash; a product definition, a tech stack declaration, an architecture reference, a specification, a plan &mdash; that chance drops to zero. The AI is no longer guessing. It is reading.</p>
+
+    <p>Context-Driven Development is the practice of making every relevant decision explicit, versioned, and reviewable before AI writes code. It is the difference between "the AI did something" and "the AI did what we agreed it should do."</p>
+
+    <h2>Keeping AI Constrained</h2>
+    <p>Without constraints, AI coding assistants exhibit four predictable failure modes:</p>
+
+    <ul>
+        <li><strong>Over-engineer</strong> &mdash; Add abstractions, utilities, and "improvements" you didn't ask for</li>
+        <li><strong>Assume context</strong> &mdash; Guess at requirements instead of working from explicit specifications</li>
+        <li><strong>Lose focus</strong> &mdash; Drift across the codebase making tangential changes</li>
+        <li><strong>Skip verification</strong> &mdash; Claim completion without proving it works</li>
+    </ul>
+
+    <p>Draft addresses each with a specific mechanism:</p>
+
+    <ul>
+        <li><strong>Explicit spec</strong> &mdash; The AI can only implement what's documented in the specification</li>
+        <li><strong>Phased plans</strong> &mdash; The AI works on one phase at a time, not the entire feature</li>
+        <li><strong>Verification steps</strong> &mdash; Each phase requires proof of completion before proceeding</li>
+        <li><strong>Status markers</strong> &mdash; Progress is tracked in the plan file, not assumed</li>
+    </ul>
+
+    <p>The result: the AI becomes an executor of pre-approved work, not an autonomous decision-maker. It has the full power of an AI coding assistant, channeled through a constraint system that ensures its output matches what the team actually needs.</p>
+
+    <p>The next chapter shows you how to set this up in your project in five minutes.</p>
+</div>

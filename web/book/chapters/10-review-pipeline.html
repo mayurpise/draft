@@ -1,0 +1,170 @@
+<div class="chapter-wrapper">
+    <h1>Review Pipeline</h1>
+    <p class="chapter-meta"><span class="part-name">Part III: Track Lifecycle</span> &middot; Chapter 10</p>
+    <p class="read-time">6 min read</p>
+
+    <p class="chapter-intro">The code is written. Tests pass. The plan shows every task marked <code>[x]</code>. You could merge now and move on. But "tests pass" is a low bar &mdash; it tells you the code does what the tests check, not that it does what the specification requires, not that it's secure, not that it follows your architecture, and not that it handles the edge cases nobody thought to test. Draft's review pipeline exists to close these gaps systematically.</p>
+
+    <h2>The Three Stages</h2>
+    <p><code>/draft:review</code> runs a sequential, three-stage review process. Each stage acts as a gate &mdash; if it fails, the review stops and sends you back to fix the structural problem before wasting effort on higher-order concerns. You don't check code quality on structurally broken code, and you don't check structure on code that doesn't meet the spec.</p>
+
+    <pre class="terminal"><code>$ /draft:review track add-oauth2
+
+Auto-detected track: add-oauth2 — Add OAuth2 Support [~]
+Commit range: a1b2c3d^..f4e5d6c (11 commits, 15 files)
+Running three-stage review...</code></pre>
+
+    <h2>Stage 1: Automated Validation</h2>
+    <p>The first stage is fast, objective, and mechanical. It answers one question: <strong>is the code structurally sound and secure?</strong></p>
+
+    <p>The reviewer scans the diff for five categories of issues:</p>
+
+    <ol>
+        <li><strong>Architecture Conformance</strong> &mdash; Checks for pattern violations documented in your <code>.ai-context.md</code>. A database import in a React component, a direct service-to-service call bypassing the message bus, a controller containing business logic &mdash; these are structural violations caught before anyone reads the code.</li>
+        <li><strong>Dead Code Detection</strong> &mdash; Searches for newly exported functions or classes in the diff that have zero references anywhere in the codebase. Code that nothing calls is either incomplete work or a maintenance burden.</li>
+        <li><strong>Dependency Cycle Detection</strong> &mdash; Traces import chains for new imports to ensure no circular dependencies (A imports B, B imports C, C imports A) are introduced. Circular dependencies indicate poor module boundaries.</li>
+        <li><strong>Security Scanning (OWASP)</strong> &mdash; Scans the diff for hardcoded secrets and API keys, SQL injection risks (string concatenation in queries), and XSS vulnerabilities (<code>innerHTML</code> or raw DOM insertion).</li>
+        <li><strong>Performance Anti-Patterns</strong> &mdash; Detects N+1 database queries (loops containing queries), blocking synchronous I/O within async functions, and unbounded queries lacking pagination.</li>
+    </ol>
+
+    <h3>Context-Specific Checks</h3>
+    <p>Stage 1 also identifies the primary domain of changed files and applies targeted checks. If the diff touches authentication files, the reviewer checks for timing-safe comparisons, constant-time operations, and secure random generation. Database migrations get checked for backward compatibility, index coverage, and zero-downtime safety. API endpoints get checked for input validation, rate limiting, and authentication guards. Configuration changes are scanned for exposed secrets and missing startup validation.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Breaking Change Detection</div>
+        <p>Stage 1 checks for changes to public API surfaces: modified function signatures, removed or renamed exports, changed error types, and altered serialization formats. A breaking change with no deprecation period or version bump is classified as <strong>Critical</strong> &mdash; it blocks the review immediately.</p>
+    </div>
+
+    <h3>STRIDE Threat Modeling</h3>
+    <p>For new endpoints or data mutations, Stage 1 applies the STRIDE framework &mdash; six threat categories evaluated systematically:</p>
+
+    <ul>
+        <li><strong>Spoofing</strong> &mdash; Can the caller's identity be faked? (authentication check)</li>
+        <li><strong>Tampering</strong> &mdash; Can request data be modified in transit? (integrity check)</li>
+        <li><strong>Repudiation</strong> &mdash; Are actions logged for audit? (logging check)</li>
+        <li><strong>Information Disclosure</strong> &mdash; Does the response leak internal details? (error message check)</li>
+        <li><strong>Denial of Service</strong> &mdash; Can the endpoint be abused? (rate limiting, resource limits)</li>
+        <li><strong>Elevation of Privilege</strong> &mdash; Are authorization checks in place? (RBAC/ABAC check)</li>
+    </ul>
+
+    <p><strong>If Stage 1 fails</strong> &mdash; any critical issue found &mdash; the review stops. The report lists the structural failures, and you fix them before proceeding. There is no point checking spec compliance on code with a SQL injection vulnerability.</p>
+
+    <h3>SAST Tool Recommendations</h3>
+    <p>After completing Stage 1, the reviewer recommends appropriate static analysis tools based on your <code>tech-stack.md</code>: ESLint with <code>eslint-plugin-security</code> for JavaScript, Bandit for Python, gosec for Go, <code>cargo clippy</code> and <code>cargo audit</code> for Rust, and Semgrep or CodeQL for multi-language projects. If these tools are not already in your CI pipeline, the recommendation appears in the report.</p>
+
+    <h2>Stage 2: Spec Compliance</h2>
+    <p>Stage 2 answers the most important review question: <strong>did they build what was specified?</strong> This stage only runs for track-level reviews where a <code>spec.md</code> exists.</p>
+
+    <p>The reviewer loads the specification's acceptance criteria and systematically verifies each one against the diff:</p>
+
+    <ol>
+        <li><strong>Requirements Coverage</strong> &mdash; For every functional requirement in <code>spec.md</code>, the reviewer finds evidence in the diff that it was implemented. Each requirement maps to specific files and line numbers.</li>
+        <li><strong>Acceptance Criteria Verification</strong> &mdash; Each criterion is checked against the diff. If TDD is enabled, the reviewer verifies that test coverage exists for each criterion.</li>
+        <li><strong>Scope Adherence</strong> &mdash; The reviewer checks for missing features (spec items not implemented) and for scope creep (extra work not in the spec). Both directions are flagged.</li>
+    </ol>
+
+    <pre><code>## Stage 2: Spec Compliance
+
+**Status:** PASS
+
+### Requirements Coverage
+- [x] Google OAuth2 login flow — Implemented in src/auth/google.ts:15-89
+- [x] GitHub OAuth2 login flow — Implemented in src/auth/github.ts:12-76
+- [x] Linked accounts in profile — Implemented in src/components/LinkedAccounts.tsx
+
+### Acceptance Criteria
+- [x] Google OAuth2 end-to-end — Verified by tests/auth/google.test.ts
+- [x] GitHub OAuth2 end-to-end — Verified by tests/auth/github.test.ts
+- [x] Existing login unaffected — Verified by tests/auth/password.test.ts
+- [x] Token revocation — Verified by tests/auth/revocation.test.ts
+- [x] Rate limiting on callback — Verified by tests/auth/ratelimit.test.ts</code></pre>
+
+    <p><strong>If Stage 2 fails</strong> &mdash; any requirement missing or acceptance criterion not met &mdash; the review stops. Stage 3 does not run. You go back to implementation and close the gaps before the review continues. Checking code quality on code that doesn't meet the spec is a waste of time.</p>
+
+    <h2>Stage 3: Code Quality</h2>
+    <p>Stage 3 is the semantic review &mdash; the part that requires judgment, not just pattern matching. It evaluates four dimensions:</p>
+
+    <ol>
+        <li><strong>Architecture</strong> &mdash; Does the code follow project patterns from <code>tech-stack.md</code>? Appropriate separation of concerns? Critical invariants from <code>.ai-context.md</code> honored?</li>
+        <li><strong>Error Handling</strong> &mdash; Errors handled at the appropriate level? User-facing errors helpful? No silent failures?</li>
+        <li><strong>Testing</strong> &mdash; Tests verify real logic, not implementation details? Edge cases have coverage?</li>
+        <li><strong>Maintainability</strong> &mdash; Code readable without excessive comments? Consistent naming and style? No functions exceeding cognitive complexity thresholds? No deeply nested control flow beyond three levels?</li>
+    </ol>
+
+    <p>For each flagged function, the report includes file path, function name, estimated complexity, and a recommended action: split, extract, or simplify.</p>
+
+    <h2>The Adversarial Pass</h2>
+    <p>When Stage 3 produces zero findings across all four dimensions, the reviewer does not accept "clean" at face value. Instead, it runs an <strong>adversarial pass</strong> &mdash; explicitly asking probing questions designed to find what a lazy review would miss:</p>
+
+    <ol>
+        <li><strong>Error paths</strong> &mdash; Is every error or exception handled? Are any failure modes silently swallowed?</li>
+        <li><strong>Edge cases</strong> &mdash; Are there boundary conditions (empty input, max values, concurrent access) not covered by tests?</li>
+        <li><strong>Implicit assumptions</strong> &mdash; Does the code assume inputs are always valid, services always up, or state always consistent?</li>
+        <li><strong>Future brittleness</strong> &mdash; Is anything hardcoded that will break on scale or configuration change?</li>
+        <li><strong>Missing coverage</strong> &mdash; Is there behavior that should be tested but isn't?</li>
+    </ol>
+
+    <p>If the adversarial pass still finds nothing, the report documents it explicitly with a one-sentence explanation per question. This prevents lazy LGTM verdicts &mdash; when the reviewer claims "nothing to find," it has to prove the claim.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Why Sequential Stages Matter</div>
+        <p>The three-stage sequence is not arbitrary. Running all checks simultaneously produces a noisy report where security vulnerabilities sit next to naming suggestions. The sequential design ensures you fix structural problems first, then verify spec compliance, then polish quality. Each stage builds on the confidence that the previous stage provides.</p>
+    </div>
+
+    <h2>Issue Classification</h2>
+    <p>Every finding is classified by severity, and severity determines the required action:</p>
+
+    <ul>
+        <li><strong>Critical</strong> &mdash; Blocks release. Breaks functionality or creates a security issue. Must fix before proceeding.</li>
+        <li><strong>Important</strong> &mdash; Degrades quality or introduces technical debt. Should fix before the phase is complete.</li>
+        <li><strong>Minor</strong> &mdash; Style, optimization, nice-to-have. Noted for later. Does not block.</li>
+    </ul>
+
+    <p>Each issue includes the file and line number, a description of the impact, and a suggested fix. The reviewer never auto-fixes &mdash; it reports, and the developer decides.</p>
+
+    <pre><code>### Critical Issues
+- [ ] [src/auth/oauth.ts:67] SQL injection risk in provider lookup
+  - **Impact:** Attacker can inject SQL via provider parameter
+  - **Suggested fix:** Use parameterized query instead of string interpolation
+
+### Important Issues
+- [ ] [src/auth/session.ts:34] No circuit breaker on token refresh call
+  - **Impact:** Provider outage cascades to all authentication attempts
+  - **Suggested fix:** Add circuit breaker with 5-failure threshold</code></pre>
+
+    <h2>Review Scopes</h2>
+    <p>While track-level review is the primary workflow, <code>/draft:review</code> supports several scopes:</p>
+
+    <ul>
+        <li><code>/draft:review</code> &mdash; Auto-detects the active track and reviews it (all three stages)</li>
+        <li><code>/draft:review track add-oauth2</code> &mdash; Reviews a specific track by ID</li>
+        <li><code>/draft:review project</code> &mdash; Reviews uncommitted changes (Stage 1 and 3 only, no spec)</li>
+        <li><code>/draft:review files "src/**/*.ts"</code> &mdash; Reviews specific file patterns</li>
+        <li><code>/draft:review commits main...HEAD</code> &mdash; Reviews a commit range</li>
+    </ul>
+
+    <p>Project-level reviews skip Stage 2 (spec compliance) since there is no specification to check against. They run automated validation and code quality only.</p>
+
+    <h2>The <code>with-bughunt</code> Modifier</h2>
+    <p>For comprehensive reviews, adding <code>with-bughunt</code> or <code>full</code> combines the three-stage review with Draft's deep bug hunting capability. The bug hunter looks for logic errors, race conditions, and edge cases that static analysis misses, producing regression tests for each finding. Results are aggregated into the review report with deduplication &mdash; if both the reviewer and bug hunter flag the same file and line, the finding with the highest severity is kept and attributed to both tools.</p>
+
+    <pre class="terminal"><code>$ /draft:review track add-oauth2 with-bughunt
+
+Running three-stage review...
+Stage 1 (Automated Validation): PASS
+Stage 2 (Spec Compliance): PASS
+Stage 3 (Code Quality): PASS WITH NOTES
+Running bug hunt...
+
+Total issues: 7 (0 Critical, 2 Important, 5 Minor)
+Report: draft/tracks/add-oauth2/review-report-2026-03-30T1445.md</code></pre>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Review Reports Are Versioned</div>
+        <p>Each review creates a timestamped report file. A <code>review-report-latest.md</code> symlink always points to the most recent one. Previous reports are preserved, so you can compare findings across review iterations and track how issues were resolved.</p>
+    </div>
+
+    <p>The review report updates <code>metadata.json</code> with the review verdict, timestamp, and a running review count. This metadata feeds into <code>/draft:status</code>, giving you a project-wide view of which tracks have been reviewed and which still need attention.</p>
+
+    <p>With code reviewed and issues resolved, the track nears completion. The next chapter covers the operational commands that manage tracks throughout their lifecycle &mdash; monitoring progress, handling mid-stream requirement changes, and safely rolling back work when needed.</p>
+</div>

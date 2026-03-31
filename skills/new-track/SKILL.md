@@ -53,7 +53,9 @@ Create a short, kebab-case ID from the description (use the stripped description
 - "Add user authentication" → `add-user-auth`
 - "Fix login bug" → `fix-login-bug`
 
-Check if `draft/tracks/<track_id>/` already exists. If collision detected, append `-<ISO-date>` suffix (e.g., `feature-auth-2026-02-21`). Verify the suffixed path is also free before proceeding.
+If the description is empty (e.g., `--quick` with no text), ask the user: "What should this track be called? (brief description)"
+
+Check if `draft/tracks/<track_id>/` already exists. If collision detected, append `-<ISO-date>` suffix (e.g., `feature-auth-2026-02-21`). If the suffixed path also exists, append `-2`, `-3`, etc. until a free path is found.
 
 ## Step 1.5: Quick Mode Path (`--quick` only)
 
@@ -64,7 +66,11 @@ Skip all intake conversation. Ask only two questions:
 1. "What exactly needs to change? (1-2 sentences)"
 2. "How will you know it's done? (list acceptance criteria)"
 
-Then generate both files directly:
+Then create the track directory and generate both files directly:
+
+```bash
+mkdir -p draft/tracks/<track_id>
+```
 
 **`draft/tracks/<track_id>/spec.md`** (minimal — no YAML frontmatter needed):
 
@@ -125,18 +131,22 @@ Next: /draft:implement
 
 Create the track directory and draft files immediately with skeleton structure:
 
+```bash
+mkdir -p draft/tracks/<track_id>
+```
+
 ### Create `draft/tracks/<track_id>/spec-draft.md`:
 
 **MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
 
 ```bash
-git branch --show-current                    # LOCAL_BRANCH
+git branch --show-current 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo "none"  # LOCAL_BRANCH
 git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
-git rev-parse HEAD                           # FULL_SHA
-git rev-parse --short HEAD                   # SHORT_SHA
-git log -1 --format=%ci HEAD                 # COMMIT_DATE
-git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
-git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
+git rev-parse HEAD 2>/dev/null || echo "none"                      # FULL_SHA
+git rev-parse --short HEAD 2>/dev/null || echo "none"              # SHORT_SHA
+git log -1 --format=%ci HEAD 2>/dev/null || echo "none"            # COMMIT_DATE
+git log -1 --format=%s HEAD 2>/dev/null || echo "none"             # COMMIT_MESSAGE
+git status --porcelain 2>/dev/null | head -1 | wc -l               # 0 = clean, >0 = dirty
 ```
 
 ```markdown
@@ -297,7 +307,7 @@ synced_to_commit: "{FULL_SHA}"
 | **Synced To** | `{FULL_SHA}` |
 
 **Track ID:** <track_id>
-**Spec:** ./spec-draft.md
+**Spec:** ./spec.md
 **Status:** [ ] Drafting
 
 > This is a working draft. Phases will be defined after spec is finalized.
@@ -618,7 +628,11 @@ Count all `- [ ]` task lines in `plan.md` and set `tasks.total` in `metadata.jso
 Before updating tracks.md, verify metadata.json was written successfully:
 
 ```bash
-cat draft/tracks/<track_id>/metadata.json | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null || echo "INVALID"
+# Validate JSON (try python3 first, fall back to node, then jq)
+cat draft/tracks/<track_id>/metadata.json | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null \
+  || node -e "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'))" < draft/tracks/<track_id>/metadata.json 2>/dev/null \
+  || jq . draft/tracks/<track_id>/metadata.json >/dev/null 2>&1 \
+  || echo "INVALID"
 ```
 
 If invalid or missing:

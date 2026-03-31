@@ -15,6 +15,14 @@
       "issues_found": 11,
       "issues_fixed": 5,
       "summary": "Fixed atomic staging disconnected from steps (integrated draft.tmp/ with .state/ dir + cleanup + forced re-init), cross-platform sha256sum/shasum detection, git metadata error handling for detached HEAD and zero-commit repos, directory creation sequencing, removed redundant SHA validation in refresh fallback"
+    },
+    {
+      "module": "new-track",
+      "path": "skills/new-track/SKILL.md",
+      "timestamp": "2026-03-30T22:15:00Z",
+      "issues_found": 8,
+      "issues_fixed": 6,
+      "summary": "Fixed git metadata error handling for detached HEAD/zero-commit repos, added mkdir -p for track directory in both standard and quick mode, fixed stale spec-draft.md reference in plan-draft.md, added track ID collision fallback chain, added empty --quick description handling, cross-platform JSON validation (python3/node/jq)"
     }
   ]
 }

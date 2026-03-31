@@ -66,7 +66,7 @@ For each acceptance criterion in `spec.md`:
 ### Sync Check (if `.ai-context.md` exists)
 
 Compare the `synced_to_commit` values in the YAML frontmatter of `spec.md` and `plan.md`.
-- **Skip if** either file has no YAML frontmatter or no `synced_to_commit` field (quick-mode tracks omit it).
+- **Skip if** either file has no YAML frontmatter or no `synced_to_commit` field (quick-mode tracks omit it). If skipped, note: "Sync check skipped — quick-mode track (no frontmatter)."
 - If they differ: "⚠️ Spec and plan were synced to different commits — verify they are still aligned."
 
 ### Result
@@ -425,9 +425,11 @@ After completing each task:
 
 2. Update `plan.md`:
    - Change `[ ]` to `[x]` for the completed task
-   - Add the commit SHA next to the task: `[x] Task description (abc1234)`
+   - Add the commit SHA next to the task: `[x] Task description [abc1234]`
 
 3. Update `metadata.json`:
+   - Read current `metadata.json` first — verify `tasks.completed` is a number
+   - If malformed or missing: HALT with "metadata.json is corrupted — expected tasks.completed to be a number, got: [actual value]"
    - Increment `tasks.completed`
    - Update `updated` timestamp
 
@@ -526,7 +528,7 @@ When all phases complete:
      ## Review Settings
      - [x] Auto-review at track completion
      ```
-   - If enabled, run `/draft:review track <track_id>`
+   - If enabled, invoke the review skill: `/draft:review track <track_id>` (this is a Draft skill invocation, not a shell command)
    - Check review results:
      - If block-on-failure enabled AND critical issues found → HALT, require fixes
      - Otherwise, document warnings and continue
@@ -540,6 +542,8 @@ When all phases complete:
      - [x] **<track_id>** — <title> (completed YYYY-MM-DD)
      ```
    - If no `## Completed` section exists, create it below `## Active`
+
+   **Write order (important for recovery):** plan.md first → metadata.json second → tracks.md last. If interrupted mid-update, `plan.md` is the source of truth — recovery reads plan.md status and reconstructs metadata.json and tracks.md from it.
 
 5. **Verify completion state consistency (CRITICAL):**
    - Read back `plan.md` - confirm status `[x] Completed`

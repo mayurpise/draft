@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jira Integration — Draft Book</title>
+    <meta name="description" content="Mapping Draft tracks to Jira issues — preview before creation, epic/story/sub-task mapping, and bidirectional sync.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="jira integration, draft to jira, ticket creation, epic mapping, project management integration">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="Jira Integration — Draft Book">
+    <meta property="og:description" content="Mapping Draft tracks to Jira issues — preview before creation, epic/story/sub-task mapping, and bidirectional sync.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/book/jira-integration/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="Jira Integration — Draft Book">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Jira Integration — Draft Book">
+    <meta name="twitter:description" content="Mapping Draft tracks to Jira issues — preview before creation, epic/story/sub-task mapping, and bidirectional sync.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="Jira Integration — Draft Book">
+    <link rel="canonical" href="https://getdraft.dev/book/jira-integration/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Jira Integration",
+      "description": "Mapping Draft tracks to Jira issues — preview before creation, epic/story/sub-task mapping, and bidirectional sync.",
+      "url": "https://getdraft.dev/book/jira-integration/",
+      "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "position": 20,
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../css/book.css">
+</head>
+<body data-chapter="jira-integration">
+
+    <div class="reading-progress" id="reading-progress"></div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="book-topbar">
+        <div class="book-topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
+            <div class="book-topbar-divider"></div>
+            <span class="book-topbar-chapter">Jira Integration</span>
+        </div>
+        <div class="book-topbar-right">
+            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="book-layout">
+        <aside class="book-sidebar" id="book-sidebar">
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Introduction</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
+                        <span class="ch-num">0.</span>What is Draft?
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">I. Foundation</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../the-problem/" class="sidebar-chapter" data-chapter="the-problem">
+                        <span class="ch-num">1.</span>The Problem
+                    </a></li>
+                    <li><a href="../context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
+                        <span class="ch-num">2.</span>Context-Driven Development
+                    </a></li>
+                    <li><a href="../getting-started/" class="sidebar-chapter" data-chapter="getting-started">
+                        <span class="ch-num">3.</span>Getting Started
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">II. How Draft Thinks</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
+                        <span class="ch-num">4.</span>Context Tiering
+                    </a></li>
+                    <li><a href="../agent-system/" class="sidebar-chapter" data-chapter="agent-system">
+                        <span class="ch-num">5.</span>The Agent System
+                    </a></li>
+                    <li><a href="../signal-classification/" class="sidebar-chapter" data-chapter="signal-classification">
+                        <span class="ch-num">6.</span>Signal Classification
+                    </a></li>
+                    <li><a href="../incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
+                        <span class="ch-num">7.</span>Incremental Refresh
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">III. Track Lifecycle</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
+                    </a></li>
+                    <li><a href="../implementation/" class="sidebar-chapter" data-chapter="implementation">
+                        <span class="ch-num">9.</span>Implementation
+                    </a></li>
+                    <li><a href="../review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
+                        <span class="ch-num">10.</span>Review Pipeline
+                    </a></li>
+                    <li><a href="../managing-tracks/" class="sidebar-chapter" data-chapter="managing-tracks">
+                        <span class="ch-num">11.</span>Managing Tracks
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">IV. Quality</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../deep-review/" class="sidebar-chapter" data-chapter="deep-review">
+                        <span class="ch-num">12.</span>Deep Review
+                    </a></li>
+                    <li><a href="../bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
+                        <span class="ch-num">13.</span>Bug Hunt
+                    </a></li>
+                    <li><a href="../coverage/" class="sidebar-chapter" data-chapter="coverage">
+                        <span class="ch-num">14.</span>Coverage
+                    </a></li>
+                    <li><a href="../pattern-learning/" class="sidebar-chapter" data-chapter="pattern-learning">
+                        <span class="ch-num">15.</span>Pattern Learning
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">V. Architecture</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../decomposition/" class="sidebar-chapter" data-chapter="decomposition">
+                        <span class="ch-num">16.</span>Decomposition
+                    </a></li>
+                    <li><a href="../adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VI. Enterprise</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../monorepo-federation/" class="sidebar-chapter" data-chapter="monorepo-federation">
+                        <span class="ch-num">18.</span>Monorepo Federation
+                    </a></li>
+                    <li><a href="../jira-integration/" class="sidebar-chapter active" data-chapter="jira-integration">
+                        <span class="ch-num">19.</span>Jira Integration
+                    </a></li>
+                    <li><a href="../multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
+                        <span class="ch-num">20.</span>Multi-IDE Support
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VII. Closing</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../philosophy-references/" class="sidebar-chapter" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Appendix</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../command-reference/" class="sidebar-chapter" data-chapter="command-reference">
+                        <span class="ch-num">A.</span>Command Reference
+                    </a></li>
+                    <li><a href="../file-reference/" class="sidebar-chapter" data-chapter="file-reference">
+                        <span class="ch-num">B.</span>File Reference
+                    </a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="book-content">
+<div class="chapter-wrapper">
+    <h1>Jira Integration</h1>
+    <p class="chapter-meta"><span class="part-name">Part VI: Enterprise</span> &middot; Chapter 19</p>
+    <p class="read-time">3 min read</p>
+
+    <p class="chapter-intro">Draft produces specs and plans. Jira tracks issues and assigns work. The gap between them is manual: someone reads the plan, creates an epic, writes stories for each phase, adds sub-tasks for each task. This is tedious, error-prone, and inevitably drifts from the source document. Draft's Jira integration closes the gap with two commands: <code>/draft:jira-preview</code> to generate the export, and <code>/draft:jira-create</code> to push it.</p>
+
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 600 210" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:600px;display:block;margin:0 auto">
+                <defs>
+                    <filter id="jira-shadow" x="-4%" y="-4%" width="108%" height="112%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a1a2e" flood-opacity="0.08"/>
+                    </filter>
+                    <marker id="jira-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+                    </marker>
+                </defs>
+                <!-- Draft Track column -->
+                <rect x="16" y="16" width="150" height="180" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5"/>
+                <text x="91" y="38" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12" font-weight="bold">Draft Track</text>
+                <rect x="28" y="48" width="126" height="28" rx="5" fill="#2563eb" filter="url(#jira-shadow)"/>
+                <text x="91" y="67" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">spec.md</text>
+                <rect x="28" y="84" width="126" height="28" rx="5" fill="#7c3aed" filter="url(#jira-shadow)"/>
+                <text x="91" y="103" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">plan.md (phases)</text>
+                <rect x="28" y="120" width="126" height="28" rx="5" fill="#059669" filter="url(#jira-shadow)"/>
+                <text x="91" y="139" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">tasks [ ] [x] [~]</text>
+                <rect x="28" y="156" width="126" height="28" rx="5" fill="#d97706" filter="url(#jira-shadow)"/>
+                <text x="91" y="175" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">bughunt findings</text>
+                <!-- Arrow 1 -->
+                <line x1="166" y1="106" x2="218" y2="106" stroke="#2563eb" stroke-width="2" marker-end="url(#jira-arrow)"/>
+                <text x="192" y="98" text-anchor="middle" fill="#2563eb" font-family="Arial,sans-serif" font-size="9" font-weight="bold">preview</text>
+                <!-- Jira Preview column -->
+                <rect x="222" y="16" width="150" height="180" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5"/>
+                <text x="297" y="38" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12" font-weight="bold">Jira Preview</text>
+                <rect x="234" y="48" width="126" height="44" rx="5" fill="#fff" stroke="#2563eb" stroke-width="1.5"/>
+                <text x="297" y="66" text-anchor="middle" fill="#2563eb" font-family="Arial,sans-serif" font-size="11" font-weight="bold">jira-export.md</text>
+                <text x="297" y="82" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">editable before push</text>
+                <text x="297" y="118" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">Track &rarr; Epic</text>
+                <text x="297" y="134" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">Phase &rarr; Story</text>
+                <text x="297" y="150" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">Task &rarr; Sub-task</text>
+                <text x="297" y="166" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">Finding &rarr; Bug</text>
+                <!-- Arrow 2 -->
+                <line x1="372" y1="106" x2="424" y2="106" stroke="#2563eb" stroke-width="2" marker-end="url(#jira-arrow)"/>
+                <text x="398" y="98" text-anchor="middle" fill="#2563eb" font-family="Arial,sans-serif" font-size="9" font-weight="bold">create</text>
+                <!-- Jira column -->
+                <rect x="428" y="16" width="156" height="180" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5"/>
+                <text x="506" y="38" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12" font-weight="bold">Jira</text>
+                <rect x="440" y="48" width="132" height="28" rx="5" fill="#2563eb" filter="url(#jira-shadow)"/>
+                <text x="506" y="67" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">Epic (PROJ-100)</text>
+                <rect x="440" y="84" width="132" height="28" rx="5" fill="#7c3aed" filter="url(#jira-shadow)"/>
+                <text x="506" y="103" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">Stories (PROJ-101...)</text>
+                <rect x="440" y="120" width="132" height="28" rx="5" fill="#059669" filter="url(#jira-shadow)"/>
+                <text x="506" y="139" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">Sub-tasks</text>
+                <rect x="440" y="156" width="132" height="28" rx="5" fill="#d97706" filter="url(#jira-shadow)"/>
+                <text x="506" y="175" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11">Bug issues</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Jira integration flow: Draft's track structure maps directly to Jira's issue hierarchy through an editable preview step.</div>
+    </div>
+
+    <h2>The Mapping</h2>
+    <p>Draft's plan structure maps naturally to Jira's issue hierarchy:</p>
+
+    <table>
+        <thead>
+            <tr><th>Draft Concept</th><th>Jira Entity</th><th>Source</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Track</td><td>Epic</td><td>Track title and spec overview</td></tr>
+            <tr><td>Phase</td><td>Story</td><td>Phase name, goal, and verification criteria</td></tr>
+            <tr><td>Task</td><td>Sub-task</td><td>Task description and status</td></tr>
+        </tbody>
+    </table>
+
+    <p>A track with 4 phases averaging 3 tasks each produces 1 epic, 4 stories, and 12 sub-tasks. Story points are calculated automatically from task count: 1-2 tasks = 1 point, 3-4 tasks = 2 points, 5-6 tasks = 3 points, 7+ tasks = 5 points.</p>
+
+    <h2>Preview Before Push</h2>
+    <p><code>/draft:jira-preview</code> generates a timestamped <code>jira-export-&lt;timestamp&gt;.md</code> file in the track directory, with a <code>jira-export-latest.md</code> symlink for easy access. This file is a complete, editable representation of what will be created in Jira.</p>
+
+    <p>The preview includes:</p>
+    <ul>
+        <li><strong>Epic</strong> &mdash; Summary from the track title, description from the spec overview</li>
+        <li><strong>Stories</strong> &mdash; One per phase, with goal and verification criteria in Jira markup, calculated story points</li>
+        <li><strong>Sub-tasks</strong> &mdash; One per task, with status mapped from plan markers (<code>[ ]</code> = To Do, <code>[x]</code> = Done, <code>[~]</code> = In Progress, <code>[!]</code> = Blocked)</li>
+        <li><strong>Bug issues</strong> &mdash; If <code>/draft:bughunt</code> or <code>/draft:review</code> reports exist, their findings are included as separate Bug issues with full detail: location, confidence level, code evidence, data flow trace, impact, and recommended fix</li>
+    </ul>
+
+    <p>The preview file is editable. Adjust story points, rewrite descriptions, add or remove sub-tasks, change bug priorities &mdash; then run <code>/draft:jira-create</code> to push the edited version.</p>
+
+    <h2>Creating Issues</h2>
+    <p><code>/draft:jira-create</code> reads the export file and creates issues in Jira via MCP (Anthropic's Model Context Protocol). It automatically detects available MCP-Jira tools and adapts to the configured tool naming convention.</p>
+
+    <p>The creation order matters:</p>
+    <ol>
+        <li><strong>Epic</strong> &mdash; Created first, capturing the epic key (e.g., PROJ-123)</li>
+        <li><strong>Stories</strong> &mdash; Created with epic link, one per phase</li>
+        <li><strong>Sub-tasks</strong> &mdash; Created under their parent story</li>
+        <li><strong>Bugs</strong> &mdash; Created as Bug issues linked to the epic, with severity mapped to Jira priority (Critical = Highest, High = High, Medium = Medium, Low = Low)</li>
+    </ol>
+
+    <p>Each issue is persisted incrementally: after creating each issue, its Jira key is written back to the export file immediately. If the process fails mid-way (network error, API limit), re-running <code>/draft:jira-create</code> skips already-created items and picks up where it left off.</p>
+
+    <h2>Configuration</h2>
+    <p>The Jira project key is stored in <code>draft/workflow.md</code> under a <code>## Jira</code> section:</p>
+
+    <pre><code>## Jira
+
+Project Key: PROJ</code></pre>
+
+    <p>If the key is missing on first run, Draft prompts for it and persists the value for all future invocations. The project key is validated against the Jira API before any issues are created &mdash; an invalid key fails fast with a clear error.</p>
+
+    <h2>Plan Synchronization</h2>
+    <p>After issue creation, <code>/draft:jira-create</code> updates <code>plan.md</code> with Jira keys inline:</p>
+
+    <pre><code>## Phase 1: Setup [PROJ-124]
+- [x] **Task 1.1:** Extract logging utilities [PROJ-125]
+- [x] **Task 1.2:** Extract security utilities [PROJ-126]</code></pre>
+
+    <p>This creates bidirectional traceability: the plan references Jira issues, and Jira issues contain the phase goals and verification criteria from the plan.</p>
+
+    <h2>Quality Reports in Jira</h2>
+    <p>When <code>/draft:review</code> or <code>/draft:bughunt</code> has been run on the track, their findings are included in the Jira export. Review findings become an informational table in the epic description. Bug hunt findings become individual Bug issues with all evidence preserved: the code snippet, the data flow trace, the verification steps completed, the reasoning for why the finding is not a false positive, and the recommended fix with regression test.</p>
+
+    <p>This means the team working in Jira has the same quality intelligence that Draft produced &mdash; not a summary, but the full detail needed to act on each finding.</p>
+
+    <h2>Bidirectional Sync Considerations</h2>
+    <p>Draft's Jira integration is currently one-directional: Draft pushes to Jira. If Jira issues are updated externally (status changes, reassignment, added comments), those changes are not pulled back into Draft's <code>plan.md</code>.</p>
+
+    <p>This is a deliberate design choice. Draft's <code>plan.md</code> is the source of truth for implementation order and task status during active development. Jira is the source of truth for project management, assignment, and organizational tracking. The two systems serve different audiences and update at different cadences. The Jira keys in <code>plan.md</code> provide the link between them when cross-referencing is needed.</p>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">MCP Requirement</div>
+        <p><code>/draft:jira-create</code> requires a configured MCP-Jira server. If MCP is not available, Draft provides the export file as a complete, structured document that can be manually imported or used with other Jira integration tools. The preview command (<code>/draft:jira-preview</code>) works without MCP.</p>
+    </div>
+</div>
+
+            <nav class="chapter-nav">
+                <a href="../monorepo-federation/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Monorepo Federation</span></a>
+                <a href="../multi-ide-support/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">Multi-IDE Support</span></a>
+            </nav>
+        </main>
+
+        <nav class="page-toc" id="page-toc" style="display: none;">
+            <div class="page-toc-title">On this page</div>
+            <div id="page-toc-list" class="page-toc-list"></div>
+        </nav>
+    </div>
+
+    <script src="../js/book.js"></script>
+</body>
+</html>

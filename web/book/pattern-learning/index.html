@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern Learning — Draft Book</title>
+    <meta name="description" content="How Draft detects codebase patterns, records them to guardrails, and applies learned conventions to future work.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="pattern learning, codebase conventions, guardrails, convention detection, pattern recognition">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="Pattern Learning — Draft Book">
+    <meta property="og:description" content="How Draft detects codebase patterns, records them to guardrails, and applies learned conventions to future work.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/book/pattern-learning/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="Pattern Learning — Draft Book">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Pattern Learning — Draft Book">
+    <meta name="twitter:description" content="How Draft detects codebase patterns, records them to guardrails, and applies learned conventions to future work.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="Pattern Learning — Draft Book">
+    <link rel="canonical" href="https://getdraft.dev/book/pattern-learning/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Pattern Learning",
+      "description": "How Draft detects codebase patterns, records them to guardrails, and applies learned conventions to future work.",
+      "url": "https://getdraft.dev/book/pattern-learning/",
+      "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "position": 16,
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../css/book.css">
+</head>
+<body data-chapter="pattern-learning">
+
+    <div class="reading-progress" id="reading-progress"></div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="book-topbar">
+        <div class="book-topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
+            <div class="book-topbar-divider"></div>
+            <span class="book-topbar-chapter">Pattern Learning</span>
+        </div>
+        <div class="book-topbar-right">
+            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="book-layout">
+        <aside class="book-sidebar" id="book-sidebar">
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Introduction</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
+                        <span class="ch-num">0.</span>What is Draft?
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">I. Foundation</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../the-problem/" class="sidebar-chapter" data-chapter="the-problem">
+                        <span class="ch-num">1.</span>The Problem
+                    </a></li>
+                    <li><a href="../context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
+                        <span class="ch-num">2.</span>Context-Driven Development
+                    </a></li>
+                    <li><a href="../getting-started/" class="sidebar-chapter" data-chapter="getting-started">
+                        <span class="ch-num">3.</span>Getting Started
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">II. How Draft Thinks</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
+                        <span class="ch-num">4.</span>Context Tiering
+                    </a></li>
+                    <li><a href="../agent-system/" class="sidebar-chapter" data-chapter="agent-system">
+                        <span class="ch-num">5.</span>The Agent System
+                    </a></li>
+                    <li><a href="../signal-classification/" class="sidebar-chapter" data-chapter="signal-classification">
+                        <span class="ch-num">6.</span>Signal Classification
+                    </a></li>
+                    <li><a href="../incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
+                        <span class="ch-num">7.</span>Incremental Refresh
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">III. Track Lifecycle</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
+                    </a></li>
+                    <li><a href="../implementation/" class="sidebar-chapter" data-chapter="implementation">
+                        <span class="ch-num">9.</span>Implementation
+                    </a></li>
+                    <li><a href="../review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
+                        <span class="ch-num">10.</span>Review Pipeline
+                    </a></li>
+                    <li><a href="../managing-tracks/" class="sidebar-chapter" data-chapter="managing-tracks">
+                        <span class="ch-num">11.</span>Managing Tracks
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">IV. Quality</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../deep-review/" class="sidebar-chapter" data-chapter="deep-review">
+                        <span class="ch-num">12.</span>Deep Review
+                    </a></li>
+                    <li><a href="../bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
+                        <span class="ch-num">13.</span>Bug Hunt
+                    </a></li>
+                    <li><a href="../coverage/" class="sidebar-chapter" data-chapter="coverage">
+                        <span class="ch-num">14.</span>Coverage
+                    </a></li>
+                    <li><a href="../pattern-learning/" class="sidebar-chapter active" data-chapter="pattern-learning">
+                        <span class="ch-num">15.</span>Pattern Learning
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">V. Architecture</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../decomposition/" class="sidebar-chapter" data-chapter="decomposition">
+                        <span class="ch-num">16.</span>Decomposition
+                    </a></li>
+                    <li><a href="../adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VI. Enterprise</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../monorepo-federation/" class="sidebar-chapter" data-chapter="monorepo-federation">
+                        <span class="ch-num">18.</span>Monorepo Federation
+                    </a></li>
+                    <li><a href="../jira-integration/" class="sidebar-chapter" data-chapter="jira-integration">
+                        <span class="ch-num">19.</span>Jira Integration
+                    </a></li>
+                    <li><a href="../multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
+                        <span class="ch-num">20.</span>Multi-IDE Support
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VII. Closing</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../philosophy-references/" class="sidebar-chapter" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Appendix</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../command-reference/" class="sidebar-chapter" data-chapter="command-reference">
+                        <span class="ch-num">A.</span>Command Reference
+                    </a></li>
+                    <li><a href="../file-reference/" class="sidebar-chapter" data-chapter="file-reference">
+                        <span class="ch-num">B.</span>File Reference
+                    </a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="book-content">
+<div class="chapter-wrapper">
+    <h1>Pattern Learning</h1>
+    <p class="chapter-meta"><span class="part-name">Part IV: Quality</span> &middot; Chapter 15</p>
+    <p class="read-time">5 min read</p>
+
+    <p class="chapter-intro">A new developer joins the team and notices that every database call in the codebase is wrapped in a transaction, even single reads. "Is this intentional?" she asks. Nobody remembers who started the pattern or why, but it has been that way for two years and nothing has broken. Three months later, an AI coding agent generates a database module without transaction wrappers. The code review catches it, but only because a human happened to know the convention. <code>/draft:learn</code> catches it automatically &mdash; because it already discovered that pattern, recorded it, and taught the AI to enforce it.</p>
+
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 440 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:460px;height:auto;display:block;margin:0 auto;">
+                <defs>
+                    <filter id="sh15" x="-4%" y="-6%" width="108%" height="116%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                    <marker id="arr15" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#718096"/></marker>
+                </defs>
+                <!-- Codebase -->
+                <rect x="140" y="10" width="160" height="50" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" filter="url(#sh15)"/>
+                <text x="220" y="41" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#2563eb">Codebase</text>
+                <!-- Arrow down -->
+                <path d="M220 62 L220 90" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr15)"/>
+                <!-- Detect Patterns -->
+                <rect x="310" y="96" width="120" height="50" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh15)"/>
+                <text x="370" y="118" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#718096">draft:learn</text>
+                <text x="370" y="135" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#7c3aed">Detect Patterns</text>
+                <!-- Arrow from codebase to detect -->
+                <path d="M300 55 L370 92" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr15)"/>
+                <!-- Learn / guardrails.md -->
+                <rect x="140" y="190" width="160" height="50" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5" filter="url(#sh15)"/>
+                <text x="220" y="212" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#718096">guardrails.md</text>
+                <text x="220" y="230" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#059669">Learn &amp; Record</text>
+                <!-- Arrow from detect to learn -->
+                <path d="M370 148 L290 190" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr15)"/>
+                <!-- Apply to Future Work -->
+                <rect x="10" y="96" width="120" height="50" rx="10" fill="#fef9c3" stroke="#d97706" stroke-width="1.5" filter="url(#sh15)"/>
+                <text x="70" y="118" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#718096">draft:implement</text>
+                <text x="70" y="135" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#d97706">Apply Rules</text>
+                <!-- Arrow from learn to apply -->
+                <path d="M150 210 L70 148" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr15)"/>
+                <!-- Arrow from apply back to codebase -->
+                <path d="M70 96 L150 55" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr15)"/>
+                <!-- Center cycle indicator -->
+                <text x="220" y="155" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" fill="#e2e8f0">&#x21bb;</text>
+            </svg>
+        </div>
+        <div class="figure-caption">The pattern learning feedback loop: scan the codebase, detect recurring patterns, record them as guardrails, apply rules to future implementations, producing code that feeds the next scan.</div>
+    </div>
+
+    <h2>How Pattern Learning Works</h2>
+    <p><code>/draft:learn</code> scans the codebase for recurring patterns &mdash; code structures that appear three or more times consistently. It distinguishes between <strong>conventions</strong> (patterns the team intentionally follows) and <strong>anti-patterns</strong> (patterns that cause bugs, security issues, or performance problems). Both are recorded in <code>draft/guardrails.md</code>, where they feed into every subsequent quality command.</p>
+
+    <pre class="terminal"><code>$ /draft:learn
+  Scanned: 247 source files across 18 directories
+
+  Results:
+    New conventions learned:     4
+    New anti-patterns learned:   2
+    Existing patterns updated:   3
+    Skipped (insufficient data): 12
+    Skipped (already documented): 5
+
+  Promotion candidates (high confidence):
+    2 patterns ready — run /draft:learn promote to review
+
+  Updated: draft/guardrails.md</code></pre>
+
+    <h2>The Evidence Threshold</h2>
+    <p>Pattern learning is conservative by design. A single occurrence is an example. Two occurrences might be coincidence. Three or more consistent occurrences are a pattern worth recording.</p>
+
+    <table>
+        <thead><tr><th>Evidence</th><th>Confidence</th><th>Action</th></tr></thead>
+        <tbody>
+            <tr><td>1-2 occurrences</td><td>&mdash;</td><td>Insufficient data, skip</td></tr>
+            <tr><td>3-5 occurrences, all consistent</td><td>Medium</td><td>Learn as convention or anti-pattern</td></tr>
+            <tr><td>5+ occurrences, consistent, cross-verified</td><td>High</td><td>Learn and flag as promotion candidate</td></tr>
+            <tr><td>5+ occurrences, inconsistent</td><td>&mdash;</td><td>Do NOT learn (investigate the inconsistency)</td></tr>
+        </tbody>
+    </table>
+
+    <p>The last row is critical. If a pattern appears in eight files but two of them do it differently, that is not a convention &mdash; it is a conflict that needs human attention. <code>/draft:learn</code> does not paper over inconsistencies; it surfaces them.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Evidence Over Assumptions</div>
+        <p>Pattern learning never infers from fewer than three occurrences, never auto-promotes to hard guardrails without human approval, never overwrites human-curated entries, and never learns framework defaults as project conventions. The rule is simple: quantity over anecdote.</p>
+    </div>
+
+    <h2>Two Categories</h2>
+    <p>Every learned pattern falls into one of two categories, and the distinction determines how quality commands treat it.</p>
+
+    <h3>Conventions (Skip in Future)</h3>
+    <p>A convention is a pattern that is consistently applied and does not cause bugs. When a convention is recorded, future runs of <code>/draft:review</code> and <code>/draft:bughunt</code> will not flag it as unusual or suspicious. This eliminates false positives.</p>
+
+    <pre><code>### Custom Error Classes for Domain Errors
+- **Category:** error-handling
+- **Confidence:** high
+- **Evidence:** Found in 9 files — src/auth/errors.ts:5,
+    src/payments/errors.ts:3, src/orders/errors.ts:7, ...
+- **Discovered at:** 2026-02-15
+- **Established at:** ~2025-06-20
+- **Last verified:** 2026-03-28
+- **Last active:** 2026-03-25
+- **Discovered by:** draft:learn on 2026-02-15
+- **Description:** All domain modules define custom error
+    classes extending BaseAppError with error codes and
+    HTTP status mappings. This is intentional for
+    centralized error handling in the API middleware.</code></pre>
+
+    <h3>Anti-Patterns (Always Flag)</h3>
+    <p>An anti-pattern is a pattern that is consistently applied but causes or risks bugs, security issues, or performance problems. When an anti-pattern is recorded, every future quality command will flag it.</p>
+
+    <pre><code>### Unguarded Environment Variable Access
+- **Category:** reliability
+- **Severity:** high
+- **Evidence:** Found in 6 files — src/config/db.ts:12,
+    src/config/cache.ts:8, src/workers/email.ts:3, ...
+- **Discovered at:** 2026-02-15
+- **Established at:** ~2025-08-10
+- **Last verified:** 2026-03-28
+- **Last active:** 2026-03-20
+- **Discovered by:** draft:learn on 2026-02-15
+- **Description:** process.env.VAR accessed without
+    undefined check or default value. Missing env vars
+    cause silent undefined propagation instead of
+    fail-fast at startup.
+- **Suggested fix:** Validate all required env vars at
+    application startup using a config validation module.</code></pre>
+
+    <h2>Temporal Metadata</h2>
+    <p>Every learned pattern carries four timestamps that enable temporal reasoning about the codebase's evolution:</p>
+
+    <table>
+        <thead><tr><th>Timestamp</th><th>Purpose</th><th>How Determined</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Discovered at</strong></td><td>When Draft first observed the pattern</td><td>Current date when the scan runs</td></tr>
+            <tr><td><strong>Established at</strong></td><td>When the pattern was introduced in the codebase</td><td><code>git blame</code> on evidence files, oldest occurrence</td></tr>
+            <tr><td><strong>Last verified</strong></td><td>When the pattern was last confirmed present</td><td>Updated on each re-verification</td></tr>
+            <tr><td><strong>Last active</strong></td><td>When files using the pattern were last modified</td><td><code>git log -1</code> on each evidence file, most recent date</td></tr>
+        </tbody>
+    </table>
+
+    <p>These timestamps answer questions that occurrence counts alone cannot. A pattern discovered recently but established two years ago is a well-entrenched convention. A pattern established last month and actively spreading is an emerging convention. A pattern where <code>last_active</code> is six months old and all occurrences live in legacy code is a declining pattern that the team is phasing out.</p>
+
+    <h2>Temporal Analysis: Declining vs. Emerging Patterns</h2>
+    <p><code>/draft:learn</code> uses <code>git blame</code> to detect the trajectory of each pattern. If a pattern appears heavily in files last modified over a year ago but rarely in files modified within the past six months, it is flagged as declining. The occurrence ratio old:new greater than 3:1 triggers the declining classification.</p>
+
+    <p>This matters because a declining pattern should not be enforced. If the team is migrating from manual error logging to structured error middleware, learning the old pattern as a convention would create friction &mdash; flagging every new file that correctly uses the new approach as inconsistent. Instead, declining patterns are annotated but not propagated to quality commands.</p>
+
+    <div class="callout callout-insight">
+        <div class="callout-title">Patterns Have Lifecycles</div>
+        <p>A pattern emerges when a developer introduces a new approach. It becomes a convention when others adopt it. It plateaus as the standard way. It declines when a better approach arrives. <code>/draft:learn</code> tracks where each pattern sits in this lifecycle, so it enforces living conventions and leaves dying patterns alone.</p>
+    </div>
+
+    <h2>The Seven Dimensions Scanned</h2>
+    <p><code>/draft:learn</code> analyzes the codebase across seven dimensions, looking for recurring structures in each:</p>
+
+    <ol>
+        <li><strong>Error handling</strong> &mdash; How errors are caught, logged, propagated. Custom error classes, retry strategies, error boundaries</li>
+        <li><strong>Naming</strong> &mdash; Variable, function, file naming conventions beyond language defaults. Module organization patterns</li>
+        <li><strong>Architecture</strong> &mdash; Import patterns, state management approaches, API call patterns, component composition</li>
+        <li><strong>Concurrency</strong> &mdash; Async/await conventions, locking approaches, queue patterns, cancellation handling</li>
+        <li><strong>Data flow</strong> &mdash; Validation placement, serialization conventions, caching strategies, transformation pipelines</li>
+        <li><strong>Testing</strong> &mdash; Test file placement, structure (arrange/act/assert vs. given/when/then), mock conventions, fixture patterns</li>
+        <li><strong>Configuration</strong> &mdash; Environment variable access patterns, feature flag patterns, config file conventions</li>
+    </ol>
+
+    <p>Before recording any candidate, <code>/draft:learn</code> cross-references it against <code>tech-stack.md</code> (already documented patterns), existing <code>guardrails.md</code> entries (already learned), and <code>.ai-context.md</code> (architecture-level documentation). No duplication occurs.</p>
+
+    <h2>How Patterns Feed Into Guardrails</h2>
+    <p><code>draft/guardrails.md</code> has three sections, each treated differently by quality commands:</p>
+
+    <table>
+        <thead><tr><th>Section</th><th>Source</th><th>Quality Command Behavior</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Hard Guardrails</strong></td><td>Human-curated, checked items</td><td>Flag violations as issues</td></tr>
+            <tr><td><strong>Learned Conventions</strong></td><td><code>/draft:learn</code></td><td>Skip these patterns during analysis (not bugs)</td></tr>
+            <tr><td><strong>Learned Anti-Patterns</strong></td><td><code>/draft:learn</code></td><td>Always flag these patterns as bugs</td></tr>
+        </tbody>
+    </table>
+
+    <p>Hard guardrails are human-written rules that override everything. Learned entries complement them but never replace them. If a learned pattern conflicts with a hard guardrail, the hard guardrail wins.</p>
+
+    <h2>Auto-Eviction</h2>
+    <p>Each section in <code>guardrails.md</code> is capped at 50 learned entries. When capacity is reached, the oldest medium-confidence entry that has not been re-verified in 90+ days is evicted to make room. This prevents guardrails from growing unboundedly and ensures that the entries reflect the current state of the codebase, not its history.</p>
+
+    <div class="callout callout-warning">
+        <div class="callout-title">Conflict Detection</div>
+        <p>Before saving any new pattern, <code>/draft:learn</code> checks for conflicts with existing entries. If a new candidate contradicts a learned convention, an existing anti-pattern, or a hard guardrail, it presents both patterns side by side and asks the developer to resolve the conflict. Options: keep both (the new pattern is a scoped exception), replace (the pattern has evolved), or discard (the existing entry is correct). No silent overwrites.</p>
+    </div>
+
+    <h2>The Promotion Workflow</h2>
+    <p>Learned patterns start as provisional entries. When a pattern reaches high confidence (5+ consistent occurrences, cross-verified), it becomes a promotion candidate. Running <code>/draft:learn promote</code> presents these candidates for human review:</p>
+
+    <pre class="terminal"><code>$ /draft:learn promote
+
+  Pattern promotion candidates:
+
+  1. [Convention] "Centralized API client pattern"
+     (high confidence, 12 files)
+     Promote to: tech-stack.md Accepted Patterns? [y/n]
+
+  2. [Anti-Pattern] "Unguarded .env access"
+     (high confidence, 6 files)
+     Promote to: Hard Guardrail (enforce always)? [y/n]</code></pre>
+
+    <p>Promoted conventions move to <code>tech-stack.md</code> under Accepted Patterns. Promoted anti-patterns become hard guardrails &mdash; permanently enforced rules. In both cases, human approval is required. <code>/draft:learn</code> never auto-promotes.</p>
+
+    <h2>The Learning Loop</h2>
+    <p>Pattern learning creates a continuous improvement cycle that makes each successive interaction with Draft more precise:</p>
+
+    <ol>
+        <li><code>/draft:init</code> establishes the project context and creates <code>guardrails.md</code></li>
+        <li><code>/draft:implement</code> generates code following existing guardrails</li>
+        <li><code>/draft:learn</code> scans the codebase, discovers new patterns, updates guardrails</li>
+        <li>Next <code>/draft:implement</code> is constrained by the updated guardrails &mdash; fewer convention violations, fewer false positives in review</li>
+        <li><code>/draft:review</code> and <code>/draft:bughunt</code> read the updated guardrails &mdash; skip known conventions, always flag known anti-patterns</li>
+        <li><code>/draft:learn promote</code> graduates stable patterns to permanent status</li>
+    </ol>
+
+    <p>Pattern learning also runs as the final phase of <code>/draft:deep-review</code>, <code>/draft:review</code>, and <code>/draft:bughunt</code>. Every quality analysis that discovers patterns feeds them back into guardrails, so the system gets smarter with each run without requiring explicit <code>/draft:learn</code> invocations.</p>
+
+    <div class="callout callout-insight">
+        <div class="callout-title">Teaching the AI Your Team's Style</div>
+        <p>Pattern learning solves a fundamental problem with AI coding assistants: they do not know your conventions. They generate code that works but does not match how your team does things. <code>/draft:learn</code> observes your codebase, extracts the implicit rules your team follows, and makes them explicit in a file the AI reads on every interaction. The AI stops guessing your conventions and starts enforcing them.</p>
+    </div>
+</div>
+
+            <nav class="chapter-nav">
+                <a href="../coverage/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Coverage</span></a>
+                <a href="../decomposition/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">Decomposition</span></a>
+            </nav>
+        </main>
+
+        <nav class="page-toc" id="page-toc" style="display: none;">
+            <div class="page-toc-title">On this page</div>
+            <div id="page-toc-list" class="page-toc-list"></div>
+        </nav>
+    </div>
+
+    <script src="../js/book.js"></script>
+</body>
+</html>

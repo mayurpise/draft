@@ -20,8 +20,9 @@ help: ## Show this help message
 	@echo "  make clean   - Clean build artifacts (currently none)"
 	@echo "  make help    - Show this message"
 
-build: ## Generate integration files from skills
+build: ## Generate integration files and book pages
 	./scripts/build-integrations.sh
+	./scripts/build-book.sh
 
 test: ## Run all tests
 	@FAILED_SUITES=""; \

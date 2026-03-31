@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decomposition — Draft Book</title>
+    <meta name="description" content="Breaking large features into independently shippable sub-tasks — tree decomposition with dependency ordering and blast radius scoping.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="task decomposition, feature breakdown, dependency ordering, blast radius, sub-task management">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="Decomposition — Draft Book">
+    <meta property="og:description" content="Breaking large features into independently shippable sub-tasks — tree decomposition with dependency ordering and blast radius scoping.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/book/decomposition/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="Decomposition — Draft Book">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Decomposition — Draft Book">
+    <meta name="twitter:description" content="Breaking large features into independently shippable sub-tasks — tree decomposition with dependency ordering and blast radius scoping.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="Decomposition — Draft Book">
+    <link rel="canonical" href="https://getdraft.dev/book/decomposition/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Decomposition",
+      "description": "Breaking large features into independently shippable sub-tasks — tree decomposition with dependency ordering and blast radius scoping.",
+      "url": "https://getdraft.dev/book/decomposition/",
+      "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "position": 17,
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../css/book.css">
+</head>
+<body data-chapter="decomposition">
+
+    <div class="reading-progress" id="reading-progress"></div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="book-topbar">
+        <div class="book-topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
+            <div class="book-topbar-divider"></div>
+            <span class="book-topbar-chapter">Decomposition</span>
+        </div>
+        <div class="book-topbar-right">
+            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="book-layout">
+        <aside class="book-sidebar" id="book-sidebar">
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Introduction</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
+                        <span class="ch-num">0.</span>What is Draft?
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">I. Foundation</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../the-problem/" class="sidebar-chapter" data-chapter="the-problem">
+                        <span class="ch-num">1.</span>The Problem
+                    </a></li>
+                    <li><a href="../context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
+                        <span class="ch-num">2.</span>Context-Driven Development
+                    </a></li>
+                    <li><a href="../getting-started/" class="sidebar-chapter" data-chapter="getting-started">
+                        <span class="ch-num">3.</span>Getting Started
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">II. How Draft Thinks</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
+                        <span class="ch-num">4.</span>Context Tiering
+                    </a></li>
+                    <li><a href="../agent-system/" class="sidebar-chapter" data-chapter="agent-system">
+                        <span class="ch-num">5.</span>The Agent System
+                    </a></li>
+                    <li><a href="../signal-classification/" class="sidebar-chapter" data-chapter="signal-classification">
+                        <span class="ch-num">6.</span>Signal Classification
+                    </a></li>
+                    <li><a href="../incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
+                        <span class="ch-num">7.</span>Incremental Refresh
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">III. Track Lifecycle</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
+                    </a></li>
+                    <li><a href="../implementation/" class="sidebar-chapter" data-chapter="implementation">
+                        <span class="ch-num">9.</span>Implementation
+                    </a></li>
+                    <li><a href="../review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
+                        <span class="ch-num">10.</span>Review Pipeline
+                    </a></li>
+                    <li><a href="../managing-tracks/" class="sidebar-chapter" data-chapter="managing-tracks">
+                        <span class="ch-num">11.</span>Managing Tracks
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">IV. Quality</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../deep-review/" class="sidebar-chapter" data-chapter="deep-review">
+                        <span class="ch-num">12.</span>Deep Review
+                    </a></li>
+                    <li><a href="../bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
+                        <span class="ch-num">13.</span>Bug Hunt
+                    </a></li>
+                    <li><a href="../coverage/" class="sidebar-chapter" data-chapter="coverage">
+                        <span class="ch-num">14.</span>Coverage
+                    </a></li>
+                    <li><a href="../pattern-learning/" class="sidebar-chapter" data-chapter="pattern-learning">
+                        <span class="ch-num">15.</span>Pattern Learning
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">V. Architecture</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../decomposition/" class="sidebar-chapter active" data-chapter="decomposition">
+                        <span class="ch-num">16.</span>Decomposition
+                    </a></li>
+                    <li><a href="../adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VI. Enterprise</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../monorepo-federation/" class="sidebar-chapter" data-chapter="monorepo-federation">
+                        <span class="ch-num">18.</span>Monorepo Federation
+                    </a></li>
+                    <li><a href="../jira-integration/" class="sidebar-chapter" data-chapter="jira-integration">
+                        <span class="ch-num">19.</span>Jira Integration
+                    </a></li>
+                    <li><a href="../multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
+                        <span class="ch-num">20.</span>Multi-IDE Support
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VII. Closing</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../philosophy-references/" class="sidebar-chapter" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Appendix</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../command-reference/" class="sidebar-chapter" data-chapter="command-reference">
+                        <span class="ch-num">A.</span>Command Reference
+                    </a></li>
+                    <li><a href="../file-reference/" class="sidebar-chapter" data-chapter="file-reference">
+                        <span class="ch-num">B.</span>File Reference
+                    </a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="book-content">
+<div class="chapter-wrapper">
+    <h1>Decomposition</h1>
+    <p class="chapter-meta"><span class="part-name">Part V: Architecture</span> &middot; Chapter 16</p>
+    <p class="read-time">4 min read</p>
+
+    <p class="chapter-intro">A feature starts as a paragraph in a spec. Implementation starts as a list of tasks in a plan. But between the two lies a structural question that determines whether the code will be maintainable or not: how do you divide the work into modules? <code>/draft:decompose</code> answers this question systematically &mdash; mapping responsibilities to modules, dependencies between them, and the order in which they should be built.</p>
+
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:600px;display:block;margin:0 auto">
+                <defs>
+                    <filter id="d-shadow" x="-4%" y="-4%" width="108%" height="112%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a1a2e" flood-opacity="0.08"/>
+                    </filter>
+                </defs>
+                <!-- Root task -->
+                <rect x="195" y="16" width="210" height="48" rx="8" fill="#2563eb" filter="url(#d-shadow)"/>
+                <text x="300" y="45" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="14" font-weight="bold">Large Feature</text>
+                <!-- Connectors L1 -->
+                <line x1="300" y1="64" x2="120" y2="112" stroke="#e2e8f0" stroke-width="2"/>
+                <line x1="300" y1="64" x2="300" y2="112" stroke="#e2e8f0" stroke-width="2"/>
+                <line x1="300" y1="64" x2="480" y2="112" stroke="#e2e8f0" stroke-width="2"/>
+                <!-- L1 boxes -->
+                <rect x="40" y="112" width="160" height="44" rx="8" fill="#7c3aed" filter="url(#d-shadow)"/>
+                <text x="120" y="139" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="13">Module A</text>
+                <rect x="220" y="112" width="160" height="44" rx="8" fill="#7c3aed" filter="url(#d-shadow)"/>
+                <text x="300" y="139" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="13">Module B</text>
+                <rect x="400" y="112" width="160" height="44" rx="8" fill="#7c3aed" filter="url(#d-shadow)"/>
+                <text x="480" y="139" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="13">Module C</text>
+                <!-- Connectors L2 from Module A -->
+                <line x1="80" y1="156" x2="50" y2="208" stroke="#e2e8f0" stroke-width="2"/>
+                <line x1="160" y1="156" x2="170" y2="208" stroke="#e2e8f0" stroke-width="2"/>
+                <!-- Connectors L2 from Module B -->
+                <line x1="270" y1="156" x2="260" y2="208" stroke="#e2e8f0" stroke-width="2"/>
+                <line x1="330" y1="156" x2="360" y2="208" stroke="#e2e8f0" stroke-width="2"/>
+                <!-- L2 boxes -->
+                <rect x="4" y="208" width="110" height="40" rx="6" fill="#059669" filter="url(#d-shadow)"/>
+                <text x="59" y="233" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">A-1 (1-3 files)</text>
+                <rect x="124" y="208" width="110" height="40" rx="6" fill="#059669" filter="url(#d-shadow)"/>
+                <text x="179" y="233" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">A-2 (1-3 files)</text>
+                <rect x="244" y="208" width="110" height="40" rx="6" fill="#059669" filter="url(#d-shadow)"/>
+                <text x="299" y="233" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">B-1 (1-3 files)</text>
+                <rect x="364" y="208" width="110" height="40" rx="6" fill="#059669" filter="url(#d-shadow)"/>
+                <text x="419" y="233" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">B-2 (1-3 files)</text>
+                <!-- Module C stays as leaf -->
+                <rect x="490" y="208" width="110" height="40" rx="6" fill="#059669" filter="url(#d-shadow)"/>
+                <text x="545" y="233" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">C (1-3 files)</text>
+                <line x1="480" y1="156" x2="545" y2="208" stroke="#e2e8f0" stroke-width="2"/>
+                <!-- Legend -->
+                <text x="300" y="290" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="11">Each leaf module: single responsibility, 1-3 source files, clear API surface</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Tree decomposition: a large feature is recursively split into focused modules, each constrained to 1-3 source files with a single responsibility.</div>
+    </div>
+
+    <h2>The Problem With Ad-Hoc Boundaries</h2>
+    <p>Without explicit decomposition, module boundaries emerge accidentally. A developer creates a file, another developer creates a related file in a different directory, a third adds a utility that both use. Six months later, nobody can explain why the authentication logic spans three directories and imports from the billing module.</p>
+
+    <p>Decomposition is the act of making module boundaries intentional. Draft's <code>/draft:decompose</code> command forces this intentionality by requiring explicit definitions for every module &mdash; what it owns, what it exposes, what it depends on, and how complex it is.</p>
+
+    <h2>Two Scopes of Decomposition</h2>
+    <p><code>/draft:decompose</code> operates at two levels, depending on context:</p>
+
+    <table>
+        <thead>
+            <tr><th>Scope</th><th>Trigger</th><th>Output</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Project-wide</td><td>No active track, or explicit <code>project</code> argument</td><td>Updates <code>draft/architecture.md</code>, regenerates <code>.ai-context.md</code></td></tr>
+            <tr><td>Track-scoped</td><td>Active track or track ID argument</td><td>Creates <code>draft/tracks/&lt;id&gt;/architecture.md</code></td></tr>
+        </tbody>
+    </table>
+
+    <p>Project-wide decomposition defines the system's module structure. Track-scoped decomposition defines the module structure for a specific feature or fix, which may introduce new modules or refine existing ones.</p>
+
+    <h2>SRP Enforcement</h2>
+    <p>The Architect Agent enforces a strict single responsibility principle during decomposition. Each module must have exactly one responsibility, expressed in one sentence. If the sentence contains "and" &mdash; if a module "handles authentication <em>and</em> manages user sessions" &mdash; it gets split.</p>
+
+    <p>This is not a style preference. It is a structural constraint. The one-sentence responsibility becomes the module's contract: everything inside the module serves that sentence, and nothing outside the module does that job.</p>
+
+    <h2>The 1-3 File Constraint</h2>
+    <p>Draft enforces a hard size constraint: each module contains 1 to 3 source files (excluding test files). This constraint is deliberately tight. If a module needs 4 files, it is doing too much and must be split further. If a module needs only a single function, it is too granular and should be absorbed into an adjacent module.</p>
+
+    <p>The constraint forces real decomposition. Teams that define modules as "the auth directory" with 15 files in it have not decomposed anything &mdash; they have named a directory. Draft's constraint means a module named <code>auth</code> might actually become <code>auth-token</code>, <code>auth-session</code>, and <code>auth-middleware</code>, each with 1-3 files and a clear boundary.</p>
+
+    <h2>Module Definition</h2>
+    <p>For each module, decomposition produces six fields:</p>
+    <ul>
+        <li><strong>Name</strong> &mdash; Short, descriptive identifier (<code>auth-token</code>, <code>scheduler</code>, <code>parser</code>)</li>
+        <li><strong>Responsibility</strong> &mdash; One sentence describing what this module owns</li>
+        <li><strong>Files</strong> &mdash; Expected source files (existing or to be created)</li>
+        <li><strong>API Surface</strong> &mdash; Public functions, classes, or interfaces using the project's language conventions</li>
+        <li><strong>Dependencies</strong> &mdash; Which other modules it imports from</li>
+        <li><strong>Complexity</strong> &mdash; Low, Medium, or High</li>
+    </ul>
+
+    <p>The API surface is especially important. It defines the only way other modules may interact with this one. Anything not in the API surface is internal and may change without affecting dependents.</p>
+
+    <h2>Dependency Analysis</h2>
+    <p>After modules are defined and approved, Draft maps dependencies between them. The process has three outputs:</p>
+
+    <p><strong>A dependency diagram</strong> &mdash; ASCII art showing which modules depend on which:</p>
+
+    <pre><code>[auth] ──&gt; [database]
+   │            │
+   └──&gt; [config] &lt;──┘
+            │
+      [logging] (no deps)</code></pre>
+
+    <p><strong>A dependency table</strong> &mdash; showing both directions of every relationship:</p>
+
+    <table>
+        <thead>
+            <tr><th>Module</th><th>Depends On</th><th>Depended By</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>logging</td><td>&mdash;</td><td>auth, database, config</td></tr>
+            <tr><td>config</td><td>logging</td><td>auth, database</td></tr>
+            <tr><td>database</td><td>config, logging</td><td>auth</td></tr>
+            <tr><td>auth</td><td>database, config</td><td>&mdash;</td></tr>
+        </tbody>
+    </table>
+
+    <p><strong>An implementation order</strong> &mdash; a topological sort that determines which modules to build first. Leaf modules (no dependencies) come first. Modules that depend on them come next. This ensures that when you start coding a module, everything it imports already exists.</p>
+
+    <h2>Breaking Circular Dependencies</h2>
+    <p>Cycles in the dependency graph are structural defects. If module A depends on module B and module B depends on module A, their boundaries are wrong. Draft's Architect Agent applies a cycle-breaking framework with three strategies:</p>
+
+    <table>
+        <thead>
+            <tr><th>Strategy</th><th>When to Use</th><th>Result</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Extract shared interface</strong></td><td>Both modules need the same abstraction</td><td>New <code>&lt;concern&gt;-types</code> module with only interfaces/types</td></tr>
+            <tr><td><strong>Invert dependency</strong></td><td>One module only needs a callback or event</td><td>Accept a function/interface instead of importing directly</td></tr>
+            <tr><td><strong>Merge modules</strong></td><td>The two modules are actually one concern</td><td>Combined module with single responsibility</td></tr>
+        </tbody>
+    </table>
+
+    <p>The first strategy is most common. When <code>user-service</code> imports from <code>notification-service</code> and vice versa, the shared concern &mdash; user preferences &mdash; gets extracted into a new <code>user-preferences</code> module that both can depend on without creating a cycle.</p>
+
+    <h2>The Architect Agent's Role</h2>
+    <p>Decomposition is guided by Draft's Architect Agent, a specialized behavioral protocol defined in <code>core/agents/architect.md</code>. The agent brings four capabilities to decomposition:</p>
+
+    <ul>
+        <li><strong>Module identification</strong> &mdash; Scans existing code for directory-per-feature patterns, barrel exports, package files, and import graphs to propose initial boundaries</li>
+        <li><strong>Story writing</strong> &mdash; Each module gets a placeholder story field during decomposition, filled in during <code>/draft:implement</code> with a natural-language algorithm description</li>
+        <li><strong>Execution state design</strong> &mdash; Defines intermediate state variables between input and output for each module</li>
+        <li><strong>Function skeleton generation</strong> &mdash; Creates function stubs with complete signatures before TDD begins</li>
+    </ul>
+
+    <p>The agent is not autonomous. Decomposition includes mandatory checkpoints where the developer reviews and approves the module breakdown, the dependency analysis, and any plan restructuring before changes are written.</p>
+
+    <h2>Plan Restructuring</h2>
+    <p>For track-scoped decomposition, Draft can restructure an existing <code>plan.md</code> to align phases with module boundaries. Each module becomes a phase (or maps to an existing phase), and the implementation order from the dependency graph determines the phase sequence.</p>
+
+    <p>Existing task statuses are preserved during restructuring: completed tasks stay completed, in-progress tasks get flagged if they span multiple modules, pending tasks are remapped freely. Tasks that don't map cleanly to any module are collected in an "Unmapped Tasks" section for developer decision &mdash; nothing is silently dropped.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Source of Truth</div>
+        <p><code>draft/architecture.md</code> is the source of truth for project-wide decomposition. <code>draft/.ai-context.md</code> is derived from it via the Condensation Subroutine. Always update <code>architecture.md</code> first, then regenerate <code>.ai-context.md</code>. Completed modules are never removed or modified during re-decomposition.</p>
+    </div>
+</div>
+
+            <nav class="chapter-nav">
+                <a href="../pattern-learning/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Pattern Learning</span></a>
+                <a href="../adrs/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">Architecture Decision Records</span></a>
+            </nav>
+        </main>
+
+        <nav class="page-toc" id="page-toc" style="display: none;">
+            <div class="page-toc-title">On this page</div>
+            <div id="page-toc-list" class="page-toc-list"></div>
+        </nav>
+    </div>
+
+    <script src="../js/book.js"></script>
+</body>
+</html>

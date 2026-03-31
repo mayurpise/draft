@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Reference — Draft Book</title>
+    <meta name="description" content="Complete reference for all Draft-generated files — architecture.md, .ai-context.md, .ai-profile.md, specs, plans, and state files.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="draft file reference, architecture.md, ai-context.md, ai-profile.md, draft directory structure">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="File Reference — Draft Book">
+    <meta property="og:description" content="Complete reference for all Draft-generated files — architecture.md, .ai-context.md, .ai-profile.md, specs, plans, and state files.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/book/file-reference/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="File Reference — Draft Book">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="File Reference — Draft Book">
+    <meta name="twitter:description" content="Complete reference for all Draft-generated files — architecture.md, .ai-context.md, .ai-profile.md, specs, plans, and state files.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="File Reference — Draft Book">
+    <link rel="canonical" href="https://getdraft.dev/book/file-reference/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "File Reference",
+      "description": "Complete reference for all Draft-generated files — architecture.md, .ai-context.md, .ai-profile.md, specs, plans, and state files.",
+      "url": "https://getdraft.dev/book/file-reference/",
+      "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "position": 24,
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../css/book.css">
+</head>
+<body data-chapter="file-reference">
+
+    <div class="reading-progress" id="reading-progress"></div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="book-topbar">
+        <div class="book-topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
+            <div class="book-topbar-divider"></div>
+            <span class="book-topbar-chapter">File Reference</span>
+        </div>
+        <div class="book-topbar-right">
+            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="book-layout">
+        <aside class="book-sidebar" id="book-sidebar">
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Introduction</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
+                        <span class="ch-num">0.</span>What is Draft?
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">I. Foundation</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../the-problem/" class="sidebar-chapter" data-chapter="the-problem">
+                        <span class="ch-num">1.</span>The Problem
+                    </a></li>
+                    <li><a href="../context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
+                        <span class="ch-num">2.</span>Context-Driven Development
+                    </a></li>
+                    <li><a href="../getting-started/" class="sidebar-chapter" data-chapter="getting-started">
+                        <span class="ch-num">3.</span>Getting Started
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">II. How Draft Thinks</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
+                        <span class="ch-num">4.</span>Context Tiering
+                    </a></li>
+                    <li><a href="../agent-system/" class="sidebar-chapter" data-chapter="agent-system">
+                        <span class="ch-num">5.</span>The Agent System
+                    </a></li>
+                    <li><a href="../signal-classification/" class="sidebar-chapter" data-chapter="signal-classification">
+                        <span class="ch-num">6.</span>Signal Classification
+                    </a></li>
+                    <li><a href="../incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
+                        <span class="ch-num">7.</span>Incremental Refresh
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">III. Track Lifecycle</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
+                    </a></li>
+                    <li><a href="../implementation/" class="sidebar-chapter" data-chapter="implementation">
+                        <span class="ch-num">9.</span>Implementation
+                    </a></li>
+                    <li><a href="../review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
+                        <span class="ch-num">10.</span>Review Pipeline
+                    </a></li>
+                    <li><a href="../managing-tracks/" class="sidebar-chapter" data-chapter="managing-tracks">
+                        <span class="ch-num">11.</span>Managing Tracks
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">IV. Quality</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../deep-review/" class="sidebar-chapter" data-chapter="deep-review">
+                        <span class="ch-num">12.</span>Deep Review
+                    </a></li>
+                    <li><a href="../bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
+                        <span class="ch-num">13.</span>Bug Hunt
+                    </a></li>
+                    <li><a href="../coverage/" class="sidebar-chapter" data-chapter="coverage">
+                        <span class="ch-num">14.</span>Coverage
+                    </a></li>
+                    <li><a href="../pattern-learning/" class="sidebar-chapter" data-chapter="pattern-learning">
+                        <span class="ch-num">15.</span>Pattern Learning
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">V. Architecture</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../decomposition/" class="sidebar-chapter" data-chapter="decomposition">
+                        <span class="ch-num">16.</span>Decomposition
+                    </a></li>
+                    <li><a href="../adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VI. Enterprise</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../monorepo-federation/" class="sidebar-chapter" data-chapter="monorepo-federation">
+                        <span class="ch-num">18.</span>Monorepo Federation
+                    </a></li>
+                    <li><a href="../jira-integration/" class="sidebar-chapter" data-chapter="jira-integration">
+                        <span class="ch-num">19.</span>Jira Integration
+                    </a></li>
+                    <li><a href="../multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
+                        <span class="ch-num">20.</span>Multi-IDE Support
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VII. Closing</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../philosophy-references/" class="sidebar-chapter" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Appendix</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../command-reference/" class="sidebar-chapter" data-chapter="command-reference">
+                        <span class="ch-num">A.</span>Command Reference
+                    </a></li>
+                    <li><a href="../file-reference/" class="sidebar-chapter active" data-chapter="file-reference">
+                        <span class="ch-num">B.</span>File Reference
+                    </a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="book-content">
+<div class="chapter-wrapper">
+    <h1>Appendix B: File Reference</h1>
+    <p class="chapter-meta"><span class="part-name">Appendix</span></p>
+
+    <p class="chapter-intro">Every file Draft generates, organized by directory. For each file: name, purpose, typical size, audience, and lifecycle.</p>
+
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 480 400" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:480px;display:block;margin:0 auto">
+                <defs>
+                    <filter id="file-shadow" x="-4%" y="-4%" width="108%" height="112%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a1a2e" flood-opacity="0.08"/>
+                    </filter>
+                </defs>
+                <style>
+                    .dir { fill: #2563eb; font-family: Arial,sans-serif; font-size: 13px; font-weight: bold; }
+                    .file-ctx { fill: #059669; font-family: Arial,sans-serif; font-size: 11px; }
+                    .file-cfg { fill: #7c3aed; font-family: Arial,sans-serif; font-size: 11px; }
+                    .file-state { fill: #d97706; font-family: Arial,sans-serif; font-size: 11px; }
+                    .file-track { fill: #2563eb; font-family: Arial,sans-serif; font-size: 11px; }
+                    .tree-line { stroke: #e2e8f0; stroke-width: 1.5; fill: none; }
+                </style>
+                <!-- Root -->
+                <text x="24" y="24" class="dir">draft/</text>
+                <!-- Vertical trunk -->
+                <line x1="36" y1="32" x2="36" y2="230" class="tree-line"/>
+                <!-- Context files -->
+                <line x1="36" y1="48" x2="56" y2="48" class="tree-line"/>
+                <rect x="58" y="36" width="160" height="20" rx="4" fill="#e6f4ea"/>
+                <text x="66" y="50" class="file-ctx">architecture.md</text>
+                <line x1="36" y1="68" x2="56" y2="68" class="tree-line"/>
+                <rect x="58" y="56" width="160" height="20" rx="4" fill="#e6f4ea"/>
+                <text x="66" y="70" class="file-ctx">.ai-context.md</text>
+                <line x1="36" y1="88" x2="56" y2="88" class="tree-line"/>
+                <rect x="58" y="76" width="160" height="20" rx="4" fill="#e6f4ea"/>
+                <text x="66" y="90" class="file-ctx">.ai-profile.md</text>
+                <!-- Config files -->
+                <line x1="36" y1="112" x2="56" y2="112" class="tree-line"/>
+                <rect x="58" y="100" width="120" height="20" rx="4" fill="#ede9fe"/>
+                <text x="66" y="114" class="file-cfg">product.md</text>
+                <line x1="36" y1="132" x2="56" y2="132" class="tree-line"/>
+                <rect x="58" y="120" width="120" height="20" rx="4" fill="#ede9fe"/>
+                <text x="66" y="134" class="file-cfg">tech-stack.md</text>
+                <line x1="36" y1="152" x2="56" y2="152" class="tree-line"/>
+                <rect x="58" y="140" width="120" height="20" rx="4" fill="#ede9fe"/>
+                <text x="66" y="154" class="file-cfg">workflow.md</text>
+                <line x1="36" y1="172" x2="56" y2="172" class="tree-line"/>
+                <rect x="58" y="160" width="120" height="20" rx="4" fill="#ede9fe"/>
+                <text x="66" y="174" class="file-cfg">guardrails.md</text>
+                <!-- .state/ -->
+                <line x1="36" y1="200" x2="56" y2="200" class="tree-line"/>
+                <text x="58" y="204" class="dir">.state/</text>
+                <line x1="72" y1="210" x2="72" y2="262" class="tree-line"/>
+                <line x1="72" y1="220" x2="92" y2="220" class="tree-line"/>
+                <rect x="94" y="208" width="140" height="20" rx="4" fill="#fef3c7"/>
+                <text x="102" y="222" class="file-state">freshness.json</text>
+                <line x1="72" y1="240" x2="92" y2="240" class="tree-line"/>
+                <rect x="94" y="228" width="140" height="20" rx="4" fill="#fef3c7"/>
+                <text x="102" y="242" class="file-state">signals.json</text>
+                <line x1="72" y1="260" x2="92" y2="260" class="tree-line"/>
+                <rect x="94" y="248" width="140" height="20" rx="4" fill="#fef3c7"/>
+                <text x="102" y="262" class="file-state">run-memory.json</text>
+                <!-- tracks/ -->
+                <line x1="36" y1="230" x2="56" y2="290" class="tree-line"/>
+                <text x="58" y="294" class="dir">tracks/&lt;name&gt;/</text>
+                <line x1="72" y1="300" x2="72" y2="372" class="tree-line"/>
+                <line x1="72" y1="312" x2="92" y2="312" class="tree-line"/>
+                <rect x="94" y="300" width="120" height="20" rx="4" fill="#dbeafe"/>
+                <text x="102" y="314" class="file-track">spec.md</text>
+                <line x1="72" y1="332" x2="92" y2="332" class="tree-line"/>
+                <rect x="94" y="320" width="120" height="20" rx="4" fill="#dbeafe"/>
+                <text x="102" y="334" class="file-track">plan.md</text>
+                <line x1="72" y1="352" x2="92" y2="352" class="tree-line"/>
+                <rect x="94" y="340" width="140" height="20" rx="4" fill="#dbeafe"/>
+                <text x="102" y="354" class="file-track">metadata.json</text>
+                <line x1="72" y1="372" x2="92" y2="372" class="tree-line"/>
+                <rect x="94" y="360" width="140" height="20" rx="4" fill="#dbeafe"/>
+                <text x="102" y="374" class="file-track">review-report.md</text>
+                <!-- Legend -->
+                <rect x="290" y="36" width="12" height="12" rx="2" fill="#e6f4ea"/>
+                <text x="308" y="47" fill="#059669" font-family="Arial,sans-serif" font-size="10">Context (AI-facing)</text>
+                <rect x="290" y="56" width="12" height="12" rx="2" fill="#ede9fe"/>
+                <text x="308" y="67" fill="#7c3aed" font-family="Arial,sans-serif" font-size="10">Config (human-editable)</text>
+                <rect x="290" y="76" width="12" height="12" rx="2" fill="#fef3c7"/>
+                <text x="308" y="87" fill="#d97706" font-family="Arial,sans-serif" font-size="10">State (internal)</text>
+                <rect x="290" y="96" width="12" height="12" rx="2" fill="#dbeafe"/>
+                <text x="308" y="107" fill="#2563eb" font-family="Arial,sans-serif" font-size="10">Track (per-feature)</text>
+            </svg>
+        </div>
+        <div class="figure-caption">The draft/ directory structure, color-coded by file type: AI-facing context files, human-editable config, internal state tracking, and per-feature track files.</div>
+    </div>
+
+    <h2>draft/ (Root)</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Purpose</th>
+                <th>Size</th>
+                <th>Audience</th>
+                <th>Created</th>
+                <th>Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>architecture.md</code></td>
+                <td>Comprehensive engineering reference with 25 sections. Source of truth for project architecture. Includes Mermaid diagrams, code snippets, module boundaries, data flows, and critical invariants.</td>
+                <td>1000-3000 lines</td>
+                <td>Human &amp; AI</td>
+                <td><code>/draft:init</code></td>
+                <td><code>/draft:init refresh</code>, <code>/draft:decompose</code></td>
+            </tr>
+            <tr>
+                <td><code>.ai-context.md</code></td>
+                <td>Token-optimized AI context derived from <code>architecture.md</code> via Condensation Subroutine. Self-contained with 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, testing strategy, glossary.</td>
+                <td>200-400 lines</td>
+                <td>AI</td>
+                <td><code>/draft:init</code></td>
+                <td>Auto-refreshed when <code>architecture.md</code> changes</td>
+            </tr>
+            <tr>
+                <td><code>.ai-profile.md</code></td>
+                <td>Ultra-compact always-injected project profile. Contains: language, framework, database, auth, API style, critical invariants, safety rules, active tracks, recent changes.</td>
+                <td>20-50 lines</td>
+                <td>AI</td>
+                <td><code>/draft:init</code></td>
+                <td>Auto-refreshed on mutations</td>
+            </tr>
+            <tr>
+                <td><code>product.md</code></td>
+                <td>Product vision, target users, success criteria, and guidelines. Defines what the product does and for whom.</td>
+                <td>50-150 lines</td>
+                <td>Human &amp; AI</td>
+                <td><code>/draft:init</code></td>
+                <td>Manual edits, <code>/draft:init refresh</code></td>
+            </tr>
+            <tr>
+                <td><code>tech-stack.md</code></td>
+                <td>Technology choices: languages, frameworks, databases, key dependencies, and accepted patterns.</td>
+                <td>30-100 lines</td>
+                <td>Human &amp; AI</td>
+                <td><code>/draft:init</code></td>
+                <td>Manual edits, <code>/draft:adr</code> (when tech changes)</td>
+            </tr>
+            <tr>
+                <td><code>workflow.md</code></td>
+                <td>TDD preferences, commit conventions, review process, Jira project key.</td>
+                <td>20-60 lines</td>
+                <td>Human &amp; AI</td>
+                <td><code>/draft:init</code></td>
+                <td>Manual edits, <code>/draft:jira-create</code> (adds Jira config)</td>
+            </tr>
+            <tr>
+                <td><code>guardrails.md</code></td>
+                <td>Hard guardrails, learned conventions, and learned anti-patterns. Entries include dual-layer timestamps for temporal reasoning (discovered_at, established_at, last_verified, last_active).</td>
+                <td>30-200 lines</td>
+                <td>AI</td>
+                <td><code>/draft:init</code></td>
+                <td><code>/draft:learn</code></td>
+            </tr>
+            <tr>
+                <td><code>tracks.md</code></td>
+                <td>Registry of all tracks with their status, type, and phase progress.</td>
+                <td>10-100 lines</td>
+                <td>Human &amp; AI</td>
+                <td><code>/draft:new-track</code></td>
+                <td><code>/draft:new-track</code>, <code>/draft:implement</code>, <code>/draft:revert</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>draft/.state/</h2>
+    <p>Internal state files for incremental refresh, signal classification, and cross-session continuity. Not intended for direct editing.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Purpose</th>
+                <th>Size</th>
+                <th>Audience</th>
+                <th>Created</th>
+                <th>Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>freshness.json</code></td>
+                <td>SHA fingerprints of source files. Used to detect changes since last <code>/draft:init</code> run, enabling incremental refresh instead of full re-analysis.</td>
+                <td>1-5 KB</td>
+                <td>AI (internal)</td>
+                <td><code>/draft:init</code></td>
+                <td><code>/draft:init refresh</code></td>
+            </tr>
+            <tr>
+                <td><code>signals.json</code></td>
+                <td>Detected signal categories from codebase analysis. Classifies what types of patterns, frameworks, and conventions are present.</td>
+                <td>1-5 KB</td>
+                <td>AI (internal)</td>
+                <td><code>/draft:init</code></td>
+                <td><code>/draft:init refresh</code></td>
+            </tr>
+            <tr>
+                <td><code>run-memory.json</code></td>
+                <td>Cross-session continuity data. Records what happened in previous sessions to enable context persistence across agent invocations.</td>
+                <td>1-10 KB</td>
+                <td>AI (internal)</td>
+                <td>First agent invocation</td>
+                <td>Each session</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>draft/tracks/&lt;track-name&gt;/</h2>
+    <p>Each track (feature, fix, or refactor) gets its own directory with these files:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Purpose</th>
+                <th>Size</th>
+                <th>Audience</th>
+                <th>Created</th>
+                <th>Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>spec.md</code></td>
+                <td>Requirements and acceptance criteria for this track. Defines what "done" looks like. Includes functional requirements, edge cases, error scenarios, and explicit non-goals.</td>
+                <td>50-200 lines</td>
+                <td>Human &amp; AI</td>
+                <td><code>/draft:new-track</code></td>
+                <td><code>/draft:change</code>, manual edits</td>
+            </tr>
+            <tr>
+                <td><code>plan.md</code></td>
+                <td>Phased implementation plan with ordered tasks, verification steps, and status markers (<code>[ ]</code> Pending, <code>[~]</code> In Progress, <code>[x]</code> Completed, <code>[!]</code> Blocked). Each phase has a goal and verification criteria.</td>
+                <td>50-300 lines</td>
+                <td>Human &amp; AI</td>
+                <td><code>/draft:new-track</code></td>
+                <td><code>/draft:implement</code>, <code>/draft:change</code>, <code>/draft:decompose</code>, <code>/draft:revert</code></td>
+            </tr>
+            <tr>
+                <td><code>metadata.json</code></td>
+                <td>Track metadata: type (feature/bugfix/refactor), priority, timestamps (created, started, completed), branch name, phase and task counts, progress counters.</td>
+                <td>0.5-2 KB</td>
+                <td>AI</td>
+                <td><code>/draft:new-track</code></td>
+                <td><code>/draft:implement</code> (after each task), <code>/draft:decompose</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Optional Track Files</h2>
+    <p>These files are created by specific commands when run against a track:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Purpose</th>
+                <th>Created By</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>architecture.md</code></td>
+                <td>Track-scoped module decomposition with dependency mapping and implementation order</td>
+                <td><code>/draft:decompose</code></td>
+            </tr>
+            <tr>
+                <td><code>review-report-&lt;timestamp&gt;.md</code></td>
+                <td>Three-stage review findings (validation, spec compliance, code quality)</td>
+                <td><code>/draft:review</code></td>
+            </tr>
+            <tr>
+                <td><code>bughunt-report-&lt;timestamp&gt;.md</code></td>
+                <td>14-dimension bug discovery results with evidence and fix recommendations</td>
+                <td><code>/draft:bughunt</code></td>
+            </tr>
+            <tr>
+                <td><code>jira-export-&lt;timestamp&gt;.md</code></td>
+                <td>Jira issue definitions (epic, stories, sub-tasks, bugs) for review and creation</td>
+                <td><code>/draft:jira-preview</code></td>
+            </tr>
+            <tr>
+                <td><code>jira-export-latest.md</code></td>
+                <td>Symlink to the most recent Jira export file</td>
+                <td><code>/draft:jira-preview</code></td>
+            </tr>
+            <tr>
+                <td><code>review-report-latest.md</code></td>
+                <td>Symlink to the most recent review report</td>
+                <td><code>/draft:review</code></td>
+            </tr>
+            <tr>
+                <td><code>bughunt-report-latest.md</code></td>
+                <td>Symlink to the most recent bughunt report</td>
+                <td><code>/draft:bughunt</code></td>
+            </tr>
+            <tr>
+                <td><code>validation-report.md</code></td>
+                <td>Track validation results when validation is enabled</td>
+                <td><code>/draft:implement</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>draft/adrs/</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Purpose</th>
+                <th>Created By</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>&lt;NNN&gt;-&lt;kebab-case-title&gt;.md</code></td>
+                <td>Architecture Decision Record capturing context, decision, alternatives, and consequences. Numbered sequentially (001, 002, ...). Lifecycle: Proposed &rarr; Accepted &rarr; Deprecated/Superseded.</td>
+                <td><code>/draft:adr</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Monorepo Root Files (from /draft:index)</h2>
+    <p>Generated at the monorepo root level when <code>/draft:index</code> aggregates service contexts:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Purpose</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>draft/service-index.md</code></td>
+                <td>Directory of all detected services with status, tech stack, dependencies, and team ownership</td>
+            </tr>
+            <tr>
+                <td><code>draft/dependency-graph.md</code></td>
+                <td>Inter-service dependency mapping with Mermaid topology and topological ordering</td>
+            </tr>
+            <tr>
+                <td><code>draft/tech-matrix.md</code></td>
+                <td>Technology distribution across services with organizational standards and variances</td>
+            </tr>
+            <tr>
+                <td><code>draft/config.yaml</code></td>
+                <td>Index configuration: service detection patterns, exclusions, re-index triggers</td>
+            </tr>
+            <tr>
+                <td><code>draft/bughunt-summary.md</code></td>
+                <td>Aggregate bughunt results across services (created by <code>/draft:index bughunt</code>)</td>
+            </tr>
+            <tr>
+                <td><code>&lt;service&gt;/draft/manifest.json</code></td>
+                <td>Per-service metadata: name, type, summary, primary tech, dependencies, dependents, team, timestamps</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Source of Truth Hierarchy</div>
+        <p><code>architecture.md</code> is the source of truth. <code>.ai-context.md</code> is derived from it (token-optimized for AI). <code>.ai-profile.md</code> is derived from <code>.ai-context.md</code> (ultra-compact, always loaded). Edits flow downward: update <code>architecture.md</code>, then the derived files are regenerated automatically via the Condensation Subroutine.</p>
+    </div>
+</div>
+
+            <nav class="chapter-nav">
+                <a href="../command-reference/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Command Reference</span></a>
+                <div></div>
+            </nav>
+        </main>
+
+        <nav class="page-toc" id="page-toc" style="display: none;">
+            <div class="page-toc-title">On this page</div>
+            <div id="page-toc-list" class="page-toc-list"></div>
+        </nav>
+    </div>
+
+    <script src="../js/book.js"></script>
+</body>
+</html>

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getting Started — Draft Book</title>
+    <meta name="description" content="Install Draft and run your first commands in five minutes. Set up architecture discovery, create a track, and start implementing.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="install draft, draft getting started, claude code setup, draft tutorial, ai plugin installation">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="Getting Started — Draft Book">
+    <meta property="og:description" content="Install Draft and run your first commands in five minutes. Set up architecture discovery, create a track, and start implementing.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/book/getting-started/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="Getting Started — Draft Book">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Getting Started — Draft Book">
+    <meta name="twitter:description" content="Install Draft and run your first commands in five minutes. Set up architecture discovery, create a track, and start implementing.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="Getting Started — Draft Book">
+    <link rel="canonical" href="https://getdraft.dev/book/getting-started/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Getting Started",
+      "description": "Install Draft and run your first commands in five minutes. Set up architecture discovery, create a track, and start implementing.",
+      "url": "https://getdraft.dev/book/getting-started/",
+      "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "position": 4,
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../css/book.css">
+</head>
+<body data-chapter="getting-started">
+
+    <div class="reading-progress" id="reading-progress"></div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="book-topbar">
+        <div class="book-topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
+            <div class="book-topbar-divider"></div>
+            <span class="book-topbar-chapter">Getting Started</span>
+        </div>
+        <div class="book-topbar-right">
+            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="book-layout">
+        <aside class="book-sidebar" id="book-sidebar">
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Introduction</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
+                        <span class="ch-num">0.</span>What is Draft?
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">I. Foundation</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../the-problem/" class="sidebar-chapter" data-chapter="the-problem">
+                        <span class="ch-num">1.</span>The Problem
+                    </a></li>
+                    <li><a href="../context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
+                        <span class="ch-num">2.</span>Context-Driven Development
+                    </a></li>
+                    <li><a href="../getting-started/" class="sidebar-chapter active" data-chapter="getting-started">
+                        <span class="ch-num">3.</span>Getting Started
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">II. How Draft Thinks</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
+                        <span class="ch-num">4.</span>Context Tiering
+                    </a></li>
+                    <li><a href="../agent-system/" class="sidebar-chapter" data-chapter="agent-system">
+                        <span class="ch-num">5.</span>The Agent System
+                    </a></li>
+                    <li><a href="../signal-classification/" class="sidebar-chapter" data-chapter="signal-classification">
+                        <span class="ch-num">6.</span>Signal Classification
+                    </a></li>
+                    <li><a href="../incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
+                        <span class="ch-num">7.</span>Incremental Refresh
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">III. Track Lifecycle</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
+                    </a></li>
+                    <li><a href="../implementation/" class="sidebar-chapter" data-chapter="implementation">
+                        <span class="ch-num">9.</span>Implementation
+                    </a></li>
+                    <li><a href="../review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
+                        <span class="ch-num">10.</span>Review Pipeline
+                    </a></li>
+                    <li><a href="../managing-tracks/" class="sidebar-chapter" data-chapter="managing-tracks">
+                        <span class="ch-num">11.</span>Managing Tracks
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">IV. Quality</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../deep-review/" class="sidebar-chapter" data-chapter="deep-review">
+                        <span class="ch-num">12.</span>Deep Review
+                    </a></li>
+                    <li><a href="../bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
+                        <span class="ch-num">13.</span>Bug Hunt
+                    </a></li>
+                    <li><a href="../coverage/" class="sidebar-chapter" data-chapter="coverage">
+                        <span class="ch-num">14.</span>Coverage
+                    </a></li>
+                    <li><a href="../pattern-learning/" class="sidebar-chapter" data-chapter="pattern-learning">
+                        <span class="ch-num">15.</span>Pattern Learning
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">V. Architecture</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../decomposition/" class="sidebar-chapter" data-chapter="decomposition">
+                        <span class="ch-num">16.</span>Decomposition
+                    </a></li>
+                    <li><a href="../adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VI. Enterprise</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../monorepo-federation/" class="sidebar-chapter" data-chapter="monorepo-federation">
+                        <span class="ch-num">18.</span>Monorepo Federation
+                    </a></li>
+                    <li><a href="../jira-integration/" class="sidebar-chapter" data-chapter="jira-integration">
+                        <span class="ch-num">19.</span>Jira Integration
+                    </a></li>
+                    <li><a href="../multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
+                        <span class="ch-num">20.</span>Multi-IDE Support
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VII. Closing</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../philosophy-references/" class="sidebar-chapter" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Appendix</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../command-reference/" class="sidebar-chapter" data-chapter="command-reference">
+                        <span class="ch-num">A.</span>Command Reference
+                    </a></li>
+                    <li><a href="../file-reference/" class="sidebar-chapter" data-chapter="file-reference">
+                        <span class="ch-num">B.</span>File Reference
+                    </a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="book-content">
+<div class="chapter-wrapper">
+    <h1>Getting Started</h1>
+    <p class="chapter-meta"><span class="part-name">Part I: Foundation</span> &middot; Chapter 3</p>
+    <p class="read-time">8 min read</p>
+
+    <p class="chapter-intro">You have a codebase. Maybe it's a React app with 200 components. Maybe it's a Go microservice with 50 endpoints. Maybe it's a Python ML pipeline that three people understand and two of them left. In five minutes, Draft will analyze that codebase, generate comprehensive architecture documentation, and create the context files that turn your AI assistant into a developer who actually knows your project.</p>
+
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;" font-family="Arial, sans-serif">
+                <defs>
+                    <filter id="shadow3" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- File tree visual -->
+                <rect x="160" y="5" width="400" height="270" rx="12" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow3)"/>
+                <text x="180" y="30" fill="#2563eb" font-size="14" font-weight="700">draft/</text>
+                <!-- Main files -->
+                <text x="200" y="52" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="52" fill="#1a1a2e" font-size="12" font-weight="600">architecture.md</text><text x="395" y="52" fill="#718096" font-size="10">Source of truth (25 sections)</text>
+                <text x="200" y="72" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="72" fill="#1a1a2e" font-size="12">.ai-context.md</text><text x="395" y="72" fill="#718096" font-size="10">Token-optimized (200-400 lines)</text>
+                <text x="200" y="92" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="92" fill="#1a1a2e" font-size="12">.ai-profile.md</text><text x="395" y="92" fill="#718096" font-size="10">Always loaded (20-50 lines)</text>
+                <text x="200" y="112" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="112" fill="#1a1a2e" font-size="12">product.md</text><text x="395" y="112" fill="#718096" font-size="10">Vision, users, goals</text>
+                <text x="200" y="132" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="132" fill="#1a1a2e" font-size="12">tech-stack.md</text><text x="395" y="132" fill="#718096" font-size="10">Languages, frameworks, patterns</text>
+                <text x="200" y="152" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="152" fill="#1a1a2e" font-size="12">workflow.md</text><text x="395" y="152" fill="#718096" font-size="10">TDD, commits, reviews</text>
+                <text x="200" y="172" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="172" fill="#1a1a2e" font-size="12">guardrails.md</text><text x="395" y="172" fill="#718096" font-size="10">Constraints, anti-patterns</text>
+                <!-- Tracks -->
+                <text x="200" y="192" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="192" fill="#2563eb" font-size="12" font-weight="600">tracks/</text>
+                <text x="230" y="212" fill="#718096" font-size="12">&#9492;&#9472;</text><text x="250" y="212" fill="#1a1a2e" font-size="11">feature-name/</text><text x="395" y="212" fill="#718096" font-size="10">spec.md, plan.md, metadata.json</text>
+                <!-- State -->
+                <text x="200" y="237" fill="#718096" font-size="12">&#9492;&#9472;</text><text x="220" y="237" fill="#7c3aed" font-size="12" font-weight="600">.state/</text>
+                <text x="240" y="257" fill="#718096" font-size="11">freshness.json  signals.json  run-memory.json  facts.json</text>
+            </svg>
+        </div>
+        <div class="figure-caption">The draft/ directory structure created by /draft:init. Every file serves a specific role in the context hierarchy.</div>
+    </div>
+
+    <h2>Installation</h2>
+    <p>Draft installs with a single command. No API keys, no accounts, no hosted services.</p>
+
+    <h3>Claude Code (Recommended)</h3>
+    <pre class="terminal"><code>$ /plugin marketplace add mayurpise/draft
+$ /plugin install draft</code></pre>
+    <p>That's it. You now have all 17 commands available as <code>/draft:*</code> slash commands.</p>
+
+    <h3>Cursor</h3>
+    <p>Cursor natively supports the <code>.claude/</code> plugin structure:</p>
+    <pre class="terminal"><code>Cursor > Settings > Rules, Skills, Subagents > Rules > New > Add from Github:
+https://github.com/mayurpise/draft.git</code></pre>
+    <p>Commands use <code>@draft init</code>, <code>@draft new-track</code>, <code>@draft implement</code> syntax.</p>
+
+    <h3>GitHub Copilot</h3>
+    <p>Copilot uses a <code>copilot-instructions.md</code> file in your project:</p>
+    <pre class="terminal"><code>$ mkdir -p .github
+$ curl -o .github/copilot-instructions.md \
+    https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md</code></pre>
+
+    <h3>Gemini</h3>
+    <p>Gemini uses a <code>.gemini.md</code> bootstrap file:</p>
+    <pre class="terminal"><code>$ curl -o .gemini.md \
+    https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/.gemini.md</code></pre>
+
+    <h3>Antigravity IDE</h3>
+    <p>Clone Draft to a global skill location and configure your <code>~/.gemini.md</code> to point to the skills directory.</p>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Cross-Platform</div>
+        <p>Draft's methodology is the same regardless of which AI tool you use. The commands and syntax differ slightly, but the workflow &mdash; init, spec, plan, implement, review &mdash; is identical.</p>
+    </div>
+
+    <h2>Running /draft:init</h2>
+    <p>Navigate to your project root and run:</p>
+    <pre class="terminal"><code>$ /draft:init</code></pre>
+
+    <p>Draft performs a five-phase analysis of your codebase. This is not a quick scan &mdash; it is an exhaustive, deep analysis designed to produce a permanent reference document that future AI sessions and human engineers will use instead of re-reading source code.</p>
+
+    <h3>Phase 1: Discovery (Broad Scan)</h3>
+    <p>Draft maps your entire project structure. It reads the directory tree, identifies the file layout, and processes your build and dependency files &mdash; <code>package.json</code>, <code>go.mod</code>, <code>Cargo.toml</code>, <code>requirements.txt</code>, <code>pom.xml</code>, or whatever applies to your stack.</p>
+
+    <p>It then reads API definition files (protobuf, OpenAPI, GraphQL schemas, route decorators) and interface/type definition files to understand your public API and design intent.</p>
+
+    <p>The critical substep here is <strong>signal classification</strong>. Draft walks the file tree and tags every file that matches one of 11 signal categories:</p>
+
+    <ul>
+        <li><strong>backend_routes</strong> &mdash; Routes, handlers, controllers, API directories</li>
+        <li><strong>frontend_routes</strong> &mdash; Pages, views, router files, Next.js app directory</li>
+        <li><strong>components</strong> &mdash; UI components, widgets</li>
+        <li><strong>services</strong> &mdash; Service classes, service directories</li>
+        <li><strong>data_models</strong> &mdash; Models, entities, schemas, migrations</li>
+        <li><strong>auth_files</strong> &mdash; Auth modules, middleware, guards, JWT/OAuth imports</li>
+        <li><strong>state_management</strong> &mdash; Stores, reducers, state directories</li>
+        <li><strong>background_jobs</strong> &mdash; Jobs, workers, task queues, cron</li>
+        <li><strong>persistence</strong> &mdash; Repositories, DAOs, database directories, ORM config</li>
+        <li><strong>test_infra</strong> &mdash; Test files, test utilities, test config</li>
+        <li><strong>config_files</strong> &mdash; Environment files, config directories, settings</li>
+    </ul>
+
+    <p>Signal counts drive <strong>adaptive section depth</strong> in the generated architecture document. Categories with 3+ files get deep treatment. Categories with zero files get skipped. This means your architecture document reflects your actual codebase, not a generic template.</p>
+
+    <h3>Phase 2: Wiring (Trace the Graph)</h3>
+    <p>Draft finds your application's entry point and traces the initialization sequence. From the top-level controller, app, or server, it follows how components are created, initialized, and wired together. It maps the registration code &mdash; where handlers, plugins, routes, and middleware are registered &mdash; and builds a dependency graph showing how the DI container, module system, or import graph connects everything.</p>
+
+    <h3>Phase 3: Depth (Trace the Flows)</h3>
+    <p>For each major data flow, Draft starts at the entry point and follows the code through every processing stage to the output. It reads core module implementations to understand algorithms, error handling, retry logic, and state management. It identifies the concurrency model &mdash; thread pools, async executors, goroutines, worker processes &mdash; and maps safety checks including invariant assertions, validation logic, auth checks, and transaction boundaries.</p>
+
+    <h3>Phase 4: Periphery</h3>
+    <p>Draft catalogs all external dependencies from build files and import statements. It examines test infrastructure to understand testing patterns and mock strategies. It scans for every configuration mechanism &mdash; flags, environment variables, config files, feature gates. And it reads any existing documentation for additional architectural context.</p>
+
+    <h3>Phase 5: Synthesis</h3>
+    <p>The final phase cross-references everything. Every component mentioned in one section must appear in all relevant sections. Every endpoint, handler, schema, and dependency is validated for completeness. Draft identifies recurring design patterns, then generates Mermaid diagrams after understanding the full picture.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Exhaustive, Not Representative</div>
+        <p>Draft's analysis mandate is explicit: read all relevant source files, enumerate all implementations, generate real diagrams with actual data. No sampling, no "and others," no placeholders. For codebases over 500 files, it focuses deep dives on the top 20 most-imported modules and summarizes others in tables.</p>
+    </div>
+
+    <h2>What Gets Created</h2>
+    <p>After the five-phase analysis, Draft creates the <code>draft/</code> directory with these files:</p>
+
+    <h3>architecture.md (Source of Truth)</h3>
+    <p>A comprehensive 25-section engineering reference with appendices. This is the primary artifact &mdash; designed for both human engineers and AI agents. It includes:</p>
+    <ul>
+        <li>Executive summary and system identity</li>
+        <li>Component map and module documentation</li>
+        <li>Data flow diagrams (Mermaid)</li>
+        <li>API definitions and interface contracts</li>
+        <li>Concurrency model and safety checks</li>
+        <li>Security architecture</li>
+        <li>Testing infrastructure</li>
+        <li>Configuration catalog</li>
+        <li>Dependency graph</li>
+    </ul>
+    <p>Every section uses real data from your codebase &mdash; actual code snippets, real module names, genuine dependency relationships. Not templates.</p>
+
+    <h3>.ai-context.md (Token-Optimized AI Context)</h3>
+    <p>A 200-400 line document derived from <code>architecture.md</code>. It contains 15+ mandatory sections condensed for AI consumption: architecture overview, invariants, interface contracts, data flows, concurrency rules, error handling patterns, implementation catalogs, extension cookbooks, testing strategy, and glossary. This is what Draft commands load when implementing features.</p>
+
+    <h3>.ai-profile.md (Always-On Profile)</h3>
+    <p>A 20-50 line ultra-compact profile that is injected into every AI interaction. Contains: language, framework, database, auth mechanism, API style, critical invariants, safety rules, active tracks, and recent changes. Even a simple task like "fix this typo" gets basic project awareness.</p>
+
+    <h3>Configuration Files</h3>
+    <ul>
+        <li><strong>product.md</strong> &mdash; Product vision, target users, goals, success criteria, and guidelines. Created through dialogue &mdash; Draft asks probing questions about what you're building and for whom.</li>
+        <li><strong>tech-stack.md</strong> &mdash; Languages, frameworks, patterns, and accepted design decisions. Auto-detected for brownfield projects, cross-referenced with the architecture analysis.</li>
+        <li><strong>workflow.md</strong> &mdash; TDD preference (strict/flexible/none), commit style, review process.</li>
+        <li><strong>guardrails.md</strong> &mdash; Hard guardrails (human-defined constraints), learned conventions (auto-discovered patterns to skip in analysis), and learned anti-patterns (auto-discovered patterns to always flag).</li>
+    </ul>
+
+    <h3>State Files</h3>
+    <p>Draft creates a <code>draft/.state/</code> directory with four files that enable incremental refresh:</p>
+    <ul>
+        <li><strong>freshness.json</strong> &mdash; SHA-256 hashes of all analyzed source files. On refresh, Draft compares current hashes against stored ones to identify exactly which files changed, which are new, and which were deleted &mdash; without re-reading unchanged files.</li>
+        <li><strong>signals.json</strong> &mdash; The signal classification from Phase 1, stored as a baseline. On refresh, Draft re-runs classification and diffs against the baseline to detect structural drift (e.g., auth files appearing for the first time).</li>
+        <li><strong>run-memory.json</strong> &mdash; Run metadata, unresolved questions, and resumable checkpoints. If an init or refresh is interrupted, Draft can resume from where it left off.</li>
+        <li><strong>facts.json</strong> &mdash; Atomic architectural facts with temporal metadata and relationship edges. Enables fact-level contradiction detection on refresh.</li>
+    </ul>
+
+    <div class="callout callout-example">
+        <div class="callout-title">The draft/ Directory</div>
+        <pre><code>draft/
+&boxvr;&boxh; architecture.md      # 25-section engineering reference (source of truth)
+&boxvr;&boxh; .ai-context.md       # 200-400 lines, token-optimized (derived)
+&boxvr;&boxh; .ai-profile.md       # 20-50 lines, always loaded (derived)
+&boxvr;&boxh; product.md           # Product vision and goals
+&boxvr;&boxh; tech-stack.md        # Languages, frameworks, patterns
+&boxvr;&boxh; workflow.md          # TDD, commit style, review process
+&boxvr;&boxh; guardrails.md        # Hard guardrails, learned patterns
+&boxvr;&boxh; tracks.md            # Master list of all tracks
+&boxvr;&boxh; tracks/              # Individual track directories
+&boxur;&boxh; .state/
+    &boxvr;&boxh; freshness.json   # File hashes for incremental refresh
+    &boxvr;&boxh; signals.json     # Signal classification baseline
+    &boxvr;&boxh; run-memory.json  # Run metadata and checkpoints
+    &boxur;&boxh; facts.json       # Atomic fact registry</code></pre>
+    </div>
+
+    <h2>Your First Track</h2>
+    <p>With initialization complete, you're ready to create your first feature track:</p>
+
+    <pre class="terminal"><code>$ /draft:new-track "Add user authentication"</code></pre>
+
+    <p>Draft loads your full project context &mdash; product vision, tech stack, architecture, workflow preferences, guardrails &mdash; and begins a collaborative dialogue to understand exactly what you need. It asks probing questions about scope, requirements, and constraints before generating anything.</p>
+
+    <p>After the dialogue, Draft produces two files:</p>
+
+    <ul>
+        <li><strong>spec.md</strong> &mdash; Requirements, acceptance criteria, non-goals, technical approach. Grounded in your architecture and tech stack.</li>
+        <li><strong>plan.md</strong> &mdash; Phased task breakdown. Foundation &rarr; Implementation &rarr; Integration &rarr; Polish. Each task specifies target files, test files, and verification criteria.</li>
+    </ul>
+
+    <p>You review these documents. Edit them if needed. Commit them for peer review. Only when the spec and plan are approved does implementation begin:</p>
+
+    <pre class="terminal"><code>$ /draft:implement</code></pre>
+
+    <p>Draft picks up the first pending task from the plan and begins the TDD cycle: write a failing test, write the code to pass it, refactor. One task at a time. One phase at a time. Each phase verified before proceeding to the next.</p>
+
+    <h2>The Quick Workflow</h2>
+    <p>Not everything needs a full specification. For hotfixes, small changes, and well-understood tasks, Draft supports a streamlined workflow:</p>
+
+    <pre class="terminal"><code>$ /draft:new-track --quick "Fix login button not responding on mobile"</code></pre>
+
+    <p>The <code>--quick</code> flag creates a lightweight track with a condensed spec and minimal plan. It still loads project context and creates trackable artifacts, but skips the extended dialogue and detailed phase breakdown. The fix is still constrained by your architecture and conventions &mdash; it's just faster to get started.</p>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">When to Use --quick</div>
+        <p>Use <code>--quick</code> for one-line fixes, typo corrections, small refactors, and changes where the scope is obvious. Use the full workflow for anything that requires design decisions, will be reviewed by others, or involves complex multi-step implementation. Draft adds structure; use it when structure has value.</p>
+    </div>
+
+    <h2>Refreshing Context</h2>
+    <p>Your codebase changes over time. New modules get added, dependencies change, architectural decisions evolve. Draft handles this with incremental refresh:</p>
+
+    <pre class="terminal"><code>$ /draft:init refresh</code></pre>
+
+    <p>Refresh uses the stored file hashes in <code>freshness.json</code> to identify exactly what changed since the last analysis. It only re-analyzes changed, new, and deleted files &mdash; unchanged files are skipped entirely. Signal classification is re-run and diffed against the baseline to detect structural drift. The architecture document, AI context, and profile are updated with targeted changes rather than a full regeneration.</p>
+
+    <p>If nothing changed, Draft short-circuits: "Architecture context is current. Nothing to refresh." No wasted tokens, no unnecessary work.</p>
+
+    <h2>What Comes Next</h2>
+    <p>You now have a project with full context, a track with a spec and plan, and an implementation workflow that keeps AI constrained to your architecture. The next chapters dive into each stage of the workflow in detail &mdash; how specifications are crafted, how plans are structured, how implementation works task by task, and how the review process catches what the AI missed.</p>
+</div>
+
+            <nav class="chapter-nav">
+                <a href="../context-driven-development/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Context-Driven Development</span></a>
+                <a href="../context-tiering/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">Context Tiering</span></a>
+            </nav>
+        </main>
+
+        <nav class="page-toc" id="page-toc" style="display: none;">
+            <div class="page-toc-title">On this page</div>
+            <div id="page-toc-list" class="page-toc-list"></div>
+        </nav>
+    </div>
+
+    <script src="../js/book.js"></script>
+</body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Managing Tracks — Draft Book</title>
+    <meta name="description" content="Track lifecycle management — status markers, parallel tracks, blocked state handling, and git-aware rollback.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="track management, feature tracking, parallel development, git rollback, status management">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="Managing Tracks — Draft Book">
+    <meta property="og:description" content="Track lifecycle management — status markers, parallel tracks, blocked state handling, and git-aware rollback.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/book/managing-tracks/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="Managing Tracks — Draft Book">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Managing Tracks — Draft Book">
+    <meta name="twitter:description" content="Track lifecycle management — status markers, parallel tracks, blocked state handling, and git-aware rollback.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="Managing Tracks — Draft Book">
+    <link rel="canonical" href="https://getdraft.dev/book/managing-tracks/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Managing Tracks",
+      "description": "Track lifecycle management — status markers, parallel tracks, blocked state handling, and git-aware rollback.",
+      "url": "https://getdraft.dev/book/managing-tracks/",
+      "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "position": 12,
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../css/book.css">
+</head>
+<body data-chapter="managing-tracks">
+
+    <div class="reading-progress" id="reading-progress"></div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="book-topbar">
+        <div class="book-topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
+            <div class="book-topbar-divider"></div>
+            <span class="book-topbar-chapter">Managing Tracks</span>
+        </div>
+        <div class="book-topbar-right">
+            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="book-layout">
+        <aside class="book-sidebar" id="book-sidebar">
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Introduction</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
+                        <span class="ch-num">0.</span>What is Draft?
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">I. Foundation</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../the-problem/" class="sidebar-chapter" data-chapter="the-problem">
+                        <span class="ch-num">1.</span>The Problem
+                    </a></li>
+                    <li><a href="../context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
+                        <span class="ch-num">2.</span>Context-Driven Development
+                    </a></li>
+                    <li><a href="../getting-started/" class="sidebar-chapter" data-chapter="getting-started">
+                        <span class="ch-num">3.</span>Getting Started
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">II. How Draft Thinks</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
+                        <span class="ch-num">4.</span>Context Tiering
+                    </a></li>
+                    <li><a href="../agent-system/" class="sidebar-chapter" data-chapter="agent-system">
+                        <span class="ch-num">5.</span>The Agent System
+                    </a></li>
+                    <li><a href="../signal-classification/" class="sidebar-chapter" data-chapter="signal-classification">
+                        <span class="ch-num">6.</span>Signal Classification
+                    </a></li>
+                    <li><a href="../incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
+                        <span class="ch-num">7.</span>Incremental Refresh
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">III. Track Lifecycle</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
+                    </a></li>
+                    <li><a href="../implementation/" class="sidebar-chapter" data-chapter="implementation">
+                        <span class="ch-num">9.</span>Implementation
+                    </a></li>
+                    <li><a href="../review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
+                        <span class="ch-num">10.</span>Review Pipeline
+                    </a></li>
+                    <li><a href="../managing-tracks/" class="sidebar-chapter active" data-chapter="managing-tracks">
+                        <span class="ch-num">11.</span>Managing Tracks
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">IV. Quality</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../deep-review/" class="sidebar-chapter" data-chapter="deep-review">
+                        <span class="ch-num">12.</span>Deep Review
+                    </a></li>
+                    <li><a href="../bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
+                        <span class="ch-num">13.</span>Bug Hunt
+                    </a></li>
+                    <li><a href="../coverage/" class="sidebar-chapter" data-chapter="coverage">
+                        <span class="ch-num">14.</span>Coverage
+                    </a></li>
+                    <li><a href="../pattern-learning/" class="sidebar-chapter" data-chapter="pattern-learning">
+                        <span class="ch-num">15.</span>Pattern Learning
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">V. Architecture</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../decomposition/" class="sidebar-chapter" data-chapter="decomposition">
+                        <span class="ch-num">16.</span>Decomposition
+                    </a></li>
+                    <li><a href="../adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VI. Enterprise</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../monorepo-federation/" class="sidebar-chapter" data-chapter="monorepo-federation">
+                        <span class="ch-num">18.</span>Monorepo Federation
+                    </a></li>
+                    <li><a href="../jira-integration/" class="sidebar-chapter" data-chapter="jira-integration">
+                        <span class="ch-num">19.</span>Jira Integration
+                    </a></li>
+                    <li><a href="../multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
+                        <span class="ch-num">20.</span>Multi-IDE Support
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VII. Closing</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../philosophy-references/" class="sidebar-chapter" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Appendix</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../command-reference/" class="sidebar-chapter" data-chapter="command-reference">
+                        <span class="ch-num">A.</span>Command Reference
+                    </a></li>
+                    <li><a href="../file-reference/" class="sidebar-chapter" data-chapter="file-reference">
+                        <span class="ch-num">B.</span>File Reference
+                    </a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="book-content">
+<div class="chapter-wrapper">
+    <h1>Managing Tracks</h1>
+    <p class="chapter-meta"><span class="part-name">Part III: Track Lifecycle</span> &middot; Chapter 11</p>
+    <p class="read-time">4 min read</p>
+
+    <p class="chapter-intro">Specs get written. Plans get approved. Implementation begins. And then the requirements change. Or a task gets blocked by an external dependency. Or you realize phase 2 introduced a regression and need to undo it without losing phase 1's work. Draft provides three operational commands for exactly these situations: <code>/draft:status</code> for visibility, <code>/draft:change</code> for mid-track adjustments, and <code>/draft:revert</code> for git-aware rollback.</p>
+
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 600 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+                <defs>
+                    <filter id="sh11" x="-3%" y="-8%" width="106%" height="120%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                    <marker id="arr11" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#718096"/></marker>
+                </defs>
+                <!-- Pending -->
+                <rect x="30" y="25" width="130" height="54" rx="10" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#sh11)"/>
+                <text x="95" y="48" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#718096" font-weight="bold">[ ]</text>
+                <text x="95" y="68" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#1a1a2e">Pending</text>
+                <!-- Arrow -->
+                <path d="M165 52 L210 52" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr11)"/>
+                <!-- In Progress -->
+                <rect x="218" y="25" width="130" height="54" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" filter="url(#sh11)"/>
+                <text x="283" y="48" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#2563eb" font-weight="bold">[~]</text>
+                <text x="283" y="68" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#1a1a2e">In Progress</text>
+                <!-- Arrow -->
+                <path d="M353 52 L398 52" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr11)"/>
+                <!-- Completed -->
+                <rect x="406" y="25" width="130" height="54" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5" filter="url(#sh11)"/>
+                <text x="471" y="48" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#059669" font-weight="bold">[x]</text>
+                <text x="471" y="68" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#1a1a2e">Completed</text>
+                <!-- Blocked branch from In Progress -->
+                <path d="M283 82 L283 100 L410 100" stroke="#e11d48" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#arr11b)"/>
+                <defs><marker id="arr11b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e11d48"/></marker></defs>
+                <rect x="415" y="84" width="120" height="32" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5" filter="url(#sh11)"/>
+                <text x="475" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#e11d48" font-weight="bold">[!] Blocked</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Track status flow: tasks move from Pending to In Progress to Completed. At any point, a task can branch to Blocked, requiring manual intervention before it can resume.</div>
+    </div>
+
+    <h2>Status: Project Visibility</h2>
+    <p><code>/draft:status</code> reads every active track's plan and metadata, then produces a comprehensive dashboard showing exactly where everything stands.</p>
+
+    <pre class="terminal"><code>$ /draft:status
+
+═══════════════════════════════════════════════════════════
+                      DRAFT STATUS
+═══════════════════════════════════════════════════════════
+
+PROJECT: Acme Platform
+
+ACTIVE TRACKS
+─────────────────────────────────────────────────────────
+[add-oauth2] Add OAuth2 Support
+  Status: [~] In Progress
+  Phase:  2/3 (Phase 2: Provider Integration)
+  Tasks:  6/11 complete
+  ├─ [x] Task 1.1: Create OAuth provider config (a1b2c3d)
+  ├─ [x] Task 1.2: Add linked_accounts migration (b2c3d4e)
+  ├─ [x] Task 1.3: Implement token exchange (c3d4e5f)
+  ├─ [x] Task 1.4: Write token exchange tests (d4e5f6a)
+  ├─ [x] Task 2.1: Google OAuth callback (e5f6a7b)
+  ├─ [x] Task 2.2: GitHub OAuth callback (f6a7b8c)
+  ├─ [~] Task 2.3: Rate limiting on callbacks  ← CURRENT
+  ├─ [ ] Task 2.4: Integration tests
+  ├─ [ ] Task 3.1: Linked accounts UI
+  ├─ [ ] Task 3.2: Token revocation
+  └─ [ ] Task 3.3: End-to-end tests
+
+[fix-email-null] Fix Null Pointer in Email Validation
+  Status: [~] In Progress
+  Type:   quick
+  Tasks:  1/3 complete
+  ├─ [x] Task 1: Add null check (g7h8i9j)
+  ├─ [~] Task 2: Write regression test  ← CURRENT
+  └─ [ ] Task 3: Verify fix in staging
+
+BLOCKED ITEMS
+─────────────────────────────────────────────────────────
+  (none)
+
+QUICK STATS
+─────────────────────────────────────────────────────────
+Active Tracks:    2
+Total Tasks:      14
+Completed:        7 (50%)
+Blocked:          0
+═══════════════════════════════════════════════════════════</code></pre>
+
+    <p>The status display adapts to track type. Multi-phase tracks show phase progress with nested task trees. Quick-mode tracks show a flat task list without phase grouping. Both use the same status markers: <code>[ ]</code> Pending, <code>[~]</code> In Progress, <code>[x]</code> Completed, <code>[!]</code> Blocked.</p>
+
+    <h3>Orphaned Track Detection</h3>
+    <p>The status command also scans for orphaned tracks &mdash; directories in <code>draft/tracks/</code> that have a <code>metadata.json</code> but no corresponding entry in <code>tracks.md</code>. These can occur when a track creation was interrupted between directory creation and registry update. The status output flags them with recovery options: add the entry to <code>tracks.md</code> manually, or remove the orphaned directory.</p>
+
+    <h3>Module Reporting</h3>
+    <p>When <code>.ai-context.md</code> or <code>architecture.md</code> exists, the status output includes a module-level view &mdash; which modules are complete, which are in progress with task counts, and which are blocked. This gives architectural visibility alongside task-level progress.</p>
+
+    <h2>Change: Mid-Track Adjustments</h2>
+    <p>Requirements change. A stakeholder wants JSON export added to a feature that was specced for CSV only. A security review reveals a new constraint. A dependency you planned to use is deprecated. <code>/draft:change</code> handles these mid-stream adjustments without losing completed work.</p>
+
+    <pre class="terminal"><code>$ /draft:change the export format should support JSON in addition to CSV</code></pre>
+
+    <p>The command follows a structured process:</p>
+
+    <ol>
+        <li><strong>Impact Analysis</strong> &mdash; The AI classifies every requirement and acceptance criterion in <code>spec.md</code> as Added, Modified, Removed, or Unaffected by the change.</li>
+        <li><strong>Plan Mapping</strong> &mdash; Each task in <code>plan.md</code> is evaluated against the spec change. Completed tasks that are now invalidated get flagged for potential rework. In-progress tasks get flagged for review. Pending tasks get proposed new text.</li>
+        <li><strong>Preview</strong> &mdash; The full impact is displayed before any file is modified: how many completed tasks may need rework, how many pending tasks need updating, the exact before/after diffs for each affected section.</li>
+        <li><strong>Confirmation</strong> &mdash; You approve, reject, or request edits to the proposed changes. The edit loop continues until you say "yes" or "no."</li>
+        <li><strong>Application</strong> &mdash; On approval, amendments are applied to <code>spec.md</code> and <code>plan.md</code>, metadata timestamps are updated, and a Change Log entry is appended to the plan with the current git SHA and timestamp.</li>
+    </ol>
+
+    <pre><code>Change: Add JSON export format
+Track:  add-export-feature
+
+Spec impact:
+  - Modified: AC #2 "User can export to CSV" → now also requires JSON
+  - Removed:  AC #5 "Export limited to 1000 rows"
+  - Added:    AC #6 "Export progress indicator for large datasets"
+
+Plan impact:
+  - 1 completed task may need rework
+  - 2 pending tasks need updating
+  - 0 blocked tasks affected
+
+Completed tasks that may need rework:
+  - [x] Task 1.3: Implement CSV serializer (abc1234)
+
+Apply these changes to spec.md and plan.md? [yes / no / edit]</code></pre>
+
+    <div class="callout callout-warning">
+        <div class="callout-title">Completed Work Is Flagged, Not Destroyed</div>
+        <p><code>/draft:change</code> never silently invalidates completed tasks. When a requirement change affects work that's already done, the task is flagged explicitly and the developer decides whether rework is needed. The commit history is preserved &mdash; you can inspect exactly what was built and decide how much needs to change.</p>
+    </div>
+
+    <h2>Revert: Git-Aware Rollback</h2>
+    <p>Sometimes you need to undo work. A phase introduced a subtle regression. An approach turned out to be a dead end. A task's implementation conflicts with a concurrent change on another branch. <code>/draft:revert</code> provides git-aware rollback that understands Draft's logical units of work.</p>
+
+    <p>The command supports three granularity levels:</p>
+
+    <ul>
+        <li><strong>Task-level revert</strong> &mdash; Undo a single task's commits. The most surgical option.</li>
+        <li><strong>Phase-level revert</strong> &mdash; Undo all commits in an entire phase. Useful when the approach for a phase was wrong.</li>
+        <li><strong>Track-level revert</strong> &mdash; Undo everything in the track. The nuclear option.</li>
+    </ul>
+
+    <p>Every revert follows the same safety protocol:</p>
+
+    <ol>
+        <li><strong>Pre-flight check</strong> &mdash; Verifies the working tree is clean. Uncommitted changes must be stashed or committed first.</li>
+        <li><strong>Commit identification</strong> &mdash; Reads commit SHAs from the <code>[x]</code> task markers in <code>plan.md</code>. Falls back to searching git log by track ID pattern if SHAs are missing.</li>
+        <li><strong>Preview</strong> &mdash; Shows exactly which commits will be reverted, which files are affected, and how <code>plan.md</code> will change. Nothing happens without your confirmation.</li>
+        <li><strong>Execution</strong> &mdash; Reverts commits in reverse chronological order using <code>git revert --no-commit</code>, then creates a single revert commit: <code>revert(add-oauth2): Revert Phase 2 provider integration</code>.</li>
+        <li><strong>State update</strong> &mdash; Reverted tasks change from <code>[x]</code> to <code>[ ]</code> in <code>plan.md</code>. The commit SHA is removed. <code>metadata.json</code> counters are decremented. Phase status markers are adjusted &mdash; if any task in a completed phase is reverted, the phase returns to In Progress.</li>
+    </ol>
+
+    <pre class="terminal"><code>$ /draft:revert
+
+Reverting: Phase 2 "Provider Integration"
+
+Commits to revert (newest first):
+  f6a7b8c feat(add-oauth2): GitHub OAuth callback
+  e5f6a7b feat(add-oauth2): Google OAuth callback
+
+Files affected:
+  src/auth/google.ts
+  src/auth/github.ts
+  tests/auth/google.test.ts
+  tests/auth/github.test.ts
+
+Plan.md changes:
+  Task 2.1: [x] (e5f6a7b) → [ ]
+  Task 2.2: [x] (f6a7b8c) → [ ]
+
+Proceed with revert? (yes/no)</code></pre>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Stale Report Handling</div>
+        <p>After a revert, any existing review or bughunt reports for the track are stale &mdash; they analyzed code that no longer exists. Draft adds a warning header to these reports or deletes them if the revert is substantial, preventing anyone from relying on outdated analysis.</p>
+    </div>
+
+    <h2>Handling Blocked Tasks</h2>
+    <p>When a task cannot proceed, it is marked <code>[!]</code> Blocked with a reason recorded in <code>plan.md</code>. The implementation command skips blocked tasks and notifies you, but it never attempts to implement them. Blocked tasks require manual intervention &mdash; resolving an external dependency, getting an API key provisioned, waiting for a team member's input.</p>
+
+    <p><code>/draft:status</code> surfaces all blocked items in a dedicated section, making them visible even if you're focused on a different part of the project. When the blocker is resolved, you manually change the marker from <code>[!]</code> to <code>[ ]</code> and resume implementation.</p>
+
+    <h2>Track Completion</h2>
+    <p>When all tasks in all phases are marked <code>[x]</code>, the implementation command runs a final review (if auto-review is enabled in <code>workflow.md</code>), updates <code>plan.md</code> status to Completed, sets <code>metadata.json</code> status to <code>"completed"</code>, and moves the track from the Active section to the Completed section in <code>tracks.md</code> with a completion date. The AI verifies all three files are consistent before announcing completion &mdash; if any file shows inconsistent state, it halts and reports exactly what needs manual correction.</p>
+
+    <pre class="terminal"><code>Track add-oauth2 completed!
+
+Summary:
+- Phases: 3/3
+- Tasks: 11/11
+
+Review: PASS
+Report: draft/tracks/add-oauth2/review-report-latest.md
+
+All acceptance criteria from spec.md verified.
+Next: Run /draft:status to see project overview.</code></pre>
+
+    <p>The completed track remains in the project history. Its specification, plan, and review reports are preserved as a permanent record of what was built, why it was built, and how it was verified. This trail becomes valuable context for future tracks that touch the same areas of the codebase.</p>
+</div>
+
+            <nav class="chapter-nav">
+                <a href="../review-pipeline/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Review Pipeline</span></a>
+                <a href="../deep-review/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">Deep Review</span></a>
+            </nav>
+        </main>
+
+        <nav class="page-toc" id="page-toc" style="display: none;">
+            <div class="page-toc-title">On this page</div>
+            <div id="page-toc-list" class="page-toc-list"></div>
+        </nav>
+    </div>
+
+    <script src="../js/book.js"></script>
+</body>
+</html>

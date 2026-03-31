@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signal Classification — Draft Book</title>
+    <meta name="description" content="How Draft classifies source files into 11 signal categories to determine which architecture sections get deep treatment, brief mention, or skip.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="signal classification, codebase analysis, file categorization, architecture discovery, adaptive analysis">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="Signal Classification — Draft Book">
+    <meta property="og:description" content="How Draft classifies source files into 11 signal categories to determine which architecture sections get deep treatment, brief mention, or skip.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/book/signal-classification/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="Signal Classification — Draft Book">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Signal Classification — Draft Book">
+    <meta name="twitter:description" content="How Draft classifies source files into 11 signal categories to determine which architecture sections get deep treatment, brief mention, or skip.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="Signal Classification — Draft Book">
+    <link rel="canonical" href="https://getdraft.dev/book/signal-classification/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Signal Classification",
+      "description": "How Draft classifies source files into 11 signal categories to determine which architecture sections get deep treatment, brief mention, or skip.",
+      "url": "https://getdraft.dev/book/signal-classification/",
+      "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "position": 7,
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../css/book.css">
+</head>
+<body data-chapter="signal-classification">
+
+    <div class="reading-progress" id="reading-progress"></div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="book-topbar">
+        <div class="book-topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
+            <div class="book-topbar-divider"></div>
+            <span class="book-topbar-chapter">Signal Classification</span>
+        </div>
+        <div class="book-topbar-right">
+            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="book-layout">
+        <aside class="book-sidebar" id="book-sidebar">
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Introduction</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
+                        <span class="ch-num">0.</span>What is Draft?
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">I. Foundation</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../the-problem/" class="sidebar-chapter" data-chapter="the-problem">
+                        <span class="ch-num">1.</span>The Problem
+                    </a></li>
+                    <li><a href="../context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
+                        <span class="ch-num">2.</span>Context-Driven Development
+                    </a></li>
+                    <li><a href="../getting-started/" class="sidebar-chapter" data-chapter="getting-started">
+                        <span class="ch-num">3.</span>Getting Started
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">II. How Draft Thinks</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
+                        <span class="ch-num">4.</span>Context Tiering
+                    </a></li>
+                    <li><a href="../agent-system/" class="sidebar-chapter" data-chapter="agent-system">
+                        <span class="ch-num">5.</span>The Agent System
+                    </a></li>
+                    <li><a href="../signal-classification/" class="sidebar-chapter active" data-chapter="signal-classification">
+                        <span class="ch-num">6.</span>Signal Classification
+                    </a></li>
+                    <li><a href="../incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
+                        <span class="ch-num">7.</span>Incremental Refresh
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">III. Track Lifecycle</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
+                    </a></li>
+                    <li><a href="../implementation/" class="sidebar-chapter" data-chapter="implementation">
+                        <span class="ch-num">9.</span>Implementation
+                    </a></li>
+                    <li><a href="../review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
+                        <span class="ch-num">10.</span>Review Pipeline
+                    </a></li>
+                    <li><a href="../managing-tracks/" class="sidebar-chapter" data-chapter="managing-tracks">
+                        <span class="ch-num">11.</span>Managing Tracks
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">IV. Quality</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../deep-review/" class="sidebar-chapter" data-chapter="deep-review">
+                        <span class="ch-num">12.</span>Deep Review
+                    </a></li>
+                    <li><a href="../bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
+                        <span class="ch-num">13.</span>Bug Hunt
+                    </a></li>
+                    <li><a href="../coverage/" class="sidebar-chapter" data-chapter="coverage">
+                        <span class="ch-num">14.</span>Coverage
+                    </a></li>
+                    <li><a href="../pattern-learning/" class="sidebar-chapter" data-chapter="pattern-learning">
+                        <span class="ch-num">15.</span>Pattern Learning
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">V. Architecture</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../decomposition/" class="sidebar-chapter" data-chapter="decomposition">
+                        <span class="ch-num">16.</span>Decomposition
+                    </a></li>
+                    <li><a href="../adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VI. Enterprise</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../monorepo-federation/" class="sidebar-chapter" data-chapter="monorepo-federation">
+                        <span class="ch-num">18.</span>Monorepo Federation
+                    </a></li>
+                    <li><a href="../jira-integration/" class="sidebar-chapter" data-chapter="jira-integration">
+                        <span class="ch-num">19.</span>Jira Integration
+                    </a></li>
+                    <li><a href="../multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
+                        <span class="ch-num">20.</span>Multi-IDE Support
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VII. Closing</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../philosophy-references/" class="sidebar-chapter" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Appendix</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../command-reference/" class="sidebar-chapter" data-chapter="command-reference">
+                        <span class="ch-num">A.</span>Command Reference
+                    </a></li>
+                    <li><a href="../file-reference/" class="sidebar-chapter" data-chapter="file-reference">
+                        <span class="ch-num">B.</span>File Reference
+                    </a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="book-content">
+<div class="chapter-wrapper">
+    <h1>Signal Classification</h1>
+    <p class="chapter-meta"><span class="part-name">Part II: How Draft Thinks</span> &middot; Chapter 6</p>
+    <p class="read-time">5 min read</p>
+
+    <p class="chapter-intro">You run <code>/draft:init</code> on a project. Draft needs to produce a comprehensive architecture document, but every project is different. A React single-page app has no backend routes. A Go microservice has no frontend components. A data pipeline has no authentication layer. Draft cannot treat every project the same way, so it reads the file tree first and classifies what it finds into signals &mdash; categories that tell it what your project actually contains, what sections deserve deep treatment, and what can be skipped entirely.</p>
+
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;" font-family="Arial, sans-serif">
+                <defs>
+                    <filter id="shadow6" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+                    <marker id="arrowB6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#2563eb"/></marker>
+                    <marker id="arrowG6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#059669"/></marker>
+                </defs>
+                <!-- Left: File tree -->
+                <rect x="15" y="15" width="170" height="170" rx="12" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow6)"/>
+                <text x="100" y="38" text-anchor="middle" fill="#1a1a2e" font-size="12" font-weight="700">File Tree</text>
+                <text x="35" y="58" fill="#718096" font-size="10">src/routes/</text>
+                <text x="35" y="74" fill="#718096" font-size="10">src/auth/</text>
+                <text x="35" y="90" fill="#718096" font-size="10">src/models/</text>
+                <text x="35" y="106" fill="#718096" font-size="10">src/services/</text>
+                <text x="35" y="122" fill="#718096" font-size="10">src/components/</text>
+                <text x="35" y="138" fill="#718096" font-size="10">tests/</text>
+                <text x="35" y="154" fill="#718096" font-size="10">config/</text>
+                <text x="35" y="170" fill="#718096" font-size="10">package.json</text>
+                <!-- Arrows left to middle -->
+                <line x1="185" y1="100" x2="250" y2="100" stroke="#2563eb" stroke-width="2" marker-end="url(#arrowB6)"/>
+                <!-- Middle: Signal detection -->
+                <rect x="255" y="15" width="210" height="170" rx="12" fill="#fff" stroke="#2563eb" stroke-width="2" filter="url(#shadow6)"/>
+                <text x="360" y="38" text-anchor="middle" fill="#2563eb" font-size="12" font-weight="700">Signal Detection</text>
+                <text x="275" y="58" fill="#059669" font-size="10" font-weight="600">backend_routes: 8</text>
+                <text x="275" y="74" fill="#059669" font-size="10" font-weight="600">auth_files: 3</text>
+                <text x="275" y="90" fill="#059669" font-size="10" font-weight="600">data_models: 6</text>
+                <text x="275" y="106" fill="#059669" font-size="10" font-weight="600">services: 5</text>
+                <text x="275" y="122" fill="#059669" font-size="10" font-weight="600">components: 22</text>
+                <text x="275" y="138" fill="#059669" font-size="10" font-weight="600">test_infra: 15</text>
+                <text x="275" y="154" fill="#718096" font-size="10">background_jobs: 0</text>
+                <text x="275" y="170" fill="#718096" font-size="10">state_mgmt: 0</text>
+                <!-- Arrows middle to right -->
+                <line x1="465" y1="100" x2="500" y2="100" stroke="#059669" stroke-width="2" marker-end="url(#arrowG6)"/>
+                <!-- Right: Architecture sections -->
+                <rect x="505" y="15" width="200" height="170" rx="12" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow6)"/>
+                <text x="605" y="38" text-anchor="middle" fill="#1a1a2e" font-size="12" font-weight="700">Architecture Sections</text>
+                <rect x="520" y="48" width="170" height="18" rx="4" fill="#059669"/><text x="605" y="61" text-anchor="middle" fill="#fff" font-size="9">API Definitions — HIGH</text>
+                <rect x="520" y="70" width="170" height="18" rx="4" fill="#059669"/><text x="605" y="83" text-anchor="middle" fill="#fff" font-size="9">Security Architecture — HIGH</text>
+                <rect x="520" y="92" width="170" height="18" rx="4" fill="#059669"/><text x="605" y="105" text-anchor="middle" fill="#fff" font-size="9">Component Map — HIGH</text>
+                <rect x="520" y="114" width="170" height="18" rx="4" fill="#059669"/><text x="605" y="127" text-anchor="middle" fill="#fff" font-size="9">Testing Infrastructure — HIGH</text>
+                <rect x="520" y="136" width="170" height="18" rx="4" fill="#e2e8f0"/><text x="605" y="149" text-anchor="middle" fill="#718096" font-size="9">Concurrency — SKIP</text>
+                <rect x="520" y="158" width="170" height="18" rx="4" fill="#e2e8f0"/><text x="605" y="171" text-anchor="middle" fill="#718096" font-size="9">State Management — SKIP</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Signal classification pipeline: the file tree is scanned, files are categorized into 11 signal types, and signal counts determine which architecture sections get deep treatment or are skipped.</div>
+    </div>
+
+    <h2>What Signals Are</h2>
+    <p>Signals are categories of source files that reveal architectural concerns. During Phase 1 of architecture discovery, Draft walks your file tree and tags every file against 11 signal categories. The signal counts determine which sections of <code>architecture.md</code> get deep treatment, which get brief mention, and which are skipped. A signal count of zero means the architectural concern does not exist in your project. A count of 3 or more means it warrants exhaustive analysis.</p>
+
+    <p>This is how Draft adapts to your codebase without being told what kind of project it is. It does not ask "is this a web app?" &mdash; it finds route files, controller files, and API middleware, and concludes that API definitions need deep treatment.</p>
+
+    <h2>The 11 Signal Categories</h2>
+
+    <h3>1. Backend Routes</h3>
+    <p>Files in <code>routes/</code>, <code>handlers/</code>, <code>controllers/</code>, or <code>**/api/**</code>. Route decorators like <code>@app.route</code>, <code>@router</code>, <code>@RequestMapping</code>. These drive deep treatment of API Definitions and Cross-Module Integration sections. A project with 12 route files gets exhaustive endpoint cataloging. A project with zero gets those sections skipped.</p>
+
+    <h3>2. Frontend Routes</h3>
+    <p>Files in <code>pages/</code>, <code>views/</code>, or route configuration files. React Router setup, Next.js <code>app/</code> directory, Vue Router. These trigger UI topology documentation in the Architecture Overview section &mdash; component hierarchy, page routing, navigation flows.</p>
+
+    <h3>3. Components</h3>
+    <p>Files in <code>components/</code>, <code>widgets/</code>, or component-typed files like <code>*.component.ts</code> and <code>*.tsx</code> in component directories. These add component hierarchy documentation to the Core Modules section.</p>
+
+    <h3>4. Services</h3>
+    <p>Files in <code>services/</code> or files matching <code>*Service.*</code> and <code>*_service.*</code> patterns. Service layer files drive the Component Map and Core Modules sections, documenting business logic boundaries and inter-service communication.</p>
+
+    <h3>5. Data Models</h3>
+    <p>Files in <code>models/</code>, <code>entities/</code>, <code>schemas/</code>, or migration directories. Files matching <code>*.model.*</code> and <code>*.entity.*</code>. These drive the State Management and API Definitions sections &mdash; schema definitions, ORM models, migration systems, and data lifecycle documentation.</p>
+
+    <h3>6. Authentication</h3>
+    <p>Files in <code>auth/</code> directories, auth middleware, guards. JWT and OAuth imports. These trigger deep treatment of the Security Architecture section: auth flows, token lifecycle, permission models, session management.</p>
+
+    <h3>7. State Management</h3>
+    <p>Files in <code>store/</code>, <code>reducers/</code>, or state directories. Redux, Vuex, Zustand, Pinia imports. These add frontend state management documentation: store structure, action flows, selector patterns, state shape.</p>
+
+    <h3>8. Background Jobs</h3>
+    <p>Files in <code>jobs/</code>, <code>workers/</code>, <code>tasks/</code>, or <code>queues/</code>. Celery, Sidekiq, Bull imports. These drive the Concurrency and Configuration sections with job scheduling, queue architecture, worker pool documentation.</p>
+
+    <h3>9. Persistence</h3>
+    <p>Files in <code>repositories/</code>, <code>dao/</code>, or database directories. ORM configuration files and migration directories. These drive the State Management section with connection pooling, query patterns, transaction boundaries.</p>
+
+    <h3>10. Test Infrastructure</h3>
+    <p>Files in <code>test/</code>, <code>tests/</code>, or <code>__tests__/</code>. Files matching <code>*.test.*</code> and <code>*.spec.*</code>. Test configuration files. These drive the Testing Infrastructure section: test frameworks, mock patterns, fixture strategies, coverage configuration.</p>
+
+    <h3>11. Configuration</h3>
+    <p>Files matching <code>.env*</code>, files in <code>config/</code>, files matching <code>*.config.*</code>, <code>application.yml</code>, and settings files. These drive the Configuration section: environment variable catalogs, config loading mechanisms, feature flags, runtime tunables.</p>
+
+    <h2>How Signals Drive Analysis Depth</h2>
+    <p>Each signal category maps to specific sections of <code>architecture.md</code>. The mapping is explicit:</p>
+
+    <pre><code>| Signal Category    | Count | Drives Section(s)                          | Depth     |
+|--------------------|-------|-------------------------------------------|-----------|
+| backend_routes     |  12   | API Definitions, Cross-Module Integration | HIGH      |
+| services           |   8   | Component Map, Core Modules               | HIGH      |
+| data_models        |   6   | State Management, API Definitions         | HIGH      |
+| test_infra         |  15   | Testing Infrastructure                    | HIGH      |
+| auth_files         |   3   | Security Architecture                     | HIGH      |
+| persistence        |   4   | State Management                          | HIGH      |
+| config_files       |   5   | Configuration                             | HIGH      |
+| components         |   0   | Core Modules (component hierarchy)        | SKIP      |
+| frontend_routes    |   0   | Architecture (UI topology)                | SKIP      |
+| state_management   |   0   | State Management (frontend state)         | SKIP      |
+| background_jobs    |   0   | Concurrency                               | SIMPLIFY  |</code></pre>
+
+    <p>The thresholds are simple: zero files means skip or simplify the section. One to two files means include the section but keep it brief. Three or more files means the section warrants deep, exhaustive treatment. This prevents Draft from generating empty boilerplate sections for concerns that do not exist in your project, while ensuring real concerns get thorough documentation.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Adaptive Sections</div>
+        <p>Signal classification integrates with the Adaptive Sections system. If your codebase has no plugin, algorithm, or handler system, the Framework and Extension Points section is skipped entirely. If your project is a library with no running process, the Process Lifecycle section is adapted to "Usage Lifecycle." If your project is a frontend module, component hierarchy, route maps, state management, and styling system documentation are added. Signals drive what gets written &mdash; the architecture document is shaped by your actual code, not a generic template.</p>
+    </div>
+
+    <h2>Signal-to-Context Mapping</h2>
+    <p>Signals do not just determine section depth in <code>architecture.md</code>. They flow through the entire context pipeline. When architecture is condensed into <code>.ai-context.md</code>, sections that received deep treatment produce more detailed entries. Sections that were skipped are absent from the condensed output. This means the 200-400 line AI context file is automatically tuned to your project's actual architectural concerns.</p>
+
+    <p>The signal state is also persisted to <code>draft/.state/signals.json</code> for incremental refresh tracking. On subsequent runs of <code>/draft:init refresh</code>, Draft re-classifies signals and compares against the stored baseline:</p>
+
+    <pre><code>Signal drift detected:
+  NEW:     auth_files (0 → 5) — Security Architecture needs generation
+  GROWN:   backend_routes (12 → 24) — API Definitions, Cross-Module Integration need expansion
+  REMOVED: background_jobs (3 → 0) — Concurrency section can be simplified
+  STABLE:  services (8 → 9), test_infra (15 → 16)</code></pre>
+
+    <p>New signal categories appearing (zero to non-zero) indicate structural drift: your project has gained an architectural concern that did not exist before. Draft flags these for section generation. Removed categories (non-zero to zero) indicate pruning opportunities.</p>
+
+    <div class="callout callout-example">
+        <div class="callout-title">Example: A React + Express Project</div>
+        <p>Consider a full-stack TypeScript project: React frontend with Express backend, PostgreSQL database, JWT authentication, and Redis caching.</p>
+        <p>Draft walks the file tree and produces this signal classification:</p>
+        <pre><code>Signal Classification:
+  backend_routes:    8 files   → API Definitions, Cross-Module Integration: HIGH
+  frontend_routes:   6 files   → Architecture (add UI topology): HIGH
+  components:       22 files   → Core Modules (add component hierarchy): HIGH
+  services:          5 files   → Component Map, Core Modules: HIGH
+  data_models:       4 files   → State Management, API Definitions: HIGH
+  auth_files:        3 files   → Security Architecture: HIGH
+  state_management:  3 files   → State Management (frontend state): HIGH
+  background_jobs:   0 files   → Concurrency: SIMPLIFY
+  persistence:       3 files   → State Management: HIGH
+  test_infra:       18 files   → Testing Infrastructure: HIGH
+  config_files:      6 files   → Configuration: HIGH</code></pre>
+        <p>Nearly every signal category is active. This is a feature-rich project with both frontend and backend concerns. The resulting <code>architecture.md</code> will be comprehensive: full API catalog, component hierarchy with React component tree, auth flow documentation with JWT lifecycle, frontend state management with Redux store structure, database schema with Prisma models, and testing infrastructure covering both Jest (frontend) and Supertest (backend).</p>
+        <p>The only section simplified is Concurrency &mdash; no background jobs means the concurrency model is straightforward Express request handling and React rendering. No need for worker pool documentation or queue architecture.</p>
+        <p>Now contrast this with a Go CLI tool that has zero frontend files, zero components, zero state management, and zero auth. That project's signal classification would trigger deep treatment for only a few sections (services, config, tests) and skip everything frontend-related. Same tool, same process, radically different output &mdash; shaped entirely by what the code actually contains.</p>
+    </div>
+
+    <h2>The Classification Procedure</h2>
+    <p>Signal classification is not heuristic. It is a file-matching procedure that runs during Phase 1 of architecture discovery. Draft counts files matching each category's detection patterns, excluding standard ignore paths (<code>node_modules/</code>, <code>.git/</code>, <code>vendor/</code>, <code>draft/</code>). The procedure is language-aware &mdash; a Python project looks for <code>@app.route</code> decorators while a Java project looks for <code>@RequestMapping</code> annotations &mdash; but the signal categories are universal across all languages.</p>
+
+    <pre class="terminal"><code>$ # Simplified detection for backend routes (actual procedure is per-language)
+$ find . -type f \( -path "*/routes/*" -o -path "*/handlers/*" \
+    -o -path "*/controllers/*" -o -path "*/api/*" \) \
+    ! -path "*/node_modules/*" ! -path "*/.git/*" | wc -l
+12</code></pre>
+
+    <p>The result is a signal summary held in memory for Phase 5 (Synthesis), where it drives section-by-section generation decisions. It is then persisted to <code>draft/.state/signals.json</code> as the baseline for future drift detection.</p>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Signals Are Discovery, Not Configuration</div>
+        <p>You do not configure signals. You do not tell Draft "this is a web app" or "skip the frontend sections." Draft discovers what your project contains by reading the file tree. If your project gains authentication files six months from now, the next <code>/draft:init refresh</code> will detect the new signal category, flag it as structural drift, and generate the Security Architecture section for the first time. The architecture document evolves with your code.</p>
+    </div>
+</div>
+
+            <nav class="chapter-nav">
+                <a href="../agent-system/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">The Agent System</span></a>
+                <a href="../incremental-refresh/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">Incremental Refresh</span></a>
+            </nav>
+        </main>
+
+        <nav class="page-toc" id="page-toc" style="display: none;">
+            <div class="page-toc-title">On this page</div>
+            <div id="page-toc-list" class="page-toc-list"></div>
+        </nav>
+    </div>
+
+    <script src="../js/book.js"></script>
+</body>
+</html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Draft Book — Context-Driven Development Deep Dive</title>
-    <meta name="description" content="A comprehensive guide to Draft's Context-Driven Development methodology. Learn specs, plans, TDD, code review, bug hunting, ACID audits, and more.">
+    <meta name="description" content="A comprehensive guide to Draft's Context-Driven Development methodology. 22 chapters covering specs, plans, TDD, code review, bug hunting, ACID audits, and more.">
     <meta name="author" content="Mayur Pise">
     <meta name="theme-color" content="#2563eb">
     <meta name="keywords" content="context-driven development book, ai coding methodology, claude code guide, spec driven development, ai code review, tdd enforcement, ai architecture discovery, bug hunting methodology, copilot best practices, ai development workflow">
@@ -51,7 +51,6 @@
     }
     </script>
 
-    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -60,7 +59,17 @@
         gtag('config', 'G-F6X062B4B7');
     </script>
 
-    <!-- Fonts -->
+    <!-- Redirect old hash-based URLs -->
+    <script>
+    (function() {
+        if (location.hash && location.hash.length > 1) {
+            var id = location.hash.slice(1);
+            var known = ["what-is-draft","the-problem","context-driven-development","getting-started","context-tiering","agent-system","signal-classification","incremental-refresh","specs-and-plans","implementation","review-pipeline","managing-tracks","deep-review","bug-hunt","coverage","pattern-learning","decomposition","adrs","monorepo-federation","jira-integration","multi-ide-support","philosophy-references","command-reference","file-reference"];
+            if (known.indexOf(id) !== -1) { location.replace(id + "/"); }
+        }
+    })();
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="style"
@@ -74,21 +83,15 @@
 </head>
 <body>
 
-    <!-- Reading progress bar -->
     <div class="reading-progress" id="reading-progress"></div>
-
-    <!-- Mobile sidebar backdrop -->
     <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
 
-    <!-- Top bar -->
     <header class="book-topbar">
         <div class="book-topbar-left">
             <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
                 <span></span><span></span><span></span>
             </button>
             <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
-            <div class="book-topbar-divider"></div>
-            <span class="book-topbar-chapter" id="topbar-chapter-title"></span>
         </div>
         <div class="book-topbar-right">
             <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
@@ -99,168 +102,188 @@
         </div>
     </header>
 
-    <!-- Book layout -->
     <div class="book-layout">
-
-        <!-- Sidebar -->
         <aside class="book-sidebar" id="book-sidebar">
-
-            <!-- Search -->
             <div class="sidebar-search">
                 <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
             </div>
-
-            <!-- Introduction -->
             <div class="sidebar-part">
                 <div class="sidebar-part-title">Introduction</div>
                 <ul class="sidebar-chapters">
-                    <li><a href="#what-is-draft" class="sidebar-chapter" data-chapter="what-is-draft">
+                    <li><a href="./what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
                         <span class="ch-num">0.</span>What is Draft?
                     </a></li>
                 </ul>
             </div>
-
-            <!-- Part I: Foundation -->
             <div class="sidebar-part">
                 <div class="sidebar-part-title">I. Foundation</div>
                 <ul class="sidebar-chapters">
-                    <li><a href="#the-problem" class="sidebar-chapter" data-chapter="the-problem">
+                    <li><a href="./the-problem/" class="sidebar-chapter" data-chapter="the-problem">
                         <span class="ch-num">1.</span>The Problem
                     </a></li>
-                    <li><a href="#context-driven-development" class="sidebar-chapter" data-chapter="context-driven-development">
+                    <li><a href="./context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
                         <span class="ch-num">2.</span>Context-Driven Development
                     </a></li>
-                    <li><a href="#getting-started" class="sidebar-chapter" data-chapter="getting-started">
+                    <li><a href="./getting-started/" class="sidebar-chapter" data-chapter="getting-started">
                         <span class="ch-num">3.</span>Getting Started
                     </a></li>
                 </ul>
             </div>
-
-            <!-- Part II: How Draft Thinks -->
             <div class="sidebar-part">
                 <div class="sidebar-part-title">II. How Draft Thinks</div>
                 <ul class="sidebar-chapters">
-                    <li><a href="#context-tiering" class="sidebar-chapter" data-chapter="context-tiering">
+                    <li><a href="./context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
                         <span class="ch-num">4.</span>Context Tiering
                     </a></li>
-                    <li><a href="#agent-system" class="sidebar-chapter" data-chapter="agent-system">
+                    <li><a href="./agent-system/" class="sidebar-chapter" data-chapter="agent-system">
                         <span class="ch-num">5.</span>The Agent System
                     </a></li>
-                    <li><a href="#signal-classification" class="sidebar-chapter" data-chapter="signal-classification">
+                    <li><a href="./signal-classification/" class="sidebar-chapter" data-chapter="signal-classification">
                         <span class="ch-num">6.</span>Signal Classification
                     </a></li>
-                    <li><a href="#incremental-refresh" class="sidebar-chapter" data-chapter="incremental-refresh">
+                    <li><a href="./incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
                         <span class="ch-num">7.</span>Incremental Refresh
                     </a></li>
                 </ul>
             </div>
-
-            <!-- Part III: Track Lifecycle -->
             <div class="sidebar-part">
                 <div class="sidebar-part-title">III. Track Lifecycle</div>
                 <ul class="sidebar-chapters">
-                    <li><a href="#specs-and-plans" class="sidebar-chapter" data-chapter="specs-and-plans">
-                        <span class="ch-num">8.</span>Specs & Plans
+                    <li><a href="./specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
                     </a></li>
-                    <li><a href="#implementation" class="sidebar-chapter" data-chapter="implementation">
+                    <li><a href="./implementation/" class="sidebar-chapter" data-chapter="implementation">
                         <span class="ch-num">9.</span>Implementation
                     </a></li>
-                    <li><a href="#review-pipeline" class="sidebar-chapter" data-chapter="review-pipeline">
+                    <li><a href="./review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
                         <span class="ch-num">10.</span>Review Pipeline
                     </a></li>
-                    <li><a href="#managing-tracks" class="sidebar-chapter" data-chapter="managing-tracks">
+                    <li><a href="./managing-tracks/" class="sidebar-chapter" data-chapter="managing-tracks">
                         <span class="ch-num">11.</span>Managing Tracks
                     </a></li>
                 </ul>
             </div>
-
-            <!-- Part IV: Quality -->
             <div class="sidebar-part">
                 <div class="sidebar-part-title">IV. Quality</div>
                 <ul class="sidebar-chapters">
-                    <li><a href="#deep-review" class="sidebar-chapter" data-chapter="deep-review">
+                    <li><a href="./deep-review/" class="sidebar-chapter" data-chapter="deep-review">
                         <span class="ch-num">12.</span>Deep Review
                     </a></li>
-                    <li><a href="#bug-hunt" class="sidebar-chapter" data-chapter="bug-hunt">
+                    <li><a href="./bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
                         <span class="ch-num">13.</span>Bug Hunt
                     </a></li>
-                    <li><a href="#coverage" class="sidebar-chapter" data-chapter="coverage">
+                    <li><a href="./coverage/" class="sidebar-chapter" data-chapter="coverage">
                         <span class="ch-num">14.</span>Coverage
                     </a></li>
-                    <li><a href="#pattern-learning" class="sidebar-chapter" data-chapter="pattern-learning">
+                    <li><a href="./pattern-learning/" class="sidebar-chapter" data-chapter="pattern-learning">
                         <span class="ch-num">15.</span>Pattern Learning
                     </a></li>
                 </ul>
             </div>
-
-            <!-- Part V: Architecture -->
             <div class="sidebar-part">
                 <div class="sidebar-part-title">V. Architecture</div>
                 <ul class="sidebar-chapters">
-                    <li><a href="#decomposition" class="sidebar-chapter" data-chapter="decomposition">
+                    <li><a href="./decomposition/" class="sidebar-chapter" data-chapter="decomposition">
                         <span class="ch-num">16.</span>Decomposition
                     </a></li>
-                    <li><a href="#adrs" class="sidebar-chapter" data-chapter="adrs">
-                        <span class="ch-num">17.</span>ADRs
+                    <li><a href="./adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
                     </a></li>
                 </ul>
             </div>
-
-            <!-- Part VI: Enterprise -->
             <div class="sidebar-part">
                 <div class="sidebar-part-title">VI. Enterprise</div>
                 <ul class="sidebar-chapters">
-                    <li><a href="#monorepo-federation" class="sidebar-chapter" data-chapter="monorepo-federation">
+                    <li><a href="./monorepo-federation/" class="sidebar-chapter" data-chapter="monorepo-federation">
                         <span class="ch-num">18.</span>Monorepo Federation
                     </a></li>
-                    <li><a href="#jira-integration" class="sidebar-chapter" data-chapter="jira-integration">
+                    <li><a href="./jira-integration/" class="sidebar-chapter" data-chapter="jira-integration">
                         <span class="ch-num">19.</span>Jira Integration
                     </a></li>
-                    <li><a href="#multi-ide-support" class="sidebar-chapter" data-chapter="multi-ide-support">
+                    <li><a href="./multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
                         <span class="ch-num">20.</span>Multi-IDE Support
                     </a></li>
                 </ul>
             </div>
-
-            <!-- Part VII: Closing -->
             <div class="sidebar-part">
                 <div class="sidebar-part-title">VII. Closing</div>
                 <ul class="sidebar-chapters">
-                    <li><a href="#philosophy-references" class="sidebar-chapter" data-chapter="philosophy-references">
-                        <span class="ch-num">21.</span>Philosophy & References
+                    <li><a href="./philosophy-references/" class="sidebar-chapter" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
                     </a></li>
                 </ul>
             </div>
-
-            <!-- Appendix -->
             <div class="sidebar-part">
                 <div class="sidebar-part-title">Appendix</div>
                 <ul class="sidebar-chapters">
-                    <li><a href="#command-reference" class="sidebar-chapter" data-chapter="command-reference">
+                    <li><a href="./command-reference/" class="sidebar-chapter" data-chapter="command-reference">
                         <span class="ch-num">A.</span>Command Reference
                     </a></li>
-                    <li><a href="#file-reference" class="sidebar-chapter" data-chapter="file-reference">
+                    <li><a href="./file-reference/" class="sidebar-chapter" data-chapter="file-reference">
                         <span class="ch-num">B.</span>File Reference
                     </a></li>
                 </ul>
             </div>
-
         </aside>
 
-        <!-- Main content -->
         <main class="book-content">
-            <div id="chapter-content">
-                <div class="chapter-loading">Loading chapter</div>
+            <div class="chapter-wrapper">
+                <div class="book-landing">
+                    <h1><span class="gradient-text">The Draft Book</span></h1>
+                    <p class="book-landing-subtitle">A comprehensive guide to Context-Driven Development — from first principles to enterprise deployment.</p>
+                </div>
+
+                <div class="book-toc">
+                    <div class="book-toc-part"><div class="book-toc-part-title">Introduction</div><ul class="book-toc-list">
+                        <li><a href="what-is-draft/" class="book-toc-entry"><span class="book-toc-num">0.</span><span class="book-toc-name">What is Draft?</span></a></li>
+                    </ul></div>
+                    <div class="book-toc-part"><div class="book-toc-part-title">I. Foundation</div><ul class="book-toc-list">
+                        <li><a href="the-problem/" class="book-toc-entry"><span class="book-toc-num">1.</span><span class="book-toc-name">The Problem</span></a></li>
+                        <li><a href="context-driven-development/" class="book-toc-entry"><span class="book-toc-num">2.</span><span class="book-toc-name">Context-Driven Development</span></a></li>
+                        <li><a href="getting-started/" class="book-toc-entry"><span class="book-toc-num">3.</span><span class="book-toc-name">Getting Started</span></a></li>
+                    </ul></div>
+                    <div class="book-toc-part"><div class="book-toc-part-title">II. How Draft Thinks</div><ul class="book-toc-list">
+                        <li><a href="context-tiering/" class="book-toc-entry"><span class="book-toc-num">4.</span><span class="book-toc-name">Context Tiering</span></a></li>
+                        <li><a href="agent-system/" class="book-toc-entry"><span class="book-toc-num">5.</span><span class="book-toc-name">The Agent System</span></a></li>
+                        <li><a href="signal-classification/" class="book-toc-entry"><span class="book-toc-num">6.</span><span class="book-toc-name">Signal Classification</span></a></li>
+                        <li><a href="incremental-refresh/" class="book-toc-entry"><span class="book-toc-num">7.</span><span class="book-toc-name">Incremental Refresh</span></a></li>
+                    </ul></div>
+                    <div class="book-toc-part"><div class="book-toc-part-title">III. Track Lifecycle</div><ul class="book-toc-list">
+                        <li><a href="specs-and-plans/" class="book-toc-entry"><span class="book-toc-num">8.</span><span class="book-toc-name">Specs &amp; Plans</span></a></li>
+                        <li><a href="implementation/" class="book-toc-entry"><span class="book-toc-num">9.</span><span class="book-toc-name">Implementation</span></a></li>
+                        <li><a href="review-pipeline/" class="book-toc-entry"><span class="book-toc-num">10.</span><span class="book-toc-name">Review Pipeline</span></a></li>
+                        <li><a href="managing-tracks/" class="book-toc-entry"><span class="book-toc-num">11.</span><span class="book-toc-name">Managing Tracks</span></a></li>
+                    </ul></div>
+                    <div class="book-toc-part"><div class="book-toc-part-title">IV. Quality</div><ul class="book-toc-list">
+                        <li><a href="deep-review/" class="book-toc-entry"><span class="book-toc-num">12.</span><span class="book-toc-name">Deep Review</span></a></li>
+                        <li><a href="bug-hunt/" class="book-toc-entry"><span class="book-toc-num">13.</span><span class="book-toc-name">Bug Hunt</span></a></li>
+                        <li><a href="coverage/" class="book-toc-entry"><span class="book-toc-num">14.</span><span class="book-toc-name">Coverage</span></a></li>
+                        <li><a href="pattern-learning/" class="book-toc-entry"><span class="book-toc-num">15.</span><span class="book-toc-name">Pattern Learning</span></a></li>
+                    </ul></div>
+                    <div class="book-toc-part"><div class="book-toc-part-title">V. Architecture</div><ul class="book-toc-list">
+                        <li><a href="decomposition/" class="book-toc-entry"><span class="book-toc-num">16.</span><span class="book-toc-name">Decomposition</span></a></li>
+                        <li><a href="adrs/" class="book-toc-entry"><span class="book-toc-num">17.</span><span class="book-toc-name">Architecture Decision Records</span></a></li>
+                    </ul></div>
+                    <div class="book-toc-part"><div class="book-toc-part-title">VI. Enterprise</div><ul class="book-toc-list">
+                        <li><a href="monorepo-federation/" class="book-toc-entry"><span class="book-toc-num">18.</span><span class="book-toc-name">Monorepo Federation</span></a></li>
+                        <li><a href="jira-integration/" class="book-toc-entry"><span class="book-toc-num">19.</span><span class="book-toc-name">Jira Integration</span></a></li>
+                        <li><a href="multi-ide-support/" class="book-toc-entry"><span class="book-toc-num">20.</span><span class="book-toc-name">Multi-IDE Support</span></a></li>
+                    </ul></div>
+                    <div class="book-toc-part"><div class="book-toc-part-title">VII. Closing</div><ul class="book-toc-list">
+                        <li><a href="philosophy-references/" class="book-toc-entry"><span class="book-toc-num">21.</span><span class="book-toc-name">Philosophy &amp; References</span></a></li>
+                    </ul></div>
+                    <div class="book-toc-part"><div class="book-toc-part-title">Appendix</div><ul class="book-toc-list">
+                        <li><a href="command-reference/" class="book-toc-entry"><span class="book-toc-num">A.</span><span class="book-toc-name">Command Reference</span></a></li>
+                        <li><a href="file-reference/" class="book-toc-entry"><span class="book-toc-num">B.</span><span class="book-toc-name">File Reference</span></a></li>
+                    </ul></div>
+                </div>
+
+                <div class="book-footer">
+                    <p>The Draft Book is part of the <a href="https://getdraft.dev">Draft</a> project. <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer">View on GitHub</a>.</p>
+                </div>
             </div>
         </main>
-
-        <!-- On this page (mini-TOC) -->
-        <nav class="page-toc" id="page-toc" style="display: none;">
-            <div class="page-toc-title">On this page</div>
-            <div id="page-toc-list" class="page-toc-list"></div>
-        </nav>
-
     </div>
 
     <script src="js/book.js"></script>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Problem — Draft Book</title>
+    <meta name="description" content="Why AI coding assistants produce wrong code without structure — the gap between speed and correctness, and why better prompting is not the answer.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="ai coding problems, ai assistant wrong code, ai code quality, prompt engineering limits, ai development challenges">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="The Problem — Draft Book">
+    <meta property="og:description" content="Why AI coding assistants produce wrong code without structure — the gap between speed and correctness, and why better prompting is not the answer.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/book/the-problem/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="The Problem — Draft Book">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Problem — Draft Book">
+    <meta name="twitter:description" content="Why AI coding assistants produce wrong code without structure — the gap between speed and correctness, and why better prompting is not the answer.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="The Problem — Draft Book">
+    <link rel="canonical" href="https://getdraft.dev/book/the-problem/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "The Problem",
+      "description": "Why AI coding assistants produce wrong code without structure — the gap between speed and correctness, and why better prompting is not the answer.",
+      "url": "https://getdraft.dev/book/the-problem/",
+      "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "position": 2,
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../css/book.css">
+</head>
+<body data-chapter="the-problem">
+
+    <div class="reading-progress" id="reading-progress"></div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="book-topbar">
+        <div class="book-topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
+            <div class="book-topbar-divider"></div>
+            <span class="book-topbar-chapter">The Problem</span>
+        </div>
+        <div class="book-topbar-right">
+            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="book-layout">
+        <aside class="book-sidebar" id="book-sidebar">
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Introduction</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
+                        <span class="ch-num">0.</span>What is Draft?
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">I. Foundation</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../the-problem/" class="sidebar-chapter active" data-chapter="the-problem">
+                        <span class="ch-num">1.</span>The Problem
+                    </a></li>
+                    <li><a href="../context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
+                        <span class="ch-num">2.</span>Context-Driven Development
+                    </a></li>
+                    <li><a href="../getting-started/" class="sidebar-chapter" data-chapter="getting-started">
+                        <span class="ch-num">3.</span>Getting Started
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">II. How Draft Thinks</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
+                        <span class="ch-num">4.</span>Context Tiering
+                    </a></li>
+                    <li><a href="../agent-system/" class="sidebar-chapter" data-chapter="agent-system">
+                        <span class="ch-num">5.</span>The Agent System
+                    </a></li>
+                    <li><a href="../signal-classification/" class="sidebar-chapter" data-chapter="signal-classification">
+                        <span class="ch-num">6.</span>Signal Classification
+                    </a></li>
+                    <li><a href="../incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
+                        <span class="ch-num">7.</span>Incremental Refresh
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">III. Track Lifecycle</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
+                    </a></li>
+                    <li><a href="../implementation/" class="sidebar-chapter" data-chapter="implementation">
+                        <span class="ch-num">9.</span>Implementation
+                    </a></li>
+                    <li><a href="../review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
+                        <span class="ch-num">10.</span>Review Pipeline
+                    </a></li>
+                    <li><a href="../managing-tracks/" class="sidebar-chapter" data-chapter="managing-tracks">
+                        <span class="ch-num">11.</span>Managing Tracks
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">IV. Quality</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../deep-review/" class="sidebar-chapter" data-chapter="deep-review">
+                        <span class="ch-num">12.</span>Deep Review
+                    </a></li>
+                    <li><a href="../bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
+                        <span class="ch-num">13.</span>Bug Hunt
+                    </a></li>
+                    <li><a href="../coverage/" class="sidebar-chapter" data-chapter="coverage">
+                        <span class="ch-num">14.</span>Coverage
+                    </a></li>
+                    <li><a href="../pattern-learning/" class="sidebar-chapter" data-chapter="pattern-learning">
+                        <span class="ch-num">15.</span>Pattern Learning
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">V. Architecture</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../decomposition/" class="sidebar-chapter" data-chapter="decomposition">
+                        <span class="ch-num">16.</span>Decomposition
+                    </a></li>
+                    <li><a href="../adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VI. Enterprise</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../monorepo-federation/" class="sidebar-chapter" data-chapter="monorepo-federation">
+                        <span class="ch-num">18.</span>Monorepo Federation
+                    </a></li>
+                    <li><a href="../jira-integration/" class="sidebar-chapter" data-chapter="jira-integration">
+                        <span class="ch-num">19.</span>Jira Integration
+                    </a></li>
+                    <li><a href="../multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
+                        <span class="ch-num">20.</span>Multi-IDE Support
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VII. Closing</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../philosophy-references/" class="sidebar-chapter" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Appendix</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../command-reference/" class="sidebar-chapter" data-chapter="command-reference">
+                        <span class="ch-num">A.</span>Command Reference
+                    </a></li>
+                    <li><a href="../file-reference/" class="sidebar-chapter" data-chapter="file-reference">
+                        <span class="ch-num">B.</span>File Reference
+                    </a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="book-content">
+<div class="chapter-wrapper">
+    <h1>The Problem</h1>
+    <p class="chapter-meta"><span class="part-name">Part I: Foundation</span> &middot; Chapter 1</p>
+    <p class="read-time">8 min read</p>
+
+    <p class="chapter-intro">A senior engineer opens their AI coding assistant and types: "Add user authentication to the app." Thirty seconds later, they have 400 lines of code. It uses Passport.js &mdash; but the team standardized on Auth0. It stores sessions in Redis &mdash; but the project uses PostgreSQL for everything. It creates a new middleware pattern &mdash; but the codebase already has one. The code works. It's also wrong in every way that matters to the team that has to maintain it.</p>
+
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;" font-family="Arial, sans-serif">
+                <defs>
+                    <filter id="shadow1" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- Left: Without Draft -->
+                <rect x="10" y="10" width="330" height="180" rx="14" fill="#fff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow1)"/>
+                <text x="175" y="36" text-anchor="middle" fill="#e53e3e" font-size="13" font-weight="700">Without Draft</text>
+                <rect x="40" y="55" width="80" height="40" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1"/>
+                <text x="80" y="79" text-anchor="middle" fill="#1a1a2e" font-size="11">Prompt</text>
+                <!-- Chaotic arrows -->
+                <line x1="120" y1="65" x2="200" y2="50" stroke="#e53e3e" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <line x1="120" y1="75" x2="210" y2="90" stroke="#e53e3e" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <line x1="120" y1="85" x2="195" y2="130" stroke="#e53e3e" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <line x1="120" y1="70" x2="205" y2="160" stroke="#e53e3e" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <text x="200" y="50" fill="#718096" font-size="9">Wrong framework</text>
+                <text x="210" y="93" fill="#718096" font-size="9">Wrong pattern</text>
+                <text x="195" y="133" fill="#718096" font-size="9">Wrong conventions</text>
+                <text x="205" y="163" fill="#718096" font-size="9">Missing guardrails</text>
+                <!-- Right: With Draft -->
+                <rect x="380" y="10" width="330" height="180" rx="14" fill="#fff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow1)"/>
+                <text x="545" y="36" text-anchor="middle" fill="#059669" font-size="13" font-weight="700">With Draft</text>
+                <rect x="400" y="60" width="72" height="36" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1"/>
+                <text x="436" y="82" text-anchor="middle" fill="#1a1a2e" font-size="10">Spec</text>
+                <line x1="472" y1="78" x2="500" y2="78" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrowB1)"/>
+                <rect x="500" y="60" width="72" height="36" rx="8" fill="#2563eb"/>
+                <text x="536" y="82" text-anchor="middle" fill="#fff" font-size="10">Plan</text>
+                <line x1="572" y1="78" x2="600" y2="78" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrowB1)"/>
+                <rect x="600" y="60" width="72" height="36" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1"/>
+                <text x="636" y="82" text-anchor="middle" fill="#1a1a2e" font-size="10">Review</text>
+                <defs><marker id="arrowB1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#2563eb"/></marker></defs>
+                <!-- Down arrow to code -->
+                <line x1="536" y1="96" x2="536" y2="130" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowG1)"/>
+                <defs><marker id="arrowG1" viewBox="0 0 10 10" refX="5" refY="9" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#059669"/></marker></defs>
+                <rect x="495" y="132" width="82" height="36" rx="8" fill="#059669"/>
+                <text x="536" y="155" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Correct Code</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Without Draft, AI output scatters across wrong assumptions. With Draft, a structured pipeline funnels output toward the right solution.</div>
+    </div>
+
+    <h2>The Power Without Direction</h2>
+    <p>AI coding assistants are the most significant productivity tool software engineering has seen in decades. They can generate working code in seconds, refactor entire modules, write comprehensive test suites, and explain complex systems with clarity. The capability is real.</p>
+
+    <p>The problem is not capability. The problem is direction.</p>
+
+    <p>Without structure, AI coding assistants operate in a vacuum. They have no knowledge of your team's architectural decisions, no awareness of your project's conventions, no understanding of why certain patterns exist in your codebase. They fill this void with assumptions &mdash; reasonable assumptions, drawn from training data, but assumptions nonetheless.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">The Core Problem</div>
+        <p>AI coding assistants are powerful but undirected. Without structure, they make assumptions about requirements, choose arbitrary technical approaches, produce code that doesn't fit the existing codebase, and lack accountability checkpoints. Fast output does not equal correct output.</p>
+    </div>
+
+    <h2>The Vibe Coding Problem</h2>
+    <p>There's a seductive workflow that emerges when AI coding tools are fast enough: describe what you want in natural language, accept whatever comes back, fix the obvious errors, ship it. This is sometimes called "vibe coding" &mdash; you vibe with the AI, it vibes with your prompt, and hopefully the output vibes with your codebase.</p>
+
+    <p>For prototypes and throwaway scripts, this works fine. For production software maintained by a team, it introduces a specific class of problems that compound over time:</p>
+
+    <ul>
+        <li><strong>Assumptions multiply silently</strong> &mdash; Each AI interaction makes dozens of micro-decisions: which pattern to use, how to name variables, where to put files, what error handling strategy to follow. Without explicit constraints, these decisions are arbitrary. Across a hundred interactions, you get a hundred different implicit design philosophies embedded in your codebase.</li>
+        <li><strong>Context gets lost between sessions</strong> &mdash; Your chat history is not your project's memory. Close the window, and every decision, every clarification, every "actually, we do it this way" disappears. The next session starts from zero.</li>
+        <li><strong>Code doesn't match architecture</strong> &mdash; The AI doesn't know about your team's module boundaries, your data flow conventions, or your dependency rules. It generates code that works in isolation but violates the structural integrity of the system.</li>
+        <li><strong>No accountability trail</strong> &mdash; When something breaks in production, there's no document that says "we decided to do X because of Y." There's just code that appeared in a commit, generated by a conversation no one can search.</li>
+    </ul>
+
+    <h2>Real-World Failure Modes</h2>
+    <p>These are not hypothetical scenarios. They are patterns that teams encounter repeatedly when using AI coding tools without structure:</p>
+
+    <h3>Wrong Framework, Right Code</h3>
+    <p>The AI generates a perfectly functional authentication system using JWT with local storage. The code is clean, well-tested, and handles edge cases. But the team uses HTTP-only cookies with server-side sessions because of a security audit six months ago. The AI had no way to know this. The entire implementation must be discarded.</p>
+
+    <h3>Convention Violations</h3>
+    <p>The project follows a repository pattern for data access. The AI generates a new feature that queries the database directly from the controller. The code works, passes the tests the AI also wrote, and gets merged. Three months later, when the team needs to add caching at the repository layer, this feature doesn't benefit because it bypassed the layer entirely. Now someone has to refactor it.</p>
+
+    <h3>Security Vulnerabilities</h3>
+    <p>The AI generates an admin endpoint without the authorization middleware that every other admin endpoint uses. Or it adds a file upload handler without the size limits and content-type validation that the team's security guardrails require. The AI doesn't know these guardrails exist because they're institutional knowledge, not code.</p>
+
+    <h3>Untestable Architecture</h3>
+    <p>The AI creates a feature that works but tightly couples business logic to the HTTP layer, makes direct database calls from utility functions, or introduces global state. The feature passes its own tests because the AI wrote the tests to match the implementation. But it's impossible to unit test in isolation, and it makes the surrounding code harder to test too.</p>
+
+    <h2>The Cost</h2>
+    <p>The cost of undirected AI coding is not immediately visible. The code works. The tests pass. The feature ships. The cost arrives later:</p>
+
+    <ul>
+        <li><strong>Rework</strong> &mdash; Code that doesn't match architecture must be rewritten. The time saved by AI generation is consumed by human refactoring.</li>
+        <li><strong>Technical debt</strong> &mdash; Inconsistent patterns accumulate. Each one is small. Together, they make the codebase harder to understand, harder to modify, and harder to onboard new developers onto.</li>
+        <li><strong>Team friction</strong> &mdash; Code reviews become adversarial. "Why did you use this pattern?" "The AI suggested it." "But we don't do it that way." This conversation repeats across every PR that was AI-generated without context.</li>
+        <li><strong>Production incidents</strong> &mdash; Security vulnerabilities, missing error handling, violated invariants &mdash; these surface in production, not in development. The AI didn't know about the invariant. The developer trusted the AI. The system broke.</li>
+    </ul>
+
+    <div class="callout callout-example">
+        <div class="callout-title">The Economics</div>
+        <p>Writing specs feels slower. It isn't. For simple features, the overhead is about 20%. For features with ambiguity, specs cut total time from 3 hours plus rework to 2 hours. For features requiring team input, the savings are even larger: 5 hours plus meetings plus rework drops to 2.5 hours. And for the wrong feature entirely &mdash; days wasted versus caught in review.</p>
+    </div>
+
+    <h2>The Chat Problem</h2>
+    <p>Traditional AI chat interfaces have fundamental limitations that make them unsuitable as a development methodology:</p>
+
+    <ul>
+        <li><strong>Context windows fill up</strong> &mdash; Long conversations exhaust token limits. The AI loses early context, including the most important architectural decisions made at the start of the session.</li>
+        <li><strong>Hallucination scales with context</strong> &mdash; More tokens in the window means more potential for confusion. The AI conflates instructions from turn 3 with corrections from turn 47.</li>
+        <li><strong>No persistent memory</strong> &mdash; Close the chat, lose the context. Every session starts from scratch.</li>
+        <li><strong>Unsearchable history</strong> &mdash; "Where did we discuss the caching strategy?" Good luck finding it in a chat log.</li>
+        <li><strong>No team visibility</strong> &mdash; Your conversation with the AI is invisible to your colleagues. Decisions made in chat can't be reviewed, approved, or challenged.</li>
+        <li><strong>Repeated context loading</strong> &mdash; Every session begins by re-explaining the project. This wastes tokens and introduces inconsistency as you describe the same system differently each time.</li>
+    </ul>
+
+    <h2>The Gap</h2>
+    <p>Here is the core observation: human development teams have natural constraint systems that AI lacks.</p>
+
+    <p>When a human developer joins a team, they go through onboarding. They learn the architecture, the conventions, the patterns. They attend design reviews. They read architecture decision records. They get feedback in code reviews that shapes their understanding of "how we do things here." Over weeks and months, they internalize the constraint system that makes their code consistent with the team's.</p>
+
+    <p>AI has none of this. Every interaction is its first day on the job. It has the skills of a senior engineer but the context of someone who just walked in the door.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">The Missing Layer</div>
+        <p>AI has the capability but lacks the constraint system that human teams naturally provide through code review, architecture discussions, and institutional knowledge. The gap is not intelligence &mdash; it's context.</p>
+    </div>
+
+    <h2>The Solution Space</h2>
+    <p>The instinctive response is "write better prompts." Add more detail to your instructions. Paste in your coding standards. Remind the AI about your conventions. This helps &mdash; but it doesn't solve the problem, for three reasons:</p>
+
+    <ol>
+        <li><strong>Prompts are ephemeral</strong> &mdash; They exist in chat sessions that disappear. The same prompt must be re-written, re-remembered, re-applied every time.</li>
+        <li><strong>Prompts don't scale</strong> &mdash; A team of ten developers will write ten different versions of "use our conventions." Consistency requires a shared artifact, not individual prompts.</li>
+        <li><strong>Prompts are verbal, not structural</strong> &mdash; Telling an AI "follow the repository pattern" is weaker than giving it a document that defines every module, its boundaries, and its interaction contracts. Structure constrains behavior more reliably than instructions.</li>
+    </ol>
+
+    <p>What if, instead of telling AI what to do in natural language, you gave it the same structural constraints that make human developers effective? Architecture documents. Specifications. Phased plans with verification steps. Explicit acceptance criteria. A persistent, versioned, reviewable context that survives across sessions and team members.</p>
+
+    <p>That is what Draft provides. The next chapter explains how.</p>
+</div>
+
+            <nav class="chapter-nav">
+                <a href="../what-is-draft/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">What is Draft?</span></a>
+                <a href="../context-driven-development/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">Context-Driven Development</span></a>
+            </nav>
+        </main>
+
+        <nav class="page-toc" id="page-toc" style="display: none;">
+            <div class="page-toc-title">On this page</div>
+            <div id="page-toc-list" class="page-toc-list"></div>
+        </nav>
+    </div>
+
+    <script src="../js/book.js"></script>
+</body>
+</html>

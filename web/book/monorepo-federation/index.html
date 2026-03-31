@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monorepo Federation — Draft Book</title>
+    <meta name="description" content="Context federation across monorepo services — per-service draft directories with shared root context and service aggregation.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="monorepo federation, multi-service context, service aggregation, monorepo management, shared context">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="Monorepo Federation — Draft Book">
+    <meta property="og:description" content="Context federation across monorepo services — per-service draft directories with shared root context and service aggregation.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/book/monorepo-federation/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="Monorepo Federation — Draft Book">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Monorepo Federation — Draft Book">
+    <meta name="twitter:description" content="Context federation across monorepo services — per-service draft directories with shared root context and service aggregation.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="Monorepo Federation — Draft Book">
+    <link rel="canonical" href="https://getdraft.dev/book/monorepo-federation/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Monorepo Federation",
+      "description": "Context federation across monorepo services — per-service draft directories with shared root context and service aggregation.",
+      "url": "https://getdraft.dev/book/monorepo-federation/",
+      "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "position": 19,
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../css/book.css">
+</head>
+<body data-chapter="monorepo-federation">
+
+    <div class="reading-progress" id="reading-progress"></div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="book-topbar">
+        <div class="book-topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
+            <div class="book-topbar-divider"></div>
+            <span class="book-topbar-chapter">Monorepo Federation</span>
+        </div>
+        <div class="book-topbar-right">
+            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="book-layout">
+        <aside class="book-sidebar" id="book-sidebar">
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Introduction</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
+                        <span class="ch-num">0.</span>What is Draft?
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">I. Foundation</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../the-problem/" class="sidebar-chapter" data-chapter="the-problem">
+                        <span class="ch-num">1.</span>The Problem
+                    </a></li>
+                    <li><a href="../context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
+                        <span class="ch-num">2.</span>Context-Driven Development
+                    </a></li>
+                    <li><a href="../getting-started/" class="sidebar-chapter" data-chapter="getting-started">
+                        <span class="ch-num">3.</span>Getting Started
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">II. How Draft Thinks</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
+                        <span class="ch-num">4.</span>Context Tiering
+                    </a></li>
+                    <li><a href="../agent-system/" class="sidebar-chapter" data-chapter="agent-system">
+                        <span class="ch-num">5.</span>The Agent System
+                    </a></li>
+                    <li><a href="../signal-classification/" class="sidebar-chapter" data-chapter="signal-classification">
+                        <span class="ch-num">6.</span>Signal Classification
+                    </a></li>
+                    <li><a href="../incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
+                        <span class="ch-num">7.</span>Incremental Refresh
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">III. Track Lifecycle</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
+                    </a></li>
+                    <li><a href="../implementation/" class="sidebar-chapter" data-chapter="implementation">
+                        <span class="ch-num">9.</span>Implementation
+                    </a></li>
+                    <li><a href="../review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
+                        <span class="ch-num">10.</span>Review Pipeline
+                    </a></li>
+                    <li><a href="../managing-tracks/" class="sidebar-chapter" data-chapter="managing-tracks">
+                        <span class="ch-num">11.</span>Managing Tracks
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">IV. Quality</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../deep-review/" class="sidebar-chapter" data-chapter="deep-review">
+                        <span class="ch-num">12.</span>Deep Review
+                    </a></li>
+                    <li><a href="../bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
+                        <span class="ch-num">13.</span>Bug Hunt
+                    </a></li>
+                    <li><a href="../coverage/" class="sidebar-chapter" data-chapter="coverage">
+                        <span class="ch-num">14.</span>Coverage
+                    </a></li>
+                    <li><a href="../pattern-learning/" class="sidebar-chapter" data-chapter="pattern-learning">
+                        <span class="ch-num">15.</span>Pattern Learning
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">V. Architecture</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../decomposition/" class="sidebar-chapter" data-chapter="decomposition">
+                        <span class="ch-num">16.</span>Decomposition
+                    </a></li>
+                    <li><a href="../adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VI. Enterprise</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../monorepo-federation/" class="sidebar-chapter active" data-chapter="monorepo-federation">
+                        <span class="ch-num">18.</span>Monorepo Federation
+                    </a></li>
+                    <li><a href="../jira-integration/" class="sidebar-chapter" data-chapter="jira-integration">
+                        <span class="ch-num">19.</span>Jira Integration
+                    </a></li>
+                    <li><a href="../multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
+                        <span class="ch-num">20.</span>Multi-IDE Support
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VII. Closing</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../philosophy-references/" class="sidebar-chapter" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Appendix</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../command-reference/" class="sidebar-chapter" data-chapter="command-reference">
+                        <span class="ch-num">A.</span>Command Reference
+                    </a></li>
+                    <li><a href="../file-reference/" class="sidebar-chapter" data-chapter="file-reference">
+                        <span class="ch-num">B.</span>File Reference
+                    </a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="book-content">
+<div class="chapter-wrapper">
+    <h1>Monorepo Federation</h1>
+    <p class="chapter-meta"><span class="part-name">Part VI: Enterprise</span> &middot; Chapter 18</p>
+    <p class="read-time">4 min read</p>
+
+    <p class="chapter-intro">A monorepo with twelve services has twelve <code>draft/</code> directories after initialization. Each service has its own architecture documentation, its own tech stack, its own context files. But nobody has a unified view of the whole system &mdash; which services depend on which, what technologies are used where, or how the pieces fit together. <code>/draft:index</code> builds that view.</p>
+
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:560px;display:block;margin:0 auto">
+                <defs>
+                    <filter id="mono-shadow" x="-4%" y="-4%" width="108%" height="112%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a1a2e" flood-opacity="0.08"/>
+                    </filter>
+                </defs>
+                <!-- Root context -->
+                <rect x="150" y="10" width="260" height="56" rx="8" fill="#2563eb" filter="url(#mono-shadow)"/>
+                <text x="280" y="33" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="13" font-weight="bold">Root draft/</text>
+                <text x="280" y="52" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="11">service-index &#183; dependency-graph &#183; tech-matrix</text>
+                <!-- Connectors -->
+                <line x1="200" y1="66" x2="100" y2="110" stroke="#e2e8f0" stroke-width="2"/>
+                <line x1="280" y1="66" x2="280" y2="110" stroke="#e2e8f0" stroke-width="2"/>
+                <line x1="360" y1="66" x2="460" y2="110" stroke="#e2e8f0" stroke-width="2"/>
+                <!-- Service A -->
+                <rect x="20" y="110" width="160" height="90" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#mono-shadow)"/>
+                <rect x="20" y="110" width="160" height="28" rx="8" fill="#7c3aed"/>
+                <rect x="20" y="126" width="160" height="12" fill="#7c3aed"/>
+                <text x="100" y="131" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12" font-weight="bold">auth-service/</text>
+                <text x="100" y="157" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="11">draft/</text>
+                <text x="100" y="173" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">architecture.md</text>
+                <text x="100" y="187" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">.ai-context.md</text>
+                <!-- Service B -->
+                <rect x="200" y="110" width="160" height="90" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#mono-shadow)"/>
+                <rect x="200" y="110" width="160" height="28" rx="8" fill="#059669"/>
+                <rect x="200" y="126" width="160" height="12" fill="#059669"/>
+                <text x="280" y="131" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12" font-weight="bold">billing-service/</text>
+                <text x="280" y="157" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="11">draft/</text>
+                <text x="280" y="173" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">architecture.md</text>
+                <text x="280" y="187" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">.ai-context.md</text>
+                <!-- Service C -->
+                <rect x="380" y="110" width="160" height="90" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#mono-shadow)"/>
+                <rect x="380" y="110" width="160" height="28" rx="8" fill="#d97706"/>
+                <rect x="380" y="126" width="160" height="12" fill="#d97706"/>
+                <text x="460" y="131" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12" font-weight="bold">api-gateway/</text>
+                <text x="460" y="157" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="11">draft/</text>
+                <text x="460" y="173" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">architecture.md</text>
+                <text x="460" y="187" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10">.ai-context.md</text>
+                <!-- /draft:index arrow -->
+                <text x="280" y="235" text-anchor="middle" fill="#2563eb" font-family="Arial,sans-serif" font-size="12" font-weight="bold">/draft:index</text>
+                <text x="280" y="252" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="11">aggregates service contexts into unified root view</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Monorepo federation: each service maintains its own draft/ context, while /draft:index aggregates them into a shared root-level system view.</div>
+    </div>
+
+    <h2>The Monorepo Context Problem</h2>
+    <p>Running <code>/draft:init</code> on each service in a monorepo produces excellent per-service context. The auth service has a detailed <code>.ai-context.md</code> explaining its JWT validation flow. The billing service documents its Stripe integration. But cross-service questions remain unanswered: what happens when auth goes down? Which services share PostgreSQL? Is anyone still using the deprecated notification API?</p>
+
+    <p><code>/draft:index</code> answers these questions by aggregating service-level context into root-level knowledge files, without deep code analysis. It reads what <code>/draft:init</code> already produced and synthesizes a system-of-systems view.</p>
+
+    <h2>Auto-Detection</h2>
+    <p>Draft detects services by scanning immediate child directories (depth=1 only, never recursive) for standard project markers:</p>
+
+    <ul>
+        <li><code>package.json</code> &mdash; Node.js services</li>
+        <li><code>go.mod</code> &mdash; Go services</li>
+        <li><code>Cargo.toml</code> &mdash; Rust services</li>
+        <li><code>pom.xml</code> / <code>build.gradle</code> &mdash; Java services</li>
+        <li><code>pyproject.toml</code> / <code>requirements.txt</code> &mdash; Python services</li>
+        <li><code>Dockerfile</code> &mdash; Containerized services</li>
+        <li><code>src/</code> directory with code files</li>
+    </ul>
+
+    <p>It excludes <code>node_modules/</code>, <code>vendor/</code>, <code>.git/</code>, and hidden directories. Each detected directory is categorized as initialized (has a <code>draft/</code> subdirectory) or uninitialized. Only initialized services contribute to the index.</p>
+
+    <h2>What Gets Generated</h2>
+    <p><code>/draft:index</code> produces six root-level files that together form a complete system map:</p>
+
+    <h3>service-index.md</h3>
+    <p>A directory of all detected services with their status, tech stack, dependencies, team ownership, and links to their individual context files. This is the entry point &mdash; the table of contents for the entire monorepo.</p>
+
+    <table>
+        <thead>
+            <tr><th>Service</th><th>Status</th><th>Tech Stack</th><th>Dependencies</th><th>Team</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>auth</td><td>Initialized</td><td>Go, Postgres</td><td>&mdash;</td><td>@auth-team</td></tr>
+            <tr><td>billing</td><td>Initialized</td><td>Node, Stripe</td><td>auth</td><td>@billing</td></tr>
+            <tr><td>legacy-reports</td><td>Not initialized</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+        </tbody>
+    </table>
+
+    <h3>dependency-graph.md</h3>
+    <p>Cross-service dependency mapping with a Mermaid topology diagram, a dependency matrix (depends-on and depended-by for every service), and a topological implementation order. This file answers "what breaks if this service changes?" and "what must exist before this service can function?"</p>
+
+    <h3>tech-matrix.md</h3>
+    <p>A technology distribution report showing which languages, databases, frameworks, and infrastructure components are used across which services. It identifies organizational standards (technologies used by the majority of services) and variances (services that deviate, with documented justifications).</p>
+
+    <h3>Synthesized Root Context</h3>
+    <p>If the root-level <code>draft/product.md</code>, <code>draft/architecture.md</code>, and <code>draft/tech-stack.md</code> are missing or are placeholders, <code>/draft:index</code> synthesizes them from service-level data:</p>
+    <ul>
+        <li><strong>product.md</strong> &mdash; Aggregated product vision from all service visions, deduplicated target users, capability matrix mapping features to services</li>
+        <li><strong>architecture.md</strong> &mdash; System-of-systems view with topology diagram, service directory, shared infrastructure, and cross-cutting patterns</li>
+        <li><strong>tech-stack.md</strong> &mdash; Organizational standards derived from majority usage, approved variances, shared libraries</li>
+    </ul>
+
+    <p>After generating <code>architecture.md</code>, the Condensation Subroutine runs to produce a root-level <code>.ai-context.md</code> &mdash; a token-optimized aggregate of all service knowledge.</p>
+
+    <h2>Root-Level vs. Service-Level Context</h2>
+    <p>After indexing, the monorepo has two layers of context:</p>
+
+    <table>
+        <thead>
+            <tr><th>Layer</th><th>Location</th><th>Contains</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Root</td><td><code>draft/</code></td><td>Service index, dependency graph, tech matrix, synthesized product/architecture/tech-stack, aggregated <code>.ai-context.md</code></td><td>Cross-service decisions, system topology, organizational standards</td></tr>
+            <tr><td>Service</td><td><code>&lt;service&gt;/draft/</code></td><td>Service-specific architecture, product, tech-stack, tracks, guardrails</td><td>Per-service implementation, feature work within a service</td></tr>
+        </tbody>
+    </table>
+
+    <p>When working within a single service, the AI loads that service's context. When making cross-service decisions &mdash; adding a new API dependency, changing a shared schema, planning a migration &mdash; the AI loads root-level context.</p>
+
+    <h2>Service Manifests</h2>
+    <p>For each initialized service, <code>/draft:index</code> creates or updates a <code>manifest.json</code> inside the service's <code>draft/</code> directory. This manifest contains the service name, type, summary, primary technology, dependencies on other services, dependents (reverse lookup), team ownership, and indexing timestamps. Manifests enable fast re-indexing without re-reading all markdown files.</p>
+
+    <h2>Initializing Missing Services</h2>
+    <p>Running <code>/draft:index --init-missing</code> offers to initialize uninitialized services. For each one, Draft prompts with four options: <strong>y</strong> (initialize this service), <strong>n</strong> (skip), <strong>all</strong> (initialize all remaining), or <strong>skip-rest</strong> (skip all remaining). This makes it practical to bring an entire monorepo under Draft management incrementally.</p>
+
+    <h2>Bughunt Mode</h2>
+    <p><code>/draft:index</code> also supports a bughunt aggregation mode. Running <code>/draft:index bughunt</code> executes <code>/draft:bughunt</code> sequentially across all initialized services (or a specified subset), then generates <code>draft/bughunt-summary.md</code> &mdash; an aggregate report showing bug counts by severity across all services, directories requiring immediate attention, and links to individual service reports.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">When to Re-Index</div>
+        <p>Re-run <code>/draft:index</code> after initializing a new service, after significant architecture changes to any service, before major cross-service planning, or as part of weekly documentation hygiene. The command preserves manual edits in sections marked with <code>&lt;!-- MANUAL START --&gt;</code> and <code>&lt;!-- MANUAL END --&gt;</code> comments.</p>
+    </div>
+</div>
+
+            <nav class="chapter-nav">
+                <a href="../adrs/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Architecture Decision Records</span></a>
+                <a href="../jira-integration/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">Jira Integration</span></a>
+            </nav>
+        </main>
+
+        <nav class="page-toc" id="page-toc" style="display: none;">
+            <div class="page-toc-title">On this page</div>
+            <div id="page-toc-list" class="page-toc-list"></div>
+        </nav>
+    </div>
+
+    <script src="../js/book.js"></script>
+</body>
+</html>

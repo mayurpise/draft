@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Agent System — Draft Book</title>
+    <meta name="description" content="Five specialized agents — Architect, Debugger, Planner, RCA, and Reviewer — each with behavioral protocols tuned for their domain.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="ai agent system, specialized ai agents, architect agent, debugger agent, ai code reviewer agent">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="The Agent System — Draft Book">
+    <meta property="og:description" content="Five specialized agents — Architect, Debugger, Planner, RCA, and Reviewer — each with behavioral protocols tuned for their domain.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/book/agent-system/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="The Agent System — Draft Book">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Agent System — Draft Book">
+    <meta name="twitter:description" content="Five specialized agents — Architect, Debugger, Planner, RCA, and Reviewer — each with behavioral protocols tuned for their domain.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="The Agent System — Draft Book">
+    <link rel="canonical" href="https://getdraft.dev/book/agent-system/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "The Agent System",
+      "description": "Five specialized agents — Architect, Debugger, Planner, RCA, and Reviewer — each with behavioral protocols tuned for their domain.",
+      "url": "https://getdraft.dev/book/agent-system/",
+      "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "position": 6,
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../css/book.css">
+</head>
+<body data-chapter="agent-system">
+
+    <div class="reading-progress" id="reading-progress"></div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="book-topbar">
+        <div class="book-topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
+            <div class="book-topbar-divider"></div>
+            <span class="book-topbar-chapter">The Agent System</span>
+        </div>
+        <div class="book-topbar-right">
+            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="book-layout">
+        <aside class="book-sidebar" id="book-sidebar">
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Introduction</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
+                        <span class="ch-num">0.</span>What is Draft?
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">I. Foundation</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../the-problem/" class="sidebar-chapter" data-chapter="the-problem">
+                        <span class="ch-num">1.</span>The Problem
+                    </a></li>
+                    <li><a href="../context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
+                        <span class="ch-num">2.</span>Context-Driven Development
+                    </a></li>
+                    <li><a href="../getting-started/" class="sidebar-chapter" data-chapter="getting-started">
+                        <span class="ch-num">3.</span>Getting Started
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">II. How Draft Thinks</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
+                        <span class="ch-num">4.</span>Context Tiering
+                    </a></li>
+                    <li><a href="../agent-system/" class="sidebar-chapter active" data-chapter="agent-system">
+                        <span class="ch-num">5.</span>The Agent System
+                    </a></li>
+                    <li><a href="../signal-classification/" class="sidebar-chapter" data-chapter="signal-classification">
+                        <span class="ch-num">6.</span>Signal Classification
+                    </a></li>
+                    <li><a href="../incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
+                        <span class="ch-num">7.</span>Incremental Refresh
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">III. Track Lifecycle</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
+                    </a></li>
+                    <li><a href="../implementation/" class="sidebar-chapter" data-chapter="implementation">
+                        <span class="ch-num">9.</span>Implementation
+                    </a></li>
+                    <li><a href="../review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
+                        <span class="ch-num">10.</span>Review Pipeline
+                    </a></li>
+                    <li><a href="../managing-tracks/" class="sidebar-chapter" data-chapter="managing-tracks">
+                        <span class="ch-num">11.</span>Managing Tracks
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">IV. Quality</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../deep-review/" class="sidebar-chapter" data-chapter="deep-review">
+                        <span class="ch-num">12.</span>Deep Review
+                    </a></li>
+                    <li><a href="../bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
+                        <span class="ch-num">13.</span>Bug Hunt
+                    </a></li>
+                    <li><a href="../coverage/" class="sidebar-chapter" data-chapter="coverage">
+                        <span class="ch-num">14.</span>Coverage
+                    </a></li>
+                    <li><a href="../pattern-learning/" class="sidebar-chapter" data-chapter="pattern-learning">
+                        <span class="ch-num">15.</span>Pattern Learning
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">V. Architecture</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../decomposition/" class="sidebar-chapter" data-chapter="decomposition">
+                        <span class="ch-num">16.</span>Decomposition
+                    </a></li>
+                    <li><a href="../adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VI. Enterprise</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../monorepo-federation/" class="sidebar-chapter" data-chapter="monorepo-federation">
+                        <span class="ch-num">18.</span>Monorepo Federation
+                    </a></li>
+                    <li><a href="../jira-integration/" class="sidebar-chapter" data-chapter="jira-integration">
+                        <span class="ch-num">19.</span>Jira Integration
+                    </a></li>
+                    <li><a href="../multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
+                        <span class="ch-num">20.</span>Multi-IDE Support
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VII. Closing</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../philosophy-references/" class="sidebar-chapter" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Appendix</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../command-reference/" class="sidebar-chapter" data-chapter="command-reference">
+                        <span class="ch-num">A.</span>Command Reference
+                    </a></li>
+                    <li><a href="../file-reference/" class="sidebar-chapter" data-chapter="file-reference">
+                        <span class="ch-num">B.</span>File Reference
+                    </a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="book-content">
+<div class="chapter-wrapper">
+    <h1>The Agent System</h1>
+    <p class="chapter-meta"><span class="part-name">Part II: How Draft Thinks</span> &middot; Chapter 5</p>
+    <p class="read-time">5 min read</p>
+
+    <p class="chapter-intro">You asked your AI assistant to debug a failing test. It immediately changed the code, broke two other tests, reverted, tried something else, broke three more, and eventually produced a "fix" that suppressed the error without understanding it. This is what happens when an AI has capability without protocol. Draft's agent system gives each specialized role a defined process that prevents freelancing.</p>
+
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;" font-family="Arial, sans-serif">
+                <defs>
+                    <filter id="shadow5" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- Central hub -->
+                <circle cx="360" cy="140" r="52" fill="#2563eb" filter="url(#shadow5)"/>
+                <text x="360" y="136" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Draft</text>
+                <text x="360" y="152" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="10">Core</text>
+                <!-- Architect (top) -->
+                <rect x="310" y="10" width="100" height="44" rx="10" fill="#7c3aed" filter="url(#shadow5)"/>
+                <text x="360" y="30" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Architect</text>
+                <text x="360" y="44" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Decomposition</text>
+                <line x1="360" y1="54" x2="360" y2="88" stroke="#7c3aed" stroke-width="2"/>
+                <!-- Planner (top-right) -->
+                <rect x="530" y="50" width="100" height="44" rx="10" fill="#059669" filter="url(#shadow5)"/>
+                <text x="580" y="70" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Planner</text>
+                <text x="580" y="84" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Specs &amp; Plans</text>
+                <line x1="530" y1="80" x2="412" y2="120" stroke="#059669" stroke-width="2"/>
+                <!-- Reviewer (bottom-right) -->
+                <rect x="530" y="185" width="100" height="44" rx="10" fill="#7c3aed" filter="url(#shadow5)"/>
+                <text x="580" y="205" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Reviewer</text>
+                <text x="580" y="219" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">3-stage review</text>
+                <line x1="530" y1="200" x2="412" y2="160" stroke="#7c3aed" stroke-width="2"/>
+                <!-- Debugger (bottom-left) -->
+                <rect x="90" y="185" width="100" height="44" rx="10" fill="#059669" filter="url(#shadow5)"/>
+                <text x="140" y="205" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Debugger</text>
+                <text x="140" y="219" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Root cause first</text>
+                <line x1="190" y1="200" x2="308" y2="160" stroke="#059669" stroke-width="2"/>
+                <!-- RCA (top-left) -->
+                <rect x="90" y="50" width="100" height="44" rx="10" fill="#7c3aed" filter="url(#shadow5)"/>
+                <text x="140" y="70" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">RCA</text>
+                <text x="140" y="84" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Incident analysis</text>
+                <line x1="190" y1="80" x2="308" y2="120" stroke="#7c3aed" stroke-width="2"/>
+                <!-- Bottom label -->
+                <text x="360" y="268" text-anchor="middle" fill="#718096" font-size="11">Each agent loads a behavioral protocol that constrains AI behavior for its domain</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Five specialized agents connect to Draft Core, each with a defined protocol: Architect decomposes, Planner specs, Reviewer validates, Debugger investigates, RCA analyzes incidents.</div>
+    </div>
+
+    <h2>Why Agents Exist</h2>
+    <p>A general-purpose AI assistant has one mode: do whatever seems helpful. That is fine for answering questions. It is dangerous for structured engineering work. Architecture decomposition requires different thinking than debugging. Code review requires different discipline than planning. When a single AI operates without role boundaries, it blends these concerns &mdash; reviewing code while simultaneously refactoring it, or planning while already implementing.</p>
+
+    <p>Draft defines five specialized agents, each with a behavioral protocol that constrains how the AI operates in that role. Agents are not separate AI instances. They are protocol documents that the AI loads and follows when a specific skill activates them. The Architect agent activates during <code>/draft:decompose</code> and <code>/draft:implement</code> (architecture mode). The Reviewer agent activates during <code>/draft:review</code>. The Debugger agent activates when a task is marked blocked. They structure AI behavior the way a runbook structures incident response.</p>
+
+    <h2>Architect Agent</h2>
+    <p>The Architect agent handles pre-implementation design: breaking systems into modules, documenting algorithms, designing execution state, and generating function skeletons. It enforces five rules for module decomposition:</p>
+
+    <ol>
+        <li><strong>Single Responsibility</strong> &mdash; each module owns one concern</li>
+        <li><strong>Size Constraint</strong> &mdash; 1 to 3 files per module; if more, split further</li>
+        <li><strong>Clear API Boundary</strong> &mdash; every module has a defined public interface</li>
+        <li><strong>Minimal Coupling</strong> &mdash; modules communicate through interfaces, not internals</li>
+        <li><strong>Testable in Isolation</strong> &mdash; each module can be unit-tested independently</li>
+    </ol>
+
+    <p>For each module, the Architect defines a name, a one-sentence responsibility, expected source files, the public API surface (with full type signatures in the project's language), dependencies on other modules, and a complexity rating. It then performs dependency analysis: identifying edges between modules, detecting circular dependencies, topologically sorting for implementation order, and identifying which modules can be built in parallel.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Stories: Algorithms Before Code</div>
+        <p>Before any code is written, the Architect writes a <strong>Story</strong> &mdash; a natural-language algorithm description placed at the top of each code file. Stories capture the Input to Output path and the algorithmic approach in 5 to 15 lines. They describe the algorithm ("sort by priority, then deduplicate"), not the implementation ("use Array.sort() with comparator"). Stories are the cheapest place to change direction &mdash; before skeletons and TDD lock in the design.</p>
+    </div>
+
+    <p>The Architect also designs <strong>execution state</strong> &mdash; the intermediate variables your code will use during processing. This bridges the gap between the Story (algorithm) and Function Skeletons (code structure). Input state, intermediate state, output state, and error state are each named, typed, and documented before implementation begins.</p>
+
+    <pre><code>## Execution State: PaymentProcessor
+
+### Input State
+- `chargeRequest: ChargeInput` — validated payment request from API layer
+
+### Intermediate State
+- `customer: StripeCustomer` — resolved Stripe customer record
+- `paymentMethod: PaymentMethod` — validated payment instrument
+- `chargeResult: StripeCharge` — raw Stripe API response
+
+### Output State
+- `invoice: Invoice` — persisted invoice with charge reference
+
+### Error State
+- `chargeErrors: PaymentError[]` — Stripe decline reasons, validation failures</code></pre>
+
+    <p>Finally, the Architect generates <strong>function skeletons</strong>: complete function signatures with parameter types, return types, and docstrings, but no implementation. The developer approves the structure before TDD begins. No code is written until the skeleton is approved.</p>
+
+    <h2>Planner Agent</h2>
+    <p>The Planner agent creates specifications and phased implementation plans. It handles collaborative intake &mdash; structured dialogue to elicit requirements, identify risks, and define acceptance criteria. Specs come in three templates: feature specs (summary, requirements, acceptance criteria, non-goals, technical approach), bug specs (reproduction steps, root cause hypothesis, blast radius), and refactor specs (current state, target state, migration strategy).</p>
+
+    <p>Plans are organized into four phases:</p>
+
+    <pre><code>| Phase          | Contains                                          |
+|----------------|---------------------------------------------------|
+| Foundation     | Data models, types, interfaces, configuration      |
+| Implementation | Business logic, core features                      |
+| Integration    | Wiring components, external APIs, cross-module work|
+| Polish         | Error handling, edge cases, documentation, cleanup |</code></pre>
+
+    <p>Each task within a plan must be completable in a focused session, have clear success criteria, produce testable output, and fit in a single commit. "Implement the feature" is not a task. "Add validation middleware for CreateUserInput with email format and password strength checks" is a task.</p>
+
+    <p>The Planner identifies dependencies between tasks, parallel execution opportunities, and external blockers. It flags technical unknowns, performance concerns, and security considerations in the spec. When requirements are ambiguous, it does not proceed with assumptions &mdash; it documents the ambiguities with options and trade-off analysis, then asks the developer to decide.</p>
+
+    <h2>Reviewer Agent</h2>
+    <p>The Reviewer agent performs three-stage code review at phase boundaries. The stages are sequential and gated &mdash; a failure at any stage stops the process.</p>
+
+    <p><strong>Stage 1: Automated Validation.</strong> Objective, static checks against the diff: architecture conformance (no pattern violations, module boundaries respected, no unauthorized cross-layer imports), dead code detection, dependency cycle detection, security scan (OWASP checklist &mdash; no hardcoded secrets, no SQL injection risks, no XSS vulnerabilities), and performance anti-pattern detection (no N+1 queries, no blocking I/O in async functions, no unbounded queries). If Stage 1 fails, review stops. Structural issues must be fixed before anything else is evaluated.</p>
+
+    <p><strong>Stage 2: Spec Compliance.</strong> Did the code implement what was specified? All functional requirements covered, all acceptance criteria met, no scope creep, edge cases from the spec handled. If requirements are missing, review stops. There is no point assessing code quality for code that builds the wrong thing.</p>
+
+    <p><strong>Stage 3: Code Quality.</strong> Architecture, error handling, testing, and maintainability. No silent failures, no functions exceeding reasonable complexity, no deeply nested control flow beyond three levels.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">The Adversarial Pass</div>
+        <p>When Stage 3 produces zero findings across all four dimensions, the Reviewer does not accept "clean" at face value. It runs an adversarial pass &mdash; seven explicit questions: Are all error paths handled? Are there untested boundary conditions? Does code assume inputs are always valid? Is anything hardcoded that will break at scale? Is there untested behavior? Do changes violate learned anti-patterns? Do changes violate critical invariants? Only after answering all seven with documented reasoning can a zero-finding review be accepted. This prevents lazy "LGTM" verdicts.</p>
+    </div>
+
+    <p>Issues are classified by severity: <strong>Critical</strong> (blocks release, must fix), <strong>Important</strong> (degrades quality, should fix before phase completes), and <strong>Minor</strong> (style, optimization, noted but does not block).</p>
+
+    <h2>Debugger Agent</h2>
+    <p>The Debugger agent enforces one iron law: <strong>no fixes without root cause investigation first.</strong> When a task is marked as blocked (<code>[!]</code> status), the Debugger follows four phases in strict order.</p>
+
+    <ol>
+        <li><strong>Investigate</strong> &mdash; Read the error, reproduce it, trace the data flow from input to failure point, document findings. No code changes allowed in this phase. If you are tempted to make a "quick fix," stop.</li>
+        <li><strong>Analyze</strong> &mdash; Find similar working code, list differences between working and failing cases, check assumptions, narrow to the smallest change that breaks. Language-specific debugging techniques are applied: async stack traces for Node.js, race detector for Go, sanitizers for C/C++, <code>RUST_BACKTRACE=1</code> for Rust.</li>
+        <li><strong>Hypothesize</strong> &mdash; Form a single hypothesis, predict the outcome if correct, run the smallest possible test. If wrong, return to Analyze. Do not try another random fix.</li>
+        <li><strong>Implement</strong> &mdash; Write the regression test first (fails before fix, passes after), implement the minimal fix addressing root cause only, run the full test suite, document the root cause.</li>
+    </ol>
+
+    <p>The Debugger also includes a performance debugging path for latency regressions and memory growth: profile before guessing, compare against baseline, target the hot path, and benchmark before optimizing. The anti-pattern list is explicit: no optimizing without profiling data, no optimizing code that is not on the hot path, no micro-optimizing when the bottleneck is I/O.</p>
+
+    <h2>RCA Agent</h2>
+    <p>The Root Cause Analysis agent extends the Debugger for bug tracks &mdash; production bugs, Jira incidents, and distributed system failures. It draws from Google SRE postmortem culture and adds practices the Debugger does not cover: blast radius analysis, SLO impact quantification, detection lag assessment, differential analysis, 5 Whys causal chains, and formal hypothesis tracking with evidence tables.</p>
+
+    <pre><code>| # | Hypothesis                        | Test             | Prediction      | Actual       | Result      |
+|---|-----------------------------------|------------------|-----------------|--------------|-------------|
+| 1 | Cache returns stale data at TTL=0 | Unit test TTL=0  | Returns stale   | Returns stale| Confirmed   |
+| 2 | Race in session invalidation      | Concurrent test  | Intermittent 401| Consistent   | Eliminated  |</code></pre>
+
+    <p>The RCA agent classifies every confirmed root cause: logic error, race condition, data corruption, config error, dependency issue, missing validation, state management, or resource exhaustion. Prevention items are categorized into detection improvements, process improvements, code improvements, and architecture improvements. Every claim must cite <code>file:line</code> &mdash; no hand-waving allowed.</p>
+
+    <p>Failed hypotheses are documented because they narrow the search space. After three failed cycles, the agent escalates rather than continuing to guess.</p>
+
+    <h2>How Agents Activate</h2>
+    <p>Agents are not invoked directly. They are activated automatically by the skill that needs them:</p>
+
+    <pre><code>| Command             | Activates          | Purpose                                |
+|---------------------|--------------------|----------------------------------------|
+| /draft:decompose    | Architect          | Module decomposition and dependency analysis|
+| /draft:implement    | Architect (if arch mode) | Story writing, skeletons before coding |
+| /draft:implement    | Debugger           | When a task is marked [!] Blocked       |
+| /draft:review       | Reviewer           | Three-stage review at phase boundaries  |
+| /draft:new-track    | Planner            | Spec and plan creation                  |
+| /draft:new-track    | RCA                | Bug track investigation structure       |</code></pre>
+
+    <p>The activation is seamless. When <code>/draft:implement</code> encounters a blocked task, it loads the Debugger protocol and follows the four phases. When <code>/draft:review</code> runs at a phase boundary, it loads the Reviewer protocol and executes all three stages. The developer does not need to know which agent is active &mdash; they see the structured output.</p>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Agents Constrain, They Do Not Replace</div>
+        <p>Agents do not replace human judgment. They structure AI behavior so that judgment happens at the right moments. The Architect presents module boundaries for approval. The Planner presents specs for review. The Reviewer flags issues for human decision. Every agent has escalation procedures for when it cannot resolve ambiguity &mdash; it documents what it knows, lists what is unclear, and asks. It does not guess.</p>
+    </div>
+</div>
+
+            <nav class="chapter-nav">
+                <a href="../context-tiering/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Context Tiering</span></a>
+                <a href="../signal-classification/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">Signal Classification</span></a>
+            </nav>
+        </main>
+
+        <nav class="page-toc" id="page-toc" style="display: none;">
+            <div class="page-toc-title">On this page</div>
+            <div id="page-toc-list" class="page-toc-list"></div>
+        </nav>
+    </div>
+
+    <script src="../js/book.js"></script>
+</body>
+</html>

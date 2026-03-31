@@ -13,145 +13,145 @@
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#what-is-draft</loc>
+        <loc>https://getdraft.dev/book/what-is-draft/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#the-problem</loc>
+        <loc>https://getdraft.dev/book/the-problem/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#context-driven-development</loc>
+        <loc>https://getdraft.dev/book/context-driven-development/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#getting-started</loc>
+        <loc>https://getdraft.dev/book/getting-started/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#context-tiering</loc>
+        <loc>https://getdraft.dev/book/context-tiering/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#agent-system</loc>
+        <loc>https://getdraft.dev/book/agent-system/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#signal-classification</loc>
+        <loc>https://getdraft.dev/book/signal-classification/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#incremental-refresh</loc>
+        <loc>https://getdraft.dev/book/incremental-refresh/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#specs-and-plans</loc>
+        <loc>https://getdraft.dev/book/specs-and-plans/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#implementation</loc>
+        <loc>https://getdraft.dev/book/implementation/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#review-pipeline</loc>
+        <loc>https://getdraft.dev/book/review-pipeline/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#managing-tracks</loc>
+        <loc>https://getdraft.dev/book/managing-tracks/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#deep-review</loc>
+        <loc>https://getdraft.dev/book/deep-review/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#bug-hunt</loc>
+        <loc>https://getdraft.dev/book/bug-hunt/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#coverage</loc>
+        <loc>https://getdraft.dev/book/coverage/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#pattern-learning</loc>
+        <loc>https://getdraft.dev/book/pattern-learning/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#decomposition</loc>
+        <loc>https://getdraft.dev/book/decomposition/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#adrs</loc>
+        <loc>https://getdraft.dev/book/adrs/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#monorepo-federation</loc>
+        <loc>https://getdraft.dev/book/monorepo-federation/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#jira-integration</loc>
+        <loc>https://getdraft.dev/book/jira-integration/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#multi-ide-support</loc>
+        <loc>https://getdraft.dev/book/multi-ide-support/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#philosophy-references</loc>
+        <loc>https://getdraft.dev/book/philosophy-references/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#command-reference</loc>
+        <loc>https://getdraft.dev/book/command-reference/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://getdraft.dev/book/#file-reference</loc>
+        <loc>https://getdraft.dev/book/file-reference/</loc>
         <lastmod>2026-03-31</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>

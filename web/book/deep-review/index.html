@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Review — Draft Book</title>
+    <meta name="description" content="Production-grade deep review with ACID compliance audits — atomicity, isolation, durability, idempotency, resilience, and observability checks.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="deep code review, ACID compliance, production audit, idempotency check, resilience testing">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="Deep Review — Draft Book">
+    <meta property="og:description" content="Production-grade deep review with ACID compliance audits — atomicity, isolation, durability, idempotency, resilience, and observability checks.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/book/deep-review/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="Deep Review — Draft Book">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Deep Review — Draft Book">
+    <meta name="twitter:description" content="Production-grade deep review with ACID compliance audits — atomicity, isolation, durability, idempotency, resilience, and observability checks.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="Deep Review — Draft Book">
+    <link rel="canonical" href="https://getdraft.dev/book/deep-review/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Deep Review",
+      "description": "Production-grade deep review with ACID compliance audits — atomicity, isolation, durability, idempotency, resilience, and observability checks.",
+      "url": "https://getdraft.dev/book/deep-review/",
+      "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "position": 13,
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../css/book.css">
+</head>
+<body data-chapter="deep-review">
+
+    <div class="reading-progress" id="reading-progress"></div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="book-topbar">
+        <div class="book-topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
+            <div class="book-topbar-divider"></div>
+            <span class="book-topbar-chapter">Deep Review</span>
+        </div>
+        <div class="book-topbar-right">
+            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="book-layout">
+        <aside class="book-sidebar" id="book-sidebar">
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Introduction</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
+                        <span class="ch-num">0.</span>What is Draft?
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">I. Foundation</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../the-problem/" class="sidebar-chapter" data-chapter="the-problem">
+                        <span class="ch-num">1.</span>The Problem
+                    </a></li>
+                    <li><a href="../context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
+                        <span class="ch-num">2.</span>Context-Driven Development
+                    </a></li>
+                    <li><a href="../getting-started/" class="sidebar-chapter" data-chapter="getting-started">
+                        <span class="ch-num">3.</span>Getting Started
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">II. How Draft Thinks</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
+                        <span class="ch-num">4.</span>Context Tiering
+                    </a></li>
+                    <li><a href="../agent-system/" class="sidebar-chapter" data-chapter="agent-system">
+                        <span class="ch-num">5.</span>The Agent System
+                    </a></li>
+                    <li><a href="../signal-classification/" class="sidebar-chapter" data-chapter="signal-classification">
+                        <span class="ch-num">6.</span>Signal Classification
+                    </a></li>
+                    <li><a href="../incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
+                        <span class="ch-num">7.</span>Incremental Refresh
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">III. Track Lifecycle</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
+                    </a></li>
+                    <li><a href="../implementation/" class="sidebar-chapter" data-chapter="implementation">
+                        <span class="ch-num">9.</span>Implementation
+                    </a></li>
+                    <li><a href="../review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
+                        <span class="ch-num">10.</span>Review Pipeline
+                    </a></li>
+                    <li><a href="../managing-tracks/" class="sidebar-chapter" data-chapter="managing-tracks">
+                        <span class="ch-num">11.</span>Managing Tracks
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">IV. Quality</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../deep-review/" class="sidebar-chapter active" data-chapter="deep-review">
+                        <span class="ch-num">12.</span>Deep Review
+                    </a></li>
+                    <li><a href="../bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
+                        <span class="ch-num">13.</span>Bug Hunt
+                    </a></li>
+                    <li><a href="../coverage/" class="sidebar-chapter" data-chapter="coverage">
+                        <span class="ch-num">14.</span>Coverage
+                    </a></li>
+                    <li><a href="../pattern-learning/" class="sidebar-chapter" data-chapter="pattern-learning">
+                        <span class="ch-num">15.</span>Pattern Learning
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">V. Architecture</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../decomposition/" class="sidebar-chapter" data-chapter="decomposition">
+                        <span class="ch-num">16.</span>Decomposition
+                    </a></li>
+                    <li><a href="../adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VI. Enterprise</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../monorepo-federation/" class="sidebar-chapter" data-chapter="monorepo-federation">
+                        <span class="ch-num">18.</span>Monorepo Federation
+                    </a></li>
+                    <li><a href="../jira-integration/" class="sidebar-chapter" data-chapter="jira-integration">
+                        <span class="ch-num">19.</span>Jira Integration
+                    </a></li>
+                    <li><a href="../multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
+                        <span class="ch-num">20.</span>Multi-IDE Support
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VII. Closing</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../philosophy-references/" class="sidebar-chapter" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Appendix</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../command-reference/" class="sidebar-chapter" data-chapter="command-reference">
+                        <span class="ch-num">A.</span>Command Reference
+                    </a></li>
+                    <li><a href="../file-reference/" class="sidebar-chapter" data-chapter="file-reference">
+                        <span class="ch-num">B.</span>File Reference
+                    </a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="book-content">
+<div class="chapter-wrapper">
+    <h1>Deep Review</h1>
+    <p class="chapter-meta"><span class="part-name">Part IV: Quality</span> &middot; Chapter 12</p>
+    <p class="read-time">5 min read</p>
+
+    <p class="chapter-intro">Your team is two weeks from launch. The feature works in staging, passes all tests, and the product manager is satisfied. Then someone asks: "What happens if the database connection drops mid-transaction?" Silence. Nobody knows. A standard code review checked that the code is clean, follows conventions, and handles the expected cases. But nobody audited whether the system survives the unexpected ones. That is the gap <code>/draft:deep-review</code> fills &mdash; a production-readiness audit that goes beyond correctness into resilience, durability, and operational maturity.</p>
+
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:420px;height:auto;display:block;margin:0 auto;">
+                <defs>
+                    <filter id="sh12" x="-4%" y="-4%" width="108%" height="108%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- Center label -->
+                <circle cx="200" cy="160" r="38" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#sh12)"/>
+                <text x="200" y="156" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#1a1a2e">Deep</text>
+                <text x="200" y="172" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#1a1a2e">Review</text>
+                <!-- Radar axes and dimension labels (8 axes at 45 deg intervals) -->
+                <!-- Top: ACID -->
+                <line x1="200" y1="122" x2="200" y2="40" stroke="#e2e8f0" stroke-width="1"/>
+                <rect x="150" y="12" width="100" height="28" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.2"/>
+                <text x="200" y="31" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#2563eb">ACID Compliance</text>
+                <!-- Top-right: Security -->
+                <line x1="227" y1="133" x2="310" y2="50" stroke="#e2e8f0" stroke-width="1"/>
+                <rect x="290" y="28" width="90" height="28" rx="6" fill="#fff1f2" stroke="#e11d48" stroke-width="1.2"/>
+                <text x="335" y="47" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#e11d48">Security</text>
+                <!-- Right: Resilience -->
+                <line x1="238" y1="160" x2="320" y2="160" stroke="#e2e8f0" stroke-width="1"/>
+                <rect x="322" y="146" width="78" height="28" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+                <text x="361" y="165" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#059669">Resilience</text>
+                <!-- Bottom-right: SLOs -->
+                <line x1="227" y1="187" x2="310" y2="270" stroke="#e2e8f0" stroke-width="1"/>
+                <rect x="295" y="262" width="70" height="28" rx="6" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.2"/>
+                <text x="330" y="281" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#7c3aed">SLOs</text>
+                <!-- Bottom: Database -->
+                <line x1="200" y1="198" x2="200" y2="280" stroke="#e2e8f0" stroke-width="1"/>
+                <rect x="155" y="282" width="90" height="28" rx="6" fill="#fef9c3" stroke="#d97706" stroke-width="1.2"/>
+                <text x="200" y="301" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#d97706">Database</text>
+                <!-- Bottom-left: Observability -->
+                <line x1="173" y1="187" x2="90" y2="270" stroke="#e2e8f0" stroke-width="1"/>
+                <rect x="22" y="262" width="100" height="28" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.2"/>
+                <text x="72" y="281" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#2563eb">Observability</text>
+                <!-- Left: Idempotency -->
+                <line x1="162" y1="160" x2="80" y2="160" stroke="#e2e8f0" stroke-width="1"/>
+                <rect x="2" y="146" width="95" height="28" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+                <text x="49" y="165" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#059669">Idempotency</text>
+                <!-- Top-left: Error Handling -->
+                <line x1="173" y1="133" x2="90" y2="50" stroke="#e2e8f0" stroke-width="1"/>
+                <rect x="15" y="28" width="110" height="28" rx="6" fill="#fff1f2" stroke="#e11d48" stroke-width="1.2"/>
+                <text x="70" y="47" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#e11d48">Error Handling</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Deep review evaluates modules across multiple production-readiness dimensions: ACID compliance, security, resilience, SLOs, database patterns, observability, idempotency, and error handling.</div>
+    </div>
+
+    <h2>Beyond Code Review</h2>
+    <p>Standard code review asks: "Is this code correct?" Deep review asks: "Will this code survive production?" These are fundamentally different questions. Correct code can still lose data during crashes, deadlock under concurrent load, or silently corrupt state when a downstream service goes down.</p>
+
+    <p><code>/draft:deep-review</code> operates at the <strong>module level</strong>, not the pull-request level. It audits an entire service, component, or module against production-grade criteria. The command auto-selects the next unreviewed module from your project, or you can target one explicitly:</p>
+
+    <pre class="terminal"><code>$ /draft:deep-review
+  Module selected: src/auth/ (first unreviewed module)
+  Reason: Not found in draft/deep-review-history.json
+
+$ /draft:deep-review src/payments/
+  Module selected: src/payments/ (explicitly requested)
+  Re-reviewing: last reviewed 2026-02-14</code></pre>
+
+    <p>Each completed review is logged to <code>draft/deep-review-history.json</code> with the module name, timestamp, issue count, and summary. Subsequent runs automatically pick the next unreviewed module, or the one with the oldest review date if all have been covered.</p>
+
+    <h2>The ACID Compliance Audit</h2>
+    <p>Deep review borrows from database theory. ACID properties &mdash; Atomicity, Consistency, Isolation, Durability &mdash; are not just database concerns. They apply to any system that manages state. Every service that writes data, updates records, or coordinates multi-step operations must answer these questions.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">ACID Beyond Databases</div>
+        <p>ACID compliance is evaluated for every state-changing operation in the module, not just database transactions. An HTTP handler that updates a cache, sends a notification, and writes to a database is a multi-step operation that can fail partway through. Deep review audits each such operation for atomicity, consistency, isolation, and durability guarantees.</p>
+    </div>
+
+    <table>
+        <thead><tr><th>Property</th><th>What Deep Review Checks</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Atomicity</strong></td><td>Are multi-step operations wrapped in transactions? If step 3 of 5 fails, do steps 1-2 roll back? Are there missing rollback paths that leave corrupt state?</td></tr>
+            <tr><td><strong>Consistency</strong></td><td>Are invariants enforced before and after every state transition? Are schema constraints, data type validations, and boundary conditions checked at every boundary?</td></tr>
+            <tr><td><strong>Isolation</strong></td><td>Can concurrent operations interfere? Is there shared mutable state without locking? Are transaction isolation levels appropriate for the use case?</td></tr>
+            <tr><td><strong>Durability</strong></td><td>Does committed data survive crashes? Are there fire-and-forget patterns, missing flush/sync calls, or inadequate error handling around persistence operations?</td></tr>
+        </tbody>
+    </table>
+
+    <p>The audit extends beyond classical ACID into distributed system patterns. If the module uses event sourcing, deep review checks whether events are immutable and replay is idempotent. If it uses CQRS, it evaluates whether the consistency lag between read and write models is acceptable. If sagas coordinate multi-service operations, it verifies that compensating transactions are defined for every step.</p>
+
+    <h2>Production Robustness Patterns</h2>
+    <p>Passing tests does not mean surviving production. Deep review evaluates a set of production robustness patterns that separate "works on my machine" from "works at 3 AM when the cache cluster is down."</p>
+
+    <h3>Resilience</h3>
+    <p>Does the module degrade gracefully when dependencies fail? Deep review looks for circuit breakers on external calls, timeout handling on every outbound request, and backpressure mechanisms that prevent cascade failures. It checks what happens at 10x and 100x current traffic, identifies bottlenecks in connection pools and thread pools, and evaluates whether the module can shed excess load without crashing.</p>
+
+    <h3>Idempotency and Retry Safety</h3>
+    <p>Can operations be safely retried without side effects? If a payment charge is retried after a network timeout, does the user get double-charged? Deep review traces retry logic to ensure exponential backoff with jitter is used and that retry budgets exist to prevent retry storms.</p>
+
+    <h3>Fail-Closed Behavior</h3>
+    <p>When something unexpected happens, does the system fail into a safe state or an unsafe one? An authorization check that defaults to "allow" on error is fail-open &mdash; a security vulnerability. Deep review identifies every error path and evaluates whether the default behavior is safe.</p>
+
+    <h2>Observability Assessment</h2>
+    <p>Production systems that cannot be observed cannot be debugged. Deep review evaluates observability across multiple dimensions:</p>
+
+    <ul>
+        <li><strong>Structured logging</strong> &mdash; Are logs structured (JSON/key-value) or free-form strings? Are log levels used correctly (ERROR for actual errors, not expected conditions)?</li>
+        <li><strong>Correlation IDs</strong> &mdash; Can a request be traced across service boundaries? Are tracing spans created at service boundaries with relevant attributes?</li>
+        <li><strong>Metric cardinality</strong> &mdash; Are metric labels bounded? Unbounded labels like <code>user_id</code> cause metric explosion that crashes monitoring infrastructure.</li>
+        <li><strong>PII leakage</strong> &mdash; Do logs or error messages expose personally identifiable information, tokens, or credentials?</li>
+        <li><strong>Alerting coverage</strong> &mdash; Are critical failure modes covered by alerts? Are there runbooks linked to those alerts?</li>
+    </ul>
+
+    <div class="callout callout-warning">
+        <div class="callout-title">Metric Cardinality Explosion</div>
+        <p>A common production failure: a developer adds <code>user_id</code> as a metric label. With 100,000 users, every metric now has 100,000 time series. Prometheus runs out of memory. Grafana dashboards timeout. The monitoring system itself becomes the outage. Deep review catches unbounded label patterns before they reach production.</p>
+    </div>
+
+    <h2>SLO Evaluation</h2>
+    <p>Deep review checks whether the module has defined service-level objectives and whether the architecture can actually deliver them. A module claiming 99.99% availability (52 minutes of downtime per year) while depending on a single database instance without failover is making a promise its architecture cannot keep.</p>
+
+    <p>The evaluation covers latency profiles (p50, p95, p99 targets), error budgets, and the gap between stated availability targets and actual architectural capabilities. If no SLOs are defined, the review recommends establishing them &mdash; because a system without SLOs has no definition of "good enough."</p>
+
+    <h2>Database-Specific Analysis</h2>
+    <p>For modules that interact with databases, deep review performs targeted analysis that generic code review misses:</p>
+
+    <table>
+        <thead><tr><th>Check</th><th>What It Catches</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Missing indexes</strong></td><td>Queries filtering or joining on unindexed columns, causing full table scans</td></tr>
+            <tr><td><strong>N+1 queries</strong></td><td>ORM relationships that trigger one query per row instead of a single join</td></tr>
+            <tr><td><strong>Wide table scans</strong></td><td><code>SELECT *</code> or queries without <code>WHERE</code> clauses on large tables</td></tr>
+            <tr><td><strong>Schema constraints</strong></td><td>Missing <code>NOT NULL</code>, <code>UNIQUE</code>, or <code>FOREIGN KEY</code> constraints that allow invalid data</td></tr>
+            <tr><td><strong>Migration safety</strong></td><td>Migrations that require downtime or are not backward-compatible with the running application</td></tr>
+        </tbody>
+    </table>
+
+    <h2>The Report</h2>
+    <p>Deep review produces a structured report saved to <code>draft/deep-review-reports/&lt;module-name&gt;.md</code>. Every finding is classified by severity and formatted as an actionable specification &mdash; not a vague suggestion, but a concrete description of what to fix and how:</p>
+
+    <pre><code>### [Critical] Missing Rollback on Payment Failure
+**File:** src/payments/processor.ts:142
+**Description:** Transaction lacks rollback when gateway returns
+  a timeout error. Steps 1-3 (debit, ledger entry, notification)
+  complete, but if step 4 (gateway confirmation) times out, the
+  debit and ledger entry persist without a corresponding charge.
+**Proposed Fix Specification:**
+- Wrap steps 1-4 in a database transaction
+- Add explicit rollback on gateway timeout
+- Emit structured log with correlation ID for reconciliation
+- Add a compensating transaction for the notification</code></pre>
+
+    <p>The report ends with a verdict: <strong>PASS</strong> (only minor issues), <strong>CONDITIONAL PASS</strong> (no critical issues, but important ones exist), or <strong>FAIL</strong> (at least one critical issue found). A FAIL verdict means the module is not production-ready.</p>
+
+    <h2>API Contract Drift Detection</h2>
+    <p>A subtle class of production bugs comes from drift between documented API contracts and actual implementations. Deep review compares the module's code interfaces against OpenAPI/Swagger specs, Protobuf definitions, GraphQL schemas, or TypeScript type exports. It flags endpoints that exist in code but not in the spec, types that differ between spec and implementation, and undocumented endpoints that external consumers may be relying on.</p>
+
+    <h2>When to Use Deep Review</h2>
+    <p>Deep review is expensive in terms of time and token usage. It is not meant for every commit or every pull request. Use it for:</p>
+
+    <ul>
+        <li><strong>Pre-launch audits</strong> &mdash; Before shipping a new service or major feature to production</li>
+        <li><strong>Critical path changes</strong> &mdash; When modifying payment processing, authentication, or data integrity code</li>
+        <li><strong>Compliance requirements</strong> &mdash; When security or regulatory review requires documented evidence of production-readiness assessment</li>
+        <li><strong>Post-incident review</strong> &mdash; After a production incident, to audit the affected module for related issues</li>
+    </ul>
+
+    <div class="callout callout-insight">
+        <div class="callout-title">Deep Review vs. Regular Review</div>
+        <p>Regular <code>/draft:review</code> checks whether code matches the spec, follows conventions, and passes quality gates. Deep review assumes the code is correct and asks whether it will survive the conditions that production imposes: failures, load, concurrency, crashes, and the slow degradation that happens over months of operation. They complement each other &mdash; review for development quality, deep review for operational readiness.</p>
+    </div>
+
+    <p>After completing the audit, deep review runs the pattern learning phase, updating <code>draft/guardrails.md</code> with architecture and concurrency conventions discovered during the module analysis. These patterns feed back into future reviews and implementations, making each subsequent deep review more precise.</p>
+</div>
+
+            <nav class="chapter-nav">
+                <a href="../managing-tracks/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Managing Tracks</span></a>
+                <a href="../bug-hunt/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">Bug Hunt</span></a>
+            </nav>
+        </main>
+
+        <nav class="page-toc" id="page-toc" style="display: none;">
+            <div class="page-toc-title">On this page</div>
+            <div id="page-toc-list" class="page-toc-list"></div>
+        </nav>
+    </div>
+
+    <script src="../js/book.js"></script>
+</body>
+</html>

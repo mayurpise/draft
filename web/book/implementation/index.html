@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implementation — Draft Book</title>
+    <meta name="description" content="Task-by-task implementation with TDD enforcement — RED, GREEN, REFACTOR cycles with architecture checkpoints and production robustness patterns.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="tdd enforcement, test-driven development, red green refactor, ai implementation, production robustness">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="Implementation — Draft Book">
+    <meta property="og:description" content="Task-by-task implementation with TDD enforcement — RED, GREEN, REFACTOR cycles with architecture checkpoints and production robustness patterns.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/book/implementation/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="Implementation — Draft Book">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Implementation — Draft Book">
+    <meta name="twitter:description" content="Task-by-task implementation with TDD enforcement — RED, GREEN, REFACTOR cycles with architecture checkpoints and production robustness patterns.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="Implementation — Draft Book">
+    <link rel="canonical" href="https://getdraft.dev/book/implementation/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Implementation",
+      "description": "Task-by-task implementation with TDD enforcement — RED, GREEN, REFACTOR cycles with architecture checkpoints and production robustness patterns.",
+      "url": "https://getdraft.dev/book/implementation/",
+      "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "position": 10,
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../css/book.css">
+</head>
+<body data-chapter="implementation">
+
+    <div class="reading-progress" id="reading-progress"></div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="book-topbar">
+        <div class="book-topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
+            <div class="book-topbar-divider"></div>
+            <span class="book-topbar-chapter">Implementation</span>
+        </div>
+        <div class="book-topbar-right">
+            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="book-layout">
+        <aside class="book-sidebar" id="book-sidebar">
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Introduction</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
+                        <span class="ch-num">0.</span>What is Draft?
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">I. Foundation</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../the-problem/" class="sidebar-chapter" data-chapter="the-problem">
+                        <span class="ch-num">1.</span>The Problem
+                    </a></li>
+                    <li><a href="../context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
+                        <span class="ch-num">2.</span>Context-Driven Development
+                    </a></li>
+                    <li><a href="../getting-started/" class="sidebar-chapter" data-chapter="getting-started">
+                        <span class="ch-num">3.</span>Getting Started
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">II. How Draft Thinks</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
+                        <span class="ch-num">4.</span>Context Tiering
+                    </a></li>
+                    <li><a href="../agent-system/" class="sidebar-chapter" data-chapter="agent-system">
+                        <span class="ch-num">5.</span>The Agent System
+                    </a></li>
+                    <li><a href="../signal-classification/" class="sidebar-chapter" data-chapter="signal-classification">
+                        <span class="ch-num">6.</span>Signal Classification
+                    </a></li>
+                    <li><a href="../incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
+                        <span class="ch-num">7.</span>Incremental Refresh
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">III. Track Lifecycle</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
+                    </a></li>
+                    <li><a href="../implementation/" class="sidebar-chapter active" data-chapter="implementation">
+                        <span class="ch-num">9.</span>Implementation
+                    </a></li>
+                    <li><a href="../review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
+                        <span class="ch-num">10.</span>Review Pipeline
+                    </a></li>
+                    <li><a href="../managing-tracks/" class="sidebar-chapter" data-chapter="managing-tracks">
+                        <span class="ch-num">11.</span>Managing Tracks
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">IV. Quality</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../deep-review/" class="sidebar-chapter" data-chapter="deep-review">
+                        <span class="ch-num">12.</span>Deep Review
+                    </a></li>
+                    <li><a href="../bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
+                        <span class="ch-num">13.</span>Bug Hunt
+                    </a></li>
+                    <li><a href="../coverage/" class="sidebar-chapter" data-chapter="coverage">
+                        <span class="ch-num">14.</span>Coverage
+                    </a></li>
+                    <li><a href="../pattern-learning/" class="sidebar-chapter" data-chapter="pattern-learning">
+                        <span class="ch-num">15.</span>Pattern Learning
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">V. Architecture</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../decomposition/" class="sidebar-chapter" data-chapter="decomposition">
+                        <span class="ch-num">16.</span>Decomposition
+                    </a></li>
+                    <li><a href="../adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VI. Enterprise</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../monorepo-federation/" class="sidebar-chapter" data-chapter="monorepo-federation">
+                        <span class="ch-num">18.</span>Monorepo Federation
+                    </a></li>
+                    <li><a href="../jira-integration/" class="sidebar-chapter" data-chapter="jira-integration">
+                        <span class="ch-num">19.</span>Jira Integration
+                    </a></li>
+                    <li><a href="../multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
+                        <span class="ch-num">20.</span>Multi-IDE Support
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VII. Closing</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../philosophy-references/" class="sidebar-chapter" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Appendix</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../command-reference/" class="sidebar-chapter" data-chapter="command-reference">
+                        <span class="ch-num">A.</span>Command Reference
+                    </a></li>
+                    <li><a href="../file-reference/" class="sidebar-chapter" data-chapter="file-reference">
+                        <span class="ch-num">B.</span>File Reference
+                    </a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="book-content">
+<div class="chapter-wrapper">
+    <h1>Implementation</h1>
+    <p class="chapter-meta"><span class="part-name">Part III: Track Lifecycle</span> &middot; Chapter 9</p>
+    <p class="read-time">6 min read</p>
+
+    <p class="chapter-intro">You have a specification your team approved and a plan broken into phases and tasks. In a conventional AI workflow, you'd paste the spec into a chat window and say "build it." The AI would generate everything at once &mdash; a single, massive, unreviewable code drop. Draft takes a fundamentally different approach. <code>/draft:implement</code> executes the plan one task at a time, each task producing a single commit, each commit verified before the next task begins.</p>
+
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:420px;height:auto;display:block;margin:0 auto;">
+                <defs>
+                    <filter id="sh09" x="-4%" y="-4%" width="108%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                    <marker id="arr09" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#718096"/></marker>
+                </defs>
+                <!-- RED circle -->
+                <circle cx="200" cy="60" r="46" fill="#fff1f2" stroke="#e11d48" stroke-width="2.5" filter="url(#sh09)"/>
+                <text x="200" y="55" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#e11d48">RED</text>
+                <text x="200" y="72" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#718096">Write failing test</text>
+                <!-- GREEN circle -->
+                <circle cx="315" cy="185" r="46" fill="#ecfdf5" stroke="#059669" stroke-width="2.5" filter="url(#sh09)"/>
+                <text x="315" y="180" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#059669">GREEN</text>
+                <text x="315" y="197" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#718096">Make it pass</text>
+                <!-- REFACTOR circle -->
+                <circle cx="85" cy="185" r="46" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5" filter="url(#sh09)"/>
+                <text x="85" y="177" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#2563eb">REFACTOR</text>
+                <text x="85" y="194" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#718096">Clean up</text>
+                <!-- Curved arrows: RED -> GREEN -->
+                <path d="M240 88 C290 110, 330 140, 325 135" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr09)"/>
+                <!-- GREEN -> REFACTOR -->
+                <path d="M270 200 C220 220, 150 220, 135 200" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr09)"/>
+                <!-- REFACTOR -> RED -->
+                <path d="M75 138 C70 110, 120 60, 150 55" stroke="#718096" stroke-width="1.8" fill="none" marker-end="url(#arr09)"/>
+                <!-- COMMIT badge -->
+                <rect x="155" y="220" width="90" height="30" rx="15" fill="#1a1a2e" filter="url(#sh09)"/>
+                <text x="200" y="240" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#ffffff">COMMIT</text>
+                <!-- Arrow from refactor to commit -->
+                <path d="M105 228 L152 237" stroke="#1a1a2e" stroke-width="1.5" fill="none" marker-end="url(#arr09c)"/>
+                <defs><marker id="arr09c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1a1a2e"/></marker></defs>
+            </svg>
+        </div>
+        <div class="figure-caption">The TDD cycle: write a failing test (Red), write minimum code to pass (Green), clean up while tests stay green (Refactor), then commit. Repeat for each task.</div>
+    </div>
+
+    <h2>How Implementation Works</h2>
+    <p>When you run <code>/draft:implement</code>, the AI loads the track's specification and plan, reads your workflow preferences, and finds the first uncompleted task. It does not ask what to build &mdash; the plan already answered that. It does not choose an approach &mdash; the specification already decided. Implementation is pure execution against pre-approved constraints.</p>
+
+    <pre class="terminal"><code>$ /draft:implement
+
+Readiness check passed.
+Starting: Phase 1 — Foundation
+Task 1.1: Create OAuth provider configuration schema</code></pre>
+
+    <p>Before the first task begins, a <strong>Readiness Gate</strong> runs once per track. It verifies that every acceptance criterion in <code>spec.md</code> has at least one corresponding task in <code>plan.md</code>. If an acceptance criterion has no task, the AI flags it before any code is written. This catches spec-plan drift at the cheapest possible moment.</p>
+
+    <h2>TDD Workflow</h2>
+    <p>When your <code>workflow.md</code> has TDD enabled, implementation follows the classic Red-Green-Refactor cycle &mdash; but with an iron law: <strong>no production code without a failing test first.</strong></p>
+
+    <ol>
+        <li><strong>RED</strong> &mdash; Write a test that captures the requirement. Run it. Verify it fails with an actual assertion failure, not a syntax error. The AI announces: "Test failing as expected: expected OAuth token to have expiry field."</li>
+        <li><strong>GREEN</strong> &mdash; Write the minimum code to make the test pass. Nothing extra. Run the test. Verify it passes. The AI announces: "Test passing: OAuth token includes expiry field."</li>
+        <li><strong>REFACTOR</strong> &mdash; Clean the code while keeping tests green. Run all related tests after each change. The AI announces: "Refactoring complete, all tests passing."</li>
+    </ol>
+
+    <p>The AI is trained to stop itself if it's about to write code before a test exists, if a test passes immediately (testing the wrong thing), or if it's about to reason "just this once" or "too simple to test." These are explicit red flags in the implementation protocol.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Test Quality Enforcement</div>
+        <p>Every test must meet a quality checklist: no shared mutable state between cases, at least one meaningful assertion, no logic (conditionals, loops, try/catch) in test code, descriptive names over DRY deduplication, and testing behavior rather than implementation details. The AI also considers property-based testing for pure functions &mdash; suggesting tools like Hypothesis (Python), fast-check (JavaScript), or proptest (Rust) when algebraic properties or round-trip invariants are applicable.</p>
+    </div>
+
+    <h2>Architecture Mode</h2>
+    <p>When your project has an <code>.ai-context.md</code> or <code>architecture.md</code> file &mdash; created by <code>/draft:init</code> or <code>/draft:decompose</code> &mdash; implementation automatically enables <strong>Architecture Mode</strong>. This adds three design steps before any code is written for each task.</p>
+
+    <h3>Story Writing</h3>
+    <p>Before coding a file, the AI writes a natural-language algorithm description as a comment block at the top. The Story captures what the module receives, the algorithmic steps it performs, and what it produces &mdash; without any code syntax.</p>
+
+    <pre><code>// Story: Token Exchange Service
+//
+// Input:  Authorization code from OAuth provider callback
+// Process:
+//   1. Validate the authorization code is not expired or replayed
+//   2. Exchange code for access token and refresh token via provider API
+//   3. Extract user identity from the access token claims
+//   4. Link the identity to an existing user or create a new user record
+//   5. Generate a session token with the configured expiry
+// Output: Session token and user profile
+//
+// Dependencies: OAuth provider API, user repository, session store
+// Side effects: Creates user record if new, writes session to store</code></pre>
+
+    <p>The AI presents the Story and waits for approval. You can refine it, rewrite it, or say "skip." The Story is the cheapest place to change direction &mdash; before execution state and skeletons lock in the design.</p>
+
+    <h3>Execution State Design</h3>
+    <p>Next, the AI defines the intermediate state variables the code will use during processing. This bridges the gap between the algorithm (Story) and the code structure (skeletons).</p>
+
+    <pre><code>EXECUTION STATE: Token Exchange Service
+---------------------------------------------
+Input State:
+  - authCode: string — authorization code from callback
+  - provider: OAuthProvider — Google or GitHub config
+
+Intermediate State:
+  - tokenResponse: ProviderTokens — raw tokens from provider API
+  - userIdentity: ProviderIdentity — extracted user claims
+  - existingUser: User | null — lookup result from user repository
+
+Output State:
+  - sessionToken: string — JWT session token
+  - userProfile: UserProfile — resolved user profile
+
+Error State:
+  - exchangeError: OAuthError — provider API failure details
+  - linkConflict: ConflictError — user already linked to different provider</code></pre>
+
+    <p>Again, mandatory checkpoint. You approve, modify, or skip before proceeding.</p>
+
+    <h3>Function Skeleton Generation</h3>
+    <p>Finally, the AI generates function stubs with complete signatures &mdash; all parameters, return types, and a one-line docstring describing purpose and call timing. No implementation bodies, just <code>// TODO</code> placeholders. Functions appear in control flow order.</p>
+
+    <pre><code>/**
+ * Exchanges authorization code for provider tokens.
+ * Called after OAuth callback validation succeeds.
+ */
+async function exchangeAuthCode(
+  code: string,
+  provider: OAuthProvider
+): Promise&lt;ProviderTokens&gt; {
+  // TODO: Implement after approval
+}
+
+/**
+ * Extracts user identity claims from access token.
+ * Called after successful token exchange.
+ */
+async function extractIdentity(
+  tokens: ProviderTokens,
+  provider: OAuthProvider
+): Promise&lt;ProviderIdentity&gt; {
+  // TODO: Implement after approval
+}</code></pre>
+
+    <p>After you approve the skeletons, the TDD cycle fills them in. Each checkpoint &mdash; Story, Execution State, Skeletons &mdash; gives you veto power over the design before implementation begins.</p>
+
+    <h2>Production Robustness Patterns</h2>
+    <p>Whether Architecture Mode is active or not, Draft enforces six categories of production robustness patterns during code generation. These are not a post-hoc checklist &mdash; they are <strong>generation directives</strong> applied while writing code.</p>
+
+    <ol>
+        <li><strong>Atomicity</strong> &mdash; Multi-step state mutations are wrapped in transactions with rollback on failure. File writes go to a temp file first, then atomic rename. Database writes happen before in-memory state updates, never the reverse. Resource cleanup always runs in <code>finally</code> blocks.</li>
+        <li><strong>Isolation</strong> &mdash; Methods that mutate shared state acquire locks before mutation. Returning internal state to callers produces a deep copy or frozen snapshot, never a mutable reference. Database I/O is moved outside lock scope.</li>
+        <li><strong>Durability</strong> &mdash; Critical state that must survive crashes is recoverable from disk or database alone, with no reliance on in-memory-only state. Async database writes are always awaited &mdash; no fire-and-forget on data persistence.</li>
+        <li><strong>Idempotency</strong> &mdash; Operations that may be retried use deduplication keys. State transitions validate that the transition is legal from the current state. Alert emissions are deduplicated on type, entity, and time window.</li>
+        <li><strong>Fail-Closed</strong> &mdash; Error paths default to the safe, restrictive, deny state. Missing data is treated as deny, not allow. Missing configuration uses the restrictive default &mdash; the system runs in safe mode, not open mode.</li>
+        <li><strong>Resilience</strong> &mdash; Retry logic uses exponential backoff with jitter, never fixed-interval retries. External dependency calls use circuit breakers. Non-critical dependency failures degrade gracefully, returning cached or default results instead of failing the entire request.</li>
+    </ol>
+
+    <div class="callout callout-warning">
+        <div class="callout-title">Patterns Override Convenience</div>
+        <p>If following a pattern makes the code more verbose, that is correct &mdash; the verbosity is the safety. The AI is instructed to never write code that violates these patterns and plan to "fix it later." If a pattern is genuinely not applicable (no database in a pure utility function), it is skipped &mdash; only relevant patterns are applied.</p>
+    </div>
+
+    <h2>One Task, One Commit</h2>
+    <p>After completing each task, the AI commits immediately. This is non-negotiable. Every task gets its own commit with a conventional message format:</p>
+
+    <pre class="terminal"><code>$ git commit -m "feat(add-oauth2): Create OAuth provider configuration schema"</code></pre>
+
+    <p>The AI stages only files changed by the current task &mdash; never <code>git add .</code>. It then updates <code>plan.md</code> to mark the task complete with the commit SHA, increments the counter in <code>metadata.json</code>, and verifies both writes succeeded. If either verification fails, the task is marked <code>[!]</code> Blocked with a recovery message specifying exactly which file needs manual correction.</p>
+
+    <p>This discipline creates a 1:1 mapping between plan tasks and git commits. You can revert a single task's work without touching anything else. You can trace any commit back to the plan task and specification requirement that motivated it.</p>
+
+    <h2>Phase Boundaries</h2>
+    <p>When all tasks in a phase are complete, the AI runs a <strong>three-stage review</strong> before proceeding to the next phase. Stage 1 checks structural integrity (architecture conformance, dead code, circular dependencies, security). Stage 2 verifies spec compliance (requirements coverage, acceptance criteria). Stage 3 assesses code quality (patterns, error handling, testing, maintainability). Critical issues block the next phase &mdash; they must be fixed first.</p>
+
+    <p>This means every phase boundary is a quality gate. Problems are caught early, in small batches, not at the end of a 2,000-line code drop.</p>
+
+    <h2>Checkpoint and Resume</h2>
+    <p>Implementation sessions can be interrupted and resumed. Because every completed task has a commit and an updated plan marker, the AI can detect exactly where work stopped. On resume, it reads <code>plan.md</code> to find the first <code>[~]</code> or <code>[ ]</code> task, checks <code>git log</code> to verify the last commit matches the last <code>[x]</code> entry, reconciles any mismatches, and continues from where it left off.</p>
+
+    <p>If a task was marked in progress (<code>[~]</code>) when the session ended, the AI checks for partial work &mdash; uncommitted changes, TODO markers, incomplete implementations. If the partial work is substantial and valid, it continues from the current state. If broken or minimal, it asks whether to continue or start fresh.</p>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Implementation Chunk Limit</div>
+        <p>In Architecture Mode, if the implementation diff for a single task exceeds approximately 200 lines, the AI stops, presents the chunk for review, waits for approval, commits it, and continues with the next chunk. This prevents large, unreviewable code drops even within a single task.</p>
+    </div>
+
+    <h2>The Architect Agent</h2>
+    <p>Architecture Mode is powered by the Architect Agent, a specialized protocol for pre-implementation design. The Architect decomposes systems into modules following strict rules: each module owns one concern, contains 1&ndash;3 files, has a defined public interface, communicates through interfaces rather than internals, and can be unit-tested in isolation. When circular dependencies are detected, the Architect applies a cycle-breaking framework &mdash; extracting shared interfaces, inverting dependencies, or merging artificially split modules.</p>
+
+    <p>The Architect does not make implementation decisions. It establishes boundaries, documents algorithms, and generates API surfaces. The developer approves each checkpoint. The TDD cycle handles the actual implementation. This separation keeps architectural decisions explicit and reviewable, rather than implicit in generated code.</p>
+
+    <h2>Tech Debt Tracking</h2>
+    <p>During implementation, shortcuts sometimes happen. When the AI encounters a workaround or known-imperfect solution, it logs it in a <strong>Tech Debt</strong> section at the bottom of <code>plan.md</code> with location, description, severity (Low/Medium/High), and a payback trigger &mdash; the condition that should prompt repayment. Only genuine debt is logged: intentional shortcuts with known consequences, not everything imperfect.</p>
+
+    <pre data-file="draft/tracks/add-oauth2/plan.md"><code>## Tech Debt
+
+| ID | Location | Description | Severity | Payback Trigger |
+|----|----------|-------------|----------|-----------------|
+| TD-1 | `src/auth/oauth.ts:45` | Hardcoded provider timeout | Low | When adding config system |
+| TD-2 | `src/auth/session.ts:12` | In-memory session store | Medium | Before horizontal scaling |</code></pre>
+
+    <p>With implementation complete, the next step is review &mdash; a three-stage process that verifies everything the plan promised was actually delivered.</p>
+</div>
+
+            <nav class="chapter-nav">
+                <a href="../specs-and-plans/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Specs &amp; Plans</span></a>
+                <a href="../review-pipeline/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">Review Pipeline</span></a>
+            </nav>
+        </main>
+
+        <nav class="page-toc" id="page-toc" style="display: none;">
+            <div class="page-toc-title">On this page</div>
+            <div id="page-toc-list" class="page-toc-list"></div>
+        </nav>
+    </div>
+
+    <script src="../js/book.js"></script>
+</body>
+</html>

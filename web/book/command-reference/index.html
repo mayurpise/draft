@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Reference — Draft Book</title>
+    <meta name="description" content="Complete reference for all 17 Draft commands — usage, options, examples, and output for each slash command.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="draft commands, slash commands, command reference, draft cli, command documentation">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="Command Reference — Draft Book">
+    <meta property="og:description" content="Complete reference for all 17 Draft commands — usage, options, examples, and output for each slash command.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/book/command-reference/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="Command Reference — Draft Book">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Command Reference — Draft Book">
+    <meta name="twitter:description" content="Complete reference for all 17 Draft commands — usage, options, examples, and output for each slash command.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="Command Reference — Draft Book">
+    <link rel="canonical" href="https://getdraft.dev/book/command-reference/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Command Reference",
+      "description": "Complete reference for all 17 Draft commands — usage, options, examples, and output for each slash command.",
+      "url": "https://getdraft.dev/book/command-reference/",
+      "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "position": 23,
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../css/book.css">
+</head>
+<body data-chapter="command-reference">
+
+    <div class="reading-progress" id="reading-progress"></div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="book-topbar">
+        <div class="book-topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
+            <div class="book-topbar-divider"></div>
+            <span class="book-topbar-chapter">Command Reference</span>
+        </div>
+        <div class="book-topbar-right">
+            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="book-layout">
+        <aside class="book-sidebar" id="book-sidebar">
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Introduction</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
+                        <span class="ch-num">0.</span>What is Draft?
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">I. Foundation</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../the-problem/" class="sidebar-chapter" data-chapter="the-problem">
+                        <span class="ch-num">1.</span>The Problem
+                    </a></li>
+                    <li><a href="../context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
+                        <span class="ch-num">2.</span>Context-Driven Development
+                    </a></li>
+                    <li><a href="../getting-started/" class="sidebar-chapter" data-chapter="getting-started">
+                        <span class="ch-num">3.</span>Getting Started
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">II. How Draft Thinks</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
+                        <span class="ch-num">4.</span>Context Tiering
+                    </a></li>
+                    <li><a href="../agent-system/" class="sidebar-chapter" data-chapter="agent-system">
+                        <span class="ch-num">5.</span>The Agent System
+                    </a></li>
+                    <li><a href="../signal-classification/" class="sidebar-chapter" data-chapter="signal-classification">
+                        <span class="ch-num">6.</span>Signal Classification
+                    </a></li>
+                    <li><a href="../incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
+                        <span class="ch-num">7.</span>Incremental Refresh
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">III. Track Lifecycle</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
+                    </a></li>
+                    <li><a href="../implementation/" class="sidebar-chapter" data-chapter="implementation">
+                        <span class="ch-num">9.</span>Implementation
+                    </a></li>
+                    <li><a href="../review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
+                        <span class="ch-num">10.</span>Review Pipeline
+                    </a></li>
+                    <li><a href="../managing-tracks/" class="sidebar-chapter" data-chapter="managing-tracks">
+                        <span class="ch-num">11.</span>Managing Tracks
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">IV. Quality</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../deep-review/" class="sidebar-chapter" data-chapter="deep-review">
+                        <span class="ch-num">12.</span>Deep Review
+                    </a></li>
+                    <li><a href="../bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
+                        <span class="ch-num">13.</span>Bug Hunt
+                    </a></li>
+                    <li><a href="../coverage/" class="sidebar-chapter" data-chapter="coverage">
+                        <span class="ch-num">14.</span>Coverage
+                    </a></li>
+                    <li><a href="../pattern-learning/" class="sidebar-chapter" data-chapter="pattern-learning">
+                        <span class="ch-num">15.</span>Pattern Learning
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">V. Architecture</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../decomposition/" class="sidebar-chapter" data-chapter="decomposition">
+                        <span class="ch-num">16.</span>Decomposition
+                    </a></li>
+                    <li><a href="../adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VI. Enterprise</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../monorepo-federation/" class="sidebar-chapter" data-chapter="monorepo-federation">
+                        <span class="ch-num">18.</span>Monorepo Federation
+                    </a></li>
+                    <li><a href="../jira-integration/" class="sidebar-chapter" data-chapter="jira-integration">
+                        <span class="ch-num">19.</span>Jira Integration
+                    </a></li>
+                    <li><a href="../multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
+                        <span class="ch-num">20.</span>Multi-IDE Support
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VII. Closing</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../philosophy-references/" class="sidebar-chapter" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Appendix</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../command-reference/" class="sidebar-chapter active" data-chapter="command-reference">
+                        <span class="ch-num">A.</span>Command Reference
+                    </a></li>
+                    <li><a href="../file-reference/" class="sidebar-chapter" data-chapter="file-reference">
+                        <span class="ch-num">B.</span>File Reference
+                    </a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="book-content">
+<div class="chapter-wrapper">
+    <h1>Appendix A: Command Reference</h1>
+    <p class="chapter-meta"><span class="part-name">Appendix</span></p>
+
+    <p class="chapter-intro">Quick-reference for all 17 Draft commands. Syntax shown is for Claude Code; Copilot uses <code>draft command</code> (no slash), Cursor uses <code>@draft command</code>.</p>
+
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 620 310" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:620px;display:block;margin:0 auto">
+                <defs>
+                    <filter id="cmd-shadow" x="-4%" y="-4%" width="108%" height="112%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a1a2e" flood-opacity="0.08"/>
+                    </filter>
+                </defs>
+                <!-- Context category -->
+                <rect x="10" y="10" width="140" height="68" rx="8" fill="#2563eb" filter="url(#cmd-shadow)"/>
+                <text x="80" y="30" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">CONTEXT</text>
+                <text x="80" y="48" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">draft</text>
+                <text x="80" y="64" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">init</text>
+                <!-- Planning category -->
+                <rect x="164" y="10" width="140" height="84" rx="8" fill="#7c3aed" filter="url(#cmd-shadow)"/>
+                <text x="234" y="30" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">PLANNING</text>
+                <text x="234" y="48" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">new-track</text>
+                <text x="234" y="64" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">decompose</text>
+                <text x="234" y="80" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">change</text>
+                <!-- Execution category -->
+                <rect x="318" y="10" width="140" height="84" rx="8" fill="#059669" filter="url(#cmd-shadow)"/>
+                <text x="388" y="30" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">EXECUTION</text>
+                <text x="388" y="48" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">implement</text>
+                <text x="388" y="64" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">status</text>
+                <text x="388" y="80" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">revert</text>
+                <!-- Quality category -->
+                <rect x="472" y="10" width="140" height="100" rx="8" fill="#d97706" filter="url(#cmd-shadow)"/>
+                <text x="542" y="30" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">QUALITY</text>
+                <text x="542" y="48" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">review</text>
+                <text x="542" y="64" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">deep-review</text>
+                <text x="542" y="80" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">bughunt</text>
+                <text x="542" y="96" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">coverage</text>
+                <!-- Knowledge category -->
+                <rect x="10" y="130" width="296" height="68" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#cmd-shadow)"/>
+                <text x="158" y="150" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10" font-weight="bold">KNOWLEDGE &amp; GOVERNANCE</text>
+                <text x="82" y="172" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">learn</text>
+                <text x="158" y="172" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">adr</text>
+                <text x="234" y="172" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">index</text>
+                <!-- Integration category -->
+                <rect x="320" y="130" width="292" height="68" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#cmd-shadow)"/>
+                <text x="466" y="150" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10" font-weight="bold">INTEGRATION</text>
+                <text x="466" y="172" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">jira-preview &middot; jira-create</text>
+                <!-- Flow arrow -->
+                <text x="310" y="240" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="11">Context &rarr; Planning &rarr; Execution &rarr; Quality &rarr; Knowledge &rarr; Integration</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Command map: Draft's 17 commands organized by workflow category, reflecting the natural development lifecycle from context setup through quality assurance and external integration.</div>
+    </div>
+
+    <table class="command-reference">
+        <thead>
+            <tr>
+                <th>Command</th>
+                <th>Purpose</th>
+                <th>Key Flags / Modifiers</th>
+                <th>Prerequisite</th>
+                <th>Chapters</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>/draft</code></td>
+                <td>Show overview, available commands, and intent mapping</td>
+                <td>&mdash;</td>
+                <td>None</td>
+                <td>0, 2</td>
+            </tr>
+            <tr>
+                <td><code>/draft:init</code></td>
+                <td>Analyze codebase and generate context files, architecture docs, and state tracking</td>
+                <td><code>refresh</code> &mdash; re-analyze and update existing context</td>
+                <td>None (run once per project)</td>
+                <td>3, 4, 5</td>
+            </tr>
+            <tr>
+                <td><code>/draft:index</code></td>
+                <td>Aggregate monorepo service contexts into root-level knowledge</td>
+                <td><code>--init-missing</code> &mdash; initialize uninitialized services; <code>bughunt [dirs]</code> &mdash; run bughunt across services</td>
+                <td><code>/draft:init</code> at root and at least one service</td>
+                <td>18</td>
+            </tr>
+            <tr>
+                <td><code>/draft:new-track</code></td>
+                <td>Create a feature/fix track with spec and phased plan through collaborative dialogue</td>
+                <td><code>--quick</code> &mdash; streamlined mode with fewer questions; <code>&lt;description&gt;</code> &mdash; initial feature description</td>
+                <td><code>/draft:init</code></td>
+                <td>6, 7, 8</td>
+            </tr>
+            <tr>
+                <td><code>/draft:implement</code></td>
+                <td>Execute tasks from plan with TDD workflow and architecture checkpoints</td>
+                <td>Resumes in-progress tasks automatically</td>
+                <td><code>/draft:new-track</code> (requires plan.md)</td>
+                <td>9, 10, 11</td>
+            </tr>
+            <tr>
+                <td><code>/draft:status</code></td>
+                <td>Show progress overview: active tracks, phase/task counts, blocked items</td>
+                <td>&mdash;</td>
+                <td><code>/draft:init</code></td>
+                <td>9</td>
+            </tr>
+            <tr>
+                <td><code>/draft:review</code></td>
+                <td>Three-stage code review: automated validation, spec compliance, code quality</td>
+                <td><code>--track &lt;id&gt;</code> &mdash; specific track; <code>--full</code> &mdash; full review; <code>with-bughunt</code> &mdash; add bughunt pass</td>
+                <td><code>/draft:init</code></td>
+                <td>12, 13</td>
+            </tr>
+            <tr>
+                <td><code>/draft:deep-review</code></td>
+                <td>Module lifecycle audit covering ACID properties and production robustness</td>
+                <td><code>[module]</code> &mdash; specific module to audit</td>
+                <td><code>/draft:init</code></td>
+                <td>14</td>
+            </tr>
+            <tr>
+                <td><code>/draft:bughunt</code></td>
+                <td>14-dimension exhaustive bug discovery with taint tracking and evidence</td>
+                <td><code>--track &lt;id&gt;</code> &mdash; scope to a specific track</td>
+                <td><code>/draft:init</code></td>
+                <td>13</td>
+            </tr>
+            <tr>
+                <td><code>/draft:coverage</code></td>
+                <td>Code coverage analysis targeting 95%+ with gap identification</td>
+                <td>&mdash;</td>
+                <td><code>/draft:init</code>, tests exist</td>
+                <td>11</td>
+            </tr>
+            <tr>
+                <td><code>/draft:learn</code></td>
+                <td>Discover coding patterns in the codebase and update guardrails</td>
+                <td><code>promote</code> &mdash; promote pattern to guardrail; <code>migrate</code> &mdash; migrate patterns; <code>path</code> &mdash; specific path</td>
+                <td><code>/draft:init</code></td>
+                <td>15</td>
+            </tr>
+            <tr>
+                <td><code>/draft:decompose</code></td>
+                <td>Module decomposition with dependency mapping and implementation ordering</td>
+                <td><code>project</code> &mdash; project-wide; <code>&lt;track-id&gt;</code> &mdash; track-scoped</td>
+                <td><code>/draft:init</code></td>
+                <td>16</td>
+            </tr>
+            <tr>
+                <td><code>/draft:adr</code></td>
+                <td>Create and manage Architecture Decision Records</td>
+                <td><code>"title"</code> &mdash; create with title; <code>list</code> &mdash; list all; <code>supersede &lt;n&gt;</code> &mdash; supersede existing ADR</td>
+                <td><code>/draft:init</code></td>
+                <td>17</td>
+            </tr>
+            <tr>
+                <td><code>/draft:change</code></td>
+                <td>Handle mid-track requirement changes with impact analysis</td>
+                <td><code>&lt;description&gt;</code> &mdash; description of the change</td>
+                <td>Active track</td>
+                <td>8</td>
+            </tr>
+            <tr>
+                <td><code>/draft:revert</code></td>
+                <td>Git-aware rollback at task, phase, or track level</td>
+                <td>Interactive &mdash; prompts for revert level and target</td>
+                <td>Active track with commits</td>
+                <td>9</td>
+            </tr>
+            <tr>
+                <td><code>/draft:jira-preview</code></td>
+                <td>Generate Jira export file from track plan for review before creating issues</td>
+                <td><code>[track-id]</code> &mdash; specific track</td>
+                <td><code>/draft:new-track</code> (requires plan.md)</td>
+                <td>19</td>
+            </tr>
+            <tr>
+                <td><code>/draft:jira-create</code></td>
+                <td>Create Jira issues from export file via MCP</td>
+                <td><code>[track-id]</code> &mdash; specific track; auto-generates export if missing</td>
+                <td><code>/draft:jira-preview</code> (or auto-generates), MCP-Jira configured</td>
+                <td>19</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">Intent Mapping</div>
+        <p>Draft recognizes natural language equivalents for all commands. Saying "set up the project" triggers <code>/draft:init</code>. "Hunt bugs" triggers <code>/draft:bughunt</code>. "What's the status?" triggers <code>/draft:status</code>. See the Draft overview (<code>/draft</code>) for the full intent mapping table.</p>
+    </div>
+</div>
+
+            <nav class="chapter-nav">
+                <a href="../philosophy-references/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Philosophy &amp; References</span></a>
+                <a href="../file-reference/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">File Reference</span></a>
+            </nav>
+        </main>
+
+        <nav class="page-toc" id="page-toc" style="display: none;">
+            <div class="page-toc-title">On this page</div>
+            <div id="page-toc-list" class="page-toc-list"></div>
+        </nav>
+    </div>
+
+    <script src="../js/book.js"></script>
+</body>
+</html>

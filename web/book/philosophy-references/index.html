@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philosophy &amp; References — Draft Book</title>
+    <meta name="description" content="The philosophical foundations of Context-Driven Development — structured development, quality gates, incremental refinement.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="software development philosophy, quality gates, incremental refinement, development principles">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="Philosophy &amp; References — Draft Book">
+    <meta property="og:description" content="The philosophical foundations of Context-Driven Development — structured development, quality gates, incremental refinement.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/book/philosophy-references/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="Philosophy &amp; References — Draft Book">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Philosophy &amp; References — Draft Book">
+    <meta name="twitter:description" content="The philosophical foundations of Context-Driven Development — structured development, quality gates, incremental refinement.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="Philosophy &amp; References — Draft Book">
+    <link rel="canonical" href="https://getdraft.dev/book/philosophy-references/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Philosophy &amp; References",
+      "description": "The philosophical foundations of Context-Driven Development — structured development, quality gates, incremental refinement.",
+      "url": "https://getdraft.dev/book/philosophy-references/",
+      "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "position": 22,
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../css/book.css">
+</head>
+<body data-chapter="philosophy-references">
+
+    <div class="reading-progress" id="reading-progress"></div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="book-topbar">
+        <div class="book-topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Book</span></a>
+            <div class="book-topbar-divider"></div>
+            <span class="book-topbar-chapter">Philosophy &amp; References</span>
+        </div>
+        <div class="book-topbar-right">
+            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="book-layout">
+        <aside class="book-sidebar" id="book-sidebar">
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="sidebar-search-input" placeholder="Search chapters..." autocomplete="off">
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Introduction</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
+                        <span class="ch-num">0.</span>What is Draft?
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">I. Foundation</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../the-problem/" class="sidebar-chapter" data-chapter="the-problem">
+                        <span class="ch-num">1.</span>The Problem
+                    </a></li>
+                    <li><a href="../context-driven-development/" class="sidebar-chapter" data-chapter="context-driven-development">
+                        <span class="ch-num">2.</span>Context-Driven Development
+                    </a></li>
+                    <li><a href="../getting-started/" class="sidebar-chapter" data-chapter="getting-started">
+                        <span class="ch-num">3.</span>Getting Started
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">II. How Draft Thinks</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../context-tiering/" class="sidebar-chapter" data-chapter="context-tiering">
+                        <span class="ch-num">4.</span>Context Tiering
+                    </a></li>
+                    <li><a href="../agent-system/" class="sidebar-chapter" data-chapter="agent-system">
+                        <span class="ch-num">5.</span>The Agent System
+                    </a></li>
+                    <li><a href="../signal-classification/" class="sidebar-chapter" data-chapter="signal-classification">
+                        <span class="ch-num">6.</span>Signal Classification
+                    </a></li>
+                    <li><a href="../incremental-refresh/" class="sidebar-chapter" data-chapter="incremental-refresh">
+                        <span class="ch-num">7.</span>Incremental Refresh
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">III. Track Lifecycle</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../specs-and-plans/" class="sidebar-chapter" data-chapter="specs-and-plans">
+                        <span class="ch-num">8.</span>Specs &amp; Plans
+                    </a></li>
+                    <li><a href="../implementation/" class="sidebar-chapter" data-chapter="implementation">
+                        <span class="ch-num">9.</span>Implementation
+                    </a></li>
+                    <li><a href="../review-pipeline/" class="sidebar-chapter" data-chapter="review-pipeline">
+                        <span class="ch-num">10.</span>Review Pipeline
+                    </a></li>
+                    <li><a href="../managing-tracks/" class="sidebar-chapter" data-chapter="managing-tracks">
+                        <span class="ch-num">11.</span>Managing Tracks
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">IV. Quality</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../deep-review/" class="sidebar-chapter" data-chapter="deep-review">
+                        <span class="ch-num">12.</span>Deep Review
+                    </a></li>
+                    <li><a href="../bug-hunt/" class="sidebar-chapter" data-chapter="bug-hunt">
+                        <span class="ch-num">13.</span>Bug Hunt
+                    </a></li>
+                    <li><a href="../coverage/" class="sidebar-chapter" data-chapter="coverage">
+                        <span class="ch-num">14.</span>Coverage
+                    </a></li>
+                    <li><a href="../pattern-learning/" class="sidebar-chapter" data-chapter="pattern-learning">
+                        <span class="ch-num">15.</span>Pattern Learning
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">V. Architecture</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../decomposition/" class="sidebar-chapter" data-chapter="decomposition">
+                        <span class="ch-num">16.</span>Decomposition
+                    </a></li>
+                    <li><a href="../adrs/" class="sidebar-chapter" data-chapter="adrs">
+                        <span class="ch-num">17.</span>Architecture Decision Records
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VI. Enterprise</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../monorepo-federation/" class="sidebar-chapter" data-chapter="monorepo-federation">
+                        <span class="ch-num">18.</span>Monorepo Federation
+                    </a></li>
+                    <li><a href="../jira-integration/" class="sidebar-chapter" data-chapter="jira-integration">
+                        <span class="ch-num">19.</span>Jira Integration
+                    </a></li>
+                    <li><a href="../multi-ide-support/" class="sidebar-chapter" data-chapter="multi-ide-support">
+                        <span class="ch-num">20.</span>Multi-IDE Support
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">VII. Closing</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../philosophy-references/" class="sidebar-chapter active" data-chapter="philosophy-references">
+                        <span class="ch-num">21.</span>Philosophy &amp; References
+                    </a></li>
+                </ul>
+            </div>
+            <div class="sidebar-part">
+                <div class="sidebar-part-title">Appendix</div>
+                <ul class="sidebar-chapters">
+                    <li><a href="../command-reference/" class="sidebar-chapter" data-chapter="command-reference">
+                        <span class="ch-num">A.</span>Command Reference
+                    </a></li>
+                    <li><a href="../file-reference/" class="sidebar-chapter" data-chapter="file-reference">
+                        <span class="ch-num">B.</span>File Reference
+                    </a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="book-content">
+<div class="chapter-wrapper">
+    <h1>Philosophy &amp; References</h1>
+    <p class="chapter-meta"><span class="part-name">Part VII: Closing</span> &middot; Chapter 21</p>
+    <p class="read-time">6 min read</p>
+
+    <p class="chapter-intro">Draft is built on a premise: AI coding assistants are powerful but undirected, and structure is the missing piece. This chapter traces that premise to its foundations &mdash; the philosophy that drives Draft's design, the production robustness patterns it enforces, and the vetted knowledge base that informs its recommendations.</p>
+
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 520 280" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:520px;display:block;margin:0 auto">
+                <defs>
+                    <filter id="phil-shadow" x="-4%" y="-4%" width="108%" height="112%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a1a2e" flood-opacity="0.08"/>
+                    </filter>
+                </defs>
+                <!-- Center node -->
+                <rect x="170" y="100" width="180" height="48" rx="24" fill="#2563eb" filter="url(#phil-shadow)"/>
+                <text x="260" y="129" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="13" font-weight="bold">Context-Driven Dev</text>
+                <!-- Top: Structured Development -->
+                <line x1="260" y1="100" x2="260" y2="56" stroke="#7c3aed" stroke-width="2"/>
+                <rect x="168" y="16" width="184" height="40" rx="20" fill="#7c3aed" filter="url(#phil-shadow)"/>
+                <text x="260" y="41" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">Structured Development</text>
+                <!-- Left: Context-Awareness -->
+                <line x1="170" y1="124" x2="28" y2="124" stroke="#059669" stroke-width="2"/>
+                <rect x="4" y="104" width="160" height="40" rx="20" fill="#059669" filter="url(#phil-shadow)"/>
+                <text x="84" y="129" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">Context-Awareness</text>
+                <!-- Right: Quality Gates -->
+                <line x1="350" y1="124" x2="370" y2="124" stroke="#d97706" stroke-width="2"/>
+                <rect x="370" y="104" width="140" height="40" rx="20" fill="#d97706" filter="url(#phil-shadow)"/>
+                <text x="440" y="129" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">Quality Gates</text>
+                <!-- Bottom: Incremental Refinement -->
+                <line x1="260" y1="148" x2="260" y2="184" stroke="#7c3aed" stroke-width="2"/>
+                <rect x="156" y="184" width="208" height="40" rx="20" fill="#7c3aed" filter="url(#phil-shadow)"/>
+                <text x="260" y="209" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">Incremental Refinement</text>
+                <!-- Bottom-left: Production Robustness -->
+                <line x1="84" y1="144" x2="114" y2="184" stroke="#e2e8f0" stroke-width="1.5"/>
+                <rect x="20" y="184" width="180" height="36" rx="18" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5"/>
+                <text x="110" y="207" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="11">Production Robustness</text>
+                <!-- Bottom-right: Vetted Knowledge -->
+                <line x1="440" y1="144" x2="410" y2="184" stroke="#e2e8f0" stroke-width="1.5"/>
+                <rect x="324" y="184" width="176" height="36" rx="18" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5"/>
+                <text x="412" y="207" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="11">Vetted Knowledge Base</text>
+                <!-- Subtitle -->
+                <text x="260" y="260" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="11">Structure over prompts &mdash; explicit, managed, versioned context</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Draft's philosophical foundations: Context-Driven Development at the center, supported by structured workflows, quality gates, incremental refinement, production robustness, and a vetted knowledge base.</div>
+    </div>
+
+    <h2>The Core Philosophy</h2>
+    <p>The gap between what AI can generate and what production systems require is not a capability gap. It is a direction gap. An AI assistant can write a complete authentication system in thirty seconds. It can also write the wrong authentication system in thirty seconds. The difference is not in the model's ability but in the constraints it operates under.</p>
+
+    <p>Draft's philosophy follows from this observation: <strong>if you want better output from AI, don't write better prompts &mdash; build better structure.</strong></p>
+
+    <p>Prompt engineering is fragile. It depends on phrasing, context window position, model version, and conversational state. A prompt that works today may not work tomorrow. Structural constraints are durable. A <code>tech-stack.md</code> file that says "PostgreSQL, not MongoDB" constrains every interaction, every session, every model version. The constraint is not a suggestion embedded in natural language &mdash; it is a versioned, reviewable artifact in the repository.</p>
+
+    <p>This is what Draft means by Context-Driven Development: making the context that shapes AI behavior explicit, managed, and permanent. Every decision captured in a Draft document is a decision the AI doesn't have to guess at.</p>
+
+    <h2>Production Robustness as a First-Class Concern</h2>
+    <p>Most AI-generated code works. It passes the tests the AI also wrote. It handles the happy path. What it frequently lacks is production robustness &mdash; the defensive patterns that keep systems running when things go wrong.</p>
+
+    <p>Draft treats robustness not as an afterthought but as a mandatory dimension of code generation. During <code>/draft:implement</code>, six production robustness patterns are always active, triggered automatically by code patterns without manual opt-in:</p>
+
+    <h3>1. Atomicity</h3>
+    <p>All-or-nothing mutations. Atomic file writes (write to temp, then rename). Database-first state updates. If an operation produces multiple side effects, either all succeed or none do. The AI does not generate code that can leave the system in a half-updated state.</p>
+
+    <h3>2. Isolation</h3>
+    <p>Lock-guarded shared state. Deep-copy returns to prevent callers from mutating internal data. No database I/O while holding locks. Each component's failure boundary is contained &mdash; a crash in one operation does not corrupt another's state.</p>
+
+    <h3>3. Durability</h3>
+    <p>Crash-recoverable state. No fire-and-forget writes. If the process dies between two operations, the system must be recoverable. State that matters is persisted before the operation is acknowledged.</p>
+
+    <h3>4. Defensive Boundaries</h3>
+    <p>Numeric validation on all user inputs. API response validation before processing. Parameterized SQL without exception. Every boundary where data enters the system is treated as hostile &mdash; validated, sanitized, and constrained before it reaches business logic.</p>
+
+    <h3>5. Idempotency</h3>
+    <p>Deduplication keys on operations that might be retried. Legal state transitions only (no invalid state jumps). Alert deduplication to prevent notification storms. If an operation is executed twice with the same input, the system state is identical to executing it once.</p>
+
+    <h3>6. Fail-Closed</h3>
+    <p>Deny on error. Deny on missing data. When the system cannot determine whether an operation is safe, it refuses rather than guessing. This is the opposite of fail-open, where errors are swallowed and execution continues with potentially corrupt state.</p>
+
+    <p>When project-specific invariants exist in <code>.ai-context.md</code> &mdash; lock ordering, concurrency models, consistency boundaries &mdash; they take precedence over the general patterns. The robustness framework adapts to each project's constraints rather than applying a one-size-fits-all ruleset.</p>
+
+    <h2>Why Explicit Context Beats Prompt Engineering</h2>
+    <p>Prompt engineering and structural context both aim to improve AI output. They differ fundamentally in durability and reliability:</p>
+
+    <table>
+        <thead>
+            <tr><th>Dimension</th><th>Prompt Engineering</th><th>Structural Context (Draft)</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Persistence</td><td>Lost when session ends</td><td>Versioned in the repository</td></tr>
+            <tr><td>Reviewability</td><td>Buried in chat history</td><td>PR-reviewable markdown files</td></tr>
+            <tr><td>Consistency</td><td>Varies by phrasing and session</td><td>Same constraints every time</td></tr>
+            <tr><td>Team alignment</td><td>Personal to one developer</td><td>Shared by the entire team</td></tr>
+            <tr><td>Model independence</td><td>May break across model versions</td><td>Model-agnostic document format</td></tr>
+            <tr><td>Accountability</td><td>No record of what was instructed</td><td>Full git history of every constraint</td></tr>
+        </tbody>
+    </table>
+
+    <p>A prompt says "remember to use PostgreSQL." A context file says "PostgreSQL is the primary datastore, connection pooling via PgBouncer, migrations via Prisma." The first is a verbal instruction that might be forgotten. The second is a structural constraint that is loaded every time.</p>
+
+    <h2>The Knowledge Base</h2>
+    <p>Draft's agents do not operate from general training data alone. They draw on a curated knowledge base (<code>core/knowledge-base.md</code>) of vetted sources across architecture, reliability, craft, and security. When an agent makes a recommendation during planning or review, it cites the source.</p>
+
+    <h3>Architecture &amp; Design</h3>
+    <ul>
+        <li><strong>Designing Data-Intensive Applications</strong> (Martin Kleppmann) &mdash; Data models, replication, partitioning, consistency, stream processing. Cited for distributed systems decisions: "Consider CQRS here (DDIA, Ch. 11) &mdash; separates read/write concerns which fits your high-read workload."</li>
+        <li><strong>Clean Architecture</strong> (Robert Martin) &mdash; Dependency rule, boundaries, use cases, separation of concerns. Cited for module boundary violations: "This violates the Dependency Rule (Clean Architecture) &mdash; domain shouldn't know about infrastructure."</li>
+        <li><strong>Domain-Driven Design</strong> (Eric Evans) &mdash; Bounded contexts, ubiquitous language, aggregates, strategic design</li>
+        <li><strong>Building Evolutionary Architectures</strong> (Ford, Parsons, Kua) &mdash; Fitness functions, incremental change, architectural governance</li>
+    </ul>
+
+    <h3>Reliability &amp; Operations</h3>
+    <ul>
+        <li><strong>Release It!</strong> (Michael Nygard) &mdash; Stability patterns, circuit breakers, bulkheads, timeouts, failure modes. Cited for resilience recommendations: "Circuit breaker pattern (Release It!) would help here &mdash; fail fast instead of cascading timeouts."</li>
+        <li><strong>Site Reliability Engineering</strong> (Google SRE Book) &mdash; SLOs, error budgets, toil reduction, incident response. The operational mindset that informs Draft's emphasis on production robustness.</li>
+        <li><strong>The Phoenix Project</strong> (Kim, Behr, Spafford) &mdash; Flow, feedback, continuous improvement</li>
+    </ul>
+
+    <h3>Craft &amp; Practice</h3>
+    <ul>
+        <li><strong>Working Effectively with Legacy Code</strong> (Michael Feathers) &mdash; Seams, characterization tests, breaking dependencies. Essential for brownfield projects where Draft analyzes existing code before proposing changes.</li>
+        <li><strong>The Pragmatic Programmer</strong> (Hunt, Thomas) &mdash; Tracer bullets, DRY, orthogonality, good enough software</li>
+        <li><strong>Refactoring</strong> (Martin Fowler) &mdash; Code smells, refactoring patterns, incremental improvement</li>
+    </ul>
+
+    <h3>Testing</h3>
+    <ul>
+        <li><strong>Growing Object-Oriented Software, Guided by Tests</strong> (Freeman, Pryce) &mdash; TDD outside-in, mock objects. Informs Draft's TDD workflow and the test-first cycle in <code>/draft:implement</code>.</li>
+        <li><strong>Unit Testing Principles, Practices, and Patterns</strong> (Khorikov) &mdash; Test pyramid, test doubles, maintainable tests</li>
+    </ul>
+
+    <h3>Security</h3>
+    <ul>
+        <li><strong>OWASP Top 10</strong> &mdash; Injection, broken auth, XSS, insecure deserialization, security misconfiguration. Referenced during review and bughunt for security-dimension findings.</li>
+        <li><strong>OWASP ASVS</strong> &mdash; Application Security Verification Standard for security requirements</li>
+        <li><strong>OWASP Cheat Sheets</strong> &mdash; Specific guidance for auth, session management, input validation</li>
+    </ul>
+
+    <h3>Resilience &amp; Chaos</h3>
+    <ul>
+        <li><strong>Netflix chaos engineering</strong> &mdash; Principles of deliberately injecting failures to build confidence in system resilience. Informs Draft's emphasis on failure-mode analysis during planning and review.</li>
+    </ul>
+
+    <h2>How References Are Cited</h2>
+    <p>Draft's agents cite sources naturally during planning and review, not as footnotes but as inline reasoning:</p>
+
+    <blockquote>
+        <p>"Consider CQRS here (DDIA, Ch. 11) &mdash; separates read/write concerns which fits your high-read workload."</p>
+    </blockquote>
+    <blockquote>
+        <p>"This violates the Dependency Rule (Clean Architecture) &mdash; domain shouldn't know about infrastructure."</p>
+    </blockquote>
+    <blockquote>
+        <p>"Circuit breaker pattern (Release It!) would help here &mdash; fail fast instead of cascading timeouts."</p>
+    </blockquote>
+
+    <p>Citations serve two purposes. They make recommendations credible by grounding them in established practice rather than model opinion. And they give developers a trail to follow &mdash; if the recommendation seems wrong, the developer can read the source and decide for themselves.</p>
+
+    <h2>The Future of Context-Driven Development</h2>
+    <p>Draft's current architecture treats context as static documents that are loaded at invocation time. The methodology works because those documents are comprehensive enough to constrain most decisions. But the trajectory points toward richer context systems:</p>
+
+    <ul>
+        <li><strong>Tiered context loading</strong> &mdash; Draft already implements three tiers (<code>.ai-profile.md</code> at 20-50 lines, <code>.ai-context.md</code> at 200-400 lines, <code>architecture.md</code> at full size). Future iterations may add relevance scoring that loads only the sections needed for a specific task.</li>
+        <li><strong>Cross-session memory</strong> &mdash; Draft's <code>.state/run-memory.json</code> already provides continuity data across sessions. The natural extension is richer state that captures what was tried, what failed, and what patterns were learned during development.</li>
+        <li><strong>Team-scale context</strong> &mdash; <code>/draft:index</code> aggregates service-level context into a system view. Future work may extend this to team-level conventions, cross-team dependency negotiation, and organizational standards enforcement.</li>
+    </ul>
+
+    <p>The underlying principle will remain constant: better structure produces better AI output. The documents may evolve. The methodology may expand. But the insight &mdash; that explicit, managed, versioned context is the most reliable way to direct AI behavior &mdash; is the foundation everything else builds on.</p>
+
+    <div class="callout callout-concept">
+        <div class="callout-title">Anti-Patterns in the Knowledge Base</div>
+        <p>The knowledge base does not only catalog good patterns. It also catalogs anti-patterns that agents actively watch for: distributed monoliths, shared databases between services, God classes, leaky abstractions, security by obscurity, hardcoded secrets, and the eight fallacies of distributed computing. These anti-patterns are flagged during review and bughunt when detected in the codebase.</p>
+    </div>
+</div>
+
+            <nav class="chapter-nav">
+                <a href="../multi-ide-support/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Multi-IDE Support</span></a>
+                <a href="../command-reference/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">Command Reference</span></a>
+            </nav>
+        </main>
+
+        <nav class="page-toc" id="page-toc" style="display: none;">
+            <div class="page-toc-title">On this page</div>
+            <div id="page-toc-list" class="page-toc-list"></div>
+        </nav>
+    </div>
+
+    <script src="../js/book.js"></script>
+</body>
+</html>

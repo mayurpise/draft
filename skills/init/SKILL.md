@@ -157,22 +157,26 @@ If `draft/` exists with context files:
 
 To prevent partial initialization from leaving a broken `draft/` directory:
 
-1. **Stage all files** in a temporary directory (`draft.tmp/`) during init
-2. **On success**: `mv draft.tmp/ draft/` (atomic rename on POSIX)
-3. **On failure**: `rm -rf draft.tmp/` — no half-initialized state left behind
+1. **Remove stale staging** if it exists from a previous failed init:
+   ```bash
+   rm -rf draft.tmp/
+   ```
+2. **Create staging directory** with all needed subdirectories:
+   ```bash
+   mkdir -p draft.tmp/tracks draft.tmp/.state
+   ```
+3. **Write all files to `draft.tmp/`** instead of `draft/` throughout Steps 1.5–6. Wherever these steps reference `draft/`, substitute `draft.tmp/` as the write target.
+4. **On success** (all files written and verified):
+   ```bash
+   mv draft.tmp/ draft/
+   ```
+5. **On failure** at any point:
+   ```bash
+   rm -rf draft.tmp/
+   ```
+   Announce the failure and stop — no half-initialized state left behind.
 
-```bash
-# Before writing any files:
-mkdir -p draft.tmp/tracks
-
-# Write all files to draft.tmp/ instead of draft/
-# ... (product.md, tech-stack.md, workflow.md, tracks.md, architecture.md, .ai-context.md)
-
-# After all files are written and verified:
-mv draft.tmp/ draft/
-```
-
-> **Forced re-init:** If `draft/` exists and the user explicitly requests a fresh init (not refresh), confirm with user before removing the existing `draft/` directory.
+> **Forced re-init:** If `draft/` exists and the user explicitly requests a fresh init (not refresh), confirm with user before proceeding. On confirmation, remove the existing directory (`rm -rf draft/`) before the final `mv draft.tmp/ draft/`.
 
 ### Monorepo Detection
 
@@ -347,11 +351,7 @@ If the user runs `/draft:init refresh`:
    - However, verify `.ai-context.md` consistency: if `.ai-context.md` is missing or its `synced_to_commit` differs from `architecture.md`, offer to regenerate it from the current (unchanged) `architecture.md`
 
    **i. Fallback to full refresh:**
-   If `synced_to_commit` is missing from metadata, or the commit SHA doesn't exist in git history:
-   ```bash
-   git cat-file -t <SYNCED_SHA> 2>/dev/null || echo "not found"
-   ```
-   If this returns "not found", run full 5-phase architecture discovery instead.
+   Reached when step (a) detects a missing or invalid `synced_to_commit` SHA. Run full 5-phase architecture discovery instead of incremental analysis.
 
    - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now
 
@@ -1907,13 +1907,13 @@ After completing the 5-phase analysis:
 1. **Gather git metadata FIRST**: Run these commands to collect current state:
    ```bash
    PROJECT_NAME=$(basename "$(pwd)")
-   GIT_BRANCH=$(git branch --show-current)
+   GIT_BRANCH=$(git branch --show-current 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo "none")
    GIT_REMOTE=$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || echo "none")
-   GIT_COMMIT=$(git rev-parse HEAD)
-   GIT_COMMIT_SHORT=$(git rev-parse --short HEAD)
-   GIT_COMMIT_DATE=$(git log -1 --format="%ci")
-   GIT_COMMIT_MSG=$(git log -1 --format="%s")
-   GIT_DIRTY=$([ -n "$(git status --porcelain)" ] && echo "true" || echo "false")
+   GIT_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "none")
+   GIT_COMMIT_SHORT=$(git rev-parse --short HEAD 2>/dev/null || echo "none")
+   GIT_COMMIT_DATE=$(git log -1 --format="%ci" 2>/dev/null || echo "none")
+   GIT_COMMIT_MSG=$(git log -1 --format="%s" 2>/dev/null || echo "none")
+   GIT_DIRTY=$([ -n "$(git status --porcelain 2>/dev/null)" ] && echo "true" || echo "false")
    ISO_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
    ```
 
@@ -2146,6 +2146,13 @@ After generating `architecture.md` and `.ai-context.md`, persist three state fil
 Compute SHA-256 hashes of all source files analyzed during Phases 1-5. This enables **file-level staleness detection** on subsequent refreshes — more granular than `synced_to_commit` which only detects that _some_ commits happened.
 
 ```bash
+# Detect platform hash command (sha256sum on Linux, shasum -a 256 on macOS)
+if command -v sha256sum >/dev/null 2>&1; then
+  HASH_CMD="sha256sum"
+else
+  HASH_CMD="shasum -a 256"
+fi
+
 # Generate SHA-256 hashes for all analyzed source files (exclude draft/, node_modules/, .git/, vendor/)
 find . -type f \
   ! -path "./draft/*" ! -path "./.git/*" ! -path "*/node_modules/*" ! -path "*/vendor/*" \
@@ -2157,7 +2164,7 @@ find . -type f \
      -o -name "*.proto" -o -name "*.graphql" -o -name "*.gql" \
      -o -name "*.yaml" -o -name "*.yml" -o -name "*.toml" -o -name "*.json" \
      -o -name "*.sql" -o -name "*.md" -o -name "Dockerfile" -o -name "Makefile" \) \
-  -exec sha256sum {} \; 2>/dev/null | sort -k2
+  -exec $HASH_CMD {} \; 2>/dev/null | sort -k2
 ```
 
 Write `draft/.state/freshness.json`:
@@ -2326,7 +2333,9 @@ synced_to_commit: "{FULL_SHA}"
 <!-- No archived tracks -->
 ```
 
-## Step 6: Create Directory Structure
+## Step 6: Verify Directory Structure
+
+Ensure the directory structure exists (already created by Atomic File Staging or earlier steps):
 
 ```bash
 mkdir -p draft/tracks draft/.state

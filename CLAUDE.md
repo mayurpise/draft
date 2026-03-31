@@ -4,47 +4,62 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides slash commands for structured software development through specifications and plans before implementation. Commands: `/draft`, `/draft:init`, `/draft:index`, `/draft:new-track`, `/draft:implement`, `/draft:status`, `/draft:revert`, `/draft:decompose`, `/draft:coverage`, `/draft:review`, `/draft:deep-review`, `/draft:bughunt`, `/draft:learn`, `/draft:adr`, `/draft:change`, `/draft:jira-preview`, `/draft:jira-create`. Run `/draft` for overview.
+Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides 17 slash commands (`/draft`, `/draft:init`, `/draft:new-track`, `/draft:implement`, `/draft:status`, `/draft:revert`, `/draft:decompose`, `/draft:coverage`, `/draft:review`, `/draft:deep-review`, `/draft:bughunt`, `/draft:learn`, `/draft:adr`, `/draft:change`, `/draft:index`, `/draft:jira-preview`, `/draft:jira-create`) for structured software development through specifications and plans before implementation. Run `/draft` for overview.
 
-## Build Commands
+The codebase is entirely markdown and bash — no application runtime. Skills (markdown files) are the source of truth, processed by a bash build script into platform-specific integration files for Copilot and Gemini.
+
+## Build & Test Commands
 
 ```bash
-# Rebuild all integrations from skill files (run after changing skills)
-./scripts/build-integrations.sh
+make build              # Generate integration files from skills (runs scripts/build-integrations.sh)
+make test               # Run all 10 test suites
+make lint               # Run shellcheck + markdownlint (requires shellcheck, markdownlint-cli)
+
+# Run a single test
+./tests/test-skill-frontmatter.sh
+./tests/test-build-integrations.sh
+# etc. — any test in tests/ is independently executable
+
+# Prerequisites: Bash 4.0+, shellcheck, markdownlint-cli
 ```
 
-Integration files (`copilot-instructions.md`, `GEMINI.md`) are auto-generated from skills - do not edit directly.
-
-Note: Cursor integration removed - Cursor now supports `.claude/` plugin structure natively.
+Tests use a custom bash framework (`tests/test-helpers.sh`) with `assert()`, `pass()`, `fail()` helpers. No external test runner.
 
 ## Architecture
 
+### Build Pipeline (the critical path)
+
+```
+skills/<name>/SKILL.md  ──┐
+core/methodology.md       ├──→  scripts/build-integrations.sh  ──→  integrations/copilot/.github/copilot-instructions.md
+core/shared/*.md          │                                          (15,000+ lines, auto-generated)
+core/templates/*.md       ├──→  (Gemini now uses bootstrap .gemini.md — no longer generated)
+core/agents/*.md          ──┘
+```
+
+The build script (`scripts/build-integrations.sh`, ~700 lines) does:
+1. Reads each skill in `SKILL_ORDER` array order (17 skills, order matters)
+2. Validates YAML frontmatter (`name:` and `description:` required)
+3. Extracts body via `extract_body()`, skipping frontmatter
+4. Applies syntax transforms (`/draft:command` → `draft command` for Copilot)
+5. Inlines 22 core reference files (methodology, shared procedures, templates, agents)
+6. Runs `verify_output()` — checks line count, completeness sentinel, syntax correctness
+
 ### Source of Truth Hierarchy
 
-1. **`core/methodology.md`** - Master methodology documentation
-2. **`skills/<name>/SKILL.md`** - Skill implementations (derive from methodology)
-3. **`integrations/copilot/.github/copilot-instructions.md`** - Generated from skills via build script
-4. **`integrations/gemini/GEMINI.md`** - Generated from skills via build script
+1. **`core/methodology.md`** — Master methodology (update first)
+2. **`skills/<name>/SKILL.md`** — Skill implementations (derive from methodology)
+3. **`integrations/copilot/.github/copilot-instructions.md`** — GENERATED, never edit directly
 
-### Plugin Structure
+### Key Directories
 
-```
-.claude-plugin/plugin.json  # Plugin manifest
-skills/                     # Slash command implementations
-  ├── <command>/SKILL.md    # Frontmatter (name, description) + execution body
-  └── GRAPH.md              # Skill dependency graph (reference artifact, not a skill)
-core/
-  ├── methodology.md        # Master methodology (update first)
-  ├── shared/               # Shared procedures (context loading, git metadata, pattern learning)
-  ├── templates/            # Templates used by /draft:init
-  └── agents/               # Specialized agent behaviors (architect, debugger, planner, rca, reviewer)
-integrations/copilot/.github/
-  └── copilot-instructions.md  # GENERATED - do not edit directly
-integrations/gemini/
-  └── GEMINI.md             # GENERATED - do not edit directly
-```
+- **`core/shared/`** — Shared procedures loaded by skills (context loading sequence, git metadata, pattern learning)
+- **`core/agents/`** — Behavioral protocols for specialized agents (architect, debugger, planner, rca, reviewer)
+- **`core/templates/`** — 18 templates for files that `/draft:init` generates in user projects
+- **`web/`** — Static website deployed to GitHub Pages (`getdraft.dev`), deployed via `.github/workflows/pages.yml`
+- **`draft/`** — Dogfooding: Draft's own context files, generated by running `/draft:init` on this repo
 
-### Skill File Format
+### Skill File Format (strict)
 
 ```yaml
 ---
@@ -57,7 +72,13 @@ description: Brief description
 Execution instructions below...
 ```
 
-The frontmatter configures the command; the body contains step-by-step instructions. After the closing `---` of frontmatter, the body **must** follow this exact format: (1) a blank line, (2) `# Title` heading, (3) a blank line, (4) content. The build script validates this structure and skips the first 3 lines of the body (via `tail -n +4`) when inlining skills into integration files.
+After the closing `---`, the body **must** be: (1) blank line, (2) `# Title` heading, (3) blank line, (4) content. The build script skips the first 3 body lines (`tail -n +4`) when inlining into integrations. Violating this format produces silent corruption in the generated output.
+
+### Syntax Transformation Rules
+
+The build script transforms skill content for platform compatibility:
+- `/draft:command` → `draft command` (Copilot uses bare syntax, no slash prefix)
+- `@architect`, `@debugger`, etc. → `@workspace` (Copilot agent references)
 
 ## Maintaining the Plugin
 
@@ -65,64 +86,40 @@ The frontmatter configures the command; the body contains step-by-step instructi
 
 1. Update `core/methodology.md` first
 2. Apply changes to relevant `skills/` SKILL.md files
-3. Run `./scripts/build-integrations.sh` to regenerate integrations (Copilot + Gemini)
+3. Run `./scripts/build-integrations.sh` to regenerate integrations
 4. Update this CLAUDE.md only if core concepts change
 
 ### Adding a New Skill
 
-1. Create `skills/<skill-name>/SKILL.md` with frontmatter
-2. Add `skills/<skill-name>/SKILL.md` to the `skills` array in `.claude-plugin/plugin.json`
-3. Rebuild: `./scripts/build-integrations.sh`
-4. Document in README.md
+1. Create `skills/<skill-name>/SKILL.md` with frontmatter (kebab-case name, no path traversal chars)
+2. Add skill name to `SKILL_ORDER` array in `scripts/build-integrations.sh`
+3. Add display name and trigger to the case statements in the build script
+4. Add `skills/<skill-name>/SKILL.md` to the `skills` array in `.claude-plugin/plugin.json`
+5. Run `make build && make test`
+6. Document in README.md
+
+### Plugin Manifest
+
+`.claude-plugin/plugin.json` — registers skills with Claude Code. The `skills` array lists paths alphabetically; `SKILL_ORDER` in the build script controls generation order (these are independent).
 
 ## End-User Context
 
-When users use Draft, it creates a `draft/` directory in their project:
+When users run `/draft:init`, it creates a `draft/` directory in their project with:
+- **`architecture.md`** — Source of truth: 25-section comprehensive engineering reference
+- **`.ai-context.md`** — Token-optimized 200-400 line AI context (derived from architecture.md)
+- **`.ai-profile.md`** — Ultra-compact 20-50 line always-injected profile (derived from .ai-context.md)
+- **`product.md`**, **`tech-stack.md`**, **`workflow.md`**, **`guardrails.md`** — Project config files
+- **`tracks/`** — Individual feature/fix tracks with `spec.md`, `plan.md`, `metadata.json`
+- **`.state/`** — Freshness hashes, signal classification, run memory for incremental refresh
 
-| File | Purpose |
-|------|---------|
-| `product.md` | Product vision, users, goals, guidelines (optional section) |
-| `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
-| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. |
-| `.ai-profile.md` | **Derived from .ai-context.md.** 20-50 lines, ultra-compact always-injected project profile. Contains: language, framework, database, auth, API style, critical invariants, safety rules, active tracks, recent changes. Tier 0 context — loaded by every command. |
-| `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ sections covering architecture, invariants, interfaces, data flows, concurrency, error handling, catalogs, cookbooks, testing, glossary. Tier 1 context — loaded for most tasks. Auto-refreshed on mutations. |
-| `workflow.md` | TDD preferences, commit strategy, validation config |
-| `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns. Entries include dual-layer timestamps (discovered_at, established_at, last_verified, last_active) for temporal reasoning. |
-| `tracks.md` | Master list of all tracks |
-| `tracks/<id>/` | Individual tracks with `spec.md`, `plan.md`, `metadata.json` |
-| `.state/facts.json` | Atomic fact registry with dual-layer timestamps, confidence scoring, and knowledge graph edges (updates/extends/derives). Enables fact-level contradiction detection on refresh and relevance-scored context loading. |
-| `.state/freshness.json` | SHA-256 hashes of all analyzed source files. Enables file-level staleness detection for incremental refresh. |
-| `.state/signals.json` | Codebase signal classification (11 categories). Detects structural drift on refresh (e.g., auth files added for the first time). |
-| `.state/run-memory.json` | Run metadata: phases completed, unresolved questions, resumable checkpoints. Enables cross-session continuity. |
-
-### Key Sections
-
-- **`product.md` `## Guidelines`** - UX standards, writing style, branding (optional)
-- **`tech-stack.md` `## Accepted Patterns`** - Intentional design decisions that bughunt/review/deep-review should honor
-- **`guardrails.md`** - Hard guardrails (human-defined constraints), learned conventions (auto-discovered, skip in analysis), learned anti-patterns (auto-discovered, always flag)
-
-### Status Markers
-
-- `[ ]` Pending/New
-- `[~]` In Progress
-- `[x]` Completed
-- `[!]` Blocked
+Status markers in tracks: `[ ]` Pending, `[~]` In Progress, `[x]` Completed, `[!]` Blocked
 
 ## Quality Disciplines
 
-### Verification Before Completion
-**Iron Law:** No completion claims without fresh verification evidence.
-
-### Systematic Debugging
-**Iron Law:** Investigate → Analyze → Hypothesize → Implement. No fixes without root cause first.
-See `core/agents/debugger.md`.
-
-### Root Cause Analysis (Bug Tracks)
-**Iron Law:** Reproduce → Trace → Hypothesize → Fix. Blast radius scoping before investigation. Detection lag analysis. 5 Whys chain. See `core/agents/rca.md`.
-
-### Three-Stage Review
-At phase boundaries: (1) Automated Validation, (2) Spec Compliance, (3) Code Quality.
-See `core/agents/reviewer.md`.
+- **Verification Before Completion:** No completion claims without fresh verification evidence
+- **Systematic Debugging:** Investigate → Analyze → Hypothesize → Implement (see `core/agents/debugger.md`)
+- **Root Cause Analysis:** Reproduce → Trace → Hypothesize → Fix with blast radius scoping (see `core/agents/rca.md`)
+- **Three-Stage Review:** (1) Automated Validation, (2) Spec Compliance, (3) Code Quality (see `core/agents/reviewer.md`)
 
 ## Communication Style
 

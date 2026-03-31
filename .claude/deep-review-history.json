@@ -1,0 +1,20 @@
+{
+  "reviews": [
+    {
+      "module": "build-integrations",
+      "path": "scripts/build-integrations.sh",
+      "timestamp": "2026-03-27T12:00:00Z",
+      "issues_found": 13,
+      "issues_fixed": 6,
+      "summary": "Fixed concurrent temp file corruption (mktemp+trap), truncation detection (sentinel+min line count), frontmatter validation (head -1), sed digit regex, cached extract_body to eliminate double reads, removed dead epic-status case"
+    },
+    {
+      "module": "init",
+      "path": "skills/init/SKILL.md",
+      "timestamp": "2026-03-30T21:30:00Z",
+      "issues_found": 11,
+      "issues_fixed": 5,
+      "summary": "Fixed atomic staging disconnected from steps (integrated draft.tmp/ with .state/ dir + cleanup + forced re-init), cross-platform sha256sum/shasum detection, git metadata error handling for detached HEAD and zero-commit repos, directory creation sequencing, removed redundant SHA validation in refresh fallback"
+    }
+  ]
+}

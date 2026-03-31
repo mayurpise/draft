@@ -147,10 +147,15 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
     margin: 3rem 0;
+    grid-auto-flow: dense;
 }
 
 .bento-wide {
     grid-column: span 2;
+}
+
+.bento-full {
+    grid-column: 1 / -1;
 }
 
 /* ============================================================
@@ -314,6 +319,9 @@
     .bento-wide {
         grid-column: span 2;
     }
+    .bento-full {
+        grid-column: 1 / -1;
+    }
     .team-flow {
         grid-template-columns: repeat(3, 1fr);
     }
@@ -342,7 +350,8 @@
     .bento-grid {
         grid-template-columns: 1fr;
     }
-    .bento-wide {
+    .bento-wide,
+    .bento-full {
         grid-column: span 1;
     }
     .team-flow {

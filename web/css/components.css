@@ -318,9 +318,10 @@
 }
 
 .problem-card p {
-    font-size: 0.9rem;
-    color: var(--text-muted);
+    font-size: 0.95rem;
+    color: var(--text-secondary);
     margin: 0;
+    line-height: 1.6;
 }
 
 .card-icon {
@@ -435,10 +436,10 @@
 }
 
 .init-phase p {
-    font-size: 0.8rem;
-    color: var(--text-muted);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 /* State persistence card */
@@ -475,8 +476,8 @@
 }
 
 .init-state-item p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
     margin: 0;
 }
 
@@ -585,9 +586,10 @@
 }
 
 .pipeline-step p:last-child {
-    font-size: 0.85rem;
-    color: var(--text-muted);
+    font-size: 0.95rem;
+    color: var(--text-secondary);
     margin: 0;
+    line-height: 1.6;
 }
 
 /* ============================================================
@@ -637,9 +639,10 @@
 }
 
 .bento-card p {
-    font-size: 0.9rem;
-    color: var(--text-muted);
+    font-size: 0.95rem;
+    color: var(--text-secondary);
     flex: 1;
+    line-height: 1.6;
 }
 
 .bento-stats {
@@ -787,8 +790,8 @@
 }
 
 .cmd-desc {
-    font-size: 0.8rem;
-    color: var(--text-muted);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
 }
 
 /* ============================================================
@@ -819,9 +822,10 @@
 }
 
 .team-step p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
+    font-size: 0.95rem;
+    color: var(--text-secondary);
     margin: 0;
+    line-height: 1.6;
 }
 
 /* ============================================================
@@ -946,9 +950,10 @@
 }
 
 .arch-card p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
+    font-size: 0.95rem;
+    color: var(--text-secondary);
     margin: 0;
+    line-height: 1.6;
 }
 
 /* Dual output */
@@ -1139,9 +1144,10 @@
 }
 
 .pricing-card p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
+    font-size: 0.95rem;
+    color: var(--text-secondary);
     margin: 0;
+    line-height: 1.6;
 }
 
 .pricing-note {

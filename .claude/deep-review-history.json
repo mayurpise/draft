@@ -23,6 +23,14 @@
       "issues_found": 8,
       "issues_fixed": 6,
       "summary": "Fixed git metadata error handling for detached HEAD/zero-commit repos, added mkdir -p for track directory in both standard and quick mode, fixed stale spec-draft.md reference in plan-draft.md, added track ID collision fallback chain, added empty --quick description handling, cross-platform JSON validation (python3/node/jq)"
+    },
+    {
+      "module": "implement",
+      "path": "skills/implement/SKILL.md",
+      "timestamp": "2026-03-30T23:00:00Z",
+      "issues_found": 15,
+      "issues_fixed": 8,
+      "summary": "Fixed [~] resume underspecified (added 4-step partial work detection), git commit failure handling (pre-commit hooks, lock files), ACID verification recovery contradiction (revert [x] to [!] before halting), phase boundary detection gap (added Step 4.6), architecture mode activation wording inconsistency (normalized to Step 1.6 reference), non-TDD path quality bar (added verification evidence requirements), condensation subroutine dangling cross-ref (inlined actionable steps), session recovery mechanism (new section), completed track format in tracks.md"
     }
   ]
 }

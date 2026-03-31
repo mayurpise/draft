@@ -4589,11 +4589,18 @@ Scan `plan.md` for the first uncompleted task:
 - "Resolve the blockage manually before continuing implementation"
 - Do NOT attempt to implement blocked tasks
 
-If resuming `[~]` task, check for partial work.
+If resuming `[~]` task, check for partial work:
+1. **Detect existing changes**: Run `git diff --name-only` and `git diff --cached --name-only` to find uncommitted files related to this task
+2. **Check for partial implementation**: Read the task description, then scan the target files for TODO/FIXME markers or incomplete implementations
+3. **Assess state**: Does the partial work compile/pass lint? Run a quick validation (`build` or `lint` if available)
+4. **Decision**:
+   - If partial work is substantial and valid → continue from where it left off
+   - If partial work is broken or minimal → ask user: "Found partial work for this task. Continue from current state or start fresh?"
+   - If no partial work detected (task was just marked `[~]` but nothing changed) → proceed as new task
 
 ## Step 2.5: Write Story (Architecture Mode Only)
 
-**Activation:** Only runs when `.ai-context.md` or `architecture.md` exists (track-level or project-level).
+**Activation:** Only runs when architecture mode is enabled (Step 1.6) — i.e., any of `draft/tracks/<id>/architecture.md`, `draft/.ai-context.md`, or `draft/architecture.md` exists.
 
 When the next task involves creating or substantially modifying a code file:
 
@@ -4635,7 +4642,7 @@ See `core/agents/architect.md` for story writing guidelines.
 
 ### Step 3.0: Design Before Code (Architecture Mode Only)
 
-**Activation:** Only runs when `.ai-context.md` or `architecture.md` exists (track-level or project-level).
+**Activation:** Only runs when architecture mode is enabled (Step 1.6) — i.e., any of `draft/tracks/<id>/architecture.md`, `draft/.ai-context.md`, or `draft/architecture.md` exists.
 **Skip for trivial tasks** - Config updates, type-only changes, single-function tasks where the design is obvious.
 
 #### 3.0a. Execution State Design
@@ -4856,13 +4863,23 @@ When implementing new API endpoints, message handlers, or service-to-service int
 **3a. Implement**
 ```
 1. Implement the task as specified
-2. Test manually or run existing tests
-3. Announce: "Implementation complete"
+2. Run existing test suite if one exists (do NOT skip existing tests even when TDD is off)
+3. If no test suite exists, perform manual verification:
+   - For API changes: test with a sample request/response
+   - For UI changes: describe the visual state before and after
+   - For logic changes: trace through at least one happy path and one error path
+4. Show verification evidence (test output, screenshot, or trace)
+5. Announce: "Implementation complete — verified by [method]"
 ```
+
+**Minimum quality bar (even without TDD):**
+- Existing tests must still pass — never break them
+- New code must compile/lint without errors
+- Edge cases listed in spec.md must be addressed (not just the happy path)
 
 ### Implementation Chunk Limit (Architecture Mode Only)
 
-**Activation:** Only when `.ai-context.md` or `architecture.md` exists (track-level or project-level).
+**Activation:** Only when architecture mode is enabled (Step 1.6).
 
 If the implementation diff for a task exceeds **~200 lines**:
 
@@ -4893,6 +4910,10 @@ After completing each task:
    - `git add <specific files>`
    - Verify staged changes exist before committing: `git diff --cached --quiet`. If nothing staged, skip the commit step.
    - `git commit -m "type(<track_id>): task description"`
+   - **If commit fails:**
+     - Pre-commit hook failure → read hook output, fix the flagged issues, re-stage, and retry commit (do NOT use `--no-verify`)
+     - Lock file error (`index.lock`) → check for concurrent git processes; if none, remove the lock file and retry
+     - Other git error → report the error to user, mark task as `[~]` (in progress, not complete), do NOT proceed
    - Get commit SHA: `git rev-parse --short HEAD`
    - Do NOT proceed to the next task without committing
    - Do NOT batch multiple tasks into one commit
@@ -4909,14 +4930,20 @@ After completing each task:
    - Read back `plan.md` - confirm task marked `[x]` with SHA
    - Read back `metadata.json` - confirm `tasks.completed` incremented
    - If EITHER verification fails:
-     - Mark task as `[!]` Blocked in plan.md
-     - Add recovery message: "State update failed after commit <SHA>. Recovery: manually edit plan.md line X to mark `[x]`, update metadata.json tasks.completed to Y"
+     - **First**, revert the task marker in `plan.md` from `[x]` to `[!]` (do not leave it as `[x]` if metadata is inconsistent)
+     - Add recovery message: "State update failed after commit <SHA>. Recovery: manually mark task `[x]` in plan.md line X, update metadata.json tasks.completed to Y"
+     - Specify which file(s) failed: plan.md, metadata.json, or both
      - HALT - require manual intervention before continuing
 
 5. If `.ai-context.md` or `architecture.md` exists for the track:
    - Update module status markers (`[ ]` → `[~]` when first task in module starts, `[~]` → `[x]` when all tasks complete)
    - Fill in Story placeholders with the approved story from Step 2.5
-   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.message` to current HEAD. Update `draft/architecture.md` with structural changes, then run the Condensation Subroutine (defined in `draft init`) to regenerate `draft/.ai-context.md`.
+   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.message` to current HEAD. Update `draft/architecture.md` with structural changes, then run the Condensation Subroutine to regenerate `draft/.ai-context.md`:
+     1. Read the updated `draft/architecture.md`
+     2. Condense it into the token-optimized `.ai-context.md` format (see `core/templates/ai-context.md` for the target structure)
+     3. Preserve all `## INVARIANTS` and `## CONCURRENCY` sections verbatim (safety-critical, never summarize)
+     4. Update `synced_to_commit` in `.ai-context.md` frontmatter to match current HEAD
+     5. Full procedure details: `skills/init/SKILL.md` → "Condensation Subroutine" section
 
 ## Verification Gate (REQUIRED)
 
@@ -4940,9 +4967,16 @@ Before marking ANY task/phase/track complete:
 
 ---
 
+## Step 4.6: Phase Boundary Detection
+
+After completing Step 4 for each task, check whether the completed task was the **last task in its phase**:
+- Re-read `plan.md` and scan the current phase's task list
+- If ALL tasks in the current phase are now `[x]` → proceed to Step 5 (Phase Boundary Check)
+- If uncompleted tasks remain in the phase → return to Step 2 (Find Next Task)
+
 ## Step 5: Phase Boundary Check
 
-When all tasks in a phase are `[x]`:
+When all tasks in a phase are `[x]` (detected in Step 4.6):
 
 1. Announce: "Phase N complete. Running three-stage review."
 
@@ -4995,8 +5029,12 @@ When all phases complete:
 2. Update `plan.md` status to `[x] Completed`
 3. Update `metadata.json` status to `"completed"`
 4. Update `draft/tracks.md`:
-   - Move from Active to Completed section
-   - Add completion date
+   - Remove the track entry from `## Active` section
+   - Add to `## Completed` section using this format:
+     ```markdown
+     - [x] **<track_id>** — <title> (completed YYYY-MM-DD)
+     ```
+   - If no `## Completed` section exists, create it below `## Active`
 
 5. **Verify completion state consistency (CRITICAL):**
    - Read back `plan.md` - confirm status `[x] Completed`
@@ -5023,6 +5061,15 @@ Report: draft/tracks/<track_id>/review-report-latest.md
 All acceptance criteria from spec.md should be verified.
 
 Next: Run `draft status` to see project overview."
+
+## Session Recovery
+
+If resuming `draft implement` in a new session (context was lost mid-implementation):
+
+1. **Detect state**: Read `plan.md` — find the first `[~]` or `[ ]` task. Check `metadata.json` for `tasks.completed` count.
+2. **Check git state**: Run `git log --oneline -5` and `git status` to verify last committed task matches plan.md's last `[x]` entry.
+3. **Reconcile mismatches**: If plan.md shows `[x]` for a task but no matching commit SHA exists in git log, the state update succeeded but the commit was lost (or vice versa). Fix the mismatch before continuing.
+4. **Resume**: Skip to Step 2 (Find Next Task). The readiness gate (Step 1.5) will be skipped automatically since `[x]` tasks exist.
 
 ## Error Handling
 

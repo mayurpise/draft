@@ -57,7 +57,8 @@
         "Incremental refresh with file-level freshness tracking",
         "Codebase signal detection (11 categories) for adaptive analysis",
         "Cross-session continuity with run memory and resumable checkpoints",
-        "Skill dependency graph with execution chains"
+        "Skill dependency graph with execution chains",
+        "Auto-learning guardrails with pattern promotion and false-positive elimination"
       ],
       "screenshot": "https://getdraft.dev/social-preview.png"
     }
@@ -438,8 +439,8 @@
                         </div>
                     </div>
                     <h3>Pattern Learning</h3>
-                    <p>Scans your codebase for recurring patterns (3+ occurrences). Temporal analysis detects declining patterns. Learns conventions to skip and anti-patterns to always flag. Continuous learning loop — quality commands auto-update guardrails after each run.</p>
-                    <div class="bento-stats"><span>Auto-learning</span><span>Temporal analysis</span></div>
+                    <p>Scans your codebase for recurring patterns (3+ occurrences). Discovers conventions to skip and anti-patterns to always flag. Every quality command updates <code>guardrails.md</code> after each run — your codebase teaches Draft what to enforce, and false positives disappear over time.</p>
+                    <div class="bento-stats"><span>Auto-learning</span><span>Temporal analysis</span><span>guardrails.md</span></div>
                 </div>
 
                 <!-- Card 8: Enterprise Ready (wide) -->
@@ -743,7 +744,7 @@
                 </div>
             </div>
 
-            <!-- Dual output comparison -->
+            <!-- Triple output comparison -->
             <div class="dual-output">
                 <div class="glass-card dual-card">
                     <h4>.ai-context.md</h4>
@@ -756,10 +757,16 @@
                     <p class="dual-meta">Human-readable &middot; 25 sections + appendices</p>
                     <p>Prose paragraphs, annotated Mermaid diagrams, onboarding framing. Source of truth — all mutations happen here. For engineers, leads, and PR reviewers.</p>
                 </div>
+                <div class="dual-divider"></div>
+                <div class="glass-card dual-card">
+                    <h4>guardrails.md</h4>
+                    <p class="dual-meta">Auto-learning &middot; Hard rules + discovered patterns</p>
+                    <p>Human-defined constraints plus auto-discovered conventions and anti-patterns. Quality commands read this file, skip known patterns, and flag violations — then update it after every run. Your codebase teaches Draft what to enforce.</p>
+                </div>
             </div>
 
             <div class="callout">
-                <strong>Pay the analysis cost once, benefit on every interaction.</strong> Reduces token cost, eliminates hallucinations, improves accuracy. The AI writes code that fits your system because it knows your system.
+                <strong>Pay the analysis cost once, benefit on every interaction.</strong> Reduces token cost, eliminates hallucinations, improves accuracy. The AI writes code that fits your system because it <em>knows</em> your system — and guardrails ensure it respects your rules.
             </div>
         </div>
     </section>

@@ -30,6 +30,34 @@ const CHAPTERS = [
     { id: 'file-reference',             file: 'appendix-b-file-reference.html',     title: 'File Reference',                  part: 'Appendix',              readTime: null     },
 ];
 
+// Chapter descriptions for SEO meta tags
+const CHAPTER_DESCRIPTIONS = {
+    'what-is-draft':              'What Draft is, what it is not, who it is for, and what you get — 17 commands and 5 specialized agents for structured AI development.',
+    'the-problem':                'Why AI coding assistants produce wrong code without structure — the gap between speed and correctness, and why better prompting is not the answer.',
+    'context-driven-development': 'The Context-Driven Development methodology — every decision grounded in explicit, versioned, reviewable documents rather than implicit assumptions.',
+    'getting-started':            'Install Draft and run your first commands in five minutes. Set up architecture discovery, create a track, and start implementing.',
+    'context-tiering':            'How Draft organizes project context into three tiers — always-loaded profiles, working memory, and deep storage — like CPU memory hierarchy.',
+    'agent-system':               'Five specialized agents — Architect, Debugger, Planner, RCA, and Reviewer — each with behavioral protocols tuned for their domain.',
+    'signal-classification':      'How Draft classifies source files into 11 signal categories to determine which architecture sections get deep treatment, brief mention, or skip.',
+    'incremental-refresh':        'How Draft detects changes and updates only what has drifted — freshness hashing, signal drift detection, and targeted regeneration.',
+    'specs-and-plans':            'Collaborative spec intake and phased plan generation — requirements to specification to implementation plan, reviewed before code exists.',
+    'implementation':             'Task-by-task implementation with TDD enforcement — RED, GREEN, REFACTOR cycles with architecture checkpoints and production robustness patterns.',
+    'review-pipeline':            'Three-stage code review pipeline — automated validation, spec compliance checking, and code quality analysis with STRIDE threat modeling.',
+    'managing-tracks':            'Track lifecycle management — status markers, parallel tracks, blocked state handling, and git-aware rollback.',
+    'deep-review':                'Production-grade deep review with ACID compliance audits — atomicity, isolation, durability, idempotency, resilience, and observability checks.',
+    'bug-hunt':                   '14-dimension bug hunting sweep — from null safety to concurrency, security to algorithmic complexity. Only HIGH/CONFIRMED confidence reported.',
+    'coverage':                   'Spec-to-implementation coverage analysis — gap identification, untested paths, and target enforcement at 95%+ coverage.',
+    'pattern-learning':           'How Draft detects codebase patterns, records them to guardrails, and applies learned conventions to future work.',
+    'decomposition':              'Breaking large features into independently shippable sub-tasks — tree decomposition with dependency ordering and blast radius scoping.',
+    'adrs':                       'Architecture Decision Records — structured decision capture with context, rationale, consequences, and lifecycle management.',
+    'monorepo-federation':        'Context federation across monorepo services — per-service draft directories with shared root context and service aggregation.',
+    'jira-integration':           'Mapping Draft tracks to Jira issues — preview before creation, epic/story/sub-task mapping, and bidirectional sync.',
+    'multi-ide-support':          'How Draft works across Claude Code, Copilot, Cursor, Gemini, and Antigravity IDE — platform-specific syntax transforms.',
+    'philosophy-references':      'The philosophical foundations of Context-Driven Development — structured development, quality gates, incremental refinement.',
+    'command-reference':          'Complete reference for all 17 Draft commands — usage, options, examples, and output for each slash command.',
+    'file-reference':             'Complete reference for all Draft-generated files — architecture.md, .ai-context.md, .ai-profile.md, specs, plans, and state files.',
+};
+
 // State
 let currentChapter = null;
 let chapterCache = {};
@@ -96,8 +124,9 @@ async function loadChapter(chapter) {
         // Scroll to top of content
         window.scrollTo(0, 0);
 
-        // Update document title
+        // Update document title and meta tags for SEO
         document.title = chapter.title + ' — Draft Book';
+        updateMeta(chapter);
 
     } catch (err) {
         content.innerHTML = `
@@ -109,6 +138,35 @@ async function loadChapter(chapter) {
 
     // Close mobile sidebar
     closeMobileSidebar();
+}
+
+// ============================================================
+// DYNAMIC META TAGS (SEO for SPA chapter navigation)
+// ============================================================
+function updateMeta(chapter) {
+    const desc = CHAPTER_DESCRIPTIONS[chapter.id] || '';
+    const title = chapter.title + ' — Draft Book';
+    const url = 'https://getdraft.dev/book/#' + chapter.id;
+
+    setMeta('name', 'description', desc);
+    setMeta('property', 'og:title', title);
+    setMeta('property', 'og:description', desc);
+    setMeta('property', 'og:url', url);
+    setMeta('name', 'twitter:title', title);
+    setMeta('name', 'twitter:description', desc);
+
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.href = url;
+}
+
+function setMeta(attr, key, value) {
+    let el = document.querySelector(`meta[${attr}="${key}"]`);
+    if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
+    }
+    el.setAttribute('content', value);
 }
 
 // ============================================================

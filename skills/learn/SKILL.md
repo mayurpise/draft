@@ -375,6 +375,8 @@ After `/draft:learn` populates guardrails.md, all quality commands automatically
 | **Learned Anti-Patterns** | Always flag these patterns as bugs |
 | **Unchecked Hard Guardrails** | Ignore (not enforced) |
 
+Maintain a maximum of 50 learned entries per section. If at capacity, replace the oldest medium confidence entry that has not been re-verified in 90+ days.
+
 This creates a **continuous improvement loop**:
 1. Quality command runs → discovers patterns → updates guardrails.md
 2. Next quality command run → reads updated guardrails.md → fewer false positives, catches known-bad patterns

@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initProgress();
     initSearch();
     buildPageTOC();
+    initCopyButtons();
 });
 
 // ============================================================
@@ -192,6 +193,51 @@ function initSearch() {
             const visibleChapters = part.querySelectorAll('.sidebar-chapter:not([style*="display: none"])');
             part.style.display = visibleChapters.length === 0 && query !== '' ? 'none' : '';
         });
+    });
+}
+
+// ============================================================
+// COPY TO CLIPBOARD
+// ============================================================
+function copyText(text) {
+    // Clipboard API requires secure context (HTTPS/localhost)
+    if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+    }
+    // Fallback for HTTP contexts
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) { /* ignore */ }
+    document.body.removeChild(ta);
+    return Promise.resolve();
+}
+
+function initCopyButtons() {
+    const COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+    document.querySelectorAll('.chapter-wrapper pre').forEach(pre => {
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn';
+        btn.title = 'Copy';
+        btn.innerHTML = COPY_ICON;
+        btn.addEventListener('click', () => {
+            const code = pre.querySelector('code');
+            const text = (code || pre).textContent.replace(/^\$ /gm, '');
+            copyText(text).then(() => {
+                btn.innerHTML = CHECK_ICON;
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerHTML = COPY_ICON;
+                    btn.classList.remove('copied');
+                }, 1500);
+            });
+        });
+        pre.appendChild(btn);
     });
 }
 

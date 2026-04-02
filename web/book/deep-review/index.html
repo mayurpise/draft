@@ -329,6 +329,11 @@ $ /draft:deep-review src/payments/
 
     <p>The evaluation covers latency profiles (p50, p95, p99 targets), error budgets, and the gap between stated availability targets and actual architectural capabilities. If no SLOs are defined, the review recommends establishing them &mdash; because a system without SLOs has no definition of "good enough."</p>
 
+    <div class="callout callout-tip">
+        <div class="callout-title">Document Your SLOs Before You Need Them</div>
+        <p>Deep review audits all dimensions for every module &mdash; ACID compliance, observability, resilience, SLOs &mdash; regardless of service type. The review is most valuable when it has concrete targets to check against. SRE and platform engineers should document actual SLO targets (availability, latency percentiles, error budgets), observability requirements (what must be logged, required metrics, alerting thresholds), and security posture expectations in <code>workflow.md</code> or your team's runbook. Without defined targets, the review can only flag the absence of SLOs &mdash; it cannot tell you whether your architecture delivers on the promises your team has made.</p>
+    </div>
+
     <h2>Database-Specific Analysis</h2>
     <p>For modules that interact with databases, deep review performs targeted analysis that generic code review misses:</p>
 

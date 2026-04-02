@@ -466,6 +466,7 @@ If the user runs `draft init refresh`:
 3. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve**: Do NOT modify `draft/tracks.md` unless explicitly requested.
+6. **Pattern Re-Discovery**: Run `draft learn` (no arguments — full codebase scan) to update `draft/guardrails.md` with any new or changed patterns since the last init/refresh. This keeps learned conventions and anti-patterns in sync with codebase evolution.
 
 Stop here after refreshing. Continue to standard steps ONLY for fresh init.
 
@@ -2389,7 +2390,7 @@ Create `draft/guardrails.md` using the template from `core/templates/guardrails.
 
 **Include the Standard File Metadata header at the top of the file.**
 
-Ask which hard guardrails to enable (check items that apply to this project). The Learned Conventions and Learned Anti-Patterns sections start empty — they are populated by `draft learn` and quality commands over time.
+Ask which hard guardrails to enable (check items that apply to this project). The Learned Conventions and Learned Anti-Patterns sections start empty — they are populated automatically by the learn step at the end of init (brownfield only) and by quality commands over time.
 
 ## Step 5: Initialize Tracks
 
@@ -2432,6 +2433,16 @@ Ensure the directory structure exists (already created by Atomic File Staging or
 mkdir -p draft/tracks draft/.state
 ```
 
+## Step 7: Pattern Discovery (Brownfield Only)
+
+For **brownfield** projects, run `draft learn` (no arguments — full codebase scan) to populate `draft/guardrails.md` with initial learned conventions and anti-patterns. This ensures quality commands (`draft bughunt`, `draft review`, `draft deep-review`) have guardrails data from the first run.
+
+**Skip this step for greenfield projects** — there is no existing codebase to scan.
+
+> **Note:** This is the same full scan that `draft learn` performs when run standalone. The guardrails can be further refined later with `draft learn promote` or by quality commands that discover new patterns.
+
+---
+
 ## Completion
 
 **Finalize run memory:** Update `draft/.state/run-memory.json`:
@@ -2449,24 +2460,29 @@ Created:
 - draft/product.md
 - draft/tech-stack.md
 - draft/workflow.md
-- draft/guardrails.md
+- draft/guardrails.md (populated with learned conventions and anti-patterns from codebase scan)
 - draft/tracks.md
 - draft/.state/facts.json (atomic fact registry with temporal metadata and relationship graph)
 - draft/.state/freshness.json (file-level hash baseline for incremental refresh)
 - draft/.state/signals.json (codebase signal classification)
 - draft/.state/run-memory.json (run metadata and unresolved questions)
 
+{Include draft learn summary report here — conventions learned, anti-patterns detected, skipped entries}
+
 {If unresolved_questions is non-empty, show:}
 Unresolved questions from analysis:
 {list each question — these are areas where the AI couldn't determine the answer with confidence}
 
 Next steps:
-1. Review draft/.ai-profile.md — verify the compact profile captures your project accurately
-2. Review draft/.ai-context.md — verify the AI context is complete and accurate
-3. Review draft/architecture.md — human-friendly version for team onboarding
-4. Review and edit the other generated files as needed
-5. Run `draft new-track` to start planning a feature
-6. Run `draft init refresh` after significant codebase changes — refresh is now incremental with fact-level contradiction detection"
+1. Review draft/product.md — verify product vision, users, and goals reflect current reality
+2. Review draft/tech-stack.md — verify languages, frameworks, and accepted patterns are accurate
+3. Review draft/workflow.md — verify TDD, commit, and review settings match your team's process
+4. Review draft/guardrails.md — verify learned conventions and anti-patterns are accurate
+5. Review draft/.ai-context.md — verify the AI context is complete and accurate
+6. Review draft/architecture.md — human-friendly version for team onboarding
+7. Run `draft new-track` to start planning a feature
+8. Run `draft init refresh` after significant codebase changes — refresh is now incremental (only stale files re-analyzed)
+9. Run `draft learn promote` to promote high-confidence patterns to Hard Guardrails"
 
 For **Greenfield** projects, announce:
 "Draft initialized successfully!
@@ -2480,9 +2496,12 @@ Created:
 - draft/.state/run-memory.json (run metadata)
 
 Next steps:
-1. Review and edit the generated files as needed
-2. Run `draft new-track` to start planning a feature
-3. Run `draft init refresh` after adding substantial code to generate architecture context"
+1. Review draft/product.md — verify product vision, users, and goals reflect current reality
+2. Review draft/tech-stack.md — verify languages, frameworks, and accepted patterns are accurate
+3. Review draft/workflow.md — verify TDD, commit, and review settings match your team's process
+4. Review draft/guardrails.md — configure hard guardrails for your project
+5. Run `draft new-track` to start planning a feature
+6. Run `draft init refresh` after adding substantial code — this will generate architecture context and auto-run `draft learn` to populate guardrails"
 
 ---
 
@@ -2625,7 +2644,9 @@ AuthService.Logic -[PostgreSQL]-> UserDB
 ### Reference for Other Skills
 
 Other skills that mutate `draft/architecture.md` should invoke this subroutine with:
-> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine defined in `draft init`."
+> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine defined in `core/shared/condensation.md`."
+
+> This subroutine is also available at `core/shared/condensation.md` for cross-skill reference.
 
 ---
 
@@ -3039,6 +3060,18 @@ billing-service: [auth-service]
 api-gateway: [auth-service, billing-service]
 ```
 
+### Step 6.1b: Cycle Detection
+
+Perform a depth-first walk of the dependency graph to detect circular dependencies:
+1. For each service, follow its `dependencies` array recursively
+2. Track visited nodes in the current path
+3. If a service appears in its own dependency chain, emit a WARNING in `dependency-graph.md`:
+   ```
+   WARNING: Circular dependency detected: A → B → C → A
+   ```
+4. Mark the cycle in `manifest.json` with `"circular": true` on the affected services
+5. Cycles are non-fatal — continue processing, but flag them prominently
+
 ### Step 6.2: Resolve Dependents (Reverse Lookup)
 
 For each service S, iterate all other services' `dependencies` arrays. If S appears in another service's dependencies, add that service to S's `dependents` array. Write the updated `manifest.json` for each service.
@@ -3359,7 +3392,7 @@ graph TD
 
 ### 7.7 Synthesize `draft/.ai-context.md` (if not exists or is placeholder)
 
-After generating `draft/architecture.md`, derive a condensed `draft/.ai-context.md` using the Condensation Subroutine (as defined in `draft init`). This provides a token-optimized, self-contained AI context file at the root level aggregating all service knowledge.
+After generating `draft/architecture.md`, derive a condensed `draft/.ai-context.md` using the Condensation Subroutine (defined in `core/shared/condensation.md`). This provides a token-optimized, self-contained AI context file at the root level aggregating all service knowledge.
 
 - Read the synthesized `draft/architecture.md`
 - Condense into 200-400 lines covering: system overview, service catalog, inter-service dependencies, shared infrastructure, cross-cutting patterns, critical invariants, and entry points
@@ -3986,12 +4019,12 @@ Enter 1–3, or "skip":
 
 When user confirms spec is ready:
 
-1. Update spec-draft.md status to `[x] Complete`
-2. Finalize `spec-draft.md` → `spec.md`:
+1. Finalize `spec-draft.md` → `spec.md`:
    1. Read `spec-draft.md` content.
    2. Write content to `spec.md`.
    3. Verify `spec.md` exists and has non-empty content.
    4. Delete `spec-draft.md`.
+2. Update `spec.md` status to `[x] Complete`
 3. Update Context References with specific connections to product.md, tech-stack.md, .ai-context.md
 4. Add Conversation Log summary with key decisions and reasoning
 
@@ -4384,7 +4417,7 @@ Parallel opportunities: config and database can start after logging.
 Write the architecture document using the template from `core/templates/architecture.md`:
 
 **Location:**
-- Project-wide: Update `draft/architecture.md` with the module changes, then run the Condensation Subroutine (defined in `draft init`) to regenerate `draft/.ai-context.md`
+- Project-wide: Update `draft/architecture.md` with the module changes, then run the Condensation Subroutine (defined in `core/shared/condensation.md`) to regenerate `draft/.ai-context.md`
 - Track-scoped: `draft/tracks/<id>/architecture.md`
 
 **Contents:**
@@ -4470,14 +4503,14 @@ Next steps:
 
 ## Mutation Protocol for architecture.md and .ai-context.md (Project-Wide)
 
-> `draft/architecture.md` is the source of truth. `draft/.ai-context.md` is derived from it via the Condensation Subroutine (defined in `draft init`). Always update `architecture.md` first, then regenerate `.ai-context.md`.
+> `draft/architecture.md` is the source of truth. `draft/.ai-context.md` is derived from it via the Condensation Subroutine (defined in `core/shared/condensation.md`). Always update `architecture.md` first, then regenerate `.ai-context.md`.
 
 When adding new modules to the project-wide architecture:
 
 1. Update `draft/architecture.md`: append module definitions, update dependency diagram and table
 2. Do NOT remove/modify `[x] Existing` modules
 3. Update YAML frontmatter `git.commit` and `git.message` to current HEAD
-4. Run the Condensation Subroutine (defined in `draft init`) to regenerate `draft/.ai-context.md`
+4. Run the Condensation Subroutine (defined in `core/shared/condensation.md`) to regenerate `draft/.ai-context.md`
 
 **Safe write pattern for architecture.md:**
 1. Backup `architecture.md` → `architecture.md.backup`
@@ -4527,12 +4560,13 @@ Draft skills are designed for single-agent, single-track execution. Do not run m
 3. Read the track's `plan.md` for task list
 4. Read `draft/workflow.md` for TDD and commit preferences
 5. Read `draft/tech-stack.md` for technical context
-6. **Check for architecture context:**
+6. Read `draft/guardrails.md` (if exists) for hard guardrails and learned conventions
+7. **Check for architecture context:**
    - Track-level: `draft/tracks/<id>/architecture.md`
    - Project-level: `draft/.ai-context.md` (or legacy `draft/architecture.md`)
    - If either exists → **Enable architecture mode** (Story, Execution State, Skeletons)
    - If neither exists → Standard TDD workflow
-7. **Load production invariants** (if `draft/.ai-context.md` exists):
+8. **Load production invariants** (if `draft/.ai-context.md` exists):
    - Read the `## INVARIANTS` section (and `## CONCURRENCY` if present)
    - Identify which invariants reference files this task will modify (same file or same module)
    - Keep matching invariants as **active constraints** for this task — these govern code generation, not just review
@@ -4544,7 +4578,8 @@ If no active track found:
 **Architecture Mode Activation:**
 - Automatically enabled when `.ai-context.md` or `architecture.md` exists (file-based, no flag needed)
 - Track-level architecture.md created by `draft decompose`
-- Project-level `.ai-context.md` created by `draft init` (brownfield only)
+- Project-level `.ai-context.md` created by `draft init`
+9. **Update track status**: Update the track's entry in `draft/tracks.md` from `[ ]` to `[~] In Progress` (if not already in progress)
 
 ## Step 1.5: Readiness Gate (Fresh Start Only)
 
@@ -4940,7 +4975,7 @@ After completing each task:
 5. If `.ai-context.md` or `architecture.md` exists for the track:
    - Update module status markers (`[ ]` → `[~]` when first task in module starts, `[~]` → `[x]` when all tasks complete)
    - Fill in Story placeholders with the approved story from Step 2.5
-   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.message` to current HEAD. Update `draft/architecture.md` with structural changes, then run the Condensation Subroutine to regenerate `draft/.ai-context.md`:
+   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.commit_message` to current HEAD. Update `draft/architecture.md` with structural changes, then run the Condensation Subroutine to regenerate `draft/.ai-context.md`:
      1. Read the updated `draft/architecture.md`
      2. Condense it into the token-optimized `.ai-context.md` format (see `core/templates/ai-context.md` for the target structure)
      3. Preserve all `## INVARIANTS` and `## CONCURRENCY` sections verbatim (safety-critical, never summarize)
@@ -5401,7 +5436,7 @@ After developer approves:
    - Uncovered: defensive null checks in jwt.ts (justified)
    ```
 
-2. **Update architecture context** — update the project-level `draft/architecture.md` with coverage data (not a track-level architecture file), then run the Condensation Subroutine (defined in `draft init`) to regenerate `draft/.ai-context.md`. The Condensation Subroutine only applies to the project-level `draft/architecture.md` → `draft/.ai-context.md` pipeline:
+2. **Update architecture context** — update the project-level `draft/architecture.md` with coverage data (not a track-level architecture file), then run the Condensation Subroutine (defined in `core/shared/condensation.md`) to regenerate `draft/.ai-context.md`. The Condensation Subroutine only applies to the project-level `draft/architecture.md` → `draft/.ai-context.md` pipeline:
    ```markdown
    - **Status:** [x] Complete (Coverage: 96.2%)
    ```
@@ -6300,7 +6335,10 @@ def test_rejects_malicious_script():
 ```go
 package input
 
-import "testing"
+import (
+    "strings"
+    "testing"
+)
 
 func TestProcessInputRejectsMaliciousScript(t *testing.T) {
     malicious := "<script>alert('xss')</script>"
@@ -6321,10 +6359,9 @@ func TestProcessInputRejectsMaliciousScript(t *testing.T) {
 ```
 
 Severity levels:
-- **CRITICAL** - Data loss, security vulnerability, crashes in production
-- **HIGH** - Incorrect behavior affecting users, significant performance issues
-- **MEDIUM** - Edge case bugs, minor UX issues, code quality concerns
-- **LOW** - Maintainability issues, minor inconsistencies, cleanup opportunities
+- **Critical** - Data loss, security vulnerability, crashes in production, incorrect behavior affecting users
+- **Important** - Significant performance issues, edge case bugs, minor UX issues
+- **Minor** - Code quality concerns, maintainability issues, minor inconsistencies, cleanup opportunities
 
 ## Report Generation
 
@@ -6362,23 +6399,18 @@ Report structure:
 | Severity | Count | Confirmed | High Confidence |
 |----------|-------|-----------|-----------------|
 | Critical | N | X | Y |
-| High | N | X | Y |
-| Medium | N | X | Y |
-| Low | N | X | Y |
+| Important | N | X | Y |
+| Minor | N | X | Y |
 
 ## Critical Issues
 
 [Issues...]
 
-## High Issues
+## Important Issues
 
 [Issues...]
 
-## Medium Issues
-
-[Issues...]
-
-## Low Issues
+## Minor Issues
 
 [Issues...]
 
@@ -6461,7 +6493,7 @@ Bugs that cannot have automated regression tests (config issues, documentation, 
 
 ## Final Instructions
 
-**CRITICAL: All verified bugs appear in the main report body.** The Regression Test Suite section organizes test artifacts, but every bug — regardless of whether a test can be written — MUST be documented in the severity sections (Critical/High/Medium/Low Issues) above. Bugs with `N/A` regression test status are still valid bugs that need reporting.
+**CRITICAL: All verified bugs appear in the main report body.** The Regression Test Suite section organizes test artifacts, but every bug — regardless of whether a test can be written — MUST be documented in the severity sections (Critical/Important/Minor Issues) above. Bugs with `N/A` regression test status are still valid bugs that need reporting.
 
 **CRITICAL: Regression tests are supplementary, not a filter.** If no test framework is detected, or if a bug cannot have a test written (config, docs, LLM workflows), mark it as `N/A` and **still include the bug in the report**. Never skip a verified bug because you cannot write a test for it.
 
@@ -7294,6 +7326,8 @@ ls draft/.ai-context.md 2>/dev/null
 
 If `draft/` does not exist: **STOP** — "No Draft context found. Run `draft init` first. Deep review requires `draft/.ai-context.md` and `draft/tech-stack.md` to evaluate against project standards."
 
+If `.ai-context.md` is missing, check for `draft/architecture.md` as a fallback (per `core/shared/draft-context-loading.md`).
+
 ---
 
 ## Module Selection
@@ -7450,6 +7484,8 @@ Format findings as actionable tasks:
 ---
 
 ## Pattern Learning
+
+Skip pattern learning if the analysis found zero findings.
 
 After generating the report, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with patterns discovered during this module audit. Module-level reviews often reveal architecture and concurrency conventions that are valuable for future analysis.
 
@@ -7828,6 +7864,8 @@ After `draft learn` populates guardrails.md, all quality commands automatically:
 | **Learned Conventions** | Skip these patterns during analysis (not bugs) |
 | **Learned Anti-Patterns** | Always flag these patterns as bugs |
 | **Unchecked Hard Guardrails** | Ignore (not enforced) |
+
+Maintain a maximum of 50 learned entries per section. If at capacity, replace the oldest medium confidence entry that has not been re-verified in 90+ days.
 
 This creates a **continuous improvement loop**:
 1. Quality command runs → discovers patterns → updates guardrails.md
@@ -8378,7 +8416,7 @@ On conflict, report: "Successfully reverted: [list]. Conflict on: [sha]. Run `gi
 
 3. Update `draft/tracks.md` if track status changed
 
-4. **Stale reports:** After revert, existing `review-report-latest.md` and `bughunt-report-latest.md` for the track are stale. Add a warning header to the symlink targets (the actual timestamped files): `> **WARNING: This report predates a revert operation and may be stale. Re-run the review/bughunt.**` Or delete them if the revert is substantial.
+4. **Stale reports:** After revert, existing `review-report-latest.md` and `bughunt-report-latest.md` for the track are stale. Resolve symlinks first via `readlink -f review-report-latest.md` and `readlink -f bughunt-report-latest.md`, then add a warning header to the resolved files (the actual timestamped files): `> **WARNING: This report predates a revert operation and may be stale. Re-run the review/bughunt.**` Or delete them if the revert is substantial.
 
 ## Step 6: Confirm
 
@@ -8581,8 +8619,10 @@ Apply these changes to spec.md and plan.md? [yes / no / edit]
 
 2. Update `draft/tracks/<id>/metadata.json`:
    - Set `updated` to current ISO timestamp
+   - Recalculate `tasks.total` by counting all checkbox lines (`- [ ]`, `- [x]`, `- [~]`) in the updated `plan.md`
+   - Recalculate `tasks.completed` by counting `[x]` lines in the updated `plan.md`
 
-3. Append a Change Log entry (with current git SHA and timestamp) to `plan.md`. If a `## Change Log` section does not exist, add it at the bottom:
+3. Append a Change Log entry (with current git SHA (obtain via `git rev-parse --short HEAD`) and timestamp) to `plan.md`. If a `## Change Log` section does not exist, add it at the bottom:
 
 ```markdown
 ## Change Log
@@ -9670,13 +9710,13 @@ Each layer narrows the solution space. By the time AI writes code, most decision
 Draft uses a three-tier context system inspired by memory architecture:
 
 ```
-Tier 0: .ai-profile.md     (20-50 lines)   — Always loaded. RAM-equivalent.
-Tier 1: .ai-context.md     (200-400 lines) — Loaded for most tasks. Working memory.
-Tier 2: architecture.md    (full document)  — Loaded for deep analysis. Long-term storage.
+Layer 0: .ai-profile.md     (20-50 lines)   — Always loaded. RAM-equivalent.
+Layer 1: .ai-context.md     (200-400 lines) — Loaded for most tasks. Working memory.
+Layer 2: architecture.md    (full document)  — Loaded for deep analysis. Long-term storage.
         .state/facts.json  (atomic facts)   — Queried by relevance. Fact-level precision.
 ```
 
-Simple tasks only need Tier 0. Implementation tasks load Tier 0 + relevant sections of Tier 1. Deep reviews and architecture refreshes access all tiers. This relevance-scored loading ensures the right context for each task without wasting tokens.
+Simple tasks only need Layer 0. Implementation tasks load Layer 0 + relevant sections of Layer 1. Deep reviews and architecture refreshes access all layers. This relevance-scored loading ensures the right context for each task without wasting tokens.
 
 ### Draft Command Workflow
 
@@ -11182,7 +11222,7 @@ git rev-parse HEAD                           # FULL_SHA
 git rev-parse --short HEAD                   # SHORT_SHA
 git log -1 --format=%ci HEAD                 # COMMIT_DATE
 git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
-git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
+[ -n "$(git status --porcelain)" ] && echo "true" || echo "false"  # dirty check
 ```
 
 ## YAML Frontmatter Template
@@ -11407,6 +11447,149 @@ After updating guardrails.md, append a brief learning summary to the end of the 
 - **Cap at 50 learned entries** per section — if at capacity, evict the oldest `medium` confidence entry that hasn't been re-verified in 90+ days to make room for new entries
 - **Human-curated always wins** — Hard Guardrails and `tech-stack.md ## Accepted Patterns` take precedence over learned patterns if there's a conflict
 - **Preserve file metadata** — update `synced_to_commit` in the YAML frontmatter when modifying guardrails.md
+
+</core-file>
+
+---
+
+## core/shared/condensation.md
+
+<core-file path="core/shared/condensation.md">
+
+# Condensation Subroutine
+
+This is a self-contained, callable procedure for generating `draft/.ai-context.md` and `draft/.ai-profile.md` from `draft/architecture.md`. Any skill that mutates `architecture.md` should execute this subroutine afterward to keep the derived context files in sync.
+
+**Called by:** `draft init`, `draft init refresh`, `draft implement`, `draft decompose`, `draft coverage`, `draft index`, `draft adr`
+
+### Inputs
+
+| Input | Path | Description |
+|-------|------|-------------|
+| architecture.md | `draft/architecture.md` | Comprehensive human-readable engineering reference (source of truth) |
+
+### Outputs
+
+| Output | Path | Description |
+|--------|------|-------------|
+| .ai-context.md | `draft/.ai-context.md` | Token-optimized, machine-readable AI context (200-400 lines) |
+| .ai-profile.md | `draft/.ai-profile.md` | Ultra-compact, always-injected project profile (20-50 lines) |
+
+**Note:** `.ai-profile.md` generation is a separate step defined in `draft init`. The Condensation Subroutine generates `.ai-context.md` only. Skills that call this subroutine should also trigger profile regeneration if `.ai-profile.md` exists.
+
+### Target Size
+
+- **Minimum**: 200 lines
+- **Maximum**: 400 lines
+- Under 200 lines indicates incomplete condensation — go back and ensure all sections are represented
+- Over 400 lines indicates insufficient compression — apply prioritization rules below
+
+### Procedure
+
+#### Step 1: Read Source
+
+Read the full contents of `draft/architecture.md`. Extract the YAML frontmatter metadata block — it will be reused (with updated `generated_by` and `generated_at`) for the output file.
+
+#### Step 2: Write YAML Frontmatter
+
+Start `draft/.ai-context.md` with an updated YAML frontmatter block. Copy all `git.*` and `synced_to_commit` fields from `architecture.md`. Set:
+- `generated_by`: the calling command (e.g., `draft:init`, `draft:implement`)
+- `generated_at`: current ISO 8601 timestamp
+
+#### Step 3: Transform Sections
+
+Transform each `architecture.md` section into machine-optimized format using this mapping:
+
+| architecture.md Section | .ai-context.md Section | Transformation |
+|------------------------|------------------------|----------------|
+| Executive Summary | META | Extract key-value pairs only (type, lang, pattern, build, test, entry, config) |
+| Architecture Overview (Mermaid) | GRAPH:COMPONENTS | Convert Mermaid diagrams to tree notation using `├─` / `└─` |
+| Component Map | GRAPH:COMPONENTS | Merge into the same tree |
+| Data Flow (Mermaid) | GRAPH:DATAFLOW | Convert to `FLOW:{Name}` with arrow notation: `source --{type}--> sink` |
+| External Dependencies | GRAPH:DEPENDENCIES | Convert to `A -[protocol]-> B` format |
+| Dependency Injection | WIRING | Extract mechanism + tokens/getters lists |
+| Critical Invariants | INVARIANTS | One line per invariant: `[CATEGORY] name: rule @file:line` |
+| Framework/Extension Points | INTERFACES + EXTEND | Condensed signatures + cookbook steps |
+| Full Catalog | CATALOG:{Category} | Pipe-separated rows: `id|type|file|purpose` |
+| Concurrency Model | THREADS + CONCURRENCY | Pipe-separated rows + rules with violation consequences |
+| Configuration | CONFIG | Pipe-separated rows: `param|default|critical:Y/N|purpose` |
+| Error Handling | ERRORS | Key-value pairs: `scenario: recovery` |
+| Build/Test | TEST + META | Extract exact commands |
+| File Structure | FILES | Concept-to-path mappings: `entry: path`, `config: path`, etc. |
+| Glossary | VOCAB | `term: definition` pairs |
+
+#### Step 4: Apply Compression
+
+- Remove all prose paragraphs — use structured key-value pairs instead
+- Remove Mermaid syntax — use text-based graph notation (`├─`, `-->`, `-[proto]->`)
+- Remove markdown formatting (no `**bold**`, no `_italic_`, no headers beyond `##`)
+- Abbreviate common words: `fn`=function, `ret`=returns, `cfg`=config, `impl`=implementation, `req`=required, `opt`=optional, `dep`=dependency, `auth`=authentication, `authz`=authorization
+- Use symbols: `@`=at/in file, `->`=calls/leads-to, `|`=column separator, `?`=optional, `!`=required/critical
+
+#### Step 5: Prioritize Content
+
+If the output exceeds 400 lines, cut sections in this order (bottom = cut first):
+
+| Priority | Section | Rule |
+|----------|---------|------|
+| 1 (never cut) | INVARIANTS | Safety critical — preserve every invariant |
+| 2 (never cut) | EXTEND | Agent productivity critical — preserve all cookbook steps |
+| 3 | GRAPH:* | Keep all component, dependency, and dataflow graphs |
+| 4 | INTERFACES | Keep all signatures |
+| 5 | CATALOG | Can abbreviate to top 20 entries per category |
+| 6 | CONFIG | Can abbreviate to `critical:Y` entries only |
+| 7 (cut first) | VOCAB | Can abbreviate to 10 most important terms |
+
+#### Step 6: Quality Check
+
+Before writing `draft/.ai-context.md`, verify:
+
+- [ ] No prose paragraphs remain (all content is structured data)
+- [ ] No Mermaid syntax (all diagrams converted to text graphs)
+- [ ] No references to `architecture.md` (file must be self-contained)
+- [ ] All invariants from architecture.md are preserved
+- [ ] Extension cookbooks are complete (an agent can follow them without other files)
+- [ ] Output is within 200-400 lines
+- [ ] YAML frontmatter metadata is present at the top
+
+#### Step 7: Write Output
+
+Write the completed content to `draft/.ai-context.md`.
+
+### Example Transformation
+
+**architecture.md input:**
+```markdown
+### 4.1 High-Level Topology
+
+The AuthService is a microservice that handles user authentication...
+
+```mermaid
+flowchart TD
+    subgraph AuthService
+        API[API Layer] --> Logic[Auth Logic]
+        Logic --> Store[Token Store]
+    end
+    Logic --> UserDB[(User Database)]
+```
+```
+
+**.ai-context.md output:**
+```
+## GRAPH:COMPONENTS
+AuthService
+  ├─API: handles HTTP requests
+  ├─Logic: validates credentials, generates tokens
+  └─Store: caches active tokens
+
+## GRAPH:DEPENDENCIES
+AuthService.Logic -[PostgreSQL]-> UserDB
+```
+
+### Reference for Other Skills
+
+Other skills that mutate `draft/architecture.md` should invoke this subroutine with:
+> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine defined in `core/shared/condensation.md`."
 
 </core-file>
 
@@ -14690,7 +14873,7 @@ function validateEntries(
 
 1. **Before coding a file** - Write Story, present for approval
 2. **Before TDD cycle** - Design execution state, generate skeletons, present each for approval
-3. **After task completion** - Update module status in `.ai-context.md` (or `architecture.md`) if it exists. For project-level `.ai-context.md` updates, also trigger the Condensation Subroutine (see `draft init`) to regenerate `.ai-context.md` from `architecture.md`.
+3. **After task completion** - Update module status in `.ai-context.md` (or `architecture.md`) if it exists. For project-level `.ai-context.md` updates, also trigger the Condensation Subroutine (defined in `core/shared/condensation.md`) to regenerate `.ai-context.md` from `architecture.md`.
 4. **Validation report** - When track validation is enabled, results are persisted to `draft/tracks/<id>/validation-report.md`.
 
 ### Escalation

@@ -93,13 +93,13 @@ Each layer narrows the solution space. By the time AI writes code, most decision
 Draft uses a three-tier context system inspired by memory architecture:
 
 ```
-Tier 0: .ai-profile.md     (20-50 lines)   — Always loaded. RAM-equivalent.
-Tier 1: .ai-context.md     (200-400 lines) — Loaded for most tasks. Working memory.
-Tier 2: architecture.md    (full document)  — Loaded for deep analysis. Long-term storage.
+Layer 0: .ai-profile.md     (20-50 lines)   — Always loaded. RAM-equivalent.
+Layer 1: .ai-context.md     (200-400 lines) — Loaded for most tasks. Working memory.
+Layer 2: architecture.md    (full document)  — Loaded for deep analysis. Long-term storage.
         .state/facts.json  (atomic facts)   — Queried by relevance. Fact-level precision.
 ```
 
-Simple tasks only need Tier 0. Implementation tasks load Tier 0 + relevant sections of Tier 1. Deep reviews and architecture refreshes access all tiers. This relevance-scored loading ensures the right context for each task without wasting tokens.
+Simple tasks only need Layer 0. Implementation tasks load Layer 0 + relevant sections of Layer 1. Deep reviews and architecture refreshes access all layers. This relevance-scored loading ensures the right context for each task without wasting tokens.
 
 ### Draft Command Workflow
 

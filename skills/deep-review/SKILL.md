@@ -29,6 +29,8 @@ ls draft/.ai-context.md 2>/dev/null
 
 If `draft/` does not exist: **STOP** — "No Draft context found. Run `/draft:init` first. Deep review requires `draft/.ai-context.md` and `draft/tech-stack.md` to evaluate against project standards."
 
+If `.ai-context.md` is missing, check for `draft/architecture.md` as a fallback (per `core/shared/draft-context-loading.md`).
+
 ---
 
 ## Module Selection
@@ -185,5 +187,7 @@ Format findings as actionable tasks:
 ---
 
 ## Pattern Learning
+
+Skip pattern learning if the analysis found zero findings.
 
 After generating the report, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with patterns discovered during this module audit. Module-level reviews often reveal architecture and concurrency conventions that are valuable for future analysis.

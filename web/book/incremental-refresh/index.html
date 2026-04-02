@@ -357,6 +357,19 @@
 
     <p>The heuristic is straightforward: if the change affects the fundamental architecture (new paradigm, new database, new auth system), run a full init. If the change extends or modifies existing architecture, refresh is sufficient.</p>
 
+    <div class="callout callout-tip">
+        <div class="callout-title">When to Refresh</div>
+        <p>"After significant codebase changes" is vague. Here are concrete triggers your team should adopt:</p>
+        <ul>
+            <li><strong>After merging large PRs</strong> (10+ files changed) &mdash; new modules, refactored services, or dependency updates shift the architecture context.</li>
+            <li><strong>At the start of each sprint or iteration</strong> &mdash; ensures all engineers begin with current context, especially after parallel work merges.</li>
+            <li><strong>After major refactors or architecture changes</strong> &mdash; renamed modules, extracted services, or restructured directories invalidate existing context.</li>
+            <li><strong>When onboarding new team members</strong> &mdash; guarantees the context they read is accurate, not a snapshot from three months ago.</li>
+            <li><strong>Before starting a new track</strong> &mdash; stale context means the spec intake aligns to an outdated architecture. A 10-second refresh prevents a 30-minute rework.</li>
+        </ul>
+        <p>Context that goes stale is worse than no context &mdash; it silently misguides every AI-assisted decision. Make refresh a habit, not an afterthought.</p>
+    </div>
+
     <div class="callout callout-example">
         <div class="callout-title">Practical Impact</div>
         <p>A 100,000-line codebase with 400 source files. Full <code>/draft:init</code> reads all 400 files, runs 5-phase analysis, generates a complete <code>architecture.md</code> and <code>.ai-context.md</code>. Time: roughly 2 minutes.</p>

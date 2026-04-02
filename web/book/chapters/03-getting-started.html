@@ -140,9 +140,22 @@ $ curl -o .github/copilot-instructions.md \
     <ul>
         <li><strong>product.md</strong> &mdash; Product vision, target users, goals, success criteria, and guidelines. Created through dialogue &mdash; Draft asks probing questions about what you're building and for whom.</li>
         <li><strong>tech-stack.md</strong> &mdash; Languages, frameworks, patterns, and accepted design decisions. Auto-detected for brownfield projects, cross-referenced with the architecture analysis.</li>
-        <li><strong>workflow.md</strong> &mdash; TDD preference (strict/flexible/none), commit style, review process.</li>
-        <li><strong>guardrails.md</strong> &mdash; Hard guardrails (human-defined constraints), learned conventions (auto-discovered patterns to skip in analysis), and learned anti-patterns (auto-discovered patterns to always flag).</li>
+        <li><strong>workflow.md</strong> &mdash; Team engineering workflow: TDD preference (strict/flexible/none), commit strategy and frequency, code review checklists, phase verification procedures, and session management rules. Every Draft agent reads this file to determine how work should be done &mdash; when to run tests, how to structure commits, what review gates to enforce.</li>
+        <li><strong>guardrails.md</strong> &mdash; Hard guardrails (human-defined constraints), learned conventions (auto-discovered patterns to skip in analysis), and learned anti-patterns (auto-discovered patterns to always flag). For brownfield projects, <code>/draft:learn</code> runs automatically during init to populate conventions and anti-patterns from your existing codebase. These are refined over time by quality commands like <code>/draft:review</code> and <code>/draft:bughunt</code>.</li>
     </ul>
+
+    <div class="callout callout-warning">
+        <div class="callout-title">These Four Files Govern Your Entire AI Workflow</div>
+        <p>Every Draft agent reads <code>product.md</code>, <code>tech-stack.md</code>, <code>workflow.md</code>, and <code>guardrails.md</code> on every command, across the entire SDLC, for every engineer who uses the repository. These are not configuration details to skim past &mdash; they are <strong>team-level engineering policy</strong> that shapes every spec, plan, implementation, and review.</p>
+        <p>After <code>/draft:init</code> completes, have your subject matter experts thoroughly review and refine all four:</p>
+        <ul>
+            <li><strong>product.md</strong> &mdash; Product managers should verify vision, user personas, and goals. Revisit after OKR cycles, product pivots, or when user segments change.</li>
+            <li><strong>tech-stack.md</strong> &mdash; Tech leads should verify languages, frameworks, and accepted patterns. Revisit after major dependency upgrades, new framework adoption, or ADR acceptance.</li>
+            <li><strong>workflow.md</strong> &mdash; Engineering leads should verify TDD settings, commit strategy, review checklists, and coverage targets. Revisit when your team's development process evolves.</li>
+            <li><strong>guardrails.md</strong> &mdash; Senior engineers should verify hard guardrails and review auto-discovered conventions and anti-patterns. Revisit after <code>/draft:learn promote</code> or when team standards change.</li>
+        </ul>
+        <p>Stale context files are worse than no context &mdash; they silently misalign every engineer's AI-assisted work. Treat these as living documents, not one-time setup.</p>
+    </div>
 
     <h3>State Files</h3>
     <p>Draft creates a <code>draft/.state/</code> directory with four files that enable incremental refresh:</p>

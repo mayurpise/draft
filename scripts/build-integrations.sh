@@ -185,6 +185,7 @@ CORE_FILES=(
     "shared/draft-context-loading.md"
     "shared/git-report-metadata.md"
     "shared/pattern-learning.md"
+    "shared/condensation.md"
     # Templates
     "templates/guardrails.md"
     "templates/intake-questions.md"

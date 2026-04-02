@@ -326,7 +326,7 @@ function validateEntries(
 
 1. **Before coding a file** - Write Story, present for approval
 2. **Before TDD cycle** - Design execution state, generate skeletons, present each for approval
-3. **After task completion** - Update module status in `.ai-context.md` (or `architecture.md`) if it exists. For project-level `.ai-context.md` updates, also trigger the Condensation Subroutine (see `/draft:init`) to regenerate `.ai-context.md` from `architecture.md`.
+3. **After task completion** - Update module status in `.ai-context.md` (or `architecture.md`) if it exists. For project-level `.ai-context.md` updates, also trigger the Condensation Subroutine (defined in `core/shared/condensation.md`) to regenerate `.ai-context.md` from `architecture.md`.
 4. **Validation report** - When track validation is enabled, results are persisted to `draft/tracks/<id>/validation-report.md`.
 
 ### Escalation

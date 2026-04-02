@@ -15,7 +15,7 @@ git rev-parse HEAD                           # FULL_SHA
 git rev-parse --short HEAD                   # SHORT_SHA
 git log -1 --format=%ci HEAD                 # COMMIT_DATE
 git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
-git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
+[ -n "$(git status --porcelain)" ] && echo "true" || echo "false"  # dirty check
 ```
 
 ## YAML Frontmatter Template

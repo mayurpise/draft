@@ -524,12 +524,12 @@ Enter 1–3, or "skip":
 
 When user confirms spec is ready:
 
-1. Update spec-draft.md status to `[x] Complete`
-2. Finalize `spec-draft.md` → `spec.md`:
+1. Finalize `spec-draft.md` → `spec.md`:
    1. Read `spec-draft.md` content.
    2. Write content to `spec.md`.
    3. Verify `spec.md` exists and has non-empty content.
    4. Delete `spec-draft.md`.
+2. Update `spec.md` status to `[x] Complete`
 3. Update Context References with specific connections to product.md, tech-stack.md, .ai-context.md
 4. Add Conversation Log summary with key decisions and reasoning
 

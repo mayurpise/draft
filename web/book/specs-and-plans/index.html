@@ -426,12 +426,13 @@ login via Google and GitHub would reduce onboarding friction.
     <p>The Planner identifies dependencies between tasks and flags parallel execution opportunities. It writes acceptance criteria that are specific (one testable condition per criterion), observable (verifiable without reading implementation), and independent (no "after criterion 3 passes" dependencies). It rejects vague criteria like "system works correctly" or "code is clean" and demands measurable targets: "Response time under 200ms at p95," not "performance is good."</p>
 
     <h2>Constraints from Project Context</h2>
-    <p>The specification and plan are not created in a vacuum. During intake, the AI continuously references three project files that act as constraints:</p>
+    <p>The specification and plan are not created in a vacuum. During intake, the AI continuously references four project files that act as constraints:</p>
 
     <ul>
         <li><strong>product.md</strong> &mdash; Product vision, user personas, goals, and guidelines. The AI aligns acceptance criteria with documented product goals and flags when proposed work contradicts the product direction.</li>
         <li><strong>tech-stack.md</strong> &mdash; Languages, frameworks, accepted patterns, and code style. The AI suggests implementation approaches consistent with the stack and warns when a proposal would introduce an unapproved dependency.</li>
-        <li><strong>guardrails.md</strong> &mdash; Hard constraints, learned conventions, and known anti-patterns accumulated from previous tracks. The AI checks proposed work against these guardrails and flags violations before they enter the plan.</li>
+        <li><strong>workflow.md</strong> &mdash; Team engineering workflow: TDD preference, commit strategy and frequency, code review checklists, phase verification procedures, and session management rules. Every Draft agent reads this file to determine <em>how</em> work should be done &mdash; when to run tests, how to structure commits, what review gates to enforce. This is not per-engineer preference; it is team-level engineering process stored in the repository.</li>
+        <li><strong>guardrails.md</strong> &mdash; Hard constraints, learned conventions, and known anti-patterns accumulated from previous tracks. The AI checks proposed work against these guardrails and flags violations before they enter the plan. Learned patterns are auto-discovered by <code>/draft:learn</code> during initialization and refined by quality commands over time.</li>
     </ul>
 
     <div class="callout callout-warning">

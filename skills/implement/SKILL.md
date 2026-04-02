@@ -32,12 +32,13 @@ Draft skills are designed for single-agent, single-track execution. Do not run m
 3. Read the track's `plan.md` for task list
 4. Read `draft/workflow.md` for TDD and commit preferences
 5. Read `draft/tech-stack.md` for technical context
-6. **Check for architecture context:**
+6. Read `draft/guardrails.md` (if exists) for hard guardrails and learned conventions
+7. **Check for architecture context:**
    - Track-level: `draft/tracks/<id>/architecture.md`
    - Project-level: `draft/.ai-context.md` (or legacy `draft/architecture.md`)
    - If either exists → **Enable architecture mode** (Story, Execution State, Skeletons)
    - If neither exists → Standard TDD workflow
-7. **Load production invariants** (if `draft/.ai-context.md` exists):
+8. **Load production invariants** (if `draft/.ai-context.md` exists):
    - Read the `## INVARIANTS` section (and `## CONCURRENCY` if present)
    - Identify which invariants reference files this task will modify (same file or same module)
    - Keep matching invariants as **active constraints** for this task — these govern code generation, not just review
@@ -49,7 +50,8 @@ If no active track found:
 **Architecture Mode Activation:**
 - Automatically enabled when `.ai-context.md` or `architecture.md` exists (file-based, no flag needed)
 - Track-level architecture.md created by `/draft:decompose`
-- Project-level `.ai-context.md` created by `/draft:init` (brownfield only)
+- Project-level `.ai-context.md` created by `/draft:init`
+9. **Update track status**: Update the track's entry in `draft/tracks.md` from `[ ]` to `[~] In Progress` (if not already in progress)
 
 ## Step 1.5: Readiness Gate (Fresh Start Only)
 
@@ -445,7 +447,7 @@ After completing each task:
 5. If `.ai-context.md` or `architecture.md` exists for the track:
    - Update module status markers (`[ ]` → `[~]` when first task in module starts, `[~]` → `[x]` when all tasks complete)
    - Fill in Story placeholders with the approved story from Step 2.5
-   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.message` to current HEAD. Update `draft/architecture.md` with structural changes, then run the Condensation Subroutine to regenerate `draft/.ai-context.md`:
+   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.commit_message` to current HEAD. Update `draft/architecture.md` with structural changes, then run the Condensation Subroutine to regenerate `draft/.ai-context.md`:
      1. Read the updated `draft/architecture.md`
      2. Condense it into the token-optimized `.ai-context.md` format (see `core/templates/ai-context.md` for the target structure)
      3. Preserve all `## INVARIANTS` and `## CONCURRENCY` sections verbatim (safety-critical, never summarize)

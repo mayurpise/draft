@@ -225,7 +225,7 @@ Parallel opportunities: config and database can start after logging.
 Write the architecture document using the template from `core/templates/architecture.md`:
 
 **Location:**
-- Project-wide: Update `draft/architecture.md` with the module changes, then run the Condensation Subroutine (defined in `/draft:init`) to regenerate `draft/.ai-context.md`
+- Project-wide: Update `draft/architecture.md` with the module changes, then run the Condensation Subroutine (defined in `core/shared/condensation.md`) to regenerate `draft/.ai-context.md`
 - Track-scoped: `draft/tracks/<id>/architecture.md`
 
 **Contents:**
@@ -311,14 +311,14 @@ Next steps:
 
 ## Mutation Protocol for architecture.md and .ai-context.md (Project-Wide)
 
-> `draft/architecture.md` is the source of truth. `draft/.ai-context.md` is derived from it via the Condensation Subroutine (defined in `/draft:init`). Always update `architecture.md` first, then regenerate `.ai-context.md`.
+> `draft/architecture.md` is the source of truth. `draft/.ai-context.md` is derived from it via the Condensation Subroutine (defined in `core/shared/condensation.md`). Always update `architecture.md` first, then regenerate `.ai-context.md`.
 
 When adding new modules to the project-wide architecture:
 
 1. Update `draft/architecture.md`: append module definitions, update dependency diagram and table
 2. Do NOT remove/modify `[x] Existing` modules
 3. Update YAML frontmatter `git.commit` and `git.message` to current HEAD
-4. Run the Condensation Subroutine (defined in `/draft:init`) to regenerate `draft/.ai-context.md`
+4. Run the Condensation Subroutine (defined in `core/shared/condensation.md`) to regenerate `draft/.ai-context.md`
 
 **Safe write pattern for architecture.md:**
 1. Backup `architecture.md` → `architecture.md.backup`

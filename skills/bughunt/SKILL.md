@@ -846,7 +846,10 @@ def test_rejects_malicious_script():
 ```go
 package input
 
-import "testing"
+import (
+    "strings"
+    "testing"
+)
 
 func TestProcessInputRejectsMaliciousScript(t *testing.T) {
     malicious := "<script>alert('xss')</script>"
@@ -867,10 +870,9 @@ func TestProcessInputRejectsMaliciousScript(t *testing.T) {
 ```
 
 Severity levels:
-- **CRITICAL** - Data loss, security vulnerability, crashes in production
-- **HIGH** - Incorrect behavior affecting users, significant performance issues
-- **MEDIUM** - Edge case bugs, minor UX issues, code quality concerns
-- **LOW** - Maintainability issues, minor inconsistencies, cleanup opportunities
+- **Critical** - Data loss, security vulnerability, crashes in production, incorrect behavior affecting users
+- **Important** - Significant performance issues, edge case bugs, minor UX issues
+- **Minor** - Code quality concerns, maintainability issues, minor inconsistencies, cleanup opportunities
 
 ## Report Generation
 
@@ -908,23 +910,18 @@ Report structure:
 | Severity | Count | Confirmed | High Confidence |
 |----------|-------|-----------|-----------------|
 | Critical | N | X | Y |
-| High | N | X | Y |
-| Medium | N | X | Y |
-| Low | N | X | Y |
+| Important | N | X | Y |
+| Minor | N | X | Y |
 
 ## Critical Issues
 
 [Issues...]
 
-## High Issues
+## Important Issues
 
 [Issues...]
 
-## Medium Issues
-
-[Issues...]
-
-## Low Issues
+## Minor Issues
 
 [Issues...]
 
@@ -1007,7 +1004,7 @@ Bugs that cannot have automated regression tests (config issues, documentation, 
 
 ## Final Instructions
 
-**CRITICAL: All verified bugs appear in the main report body.** The Regression Test Suite section organizes test artifacts, but every bug — regardless of whether a test can be written — MUST be documented in the severity sections (Critical/High/Medium/Low Issues) above. Bugs with `N/A` regression test status are still valid bugs that need reporting.
+**CRITICAL: All verified bugs appear in the main report body.** The Regression Test Suite section organizes test artifacts, but every bug — regardless of whether a test can be written — MUST be documented in the severity sections (Critical/Important/Minor Issues) above. Bugs with `N/A` regression test status are still valid bugs that need reporting.
 
 **CRITICAL: Regression tests are supplementary, not a filter.** If no test framework is detected, or if a bug cannot have a test written (config, docs, LLM workflows), mark it as `N/A` and **still include the bug in the report**. Never skip a verified bug because you cannot write a test for it.
 

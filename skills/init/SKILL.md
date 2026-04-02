@@ -375,6 +375,7 @@ If the user runs `/draft:init refresh`:
 3. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve**: Do NOT modify `draft/tracks.md` unless explicitly requested.
+6. **Pattern Re-Discovery**: Run `/draft:learn` (no arguments — full codebase scan) to update `draft/guardrails.md` with any new or changed patterns since the last init/refresh. This keeps learned conventions and anti-patterns in sync with codebase evolution.
 
 Stop here after refreshing. Continue to standard steps ONLY for fresh init.
 
@@ -2298,7 +2299,7 @@ Create `draft/guardrails.md` using the template from `core/templates/guardrails.
 
 **Include the Standard File Metadata header at the top of the file.**
 
-Ask which hard guardrails to enable (check items that apply to this project). The Learned Conventions and Learned Anti-Patterns sections start empty — they are populated by `/draft:learn` and quality commands over time.
+Ask which hard guardrails to enable (check items that apply to this project). The Learned Conventions and Learned Anti-Patterns sections start empty — they are populated automatically by the learn step at the end of init (brownfield only) and by quality commands over time.
 
 ## Step 5: Initialize Tracks
 
@@ -2341,6 +2342,16 @@ Ensure the directory structure exists (already created by Atomic File Staging or
 mkdir -p draft/tracks draft/.state
 ```
 
+## Step 7: Pattern Discovery (Brownfield Only)
+
+For **brownfield** projects, run `/draft:learn` (no arguments — full codebase scan) to populate `draft/guardrails.md` with initial learned conventions and anti-patterns. This ensures quality commands (`/draft:bughunt`, `/draft:review`, `/draft:deep-review`) have guardrails data from the first run.
+
+**Skip this step for greenfield projects** — there is no existing codebase to scan.
+
+> **Note:** This is the same full scan that `/draft:learn` performs when run standalone. The guardrails can be further refined later with `/draft:learn promote` or by quality commands that discover new patterns.
+
+---
+
 ## Completion
 
 **Finalize run memory:** Update `draft/.state/run-memory.json`:
@@ -2358,24 +2369,29 @@ Created:
 - draft/product.md
 - draft/tech-stack.md
 - draft/workflow.md
-- draft/guardrails.md
+- draft/guardrails.md (populated with learned conventions and anti-patterns from codebase scan)
 - draft/tracks.md
 - draft/.state/facts.json (atomic fact registry with temporal metadata and relationship graph)
 - draft/.state/freshness.json (file-level hash baseline for incremental refresh)
 - draft/.state/signals.json (codebase signal classification)
 - draft/.state/run-memory.json (run metadata and unresolved questions)
 
+{Include /draft:learn summary report here — conventions learned, anti-patterns detected, skipped entries}
+
 {If unresolved_questions is non-empty, show:}
 Unresolved questions from analysis:
 {list each question — these are areas where the AI couldn't determine the answer with confidence}
 
 Next steps:
-1. Review draft/.ai-profile.md — verify the compact profile captures your project accurately
-2. Review draft/.ai-context.md — verify the AI context is complete and accurate
-3. Review draft/architecture.md — human-friendly version for team onboarding
-4. Review and edit the other generated files as needed
-5. Run `/draft:new-track` to start planning a feature
-6. Run `/draft:init refresh` after significant codebase changes — refresh is now incremental with fact-level contradiction detection"
+1. Review draft/product.md — verify product vision, users, and goals reflect current reality
+2. Review draft/tech-stack.md — verify languages, frameworks, and accepted patterns are accurate
+3. Review draft/workflow.md — verify TDD, commit, and review settings match your team's process
+4. Review draft/guardrails.md — verify learned conventions and anti-patterns are accurate
+5. Review draft/.ai-context.md — verify the AI context is complete and accurate
+6. Review draft/architecture.md — human-friendly version for team onboarding
+7. Run `/draft:new-track` to start planning a feature
+8. Run `/draft:init refresh` after significant codebase changes — refresh is now incremental (only stale files re-analyzed)
+9. Run `/draft:learn promote` to promote high-confidence patterns to Hard Guardrails"
 
 For **Greenfield** projects, announce:
 "Draft initialized successfully!
@@ -2389,9 +2405,12 @@ Created:
 - draft/.state/run-memory.json (run metadata)
 
 Next steps:
-1. Review and edit the generated files as needed
-2. Run `/draft:new-track` to start planning a feature
-3. Run `/draft:init refresh` after adding substantial code to generate architecture context"
+1. Review draft/product.md — verify product vision, users, and goals reflect current reality
+2. Review draft/tech-stack.md — verify languages, frameworks, and accepted patterns are accurate
+3. Review draft/workflow.md — verify TDD, commit, and review settings match your team's process
+4. Review draft/guardrails.md — configure hard guardrails for your project
+5. Run `/draft:new-track` to start planning a feature
+6. Run `/draft:init refresh` after adding substantial code — this will generate architecture context and auto-run `/draft:learn` to populate guardrails"
 
 ---
 
@@ -2534,4 +2553,6 @@ AuthService.Logic -[PostgreSQL]-> UserDB
 ### Reference for Other Skills
 
 Other skills that mutate `draft/architecture.md` should invoke this subroutine with:
-> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine defined in `/draft:init`."
+> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine defined in `core/shared/condensation.md`."
+
+> This subroutine is also available at `core/shared/condensation.md` for cross-skill reference.

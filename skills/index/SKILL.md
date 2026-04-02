@@ -411,6 +411,18 @@ billing-service: [auth-service]
 api-gateway: [auth-service, billing-service]
 ```
 
+### Step 6.1b: Cycle Detection
+
+Perform a depth-first walk of the dependency graph to detect circular dependencies:
+1. For each service, follow its `dependencies` array recursively
+2. Track visited nodes in the current path
+3. If a service appears in its own dependency chain, emit a WARNING in `dependency-graph.md`:
+   ```
+   WARNING: Circular dependency detected: A → B → C → A
+   ```
+4. Mark the cycle in `manifest.json` with `"circular": true` on the affected services
+5. Cycles are non-fatal — continue processing, but flag them prominently
+
 ### Step 6.2: Resolve Dependents (Reverse Lookup)
 
 For each service S, iterate all other services' `dependencies` arrays. If S appears in another service's dependencies, add that service to S's `dependents` array. Write the updated `manifest.json` for each service.
@@ -731,7 +743,7 @@ graph TD
 
 ### 7.7 Synthesize `draft/.ai-context.md` (if not exists or is placeholder)
 
-After generating `draft/architecture.md`, derive a condensed `draft/.ai-context.md` using the Condensation Subroutine (as defined in `/draft:init`). This provides a token-optimized, self-contained AI context file at the root level aggregating all service knowledge.
+After generating `draft/architecture.md`, derive a condensed `draft/.ai-context.md` using the Condensation Subroutine (defined in `core/shared/condensation.md`). This provides a token-optimized, self-contained AI context file at the root level aggregating all service knowledge.
 
 - Read the synthesized `draft/architecture.md`
 - Condense into 200-400 lines covering: system overview, service catalog, inter-service dependencies, shared infrastructure, cross-cutting patterns, critical invariants, and entry points

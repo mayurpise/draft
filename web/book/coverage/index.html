@@ -280,6 +280,11 @@
         </tbody>
     </table>
 
+    <div class="callout callout-tip">
+        <div class="callout-title">Calibrate These Targets for Your Team</div>
+        <p>The defaults above are starting points, not mandates. Teams should customize coverage targets in <code>workflow.md</code> under the <code>coverage_targets</code> key, including per-module overrides that map specific directories to risk levels. A payments service handling real money needs different thresholds than an internal admin dashboard. Teams operating under regulatory requirements (SOC2, HIPAA, PCI-DSS) may need higher minimums. Engineering leads should calibrate these targets after <code>/draft:init</code> and revisit them when the risk profile of the codebase changes.</p>
+    </div>
+
     <p>When no explicit configuration exists, these defaults are applied and the inferred classification is flagged in the report so the developer can correct it. The report shows per-module targets alongside actual coverage:</p>
 
     <pre><code>PER-FILE BREAKDOWN (module-level targets)

@@ -157,8 +157,10 @@ Apply these changes to spec.md and plan.md? [yes / no / edit]
 
 2. Update `draft/tracks/<id>/metadata.json`:
    - Set `updated` to current ISO timestamp
+   - Recalculate `tasks.total` by counting all checkbox lines (`- [ ]`, `- [x]`, `- [~]`) in the updated `plan.md`
+   - Recalculate `tasks.completed` by counting `[x]` lines in the updated `plan.md`
 
-3. Append a Change Log entry (with current git SHA and timestamp) to `plan.md`. If a `## Change Log` section does not exist, add it at the bottom:
+3. Append a Change Log entry (with current git SHA (obtain via `git rev-parse --short HEAD`) and timestamp) to `plan.md`. If a `## Change Log` section does not exist, add it at the bottom:
 
 ```markdown
 ## Change Log

@@ -339,15 +339,16 @@ a { color: inherit; text-decoration: none; }
 .book-content {
     margin-left: var(--sidebar-width);
     padding-top: 56px;
-    padding-right: 240px; /* reserve space for the fixed page-toc (200px + 2rem gap) */
+    padding-right: 220px; /* reserve space for the fixed page-toc (200px + gap) */
     min-height: 100vh;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
 }
 
 .chapter-wrapper {
     width: 100%;
-    max-width: 780px;
+    max-width: 860px;
     padding: 3rem 2.5rem 4rem;
 }
 
@@ -741,34 +742,40 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ============================================================
-   CHAPTER NAVIGATION (prev/next)
+   CHAPTER NAVIGATION (prev/next — compact top bar)
    ============================================================ */
 .chapter-nav {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: 4rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border);
+    order: -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 860px;
+    padding: 0.6rem 1rem;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 .chapter-nav-link {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 1.25rem;
-    background: var(--bg-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    transition: border-color 0.2s, transform 0.2s var(--ease-out), box-shadow 0.2s;
+    border-radius: 100px;
     text-decoration: none !important;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    white-space: nowrap;
 }
 
 .chapter-nav-link:hover {
     border-color: rgba(37, 99, 235, 0.3);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    transform: translateY(-2px);
+    color: var(--accent-cyan);
+    background: rgba(37, 99, 235, 0.04);
 }
 
 .chapter-nav-link--next {
@@ -779,15 +786,15 @@ a { color: inherit; text-decoration: none; }
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     color: var(--text-muted);
 }
 
 .chapter-nav-title {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: inherit;
 }
 
 /* ============================================================
@@ -956,8 +963,8 @@ a { color: inherit; text-decoration: none; }
    RESPONSIVE
    ============================================================ */
 
-/* Hide page-toc below 1280px */
-@media (max-width: 1280px) {
+/* Hide page-toc below 1200px */
+@media (max-width: 1200px) {
     .page-toc { display: none; }
     .book-content { padding-right: 0; }
 }
@@ -1019,12 +1026,59 @@ a { color: inherit; text-decoration: none; }
         font-size: 1.3rem;
     }
 
-    .chapter-nav {
-        grid-template-columns: 1fr;
+    .chapter-wrapper h3 {
+        font-size: 1.1rem;
     }
 
-    .chapter-nav-link--next {
-        text-align: left;
+    /* Tables: horizontal scroll on mobile */
+    .chapter-wrapper table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+    }
+
+    /* Code blocks: bleed slightly for more width */
+    .chapter-wrapper pre {
+        border-radius: 8px;
+        padding: 1rem;
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
+        font-size: 0.82rem;
+    }
+
+    .chapter-wrapper pre code {
+        font-size: 0.82rem;
+    }
+
+    /* Diagrams: allow scroll */
+    .figure-content {
+        padding: 1rem;
+    }
+
+    .diagram {
+        font-size: 0.68rem;
+        overflow-x: auto;
+        max-width: 100%;
+        display: block;
+    }
+
+    /* Callouts: tighter on mobile */
+    .callout {
+        padding: 1rem 1.1rem;
+        border-radius: 10px;
+    }
+
+    /* Chapter nav: hide titles, keep arrow labels */
+    .chapter-nav {
+        padding: 0.5rem 0.75rem;
+    }
+    .chapter-nav-title {
+        display: none;
+    }
+    .chapter-nav-link {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.75rem;
     }
 
     .book-topbar-chapter {
@@ -1038,19 +1092,57 @@ a { color: inherit; text-decoration: none; }
     .book-topbar-right .book-topbar-link {
         display: none;
     }
+
+    /* Book landing page on mobile */
+    .book-landing {
+        padding: 2rem 0 1rem;
+    }
+
+    .book-toc-entry {
+        padding: 0.6rem 0.25rem;
+    }
+
+    .book-toc-time {
+        display: none;
+    }
 }
 
 /* Small mobile */
 @media (max-width: 480px) {
     .chapter-wrapper {
-        padding: 1.5rem 1rem 2.5rem;
+        padding: 1.5rem 0.75rem 2.5rem;
+    }
+
+    .chapter-wrapper h1 {
+        font-size: 1.5rem;
+    }
+
+    .chapter-wrapper p {
+        font-size: 1rem;
     }
 
     .chapter-wrapper pre {
         border-radius: 8px;
-        padding: 1rem;
-        margin-left: -0.5rem;
-        margin-right: -0.5rem;
+        padding: 0.85rem;
+        margin-left: -0.75rem;
+        margin-right: -0.75rem;
+    }
+
+    .chapter-wrapper pre code {
+        font-size: 0.78rem;
+    }
+
+    .book-topbar {
+        padding: 0 1rem;
+    }
+
+    .book-topbar-logo span {
+        display: none;
+    }
+
+    .chapter-nav-link {
+        padding: 0.25rem 0.6rem;
+        font-size: 0.7rem;
     }
 }
 

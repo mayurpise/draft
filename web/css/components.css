@@ -94,21 +94,63 @@
 }
 
 @media (max-width: 768px) {
+    .top-nav {
+        padding: 0.75rem 1.25rem;
+        flex-wrap: wrap;
+    }
     .nav-links, .nav-actions { display: none; }
     .nav-toggle { display: flex; }
+
+    /* Mobile dropdown: both nav-links and nav-actions flow into the row below */
+    .top-nav.open {
+        background: rgba(255, 255, 255, 0.97);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom-color: var(--border);
+    }
 
     .top-nav.open .nav-links {
         display: flex;
         flex-direction: column;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        padding: 1rem 2rem 2rem;
-        border-bottom: 1px solid var(--border);
-        gap: 1rem;
+        flex-basis: 100%;
+        order: 10;
+        gap: 0.25rem;
+        padding: 0.75rem 0 0.5rem;
+    }
+
+    .top-nav.open .nav-links a {
+        padding: 0.6rem 0.5rem;
+        font-size: 1rem;
+        border-radius: 8px;
+    }
+
+    .top-nav.open .nav-links a:active {
+        background: rgba(0, 0, 0, 0.04);
+    }
+
+    .top-nav.open .nav-actions {
+        display: flex;
+        flex-basis: 100%;
+        order: 11;
+        padding: 0.25rem 0 0.75rem;
+    }
+
+    .top-nav.open .nav-github {
+        justify-content: center;
+        padding: 0.7rem 1rem;
+        width: 100%;
+        font-size: 0.9rem;
+    }
+
+    /* Hamburger to X animation */
+    .top-nav.open .nav-toggle span:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+    }
+    .top-nav.open .nav-toggle span:nth-child(2) {
+        opacity: 0;
+    }
+    .top-nav.open .nav-toggle span:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
     }
 }
 
@@ -503,6 +545,58 @@
     }
     .init-state-grid {
         grid-template-columns: 1fr;
+    }
+
+    /* Terminal: full-width bleed on mobile */
+    .terminal {
+        margin-left: -0.25rem;
+        margin-right: -0.25rem;
+        border-radius: 12px;
+    }
+    .terminal-body {
+        font-size: 0.78rem;
+        padding: 1rem;
+        min-height: 160px;
+    }
+
+    /* Comparison cards: reduce padding */
+    .comparison-col {
+        padding: 1.25rem;
+    }
+
+    /* Code blocks: allow horizontal scroll */
+    .code-block pre {
+        font-size: 0.75rem;
+    }
+
+    /* Pipeline connectors don't make sense vertically */
+    .pipeline-connector {
+        display: none;
+    }
+
+    /* Audience cards: reduce padding */
+    .audience-card {
+        padding: 1.25rem;
+    }
+
+    /* Scroll indicator: hide on mobile (thumb-scrolling is obvious) */
+    .scroll-indicator {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .terminal-body {
+        font-size: 0.72rem;
+        line-height: 1.6;
+    }
+    .glass-card {
+        padding: 1.25rem;
+        border-radius: 12px;
+    }
+    .badge {
+        font-size: 0.78rem;
+        padding: 0.4rem 0.8rem;
     }
 }
 

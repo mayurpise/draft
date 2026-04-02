@@ -53,11 +53,18 @@
             topNav.classList.toggle('open');
         });
 
-        // Close on link click
-        topNav.querySelectorAll('.nav-links a').forEach(function(link) {
+        // Close on any link click inside the mobile dropdown
+        topNav.querySelectorAll('.nav-links a, .nav-actions a').forEach(function(link) {
             link.addEventListener('click', function() {
                 topNav.classList.remove('open');
             });
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (topNav.classList.contains('open') && !topNav.contains(e.target)) {
+                topNav.classList.remove('open');
+            }
         });
     }
 

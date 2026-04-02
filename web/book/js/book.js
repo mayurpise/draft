@@ -111,14 +111,27 @@ function initSidebar() {
     if (backdrop) {
         backdrop.addEventListener('click', closeMobileSidebar);
     }
+
+    // Close sidebar when a chapter link is clicked (mobile)
+    document.querySelectorAll('.sidebar-chapter').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                closeMobileSidebar();
+            }
+        });
+    });
+
+    // Swipe-to-close on the sidebar
+    initSidebarSwipe();
 }
 
 function toggleMobileSidebar() {
     const sidebar = document.getElementById('book-sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
+    const isOpen = sidebar.classList.toggle('open');
 
-    sidebar.classList.toggle('open');
-    backdrop.classList.toggle('visible');
+    backdrop.classList.toggle('visible', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
 }
 
 function closeMobileSidebar() {
@@ -127,6 +140,22 @@ function closeMobileSidebar() {
 
     if (sidebar) sidebar.classList.remove('open');
     if (backdrop) backdrop.classList.remove('visible');
+    document.body.style.overflow = '';
+}
+
+function initSidebarSwipe() {
+    const sidebar = document.getElementById('book-sidebar');
+    if (!sidebar) return;
+
+    let startX = 0;
+    sidebar.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+    }, { passive: true });
+
+    sidebar.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - startX;
+        if (dx < -60) closeMobileSidebar(); // swipe left to close
+    }, { passive: true });
 }
 
 // ============================================================

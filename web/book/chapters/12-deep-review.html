@@ -157,6 +157,58 @@ $ /draft:deep-review src/payments/
 
     <p>The report ends with a verdict: <strong>PASS</strong> (only minor issues), <strong>CONDITIONAL PASS</strong> (no critical issues, but important ones exist), or <strong>FAIL</strong> (at least one critical issue found). A FAIL verdict means the module is not production-ready.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;display:block;margin:0 auto;">
+                <defs>
+                    <filter id="sh12v" x="-2%" y="-6%" width="104%" height="116%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                    <linearGradient id="failGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#fecaca"/><stop offset="100%" stop-color="#fca5a5"/>
+                    </linearGradient>
+                    <linearGradient id="condGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#fef3c7"/><stop offset="100%" stop-color="#fde68a"/>
+                    </linearGradient>
+                    <linearGradient id="passGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#d1fae5"/><stop offset="100%" stop-color="#a7f3d0"/>
+                    </linearGradient>
+                </defs>
+                <!-- Title -->
+                <text x="350" y="24" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#1a1a2e">Verdict Scale</text>
+                <!-- Gauge track background -->
+                <rect x="40" y="48" width="620" height="54" rx="10" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1" filter="url(#sh12v)"/>
+                <!-- FAIL segment -->
+                <rect x="42" y="50" width="200" height="50" rx="8" fill="url(#failGrad)"/>
+                <text x="142" y="70" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="bold" fill="#dc2626">&#x2717;</text>
+                <text x="142" y="90" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#dc2626">FAIL</text>
+                <!-- CONDITIONAL PASS segment -->
+                <rect x="248" y="50" width="206" height="50" rx="0" fill="url(#condGrad)"/>
+                <text x="351" y="70" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="bold" fill="#d97706">&#x25B3;</text>
+                <text x="351" y="90" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#d97706">CONDITIONAL PASS</text>
+                <!-- PASS segment -->
+                <rect x="460" y="50" width="198" height="50" rx="8" fill="url(#passGrad)"/>
+                <text x="559" y="70" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="bold" fill="#059669">&#x2713;</text>
+                <text x="559" y="90" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#059669">PASS</text>
+                <!-- Detail labels below gauge -->
+                <!-- FAIL detail -->
+                <rect x="42" y="118" width="200" height="60" rx="8" fill="#fff" stroke="#fecaca" stroke-width="1.2" filter="url(#sh12v)"/>
+                <text x="142" y="138" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#dc2626">Critical issues found</text>
+                <text x="142" y="153" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#64748b">Not production-ready</text>
+                <text x="142" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#94a3b8">e.g. 2 critical, 5 important</text>
+                <!-- CONDITIONAL PASS detail -->
+                <rect x="248" y="118" width="206" height="60" rx="8" fill="#fff" stroke="#fde68a" stroke-width="1.2" filter="url(#sh12v)"/>
+                <text x="351" y="138" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#d97706">No critical, important exist</text>
+                <text x="351" y="153" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#64748b">Fix before launch</text>
+                <text x="351" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#94a3b8">e.g. 0 critical, 4 important</text>
+                <!-- PASS detail -->
+                <rect x="460" y="118" width="198" height="60" rx="8" fill="#fff" stroke="#a7f3d0" stroke-width="1.2" filter="url(#sh12v)"/>
+                <text x="559" y="138" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#059669">Only minor issues</text>
+                <text x="559" y="153" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#64748b">Production-ready</text>
+                <text x="559" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#94a3b8">e.g. 0 critical, 0 important</text>
+            </svg>
+        </div>
+        <div class="figure-caption">The verdict scale: FAIL indicates critical issues that block production deployment, CONDITIONAL PASS means no critical issues but important ones require attention before launch, and PASS confirms the module is production-ready with only minor findings.</div>
+    </div>
+
     <h2>API Contract Drift Detection</h2>
     <p>A subtle class of production bugs comes from drift between documented API contracts and actual implementations. Deep review compares the module's code interfaces against OpenAPI/Swagger specs, Protobuf definitions, GraphQL schemas, or TypeScript type exports. It flags endpoints that exist in code but not in the spec, types that differ between spec and implementation, and undocumented endpoints that external consumers may be relying on.</p>
 

@@ -44,6 +44,14 @@ SKILL_ORDER=(
     change
     jira-preview
     jira-create
+    debug
+    deploy-checklist
+    documentation
+    incident-response
+    quick-review
+    standup
+    tech-debt
+    testing-strategy
 )
 
 get_skill_header() {
@@ -65,7 +73,15 @@ get_skill_header() {
         revert)       echo "Revert Command" ;;
         change)       echo "Change Command" ;;
         jira-preview) echo "Jira Preview Command" ;;
-        jira-create)  echo "Jira Create Command" ;;
+        jira-create)       echo "Jira Create Command" ;;
+        debug)             echo "Debug Command" ;;
+        deploy-checklist)  echo "Deploy Checklist Command" ;;
+        documentation)     echo "Documentation Command" ;;
+        incident-response) echo "Incident Response Command" ;;
+        quick-review)      echo "Quick Review Command" ;;
+        standup)           echo "Standup Command" ;;
+        tech-debt)         echo "Tech Debt Command" ;;
+        testing-strategy)  echo "Testing Strategy Command" ;;
         *)            echo "$(echo "${skill:0:1}" | tr '[:lower:]' '[:upper:]')${skill:1} Command" ;;
     esac
 }
@@ -91,7 +107,15 @@ get_trigger() {
         revert)       echo "\"revert\" or \"${prefix}draft revert\"" ;;
         change)       echo "\"handle change\" or \"${prefix}draft change <description>\"" ;;
         jira-preview) echo "\"preview jira\" or \"${prefix}draft jira-preview [track-id]\"" ;;
-        jira-create)  echo "\"create jira\" or \"${prefix}draft jira-create [track-id]\"" ;;
+        jira-create)       echo "\"create jira\" or \"${prefix}draft jira-create [track-id]\"" ;;
+        debug)             echo "\"debug bug\" or \"${prefix}draft debug [description|track <id>]\"" ;;
+        deploy-checklist)  echo "\"deploy checklist\" or \"${prefix}draft deploy-checklist [track <id>]\"" ;;
+        documentation)     echo "\"write docs\" or \"${prefix}draft documentation [readme|runbook|api|onboarding]\"" ;;
+        incident-response) echo "\"incident\" or \"${prefix}draft incident-response [new|update|postmortem]\"" ;;
+        quick-review)      echo "\"quick review\" or \"${prefix}draft quick-review [file|pr <number>]\"" ;;
+        standup)           echo "\"standup\" or \"${prefix}draft standup [date|week|save]\"" ;;
+        tech-debt)         echo "\"tech debt\" or \"${prefix}draft tech-debt [path|track <id>]\"" ;;
+        testing-strategy)  echo "\"test strategy\" or \"${prefix}draft testing-strategy [track <id>|path]\"" ;;
         *)            echo "\"${prefix}draft $skill\"" ;;
     esac
 }
@@ -166,8 +190,8 @@ transform_copilot_syntax() {
         -e 's|@draft$|draft|g' \
         -e 's|`@draft`|`draft`|g' \
         -e 's|`@draft |`draft |g' \
-        -e 's#@(architect|debugger|planner|rca|reviewer)([^a-z0-9_-])#@workspace\2#g' \
-        -e 's#@(architect|debugger|planner|rca|reviewer)$#@workspace#g'
+        -e 's#@(architect|debugger|planner|rca|reviewer|ops|writer)([^a-z0-9_-])#@workspace\2#g' \
+        -e 's#@(architect|debugger|planner|rca|reviewer|ops|writer)$#@workspace#g'
 }
 
 # ─────────────────────────────────────────────────────────
@@ -186,6 +210,8 @@ CORE_FILES=(
     "shared/git-report-metadata.md"
     "shared/pattern-learning.md"
     "shared/condensation.md"
+    "shared/cross-skill-dispatch.md"
+    "shared/jira-sync.md"
     # Templates
     "templates/guardrails.md"
     "templates/intake-questions.md"
@@ -210,6 +236,10 @@ CORE_FILES=(
     "agents/planner.md"
     "agents/rca.md"
     "agents/reviewer.md"
+    "agents/ops.md"
+    "agents/writer.md"
+    # Templates (RCA)
+    "templates/rca.md"
 )
 
 # Emit all core files as appendices

@@ -275,6 +275,59 @@ spec.md             &rarr;  "Add drag-and-drop reordering"
   &darr;
 plan.md             &rarr;  "Phase 1: sortable list, Phase 2: persistence"</code></pre>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;" font-family="Arial, sans-serif">
+                <defs>
+                    <filter id="shadowFunnel" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- Title -->
+                <text x="360" y="24" text-anchor="middle" fill="#1a1a2e" font-size="14" font-weight="700">The Constraint Funnel</text>
+
+                <!-- Layer 0: All possible implementations (widest) -->
+                <polygon points="60,50 660,50 630,94 90,94" fill="#f1f5f9" stroke="#cbd5e0" stroke-width="1.5" filter="url(#shadowFunnel)"/>
+                <text x="360" y="68" text-anchor="middle" fill="#94a3b8" font-size="12" font-weight="600">All possible implementations</text>
+                <text x="360" y="84" text-anchor="middle" fill="#94a3b8" font-size="10">Infinite choices</text>
+
+                <!-- Layer 1: product.md -->
+                <polygon points="90,98 630,98 598,142 122,142" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5" filter="url(#shadowFunnel)"/>
+                <text x="360" y="116" text-anchor="middle" fill="#1e40af" font-size="12" font-weight="600">product.md</text>
+                <text x="360" y="132" text-anchor="middle" fill="#2563eb" font-size="10">What and why &mdash; scope, users, goals</text>
+
+                <!-- Layer 2: tech-stack.md -->
+                <polygon points="122,146 598,146 564,190 156,190" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5" filter="url(#shadowFunnel)"/>
+                <text x="360" y="164" text-anchor="middle" fill="#5b21b6" font-size="12" font-weight="600">tech-stack.md</text>
+                <text x="360" y="180" text-anchor="middle" fill="#7c3aed" font-size="10">How (tools) &mdash; languages, frameworks, patterns</text>
+
+                <!-- Layer 3: architecture.md -->
+                <polygon points="156,194 564,194 528,238 192,238" fill="#d1fae5" stroke="#059669" stroke-width="1.5" filter="url(#shadowFunnel)"/>
+                <text x="360" y="212" text-anchor="middle" fill="#065f46" font-size="12" font-weight="600">architecture.md</text>
+                <text x="360" y="228" text-anchor="middle" fill="#059669" font-size="10">How (structure) &mdash; modules, boundaries, flows</text>
+
+                <!-- Layer 4: spec.md -->
+                <polygon points="192,242 528,242 490,286 230,286" fill="#fef3c7" stroke="#d97706" stroke-width="1.5" filter="url(#shadowFunnel)"/>
+                <text x="360" y="260" text-anchor="middle" fill="#92400e" font-size="12" font-weight="600">spec.md</text>
+                <text x="360" y="276" text-anchor="middle" fill="#d97706" font-size="10">What (specific) &mdash; acceptance criteria, scope</text>
+
+                <!-- Layer 5: plan.md -->
+                <polygon points="230,290 490,290 448,334 272,334" fill="#1e293b" stroke="#0f172a" stroke-width="1.5" filter="url(#shadowFunnel)"/>
+                <text x="360" y="308" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">plan.md</text>
+                <text x="360" y="324" text-anchor="middle" fill="#94a3b8" font-size="10">When and order &mdash; phased tasks, verification</text>
+
+                <!-- Bottom point: Correct code -->
+                <polygon points="272,338 448,338 390,358 330,358" fill="#059669" stroke="#047857" stroke-width="1.5" filter="url(#shadowFunnel)"/>
+                <text x="360" y="353" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Correct code</text>
+
+                <!-- Side annotations -->
+                <text x="30" y="72" text-anchor="middle" fill="#cbd5e0" font-size="20" font-weight="300">&larr;</text>
+                <text x="690" y="72" text-anchor="middle" fill="#cbd5e0" font-size="20" font-weight="300">&rarr;</text>
+                <text x="26" y="353" text-anchor="end" fill="#059669" font-size="10" font-weight="600">Narrow</text>
+                <text x="26" y="72" text-anchor="end" fill="#94a3b8" font-size="10" font-weight="600">Wide</text>
+            </svg>
+        </div>
+        <div class="figure-caption">The constraint funnel: each layer of context narrows the solution space. By the time AI writes code, most decisions are already made.</div>
+    </div>
+
     <p>Each layer locks in a different class of decisions:</p>
 
     <h3>product.md &mdash; What and Why</h3>

@@ -4,21 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Command Reference — Draft Book</title>
-    <meta name="description" content="Complete reference for all 17 Draft commands — usage, options, examples, and output for each slash command.">
+    <meta name="description" content="Complete reference for all 25 Draft commands — usage, options, examples, and output for each slash command.">
     <meta name="author" content="Mayur Pise">
     <meta name="theme-color" content="#2563eb">
     <meta name="keywords" content="draft commands, slash commands, command reference, draft cli, command documentation">
     <meta name="robots" content="index, follow">
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
     <meta property="og:title" content="Command Reference — Draft Book">
-    <meta property="og:description" content="Complete reference for all 17 Draft commands — usage, options, examples, and output for each slash command.">
+    <meta property="og:description" content="Complete reference for all 25 Draft commands — usage, options, examples, and output for each slash command.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://getdraft.dev/book/command-reference/">
     <meta property="og:image" content="https://getdraft.dev/social-preview.png">
     <meta property="og:image:alt" content="Command Reference — Draft Book">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Command Reference — Draft Book">
-    <meta name="twitter:description" content="Complete reference for all 17 Draft commands — usage, options, examples, and output for each slash command.">
+    <meta name="twitter:description" content="Complete reference for all 25 Draft commands — usage, options, examples, and output for each slash command.">
     <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
     <meta name="twitter:image:alt" content="Command Reference — Draft Book">
     <link rel="canonical" href="https://getdraft.dev/book/command-reference/">
@@ -28,7 +28,7 @@
       "@context": "https://schema.org",
       "@type": "Article",
       "headline": "Command Reference",
-      "description": "Complete reference for all 17 Draft commands — usage, options, examples, and output for each slash command.",
+      "description": "Complete reference for all 25 Draft commands — usage, options, examples, and output for each slash command.",
       "url": "https://getdraft.dev/book/command-reference/",
       "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
       "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
@@ -210,11 +210,11 @@
     <h1>Appendix A: Command Reference</h1>
     <p class="chapter-meta"><span class="part-name">Appendix</span></p>
 
-    <p class="chapter-intro">Quick-reference for all 17 Draft commands. Syntax shown is for Claude Code; Copilot uses <code>draft command</code> (no slash), Cursor uses <code>@draft command</code>.</p>
+    <p class="chapter-intro">Quick-reference for all 25 Draft commands. Syntax shown is for Claude Code; Copilot uses <code>draft command</code> (no slash), Cursor uses <code>@draft command</code>.</p>
 
     <div class="figure">
         <div class="figure-content">
-            <svg viewBox="0 0 620 310" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:620px;display:block;margin:0 auto">
+            <svg viewBox="0 0 620 430" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:620px;display:block;margin:0 auto">
                 <defs>
                     <filter id="cmd-shadow" x="-4%" y="-4%" width="108%" height="112%">
                         <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a1a2e" flood-opacity="0.08"/>
@@ -232,33 +232,47 @@
                 <text x="234" y="64" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">decompose</text>
                 <text x="234" y="80" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">change</text>
                 <!-- Execution category -->
-                <rect x="318" y="10" width="140" height="84" rx="8" fill="#059669" filter="url(#cmd-shadow)"/>
+                <rect x="318" y="10" width="140" height="100" rx="8" fill="#059669" filter="url(#cmd-shadow)"/>
                 <text x="388" y="30" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">EXECUTION</text>
                 <text x="388" y="48" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">implement</text>
                 <text x="388" y="64" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">status</text>
                 <text x="388" y="80" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">revert</text>
+                <text x="388" y="96" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">debug</text>
                 <!-- Quality category -->
-                <rect x="472" y="10" width="140" height="100" rx="8" fill="#d97706" filter="url(#cmd-shadow)"/>
+                <rect x="472" y="10" width="140" height="132" rx="8" fill="#d97706" filter="url(#cmd-shadow)"/>
                 <text x="542" y="30" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">QUALITY</text>
                 <text x="542" y="48" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">review</text>
                 <text x="542" y="64" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">deep-review</text>
                 <text x="542" y="80" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">bughunt</text>
                 <text x="542" y="96" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">coverage</text>
+                <text x="542" y="112" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">quick-review</text>
+                <text x="542" y="128" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">testing-strategy</text>
+                <!-- Operations category -->
+                <rect x="10" y="130" width="200" height="84" rx="8" fill="#dc2626" filter="url(#cmd-shadow)"/>
+                <text x="110" y="150" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">OPERATIONS</text>
+                <text x="110" y="168" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">deploy-checklist</text>
+                <text x="110" y="184" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">incident-response</text>
+                <text x="110" y="200" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">standup</text>
                 <!-- Knowledge category -->
-                <rect x="10" y="130" width="296" height="68" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#cmd-shadow)"/>
-                <text x="158" y="150" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10" font-weight="bold">KNOWLEDGE &amp; GOVERNANCE</text>
-                <text x="82" y="172" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">learn</text>
-                <text x="158" y="172" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">adr</text>
-                <text x="234" y="172" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">index</text>
+                <rect x="224" y="158" width="200" height="84" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#cmd-shadow)"/>
+                <text x="324" y="178" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10" font-weight="bold">KNOWLEDGE &amp; GOVERNANCE</text>
+                <text x="278" y="200" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">learn</text>
+                <text x="324" y="200" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">adr</text>
+                <text x="370" y="200" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">index</text>
+                <text x="324" y="224" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">tech-debt</text>
+                <!-- Authoring category -->
+                <rect x="438" y="158" width="174" height="68" rx="8" fill="#0891b2" filter="url(#cmd-shadow)"/>
+                <text x="525" y="178" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">AUTHORING</text>
+                <text x="525" y="200" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">documentation</text>
                 <!-- Integration category -->
-                <rect x="320" y="130" width="292" height="68" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#cmd-shadow)"/>
-                <text x="466" y="150" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10" font-weight="bold">INTEGRATION</text>
-                <text x="466" y="172" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">jira-preview &middot; jira-create</text>
+                <rect x="10" y="260" width="292" height="68" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#cmd-shadow)"/>
+                <text x="156" y="280" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10" font-weight="bold">INTEGRATION</text>
+                <text x="156" y="302" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">jira-preview &middot; jira-create</text>
                 <!-- Flow arrow -->
-                <text x="310" y="240" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="11">Context &rarr; Planning &rarr; Execution &rarr; Quality &rarr; Knowledge &rarr; Integration</text>
+                <text x="310" y="370" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="11">Context &rarr; Planning &rarr; Execution &rarr; Quality &rarr; Operations &rarr; Knowledge &rarr; Integration</text>
             </svg>
         </div>
-        <div class="figure-caption">Command map: Draft's 17 commands organized by workflow category, reflecting the natural development lifecycle from context setup through quality assurance and external integration.</div>
+        <div class="figure-caption">Command map: Draft's 25 commands organized by workflow category, reflecting the natural development lifecycle from context setup through quality assurance and external integration.</div>
     </div>
 
     <table class="command-reference">
@@ -378,6 +392,62 @@
                 <td>9</td>
             </tr>
             <tr>
+                <td><code>/draft:debug</code></td>
+                <td>Structured debugging: reproduce, isolate, diagnose, fix</td>
+                <td><code>track &lt;id&gt;</code>, <code>&lt;JIRA-KEY&gt;</code></td>
+                <td>init (optional)</td>
+                <td>&mdash;</td>
+            </tr>
+            <tr>
+                <td><code>/draft:quick-review</code></td>
+                <td>Lightweight 4-dimension code review for a PR, diff, or file</td>
+                <td><code>&lt;file&gt;</code>, <code>&lt;PR-URL&gt;</code>, <code>&lt;commit-range&gt;</code></td>
+                <td>None</td>
+                <td>10</td>
+            </tr>
+            <tr>
+                <td><code>/draft:deploy-checklist</code></td>
+                <td>Pre-deployment verification checklist with rollback triggers</td>
+                <td><code>&lt;service&gt;</code>, <code>track &lt;id&gt;</code></td>
+                <td>init (optional)</td>
+                <td>&mdash;</td>
+            </tr>
+            <tr>
+                <td><code>/draft:testing-strategy</code></td>
+                <td>Design test strategies with coverage targets</td>
+                <td><code>track &lt;id&gt;</code>, <code>module &lt;name&gt;</code></td>
+                <td>init (optional)</td>
+                <td>14</td>
+            </tr>
+            <tr>
+                <td><code>/draft:tech-debt</code></td>
+                <td>Technical debt analysis across 6 dimensions with prioritization</td>
+                <td><code>module &lt;name&gt;</code>, <code>category &lt;type&gt;</code></td>
+                <td>init (optional)</td>
+                <td>&mdash;</td>
+            </tr>
+            <tr>
+                <td><code>/draft:standup</code></td>
+                <td>Generate standup summary from git history and track progress</td>
+                <td><code>&lt;days&gt;</code>, <code>weekly</code></td>
+                <td>None</td>
+                <td>&mdash;</td>
+            </tr>
+            <tr>
+                <td><code>/draft:incident-response</code></td>
+                <td>Incident management: triage, communicate, mitigate, postmortem</td>
+                <td><code>new</code>, <code>update</code>, <code>postmortem</code></td>
+                <td>None</td>
+                <td>&mdash;</td>
+            </tr>
+            <tr>
+                <td><code>/draft:documentation</code></td>
+                <td>Technical documentation: readme, runbook, api, onboarding</td>
+                <td><code>readme</code>, <code>runbook &lt;service&gt;</code>, <code>api &lt;module&gt;</code>, <code>onboarding</code></td>
+                <td>init (optional)</td>
+                <td>&mdash;</td>
+            </tr>
+            <tr>
                 <td><code>/draft:jira-preview</code></td>
                 <td>Generate Jira export file from track plan for review before creating issues</td>
                 <td><code>[track-id]</code> &mdash; specific track</td>
@@ -394,9 +464,35 @@
         </tbody>
     </table>
 
+    <h2>Intent Mapping</h2>
+    <p>Draft recognizes natural language equivalents for all commands. You do not need to memorize slash syntax &mdash; describe what you want and Draft maps it to the right command.</p>
+
+    <div class="callout callout-example">
+        <div class="callout-title">Natural Language to Command Mapping</div>
+        <table>
+            <thead>
+                <tr><th>What You Say</th><th>What Runs</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>"Set up the project"</td><td><code>/draft:init</code></td></tr>
+                <tr><td>"Start a new feature"</td><td><code>/draft:new-track</code></td></tr>
+                <tr><td>"Build it"</td><td><code>/draft:implement</code></td></tr>
+                <tr><td>"Review the code"</td><td><code>/draft:review</code></td></tr>
+                <tr><td>"Hunt for bugs"</td><td><code>/draft:bughunt</code></td></tr>
+                <tr><td>"What's the status?"</td><td><code>/draft:status</code></td></tr>
+                <tr><td>"Break this down"</td><td><code>/draft:decompose</code></td></tr>
+                <tr><td>"Record this decision"</td><td><code>/draft:adr</code></td></tr>
+                <tr><td>"Generate a deploy checklist"</td><td><code>/draft:deploy-checklist</code></td></tr>
+                <tr><td>"Write the docs"</td><td><code>/draft:documentation</code></td></tr>
+                <tr><td>"Learn the patterns"</td><td><code>/draft:learn</code></td></tr>
+                <tr><td>"Send to Jira"</td><td><code>/draft:jira-create</code></td></tr>
+            </tbody>
+        </table>
+    </div>
+
     <div class="callout callout-tip">
-        <div class="callout-title">Intent Mapping</div>
-        <p>Draft recognizes natural language equivalents for all commands. Saying "set up the project" triggers <code>/draft:init</code>. "Hunt bugs" triggers <code>/draft:bughunt</code>. "What's the status?" triggers <code>/draft:status</code>. See the Draft overview (<code>/draft</code>) for the full intent mapping table.</p>
+        <div class="callout-title">Full Intent List</div>
+        <p>Run <code>/draft</code> (the overview command) to see the complete intent mapping table with all 25 commands and their natural language triggers.</p>
     </div>
 </div>
 

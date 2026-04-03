@@ -288,6 +288,33 @@ When a task involves refactoring existing code that lacks test coverage, run thi
 4. Characterization tests serve as a safety net — if they break during refactoring, the behavioral change is intentional or a regression
 - Reference: "Working Effectively with Legacy Code" (Michael Feathers)
 
+### Step 2.7: Testing Strategy Loading
+
+Before starting the TDD cycle, check for testing strategy context:
+
+1. Check for track-level strategy: `draft/tracks/<id>/testing-strategy.md`
+2. If not found, check project-level: `draft/testing-strategy.md`
+3. If found, load coverage targets and test boundaries as TDD context
+4. If not found, proceed with default TDD approach
+
+### Bug Track Test Guardrail
+
+If the current track type is `bugfix` (from `metadata.json`):
+
+**STOP** before writing any test:
+```
+ASK: "Root cause confirmed: [summary]. Want me to write a regression test for this fix? [Y/n]"
+```
+- If accepted: write regression test first (fails before fix, passes after)
+- If declined: note "Tests: developer-handled" in plan.md and proceed to fix
+
+### Bug Track RCA Integration
+
+For bug tracks, check if `draft/tracks/<id>/rca.md` exists:
+- If found: load as investigation context for the fix implementation
+- This provides root cause analysis, blast radius, and prevention items from the auto-triage pipeline
+- After fix is verified: update `draft/tracks/<id>/rca.md` Prevention Items with actual fix details
+
 ### If TDD Enabled:
 
 **Iron Law:** No production code without a failing test first.
@@ -644,3 +671,30 @@ Status: Complete
 Phase Progress: N/M tasks
 Overall: X% complete
 ```
+
+## Cross-Skill Dispatch
+
+### At Phase Boundaries
+- **Review Offer:** At each phase boundary, present options:
+  ```
+  Phase {N} complete. Review options:
+    1. Full three-stage review (recommended)
+    2. /draft:quick-review — lightweight 4-dimension check (faster)
+    Choose [1/2, default: 1]:
+  ```
+- **Debug for Blocked Tasks:** When a task is marked `[!]` Blocked, instead of inline debugging, offer:
+  ```
+  Task blocked: {description}. Run /draft:debug for structured investigation? [Y/n]
+  ```
+
+### At Track Completion
+Based on context, suggest relevant follow-ups:
+- If track modifies production code: "Run `/draft:deploy-checklist` to verify deployment readiness"
+- If track added new APIs or services: "Run `/draft:documentation api` to document new endpoints"
+- If implementation contains TODO/FIXME/HACK comments: "Run `/draft:tech-debt` to catalog debt items"
+- If new patterns or dependencies were introduced: "Run `/draft:adr` to record the decisions"
+- If testing strategy exists: "Run `/draft:coverage` to verify test targets were met"
+
+### Jira Sync
+If a Jira ticket is linked in `metadata.json`:
+- At completion: post comment "[draft] implementation-complete: {n} tasks done across {m} phases" via `core/shared/jira-sync.md`

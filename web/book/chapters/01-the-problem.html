@@ -86,6 +86,73 @@
     <h3>Untestable Architecture</h3>
     <p>The AI creates a feature that works but tightly couples business logic to the HTTP layer, makes direct database calls from utility functions, or introduces global state. The feature passes its own tests because the AI wrote the tests to match the implementation. But it's impossible to unit test in isolation, and it makes the surrounding code harder to test too.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;" font-family="Arial, sans-serif">
+                <defs>
+                    <filter id="shadowCascade" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+                    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#e53e3e"/></marker>
+                    <linearGradient id="costGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#feb2b2"/>
+                        <stop offset="100%" stop-color="#742a2a"/>
+                    </linearGradient>
+                </defs>
+                <!-- Title -->
+                <text x="360" y="22" text-anchor="middle" fill="#1a1a2e" font-size="14" font-weight="700">The Cost Cascade of Undirected AI Coding</text>
+                <!-- Cost bar (grows wider) -->
+                <rect x="40" y="170" width="640" height="8" rx="4" fill="url(#costGrad)" opacity="0.3"/>
+                <!-- Stage 1: Fast Output -->
+                <rect x="12" y="48" width="95" height="52" rx="10" fill="#fff5f5" stroke="#fc8181" stroke-width="1.5" filter="url(#shadowCascade)"/>
+                <text x="59" y="70" text-anchor="middle" fill="#c53030" font-size="10" font-weight="700">Fast Output</text>
+                <text x="59" y="84" text-anchor="middle" fill="#e53e3e" font-size="9">Looks good</text>
+                <!-- Arrow 1-2 -->
+                <line x1="107" y1="74" x2="127" y2="74" stroke="#e53e3e" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+                <!-- Stage 2: Wrong Assumptions -->
+                <rect x="127" y="42" width="100" height="64" rx="10" fill="#fff5f5" stroke="#fc8181" stroke-width="1.5" filter="url(#shadowCascade)"/>
+                <text x="177" y="66" text-anchor="middle" fill="#c53030" font-size="10" font-weight="700">Wrong</text>
+                <text x="177" y="80" text-anchor="middle" fill="#c53030" font-size="10" font-weight="700">Assumptions</text>
+                <text x="177" y="96" text-anchor="middle" fill="#e53e3e" font-size="9">Hidden errors</text>
+                <!-- Arrow 2-3 -->
+                <line x1="227" y1="74" x2="247" y2="74" stroke="#e53e3e" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+                <!-- Stage 3: Rework -->
+                <rect x="247" y="36" width="100" height="76" rx="10" fill="#fed7d7" stroke="#fc8181" stroke-width="1.5" filter="url(#shadowCascade)"/>
+                <text x="297" y="66" text-anchor="middle" fill="#9b2c2c" font-size="11" font-weight="700">Rework</text>
+                <text x="297" y="82" text-anchor="middle" fill="#c53030" font-size="9">Time saved</text>
+                <text x="297" y="94" text-anchor="middle" fill="#c53030" font-size="9">is consumed</text>
+                <!-- Arrow 3-4 -->
+                <line x1="347" y1="74" x2="367" y2="74" stroke="#e53e3e" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+                <!-- Stage 4: Tech Debt -->
+                <rect x="367" y="30" width="100" height="88" rx="10" fill="#feb2b2" stroke="#e53e3e" stroke-width="1.5" filter="url(#shadowCascade)"/>
+                <text x="417" y="62" text-anchor="middle" fill="#9b2c2c" font-size="11" font-weight="700">Tech Debt</text>
+                <text x="417" y="78" text-anchor="middle" fill="#9b2c2c" font-size="9">Inconsistent</text>
+                <text x="417" y="90" text-anchor="middle" fill="#9b2c2c" font-size="9">patterns</text>
+                <text x="417" y="102" text-anchor="middle" fill="#9b2c2c" font-size="9">accumulate</text>
+                <!-- Arrow 4-5 -->
+                <line x1="467" y1="74" x2="487" y2="74" stroke="#e53e3e" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+                <!-- Stage 5: Team Friction -->
+                <rect x="487" y="24" width="100" height="100" rx="10" fill="#fc8181" stroke="#c53030" stroke-width="1.5" filter="url(#shadowCascade)"/>
+                <text x="537" y="58" text-anchor="middle" fill="#742a2a" font-size="11" font-weight="700">Team</text>
+                <text x="537" y="74" text-anchor="middle" fill="#742a2a" font-size="11" font-weight="700">Friction</text>
+                <text x="537" y="92" text-anchor="middle" fill="#9b2c2c" font-size="9">Adversarial</text>
+                <text x="537" y="104" text-anchor="middle" fill="#9b2c2c" font-size="9">code reviews</text>
+                <!-- Arrow 5-6 -->
+                <line x1="587" y1="74" x2="607" y2="74" stroke="#e53e3e" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+                <!-- Stage 6: Production Incidents -->
+                <rect x="607" y="18" width="103" height="112" rx="10" fill="#e53e3e" stroke="#9b2c2c" stroke-width="2" filter="url(#shadowCascade)"/>
+                <text x="658" y="56" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Production</text>
+                <text x="658" y="72" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Incidents</text>
+                <text x="658" y="92" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="9">Security holes,</text>
+                <text x="658" y="104" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="9">broken invariants,</text>
+                <text x="658" y="116" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="9">system failures</text>
+                <!-- Cost labels -->
+                <text x="59" y="155" text-anchor="middle" fill="#a0aec0" font-size="9">Low cost</text>
+                <text x="658" y="155" text-anchor="middle" fill="#9b2c2c" font-size="9" font-weight="600">Maximum cost</text>
+                <text x="360" y="195" text-anchor="middle" fill="#718096" font-size="10" font-style="italic">Each stage compounds the cost of the previous one. The cascade is preventable with structure.</text>
+            </svg>
+        </div>
+        <div class="figure-caption">The cost cascade: fast AI output without direction compounds into increasingly expensive problems. Each stage makes the next one worse.</div>
+    </div>
+
     <h2>The Cost</h2>
     <p>The cost of undirected AI coding is not immediately visible. The code works. The tests pass. The feature ships. The cost arrives later:</p>
 

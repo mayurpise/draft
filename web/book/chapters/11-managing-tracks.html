@@ -133,6 +133,96 @@ Apply these changes to spec.md and plan.md? [yes / no / edit]</code></pre>
         <p><code>/draft:change</code> never silently invalidates completed tasks. When a requirement change affects work that's already done, the task is flagged explicitly and the developer decides whether rework is needed. The commit history is preserved &mdash; you can inspect exactly what was built and decide how much needs to change.</p>
     </div>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 700 620" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;display:block;margin:0 auto;">
+                <defs>
+                    <filter id="sh11a" x="-2%" y="-2%" width="104%" height="106%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                    <marker id="arr11a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6366f1"/></marker>
+                </defs>
+
+                <!-- Input: Requirement Change -->
+                <rect x="230" y="16" width="240" height="52" rx="26" fill="#fef3c7" stroke="#d97706" stroke-width="2" filter="url(#sh11a)"/>
+                <text x="266" y="38" font-family="Arial,sans-serif" font-size="16" fill="#d97706">&#9889;</text>
+                <text x="350" y="38" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#92400e">Requirement Change</text>
+                <text x="350" y="54" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#b45309">mid-track modification request</text>
+
+                <!-- Arrow input→step1 -->
+                <path d="M350 68 L350 98" stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#arr11a)"/>
+
+                <!-- Step 1: Impact Analysis -->
+                <rect x="170" y="104" width="360" height="80" rx="12" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5" filter="url(#sh11a)"/>
+                <text x="350" y="128" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#be123c">Step 1: Impact Analysis</text>
+                <text x="350" y="148" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#64748b">Classify each requirement against the change</text>
+                <!-- Status chips -->
+                <rect x="200" y="158" width="60" height="20" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1"/>
+                <text x="230" y="172" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#16a34a">Added</text>
+                <rect x="270" y="158" width="70" height="20" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                <text x="305" y="172" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#d97706">Modified</text>
+                <rect x="350" y="158" width="70" height="20" rx="10" fill="#ffe4e6" stroke="#e11d48" stroke-width="1"/>
+                <text x="385" y="172" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#e11d48">Removed</text>
+                <rect x="430" y="158" width="80" height="20" rx="10" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+                <text x="470" y="172" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#64748b">Unaffected</text>
+
+                <!-- Arrow step1→step2 -->
+                <path d="M350 184 L350 214" stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#arr11a)"/>
+
+                <!-- Step 2: Plan Mapping -->
+                <rect x="170" y="220" width="360" height="80" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" filter="url(#sh11a)"/>
+                <text x="350" y="244" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#1e40af">Step 2: Plan Mapping</text>
+                <text x="350" y="264" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#64748b">Map spec changes to plan tasks</text>
+                <!-- Task indicators -->
+                <text x="210" y="288" font-family="Arial,sans-serif" font-size="10" fill="#059669">[x] completed &rarr; rework?</text>
+                <text x="380" y="288" font-family="Arial,sans-serif" font-size="10" fill="#2563eb">[~] in-progress &rarr; review</text>
+                <text x="210" y="298" font-family="Arial,sans-serif" font-size="10" fill="#718096">[ ] pending &rarr; update text</text>
+
+                <!-- Arrow step2→step3 -->
+                <path d="M350 300 L350 330" stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#arr11a)"/>
+
+                <!-- Step 3: Preview -->
+                <rect x="170" y="336" width="360" height="70" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh11a)"/>
+                <text x="350" y="360" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#5b21b6">Step 3: Preview</text>
+                <text x="350" y="380" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#64748b">Show exact before/after diffs</text>
+                <text x="350" y="396" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#94a3b8">No files modified yet</text>
+
+                <!-- Arrow step3→step4 -->
+                <path d="M350 406 L350 436" stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#arr11a)"/>
+
+                <!-- Step 4: Confirmation -->
+                <rect x="170" y="442" width="360" height="60" rx="12" fill="#faf5ff" stroke="#a855f7" stroke-width="1.5" filter="url(#sh11a)"/>
+                <text x="350" y="466" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#7e22ce">Step 4: Confirmation</text>
+                <!-- Decision chips -->
+                <rect x="220" y="476" width="70" height="20" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1"/>
+                <text x="255" y="490" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#16a34a">Approve</text>
+                <rect x="300" y="476" width="70" height="20" rx="10" fill="#ffe4e6" stroke="#e11d48" stroke-width="1"/>
+                <text x="335" y="490" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#e11d48">Reject</text>
+                <rect x="380" y="476" width="70" height="20" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                <text x="415" y="490" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#d97706">Edit</text>
+
+                <!-- Arrow step4→step5 -->
+                <path d="M350 502 L350 532" stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#arr11a)"/>
+
+                <!-- Step 5: Application -->
+                <rect x="200" y="538" width="300" height="60" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2" filter="url(#sh11a)"/>
+                <text x="350" y="562" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#047857">Step 5: Application</text>
+                <text x="350" y="582" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#64748b">Amend spec.md + plan.md + changelog</text>
+
+                <!-- Edit loop arrow (from Confirmation back to Preview) -->
+                <path d="M540 472 Q570 472 570 400 Q570 370 540 370" stroke="#d97706" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#arr11b2)"/>
+                <defs><marker id="arr11b2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#d97706"/></marker></defs>
+                <text x="584" y="424" font-family="Arial,sans-serif" font-size="9" fill="#d97706">edit loop</text>
+
+                <!-- Left sidebar: step numbers -->
+                <text x="152" y="148" text-anchor="end" font-family="Arial,sans-serif" font-size="24" font-weight="bold" fill="#f1f5f9">1</text>
+                <text x="152" y="264" text-anchor="end" font-family="Arial,sans-serif" font-size="24" font-weight="bold" fill="#f1f5f9">2</text>
+                <text x="152" y="376" text-anchor="end" font-family="Arial,sans-serif" font-size="24" font-weight="bold" fill="#f1f5f9">3</text>
+                <text x="152" y="476" text-anchor="end" font-family="Arial,sans-serif" font-size="24" font-weight="bold" fill="#f1f5f9">4</text>
+                <text x="182" y="572" text-anchor="end" font-family="Arial,sans-serif" font-size="24" font-weight="bold" fill="#f1f5f9">5</text>
+            </svg>
+        </div>
+        <div class="figure-caption">The /draft:change impact analysis flow: requirement changes are classified, mapped to plan tasks, previewed as diffs, confirmed by the developer (with an edit loop), and then applied to spec and plan files with a changelog entry.</div>
+    </div>
+
     <h2>Revert: Git-Aware Rollback</h2>
     <p>Sometimes you need to undo work. A phase introduced a subtle regression. An approach turned out to be a dead end. A task's implementation conflicts with a concurrent change on another branch. <code>/draft:revert</code> provides git-aware rollback that understands Draft's logical units of work.</p>
 

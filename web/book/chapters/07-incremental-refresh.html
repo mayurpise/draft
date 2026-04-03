@@ -149,6 +149,64 @@
 
     <p>The heuristic is straightforward: if the change affects the fundamental architecture (new paradigm, new database, new auth system), run a full init. If the change extends or modifies existing architecture, refresh is sufficient.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;" font-family="Arial, sans-serif">
+                <defs>
+                    <filter id="shadow7b" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- Column headers -->
+                <text x="140" y="25" text-anchor="middle" fill="#718096" font-size="12" font-weight="700">CHANGE TYPE</text>
+                <text x="580" y="25" text-anchor="middle" fill="#718096" font-size="12" font-weight="700">RECOMMENDED ACTION</text>
+                <!-- Divider -->
+                <line x1="360" y1="10" x2="360" y2="330" stroke="#e2e8f0" stroke-width="1.5"/>
+                <!-- Incremental-safe label -->
+                <rect x="395" y="48" width="170" height="32" rx="8" fill="#059669" filter="url(#shadow7b)"/>
+                <text x="480" y="69" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">/draft:init refresh</text>
+                <!-- Full-init label -->
+                <rect x="395" y="218" width="170" height="32" rx="8" fill="#d97706" filter="url(#shadow7b)"/>
+                <text x="480" y="239" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Full /draft:init</text>
+                <!-- Left items: Incremental-safe changes -->
+                <rect x="20" y="48" width="260" height="32" rx="8" fill="#f0fdf4" stroke="#059669" stroke-width="1.5" filter="url(#shadow7b)"/>
+                <text x="150" y="69" text-anchor="middle" fill="#059669" font-size="11" font-weight="600">Added files / bug fixes</text>
+                <line x1="280" y1="64" x2="393" y2="64" stroke="#059669" stroke-width="1.5" stroke-dasharray="6,3"/>
+                <circle cx="393" cy="64" r="4" fill="#059669"/>
+                <rect x="20" y="90" width="260" height="32" rx="8" fill="#f0fdf4" stroke="#059669" stroke-width="1.5" filter="url(#shadow7b)"/>
+                <text x="150" y="111" text-anchor="middle" fill="#059669" font-size="11" font-weight="600">New module / updated dependencies</text>
+                <line x1="280" y1="106" x2="393" y2="82" stroke="#059669" stroke-width="1.5" stroke-dasharray="6,3"/>
+                <circle cx="393" cy="82" r="4" fill="#059669"/>
+                <rect x="20" y="132" width="260" height="32" rx="8" fill="#f0fdf4" stroke="#059669" stroke-width="1.5" filter="url(#shadow7b)"/>
+                <text x="150" y="153" text-anchor="middle" fill="#059669" font-size="11" font-weight="600">Modified services / new tests</text>
+                <line x1="280" y1="148" x2="393" y2="76" stroke="#059669" stroke-width="1.5" stroke-dasharray="6,3"/>
+                <circle cx="393" cy="76" r="4" fill="#059669"/>
+                <!-- Separator area -->
+                <line x1="20" y1="185" x2="340" y2="185" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,4"/>
+                <text x="180" y="203" text-anchor="middle" fill="#718096" font-size="10" font-style="italic">Structural boundary</text>
+                <!-- Left items: Full-init changes -->
+                <rect x="20" y="218" width="260" height="32" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5" filter="url(#shadow7b)"/>
+                <text x="150" y="239" text-anchor="middle" fill="#d97706" font-size="11" font-weight="600">Framework migration</text>
+                <line x1="280" y1="234" x2="393" y2="234" stroke="#d97706" stroke-width="1.5" stroke-dasharray="6,3"/>
+                <circle cx="393" cy="234" r="4" fill="#d97706"/>
+                <rect x="20" y="260" width="260" height="32" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5" filter="url(#shadow7b)"/>
+                <text x="150" y="281" text-anchor="middle" fill="#d97706" font-size="11" font-weight="600">Database technology change</text>
+                <line x1="280" y1="276" x2="393" y2="242" stroke="#d97706" stroke-width="1.5" stroke-dasharray="6,3"/>
+                <circle cx="393" cy="242" r="4" fill="#d97706"/>
+                <rect x="20" y="298" width="260" height="32" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5" filter="url(#shadow7b)"/>
+                <text x="150" y="319" text-anchor="middle" fill="#d97706" font-size="11" font-weight="600">Auth system rewrite</text>
+                <line x1="280" y1="314" x2="393" y2="246" stroke="#d97706" stroke-width="1.5" stroke-dasharray="6,3"/>
+                <circle cx="393" cy="246" r="4" fill="#d97706"/>
+                <!-- Right side: descriptions -->
+                <text x="580" y="100" text-anchor="middle" fill="#059669" font-size="10">Patches existing docs</text>
+                <text x="580" y="115" text-anchor="middle" fill="#718096" font-size="9">Re-analyzes only changed files</text>
+                <text x="580" y="130" text-anchor="middle" fill="#718096" font-size="9">~10 seconds</text>
+                <text x="580" y="270" text-anchor="middle" fill="#d97706" font-size="10">Full 5-phase regeneration</text>
+                <text x="580" y="285" text-anchor="middle" fill="#718096" font-size="9">Re-reads entire codebase</text>
+                <text x="580" y="300" text-anchor="middle" fill="#718096" font-size="9">~2 minutes</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Refresh decision matrix: incremental-safe changes (green) extend existing architecture and are handled by refresh. Structural changes (amber) alter fundamental architecture and require full re-initialization.</div>
+    </div>
+
     <div class="callout callout-tip">
         <div class="callout-title">When to Refresh</div>
         <p>"After significant codebase changes" is vague. Here are concrete triggers your team should adopt:</p>

@@ -2556,3 +2556,30 @@ Other skills that mutate `draft/architecture.md` should invoke this subroutine w
 > "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine defined in `core/shared/condensation.md`."
 
 > This subroutine is also available at `core/shared/condensation.md` for cross-skill reference.
+
+## Cross-Skill Dispatch
+
+### Brownfield Projects
+When architectural debt is detected during discovery (outdated deps, complex coupling, missing tests):
+- Suggest: "Run `/draft:tech-debt` to catalog and prioritize the debt discovered during initialization"
+
+### All Projects — Post-Init Suggestions
+At completion, present categorized suggestions:
+
+**Start building:**
+- "Run `/draft:new-track` to create your first feature or bug fix track"
+
+**Quality & Testing:**
+- "Run `/draft:testing-strategy` to design a test strategy for this project"
+- "Run `/draft:bughunt` for initial codebase health check"
+
+**Documentation:**
+- "Run `/draft:documentation readme` to generate or update the project README"
+
+**Debugging & Operations:**
+- "Run `/draft:debug` for ad-hoc debugging sessions"
+- "Run `/draft:standup` to generate standup summaries from git activity"
+
+### Jira Sync
+If Jira MCP is available and project has Jira integration configured:
+- Sync initialization artifacts via `core/shared/jira-sync.md`

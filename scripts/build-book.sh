@@ -100,12 +100,12 @@ CHAPTER_TITLES=(
 CHAPTER_NUMS=("0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "A" "B")
 
 CHAPTER_DESCRIPTIONS=(
-    "What Draft is, what it is not, who it is for, and what you get — 17 commands and 5 specialized agents for structured AI development."
+    "What Draft is, what it is not, who it is for, and what you get — 25 commands and 7 specialized agents for structured AI development."
     "Why AI coding assistants produce wrong code without structure — the gap between speed and correctness, and why better prompting is not the answer."
     "The Context-Driven Development methodology — every decision grounded in explicit, versioned, reviewable documents rather than implicit assumptions."
     "Install Draft and run your first commands in five minutes. Set up architecture discovery, create a track, and start implementing."
     "How Draft organizes project context into three tiers — always-loaded profiles, working memory, and deep storage — like CPU memory hierarchy."
-    "Five specialized agents — Architect, Debugger, Planner, RCA, and Reviewer — each with behavioral protocols tuned for their domain."
+    "Seven specialized agents — Architect, Debugger, Ops, Planner, RCA, Reviewer, and Writer — each with behavioral protocols tuned for their domain."
     "How Draft classifies source files into 11 signal categories to determine which architecture sections get deep treatment, brief mention, or skip."
     "How Draft detects changes and updates only what has drifted — freshness hashing, signal drift detection, and targeted regeneration."
     "Collaborative spec intake and phased plan generation — requirements to specification to implementation plan, reviewed before code exists."
@@ -122,7 +122,7 @@ CHAPTER_DESCRIPTIONS=(
     "Mapping Draft tracks to Jira issues — preview before creation, epic/story/sub-task mapping, and bidirectional sync."
     "How Draft works across Claude Code, Copilot, Cursor, Gemini, and Antigravity IDE — platform-specific syntax transforms."
     "The philosophical foundations of Context-Driven Development — structured development, quality gates, incremental refinement."
-    "Complete reference for all 17 Draft commands — usage, options, examples, and output for each slash command."
+    "Complete reference for all 25 Draft commands — usage, options, examples, and output for each slash command."
     "Complete reference for all Draft-generated files — architecture.md, .ai-context.md, .ai-profile.md, specs, plans, and state files."
 )
 

@@ -333,6 +333,7 @@ For each criterion in `spec.md`:
 
 **Verdict:**
 - **PASS:** All requirements implemented AND all acceptance criteria met → Proceed to Stage 3
+- **PASS WITH NOTES:** All requirements met but minor gaps in acceptance criteria verification → Proceed to Stage 3 with notes
 - **FAIL:** ANY requirement missing OR ANY acceptance criterion not met → List gaps, report, and stop (no Stage 3)
 
 ### Stage 3: Code Quality
@@ -375,6 +376,8 @@ If Stage 3 produces zero findings across all four dimensions, do NOT accept "cle
 3. **Implicit assumptions** — Does code assume inputs are always valid, services always up, or state always consistent?
 4. **Future brittleness** — Is anything hardcoded that will break on scale or config change?
 5. **Missing coverage** — Is there behavior that should be tested but isn't?
+6. **Guardrails** — Do any changes violate learned anti-patterns from `guardrails.md`?
+7. **Invariants** — Do any changes violate critical invariants documented in `.ai-context.md`?
 
 If still zero after this pass, document it explicitly in the review report:
 > "Adversarial pass completed. Zero findings confirmed: [one sentence per question explaining why each is clean]"
@@ -782,3 +785,14 @@ After generating the review report, execute the pattern learning phase from `cor
 ```bash
 /draft:review track my-feature with-bughunt
 ```
+
+## Cross-Skill Dispatch
+
+- **Auto-invokes:** `/draft:coverage` after Stage 3 if TDD is enabled for the track
+- **At completion, suggests based on findings:**
+  - If tech debt patterns found: "Run `/draft:tech-debt` to catalog and prioritize debt items"
+  - If documentation gaps: "Run `/draft:documentation` to address documentation findings"
+  - If design decisions need recording: "Run `/draft:adr` to document architectural decisions"
+- If architecture concerns found in review: "Consider running `/draft:deep-review` for a production-grade module audit"
+- If review passes and track modifies production code: "Consider running `/draft:deploy-checklist` before deployment"
+- **Jira sync:** If ticket linked, attach review report and post comment: "[draft] review-complete: {verdict} — {n} findings ({critical} critical)" via `core/shared/jira-sync.md`

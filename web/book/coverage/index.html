@@ -323,6 +323,58 @@ src/generated/api.ts       --    [generated: excluded]</code></pre>
 
     <p>Any boolean expression with three or more conditions is flagged as an MC/DC candidate. For example, <code>if (isAdmin && hasPermission && !isLocked)</code> requires tests proving that changing each condition alone can flip the result &mdash; not just that the overall expression was true once and false once.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;display:block;margin:0 auto;">
+                <defs>
+                    <filter id="sh14c" x="-4%" y="-4%" width="108%" height="108%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- Title -->
+                <text x="350" y="22" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#1a1a2e">Coverage Layers</text>
+                <text x="350" y="38" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#94a3b8">Each inner ring catches what the outer ring misses</text>
+                <!-- Outermost ring: Line Coverage -->
+                <circle cx="350" cy="220" r="160" fill="#eff6ff" stroke="#93c5fd" stroke-width="2" filter="url(#sh14c)"/>
+                <text x="350" y="72" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#2563eb">Line Coverage</text>
+                <text x="350" y="88" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#64748b">Basic: was this line executed?</text>
+                <!-- Second ring: Branch Coverage -->
+                <circle cx="350" cy="220" r="118" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+                <text x="350" y="114" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#7c3aed">Branch Coverage</text>
+                <text x="350" y="130" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#64748b">Meaningful: every decision path tested?</text>
+                <!-- Third ring: MC/DC -->
+                <circle cx="350" cy="220" r="76" fill="#fef9c3" stroke="#fcd34d" stroke-width="2"/>
+                <text x="350" y="158" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#d97706">MC/DC</text>
+                <text x="350" y="174" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#64748b">Safety-critical: each condition</text>
+                <text x="350" y="186" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#64748b">independently affects outcome?</text>
+                <!-- Center: Mutation Testing -->
+                <circle cx="350" cy="220" r="38" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/>
+                <text x="350" y="214" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#059669">Mutation</text>
+                <text x="350" y="228" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#059669">Testing</text>
+                <!-- Annotations: what each layer catches that the outer misses -->
+                <!-- Branch annotation (left) -->
+                <line x1="232" y1="220" x2="130" y2="220" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4,3"/>
+                <rect x="10" y="204" width="122" height="34" rx="6" fill="#fff" stroke="#c4b5fd" stroke-width="1" filter="url(#sh14c)"/>
+                <text x="71" y="218" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#7c3aed">Catches untested</text>
+                <text x="71" y="230" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#7c3aed">if/else branches</text>
+                <!-- MC/DC annotation (right) -->
+                <line x1="426" y1="200" x2="530" y2="180" stroke="#d97706" stroke-width="1" stroke-dasharray="4,3"/>
+                <rect x="532" y="164" width="148" height="34" rx="6" fill="#fff" stroke="#fcd34d" stroke-width="1" filter="url(#sh14c)"/>
+                <text x="606" y="178" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#d97706">Catches compound boolean</text>
+                <text x="606" y="190" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#d97706">conditions only partly tested</text>
+                <!-- Mutation annotation (bottom right) -->
+                <line x1="380" y1="250" x2="530" y2="300" stroke="#059669" stroke-width="1" stroke-dasharray="4,3"/>
+                <rect x="532" y="286" width="148" height="34" rx="6" fill="#fff" stroke="#a7f3d0" stroke-width="1" filter="url(#sh14c)"/>
+                <text x="606" y="300" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#059669">Catches weak assertions</text>
+                <text x="606" y="312" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#059669">that never verify behavior</text>
+                <!-- Line Coverage annotation (bottom left) -->
+                <line x1="250" y1="340" x2="130" y2="340" stroke="#2563eb" stroke-width="1" stroke-dasharray="4,3"/>
+                <rect x="10" y="326" width="122" height="34" rx="6" fill="#fff" stroke="#93c5fd" stroke-width="1" filter="url(#sh14c)"/>
+                <text x="71" y="340" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="#2563eb">Catches completely</text>
+                <text x="71" y="352" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#2563eb">untested code</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Coverage layers as concentric rings: line coverage catches untested code, branch coverage catches untested decision paths, MC/DC catches compound conditions where individual variables are not independently tested, and mutation testing catches tests that execute code without actually verifying behavior.</div>
+    </div>
+
     <h2>Gap Analysis</h2>
     <p>For every file below its target, <code>/draft:coverage</code> identifies uncovered lines and classifies each gap:</p>
 

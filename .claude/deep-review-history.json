@@ -31,6 +31,14 @@
       "issues_found": 15,
       "issues_fixed": 8,
       "summary": "Fixed [~] resume underspecified (added 4-step partial work detection), git commit failure handling (pre-commit hooks, lock files), ACID verification recovery contradiction (revert [x] to [!] before halting), phase boundary detection gap (added Step 4.6), architecture mode activation wording inconsistency (normalized to Step 1.6 reference), non-TDD path quality bar (added verification evidence requirements), condensation subroutine dangling cross-ref (inlined actionable steps), session recovery mechanism (new section), completed track format in tracks.md"
+    },
+    {
+      "module": "cross-skill-dispatch",
+      "path": "core/shared/cross-skill-dispatch.md + 25 skills + 7 agents",
+      "timestamp": "2026-04-02T22:00:00Z",
+      "issues_found": 25,
+      "issues_fixed": 21,
+      "summary": "Fixed 7 dead /draft:upload refs, 1 dead /draft:regression ref, learn vs pattern-learning.md conflation, 3 tier mismatches, 2 unmatched inbound claims, stale jira-sync.md refs, missing incident-response Jira sync. Logical workflow audit: PASS — all 6 execution chains coherent."
     }
   ]
 }

@@ -1022,3 +1022,21 @@ Bugs that cannot have automated regression tests (config issues, documentation, 
 - **Respect project conventions** — Match existing test directory structure, naming patterns, import conventions, and framework idioms
 - **Use native frameworks** — pytest for Python, `go test` for Go, GTest for C++, Jest/Vitest for JS/TS, `cargo test` for Rust, JUnit for Java — never force a foreign test framework
 - **Learn from findings** — After report generation, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with newly discovered conventions and anti-patterns
+
+## Cross-Skill Dispatch
+
+- **Auto-invoked by:** `/draft:review` (with `--full` or `with-bughunt` flag)
+- **Suggests at completion:**
+  - If critical bugs found: "Run `/draft:debug` to investigate critical bugs with structured debugging"
+  - If regression suspected: use `git bisect` to find the exact commit that introduced this bug
+- If systemic patterns found: "Consider running `/draft:learn` to capture these patterns into guardrails"
+- **Feeds into:** `/draft:jira-preview` (bughunt report enriches Jira export)
+- **Jira sync:** If ticket linked, attach bughunt report and post comment: "[draft] bughunt-complete: Found {n} issues ({critical} critical, {important} important)" via `core/shared/jira-sync.md`
+
+### Test Writing Guardrail
+
+When generating regression tests during bughunt, follow the standard guardrail:
+- Always ask the developer before writing regression tests for bugs found
+- Format: "Want me to write regression tests for bugs #{list}? [Y/n]"
+- If declined: mark as "Tests: developer-handled" in the report
+- This guardrail does NOT apply to the regression test suite section which documents test recommendations (not actual test files)

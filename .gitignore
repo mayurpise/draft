@@ -9,6 +9,9 @@ Thumbs.db
 .idea/
 .vscode/
 
+# Build temp files
+integrations/copilot/.github/copilot-instructions.md.*
+
 # Archives
 *.zip
 *.tar.gz

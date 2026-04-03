@@ -306,3 +306,16 @@ If after 3 hypothesis cycles the root cause is not confirmed:
 6. The debugger agent (`core/agents/debugger.md`) handles blocked tasks within any track; the RCA agent handles the overall investigation flow for bug tracks
 
 **Decision rule:** For blocked tasks within bug tracks, follow the RCA agent (investigation context is already established). The debugger agent applies to blocked tasks in feature and refactor tracks.
+
+## Test Writing Guardrail
+
+**In RCA workflows:** Never auto-write regression tests. Always ask the developer first.
+
+```
+If current context is RCA investigation:
+  BEFORE writing any test file:
+    ASK: "Root cause confirmed: [summary]. Want me to write a regression test? [Y/n]"
+    If declined: skip test writing, note in plan.md: "Tests: developer-handled"
+```
+
+This guardrail ensures the developer maintains control over the test suite during sensitive bug fix workflows where incorrect tests could mask the real issue or create false confidence.

@@ -191,3 +191,12 @@ Format findings as actionable tasks:
 Skip pattern learning if the analysis found zero findings.
 
 After generating the report, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with patterns discovered during this module audit. Module-level reviews often reveal architecture and concurrency conventions that are valuable for future analysis.
+
+## Cross-Skill Dispatch
+
+- **Suggested by:** `/draft:review` (when deep architectural issues suspected), `/draft:implement` (track completion for critical modules)
+- **At completion, suggests based on findings:**
+  - If architecture debt found: "Run `/draft:tech-debt` to catalog and prioritize the debt items"
+  - If design decisions need recording: "Run `/draft:adr` to document the architectural decisions"
+  - If documentation gaps found: "Run `/draft:documentation runbook` to create operational documentation"
+- **Jira sync:** If ticket linked, attach deep-review report and post summary via `core/shared/jira-sync.md`

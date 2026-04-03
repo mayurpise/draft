@@ -57,6 +57,15 @@ If the description is empty (e.g., `--quick` with no text), ask the user: "What 
 
 Check if `draft/tracks/<track_id>/` already exists. If collision detected, append `-<ISO-date>` suffix (e.g., `feature-auth-2026-02-21`). If the suffixed path also exists, append `-2`, `-3`, etc. until a free path is found.
 
+### Branch Creation (Toolchain-Aware)
+
+Read `draft/workflow.md` → `## Toolchain` section to determine VCS mode:
+- **git mode:** `git checkout -b <track_id>`
+- **cot mode with Jira ticket:** `cot checkout -t <JIRA_ID> -s <track_id>`
+- **cot mode without Jira ticket:** `cot checkout <track_id>`
+
+If no toolchain section found, default to git mode.
+
 ## Step 1.5: Quick Mode Path (`--quick` only)
 
 **Skip if:** `--quick` was not present in `$ARGUMENTS`.
@@ -431,6 +440,22 @@ After each answer:
 
 **Checkpoint:** "Acceptance criteria so far: [list]. Missing anything?"
 
+### Step 3A.5: Cross-Skill Integration
+
+At this point, check for cross-skill dispatch opportunities:
+
+**Refactor Tracks → Tech-Debt Offer:**
+If track type is "refactor" (detected from description keywords: refactor, clean up, reorganize, migrate, upgrade):
+```
+"Run `/draft:tech-debt` to scope this refactor before writing the spec? [Y/n]"
+```
+- If accepted: run tech-debt analysis, feed findings into spec scope section
+- If declined: proceed with manual scoping
+
+**Design Decision Detection → ADR Suggestion:**
+If the spec involves any of: new technology adoption, architectural boundary changes, API redesign, data model changes:
+- Suggest: "This involves a significant design decision. Run `/draft:adr` to document it? [Y/n]"
+
 ---
 
 ## Step 3B: Intake Flow (Bug & RCA)
@@ -464,6 +489,47 @@ AI contribution: Help narrow investigation scope, reference architecture.md for 
 AI contribution: Suggest investigation approach, reference debugging patterns.
 
 Update spec-draft.md with bug-specific structure after gathering sufficient context.
+
+### Step 3B.5: Auto-Triage Pipeline
+
+For bug tracks, execute this automated triage pipeline:
+
+**Trigger:** Track type is bug/RCA AND any of: Jira ticket ID found, description contains "incident", "outage", "SEV", "regression", "crash".
+
+If trigger conditions not met, skip to Step 4.
+
+1. **Gather External Context:**
+   - If Jira ticket provided: pull via MCP (`get_issue()`, `get_issue_description()`, `get_issue_comments()`)
+   - Extract URLs, log paths, stack traces, reproduction steps, affected services
+   - Use `curl`/`wget` to fetch any URLs mentioned (dashboards, error pages, API responses)
+   - Use `ssh` to access log locations on remote nodes (if paths like `/home/log/`, node IPs mentioned)
+
+2. **Offer Debug Session:**
+   "Run `/draft:debug` to investigate before writing the spec? [Y/n]"
+   - If accepted: launch debug session, feed findings back into spec
+   - If declined: proceed with spec generation from available context
+
+3. **RCA Analysis (if sufficient context):**
+   - Apply 5 Whys methodology (reference `core/agents/rca.md`)
+   - Classify root cause type
+   - Assess blast radius using `.ai-context.md` module boundaries
+
+4. **Generate rca.md:**
+   - Save to `draft/tracks/<id>/rca.md` using `core/templates/rca.md` template
+   - This feeds into `/draft:implement` as investigation context
+
+5. **Jira Sync:**
+   - If ticket linked: attach rca.md and post comment via `core/shared/jira-sync.md`
+
+6. **Developer Checkpoint:**
+   "Root cause hypothesis: [summary]. Blast radius: [scope]. Proceed with spec generation? [Y/n]"
+   - "Want me to write regression tests for this? [Y/n]"
+
+### Step 3B.6: Incident Context Detection
+
+Check if incident keywords detected in description (outage, incident, P0, SEV1, production down):
+- If postmortem exists: load as context for spec generation
+- Suggest: "Consider running `/draft:incident-response postmortem` for formal post-incident analysis"
 
 ---
 
@@ -695,3 +761,18 @@ Updated:
 Key decisions documented in spec.md Conversation Log.
 
 Next: Review the spec and plan, then run `/draft:implement` to begin."
+
+## Cross-Skill Dispatch
+
+### Conditional Plan Tasks
+When generating plan.md, auto-embed these tasks based on context:
+- All tracks: add "Run `/draft:testing-strategy`" task if no testing strategy exists
+- Feature tracks with new APIs: add "Run `/draft:documentation api`" task
+- All tracks: add "Run `/draft:deploy-checklist`" as a final pre-deployment verification task
+
+### At Completion
+- **Jira sync:** If ticket linked, attach spec.md and plan.md, post comment: "[draft] spec-complete: Specification and plan generated for track {id}" via `core/shared/jira-sync.md`
+- **Bug tracks:** "Run `/draft:debug track {id}` to begin structured investigation"
+- **Feature tracks:** "Review the spec and plan, then run `/draft:implement` to begin"
+- If track scope is large or involves multiple modules: "Run `/draft:decompose` to break this into modules? [Y/n]"
+- **Refactor tracks:** "Run `/draft:tech-debt` to catalog debt items before implementation"

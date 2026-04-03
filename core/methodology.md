@@ -1137,7 +1137,7 @@ See `core/agents/reviewer.md` for detailed process.
 
 **Note:** Canonical agent behavior is defined in `core/agents/*.md`. This section provides summaries for reference. When in doubt, defer to the agent files.
 
-Draft includes five specialized agent behaviors that activate during specific workflow phases.
+Draft includes seven specialized agent behaviors that activate during specific workflow phases.
 
 ### Debugger Agent
 
@@ -1252,6 +1252,18 @@ Activated during `/draft:new-track` plan creation and `/draft:decompose`. Provid
 - Plan structure mirrors spec requirements for traceability
 
 See `core/agents/planner.md` for the full planning process and integration workflows.
+
+### Ops Agent
+
+Activated during `/draft:deploy-checklist`, `/draft:incident-response`, and `/draft:standup`. Enforces production-safety mindset with six principles: production-first thinking, blast-radius awareness, rollback readiness, communicate early, severity over speed, and blameless culture. Provides severity classification (SEV1-SEV4), rollback decision frameworks, and stakeholder communication templates.
+
+See `core/agents/ops.md` for the full operational safety protocol.
+
+### Writer Agent
+
+Activated during `/draft:documentation` across four modes: readme, runbook, api, and onboarding. Enforces audience-aware writing with six principles: audience first, progressive disclosure, link don't duplicate, maintain don't create, examples over explanations, and scannable structure. Adapts tone and detail level based on audience profiles (new team member, experienced developer, operator/SRE, external integrator).
+
+See `core/agents/writer.md` for the full writing process and documentation modes.
 
 ---
 

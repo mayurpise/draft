@@ -185,3 +185,23 @@ When debugging a blocked task:
 3. Follow four phases above
 4. When fixed, update task with root cause note
 5. Change status to `[x]` only after verification passes
+
+## Test Writing Guardrail
+
+**In bug/debug workflows:** Never auto-write unit tests. Always ask the developer first.
+
+```
+If current context is debug/RCA:
+  BEFORE writing any test file:
+    ASK: "Want me to write [regression/unit] tests for [description]? [Y/n]"
+    If declined: skip test writing, note in plan.md: "Tests: developer-handled"
+```
+
+This guardrail applies when:
+- Debugging a blocked task in any track type
+- Running a standalone debug session via `/draft:debug`
+- Investigating via RCA agent
+
+Does NOT apply to:
+- Feature tracks with TDD enabled (TDD cycle handles test creation)
+- `/draft:coverage` (measures existing tests, doesn't write new ones)

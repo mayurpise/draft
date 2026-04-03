@@ -142,6 +142,7 @@ For each module, define:
 - Each module should have a single responsibility
 - Target 1-3 files per module
 - Every module needs a clear API boundary
+- **Minimal Coupling** — Modules should communicate through interfaces, not internals. Prefer explicit contracts over shared state.
 - Modules should be testable in isolation
 - Each module typically contains: API, control flow, execution state, functions
 
@@ -334,3 +335,13 @@ When revisiting decomposition (running `/draft:decompose` on an existing `.ai-co
 2. Ask developer what changed (new modules, removed modules, restructured boundaries)
 3. Follow the same checkpoint process for changes
 4. Update the document, preserving completed module statuses and stories
+
+## Cross-Skill Dispatch
+
+- **Suggested by:** `/draft:new-track` (large feature tracks)
+- **At completion, suggests:**
+  - "Run `/draft:testing-strategy` to design test plans for decomposed modules"
+  - "Run `/draft:documentation api` to document new module APIs"
+  - If design decisions were made: "Run `/draft:adr` to record the decomposition rationale"
+- **Dependency cycle detection:** If decomposition reveals dependency cycles or high coupling, suggest: "Run `/draft:tech-debt` to catalog and prioritize the coupling issues"
+- **ADR auto-invocation:** When decomposition involves breaking a monolith or major architectural boundary change, auto-invoke `/draft:adr` to record the decision

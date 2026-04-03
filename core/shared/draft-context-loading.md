@@ -156,3 +156,17 @@ Once loaded, Draft context enables analysis that pure code reading cannot:
 - **Consistency boundary bugs** — Stale reads, lost events at eventual-consistency seams
 - **Guardrail violations** — Checked hard guardrails and learned anti-patterns from guardrails.md
 - **False positive suppression** — Learned conventions and accepted patterns are skipped during analysis
+
+## Future MCP Extensions
+
+The following MCP servers are planned for future integration. Skills referencing these should use graceful fallback (skip silently if unavailable).
+
+| MCP Server | Purpose | Used By | Status |
+|------------|---------|---------|--------|
+| Monitoring MCP | Query metrics, dashboards, alerts | `/draft:incident-response`, `/draft:deploy-checklist` | Planned |
+| CI/CD MCP | Query build status, pipeline results | `/draft:deploy-checklist`, `/draft:implement` | Planned |
+| Chat MCP | Post notifications to Slack/Teams | `/draft:incident-response`, `/draft:standup` | Planned |
+| Incident Management MCP | Query PagerDuty/OpsGenie incidents | `/draft:incident-response` | Planned |
+| APM MCP | Query traces, performance data | `/draft:debug`, `/draft:deep-review` | Planned |
+
+**Graceful fallback pattern:** Check MCP availability during context loading. If unavailable, skip the MCP-dependent step and note in output: "{MCP} unavailable — skipped {step}. Configure {MCP} for richer {skill} results."

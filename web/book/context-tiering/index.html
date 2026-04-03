@@ -375,6 +375,65 @@ coverage: `npm run coverage` | target: 80% line coverage</code></pre>
 
     <p>Relevance scoring activates when three conditions hold: a specific track is active (has <code>spec.md</code> and/or <code>plan.md</code>), <code>.ai-context.md</code> exists and exceeds 200 lines, and the command benefits from focused context (<code>/draft:implement</code>, <code>/draft:bughunt</code>, <code>/draft:review</code>). Commands that need the full picture &mdash; <code>/draft:init</code>, <code>/draft:deep-review</code>, <code>/draft:decompose</code> &mdash; bypass scoring and load everything.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 370" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;" font-family="Arial, sans-serif">
+                <defs>
+                    <filter id="shadow4b" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- Start node -->
+                <rect x="290" y="10" width="140" height="36" rx="18" fill="#1a1a2e" filter="url(#shadow4b)"/>
+                <text x="360" y="33" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Task received</text>
+                <!-- Arrow down to decision -->
+                <line x1="360" y1="46" x2="360" y2="70" stroke="#718096" stroke-width="2"/>
+                <polygon points="360,76 355,68 365,68" fill="#718096"/>
+                <!-- Decision diamond -->
+                <polygon points="360,80 460,130 360,180 260,130" fill="#fff" stroke="#2563eb" stroke-width="2" filter="url(#shadow4b)"/>
+                <text x="360" y="126" text-anchor="middle" fill="#2563eb" font-size="12" font-weight="700">Complexity?</text>
+                <text x="360" y="140" text-anchor="middle" fill="#718096" font-size="10">Assess task scope</text>
+                <!-- Left branch: Simple fix -->
+                <line x1="260" y1="130" x2="110" y2="130" stroke="#2563eb" stroke-width="2"/>
+                <polygon points="110,130 118,125 118,135" fill="#2563eb"/>
+                <text x="185" y="122" text-anchor="middle" fill="#2563eb" font-size="10" font-weight="600">Simple fix</text>
+                <!-- Left outcome -->
+                <rect x="10" y="105" width="100" height="50" rx="10" fill="#2563eb" filter="url(#shadow4b)"/>
+                <text x="60" y="125" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Tier 0</text>
+                <text x="60" y="140" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Only</text>
+                <!-- Left detail box -->
+                <rect x="10" y="165" width="100" height="52" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1"/>
+                <text x="60" y="182" text-anchor="middle" fill="#2563eb" font-size="9" font-weight="600">.ai-profile.md</text>
+                <text x="60" y="196" text-anchor="middle" fill="#718096" font-size="9">20-50 lines</text>
+                <text x="60" y="210" text-anchor="middle" fill="#718096" font-size="9">~500 tokens</text>
+                <!-- Right branch: Deep analysis -->
+                <line x1="460" y1="130" x2="610" y2="130" stroke="#059669" stroke-width="2"/>
+                <polygon points="610,130 602,125 602,135" fill="#059669"/>
+                <text x="535" y="122" text-anchor="middle" fill="#059669" font-size="10" font-weight="600">Deep analysis</text>
+                <!-- Right outcome -->
+                <rect x="610" y="105" width="100" height="50" rx="10" fill="#059669" filter="url(#shadow4b)"/>
+                <text x="660" y="125" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">All Tiers</text>
+                <text x="660" y="140" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">0 + 1 + 2</text>
+                <!-- Right detail box -->
+                <rect x="610" y="165" width="100" height="52" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1"/>
+                <text x="660" y="182" text-anchor="middle" fill="#059669" font-size="9" font-weight="600">All files + facts</text>
+                <text x="660" y="196" text-anchor="middle" fill="#718096" font-size="9">2000+ lines</text>
+                <text x="660" y="210" text-anchor="middle" fill="#718096" font-size="9">~25k tokens</text>
+                <!-- Bottom branch: Feature work -->
+                <line x1="360" y1="180" x2="360" y2="250" stroke="#7c3aed" stroke-width="2"/>
+                <polygon points="360,256 355,248 365,248" fill="#7c3aed"/>
+                <text x="375" y="220" fill="#7c3aed" font-size="10" font-weight="600">Feature work</text>
+                <!-- Bottom outcome -->
+                <rect x="285" y="260" width="150" height="50" rx="10" fill="#7c3aed" filter="url(#shadow4b)"/>
+                <text x="360" y="280" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Tier 0 + Tier 1</text>
+                <text x="360" y="295" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Relevant sections</text>
+                <!-- Bottom detail box -->
+                <rect x="275" y="320" width="170" height="42" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1"/>
+                <text x="360" y="337" text-anchor="middle" fill="#7c3aed" font-size="9" font-weight="600">Profile + scored .ai-context.md</text>
+                <text x="360" y="351" text-anchor="middle" fill="#718096" font-size="9">100-250 lines | ~3k tokens</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Context loading decision tree: task complexity determines which tiers are loaded, keeping token costs proportional to task scope.</div>
+    </div>
+
     <h2>The Fact Registry</h2>
     <p>Beyond the three-tier document hierarchy, Draft maintains a fact registry at <code>draft/.state/facts.json</code>. Each fact is an atomic, verifiable statement about the codebase with source file references, a confidence level, a category, and relationship links to other facts.</p>
 

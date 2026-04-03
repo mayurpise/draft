@@ -148,6 +148,62 @@
         <p>A pattern emerges when a developer introduces a new approach. It becomes a convention when others adopt it. It plateaus as the standard way. It declines when a better approach arrives. <code>/draft:learn</code> tracks where each pattern sits in this lifecycle, so it enforces living conventions and leaves dying patterns alone.</p>
     </div>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;display:block;margin:0 auto;">
+                <defs>
+                    <filter id="sh15l" x="-4%" y="-6%" width="108%" height="116%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                </defs>
+                <!-- Title -->
+                <text x="360" y="22" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#1a1a2e">Pattern Lifecycle</text>
+                <!-- Axes -->
+                <!-- Y-axis -->
+                <line x1="60" y1="48" x2="60" y2="240" stroke="#cbd5e1" stroke-width="1.5"/>
+                <text x="28" y="148" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#94a3b8" transform="rotate(-90,28,148)">Adoption Rate</text>
+                <!-- X-axis -->
+                <line x1="60" y1="240" x2="690" y2="240" stroke="#cbd5e1" stroke-width="1.5"/>
+                <text x="375" y="260" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#94a3b8">Time</text>
+                <!-- Adoption curve -->
+                <path d="M 90,230 C 130,225 150,210 190,180 C 230,140 270,80 330,65 C 390,52 440,50 490,52 C 530,55 560,60 590,90 C 620,120 640,160 660,200" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round"/>
+                <!-- Area fill under curve -->
+                <path d="M 90,230 C 130,225 150,210 190,180 C 230,140 270,80 330,65 C 390,52 440,50 490,52 C 530,55 560,60 590,90 C 620,120 640,160 660,200 L 660,240 L 90,240 Z" fill="#2563eb" opacity="0.06"/>
+                <!-- Stage dividers (vertical dashed lines) -->
+                <line x1="160" y1="48" x2="160" y2="240" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,4"/>
+                <line x1="280" y1="48" x2="280" y2="240" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,4"/>
+                <line x1="420" y1="48" x2="420" y2="240" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,4"/>
+                <line x1="560" y1="48" x2="560" y2="240" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,4"/>
+                <!-- Stage labels (boxes below x-axis) -->
+                <!-- Stage 1: Emergence -->
+                <rect x="68" y="270" width="84" height="42" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" filter="url(#sh15l)"/>
+                <text x="110" y="286" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#64748b">Emergence</text>
+                <text x="110" y="300" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" fill="#94a3b8">1-2 occurrences</text>
+                <!-- Stage 2: Adoption -->
+                <rect x="168" y="270" width="104" height="42" rx="6" fill="#eff6ff" stroke="#93c5fd" stroke-width="1" filter="url(#sh15l)"/>
+                <text x="220" y="286" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#2563eb">Adoption</text>
+                <text x="220" y="300" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" fill="#94a3b8">3-5 occurrences</text>
+                <!-- Stage 3: Convention -->
+                <rect x="288" y="270" width="124" height="42" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.2" filter="url(#sh15l)"/>
+                <text x="350" y="286" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#1e40af">Convention</text>
+                <text x="350" y="300" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" fill="#94a3b8">5+ consistent</text>
+                <!-- Stage 4: Plateau -->
+                <rect x="428" y="270" width="124" height="42" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.2" filter="url(#sh15l)"/>
+                <text x="490" y="286" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#059669">Plateau</text>
+                <text x="490" y="300" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" fill="#94a3b8">stable standard</text>
+                <!-- Stage 5: Decline -->
+                <rect x="568" y="270" width="104" height="42" rx="6" fill="#fef9c3" stroke="#d97706" stroke-width="1.2" filter="url(#sh15l)"/>
+                <text x="620" y="286" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#d97706">Decline</text>
+                <text x="620" y="300" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" fill="#94a3b8">old:new &gt; 3:1</text>
+                <!-- Annotation dots on curve -->
+                <circle cx="110" cy="222" r="5" fill="#64748b" stroke="#fff" stroke-width="1.5"/>
+                <circle cx="220" cy="148" r="5" fill="#2563eb" stroke="#fff" stroke-width="1.5"/>
+                <circle cx="350" cy="60" r="5" fill="#1e40af" stroke="#fff" stroke-width="1.5"/>
+                <circle cx="490" cy="52" r="5" fill="#059669" stroke="#fff" stroke-width="1.5"/>
+                <circle cx="630" cy="170" r="5" fill="#d97706" stroke="#fff" stroke-width="1.5"/>
+            </svg>
+        </div>
+        <div class="figure-caption">The pattern lifecycle: a pattern emerges when a developer introduces a new approach, gains adoption as others use it, becomes a convention at 5+ consistent occurrences, plateaus as the established standard, and eventually declines when a better approach supersedes it. Draft tracks each pattern's position in this lifecycle to enforce living conventions and ignore dying patterns.</div>
+    </div>
+
     <h2>The Seven Dimensions Scanned</h2>
     <p><code>/draft:learn</code> analyzes the codebase across seven dimensions, looking for recurring structures in each:</p>
 

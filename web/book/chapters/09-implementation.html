@@ -141,6 +141,88 @@ async function extractIdentity(
 
     <p>After you approve the skeletons, the TDD cycle fills them in. Each checkpoint &mdash; Story, Execution State, Skeletons &mdash; gives you veto power over the design before implementation begins.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;margin:0 auto;">
+                <defs>
+                    <filter id="sh09a" x="-2%" y="-4%" width="104%" height="112%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                    <marker id="arr09a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6366f1"/></marker>
+                    <linearGradient id="archGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#3b82f6"/>
+                        <stop offset="50%" stop-color="#7c3aed"/>
+                        <stop offset="100%" stop-color="#059669"/>
+                    </linearGradient>
+                </defs>
+
+                <!-- Progress bar background -->
+                <rect x="40" y="10" width="640" height="6" rx="3" fill="#f1f5f9"/>
+                <rect x="40" y="10" width="640" height="6" rx="3" fill="url(#archGrad)" opacity="0.3"/>
+
+                <!-- Abstraction labels -->
+                <text x="80" y="30" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#94a3b8">Abstract</text>
+                <text x="640" y="30" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#94a3b8">Concrete</text>
+
+                <!-- Step 1: Story Writing -->
+                <rect x="20" y="44" width="140" height="100" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5" filter="url(#sh09a)"/>
+                <text x="90" y="68" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#1e40af">Story Writing</text>
+                <text x="90" y="86" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#64748b">Natural-language</text>
+                <text x="90" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#64748b">algorithm description</text>
+                <!-- Checkpoint -->
+                <rect x="52" y="120" width="76" height="20" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/>
+                <text x="90" y="134" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#2563eb">Checkpoint &#10003;</text>
+
+                <!-- Arrow 1→2 -->
+                <path d="M160 94 L190 94" stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#arr09a)"/>
+
+                <!-- Step 2: Execution State -->
+                <rect x="196" y="44" width="140" height="100" rx="12" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh09a)"/>
+                <text x="266" y="64" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#5b21b6">Execution State</text>
+                <text x="266" y="80" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#5b21b6">Design</text>
+                <text x="266" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#64748b">Input, intermediate,</text>
+                <text x="266" y="112" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#64748b">output &amp; error state</text>
+                <!-- Checkpoint -->
+                <rect x="228" y="120" width="76" height="20" rx="10" fill="#f3e8ff" stroke="#7c3aed" stroke-width="1"/>
+                <text x="266" y="134" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#7c3aed">Checkpoint &#10003;</text>
+
+                <!-- Arrow 2→3 -->
+                <path d="M336 94 L366 94" stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#arr09a)"/>
+
+                <!-- Step 3: Function Skeletons -->
+                <rect x="372" y="44" width="140" height="100" rx="12" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5" filter="url(#sh09a)"/>
+                <text x="442" y="64" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#15803d">Function</text>
+                <text x="442" y="80" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#15803d">Skeletons</text>
+                <text x="442" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#64748b">Signatures, types,</text>
+                <text x="442" y="112" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#64748b">TODO placeholders</text>
+                <!-- Checkpoint -->
+                <rect x="404" y="120" width="76" height="20" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1"/>
+                <text x="442" y="134" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#16a34a">Checkpoint &#10003;</text>
+
+                <!-- Arrow 3→4 -->
+                <path d="M512 94 L542 94" stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#arr09a)"/>
+
+                <!-- Step 4: TDD Cycle -->
+                <rect x="548" y="44" width="150" height="100" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2" filter="url(#sh09a)"/>
+                <text x="623" y="68" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#047857">TDD Cycle</text>
+                <!-- Mini cycle indicators -->
+                <circle cx="590" cy="100" r="14" fill="#fff1f2" stroke="#e11d48" stroke-width="1.2"/>
+                <text x="590" y="104" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="bold" fill="#e11d48">R</text>
+                <circle cx="623" cy="100" r="14" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+                <text x="623" y="104" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="bold" fill="#059669">G</text>
+                <circle cx="656" cy="100" r="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.2"/>
+                <text x="656" y="104" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="bold" fill="#2563eb">Rf</text>
+                <!-- Checkpoint -->
+                <rect x="585" y="120" width="76" height="20" rx="10" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                <text x="623" y="134" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#059669">COMMIT</text>
+
+                <!-- Bottom: developer approval label -->
+                <path d="M90 148 L90 170 L623 170 L623 148" stroke="#e2e8f0" stroke-width="1" fill="none" stroke-dasharray="4,3"/>
+                <rect x="280" y="178" width="160" height="28" rx="14" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#sh09a)"/>
+                <text x="360" y="196" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#64748b">Developer approval at each step</text>
+            </svg>
+        </div>
+        <div class="figure-caption">Architecture Mode pipeline: each step moves from abstract algorithm to concrete code, with a mandatory developer checkpoint between stages. No code is written until stories, state, and skeletons are approved.</div>
+    </div>
+
     <h2>Production Robustness Patterns</h2>
     <p>Whether Architecture Mode is active or not, Draft enforces six categories of production robustness patterns during code generation. These are not a post-hoc checklist &mdash; they are <strong>generation directives</strong> applied while writing code.</p>
 

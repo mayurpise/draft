@@ -106,6 +106,55 @@
 
     <p>After generating <code>architecture.md</code>, the Condensation Subroutine runs to produce a root-level <code>.ai-context.md</code> &mdash; a token-optimized aggregate of all service knowledge.</p>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:700px;display:block;margin:0 auto">
+                <defs>
+                    <filter id="stack-shadow" x="-4%" y="-4%" width="108%" height="112%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a1a2e" flood-opacity="0.08"/>
+                    </filter>
+                </defs>
+                <!-- Label: Generated -->
+                <text x="160" y="24" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="11" font-weight="bold">GENERATED</text>
+                <!-- Card 1: service-index.md -->
+                <rect x="30" y="38" width="260" height="68" rx="8" fill="#2563eb" filter="url(#stack-shadow)" transform="rotate(-3, 160, 72)"/>
+                <text x="56" y="64" fill="#fff" font-family="Arial,sans-serif" font-size="13" font-weight="bold" transform="rotate(-3, 160, 72)">service-index.md</text>
+                <text x="56" y="82" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="11" transform="rotate(-3, 160, 72)">Directory of all services</text>
+                <!-- Card 2: dependency-graph.md -->
+                <rect x="30" y="110" width="260" height="68" rx="8" fill="#7c3aed" filter="url(#stack-shadow)" transform="rotate(-1.5, 160, 144)"/>
+                <text x="56" y="136" fill="#fff" font-family="Arial,sans-serif" font-size="13" font-weight="bold" transform="rotate(-1.5, 160, 144)">dependency-graph.md</text>
+                <text x="56" y="154" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="11" transform="rotate(-1.5, 160, 144)">Cross-service dependencies</text>
+                <!-- Card 3: tech-matrix.md -->
+                <rect x="30" y="182" width="260" height="68" rx="8" fill="#d97706" filter="url(#stack-shadow)"/>
+                <text x="56" y="208" fill="#fff" font-family="Arial,sans-serif" font-size="13" font-weight="bold">tech-matrix.md</text>
+                <text x="56" y="226" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="11">Technology distribution</text>
+
+                <!-- Divider arrow -->
+                <line x1="340" y1="100" x2="340" y2="250" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="6,4"/>
+                <text x="348" y="176" fill="#718096" font-family="Arial,sans-serif" font-size="18">+</text>
+
+                <!-- Label: Synthesized -->
+                <text x="530" y="24" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="11" font-weight="bold">SYNTHESIZED</text>
+                <!-- Card 4: product.md -->
+                <rect x="400" y="38" width="260" height="60" rx="8" fill="#059669" filter="url(#stack-shadow)" transform="rotate(2, 530, 68)"/>
+                <text x="426" y="62" fill="#fff" font-family="Arial,sans-serif" font-size="13" font-weight="bold" transform="rotate(2, 530, 68)">product.md</text>
+                <text x="426" y="78" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="11" transform="rotate(2, 530, 68)">Aggregated product vision</text>
+                <!-- Card 5: architecture.md -->
+                <rect x="400" y="104" width="260" height="60" rx="8" fill="#059669" filter="url(#stack-shadow)" transform="rotate(1, 530, 134)"/>
+                <text x="426" y="128" fill="#fff" font-family="Arial,sans-serif" font-size="13" font-weight="bold" transform="rotate(1, 530, 134)">architecture.md</text>
+                <text x="426" y="144" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="11" transform="rotate(1, 530, 134)">System-of-systems view</text>
+                <!-- Card 6: tech-stack.md -->
+                <rect x="400" y="170" width="260" height="60" rx="8" fill="#059669" filter="url(#stack-shadow)"/>
+                <text x="426" y="194" fill="#fff" font-family="Arial,sans-serif" font-size="13" font-weight="bold">tech-stack.md</text>
+                <text x="426" y="210" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="11">Org standards</text>
+
+                <!-- Legend -->
+                <text x="350" y="280" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="11">Generated files map what exists; synthesized files aggregate service-level context into system-level knowledge</text>
+            </svg>
+        </div>
+        <div class="figure-caption">The six root-level files produced by /draft:index: three generated files that map the monorepo structure, plus three synthesized files that aggregate service-level context into a unified system view.</div>
+    </div>
+
     <h2>Root-Level vs. Service-Level Context</h2>
     <p>After indexing, the monorepo has two layers of context:</p>
 

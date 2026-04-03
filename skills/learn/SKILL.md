@@ -394,3 +394,10 @@ This creates a **continuous improvement loop**:
 | Learn framework defaults as conventions | Only learn project-specific patterns |
 | Remove entries on re-scan | Update evidence/dates, never delete |
 | Learn from test/mock code | Focus on production source code |
+
+## Cross-Skill Dispatch
+
+- **Related shared procedure:** `core/shared/pattern-learning.md` is run inline by `/draft:implement`, `/draft:review`, `/draft:bughunt`, and `/draft:deep-review` to update `draft/guardrails.md` automatically. The `/draft:learn` skill provides a deeper, standalone pattern scan beyond what the inline procedure captures.
+- **Fed by:** `/draft:bughunt` (systemic patterns), `/draft:deep-review` (architecture patterns), `/draft:incident-response` (incident patterns)
+- **Updates:** `draft/guardrails.md` with learned conventions and anti-patterns
+- **No downstream dispatch** — learn is a terminal skill that updates guardrails for all quality skills to consume

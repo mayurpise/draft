@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-04-02
+
+### Added
+- **8 new specialist commands** expanding Draft from 17 to 25 skills:
+  - `/draft:debug` — Structured debugging: reproduce, isolate, diagnose, fix. Auto-invoked by `/draft:new-track` for bug tracks.
+  - `/draft:deploy-checklist` — Pre-deployment verification checklists customized by tech-stack with rollback triggers.
+  - `/draft:documentation` — Technical doc writing (readme, runbook, api, onboarding) using writer agent principles.
+  - `/draft:incident-response` — Incident lifecycle: triage, communicate, mitigate, postmortem. Three modes (new/update/postmortem).
+  - `/draft:quick-review` — Lightweight ad-hoc review for PRs, diffs, or files. Four dimensions, no track context required.
+  - `/draft:standup` — Generate standup summaries from git history and track progress. Read-only.
+  - `/draft:tech-debt` — Identify, categorize, and prioritize tech debt across six dimensions with remediation plans.
+  - `/draft:testing-strategy` — Design test strategies with coverage targets. Complements `/draft:coverage`.
+- **Two-tier architecture** — 4 primary workflow commands with auto-invocation + 21 specialist commands
+- **Draft Book** — 22-chapter + 2-appendix comprehensive guide at `web/book/`:
+  - Static path-based pages for SEO (migrated from hash SPA)
+  - Full chapter navigation with prev/next links
+  - Mobile-friendly responsive design
+- **Website enhancements:**
+  - Light theme with SVG illustrations
+  - Comprehensive SEO (meta tags, Open Graph, sitemap with 24 book entries)
+  - GA4 analytics on book pages
+  - Bento grid layout with dense flow and full-width capstone
+  - Guardrails.md card in architecture section
+- **Enhanced agents:** debugger and RCA agents with expanded investigation protocols
+- **Context loading improvements:** draft context loading shared procedure enhanced
+
+### Changed
+- Plugin manifest updated to register all 25 skills (was 17)
+- `SKILL_ORDER` in build script expanded to 25 entries with headers and triggers for all new skills
+- Skill dependency graph (`GRAPH.md`) rewritten for two-tier architecture with new subsystem groupings (Debugging, Operations, Authoring)
+- `/draft:draft` overview command updated with complete 25-command reference table and subsystem descriptions
+- Core methodology updated with references to new specialist commands
+- Copilot integration regenerated (20,311 lines, up from ~15,000)
+- Book build script (`build-book.sh`) improvements
+
+### Fixed
+- GRAPH.md specialist command count corrected (20 → 21)
+- Ported enhancements and bug fixes from draft to draft (init, new-track, implement skills)
+
 ### Added
 - **Codebase Signal Detection** in `/draft:init` Phase 1:
   - Classifies all source files into 11 signal categories: `backend_routes`, `frontend_routes`, `components`, `services`, `data_models`, `auth_files`, `state_management`, `background_jobs`, `persistence`, `test_infra`, `config_files`

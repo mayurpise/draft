@@ -99,10 +99,18 @@ curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integr
 | **`/draft:status`** | Show progress overview |
 | **`/draft:revert`** | Git-aware rollback |
 | **`/draft:change`** | Handle mid-track requirement changes |
+| **`/draft:debug`** | Structured debugging: reproduce, isolate, diagnose, fix |
+| **`/draft:quick-review`** | Lightweight 4-dimension code review |
+| **`/draft:deploy-checklist`** | Pre-deployment verification with rollback triggers |
+| **`/draft:testing-strategy`** | Test plan design with coverage targets |
+| **`/draft:tech-debt`** | Technical debt analysis across 6 dimensions |
+| **`/draft:standup`** | Git activity standup summary (read-only) |
+| **`/draft:incident-response`** | Incident lifecycle: triage, communicate, mitigate, postmortem |
+| **`/draft:documentation`** | Technical docs: readme, runbook, api, onboarding |
 | **`/draft:jira-preview`** | Generate Jira export for review |
 | **`/draft:jira-create`** | Push issues to Jira via MCP |
 
-[See all 17 commands →](core/methodology.md#command-workflows)
+[See all 25 commands →](core/methodology.md#command-workflows)
 
 ---
 

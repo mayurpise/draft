@@ -129,6 +129,77 @@
         <p>Every reported bug must include: the actual problematic code snippet, the trace showing how data reaches the bug, which verification checks were completed, and an explicit statement of why this is not a false positive. A finding without evidence is not a finding &mdash; it is speculation.</p>
     </div>
 
+    <div class="figure">
+        <div class="figure-content">
+            <svg viewBox="0 0 700 440" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;height:auto;display:block;margin:0 auto;">
+                <defs>
+                    <filter id="sh13f" x="-4%" y="-4%" width="108%" height="108%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
+                    <marker id="arr13f" viewBox="0 0 10 10" refX="5" refY="10" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 0 L 5 10 z" fill="#718096"/></marker>
+                </defs>
+                <!-- Title -->
+                <text x="350" y="22" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#1a1a2e">6-Step Verification Pipeline</text>
+                <!-- Entry label -->
+                <text x="350" y="46" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#94a3b8">Candidate findings enter</text>
+                <!-- Funnel: wide at top, narrow at bottom -->
+                <!-- Step 1 - widest -->
+                <polygon points="110,58 590,58 580,108 120,108" fill="#eff6ff" stroke="#2563eb" stroke-width="1.2" filter="url(#sh13f)"/>
+                <text x="300" y="80" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#2563eb">Step 1</text>
+                <text x="420" y="80" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#1a1a2e">Code Path Verification</text>
+                <text x="420" y="96" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#64748b">Trace data flow, check reachability</text>
+                <!-- Filter-out label right side -->
+                <line x1="582" y1="83" x2="640" y2="83" stroke="#e11d48" stroke-width="1" stroke-dasharray="4,3"/>
+                <text x="643" y="78" font-family="Arial,sans-serif" font-size="9" fill="#e11d48" font-weight="bold">Filtered</text>
+                <text x="643" y="90" font-family="Arial,sans-serif" font-size="9" fill="#e11d48">unreachable</text>
+                <!-- Arrow between steps -->
+                <line x1="350" y1="110" x2="350" y2="118" stroke="#718096" stroke-width="1.5"/>
+                <!-- Step 2 -->
+                <polygon points="130,120 570,120 560,170 140,170" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.2" filter="url(#sh13f)"/>
+                <text x="300" y="142" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#7c3aed">Step 2</text>
+                <text x="420" y="142" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#1a1a2e">Context Cross-Reference</text>
+                <text x="420" y="158" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#64748b">.ai-context.md, tech-stack.md, product.md</text>
+                <line x1="562" y1="145" x2="640" y2="145" stroke="#e11d48" stroke-width="1" stroke-dasharray="4,3"/>
+                <text x="643" y="140" font-family="Arial,sans-serif" font-size="9" fill="#e11d48" font-weight="bold">Filtered</text>
+                <text x="643" y="152" font-family="Arial,sans-serif" font-size="9" fill="#e11d48">intentional</text>
+                <line x1="350" y1="172" x2="350" y2="180" stroke="#718096" stroke-width="1.5"/>
+                <!-- Step 3 -->
+                <polygon points="150,182 550,182 540,232 160,232" fill="#ecfdf5" stroke="#059669" stroke-width="1.2" filter="url(#sh13f)"/>
+                <text x="300" y="204" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#059669">Step 3</text>
+                <text x="420" y="204" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#1a1a2e">Framework Verification</text>
+                <text x="420" y="220" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#64748b">Check official docs, version behavior</text>
+                <line x1="542" y1="207" x2="640" y2="207" stroke="#e11d48" stroke-width="1" stroke-dasharray="4,3"/>
+                <text x="643" y="202" font-family="Arial,sans-serif" font-size="9" fill="#e11d48" font-weight="bold">Filtered</text>
+                <text x="643" y="214" font-family="Arial,sans-serif" font-size="9" fill="#e11d48">handled</text>
+                <line x1="350" y1="234" x2="350" y2="242" stroke="#718096" stroke-width="1.5"/>
+                <!-- Step 4 -->
+                <polygon points="170,244 530,244 520,294 180,294" fill="#fef9c3" stroke="#d97706" stroke-width="1.2" filter="url(#sh13f)"/>
+                <text x="300" y="266" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#d97706">Step 4</text>
+                <text x="415" y="266" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#1a1a2e">Codebase Pattern Check</text>
+                <text x="415" y="282" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#64748b">Same pattern elsewhere? What differs?</text>
+                <line x1="522" y1="269" x2="640" y2="269" stroke="#e11d48" stroke-width="1" stroke-dasharray="4,3"/>
+                <text x="643" y="264" font-family="Arial,sans-serif" font-size="9" fill="#e11d48" font-weight="bold">Filtered</text>
+                <text x="643" y="276" font-family="Arial,sans-serif" font-size="9" fill="#e11d48">consistent</text>
+                <line x1="350" y1="296" x2="350" y2="304" stroke="#718096" stroke-width="1.5"/>
+                <!-- Step 5 -->
+                <polygon points="190,306 510,306 500,356 200,356" fill="#fff1f2" stroke="#e11d48" stroke-width="1.2" filter="url(#sh13f)"/>
+                <text x="300" y="328" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#e11d48">Step 5</text>
+                <text x="410" y="328" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#1a1a2e">False Positive Elimination</text>
+                <text x="410" y="344" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#64748b">Dead code? Test-only? Commented?</text>
+                <line x1="502" y1="331" x2="640" y2="331" stroke="#e11d48" stroke-width="1" stroke-dasharray="4,3"/>
+                <text x="643" y="326" font-family="Arial,sans-serif" font-size="9" fill="#e11d48" font-weight="bold">Filtered</text>
+                <text x="643" y="338" font-family="Arial,sans-serif" font-size="9" fill="#e11d48">dead code</text>
+                <line x1="350" y1="358" x2="350" y2="366" stroke="#718096" stroke-width="1.5"/>
+                <!-- Step 6 - narrowest -->
+                <polygon points="210,368 490,368 480,418 220,418" fill="#f0fdf4" stroke="#059669" stroke-width="1.5" filter="url(#sh13f)"/>
+                <text x="300" y="390" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#059669">Step 6</text>
+                <text x="405" y="390" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#1a1a2e">Pattern Prevalence Check</text>
+                <text x="405" y="406" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#64748b">5+ occurrences? Sample and verify</text>
+                <!-- Output label -->
+                <text x="350" y="436" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#059669">&#x2193; Verified bugs only</text>
+            </svg>
+        </div>
+        <div class="figure-caption">The 6-step verification funnel: many candidate findings enter at the top, but each step filters out false positives. Only verified bugs with evidence survive all six checks and appear in the final report.</div>
+    </div>
+
     <h2>Confidence Filtering</h2>
     <p>Bughunt uses a strict confidence threshold. Only <strong>HIGH</strong> and <strong>CONFIRMED</strong> findings are included in the report. This is a deliberate design choice &mdash; a report with 50 findings where half are false positives teaches the team to ignore the report. A report with 8 verified findings, all actionable, teaches the team to trust it.</p>
 

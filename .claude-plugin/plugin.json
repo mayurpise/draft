@@ -22,31 +22,5 @@
     "signal-detection",
     "state-management"
   ],
-  "skills": [
-    "skills/adr/SKILL.md",
-    "skills/bughunt/SKILL.md",
-    "skills/change/SKILL.md",
-    "skills/coverage/SKILL.md",
-    "skills/debug/SKILL.md",
-    "skills/decompose/SKILL.md",
-    "skills/deep-review/SKILL.md",
-    "skills/deploy-checklist/SKILL.md",
-    "skills/documentation/SKILL.md",
-    "skills/draft/SKILL.md",
-    "skills/implement/SKILL.md",
-    "skills/incident-response/SKILL.md",
-    "skills/index/SKILL.md",
-    "skills/init/SKILL.md",
-    "skills/jira-create/SKILL.md",
-    "skills/jira-preview/SKILL.md",
-    "skills/learn/SKILL.md",
-    "skills/new-track/SKILL.md",
-    "skills/quick-review/SKILL.md",
-    "skills/revert/SKILL.md",
-    "skills/review/SKILL.md",
-    "skills/standup/SKILL.md",
-    "skills/status/SKILL.md",
-    "skills/tech-debt/SKILL.md",
-    "skills/testing-strategy/SKILL.md"
-  ]
+  "skills": "./skills/"
 }

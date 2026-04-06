@@ -22,6 +22,9 @@
     <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
     <meta name="twitter:image:alt" content="Draft: Context-Driven Development Plugin for AI Coding Agents">
     <link rel="canonical" href="https://getdraft.dev">
+    <link rel="alternate" hreflang="en" href="https://getdraft.dev/">
+    <link rel="alternate" hreflang="x-default" href="https://getdraft.dev/">
+    <link rel="alternate" type="text/plain" href="https://getdraft.dev/llms.txt" title="LLM-optimized content">
 
     <script type="application/ld+json">
     {
@@ -61,6 +64,95 @@
         "Auto-learning guardrails with pattern promotion and false-positive elimination"
       ],
       "screenshot": "https://getdraft.dev/social-preview.png"
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Draft?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Draft is a free, open-source plugin that adds Context-Driven Development to AI coding agents. It provides 25 commands covering spec-driven planning, TDD enforcement, 3-stage code review, 14-dimension bug hunting, and architecture discovery for Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Gemini."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Draft free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, Draft is completely free and open source under the MIT license. There are no paid tiers, no usage limits, and no vendor lock-in. The only costs are from the host AI tools you use (Claude Code, Copilot, etc.)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What AI coding agents does Draft support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Draft supports Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Gemini. It integrates natively with each platform using their respective configuration formats — slash commands for Claude Code and Cursor, copilot-instructions.md for Copilot, and .gemini.md for Gemini and Antigravity."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I install Draft?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For Claude Code, run '/plugin marketplace add mayurpise/draft' then '/plugin install draft'. For Cursor, add the GitHub repo via Settings > Rules. For Copilot, download copilot-instructions.md into your .github directory. Each platform takes under 30 seconds to set up."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Context-Driven Development?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Context-Driven Development is a methodology where AI coding agents operate from persistent, file-based project context rather than ephemeral chat. Draft analyzes your codebase to generate architecture docs, then enforces a spec-first workflow: specifications and plans are written and reviewed before any code is generated."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Draft work with my existing project?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Running /draft:init performs a 5-phase analysis of your existing codebase, generating architecture documentation, AI context files, and signal classifications. It works with any language, framework, or project structure — brownfield or greenfield."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is Draft different from other AI coding tools?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Draft is not an AI coding tool — it is a methodology layer that runs on top of existing AI agents. While tools like Cursor or Copilot generate code, Draft ensures that code follows approved specifications, passes TDD gates, and fits your architecture. It adds structure and quality gates, not another AI model."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Draft require any configuration?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Minimal. After installation, run /draft:init and it automatically analyzes your codebase and generates all necessary configuration files (product.md, tech-stack.md, architecture.md, etc.). You can customize these files afterward, but the defaults work out of the box."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can Draft work with monorepos?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The /draft:index command provides monorepo federation — it discovers services, builds dependency graphs, and aggregates context across multiple packages or services. Each service gets its own context while maintaining a unified root-level view."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Draft support Jira integration?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. /draft:jira-preview generates a Jira export file mapping tracks to epics, phases to stories, and tasks to sub-tasks with auto-generated story points. /draft:jira-create pushes these issues to Jira via MCP. Draft also supports epic qualification pipelines combining Jira, Gerrit, and GitHub data."
+          }
+        }
+      ]
     }
     </script>
 
@@ -123,6 +215,7 @@
         <a href="#architecture" class="side-dot" data-label="Research"><span></span></a>
         <a href="#audience" class="side-dot" data-label="Audience"><span></span></a>
         <a href="#industry" class="side-dot" data-label="Standards"><span></span></a>
+        <a href="#faq" class="side-dot" data-label="FAQ"><span></span></a>
     </nav>
 
     <!-- ============================================================ -->
@@ -981,6 +1074,89 @@
 
             <div class="callout callout--emerald">
                 <strong>Maturity Level 4/5 (High).</strong> Adopting Draft puts your workflow on par with Staff Engineer practices at FAANG companies: proposing implementations of specs, performing systematic bughunts, and maintaining architectural documents.
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 11: FAQ                                              -->
+    <!-- ============================================================ -->
+    <section id="faq" class="section">
+        <div class="section-glow section-glow--amber"></div>
+        <div class="section-inner">
+            <span class="section-label">Questions &amp; Answers</span>
+            <h2>Frequently asked <span class="text-amber">questions</span></h2>
+
+            <div class="faq-list">
+                <details class="faq-item glass-card">
+                    <summary class="faq-question">What is Draft?</summary>
+                    <div class="faq-answer">
+                        <p>Draft is a free, open-source plugin that adds Context-Driven Development to AI coding agents. It provides 25 commands covering spec-driven planning, TDD enforcement, 3-stage code review, 14-dimension bug hunting, and architecture discovery for Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Gemini.</p>
+                    </div>
+                </details>
+
+                <details class="faq-item glass-card">
+                    <summary class="faq-question">Is Draft free?</summary>
+                    <div class="faq-answer">
+                        <p>Yes, Draft is completely free and open source under the MIT license. There are no paid tiers, no usage limits, and no vendor lock-in. The only costs are from the host AI tools you use (Claude Code, Copilot, etc.).</p>
+                    </div>
+                </details>
+
+                <details class="faq-item glass-card">
+                    <summary class="faq-question">What AI coding agents does Draft support?</summary>
+                    <div class="faq-answer">
+                        <p>Draft supports Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Gemini. It integrates natively with each platform using their respective configuration formats — slash commands for Claude Code and Cursor, copilot-instructions.md for Copilot, and .gemini.md for Gemini and Antigravity.</p>
+                    </div>
+                </details>
+
+                <details class="faq-item glass-card">
+                    <summary class="faq-question">How do I install Draft?</summary>
+                    <div class="faq-answer">
+                        <p>For Claude Code, run <code>/plugin marketplace add mayurpise/draft</code> then <code>/plugin install draft</code>. For Cursor, add the GitHub repo via Settings > Rules. For Copilot, download copilot-instructions.md into your .github directory. Each platform takes under 30 seconds to set up.</p>
+                    </div>
+                </details>
+
+                <details class="faq-item glass-card">
+                    <summary class="faq-question">What is Context-Driven Development?</summary>
+                    <div class="faq-answer">
+                        <p>Context-Driven Development is a methodology where AI coding agents operate from persistent, file-based project context rather than ephemeral chat. Draft analyzes your codebase to generate architecture docs, then enforces a spec-first workflow: specifications and plans are written and reviewed before any code is generated.</p>
+                    </div>
+                </details>
+
+                <details class="faq-item glass-card">
+                    <summary class="faq-question">Does Draft work with my existing project?</summary>
+                    <div class="faq-answer">
+                        <p>Yes. Running <code>/draft:init</code> performs a 5-phase analysis of your existing codebase, generating architecture documentation, AI context files, and signal classifications. It works with any language, framework, or project structure — brownfield or greenfield.</p>
+                    </div>
+                </details>
+
+                <details class="faq-item glass-card">
+                    <summary class="faq-question">How is Draft different from other AI coding tools?</summary>
+                    <div class="faq-answer">
+                        <p>Draft is not an AI coding tool — it is a methodology layer that runs on top of existing AI agents. While tools like Cursor or Copilot generate code, Draft ensures that code follows approved specifications, passes TDD gates, and fits your architecture. It adds structure and quality gates, not another AI model.</p>
+                    </div>
+                </details>
+
+                <details class="faq-item glass-card">
+                    <summary class="faq-question">Does Draft require any configuration?</summary>
+                    <div class="faq-answer">
+                        <p>Minimal. After installation, run <code>/draft:init</code> and it automatically analyzes your codebase and generates all necessary configuration files (product.md, tech-stack.md, architecture.md, etc.). You can customize these files afterward, but the defaults work out of the box.</p>
+                    </div>
+                </details>
+
+                <details class="faq-item glass-card">
+                    <summary class="faq-question">Can Draft work with monorepos?</summary>
+                    <div class="faq-answer">
+                        <p>Yes. The <code>/draft:index</code> command provides monorepo federation — it discovers services, builds dependency graphs, and aggregates context across multiple packages or services. Each service gets its own context while maintaining a unified root-level view.</p>
+                    </div>
+                </details>
+
+                <details class="faq-item glass-card">
+                    <summary class="faq-question">Does Draft support Jira integration?</summary>
+                    <div class="faq-answer">
+                        <p>Yes. <code>/draft:jira-preview</code> generates a Jira export file mapping tracks to epics, phases to stories, and tasks to sub-tasks with auto-generated story points. <code>/draft:jira-create</code> pushes these issues to Jira via MCP. Draft also supports epic qualification pipelines combining Jira, Gerrit, and GitHub data.</p>
+                    </div>
+                </details>
             </div>
         </div>
     </section>

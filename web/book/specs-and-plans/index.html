@@ -22,6 +22,20 @@
     <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
     <meta name="twitter:image:alt" content="Specs &amp; Plans — Draft Book">
     <link rel="canonical" href="https://getdraft.dev/book/specs-and-plans/">
+    <link rel="alternate" hreflang="en" href="https://getdraft.dev/book/specs-and-plans/">
+    <link rel="alternate" hreflang="x-default" href="https://getdraft.dev/book/specs-and-plans/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://getdraft.dev/"},
+        {"@type": "ListItem", "position": 2, "name": "Book", "item": "https://getdraft.dev/book/"},
+        {"@type": "ListItem", "position": 3, "name": "Specs & Plans", "item": "https://getdraft.dev/book/specs-and-plans/"}
+      ]
+    }
+    </script>
 
     <script type="application/ld+json">
     {
@@ -202,6 +216,13 @@
         </aside>
 
         <main class="book-content">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="/">Home</a></li>
+        <li><a href="/book/">Book</a></li>
+        <li aria-current="page">Specs &amp; Plans</li>
+      </ol>
+    </nav>
 <div class="chapter-wrapper">
     <h1>Specs &amp; Plans</h1>
     <p class="chapter-meta"><span class="part-name">Part II: Track Lifecycle</span> &middot; Chapter 4</p>
@@ -556,6 +577,17 @@ login via Google and GitHub would reduce onboarding friction.
 
     <p>With the specification finalized and the plan approved, the track is ready for implementation. The next chapter covers how <code>/draft:implement</code> executes the plan, one task at a time, with the same discipline that created it.</p>
 </div>
+
+
+    <nav class="related-chapters" aria-label="Related chapters">
+      <h3>Related Chapters</h3>
+      <ul>
+        <li><a href="/book/getting-started/">Getting Started</a> &mdash; Quick setup guide to start using Draft</li>
+        <li><a href="/book/implementation/">Implementation</a> &mdash; How plans are executed task-by-task with TDD</li>
+        <li><a href="/book/managing-tracks/">Managing Tracks</a> &mdash; Track lifecycle management and status tracking</li>
+        <li><a href="/book/decomposition/">Decomposition</a> &mdash; Breaking large features into shippable sub-tasks</li>
+      </ul>
+    </nav>
 
             <nav class="chapter-nav">
                 <a href="../getting-started/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Getting Started</span></a>

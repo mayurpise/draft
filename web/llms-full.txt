@@ -1,0 +1,224 @@
+# Draft
+
+> Free, open-source Context-Driven Development plugin for AI coding agents.
+
+Draft is a methodology and plugin that structures AI coding agents around human decision-making. It drives collaborative design through structured requirements gathering, trade-off analysis, and specification review before execution begins. It then delivers implementation, testing, code review, and validation — all grounded in deep codebase context with full traceability.
+
+Draft works with Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Google Gemini.
+
+## Installation
+
+### Claude Code (primary)
+```
+/plugin marketplace add mayurpise/draft
+/plugin install draft
+/draft:init
+```
+
+### Cursor
+Cursor > Settings > Rules, Skills, Subagents > Rules > New > Add from Github:
+```
+https://github.com/mayurpise/draft.git
+```
+Then use: `@draft init`, `@draft new-track`, `@draft implement`
+
+### GitHub Copilot
+```
+mkdir -p .github && curl -o .github/copilot-instructions.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md
+```
+
+### Gemini
+```
+curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/.gemini.md
+```
+
+### Antigravity IDE
+Clone Draft to `~/.gemini/antigravity/skills/draft` and configure `~/.gemini.md` to point to the global skills.
+
+## Core Workflow
+
+The primary development cycle follows four stages:
+
+1. **`/draft:init`** — 5-phase codebase analysis. Generates architecture.md (source of truth), .ai-context.md (token-optimized AI context), .ai-profile.md (ultra-compact always-on profile), and state tracking files.
+2. **`/draft:new-track`** — Collaborative intake with structured questions, AI guidance, and progressive refinement. Produces spec.md (acceptance criteria) and plan.md (phased execution plan).
+3. **`/draft:implement`** — TDD workflow: RED (write failing test) → GREEN (make it pass) → REFACTOR. Executes plan tasks phase by phase with checkpoints and progress tracking.
+4. **`/draft:review`** — Three-stage review: (1) Automated Validation, (2) Spec Compliance, (3) Code Quality. Integrates reviewer agent and bughunt.
+
+After initial setup, `/draft:init refresh` uses stored file hashes and signal classification to only re-analyze changed files — no full re-scan needed.
+
+## All Commands (28)
+
+### Primary Workflow
+- `/draft` — Overview, intent mapping, and command reference
+- `/draft:init` — Analyze codebase, create context files and state tracking
+- `/draft:new-track` — Collaborative spec and plan with AI-guided refinement
+- `/draft:implement` — TDD workflow with checkpoints
+- `/draft:review` — 3-stage review (validation + spec compliance + code quality)
+
+### Quality
+- `/draft:deep-review` — Enterprise-grade module lifecycle and ACID audit
+- `/draft:bughunt` — Exhaustive 14-dimension defect discovery with taint tracking
+- `/draft:quick-review` — Lightweight 4-dimension code review
+- `/draft:coverage` — Code coverage report (target 95%+)
+- `/draft:testing-strategy` — Test plan design with coverage targets
+- `/draft:tech-debt` — Technical debt analysis across 6 dimensions
+
+### Architecture & Planning
+- `/draft:decompose` — Module decomposition with dependency mapping
+- `/draft:adr` — Architecture Decision Records
+- `/draft:change` — Handle mid-track requirement changes
+- `/draft:learn` — Discover coding patterns, update guardrails
+
+### Operations
+- `/draft:debug` — Structured debugging: reproduce, isolate, diagnose, fix
+- `/draft:deploy-checklist` — Pre-deployment verification with rollback triggers
+- `/draft:incident-response` — Incident lifecycle: triage, communicate, mitigate, postmortem
+- `/draft:standup` — Git activity standup summary (read-only)
+
+### Project Management
+- `/draft:status` — Show progress overview
+- `/draft:revert` — Git-aware rollback
+- `/draft:index` — Aggregate monorepo service contexts
+- `/draft:jira-preview` — Generate Jira export for review
+- `/draft:jira-create` — Push issues to Jira via MCP
+
+### Authoring & Onboarding
+- `/draft:documentation` — Technical docs: readme, runbook, api, onboarding
+- `/draft:tour` — Interactive architecture mentorship and codebase walkthrough
+- `/draft:impact` — ROI analytics tracking friction and timeline metrics
+- `/draft:assist-review` — Summarize intent and highlight structural PR risks for reviewers
+
+## The 7 Specialized Agents
+
+### Architect Agent
+Activated during `/draft:decompose` and `/draft:implement` (architecture mode). Guides structured pre-implementation design: module decomposition, single responsibility, clear API boundaries, dependency analysis, and Mermaid diagram generation.
+
+### Debugger Agent
+Activated when a task is blocked. Enforces root cause investigation before any fix attempts. Four-phase process: Reproduce → Isolate → Diagnose → Fix.
+
+### Planner Agent
+Activated during `/draft:new-track` plan creation and `/draft:decompose`. Provides structured plan generation with phased task breakdown, verification criteria, and dependency ordering.
+
+### Reviewer Agent
+Activated at phase boundaries during `/draft:implement`. Performs three-stage review: (1) Automated Validation — architecture conformance, dead code, circular dependencies, security; (2) Spec Compliance — acceptance criteria verification; (3) Code Quality — readability, maintainability, test coverage.
+
+### RCA Agent
+Activated for bug/RCA tracks via `/draft:new-track`. Structured Root Cause Analysis methodology extending the debugger agent with practices from Google SRE postmortem culture and distributed systems debugging. Four-phase process: Reproduce → Trace → Hypothesize → Fix with blast radius scoping.
+
+### Ops Agent
+Activated during `/draft:deploy-checklist`, `/draft:incident-response`, and `/draft:standup`. Enforces production-safety mindset: production-first thinking, blast-radius awareness, rollback readiness, communicate early, severity classification (SEV1-SEV4), and blameless culture.
+
+### Writer Agent
+Activated during `/draft:documentation` across four modes: readme, runbook, api, and onboarding. Enforces audience-aware writing: audience first, progressive disclosure, link don't duplicate, maintain don't create, examples over explanations, and scannable structure.
+
+## Context-Driven Development Methodology
+
+### The Core Problem
+AI coding assistants are powerful but undirected. Without structure, they make assumptions about requirements, choose arbitrary technical approaches, produce code that doesn't fit the existing codebase, and lack accountability checkpoints.
+
+Draft solves this through Context-Driven Development: structured documents that constrain and guide AI behavior. By treating context as a managed artifact alongside code, the repository becomes a single source of truth that drives every agent interaction.
+
+### The Constraint Hierarchy
+```
+product.md          → "Build a task manager for developers"
+tech-stack.md       → "Use React, TypeScript, Tailwind"
+architecture.md     → "Express API → Service layer → Prisma ORM → PostgreSQL"
+  .ai-context.md    → Token-optimized condensed version (200-400 lines)
+  .ai-profile.md    → Ultra-compact always-on profile (20-50 lines)
+spec.md             → "Add drag-and-drop reordering"
+plan.md             → "Phase 1: sortable list, Phase 2: persistence"
+```
+Each layer narrows the solution space. By the time AI writes code, most decisions are already made.
+
+### Context Tiering
+Three-tier context system inspired by memory architecture:
+- **Layer 0: .ai-profile.md** (20-50 lines) — Always loaded. RAM-equivalent.
+- **Layer 1: .ai-context.md** (200-400 lines) — Loaded for most tasks. Working memory.
+- **Layer 2: architecture.md** (full document) — Loaded for deep analysis. Long-term storage.
+
+Simple tasks only need Layer 0. Implementation tasks load Layer 0 + relevant sections of Layer 1. Deep reviews access all layers.
+
+## Project File Structure
+
+When users run `/draft:init`, it creates a `draft/` directory in their project:
+
+```
+draft/
+  architecture.md       — Source of truth: 25-section comprehensive engineering reference
+  .ai-context.md        — Token-optimized 200-400 line AI context (derived from architecture.md)
+  .ai-profile.md        — Ultra-compact 20-50 line always-injected profile
+  product.md            — Users, goals, success criteria, guidelines
+  tech-stack.md         — Languages, frameworks, patterns, accepted dependencies
+  workflow.md           — TDD preference, commit style, review process
+  guardrails.md         — Hard guardrails, learned conventions, anti-patterns
+  tracks/
+    <track-id>/
+      spec.md           — Acceptance criteria for this track
+      plan.md           — Ordered phases with verification steps
+      metadata.json     — Track metadata and status
+  .state/
+    freshness hashes    — File-level change detection for incremental refresh
+    signal classification — Codebase signal detection across 11 categories
+    run memory          — Cross-session continuity with resumable checkpoints
+```
+
+Status markers in tracks: `[ ]` Pending, `[~]` In Progress, `[x]` Completed, `[!]` Blocked.
+
+## Key Differentiators
+
+- **Specs before code:** AI executes pre-approved work, not guesses
+- **Context as a managed artifact:** Structured documents constrain AI behavior
+- **Three-tier context loading:** Only loads what's needed per task, saving tokens
+- **Incremental refresh:** Hash-based change detection avoids full re-scans
+- **Platform-agnostic:** Same methodology across Claude Code, Cursor, Copilot, Gemini, Antigravity IDE
+- **TDD enforcement:** RED → GREEN → REFACTOR cycle with verification
+- **14-dimension bug hunting:** Exhaustive defect discovery beyond simple linting
+- **ACID compliance audits:** Enterprise-grade module lifecycle reviews
+- **7 specialized agents:** Purpose-built behaviors for architecture, debugging, planning, review, RCA, operations, and documentation
+- **Pattern learning:** Auto-discovers coding conventions and updates guardrails
+- **Free and open-source:** MIT license, $0 forever
+
+## The Draft Book
+
+A comprehensive guide to Context-Driven Development, available at https://getdraft.dev/book/
+
+### Chapters
+- 0. What is Draft? — https://getdraft.dev/book/what-is-draft/
+- 1. The Problem — https://getdraft.dev/book/the-problem/
+- 2. Context-Driven Development — https://getdraft.dev/book/context-driven-development/
+- 3. Getting Started — https://getdraft.dev/book/getting-started/
+- 4. Specs & Plans — https://getdraft.dev/book/specs-and-plans/
+- 5. Implementation — https://getdraft.dev/book/implementation/
+- 6. Review Pipeline — https://getdraft.dev/book/review-pipeline/
+- 7. Managing Tracks — https://getdraft.dev/book/managing-tracks/
+- 8. Decomposition — https://getdraft.dev/book/decomposition/
+- 9. Architecture Decision Records — https://getdraft.dev/book/adrs/
+- 10. Context Tiering — https://getdraft.dev/book/context-tiering/
+- 11. The Agent System — https://getdraft.dev/book/agent-system/
+- 12. Signal Classification — https://getdraft.dev/book/signal-classification/
+- 13. Incremental Refresh — https://getdraft.dev/book/incremental-refresh/
+- 14. Deep Review — https://getdraft.dev/book/deep-review/
+- 15. Bug Hunt — https://getdraft.dev/book/bug-hunt/
+- 16. Coverage — https://getdraft.dev/book/coverage/
+- 17. Pattern Learning — https://getdraft.dev/book/pattern-learning/
+- 18. Monorepo Federation — https://getdraft.dev/book/monorepo-federation/
+- 19. Jira Integration — https://getdraft.dev/book/jira-integration/
+- 20. Multi-IDE Support — https://getdraft.dev/book/multi-ide-support/
+- 21. Philosophy & References — https://getdraft.dev/book/philosophy-references/
+- A. Command Reference — https://getdraft.dev/book/command-reference/
+- B. File Reference — https://getdraft.dev/book/file-reference/
+
+## Links
+
+- Homepage: https://getdraft.dev
+- Book: https://getdraft.dev/book/
+- Getting Started: https://getdraft.dev/book/getting-started/
+- Command Reference: https://getdraft.dev/book/command-reference/
+- File Reference: https://getdraft.dev/book/file-reference/
+- GitHub: https://github.com/mayurpise/draft
+- Methodology: https://github.com/mayurpise/draft/blob/main/core/methodology.md
+- Concise LLM context: https://getdraft.dev/llms.txt
+
+## License
+
+MIT License. Free forever.

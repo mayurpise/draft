@@ -1,0 +1,47 @@
+# Draft
+
+> Free, open-source Context-Driven Development plugin for AI coding agents.
+
+Draft is a methodology and plugin that structures AI coding agents around human decision-making. It enforces specifications before code, phased execution plans, TDD workflows, and three-stage code review — ensuring AI outputs remain aligned, predictable, and production-ready.
+
+Draft works with Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Google Gemini. It provides 28 slash commands, 7 specialized agents, 14-dimension bug hunting, and ACID compliance audits.
+
+## Installation
+
+Install as a Claude Code plugin:
+
+```
+/plugin marketplace add mayurpise/draft
+/plugin install draft
+```
+
+For Cursor, Copilot, Gemini, and Antigravity IDE, see the getting started guide.
+
+## Core Workflow
+
+1. `/draft:init` — Analyze codebase, generate context files
+2. `/draft:new-track` — Collaborative spec and plan creation
+3. `/draft:implement` — TDD execution with checkpoints
+4. `/draft:review` — Three-stage code review
+
+## Key Concepts
+
+- **Context-Driven Development (CDD):** Structured documents constrain and guide AI behavior
+- **Tracks:** Isolated units of work with spec.md, plan.md, and status markers
+- **7 Specialized Agents:** Architect, Debugger, Planner, Reviewer, RCA, Ops, Writer
+- **ACID Compliance:** Enterprise-grade module lifecycle audits
+- **Incremental Refresh:** File-hash-based re-analysis of only changed files
+
+## Links
+
+- Homepage: https://getdraft.dev
+- Book: https://getdraft.dev/book/
+- Getting Started: https://getdraft.dev/book/getting-started/
+- Command Reference: https://getdraft.dev/book/command-reference/
+- GitHub: https://github.com/mayurpise/draft
+- Methodology: https://github.com/mayurpise/draft/blob/main/core/methodology.md
+- Full LLM context: https://getdraft.dev/llms-full.txt
+
+## License
+
+MIT License. Free forever.

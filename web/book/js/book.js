@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSearch();
     buildPageTOC();
     initCopyButtons();
+    initAudioSupport(); // Newly added
 });
 
 // ============================================================
@@ -259,3 +260,45 @@ document.addEventListener('keydown', (e) => {
         location.href = '../' + CHAPTERS[idx + 1].id + '/';
     }
 });
+// ============================================================
+// AUDIO PLAYER INJECTION
+// ============================================================
+function initAudioSupport() {
+    // If scripts already exist, don't re-inject
+    if (window.draftAudio) return;
+
+    const isChapter = !!document.body.dataset.chapter;
+    const isAudioPage = document.body.classList.contains('audio-player-page');
+    const base = (isChapter || isAudioPage) ? '../' : './';
+    
+    // Inject Styles if not present
+    if (!document.querySelector(`link[href*="audio-player.css"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = base + 'css/audio-player.css';
+        document.head.appendChild(link);
+    }
+
+    // Inject Script if not present
+    if (!document.querySelector(`script[src*="audio-player.js"]`)) {
+        const script = document.createElement('script');
+        script.src = base + 'js/audio-player.js';
+        script.defer = true;
+        document.head.appendChild(script);
+    }
+
+    // 3. Add Listen Button to Chapters
+    if (isChapter) {
+        const wrapper = document.querySelector('.chapter-wrapper');
+        const meta = wrapper.querySelector('.chapter-meta');
+        if (meta) {
+            const btn = document.createElement('button');
+            btn.className = 'btn-listen-chapter';
+            btn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1a2 2 0 0 1 2 2v10a2 2 0 0 1-4 0V3a2 2 0 0 1 2-2z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                Listen to this chapter
+            `;
+            meta.parentNode.insertBefore(btn, meta.nextSibling);
+        }
+    }
+}

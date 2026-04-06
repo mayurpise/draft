@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audiobook Player — The Draft Book</title>
+    <meta name="description" content="Listen to the full Draft Book — Context-Driven Development Deep Dive. Optimized for hands-free learning.">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../css/book.css">
+    <link rel="stylesheet" href="../css/audio-player.css">
+    <style>
+        :root {
+            --audio-page-bg: #0f172a;
+            --audio-page-text: #f8fafc;
+            --audio-page-accent: #3882f6;
+        }
+
+        body.audio-player-page {
+            background: var(--audio-page-bg);
+            color: var(--audio-page-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .audio-page-content {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 40px 120px;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .audio-page-cover-wrapper {
+            position: relative;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            border-radius: 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            padding: 40px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .audio-page-cover-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('../../favicon.svg') no-repeat center/200%;
+            opacity: 0.1;
+            filter: blur(20px);
+        }
+
+        .cover-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .cover-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            position: relative;
+        }
+
+        .audio-page-playlist {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 20px;
+        }
+
+        .audio-page-playlist::-webkit-scrollbar { width: 4px; }
+        .audio-page-playlist::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+
+        .playlist-header {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .playlist-count {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            font-weight: 400;
+        }
+
+        .playlist-item {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            padding: 1.25rem;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .playlist-item:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .playlist-item.active {
+            background: rgba(56, 130, 246, 0.15);
+            border-color: rgba(56, 130, 246, 0.3);
+        }
+
+        .item-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            opacity: 0.4;
+            width: 24px;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 0.1rem;
+        }
+
+        .item-meta {
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+
+        .playlist-item.active .item-num,
+        .playlist-item.active .item-title {
+            color: var(--audio-page-accent);
+        }
+
+        /* Override Player for this page */
+        .audio-player-page .draft-audio-player {
+            bottom: 0;
+            left: 0;
+            transform: translateX(0);
+            width: 100%;
+            max-width: none;
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+            border-bottom: none;
+            height: 100px;
+            background: rgba(15, 23, 42, 0.9);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .audio-player-page .audio-player-info {
+            color: white;
+        }
+        
+        .audio-player-page .audio-player-title { color: white; }
+        .audio-player-page .audio-player-subtitle { color: rgba(255,255,255,0.6); }
+        .audio-player-page .ctrl-btn { color: white; }
+
+        @media (max-width: 900px) {
+            .audio-page-content {
+                grid-template-columns: 1fr;
+                padding-top: 40px;
+            }
+            .audio-page-cover-wrapper {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body class="audio-player-page">
+
+    <header class="book-topbar" style="background: transparent; border: none; box-shadow: none;">
+        <div class="book-topbar-left">
+            <a href="../" class="book-topbar-logo" style="color: white;">Draft <span style="color: rgba(255,255,255,0.5);">Book</span></a>
+        </div>
+        <div class="book-topbar-right">
+            <a href="../" class="book-topbar-link" style="color: white;">Back to Text</a>
+        </div>
+    </header>
+
+    <main class="audio-page-content">
+        <div class="audio-page-cover-wrapper">
+            <h1 class="cover-title">The Draft <br>Book</h1>
+            <p class="cover-subtitle">Context-Driven Development Deep Dive</p>
+        </div>
+
+        <div class="audio-page-playlist-wrapper">
+            <div class="playlist-header">
+                Tracks <span class="playlist-count">24 Chapters</span>
+            </div>
+            <div class="audio-page-playlist" id="playlist">
+                <!-- Chapters will be injected by JS -->
+            </div>
+        </div>
+    </main>
+
+    <div class="chapter-wrapper" style="display:none;" id="audio-content-source">
+        <!-- Hidden container to load chapter content for reading -->
+    </div>
+
+    <script src="../js/book.js"></script>
+    <script src="../js/audio-player.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const playlistEl = document.getElementById('playlist');
+            const chapters = [
+                { id: 'overview', title: 'Introduction: The AI Context Crisis' }, // Virtual entry
+                { id: 'what-is-draft', title: '0. What is Draft?' },
+                { id: 'the-problem', title: '1. The Problem' },
+                { id: 'context-driven-development', title: '2. Context-Driven Development' },
+                { id: 'getting-started', title: '3. Getting Started' },
+                { id: 'specs-and-plans', title: '4. Specs & Plans' },
+                { id: 'implementation', title: '5. Implementation' },
+                { id: 'review-pipeline', title: '6. Review Pipeline' },
+                { id: 'managing-tracks', title: '7. Managing Tracks' },
+                { id: 'decomposition', title: '8. Decomposition' },
+                { id: 'adrs', title: '9. Architecture Decision Records' },
+                { id: 'context-tiering', title: '10. Context Tiering' },
+                { id: 'agent-system', title: '11. The Agent System' },
+                { id: 'signal-classification', title: '12. Signal Classification' },
+                { id: 'incremental-refresh', title: '13. Incremental Refresh' },
+                { id: 'deep-review', title: '14. Deep Review' },
+                { id: 'bug-hunt', title: '15. Bug Hunt' },
+                { id: 'coverage', title: '16. Coverage' },
+                { id: 'pattern-learning', title: '17. Pattern Learning' },
+                { id: 'monorepo-federation', title: '18. Monorepo Federation' },
+                { id: 'jira-integration', title: '19. Jira Integration' },
+                { id: 'multi-ide-support', title: '20. Multi-IDE Support' },
+                { id: 'philosophy-references', title: '21. Philosophy & References' },
+                { id: 'command-reference', title: 'A. Command Reference' }
+            ];
+
+            chapters.forEach((ch, index) => {
+                const item = document.createElement('div');
+                item.className = 'playlist-item';
+                item.innerHTML = `
+                    <div class="item-num">${(index).toString().padStart(2, '0')}</div>
+                    <div class="item-info">
+                        <div class="item-title">${ch.title}</div>
+                        <div class="item-meta">Draft Methodology &middot; Part ${Math.floor(index/4) + 1}</div>
+                    </div>
+                `;
+                item.onclick = () => loadAndPlay(ch.id, item);
+                playlistEl.appendChild(item);
+            });
+
+            async function loadAndPlay(chapterId, el) {
+                document.querySelectorAll('.playlist-item').forEach(i => i.classList.remove('active'));
+                el.classList.add('active');
+
+                // In a real app, we'd fetch the HTML. Here we can simulate or fetch.
+                const source = document.getElementById('audio-content-source');
+                const relPath = chapterId === 'overview' ? '../index.html' : `../${chapterId}/index.html`;
+                
+                try {
+                    const resp = await fetch(relPath);
+                    const html = await resp.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const content = doc.querySelector('.chapter-wrapper');
+                    source.innerHTML = content.innerHTML;
+                    
+                    // Trigger the audio player
+                    if (window.draftAudio) {
+                        window.draftAudio.startChapterPlayback();
+                    }
+                } catch (e) {
+                    console.error('Failed to load chapter content', e);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

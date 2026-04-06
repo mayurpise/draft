@@ -861,6 +861,105 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ============================================================
+   BREADCRUMB NAVIGATION
+   ============================================================ */
+.breadcrumb {
+    width: 100%;
+    max-width: 860px;
+    padding: 0.75rem 2.5rem 0;
+}
+
+.breadcrumb ol {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+}
+
+.breadcrumb li {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.breadcrumb li + li::before {
+    content: "\203A";
+    margin: 0 0.5rem;
+    color: var(--border);
+    font-size: 1rem;
+}
+
+.breadcrumb a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.breadcrumb a:hover {
+    color: var(--accent-cyan);
+}
+
+.breadcrumb li[aria-current="page"] {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ============================================================
+   RELATED CHAPTERS
+   ============================================================ */
+.related-chapters {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.related-chapters h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.75rem;
+    letter-spacing: -0.01em;
+}
+
+.related-chapters ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.related-chapters li {
+    padding: 0.4rem 0;
+    font-size: 0.9rem;
+    color: var(--text-reading);
+    line-height: 1.6;
+}
+
+.related-chapters li + li {
+    border-top: 1px solid var(--border-subtle);
+}
+
+.related-chapters a {
+    color: var(--accent-cyan);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.related-chapters a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(37, 99, 235, 0.4);
+}
+
+/* ============================================================
    CHAPTER NAVIGATION (prev/next — compact top bar)
    ============================================================ */
 .chapter-nav {
@@ -1133,6 +1232,23 @@ a { color: inherit; text-decoration: none; }
         margin-left: 0;
     }
 
+    .breadcrumb {
+        padding: 0.5rem 1.25rem 0;
+    }
+
+    .breadcrumb li {
+        font-size: 0.75rem;
+    }
+
+    .related-chapters {
+        margin-top: 2rem;
+        padding: 1.25rem 1rem;
+    }
+
+    .related-chapters li {
+        font-size: 0.85rem;
+    }
+
     .chapter-wrapper {
         padding: 2rem 1.25rem 3rem;
     }
@@ -1275,7 +1391,9 @@ a { color: inherit; text-decoration: none; }
     .page-toc,
     .chapter-nav,
     .sidebar-toggle,
-    .sidebar-backdrop {
+    .sidebar-backdrop,
+    .breadcrumb,
+    .related-chapters {
         display: none !important;
     }
 

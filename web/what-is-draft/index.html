@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What is Draft? — Context-Driven Development Plugin for AI Coding Agents</title>
+    <meta name="description" content="Draft is a free, open-source Context-Driven Development (CDD) plugin for AI coding agents including Claude Code, GitHub Copilot, Gemini, Cursor, and Antigravity IDE. 25 slash commands, 7 specialized agents, TDD enforcement, and 3-stage code review.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="keywords" content="what is draft, draft ai, context driven development, CDD, ai coding plugin, claude code plugin, github copilot plugin, gemini plugin, cursor plugin, spec driven development, tdd enforcement, ai code review, ai development methodology, open source developer tools">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="What is Draft? — Context-Driven Development Plugin for AI Coding Agents">
+    <meta property="og:description" content="Draft is a free, open-source plugin that adds structured methodology to AI coding agents. 25 slash commands, 7 specialized agents, TDD enforcement, and 3-stage code review for Claude Code, Copilot, Gemini, Cursor, and Antigravity IDE.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/what-is-draft/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta property="og:image:alt" content="Draft: Context-Driven Development Plugin for AI Coding Agents">
+    <meta property="og:site_name" content="Draft">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="What is Draft? — Context-Driven Development Plugin for AI Coding Agents">
+    <meta name="twitter:description" content="Free, open-source plugin that adds structured methodology to AI coding agents. 25 commands, 7 agents, TDD, and 3-stage code review.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:image:alt" content="Draft: Context-Driven Development Plugin for AI Coding Agents">
+
+    <!-- Canonical & hreflang -->
+    <link rel="canonical" href="https://getdraft.dev/what-is-draft/">
+    <link rel="alternate" hreflang="en" href="https://getdraft.dev/what-is-draft/">
+    <link rel="alternate" hreflang="x-default" href="https://getdraft.dev/what-is-draft/">
+
+    <!-- Structured Data: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://getdraft.dev/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "What is Draft?",
+          "item": "https://getdraft.dev/what-is-draft/"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Structured Data: Article -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "What is Draft? — Context-Driven Development Plugin for AI Coding Agents",
+      "description": "Draft is a free, open-source Context-Driven Development (CDD) plugin that adds structured methodology to AI coding agents including Claude Code, GitHub Copilot, Gemini, Cursor, and Antigravity IDE.",
+      "url": "https://getdraft.dev/what-is-draft/",
+      "datePublished": "2025-06-01",
+      "dateModified": "2026-04-05",
+      "author": {
+        "@type": "Person",
+        "name": "Mayur Pise",
+        "url": "https://www.linkedin.com/in/mayurpise/",
+        "sameAs": ["https://github.com/mayurpise"]
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Draft",
+        "url": "https://getdraft.dev"
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://getdraft.dev/what-is-draft/"
+      },
+      "inLanguage": "en"
+    }
+    </script>
+
+    <!-- Structured Data: FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is Draft free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Draft is completely free and open source under the MIT license. There are no paid tiers, no usage limits, and no vendor lock-in. The only costs come from the host AI tools you already use (Claude Code, Copilot, etc.)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What AI coding agents does Draft support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Draft supports Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Google Gemini. It integrates natively with each platform using their respective configuration formats."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is Draft different from other AI coding tools?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Draft is not an AI coding tool — it is a methodology layer that runs on top of existing AI agents. While tools like Cursor or Copilot generate code, Draft ensures that code follows approved specifications, passes TDD gates, and fits your architecture. It adds structure and quality gates, not another AI model."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Draft work with existing projects?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Running /draft:init performs a 5-phase analysis of your existing codebase, generating architecture documentation, AI context files, and signal classifications. It works with any language, framework, or project structure — brownfield or greenfield."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Context-Driven Development?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Context-Driven Development (CDD) is a methodology where AI coding agents operate from persistent, file-based project context rather than ephemeral chat prompts. Draft analyzes your codebase to generate architecture docs, then enforces a spec-first workflow: specifications and plans are written and reviewed before any code is generated."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Draft require configuration?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Minimal. After installation, run /draft:init and it automatically analyzes your codebase and generates all necessary configuration files (product.md, tech-stack.md, architecture.md, etc.). Defaults work out of the box."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <!-- Site CSS -->
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/components.css">
+
+    <style>
+        /* Page-specific styles for the reference page */
+        .ref-page {
+            padding-top: 80px;
+        }
+
+        .ref-content {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+
+        .ref-content h1 {
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            margin-bottom: 0.5rem;
+            line-height: 1.15;
+        }
+
+        .ref-subtitle {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        .ref-content h2 {
+            font-size: clamp(1.4rem, 3vw, 1.8rem);
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .ref-content h2:first-of-type {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        .ref-lead {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .ref-content ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.5rem;
+        }
+
+        .ref-content ul li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.6rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .ref-content ul li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.6em;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+        }
+
+        /* Workflow phases */
+        .workflow-phases {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0 2rem;
+        }
+
+        .workflow-phase {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem 1rem;
+            text-align: center;
+        }
+
+        .workflow-phase-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.4rem;
+        }
+
+        .workflow-phase-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .workflow-phase-cmd {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--accent-amber);
+        }
+
+        .workflow-phase-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 0.4rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .workflow-phases {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .workflow-phases {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Platform table */
+        .platform-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0 2rem;
+            font-size: 0.92rem;
+        }
+
+        .platform-table th,
+        .platform-table td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .platform-table th {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+        }
+
+        .platform-table td {
+            color: var(--text-secondary);
+        }
+
+        .platform-table td:first-child {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .platform-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        @media (max-width: 600px) {
+            .platform-table {
+                font-size: 0.82rem;
+            }
+            .platform-table th,
+            .platform-table td {
+                padding: 0.6rem 0.6rem;
+            }
+        }
+
+        /* Install block */
+        .install-block {
+            background: #1a1a2e;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0 2rem;
+            overflow-x: auto;
+        }
+
+        .install-block pre {
+            margin: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88rem;
+            line-height: 1.7;
+            color: #e2e8f0;
+        }
+
+        .install-block .comment {
+            color: #718096;
+        }
+
+        .install-block .cmd {
+            color: #68d391;
+        }
+
+        /* FAQ */
+        .faq-list {
+            margin: 1.5rem 0 2rem;
+        }
+
+        .faq-list details {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+
+        .faq-list details[open] {
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+
+        .faq-list summary {
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .faq-list summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .faq-list summary::after {
+            content: '+';
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            flex-shrink: 0;
+            margin-left: 1rem;
+            transition: transform 0.2s;
+        }
+
+        .faq-list details[open] summary::after {
+            content: '\2212';
+        }
+
+        .faq-list summary:hover {
+            background: var(--bg-secondary);
+        }
+
+        .faq-list .faq-answer {
+            padding: 0 1.25rem 1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 0.92rem;
+        }
+
+        /* CTA links */
+        .ref-cta-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .ref-cta-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.4rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .ref-cta-link:hover {
+            transform: translateY(-1px);
+        }
+
+        .ref-cta-link--primary {
+            background: var(--accent-cyan);
+            color: #fff;
+        }
+
+        .ref-cta-link--primary:hover {
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
+        }
+
+        .ref-cta-link--secondary {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .ref-cta-link--secondary:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        /* Breadcrumb */
+        .ref-breadcrumb {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .ref-breadcrumb a {
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+
+        .ref-breadcrumb a:hover {
+            color: var(--accent-cyan);
+        }
+
+        .ref-breadcrumb span {
+            margin: 0 0.4rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="cursor-glow" aria-hidden="true"></div>
+
+    <!-- Top navigation -->
+    <nav class="top-nav scrolled" id="top-nav">
+        <a href="https://getdraft.dev" class="nav-logo">Draft</a>
+        <div class="nav-links">
+            <a href="https://getdraft.dev/#features">Features</a>
+            <a href="https://getdraft.dev/#commands">Commands</a>
+            <a href="https://getdraft.dev/#install">Install</a>
+            <a href="https://getdraft.dev/book/">Book</a>
+        </div>
+        <div class="nav-actions">
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="nav-github">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                Star on GitHub
+            </a>
+        </div>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <div class="ref-page">
+        <div class="ref-content">
+            <!-- Breadcrumb -->
+            <nav class="ref-breadcrumb" aria-label="Breadcrumb">
+                <a href="https://getdraft.dev">Home</a>
+                <span>/</span>
+                What is Draft?
+            </nav>
+
+            <h1>What is Draft?</h1>
+            <p class="ref-subtitle">Context-Driven Development plugin for AI coding agents</p>
+
+            <!-- Opening definition paragraph — optimized for AI citation and featured snippets -->
+            <p class="ref-lead">Draft is a free, open-source Context-Driven Development (CDD) plugin that adds structured methodology to AI coding agents. It works with Claude Code, GitHub Copilot, Google Gemini, Cursor, and Antigravity IDE to enforce spec-driven development, test-driven development (TDD), and automated code review. Draft provides 25 slash commands and 7 specialized agents that turn AI assistants from autonomous guessing machines into disciplined executors of pre-approved work.</p>
+
+            <p>The core idea: before AI writes a single line of code, it analyzes your codebase, generates a specification, builds a phased plan, and waits for your approval. Only then does implementation begin &mdash; constrained by your architecture, your conventions, and your acceptance criteria. Every decision is grounded in explicit, versioned, reviewable documents rather than implicit assumptions buried in a chat window.</p>
+
+            <!-- How Draft Works -->
+            <h2>How Draft Works</h2>
+            <p>Draft operates through a 4-phase workflow that mirrors how experienced engineering teams ship software:</p>
+
+            <div class="workflow-phases">
+                <div class="workflow-phase">
+                    <div class="workflow-phase-num">Phase 1</div>
+                    <div class="workflow-phase-name">Init</div>
+                    <div class="workflow-phase-cmd">/draft:init</div>
+                    <div class="workflow-phase-desc">Analyzes your codebase and generates architecture docs, AI context files, and project configuration.</div>
+                </div>
+                <div class="workflow-phase">
+                    <div class="workflow-phase-num">Phase 2</div>
+                    <div class="workflow-phase-name">Plan</div>
+                    <div class="workflow-phase-cmd">/draft:new-track</div>
+                    <div class="workflow-phase-desc">Creates a specification and phased implementation plan through collaborative dialogue. You approve before code begins.</div>
+                </div>
+                <div class="workflow-phase">
+                    <div class="workflow-phase-num">Phase 3</div>
+                    <div class="workflow-phase-name">Implement</div>
+                    <div class="workflow-phase-cmd">/draft:implement</div>
+                    <div class="workflow-phase-desc">Builds features task-by-task with TDD cycles (RED &rarr; GREEN &rarr; REFACTOR) and architecture checkpoints.</div>
+                </div>
+                <div class="workflow-phase">
+                    <div class="workflow-phase-num">Phase 4</div>
+                    <div class="workflow-phase-name">Review</div>
+                    <div class="workflow-phase-cmd">/draft:review</div>
+                    <div class="workflow-phase-desc">3-stage code review: automated validation, spec compliance, and code quality assessment.</div>
+                </div>
+            </div>
+
+            <p>This workflow is supported by 21 additional specialist commands for debugging, operations, quality assurance, documentation, and more. Each command loads only the context it needs, keeping token usage efficient while maintaining full project awareness.</p>
+
+            <!-- Key Features -->
+            <h2>Key Features</h2>
+            <ul>
+                <li><strong>25 slash commands</strong> organized in a two-tier architecture: 4 primary workflow commands with auto-invocation, plus 21 specialist commands</li>
+                <li><strong>7 specialized agents</strong> &mdash; Architect, Debugger, Planner, Reviewer, RCA (root cause analysis), Ops, and Writer &mdash; each with behavioral protocols tuned for their domain</li>
+                <li><strong>Context tiering</strong> &mdash; three-layer system (profile &rarr; context &rarr; architecture) that loads the right amount of project knowledge for each task</li>
+                <li><strong>TDD enforcement</strong> &mdash; RED &rarr; GREEN &rarr; REFACTOR cycle with test-first implementation and architecture checkpoints</li>
+                <li><strong>3-stage code review pipeline</strong> &mdash; automated validation, spec compliance verification, and code quality assessment</li>
+                <li><strong>ACID compliance auditing</strong> &mdash; enterprise-grade module lifecycle and data integrity verification</li>
+                <li><strong>Pattern learning and guardrails</strong> &mdash; auto-learns your codebase conventions and enforces them; supports pattern promotion and false-positive elimination</li>
+                <li><strong>Monorepo federation</strong> &mdash; discovers services, builds dependency graphs, and aggregates context across multiple packages</li>
+                <li><strong>14-dimension bug hunting</strong> &mdash; exhaustive analysis with severity-ranked reports and regression test generation</li>
+                <li><strong>Jira integration</strong> &mdash; maps tracks to epics, phases to stories, and tasks to sub-tasks with auto-generated story points</li>
+                <li><strong>Incremental refresh</strong> &mdash; file-level freshness tracking with signal classification across 11 categories</li>
+                <li><strong>Architecture Decision Records</strong> &mdash; documents significant technical decisions with context, alternatives, and consequences</li>
+            </ul>
+
+            <!-- Supported Platforms -->
+            <h2>Supported Platforms</h2>
+            <p>Draft integrates natively with each platform using their respective configuration formats:</p>
+
+            <table class="platform-table">
+                <thead>
+                    <tr>
+                        <th>Platform</th>
+                        <th>Integration Method</th>
+                        <th>Setup</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Claude Code</td>
+                        <td>Native plugin (<code>/plugin install</code>)</td>
+                        <td>30 seconds</td>
+                    </tr>
+                    <tr>
+                        <td>Cursor</td>
+                        <td>Native <code>.claude/</code> plugin structure</td>
+                        <td>30 seconds</td>
+                    </tr>
+                    <tr>
+                        <td>GitHub Copilot</td>
+                        <td><code>.github/copilot-instructions.md</code></td>
+                        <td>1 minute</td>
+                    </tr>
+                    <tr>
+                        <td>Google Gemini</td>
+                        <td><code>.gemini.md</code> bootstrap file</td>
+                        <td>1 minute</td>
+                    </tr>
+                    <tr>
+                        <td>Antigravity IDE</td>
+                        <td>Global skill installation</td>
+                        <td>1 minute</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Installation -->
+            <h2>Installation</h2>
+            <p>For Claude Code (the primary platform):</p>
+
+            <div class="install-block">
+                <pre><span class="comment"># Add from the plugin marketplace</span>
+<span class="cmd">/plugin marketplace add mayurpise/draft</span>
+
+<span class="comment"># Install the plugin</span>
+<span class="cmd">/plugin install draft</span>
+
+<span class="comment"># Initialize your project</span>
+<span class="cmd">/draft:init</span></pre>
+            </div>
+
+            <p>For other platforms, see the <a href="https://github.com/mayurpise/draft#installation" class="link-cyan">installation guide on GitHub</a>.</p>
+
+            <!-- FAQ -->
+            <h2>Frequently Asked Questions</h2>
+
+            <div class="faq-list">
+                <details>
+                    <summary>Is Draft free?</summary>
+                    <div class="faq-answer">
+                        <p>Yes. Draft is completely free and open source under the MIT license. There are no paid tiers, no usage limits, and no vendor lock-in. The only costs come from the host AI tools you already use (Claude Code, Copilot, etc.).</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>How is Draft different from other AI coding tools?</summary>
+                    <div class="faq-answer">
+                        <p>Draft is not an AI coding tool &mdash; it is a methodology layer that runs on top of existing AI agents. While tools like Cursor or Copilot generate code, Draft ensures that code follows approved specifications, passes TDD gates, and fits your architecture. It adds structure and quality gates, not another AI model. There is no API key, no hosted service, no vendor lock-in. Draft is markdown files and bash scripts.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Does Draft work with existing projects?</summary>
+                    <div class="faq-answer">
+                        <p>Yes. Running <code>/draft:init</code> performs a 5-phase analysis of your existing codebase, generating architecture documentation, AI context files, and signal classifications. It works with any language, framework, or project structure &mdash; brownfield or greenfield.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>What is Context-Driven Development?</summary>
+                    <div class="faq-answer">
+                        <p>Context-Driven Development (CDD) is a methodology where AI coding agents operate from persistent, file-based project context rather than ephemeral chat prompts. Draft analyzes your codebase to generate architecture docs, then enforces a spec-first workflow: specifications and plans are written and reviewed before any code is generated. Every decision is explicit, versioned, and reviewable.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Does Draft require a lot of configuration?</summary>
+                    <div class="faq-answer">
+                        <p>Minimal. After installation, run <code>/draft:init</code> and it automatically analyzes your codebase and generates all necessary configuration files (product.md, tech-stack.md, architecture.md, etc.). Defaults work out of the box. You can customize afterward.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Can Draft work with monorepos?</summary>
+                    <div class="faq-answer">
+                        <p>Yes. The <code>/draft:index</code> command provides monorepo federation &mdash; it discovers services, builds dependency graphs, and aggregates context across multiple packages or services. Each service gets its own context while maintaining a unified root-level view.</p>
+                    </div>
+                </details>
+            </div>
+
+            <!-- Links / CTA -->
+            <h2>Learn More</h2>
+            <p>Draft is built and maintained by <a href="https://www.linkedin.com/in/mayurpise/" target="_blank" rel="noopener noreferrer" class="link-cyan">Mayur Pise</a> and is available on GitHub under the MIT license.</p>
+
+            <div class="ref-cta-links">
+                <a href="https://getdraft.dev/book/" class="ref-cta-link ref-cta-link--primary">Read the Book</a>
+                <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="ref-cta-link ref-cta-link--secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub
+                </a>
+                <a href="https://getdraft.dev/book/getting-started/" class="ref-cta-link ref-cta-link--secondary">Getting Started Guide</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer (matches homepage) -->
+    <footer id="footer" class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="footer-logo">Draft</span>
+                <p>Context-Driven Development for AI-powered software engineering.</p>
+            </div>
+            <div class="footer-links">
+                <a href="https://getdraft.dev/book/">Read the Book</a>
+            </div>
+            <div class="footer-social">
+                <span class="footer-social-label">Share</span>
+                <a href="https://api.whatsapp.com/send?text=Draft%3A%20Free%20Context-Driven%20Development%20plugin%20for%20AI%20coding%20agents.%20https%3A%2F%2Fgetdraft.dev%2Fwhat-is-draft%2F" target="_blank" rel="noopener noreferrer" class="social-btn" title="WhatsApp">
+                    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                </a>
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fgetdraft.dev%2Fwhat-is-draft%2F" target="_blank" rel="noopener noreferrer" class="social-btn" title="LinkedIn">
+                    <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                </a>
+                <a href="https://reddit.com/submit?url=https%3A%2F%2Fgetdraft.dev%2Fwhat-is-draft%2F&title=What%20is%20Draft%3F%20%E2%80%94%20Context-Driven%20Development%20for%20AI%20Coding%20Agents" target="_blank" rel="noopener noreferrer" class="social-btn" title="Reddit">
+                    <svg viewBox="0 0 24 24"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+                </a>
+                <a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fgetdraft.dev%2Fwhat-is-draft%2F&text=Draft%3A%20Free%20Context-Driven%20Development%20plugin%20for%20AI%20coding%20agents" target="_blank" rel="noopener noreferrer" class="social-btn" title="X">
+                    <svg viewBox="0 0 24 24"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
+                </a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>MIT License &middot; Made by <a href="https://www.linkedin.com/in/mayurpise/" target="_blank" rel="noopener noreferrer">Mayur Pise</a></p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile nav toggle
+        const toggle = document.getElementById('nav-toggle');
+        const nav = document.getElementById('top-nav');
+        if (toggle) {
+            toggle.addEventListener('click', () => nav.classList.toggle('open'));
+        }
+    </script>
+</body>
+</html>

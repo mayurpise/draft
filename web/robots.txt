@@ -2,3 +2,20 @@ User-agent: *
 Allow: /
 
 Sitemap: https://getdraft.dev/sitemap.xml
+
+# AI/LLM discoverability
+# See https://llmstxt.org for spec
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /

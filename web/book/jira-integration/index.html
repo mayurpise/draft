@@ -22,6 +22,20 @@
     <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
     <meta name="twitter:image:alt" content="Jira Integration — Draft Book">
     <link rel="canonical" href="https://getdraft.dev/book/jira-integration/">
+    <link rel="alternate" hreflang="en" href="https://getdraft.dev/book/jira-integration/">
+    <link rel="alternate" hreflang="x-default" href="https://getdraft.dev/book/jira-integration/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://getdraft.dev/"},
+        {"@type": "ListItem", "position": 2, "name": "Book", "item": "https://getdraft.dev/book/"},
+        {"@type": "ListItem", "position": 3, "name": "Jira Integration", "item": "https://getdraft.dev/book/jira-integration/"}
+      ]
+    }
+    </script>
 
     <script type="application/ld+json">
     {
@@ -202,6 +216,13 @@
         </aside>
 
         <main class="book-content">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="/">Home</a></li>
+        <li><a href="/book/">Book</a></li>
+        <li aria-current="page">Jira Integration</li>
+      </ol>
+    </nav>
 <div class="chapter-wrapper">
     <h1>Jira Integration</h1>
     <p class="chapter-meta"><span class="part-name">Part VI: Enterprise</span> &middot; Chapter 19</p>
@@ -338,6 +359,17 @@ Project Key: PROJ</code></pre>
         <p><code>/draft:jira-create</code> requires a configured MCP-Jira server. If MCP is not available, Draft provides the export file as a complete, structured document that can be manually imported or used with other Jira integration tools. The preview command (<code>/draft:jira-preview</code>) works without MCP.</p>
     </div>
 </div>
+
+
+    <nav class="related-chapters" aria-label="Related chapters">
+      <h3>Related Chapters</h3>
+      <ul>
+        <li><a href="/book/specs-and-plans/">Specs &amp; Plans</a> &mdash; Specs and plans that map to Jira issues</li>
+        <li><a href="/book/managing-tracks/">Managing Tracks</a> &mdash; Track lifecycle that syncs with Jira</li>
+        <li><a href="/book/monorepo-federation/">Monorepo Federation</a> &mdash; Cross-service Jira coordination</li>
+        <li><a href="/book/command-reference/">Command Reference</a> &mdash; Reference for jira-preview and jira-create commands</li>
+      </ul>
+    </nav>
 
             <nav class="chapter-nav">
                 <a href="../monorepo-federation/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Monorepo Federation</span></a>

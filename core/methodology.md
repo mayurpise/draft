@@ -44,6 +44,9 @@ Draft solves this through **Context-Driven Development**: structured documents t
   - [/draft:review](#draftreview--code-review-orchestrator)
   - [/draft:learn](#draftlearn--pattern-discovery--guardrails-update)
   - [/draft:change](#draftchange--course-correction)
+  - [/draft:tour](#drafttour--interactive-onboarding)
+  - [/draft:impact](#draftimpact--telemetry--analytics)
+  - [/draft:assist-review](#draftassist-review--human-in-the-loop-gateway)
 - [Architecture Mode](#architecture-mode)
 - [Coverage](#coverage)
 - [Jira Integration (Optional)](#jira-integration-optional)
@@ -138,6 +141,12 @@ graph LR
     S --> PL["plan.md<br/><i>When & Order</i>"]
     PL --> Code["Implementation"]
 ```
+
+### Advanced DX Commands
+Draft natively tracks analytics and enables advanced workflows to lower reviewer friction via:
+- **`/draft:tour`** - Mentorship mode for codebase exploration.
+- **`/draft:impact`** - Friction mapping and ROI calculation using state metadata.
+- **`/draft:assist-review`** - Reduces cognitive load on PR reviews by tracking intent vs execution.
 
 ### Keeping AI Constrained
 

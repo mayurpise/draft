@@ -13393,6 +13393,9 @@ Draft solves this through **Context-Driven Development**: structured documents t
   - [draft review](#draftreview--code-review-orchestrator)
   - [draft learn](#draftlearn--pattern-discovery--guardrails-update)
   - [draft change](#draftchange--course-correction)
+  - [draft tour](#drafttour--interactive-onboarding)
+  - [draft impact](#draftimpact--telemetry--analytics)
+  - [draft assist-review](#draftassist-review--human-in-the-loop-gateway)
 - [Architecture Mode](#architecture-mode)
 - [Coverage](#coverage)
 - [Jira Integration (Optional)](#jira-integration-optional)
@@ -13487,6 +13490,12 @@ graph LR
     S --> PL["plan.md<br/><i>When & Order</i>"]
     PL --> Code["Implementation"]
 ```
+
+### Advanced DX Commands
+Draft natively tracks analytics and enables advanced workflows to lower reviewer friction via:
+- **`draft tour`** - Mentorship mode for codebase exploration.
+- **`draft impact`** - Friction mapping and ROI calculation using state metadata.
+- **`draft assist-review`** - Reduces cognitive load on PR reviews by tracking intent vs execution.
 
 ### Keeping AI Constrained
 
@@ -14705,6 +14714,18 @@ AI guidance during track creation must be grounded in vetted sources. When provi
 
 ---
 
+## Context-Driven Development (CDD)
+
+### Principles for AI Orchestration
+- **Measure Twice, Code Once** — Draft explicit `.md` requirements, trade-off lists, and specifications *before* generating logic. Refine in text first.
+- **Context Tiering** — Organize memory loads to prevent token exhaustion. (`.ai-profile.md` for rapid always-on rules; `.ai-context.md` for local session boundaries; `architecture.md` for deep structural storage). 
+- **The Constraint Hierarchy** — Eliminate AI guesswork by adhering to pre-defined constraints: Product Vision → Tech Stack → Architecture → Spec → Phased Plan.
+- **Phase Isolation (Blast Radius Mitigation)** — Avoid allowing an AI agent to execute sweeping, repository-wide changes at once. Break plans into strictly verifiable phases.
+- **Alignment Before Code** — Human review occurs on the specification (`spec.md` or `plan.md`) to resolve conceptual disagreements *prior* to executing the codebase implementation.
+- **Immutable Context Sourcing** — Prefer file-tracked specifications and architectural maps (which are version-controlled and searchable) over ephemeral, unsearchable chat logs. 
+
+---
+
 ## Patterns
 
 ### Creational (GoF)
@@ -14737,6 +14758,12 @@ AI guidance during track creation must be grounded in vetted sources. When provi
 ---
 
 ## Anti-Patterns to Flag
+
+### AI Coding Assistance
+- **Prompt Engineering as Architecture** — Attempting to fix poor AI outputs by infinitely tweaking conversational prompts rather than correcting the root structural defects in the static `.ai-context.md` or `architecture.md`.
+- **Chat Log Amnesia** — Losing critical architectural decisions or context because they were finalized in an ephemeral chat window instead of captured permanently in an Architecture Decision Record (ADR).
+- **AI-Induced Shotgun Surgery** — Allowing an AI assistant to make undocumented, sweeping changes across multiple isolated modules in a "single shot" without a constrained execution plan.
+- **Reviewing Output over Intent** — Only conducting human review on an AI's Pull Request code (the *output*) without first reviewing the `spec.md` or the `plan.md` (the *intent*).
 
 ### Distributed Systems
 - **Fallacies of Distributed Computing** — Network reliability, zero latency, infinite bandwidth, secure network, topology stability, single admin, zero transport cost, homogeneous network
@@ -14773,6 +14800,10 @@ When providing guidance, cite sources naturally:
 > "Watch for N+1 queries (common GraphQL pitfall) — use DataLoader pattern."
 
 > "Circuit breaker pattern (Release It!) would help here — fail fast instead of cascading timeouts."
+
+> "This task is too broad and risks AI-induced shotgun surgery (Draft CDD) — let's break this into a phased track plan."
+
+> "Let's capture this decision in an ADR rather than losing it to Chat Log Amnesia (Draft Methodology)."
 
 </core-file>
 

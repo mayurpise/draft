@@ -1,4 +1,4 @@
-.PHONY: build clean help test
+.PHONY: build clean help test lint
 .DEFAULT_GOAL := help
 
 TEST_SCRIPTS = \
@@ -17,12 +17,16 @@ help: ## Show this help message
 	@echo "Available targets:"
 	@echo "  make build   - Generate Copilot and Gemini integration files"
 	@echo "  make test    - Run all tests"
+	@echo "  make lint    - Run shellcheck and markdownlint checks"
 	@echo "  make clean   - Clean build artifacts (currently none)"
 	@echo "  make help    - Show this message"
 
 build: ## Generate integration files and book pages
 	./scripts/build-integrations.sh
 	./scripts/build-book.sh
+
+lint: ## Run linters (shellcheck and markdownlint)
+	./scripts/lint.sh
 
 test: ## Run all tests
 	@FAILED_SUITES=""; \

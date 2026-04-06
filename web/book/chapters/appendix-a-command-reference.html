@@ -2,7 +2,7 @@
     <h1>Appendix A: Command Reference</h1>
     <p class="chapter-meta"><span class="part-name">Appendix</span></p>
 
-    <p class="chapter-intro">Quick-reference for all 25 Draft commands. Syntax shown is for Claude Code; Copilot uses <code>draft command</code> (no slash), Cursor uses <code>@draft command</code>.</p>
+    <p class="chapter-intro">Quick-reference for all 28 Draft commands. Syntax shown is for Claude Code; Copilot uses <code>draft command</code> (no slash), Cursor uses <code>@draft command</code>.</p>
 
     <div class="figure">
         <div class="figure-content">
@@ -31,7 +31,7 @@
                 <text x="388" y="80" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">revert</text>
                 <text x="388" y="96" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">debug</text>
                 <!-- Quality category -->
-                <rect x="472" y="10" width="140" height="132" rx="8" fill="#d97706" filter="url(#cmd-shadow)"/>
+                <rect x="472" y="10" width="140" height="148" rx="8" fill="#d97706" filter="url(#cmd-shadow)"/>
                 <text x="542" y="30" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">QUALITY</text>
                 <text x="542" y="48" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">review</text>
                 <text x="542" y="64" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">deep-review</text>
@@ -39,23 +39,26 @@
                 <text x="542" y="96" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">coverage</text>
                 <text x="542" y="112" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">quick-review</text>
                 <text x="542" y="128" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">testing-strategy</text>
+                <text x="542" y="144" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">assist-review</text>
                 <!-- Operations category -->
-                <rect x="10" y="130" width="200" height="84" rx="8" fill="#dc2626" filter="url(#cmd-shadow)"/>
+                <rect x="10" y="130" width="200" height="100" rx="8" fill="#dc2626" filter="url(#cmd-shadow)"/>
                 <text x="110" y="150" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">OPERATIONS</text>
                 <text x="110" y="168" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">deploy-checklist</text>
                 <text x="110" y="184" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">incident-response</text>
                 <text x="110" y="200" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">standup</text>
+                <text x="110" y="216" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">impact</text>
                 <!-- Knowledge category -->
-                <rect x="224" y="158" width="200" height="84" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#cmd-shadow)"/>
+                <rect x="224" y="158" width="200" height="100" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#cmd-shadow)"/>
                 <text x="324" y="178" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10" font-weight="bold">KNOWLEDGE &amp; GOVERNANCE</text>
                 <text x="278" y="200" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">learn</text>
                 <text x="324" y="200" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">adr</text>
                 <text x="370" y="200" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">index</text>
-                <text x="324" y="224" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">tech-debt</text>
+                <text x="278" y="224" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">tech-debt</text>
+                <text x="324" y="224" text-anchor="middle" fill="#1a1a2e" font-family="Arial,sans-serif" font-size="12">tour</text>
                 <!-- Authoring category -->
-                <rect x="438" y="158" width="174" height="68" rx="8" fill="#0891b2" filter="url(#cmd-shadow)"/>
-                <text x="525" y="178" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">AUTHORING</text>
-                <text x="525" y="200" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">documentation</text>
+                <rect x="438" y="175" width="174" height="68" rx="8" fill="#0891b2" filter="url(#cmd-shadow)"/>
+                <text x="525" y="195" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial,sans-serif" font-size="10" font-weight="bold">AUTHORING</text>
+                <text x="525" y="217" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="12">documentation</text>
                 <!-- Integration category -->
                 <rect x="10" y="260" width="292" height="68" rx="8" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#cmd-shadow)"/>
                 <text x="156" y="280" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="10" font-weight="bold">INTEGRATION</text>
@@ -64,7 +67,7 @@
                 <text x="310" y="370" text-anchor="middle" fill="#718096" font-family="Arial,sans-serif" font-size="11">Context &rarr; Planning &rarr; Execution &rarr; Quality &rarr; Operations &rarr; Knowledge &rarr; Integration</text>
             </svg>
         </div>
-        <div class="figure-caption">Command map: Draft's 25 commands organized by workflow category, reflecting the natural development lifecycle from context setup through quality assurance and external integration.</div>
+        <div class="figure-caption">Command map: Draft's 28 commands organized by workflow category, reflecting the natural development lifecycle from context setup through quality assurance and external integration.</div>
     </div>
 
     <table class="command-reference">
@@ -104,28 +107,28 @@
                 <td>Create a feature/fix track with spec and phased plan through collaborative dialogue</td>
                 <td><code>--quick</code> &mdash; streamlined mode with fewer questions; <code>&lt;description&gt;</code> &mdash; initial feature description</td>
                 <td><code>/draft:init</code></td>
-                <td>6, 7, 8</td>
+                <td>4</td>
             </tr>
             <tr>
                 <td><code>/draft:implement</code></td>
                 <td>Execute tasks from plan with TDD workflow and architecture checkpoints</td>
                 <td>Resumes in-progress tasks automatically</td>
                 <td><code>/draft:new-track</code> (requires plan.md)</td>
-                <td>9, 10, 11</td>
+                <td>5</td>
             </tr>
             <tr>
                 <td><code>/draft:status</code></td>
                 <td>Show progress overview: active tracks, phase/task counts, blocked items</td>
                 <td>&mdash;</td>
                 <td><code>/draft:init</code></td>
-                <td>9</td>
+                <td>7</td>
             </tr>
             <tr>
                 <td><code>/draft:review</code></td>
                 <td>Three-stage code review: automated validation, spec compliance, code quality</td>
                 <td><code>--track &lt;id&gt;</code> &mdash; specific track; <code>--full</code> &mdash; full review; <code>with-bughunt</code> &mdash; add bughunt pass</td>
                 <td><code>/draft:init</code></td>
-                <td>12, 13</td>
+                <td>6</td>
             </tr>
             <tr>
                 <td><code>/draft:deep-review</code></td>
@@ -139,49 +142,49 @@
                 <td>14-dimension exhaustive bug discovery with taint tracking and evidence</td>
                 <td><code>--track &lt;id&gt;</code> &mdash; scope to a specific track</td>
                 <td><code>/draft:init</code></td>
-                <td>13</td>
+                <td>15</td>
             </tr>
             <tr>
                 <td><code>/draft:coverage</code></td>
                 <td>Code coverage analysis targeting 95%+ with gap identification</td>
                 <td>&mdash;</td>
                 <td><code>/draft:init</code>, tests exist</td>
-                <td>11</td>
+                <td>16</td>
             </tr>
             <tr>
                 <td><code>/draft:learn</code></td>
                 <td>Discover coding patterns in the codebase and update guardrails</td>
                 <td><code>promote</code> &mdash; promote pattern to guardrail; <code>migrate</code> &mdash; migrate patterns; <code>path</code> &mdash; specific path</td>
                 <td><code>/draft:init</code></td>
-                <td>15</td>
+                <td>17</td>
             </tr>
             <tr>
                 <td><code>/draft:decompose</code></td>
                 <td>Module decomposition with dependency mapping and implementation ordering</td>
                 <td><code>project</code> &mdash; project-wide; <code>&lt;track-id&gt;</code> &mdash; track-scoped</td>
                 <td><code>/draft:init</code></td>
-                <td>16</td>
+                <td>8</td>
             </tr>
             <tr>
                 <td><code>/draft:adr</code></td>
                 <td>Create and manage Architecture Decision Records</td>
                 <td><code>"title"</code> &mdash; create with title; <code>list</code> &mdash; list all; <code>supersede &lt;n&gt;</code> &mdash; supersede existing ADR</td>
                 <td><code>/draft:init</code></td>
-                <td>17</td>
+                <td>9</td>
             </tr>
             <tr>
                 <td><code>/draft:change</code></td>
                 <td>Handle mid-track requirement changes with impact analysis</td>
                 <td><code>&lt;description&gt;</code> &mdash; description of the change</td>
                 <td>Active track</td>
-                <td>8</td>
+                <td>7</td>
             </tr>
             <tr>
                 <td><code>/draft:revert</code></td>
                 <td>Git-aware rollback at task, phase, or track level</td>
                 <td>Interactive &mdash; prompts for revert level and target</td>
                 <td>Active track with commits</td>
-                <td>9</td>
+                <td>7</td>
             </tr>
             <tr>
                 <td><code>/draft:debug</code></td>
@@ -195,7 +198,7 @@
                 <td>Lightweight 4-dimension code review for a PR, diff, or file</td>
                 <td><code>&lt;file&gt;</code>, <code>&lt;PR-URL&gt;</code>, <code>&lt;commit-range&gt;</code></td>
                 <td>None</td>
-                <td>10</td>
+                <td>6</td>
             </tr>
             <tr>
                 <td><code>/draft:deploy-checklist</code></td>
@@ -253,6 +256,27 @@
                 <td><code>/draft:jira-preview</code> (or auto-generates), MCP-Jira configured</td>
                 <td>19</td>
             </tr>
+            <tr>
+                <td><code>/draft:tour</code></td>
+                <td>Interactive architecture mentorship and codebase walk-through</td>
+                <td>&mdash;</td>
+                <td><code>/draft:init</code></td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td><code>/draft:impact</code></td>
+                <td>Generate ROI analytics mapping track friction and timeline metrics</td>
+                <td>&mdash;</td>
+                <td><code>/draft:init</code></td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td><code>/draft:assist-review</code></td>
+                <td>Summarize intent and highlight structural PR risks for human reviewers</td>
+                <td><code>&lt;PR-URL&gt;</code>, <code>track &lt;id&gt;</code></td>
+                <td><code>/draft:new-track</code></td>
+                <td>6</td>
+            </tr>
         </tbody>
     </table>
 
@@ -278,12 +302,15 @@
                 <tr><td>"Write the docs"</td><td><code>/draft:documentation</code></td></tr>
                 <tr><td>"Learn the patterns"</td><td><code>/draft:learn</code></td></tr>
                 <tr><td>"Send to Jira"</td><td><code>/draft:jira-create</code></td></tr>
+                <tr><td>"Tour the codebase"</td><td><code>/draft:tour</code></td></tr>
+                <tr><td>"Show AI impact metrics"</td><td><code>/draft:impact</code></td></tr>
+                <tr><td>"Assist PR review"</td><td><code>/draft:assist-review</code></td></tr>
             </tbody>
         </table>
     </div>
 
     <div class="callout callout-tip">
         <div class="callout-title">Full Intent List</div>
-        <p>Run <code>/draft</code> (the overview command) to see the complete intent mapping table with all 25 commands and their natural language triggers.</p>
+        <p>Run <code>/draft</code> (the overview command) to see the complete intent mapping table with all 28 commands and their natural language triggers.</p>
     </div>
 </div>

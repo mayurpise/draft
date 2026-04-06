@@ -6,8 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Ongoing refinements to agent behavior protocols.
 
-## [2.2.0] - 2026-04-02
+## [2.3.0] - 2026-04-05
+
+### Added
+- **3 new DX-focused commands** expanding Draft from 25 to 28 commands:
+  - `/draft:tour` — Interactive architecture mentorship and codebase walk-through.
+  - `/draft:impact` — ROI analytics tracking project friction, timeline metrics, and risk analysis.
+  - `/draft:assist-review` — Summarizes intent and structural PR risks specifically for human reviewers.
+- **Progressive Disclosure Reading Flow** — Major restructuring of the Draft book to prioritize developer workflows:
+  - **Part II: Track Lifecycle** (Specs, Implementation, Review) now immediately follows Getting Started.
+  - **Part III: How Draft Thinks** (deep architectural internals) moved to later chapters to maintain momentum.
+
+### Changed
+- **Global Synchronization:** All documentation, the main website, and all 24 book chapters updated to reflect the new **28-command** total.
+- **Build Engine Refactor:** `scripts/build-book.sh` updated with dynamic TOC generation logic to handle renamed chapter files and shifted indices.
+- **Appendix Audit:** Updated every chapter cross-reference in `Appendix A: Command Reference` to point to the correct sections in the new chapter sequence.
+- **UI Consistency:** Chapter metadata in all 24 HTML fragments synchronized with the new Part numbering.
+
+### Fixed
+- Stale chapter indices in the command reference table.
+- Hardcoded chapter ranges in the book landing page TOC logic.
+
 
 ### Added
 - **8 new specialist commands** expanding Draft from 17 to 25 skills:

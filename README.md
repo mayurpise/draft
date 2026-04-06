@@ -109,8 +109,11 @@ curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integr
 | **`/draft:documentation`** | Technical docs: readme, runbook, api, onboarding |
 | **`/draft:jira-preview`** | Generate Jira export for review |
 | **`/draft:jira-create`** | Push issues to Jira via MCP |
+| **`/draft:tour`** | Interactive architecture mentorship and codebase walk-through |
+| **`/draft:impact`** | ROI analytics tracking friction and timeline metrics |
+| **`/draft:assist-review`** | Summarize intent and highlight structural PR risks for reviewers |
 
-[See all 25 commands →](core/methodology.md#command-workflows)
+[See all 28 commands →](core/methodology.md#command-workflows)
 
 ---
 

@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initSearch();
     buildPageTOC();
     initCopyButtons();
-    initAudioSupport(); // Newly added for NotebookLM playback
 });
 
 // ============================================================

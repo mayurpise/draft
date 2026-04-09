@@ -104,7 +104,7 @@
         <li><strong>tech-stack.md</strong> &mdash; Organizational standards derived from majority usage, approved variances, shared libraries</li>
     </ul>
 
-    <p>After generating <code>architecture.md</code>, the Condensation Subroutine runs to produce a root-level <code>.ai-context.md</code> &mdash; a token-optimized aggregate of all service knowledge.</p>
+    <p>After generating <code>architecture.md</code>, the Condensation Subroutine runs to produce a root-level <code>.ai-context.md</code> &mdash; a token-optimized aggregate of all service knowledge &mdash; and then derives <code>.ai-profile.md</code>, the ultra-compact Tier 0 profile.</p>
 
     <div class="figure">
         <div class="figure-content">
@@ -163,7 +163,7 @@
             <tr><th>Layer</th><th>Location</th><th>Contains</th><th>Purpose</th></tr>
         </thead>
         <tbody>
-            <tr><td>Root</td><td><code>draft/</code></td><td>Service index, dependency graph, tech matrix, synthesized product/architecture/tech-stack, aggregated <code>.ai-context.md</code></td><td>Cross-service decisions, system topology, organizational standards</td></tr>
+            <tr><td>Root</td><td><code>draft/</code></td><td>Service index, dependency graph, tech matrix, synthesized product/architecture/tech-stack, aggregated <code>.ai-context.md</code>, <code>.ai-profile.md</code></td><td>Cross-service decisions, system topology, organizational standards</td></tr>
             <tr><td>Service</td><td><code>&lt;service&gt;/draft/</code></td><td>Service-specific architecture, product, tech-stack, tracks, guardrails</td><td>Per-service implementation, feature work within a service</td></tr>
         </tbody>
     </table>
@@ -177,7 +177,7 @@
     <p>Running <code>/draft:index --init-missing</code> offers to initialize uninitialized services. For each one, Draft prompts with four options: <strong>y</strong> (initialize this service), <strong>n</strong> (skip), <strong>all</strong> (initialize all remaining), or <strong>skip-rest</strong> (skip all remaining). This makes it practical to bring an entire monorepo under Draft management incrementally.</p>
 
     <h2>Bughunt Mode</h2>
-    <p><code>/draft:index</code> also supports a bughunt aggregation mode. Running <code>/draft:index bughunt</code> executes <code>/draft:bughunt</code> sequentially across all initialized services (or a specified subset), then generates <code>draft/bughunt-summary.md</code> &mdash; an aggregate report showing bug counts by severity across all services, directories requiring immediate attention, and links to individual service reports.</p>
+    <p><code>/draft:index</code> also supports a bughunt aggregation mode. Running <code>/draft:index --bughunt</code> executes <code>/draft:bughunt</code> sequentially across all initialized services (or a specified subset), then generates <code>draft/bughunt-summary.md</code> &mdash; an aggregate report showing bug counts by severity across all services, directories requiring immediate attention, and links to individual service reports.</p>
 
     <div class="callout callout-concept">
         <div class="callout-title">When to Re-Index</div>

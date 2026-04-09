@@ -145,8 +145,8 @@ curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integr
 │        Three-stage review (validation + spec + quality)     │
 └─────────────────────────────────────────────────────────────┘
 
-         /draft:init refresh  ←── incremental: only re-analyze
-                                   files with changed hashes
+         /draft:init --refresh  ←── incremental: only re-analyze
+                                    files with changed hashes
 ```
 
 [Full workflow →](core/methodology.md#core-workflow)
@@ -169,7 +169,7 @@ plan.md          →  "Phase 1: sortable, Phase 2: persist"
 
 Each layer narrows the solution space. By the time AI writes code, decisions are made.
 
-**Incremental refresh**: After initial setup, `/draft:init refresh` uses stored file hashes and signal classification to only re-analyze what changed — no full re-scan needed.
+**Incremental refresh**: After initial setup, `/draft:init --refresh` uses stored file hashes and signal classification to only re-analyze what changed — no full re-scan needed.
 
 [Read methodology →](core/methodology.md#philosophy)
 

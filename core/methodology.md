@@ -463,9 +463,9 @@ Draft auto-classifies the project:
 
 > **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `/draft:decompose` on a track. File-based activation — no opt-in needed.
 
-If `draft/` already exists with context files, init reports "already initialized" and suggests using `/draft:init refresh` or `/draft:new-track`.
+If `draft/` already exists with context files, init reports "already initialized" and suggests using `/draft:init --refresh` or `/draft:new-track`.
 
-#### Refresh Mode (`/draft:init refresh`)
+#### Refresh Mode (`/draft:init --refresh`)
 
 Re-scans and updates existing context without starting from scratch. Uses stored state for incremental, targeted refresh.
 

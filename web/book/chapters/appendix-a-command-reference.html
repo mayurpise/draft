@@ -91,14 +91,14 @@
             <tr>
                 <td><code>/draft:init</code></td>
                 <td>Analyze codebase and generate context files, architecture docs, and state tracking</td>
-                <td><code>refresh</code> &mdash; re-analyze and update existing context</td>
+                <td><code>--refresh</code> &mdash; re-analyze and update existing context</td>
                 <td>None (run once per project)</td>
                 <td>3, 4, 5</td>
             </tr>
             <tr>
                 <td><code>/draft:index</code></td>
                 <td>Aggregate monorepo service contexts into root-level knowledge</td>
-                <td><code>--init-missing</code> &mdash; initialize uninitialized services; <code>bughunt [dirs]</code> &mdash; run bughunt across services</td>
+                <td><code>--init-missing</code> &mdash; initialize uninitialized services; <code>--bughunt [dirs]</code> &mdash; run bughunt across services</td>
                 <td><code>/draft:init</code> at root and at least one service</td>
                 <td>18</td>
             </tr>

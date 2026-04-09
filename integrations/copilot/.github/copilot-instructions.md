@@ -100,7 +100,7 @@ You are initializing a Draft project for Context-Driven Development.
 
 ## Red Flags - STOP if you're:
 
-- Re-initializing a project that already has `draft/` without using `refresh` mode
+- Re-initializing a project that already has `draft/` without using `--refresh` mode
 - Skipping brownfield analysis for an existing codebase
 - Rushing through product definition questions without probing for detail
 - Auto-generating tech-stack.md without verifying detected dependencies
@@ -203,7 +203,7 @@ synced_to_commit: "{FULL_SHA}"
 ### Usage in Refresh
 
 The `synced_to_commit` field is critical for incremental refresh:
-- `draft init refresh` reads this field to find changed files since last sync
+- `draft init --refresh` reads this field to find changed files since last sync
 - If `git.dirty: true`, warn user that docs may not reflect committed state
 - After refresh, update `synced_to_commit` to current HEAD
 
@@ -232,7 +232,7 @@ synced_to_commit: "a1b2c3d4e5f6789012345678901234567890abcd"
 ## Pre-Check
 
 Check for arguments:
-- `refresh`: Update existing context without full re-init
+- `--refresh`: Update existing context without full re-init
 
 ### Standard Init Check
 
@@ -241,7 +241,7 @@ ls draft/ 2>/dev/null
 ```
 
 If `draft/` exists with context files:
-- Announce: "Project already initialized. Use `draft init refresh` to update context or `draft new-track` to create a feature."
+- Announce: "Project already initialized. Use `draft init --refresh` to update context or `draft new-track` to create a feature."
 - Stop here.
 
 ### Atomic File Staging
@@ -277,7 +277,7 @@ Check for monorepo indicators:
 - `packages/`, `apps/`, `services/` directories with independent manifests
 
 If monorepo detected:
-- Announce: "Detected monorepo structure. Consider using `draft index` at root level to aggregate service context, or run `draft init` within individual service directories."
+- Announce: "Detected monorepo structure. Recommended workflow: (1) Run `draft init` inside each service directory first to create per-service context, then (2) run `draft index` at the monorepo root to aggregate service contexts into a federated index."
 - Ask user to confirm: initialize here (single service) or abort (use draft index instead)
 
 ### Migration Detection
@@ -288,12 +288,12 @@ If `draft/architecture.md` exists WITHOUT `draft/.ai-context.md`:
 - If user declines: Continue without .ai-context.md
 
 If `draft/.ai-context.md` exists WITHOUT `draft/architecture.md`:
-- Announce: "Detected .ai-context.md without its source architecture.md. The derived file exists but its primary source is missing (may have been accidentally deleted). Recommend running `draft init refresh` to regenerate architecture.md from codebase analysis."
+- Announce: "Detected .ai-context.md without its source architecture.md. The derived file exists but its primary source is missing (may have been accidentally deleted). Recommend running `draft init --refresh` to regenerate architecture.md from codebase analysis."
 - Do NOT delete the existing `.ai-context.md` — it still provides useful context until `architecture.md` is regenerated
 
 ### Refresh Mode
 
-If the user runs `draft init refresh`:
+If the user runs `draft init --refresh`:
 
 **0. State-Aware Pre-Check** (before any refresh work):
 
@@ -313,10 +313,6 @@ If the user runs `draft init refresh`:
    - **Deleted files**: Present in stored but not in current tree → sections to prune
    - **Unchanged files**: Hash matches → skip re-reading these files entirely
 
-   If NO files changed (all hashes match AND no new/deleted files), announce:
-   "No source file changes detected since last init/refresh ({generated_at}). Architecture context is current. Nothing to refresh."
-   Stop here unless the user insists.
-
    **c. Load signal state (if available):**
    ```bash
    cat draft/.state/signals.json 2>/dev/null
@@ -334,6 +330,13 @@ If the user runs `draft init refresh`:
      REMOVED: background_jobs (3 → 0) — §8 Concurrency can be simplified
      STABLE:  services (8 → 9), test_infra (15 → 16)
    ```
+
+   **c.1. Early-exit check (after signal analysis):**
+   If NO files changed (all hashes match AND no new/deleted files from step b) AND no signal drift detected (step c), announce:
+   "No source file changes detected since last init/refresh ({generated_at}). Architecture context is current. Nothing to refresh."
+   Stop here unless the user insists.
+
+   > **Why after signal analysis:** Previously, the early-exit happened before signal classification, which meant structural drift (e.g., new auth files appearing) went undetected if file hashes happened to match.
 
    **d. Create refresh run memory:**
    If starting fresh: write new `draft/.state/run-memory.json` with `run_type: "refresh"` and `status: "in_progress"`.
@@ -376,7 +379,7 @@ If the user runs `draft init refresh`:
    - **Renamed files**: Update file references
 
    **e. Targeted analysis (only changed files):**
-   > **Guardrail:** If more than 100 files changed since last sync, recommend full 5-phase refresh instead of incremental analysis. Too many changes means the incremental approach loses its token-efficiency advantage.
+   > **Guardrail:** If more than 100 files changed since last sync, recommend full 5-phase refresh instead of incremental analysis. Too many changes means the incremental approach loses its token-efficiency advantage. Use the higher of the `git diff` changed file count vs the `freshness.json` hash delta count to determine whether the guardrail is triggered.
 
    - Read each changed file to understand modifications (up to 100 files; if more, fall back to full refresh)
    - Identify which architecture.md sections are affected:
@@ -440,6 +443,7 @@ If the user runs `draft init refresh`:
    **h. On user rejection:**
    - No changes made to `draft/architecture.md`
    - However, verify `.ai-context.md` consistency: if `.ai-context.md` is missing or its `synced_to_commit` differs from `architecture.md`, offer to regenerate it from the current (unchanged) `architecture.md`
+   - Also verify `.ai-profile.md` consistency: if `.ai-profile.md` is missing or its `synced_to_commit` differs from `.ai-context.md`, offer to regenerate it from the current `.ai-context.md`
 
    **i. Fallback to full refresh:**
    Reached when step (a) detects a missing or invalid `synced_to_commit` SHA. Run full 5-phase architecture discovery instead of incremental analysis.
@@ -448,7 +452,7 @@ If the user runs `draft init refresh`:
 
    **j. Update metadata after refresh:**
    After successful refresh, update the YAML frontmatter in all modified files:
-   - `generated_by`: `draft:init refresh`
+   - `generated_by`: `draft:init --refresh`
    - `generated_at`: current timestamp
    - `git.*`: current git state
    - `synced_to_commit`: current HEAD SHA
@@ -2104,7 +2108,7 @@ git log --oneline -5 --no-merges -- . ':!draft/' 2>/dev/null
 
 Write `draft/.ai-profile.md` using the template from `core/templates/ai-profile.md`. The file should be 20-50 lines.
 
-**Called by:** `draft init`, `draft init refresh`, Condensation Subroutine, `draft implement`
+**Called by:** `draft init`, `draft init --refresh`, Condensation Subroutine, `draft implement`
 
 ---
 
@@ -2481,7 +2485,7 @@ Next steps:
 5. Review draft/.ai-context.md — verify the AI context is complete and accurate
 6. Review draft/architecture.md — human-friendly version for team onboarding
 7. Run `draft new-track` to start planning a feature
-8. Run `draft init refresh` after significant codebase changes — refresh is now incremental (only stale files re-analyzed)
+8. Run `draft init --refresh` after significant codebase changes — refresh is now incremental (only stale files re-analyzed)
 9. Run `draft learn promote` to promote high-confidence patterns to Hard Guardrails"
 
 For **Greenfield** projects, announce:
@@ -2501,7 +2505,7 @@ Next steps:
 3. Review draft/workflow.md — verify TDD, commit, and review settings match your team's process
 4. Review draft/guardrails.md — configure hard guardrails for your project
 5. Run `draft new-track` to start planning a feature
-6. Run `draft init refresh` after adding substantial code — this will generate architecture context and auto-run `draft learn` to populate guardrails"
+6. Run `draft init --refresh` after adding substantial code — this will generate architecture context and auto-run `draft learn` to populate guardrails"
 
 ---
 
@@ -2509,7 +2513,7 @@ Next steps:
 
 This is a self-contained, callable procedure for generating `draft/.ai-context.md` from `draft/architecture.md`. Any skill that mutates `architecture.md` should execute this subroutine afterward to keep the derived context file in sync.
 
-**Called by:** `draft init`, `draft init refresh`, `draft implement`, `draft decompose`, `draft coverage`, `draft index`
+**Called by:** `draft init`, `draft init --refresh`, `draft implement`, `draft decompose`, `draft coverage`, `draft index`
 
 ### Inputs
 
@@ -2779,6 +2783,20 @@ ls draft/.index-lock 2>/dev/null
 - **If `draft/.index-lock` exists and is older than 10 minutes:** Remove it and continue.
 - **If no lock exists:** Continue.
 
+```bash
+# Check lockfile age (cross-platform)
+if [ -f draft/.index-lock ]; then
+  # Linux
+  lock_age=$(( $(date +%s) - $(stat -c %Y draft/.index-lock 2>/dev/null || stat -f %m draft/.index-lock) ))
+  if [ "$lock_age" -lt 600 ]; then
+    echo "Lock is ${lock_age}s old (< 10 min). Previous indexing may be incomplete."
+  else
+    echo "Stale lock (${lock_age}s old). Removing."
+    rm -f draft/.index-lock
+  fi
+fi
+```
+
 Create `draft/.index-lock` with the current timestamp before starting:
 
 ```bash
@@ -2791,16 +2809,50 @@ date -u +"%Y-%m-%dT%H:%M:%SZ" > draft/.index-lock
 rm -f draft/.index-lock
 ```
 
+### Run Memory
+
+Before starting, check for interrupted previous runs and create run state:
+
+```bash
+cat draft/.state/run-memory.json 2>/dev/null
+```
+
+- If `status` is `"in_progress"`, warn: "Previous indexing run was interrupted. Starting fresh."
+- Create/overwrite `draft/.state/run-memory.json`:
+
+```json
+{
+  "run_type": "index",
+  "status": "in_progress",
+  "started_at": "{ISO_TIMESTAMP}",
+  "completed_at": null,
+  "services_scanned": 0,
+  "services_indexed": 0
+}
+```
+
+On successful completion (Step 9), update:
+```json
+{
+  "status": "completed",
+  "completed_at": "{ISO_TIMESTAMP}",
+  "services_scanned": X,
+  "services_indexed": Y
+}
+```
+
+On fatal error, update `status` to `"failed"` with `error` field describing the failure.
+
 ## Step 1: Parse Arguments
 
 Check for optional arguments:
 - `--init-missing`: Also initialize services that don't have `draft/` directories
-- `bughunt [dir1 dir2 ...]`: Run bug hunt across subdirectories with `draft/` folders
+- `--bughunt [dir1 dir2 ...]`: Run bug hunt across subdirectories with `draft/` folders
   - If no directories specified: auto-discover all subdirectories with `draft/`
   - If directories specified: run bughunt only in those subdirectories (skip if no `draft/`)
   - Generate summary report at: `draft/bughunt-summary.md`
 
-**If `bughunt` argument detected:** Skip to Step 1A (Bughunt Mode) instead of continuing to Step 2.
+**If `--bughunt` argument detected:** Skip to Step 1A (Bughunt Mode) instead of continuing to Step 2.
 
 ## Step 1A: Bughunt Mode
 
@@ -2808,13 +2860,13 @@ This mode runs `draft bughunt` across multiple subdirectories and aggregates res
 
 ### 1A.1: Determine Target Directories
 
-**If directories explicitly specified** (e.g., `bughunt dir1 dir2 dir3`):
+**If directories explicitly specified** (e.g., `--bughunt dir1 dir2 dir3`):
 - Use provided directory list as targets
 - Verify each directory exists
 - Check each directory for `draft/` subdirectory
 - Warn and skip any directory without `draft/`
 
-**If no directories specified** (e.g., just `bughunt`):
+**If no directories specified** (e.g., just `--bughunt`):
 - Auto-discover all immediate child directories (depth=1)
 - Filter for directories containing `draft/` subdirectory
 - Exclude patterns: `node_modules/`, `vendor/`, `.git/`, `draft/`, `.*`
@@ -2923,11 +2975,11 @@ Create `draft/bughunt-summary.md`:
 1. **Prioritize Critical Issues:** Review directories with Critical bugs first
 2. **Review Individual Reports:** Click links above to see detailed findings
 3. **Track Fixes:** Use `draft new-track` to create implementation tracks for fixes
-4. **Re-run After Fixes:** Run `draft index bughunt` again to verify
+4. **Re-run After Fixes:** Run `draft index --bughunt` again to verify
 
 ---
 
-*Generated by `draft index bughunt` command*
+*Generated by `draft index --bughunt` command*
 ```
 
 ### 1A.5: Completion Report
@@ -3246,7 +3298,7 @@ Services deviating from org standards:
 
 ### Placeholder Detection
 
-A file is considered a placeholder if it contains the marker `<!-- AUTO-GENERATED -->` or is smaller than 100 bytes. Placeholders may be overwritten without confirmation. Non-placeholder files require user confirmation before overwriting.
+A file is considered a placeholder if it contains the marker `<!-- AUTO-GENERATED BY DRAFT:INDEX -->`. Placeholders may be overwritten without confirmation. Non-placeholder files require user confirmation before overwriting.
 
 ### 7.4 Synthesize `draft/product.md` (if not exists or is placeholder)
 
@@ -3425,6 +3477,14 @@ After generating `draft/architecture.md`, derive a condensed `draft/.ai-context.
 - Condense into 200-400 lines covering: system overview, service catalog, inter-service dependencies, shared infrastructure, cross-cutting patterns, critical invariants, and entry points
 - If `draft/.ai-context.md` already exists and is not a placeholder, prompt before overwriting
 
+### 7.8 Generate `draft/.ai-profile.md` (if not exists or is placeholder)
+
+After generating `draft/.ai-context.md`, derive an ultra-compact `draft/.ai-profile.md` using the Profile Generation step from the Condensation Subroutine. This provides an always-injected, minimal context profile at the root level.
+
+- Read the synthesized `draft/.ai-context.md`
+- Generate a 20-50 line profile covering: project identity, active tracks, key constraints, and entry points
+- If `draft/.ai-profile.md` already exists and is not a placeholder, prompt before overwriting
+
 ## Step 8: Create Root Config
 
 Create `draft/config.yaml` if not exists:
@@ -3482,6 +3542,8 @@ Generated/Updated:
   ✓ draft/product.md            (synthesized product vision)
   ✓ draft/architecture.md       (system-of-systems view)
   ✓ draft/tech-stack.md         (org standards)
+  ✓ draft/.ai-context.md        (token-optimized AI context)
+  ✓ draft/.ai-profile.md        (always-on AI profile)
   ✓ draft/config.yaml           (index configuration)
 
 Service manifests updated: Y services
@@ -3493,7 +3555,7 @@ Next steps:
 4. Run draft index periodically to refresh
 
 For uninitialized services, run:
-  draft index init-missing
+  draft index --init-missing
 ═══════════════════════════════════════════════════════════
 ```
 
@@ -13812,9 +13874,9 @@ Draft auto-classifies the project:
 
 > **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `draft decompose` on a track. File-based activation — no opt-in needed.
 
-If `draft/` already exists with context files, init reports "already initialized" and suggests using `draft init refresh` or `draft new-track`.
+If `draft/` already exists with context files, init reports "already initialized" and suggests using `draft init --refresh` or `draft new-track`.
 
-#### Refresh Mode (`draft init refresh`)
+#### Refresh Mode (`draft init --refresh`)
 
 Re-scans and updates existing context without starting from scratch. Uses stored state for incremental, targeted refresh.
 
@@ -15249,7 +15311,7 @@ After updating guardrails.md, append a brief learning summary to the end of the 
 
 This is a self-contained, callable procedure for generating `draft/.ai-context.md` and `draft/.ai-profile.md` from `draft/architecture.md`. Any skill that mutates `architecture.md` should execute this subroutine afterward to keep the derived context files in sync.
 
-**Called by:** `draft init`, `draft init refresh`, `draft implement`, `draft decompose`, `draft coverage`, `draft index`, `draft adr`
+**Called by:** `draft init`, `draft init --refresh`, `draft implement`, `draft decompose`, `draft coverage`, `draft index`, `draft adr`
 
 ### Inputs
 

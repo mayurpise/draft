@@ -538,9 +538,7 @@ Perform a **one-time, exhaustive analysis** of the existing codebase. This is NO
 - **Populate ALL tables** — with real data, not placeholders or examples
 - **Target: comprehensive coverage** — shorter output indicates incomplete analysis
 
-If the codebase is large (200+ files), focus on the module boundaries but still enumerate exhaustively within each module.
-
-> **Large codebase guardrail:** If the codebase exceeds 500 source files, limit deep dives to the top 20 most-imported modules and summarize others in a table. Rank modules by the number of unique files that import/reference them (descending). For dynamic languages where static import counting is impractical, rank by file count within each module directory (larger modules first).
+Regardless of codebase size, deep-dive every discovered module. Larger codebases require MORE depth, not less — they have more integration points, more invariants, and more places for bugs to hide. Rank modules by the number of unique files that import/reference them (descending) and process them in that order, but do NOT skip or summarize any module.
 
 ### Execution Strategy for Depth
 
@@ -665,8 +663,8 @@ Follow these steps in order. The specific files to look for depend on the langua
 
    | Classification | Criteria | Action |
    |----------------|----------|--------|
-   | **MODULE** | Contains source files, build files (package.json, go.mod, Cargo.toml, etc.), or 5+ files | Include in module map |
-   | **SKIP** | Matches exclude pattern or contains no meaningful source | Exclude from analysis |
+   | **MODULE** | Contains ANY source files or build files (package.json, go.mod, Cargo.toml, etc.) | Include in module map |
+   | **SKIP** | Matches exclude pattern AND contains no meaningful source | Exclude from analysis |
 
    **Exclude patterns:** `node_modules/`, `vendor/`, `.git/`, `dist/`, `build/`, `out/`, `__pycache__/`, `.next/`, `.cache/`, directories starting with `.`
 
@@ -682,10 +680,10 @@ Follow these steps in order. The specific files to look for depend on the langua
      # Count meaningful files
      file_count=$(find "$dir" -maxdepth 2 -type f \( -name '*.ts' -o -name '*.js' -o -name '*.py' -o -name '*.go' -o -name '*.rs' -o -name '*.java' -o -name '*.rb' -o -name '*.cs' -o -name '*.c' -o -name '*.cpp' -o -name '*.swift' -o -name '*.kt' \) 2>/dev/null | wc -l)
      has_build=$(ls "$dir"/{package.json,go.mod,Cargo.toml,pom.xml,build.gradle,pyproject.toml,requirements.txt,Makefile,CMakeLists.txt} 2>/dev/null | head -1)
-     if [ "$file_count" -ge 5 ] || [ -n "$has_build" ]; then
+     if [ "$file_count" -ge 1 ] || [ -n "$has_build" ]; then
        echo "MODULE: $dir_name ($file_count source files)"
      else
-       echo "SKIP: $dir_name ($file_count source files, no build file)"
+       echo "SKIP: $dir_name (0 source files, no build file)"
      fi
    done
    ```
@@ -742,7 +740,7 @@ Follow these steps in order. The specific files to look for depend on the langua
      config_files:       5 files  → §22 HIGH
    ```
 
-   **Integration with Adaptive Sections table (above):** Use signal counts to override the default skip rules. A signal count of 0 means the section should be skipped or simplified. A count ≥ 3 means the section warrants deep treatment. Between 1-2, include the section but keep it brief.
+   **Integration with Adaptive Sections table (above):** Use signal counts to calibrate section depth. A signal count of 0 means the section should be skipped or simplified. A count ≥ 1 means the section warrants full treatment — include it with complete analysis. Even a single signal file can reveal critical architecture (e.g., one auth file still defines the entire security boundary).
 
 #### Phase 2: Wiring (Trace the Graph)
 
@@ -1734,7 +1732,7 @@ Before writing architecture.md, verify your output matches these expectations:
 | **Code snippets** | 5 snippets | 10-15 snippets |
 | **File references** | 50 refs | 100+ refs |
 | **Invariants documented** | 8 | 10-15 |
-| **Modules deep-dived** | 5 | 5-8 |
+| **Modules deep-dived** | All discovered modules | All discovered modules (no cap) |
 
 **Completeness guidance:** All 25 sections + 4 appendices must be present. HIGH-priority sections require depth and diagrams. If any HIGH-priority section is thin, expand it before finalizing.
 
@@ -1765,7 +1763,7 @@ This table identifies which sections require the MOST depth and WHY. High-priori
 | 4 | Architecture Overview | **HIGH** | **YES: flowchart TD** | Visual mental model — diagram is mandatory |
 | 5 | Component Map & Interactions | **HIGH** | **YES: flowchart + matrix** | Know what talks to what |
 | 6 | Data Flow — End to End | **HIGH** | **YES: multiple flowcharts** | Trace any request — separate diagram per major flow |
-| 7 | Core Modules Deep Dive | **HIGH** | **YES: stateDiagram per module** | 5-8 modules × full deep-dive each |
+| 7 | Core Modules Deep Dive | **HIGH** | **YES: stateDiagram per module** | ALL discovered modules × full deep-dive each |
 | 8 | Concurrency Model | High | Optional | **Prevents race conditions** in generated code |
 | 9 | Framework & Extension Points | High | No | Understand the plugin architecture |
 | 10 | Full Catalog | **HIGH** | No | **Exhaustive enumeration** — no sampling |
@@ -16832,7 +16830,7 @@ flowchart LR
 
 ## 6. Core Modules Deep Dive
 
-{For each major module (5-8), provide detailed analysis.}
+{For EVERY discovered module, provide detailed analysis. Do not cap the number of modules.}
 
 ### 6.1 {Module Name}
 

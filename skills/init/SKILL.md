@@ -505,6 +505,10 @@ Not every codebase has every concept. Apply these rules:
 | Is containerized / has infra config | Add: Dockerfile, Kubernetes manifests, Helm charts, Terraform, CI/CD pipeline |
 | Is a single-threaded / simple module | Simplify Section 8 (Concurrency) to note "single-threaded" and skip detailed thread maps |
 | Has no configuration flags | Adapt Section 22 to cover whatever config mechanism exists (env vars, YAML, JSON, TOML, .env) |
+| Has no domain model / is pure infrastructure | Simplify Section 26 (Domain Model) — note "infrastructure-only, no domain entities" |
+| Is a single-service / no inter-service communication | Simplify Section 28 (Interaction Surfaces) — focus on human interaction layers and external APIs only |
+| Has no feature flags / remote config | Skip feature flags subsection in Section 22 |
+| Has no event/message system | Skip Section 28.4 (Event & Message Contracts) |
 
 ---
 
@@ -668,6 +672,10 @@ Follow these steps in order. The specific files to look for depend on the langua
    | `persistence` | `repositories/`, `dao/`, `**/db/**`, ORM config files, migration directories | §19 State Management |
    | `test_infra` | `test/`, `tests/`, `__tests__/`, `*.test.*`, `*.spec.*`, test config files | §26 Testing Infrastructure |
    | `config_files` | `.env*`, `config/`, `*.config.*`, `application.yml`, `settings.*` | §22 Configuration |
+   | `domain_models` | `domain/`, `entities/`, `aggregates/`, `value-objects/`, DDD-style directories | §29 Domain Model |
+   | `messaging` | `events/`, `messages/`, `publishers/`, `subscribers/`, `handlers/`, event bus imports | §31 Interaction Surfaces, §30 Execution Flow |
+   | `infra_config` | `Dockerfile*`, `docker-compose*`, `.github/workflows/`, `k8s/`, `terraform/`, `helm/` | §4 Build Artifacts, §25 Build System |
+   | `feature_flags` | `flags/`, `features/`, LaunchDarkly/Split/Unleash imports, feature toggle patterns | §22 Configuration (Feature Flags) |
 
    **Procedure:**
 
@@ -730,33 +738,54 @@ Follow these steps in order. The specific files to look for depend on the langua
 
 #### Phase 3: Depth (Trace the Flows)
 
-10. **Trace data flows end-to-end**: For each major flow, start at the data source / entry point and follow the code through processing stages to the output.
+10. **Trace data flows end-to-end**: For each major flow, start at the data source / entry point and follow the code through processing stages to the output. Map data ingress/egress points, serialization boundaries, and transformation stages.
 
 11. **Read implementation files**: For core modules, read the implementation to understand algorithms, error handling, retry logic, and state management.
 
-12. **Identify concurrency model**: Find where thread pools, async executors, goroutines, or worker processes are created and what work is dispatched to each.
+12. **Identify concurrency model**: Find where thread pools, async executors, goroutines, or worker processes are created and what work is dispatched to each. Document resource budgets (connection pools, memory limits, file descriptor limits).
 
 13. **Find safety checks**: Look for invariant assertions, validation logic, auth checks, version checks, lock acquisitions, and transaction boundaries.
 
+13b. **Extract domain model**: Identify core business entities, their relationships, and the boundary between business logic and infrastructure code. Map aggregate boundaries — groups of entities that must change atomically. Document domain invariants distinct from technical invariants.
+
+13c. **Map execution flows**: For each major request type, trace the complete lifecycle: entry point → middleware → handler → service → repository → response. Document the happy path, failure paths, retry/fallback flows, and state transitions. Create control flow path tables.
+
+13d. **Map interaction surfaces**: Catalog all communication channels: service-to-service (REST, gRPC, messaging), external integrations (APIs, auth systems), and human interaction layers (CLI, UI, config inputs). Document event/message contracts with delivery guarantees.
+
 #### Phase 4: Periphery
 
-14. **Catalog external dependencies**: Check build/dependency files and import statements to map all external library and service dependencies.
+14. **Catalog external dependencies**: Check build/dependency files and import statements to map all external library and service dependencies. Identify version constraints, compatibility risks, and EOL timelines.
 
 15. **Examine test infrastructure**: Read test files and test utilities to understand the testing approach, mock patterns, and test harness.
 
-16. **Scan for configuration**: Find all configuration mechanisms (flags, env vars, config files, feature gates, constants).
+16. **Scan for configuration**: Find all configuration mechanisms (flags, env vars, config files, feature gates, constants). Document the env variable hierarchy, feature flag system, and deployment-time vs runtime config distinction.
+
+16b. **Catalog entry points and build artifacts**: Enumerate all entry points (CLI commands, API servers, schedulers, event handlers, workers). Catalog build/runtime artifacts (Dockerfiles, CI pipelines, Helm charts, Terraform configs).
 
 17. **Look for documentation**: Check for existing README, docs/, architecture decision records (ADRs), or inline comments that provide architectural context.
 
+17b. **Identify risk zones**: Find high-churn files (frequent commits), fragile areas (tight coupling, shared state, no tests), and error propagation paths. Assess blast radius for changes in each area. Catalog debug surfaces (debug endpoints, verbose modes, profiling hooks).
+
 #### Phase 5: Synthesis
 
-18. **Cross-reference**: Ensure every component mentioned in one section appears in all relevant sections (architecture, data flow, interaction matrix, etc.).
+18. **Cross-reference**: Ensure every component mentioned in one section appears in all relevant sections (architecture, data flow, interaction matrix, domain model, interaction surfaces, etc.).
 
 19. **Validate completeness**: Confirm ALL handlers / endpoints / plugins / schemas / dependencies are listed. Do not sample — enumerate exhaustively.
 
 20. **Identify patterns**: Look for recurring design patterns and document them.
 
 21. **Generate diagrams**: Create Mermaid diagrams AFTER understanding the full picture, not during exploration.
+
+21b. **Build required output artifacts**: Generate the 5 mandatory structured artifacts:
+   - **System Architecture Diagram** (Section 3.1): Components, connections, boundaries — the primary visual mental model
+   - **Execution Flow Diagrams** (Section 27): Sequence diagrams for key request lifecycles with happy/failure/retry paths
+   - **Dependency Graph Visualization** (Appendix E): Layered internal module graph + external dependency graph with version constraints
+   - **Data Flow Diagram** (Section 5): Sources → transformations → sinks with serialization boundaries
+   - **Context Index** (Appendix F): File → responsibility → dependencies → entry points mapping for every significant file
+
+21c. **Build domain model artifacts**: Generate entity-relationship diagram (Section 26), business/infrastructure boundary map, and aggregate boundary documentation.
+
+21d. **Build interaction surface map**: Generate service-to-service communication graph (Section 28), external integration catalog, and event/message contract registry.
 
 ---
 
@@ -766,7 +795,7 @@ Generate `draft/architecture.md` — a comprehensive human-readable engineering 
 
 **Output format**:
 - Markdown report with Mermaid diagrams, tables, and code blocks
-- **Target length: comprehensive** — cover all 25 sections + 4 appendices exhaustively
+- **Target length: comprehensive** — cover all 31 sections + 6 appendices exhaustively
 - Include a **Table of Contents** with numbered sections
 - End the document with: `"End of analysis. Queries should reference the .ai-context.md file for token efficiency."`
 
@@ -803,7 +832,7 @@ synced_to_commit: "{FULL_SHA}"
 1. [Executive Summary](#1-executive-summary)
 2. [AI Agent Quick Reference](#2-ai-agent-quick-reference)
 3. [System Identity & Purpose](#3-system-identity--purpose)
-... (continue with all 28 sections + appendices)
+... (continue with all 31 sections + 6 appendices)
 ```
 
 **Do NOT skip the YAML frontmatter. It enables incremental refresh tracking.**
@@ -1612,6 +1641,98 @@ Include both technical terms and business/domain terms.
 
 ---
 
+### 29. Domain Model
+
+**Expected length: 2-4 pages with entity-relationship diagram**
+
+This section captures the system's domain knowledge — the business concepts, their relationships, and the invariants that govern them. It must clearly separate business logic from infrastructure code.
+
+#### 29.1 Core Entities & Relationships
+
+**MANDATORY: Generate a Mermaid `erDiagram`** showing all core entities and their relationships:
+```mermaid
+erDiagram
+    User ||--o{ Order : "places"
+    Order }|--|| Product : "contains"
+```
+
+Table of ALL entities with definitions, key attributes, and lifecycle states.
+
+#### 29.2 Domain Invariants & Constraints
+
+Business rules that must always hold true, distinct from technical invariants in Section 15:
+- Entity validation rules
+- Cross-entity consistency requirements
+- Business rule enforcement locations
+
+#### 29.3 Business Logic vs Infrastructure Boundaries
+
+**MANDATORY**: Identify and document the layered boundary between:
+- **Domain/Business Logic** — pure rules, validation, calculations (no I/O)
+- **Application/Use Cases** — orchestration, workflows, transactions
+- **Infrastructure** — DB, HTTP, messaging, file I/O
+- **Presentation** — API routes, CLI handlers, UI
+
+#### 29.4 Aggregate Boundaries
+
+For DDD-style architectures: aggregate roots and their boundaries.
+For non-DDD: transactional consistency boundaries — entities that must change together atomically.
+
+---
+
+### 30. Execution Flow Mapping
+
+**Expected length: 3-5 pages with 2-3 sequence diagrams**
+
+This section maps the complete end-to-end lifecycle of primary request types through the system. It must enable deterministic reconstruction of execution paths.
+
+#### 30.1 End-to-End Request Lifecycle
+
+**MANDATORY: Generate a Mermaid `sequenceDiagram`** for the primary request type, showing every participant from entry to response.
+
+Trace through: entry point → middleware → handler → service → repository → external calls → response construction → response delivery.
+
+#### 30.2 Control Flow Paths
+
+Document three path types for each major operation:
+- **Happy Path** — step-by-step table: component → action → output
+- **Failure Paths** — failure point → error type → handler → recovery → user effect
+- **Retry & Fallback Flows** — **MANDATORY flowchart** showing retry logic, backoff, and fallback decision trees
+
+#### 30.3 State Transitions
+
+**MANDATORY for stateful systems: Generate a Mermaid `stateDiagram-v2`** showing all valid state transitions with triggers and guard conditions.
+
+Table: from state → to state → trigger → guard condition → side effects.
+
+---
+
+### 31. Interaction Surfaces
+
+**Expected length: 2-3 pages with service communication diagram**
+
+This section catalogs ALL communication channels and interaction points in the system.
+
+#### 31.1 Service-to-Service Communication
+
+**MANDATORY: Generate a Mermaid `graph`** showing all inter-service communication with protocol labels on edges.
+
+Table of ALL service-to-service connections: source → target → protocol → pattern (sync/async/pub-sub) → payload → SLA.
+
+#### 31.2 External Integration Points
+
+Table: integration → direction → protocol → auth method → rate limit → circuit breaker configuration.
+
+#### 31.3 Human Interaction Layers
+
+Table: interface → type (CLI/Web UI/Mobile/Admin/Config) → users → entry point → key flows.
+
+#### 31.4 Event & Message Contracts
+
+Table: event/message → publisher → subscriber(s) → schema → delivery guarantee (at-most-once/at-least-once/exactly-once).
+
+---
+
 ### Appendix A: File Structure Summary
 
 Full directory tree using `├──` / `└──` notation. Each file or directory gets a brief inline annotation: `← description`. Go 2–3 levels deep for all subdirectories.
@@ -1689,21 +1810,62 @@ sequenceDiagram
 
 ---
 
+### Appendix E: Dependency Graph Visualization
+
+**MANDATORY: Provide layered dependency graphs** for both internal and external dependencies.
+
+#### Internal Module Dependencies (Layered)
+
+**Generate a Mermaid `graph TD`** with subgraphs for each architectural layer (Presentation, Application, Domain, Infrastructure). Show directional arrows for dependencies — arrows should point downward through layers. Dotted arrows for optional/indirect dependencies.
+
+Include an adjacency matrix table: module → depends on → depended by → coupling score (High/Med/Low).
+
+#### External Dependency Graph
+
+**Generate a Mermaid `graph LR`** showing system boundary with all external dependencies. Label edges with version constraints.
+
+Table: dependency → version → constraint type → consumers → upgrade risk.
+
+---
+
+### Appendix F: Context Index
+
+**MANDATORY: Machine-navigable file index** enabling deterministic lookup.
+
+For every significant file in the codebase (not generated/vendored files), provide:
+
+| File | Responsibility | Module | Depends On | Depended By | Entry Points | Test Coverage |
+|------|---------------|--------|-----------|-------------|-------------|--------------|
+
+Group files by responsibility category: Entry Point, Business Logic, Data Access, Infrastructure, Configuration, Testing, Build/Deploy.
+
+This index enables:
+- **Impact analysis**: Change file X → what else is affected?
+- **Navigation**: Need to modify behavior Y → which file?
+- **Coverage assessment**: File X → is it tested?
+
+---
+
 ### Expected Output Summary
 
 Before writing architecture.md, verify your output matches these expectations:
 
 | Metric | Minimum | Target |
 |--------|---------|--------|
-| **Depth** | 25 sections minimum | Comprehensive (25 sections + 4 appendices) |
-| **Mermaid diagrams** | 5 diagrams | 8-12 diagrams |
-| **Tables with data** | 15 tables | 20-30 tables |
+| **Depth** | 28 sections minimum | Comprehensive (31 sections + 6 appendices) |
+| **Mermaid diagrams** | 8 diagrams | 12-18 diagrams |
+| **Tables with data** | 20 tables | 30-40 tables |
 | **Code snippets** | 5 snippets | 10-15 snippets |
 | **File references** | 50 refs | 100+ refs |
 | **Invariants documented** | 8 | 10-15 |
 | **Modules deep-dived** | All discovered modules | All discovered modules (no cap) |
+| **Domain entities documented** | All core entities | All entities with relationships |
+| **Execution flows traced** | Primary request lifecycle | All major request types |
+| **Interaction surfaces cataloged** | All service connections | All connections + human interfaces |
+| **Context index entries** | All significant files | Every non-generated file |
+| **Dependency graph layers** | Internal + external | Internal (layered) + external (versioned) |
 
-**Completeness guidance:** All 25 sections + 4 appendices must be present. HIGH-priority sections require depth and diagrams. If any HIGH-priority section is thin, expand it before finalizing.
+**Completeness guidance:** All 31 sections + 6 appendices must be present. HIGH-priority sections require depth and diagrams. If any HIGH-priority section is thin, expand it before finalizing.
 
 ---
 
@@ -1754,10 +1916,15 @@ This table identifies which sections require the MOST depth and WHY. High-priori
 | 26 | Testing Infrastructure | High | No | Know how to test changes |
 | 27 | Tech Debt & Limitations | Medium | No | Avoid deprecated foundations |
 | 28 | Glossary | Medium | No | 15-30 domain terms |
+| 29 | Domain Model | **HIGH** | **YES: erDiagram** | **Core entities, relationships, business/infra boundaries** |
+| 30 | Execution Flow Mapping | **HIGH** | **YES: sequenceDiagram + stateDiagram + flowchart** | **Deterministic execution path reconstruction** |
+| 31 | Interaction Surfaces | **HIGH** | **YES: graph** | **All communication channels and integration points** |
 | A | File Structure | High | No | Full tree with annotations |
 | B | Data Source Mapping | High | No | Cross-reference: who reads what |
 | C | Output Flow Mapping | High | No | Cross-reference: who writes what |
 | D | Sequence Diagrams | **HIGH** | **YES: 2-3 diagrams** | Complex multi-step flows |
+| E | Dependency Graph Visualization | **HIGH** | **YES: layered graph** | **Internal + external dependency structure with versions** |
+| F | Context Index | **HIGH** | No | **File → responsibility → deps → entry points mapping** |
 
 ### Diagram Checklist
 
@@ -1769,20 +1936,31 @@ Before completing architecture.md, verify these diagrams exist:
 - [ ] **Section 7**: State machine for each stateful module (stateDiagram-v2)
 - [ ] **Section 11**: V2 architecture flowchart (if V1/V2 split exists)
 - [ ] **Section 14**: Sequence diagram for top 2-3 cross-module flows
+- [ ] **Section 18**: Error propagation path flowchart
+- [ ] **Section 29**: Entity-relationship diagram (erDiagram)
+- [ ] **Section 30**: Request lifecycle sequence diagram + retry/fallback flowchart + state transition diagram
+- [ ] **Section 31**: Service communication graph
 - [ ] **Appendix D**: 2-3 detailed sequence diagrams with payloads
+- [ ] **Appendix E**: Layered internal dependency graph + external dependency graph
 
 ### Self-Check Before Completion
 
 Run this checklist before writing architecture.md:
 
-- [ ] **Page count**: Rendered output approaches 30+ pages (not 5-10). For a typical brownfield codebase, expect 800-1500+ lines of markdown. If your output is under 600 lines, you have almost certainly skipped modules or abbreviated sections — go back and expand.
+- [ ] **Page count**: Rendered output approaches 40+ pages (not 5-10). For a typical brownfield codebase, expect 1000-2000+ lines of markdown. If your output is under 800 lines, you have almost certainly skipped modules or abbreviated sections — go back and expand.
 - [ ] **Module coverage**: EVERY module from the final combined list (structural candidates from step 1b Tier 1/Tier 2 + logical modules from Phase 2) has its own Section 7 subsection — no modules were dropped, capped, or merged. Sub-modules have nested subsections under their parent.
-- [ ] **Diagram count**: At least 5-10 Mermaid diagrams present
+- [ ] **Diagram count**: At least 8-15 Mermaid diagrams present
 - [ ] **Table population**: ALL tables have real data, not placeholders
 - [ ] **Code snippets**: Actual code from codebase, not pseudocode
 - [ ] **Exhaustive enumeration**: No "and others", "etc.", "similar to above"
 - [ ] **N/A sections**: Explicitly state why skipped, not silently omitted
 - [ ] **File references**: Every claim traceable to specific source file
+- [ ] **Domain model**: Section 29 has ER diagram, entity table, business/infra boundary map
+- [ ] **Execution flows**: Section 30 has request lifecycle sequence diagram, control flow paths, state transitions
+- [ ] **Interaction surfaces**: Section 31 has service communication graph, external integrations, human layers
+- [ ] **Dependency graphs**: Appendix E has layered internal graph + versioned external graph
+- [ ] **Context index**: Appendix F has file-level mapping for every significant file
+- [ ] **Required output artifacts**: All 5 mandatory artifacts present (architecture diagram, execution flows, dependency graph, data flow, context index)
 
 **After completing analysis: Write this content to `draft/architecture.md` using the Write tool. This is the PRIMARY output. Then run the Condensation Subroutine to derive .ai-context.md.**
 
@@ -2040,6 +2218,11 @@ Verify before writing:
 - [ ] Agent can find correct file for any modification
 - [ ] Agent knows test command and patterns
 - [ ] Agent knows V1/V2 boundary (if applicable)
+- [ ] Agent knows domain model entities and their relationships (DOMAIN section)
+- [ ] Agent can trace execution flow for primary request types (FLOWS section)
+- [ ] Agent knows all interaction surfaces and communication protocols (INTERACTIONS section)
+- [ ] Agent can assess dependency coupling and change impact (DEPGRAPH + CONTEXT_INDEX sections)
+- [ ] Agent knows risk zones — high churn files, fragile areas (RISK section)
 - [ ] No prose paragraphs (all structured data)
 - [ ] No references to architecture.md
 - [ ] 200-400 lines total
@@ -2199,18 +2382,23 @@ For each section of `architecture.md`, extract atomic facts:
 
 | Section(s) | Target Facts |
 |------------|-------------|
-| §4 Architecture Overview | Component topology facts |
+| §4 Architecture Overview | Component topology facts, entry points, build artifacts |
 | §5 Component Map | Ownership and interaction facts |
-| §6 Data Flow | Pipeline and flow facts |
+| §6 Data Flow | Pipeline, flow, ingress/egress, serialization boundary facts |
 | §7 Core Modules | Module responsibility and interface facts |
-| §8 Concurrency | Threading and safety rule facts |
+| §8 Concurrency | Threading, safety rule, resource management, scaling facts |
 | §12 API Definitions | Endpoint and schema facts |
-| §13 External Dependencies | Dependency relationship facts |
+| §13 External Dependencies | Dependency relationship and version constraint facts |
 | §15 Critical Invariants | Invariant facts (highest priority) |
-| §18 Error Handling | Error recovery and retry facts |
+| §18 Error Handling | Error recovery, retry, and error propagation path facts |
 | §19 State Management | Persistence and state facts |
 | §21 Design Patterns | Pattern usage facts |
-| §22 Configuration | Configuration mechanism facts |
+| §22 Configuration | Configuration mechanism, env hierarchy, feature flag facts |
+| §29 Domain Model | Entity relationship, domain invariant, business/infra boundary facts |
+| §30 Execution Flow | Request lifecycle, control flow, state transition facts |
+| §31 Interaction Surfaces | Service communication, external integration, event contract facts |
+| Appendix E | Dependency graph structure and coupling facts |
+| Appendix F | File-level responsibility and dependency facts |
 
 #### Step 2: Assign Temporal Metadata
 
@@ -2619,6 +2807,12 @@ Transform each `architecture.md` section into machine-optimized format using thi
 | Build/Test | TEST + META | Extract exact commands |
 | File Structure | FILES | Concept-to-path mappings: `entry: path`, `config: path`, etc. |
 | Glossary | VOCAB | `term: definition` pairs |
+| Domain Model | DOMAIN | entities list, relationships as arrows, domain invariants, layer boundaries |
+| Execution Flow Mapping | FLOWS | `FLOW:{Name}` with happy/failure/retry paths, `STATES:{Entity}` with transitions |
+| Interaction Surfaces | INTERACTIONS | svc_to_svc arrows, external integrations, human layers, event contracts |
+| Appendix E: Dependency Graph | DEPGRAPH | Layer groupings, coupling matrix as pipe-separated rows |
+| Appendix F: Context Index | CONTEXT_INDEX | Pipe-separated rows: `file|responsibility|module|deps|entry_point` |
+| Tech Debt: Risk Zones | RISK | churn files list, fragile areas with reasons, error propagation paths |
 
 #### Step 4: Apply Compression
 
@@ -2636,11 +2830,16 @@ If the output exceeds 400 lines, cut sections in this order (bottom = cut first)
 |----------|---------|------|
 | 1 (never cut) | INVARIANTS | Safety critical — preserve every invariant |
 | 2 (never cut) | EXTEND | Agent productivity critical — preserve all cookbook steps |
-| 3 | GRAPH:* | Keep all component, dependency, and dataflow graphs |
-| 4 | INTERFACES | Keep all signatures |
-| 5 | CATALOG | Can abbreviate to top 20 entries per category |
-| 6 | CONFIG | Can abbreviate to `critical:Y` entries only |
-| 7 (cut first) | VOCAB | Can abbreviate to 10 most important terms |
+| 3 (never cut) | DOMAIN | Business logic boundaries — preserve entity relationships and domain invariants |
+| 4 | GRAPH:* | Keep all component, dependency, and dataflow graphs |
+| 5 | FLOWS | Keep primary request lifecycle and failure paths |
+| 6 | INTERACTIONS | Keep service-to-service and external integration maps |
+| 7 | INTERFACES | Keep all signatures |
+| 8 | DEPGRAPH + CONTEXT_INDEX | Can abbreviate CONTEXT_INDEX to entry points and high-coupling files only |
+| 9 | CATALOG | Can abbreviate to top 20 entries per category |
+| 10 | CONFIG | Can abbreviate to `critical:Y` entries only |
+| 11 | RISK | Can abbreviate to top 5 highest risk items |
+| 12 (cut first) | VOCAB | Can abbreviate to 10 most important terms |
 
 #### Step 6: Quality Check
 

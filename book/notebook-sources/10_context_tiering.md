@@ -34,7 +34,7 @@ This file isderivedfromarchitecture.md, not written directly. Draft's condensati
 
 ## Tier 2: The Full Architecture
 
-The filedraft/architecture.mdis the source of truth. It is a comprehensive, human-readable engineering reference with 25 sections and 4 appendices, complete with Mermaid diagrams, code snippets, interaction matrices, and state machine definitions. It exists for two audiences: AI agents performing deep analysis, and engineers who need to understand a module without reading source code.
+The filedraft/architecture.mdis the source of truth. It is a comprehensive, human-readable engineering reference with 31 sections and 6 appendices, complete with Mermaid diagrams, code snippets, interaction matrices, and state machine definitions. It exists for two audiences: AI agents performing deep analysis, and engineers who need to understand a module without reading source code.
 
 Tier 2 is loaded only for deep analysis:/draft:initrefresh,/draft:deep-review,/draft:decompose, and full architecture refreshes. Most day-to-day development never touches it. When it is loaded, it provides exhaustive context that Tier 1 intentionally omits: per-module state machines, thread safety annotations, the full implementation catalog, concurrency model details, and configuration reference tables.
 

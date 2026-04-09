@@ -311,7 +311,7 @@ $ curl -o .github/copilot-instructions.md \
 
     <p>Refresh uses the stored file hashes in <code>freshness.json</code> to identify exactly what changed since the last analysis. It only re-analyzes changed, new, and deleted files &mdash; unchanged files are skipped entirely. Signal classification is re-run and diffed against the baseline to detect structural drift. The architecture document, AI context, and profile are updated with targeted changes rather than a full regeneration.</p>
 
-    <p>If nothing changed, Draft short-circuits: "Architecture context is current. Nothing to refresh." No wasted tokens, no unnecessary work.</p>
+    <p>If nothing changed, Draft short-circuits: "Architecture context is current. Nothing to refresh." No wasted tokens, no unnecessary work. Use <code>--force</code> with <code>--refresh</code> to bypass this check and run a full re-analysis when the init skill has been upgraded &mdash; it builds on the existing architecture as a baseline rather than starting from scratch.</p>
 
     <h2>What Comes Next</h2>
     <p>You now have a project with full context, a track with a spec and plan, and an implementation workflow that keeps AI constrained to your architecture. The next chapters dive into each stage of the workflow in detail &mdash; how specifications are crafted, how plans are structured, how implementation works task by task, and how the review process catches what the AI missed.</p>

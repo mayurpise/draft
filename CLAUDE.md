@@ -32,7 +32,7 @@ Tests use a custom bash framework (`tests/test-helpers.sh`) with `assert()`, `pa
 ```
 skills/<name>/SKILL.md  ──┐
 core/methodology.md       ├──→  scripts/build-integrations.sh  ──→  integrations/copilot/.github/copilot-instructions.md
-core/shared/*.md          │                                          (15,000+ lines, auto-generated)
+core/shared/*.md          │                                          (20,000+ lines, auto-generated)
 core/templates/*.md       │
 core/agents/*.md          ──┘
 ```

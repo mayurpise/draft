@@ -142,7 +142,7 @@ synced_to_commit: "a1b2c3d4e5f6789012345678901234567890abcd"
 
 Check for arguments:
 - `--refresh`: Update existing context without full re-init
-- `--force`: Used with `--refresh` — bypass freshness checks and force full 5-phase re-analysis. Use when the analysis methodology has changed (e.g., updated module detection, deeper signal classification) and you want to rebuild architecture.md on top of existing context with deeper analysis, even if no source files changed.
+- `--force`: Used with `--refresh` — bypass freshness/commit checks and run a full 5-phase re-analysis that builds on top of the existing architecture.md. Use when the init skill itself has been upgraded and existing artifacts need deeper analysis without any source code changes.
 
 ### Standard Init Check
 
@@ -203,9 +203,11 @@ If `draft/.ai-context.md` exists WITHOUT `draft/architecture.md`:
 
 ### Refresh Mode
 
-If the user runs `/draft:init --refresh`:
+If the user runs `/draft:init --refresh` (optionally with `--force`):
 
 **0. State-Aware Pre-Check** (before any refresh work):
+
+   **Force mode detection:** If `--force` is present, set `FORCE_MODE=true`. Force mode skips freshness and signal early-exit checks (steps 0b-0c.1) and routes directly to a full 5-phase re-analysis (step 0i-force below) instead of incremental analysis. The existing `architecture.md` is used as a **baseline to build upon**, not discarded.
 
    **a. Check for interrupted previous run:**
    ```bash
@@ -241,11 +243,11 @@ If the user runs `/draft:init --refresh`:
      STABLE:  services (8 → 9), test_infra (15 → 16)
    ```
 
-   **c.1. Early-exit check (after signal analysis):**
-   If `--force` flag is set, skip this check entirely — proceed directly to step d.
+   **c.1 Early exit decision (after both freshness and signal checks):**
+   If `FORCE_MODE=true`: skip this check entirely — proceed to step 0d, then jump to step 0i-force (forced full re-analysis).
 
-   Otherwise, if NO files changed (all hashes match AND no new/deleted files from step b) AND no signal drift detected (step c), announce:
-   "No source file changes detected since last init/refresh ({generated_at}). Architecture context is current. Nothing to refresh. Use `--force` to re-analyze with current methodology."
+   If NO files changed (step 0b) AND no signal drift detected (step 0c), announce:
+   "No source file changes or structural drift detected since last init/refresh ({generated_at}). Architecture context is current. Nothing to refresh. Use `--force` to re-analyze with current skill version."
    Stop here unless the user insists.
 
    > **Why after signal analysis:** Previously, the early-exit happened before signal classification, which meant structural drift (e.g., new auth files appearing) went undetected if file hashes happened to match.
@@ -260,9 +262,9 @@ If the user runs `/draft:init --refresh`:
 
 1. **Tech Stack Refresh**: Re-scan `package.json`, `go.mod`, etc. Compare with `draft/tech-stack.md`. Propose updates.
 
-2. **Architecture Refresh**: If `--force` flag is set, skip incremental analysis and jump directly to step (i) — full 5-phase refresh. This re-runs the complete discovery pipeline (including two-tier module detection, signal classification, and dependency wiring) against the existing `architecture.md`, deepening and expanding it with current methodology. The existing content is used as a baseline to build upon, not discarded.
+2. **Architecture Refresh**: If `FORCE_MODE=true`, skip incremental analysis and jump directly to step 0i-force (forced full re-analysis). This re-runs the complete discovery pipeline (including two-tier module detection, signal classification, and dependency wiring) against the existing `architecture.md`, deepening and expanding it with current methodology. The existing content is used as a baseline to build upon, not discarded.
 
-   If `draft/architecture.md` exists and `--force` is NOT set, use metadata-based incremental analysis. If freshness state is available from step 0b, use file-level deltas to scope the refresh more precisely than git-diff alone:
+   If `draft/architecture.md` exists and `FORCE_MODE` is NOT set, use metadata-based incremental analysis. If freshness state is available from step 0b, use file-level deltas to scope the refresh more precisely than git-diff alone:
 
    **a. Read synced commit from metadata:**
    ```bash
@@ -360,14 +362,39 @@ If the user runs `/draft:init --refresh`:
    - Also verify `.ai-profile.md` consistency: if `.ai-profile.md` is missing or its `synced_to_commit` differs from `.ai-context.md`, offer to regenerate it from the current `.ai-context.md`
 
    **i. Fallback to full refresh:**
-   Reached when: (1) step (a) detects a missing or invalid `synced_to_commit` SHA, (2) `--force` flag is set, or (3) too many files changed (>100 guardrail from step e). Run full 5-phase architecture discovery (Phase 1 through Phase 5) instead of incremental analysis.
+   Reached when: (1) step (a) detects a missing or invalid `synced_to_commit` SHA, or (2) too many files changed (>100 guardrail from step e). Run full 5-phase architecture discovery (Phase 1 through Phase 5) instead of incremental analysis.
 
-   - **When `--force` is set and `architecture.md` exists:** Read the existing `architecture.md` first. Use it as a baseline — the full 5-phase analysis should deepen and expand existing sections (especially module detection via Tier 2 sub-module discovery), not start from scratch. Sections that were shallow due to previous methodology limitations should be expanded with deeper analysis. New modules discovered by the improved detection should be added as new `7.X` subsections.
    - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now
+
+   **i-force. Forced full re-analysis** (when `FORCE_MODE=true`):
+   This mode is for when the init skill itself has been upgraded and existing artifacts need deeper/broader analysis — even though no source code changed.
+
+   1. **Read existing `architecture.md`** as a baseline. Parse its structure: which sections exist, which modules were documented, what depth each section reached.
+   2. **Run the full 5-phase analysis** (Phase 1-5) against the codebase as if it were a fresh init — but with the existing architecture.md as reference context:
+      - **Module discovery**: Execute steps 1b (Tier 1 + Tier 2) and 9b fully. Compare the newly discovered module list against the modules documented in the existing architecture.md.
+      - **Gap identification**: Flag modules, sub-modules, or logical boundaries that exist in the new discovery but are missing or under-documented in the existing artifact.
+      - **Depth audit**: For each existing section, compare against current skill expectations (e.g., does Section 7 have sub-module subsections? Are all signal-driven sections present?).
+   3. **Merge strategy — additive, not destructive**:
+      - **Existing sections with adequate depth**: Preserve as-is (do not regenerate what already meets the current skill's quality bar)
+      - **Existing sections that are thin**: Expand in place with deeper analysis
+      - **Missing modules/sub-modules**: Add new Section 7 subsections for newly discovered modules
+      - **Missing sections**: Generate from scratch (e.g., new sub-module deep dives, inter-module dependency sections)
+      - **Structural changes**: Reformat to match current skill template (e.g., add Module Summary Table if missing, add sub-module nesting)
+   4. **Present the enhancement plan** to the user before writing:
+      ```
+      Force refresh analysis complete. Enhancement plan:
+        PRESERVE:  15 sections (adequate depth)
+        EXPAND:    4 sections (thin — adding depth)
+        ADD:       3 new sub-module deep dives (src/auth, src/api, src/store)
+        ADD:       1 new Module Summary Table
+        REFORMAT:  Section 7 (adding sub-module nesting)
+      Proceed? [Y/n]
+      ```
+   5. On approval, write the enhanced `architecture.md` and run the Condensation Subroutine.
 
    **j. Update metadata after refresh:**
    After successful refresh, update the YAML frontmatter in all modified files:
-   - `generated_by`: `draft:init --refresh`
+   - `generated_by`: `draft:init --refresh` (or `draft:init --refresh --force` if force mode)
    - `generated_at`: current timestamp
    - `git.*`: current git state
    - `synced_to_commit`: current HEAD SHA
@@ -424,14 +451,21 @@ Perform a **one-time, exhaustive analysis** of the existing codebase. This is NO
 ### Exhaustive Analysis Mandate
 
 **CRITICAL**: This analysis must be EXHAUSTIVE, not representative. Specifically:
-- **Read ALL relevant source files** — do not sample or skim
+- **Read ALL relevant source files** — do not sample or skim; there is no file-count ceiling
+- **Scan ALL directories** — no directory is too small or too large to analyze
 - **Enumerate ALL implementations** — no "and others", "etc.", or "similar patterns"
+- **Deep-dive ALL modules** — every module (top-level, sub-module, and logically discovered) gets a full subsection, regardless of how many exist
 - **Generate REAL Mermaid diagrams** — every section calling for a diagram MUST have one
 - **Include ACTUAL code snippets** — from the codebase, not pseudocode
 - **Populate ALL tables** — with real data, not placeholders or examples
 - **Target: comprehensive coverage** — shorter output indicates incomplete analysis
+- **No caps or limits** — do not limit analysis to "top N" modules, directories, or files for any reason
 
-Regardless of codebase size, deep-dive every discovered module. Larger codebases require MORE depth, not less — they have more integration points, more invariants, and more places for bugs to hide. Rank modules by the number of unique files that import/reference them (descending) and process them in that order, but do NOT skip or summarize any module.
+Regardless of codebase size, analyze ALL modules and ALL directories without caps or limits. The goal is a complete reference, not a sampled overview. Module discovery uses TWO complementary methods:
+1. **Structural scan** (Phase 1 step 1b): First-level subdirectories and their immediate children (Tier 1 + Tier 2) as module candidates
+2. **Organic discovery** (Phase 2 steps 6-9b): Import graphs, DI wiring, and dependency tracing to find logical modules — including nested packages, cross-cutting concerns, and boundaries that don't align with directory structure
+
+The final module list is the union of both. Every module — top-level, sub-module, or logically discovered — MUST receive a full deep dive in Section 7. Do not limit to a top-N subset or summarize lesser modules in a table.
 
 ### Execution Strategy for Depth
 
@@ -552,7 +586,7 @@ Follow these steps in order. The specific files to look for depend on the langua
 
 1. **Map the directory tree**: Recursively list the project to understand the file layout. Note subdirectory groupings.
 
-1b. **Two-tier module detection**: Discover module boundaries using BOTH directory structure AND organic heuristics (imports, build files, DI wiring). The directory scan provides initial candidates; organic discovery refines and deepens them.
+1b. **Two-tier module detection** *(additive — supplements, does NOT replace, organic module discovery in Phase 2)*: Discover module boundaries using BOTH directory structure AND organic heuristics (imports, build files, DI wiring). The directory scan provides initial candidates; organic discovery refines and deepens them.
 
    **Tier 1 — Top-level boundary scan**: Scan each first-level subdirectory and classify it:
 
@@ -609,7 +643,9 @@ Follow these steps in order. The specific files to look for depend on the langua
 
    **Cross-cutting concerns**: Shared utilities, middleware, and config directories that span multiple modules should still appear as their own module entries — they define integration boundaries even if they sit at a different directory level.
 
-   **Hold the module map in memory** — it feeds Phase 2 step 9b (inter-module dependencies) and Section 7 (one deep-dive subsection per module). The map will be refined during Phase 2 as import analysis and dependency wiring reveal additional module boundaries not visible from directory structure alone.
+   **IMPORTANT**: Step 1b provides the initial structural candidates only. Phase 2 (steps 6-9b) refines this list through import analysis, DI wiring, and dependency tracing — discovering additional logical modules that may not align with directory boundaries (e.g., cross-cutting concerns, virtual modules defined by import graphs). The **final module list** for Section 7 is the union of structural candidates (1b Tier 1 + Tier 2) and logical modules discovered in Phase 2.
+
+   **Hold the module map in memory** — it feeds Phase 2 step 9b (inter-module dependencies) and Section 7 (one deep-dive subsection per module).
 
 2. **Read build / dependency files**: These reveal the module structure, dependencies, and targets. (See language guide above for which files.)
 
@@ -673,21 +709,24 @@ Follow these steps in order. The specific files to look for depend on the langua
 
 9. **Map the dependency wiring**: Find the DI container, context struct, module system, or import graph that connects components.
 
-9b. **Inter-module dependency mapping**: Using the module map from step 1b (including sub-modules from Tier 2), trace cross-module imports. Build a directed dependency graph showing which modules depend on which:
+9b. **Map inter-module dependencies and refine module list**: Using the module candidates from step 1b (Tier 1 + Tier 2) AND the import graph / DI wiring from step 9, trace cross-directory imports and references. Build a directed dependency graph:
 
     ```
-    Example dependency graph:
+    Inter-Module Dependencies:
       src/api/ → src/services/ → src/models/
       src/api/ → middleware/
       src/services/ → common/
       workers/ → src/services/ → src/models/
+      src/api/ → src/auth/  (imports auth middleware)
+      src/api/ → src/store/ (imports data access layer)
     ```
 
-    - Scan import/require/use statements in each MODULE and SUB-MODULE directory
-    - Record edges: `source_module → imported_module`
-    - Flag circular dependencies
-    - **Refine the module map**: If import analysis reveals module boundaries not caught by Tier 1/Tier 2 directory scanning (e.g., a flat directory where half the files import `auth` utilities and the other half import `api` utilities), split them into separate logical modules
-    - This feeds Section 5.3 (Component Map), Section 7 (Core Modules), and Section 14 (Cross-Module Integration)
+    **Refine the module list**: During steps 6-9, you may discover logical modules that were not captured by the directory-based scan in step 1b. Examples:
+    - A cross-cutting "auth" concern spanning files in multiple directories
+    - A "plugin system" that lives across `core/`, `plugins/`, and `registry/`
+    - Virtual modules defined by import clusters rather than directory boundaries
+
+    **Add these to the final module list.** The final module list = structural candidates (1b Tier 1 + Tier 2) ∪ logical modules (Phase 2 discovery). This combined list drives Section 5.3 (Component Map), Section 7 (per-module deep dives), and Section 14 (Cross-Module Integration).
 
 #### Phase 3: Depth (Trace the Flows)
 
@@ -953,24 +992,29 @@ Document with diagram or prose: transactions, idempotency guards, version checks
 
 **Expected length: 8-15 pages (1-2 pages per module)**
 
-**MANDATE:** Step 1b provides initial module candidates via directory scanning (Tier 1 + Tier 2). The final module list is refined during Phase 2 using import analysis and dependency wiring — it may include sub-modules discovered during deeper analysis that weren't visible from directory structure alone. Every module in the **final refined list** MUST get its own deep-dive subsection below. Do not flatten distinct sub-packages into a single summary (e.g., if `src/` contains `src/auth/`, `src/api/`, `src/store/`, each gets its own `7.X` section — not one section for `src/`).
+**CRITICAL: The final module list is the union of two discovery methods:**
+1. **Structural candidates** from Phase 1 step 1b (Tier 1 top-level directories + Tier 2 sub-modules within each top-level directory)
+2. **Logical modules** discovered during Phase 2 (steps 6-9b) through import analysis, DI wiring, and dependency tracing
 
-**Module Summary Table** (generated from refined module map after Phase 2):
+Every module in this combined list MUST receive its own subsection below. Do not flatten distinct directories or logical boundaries into a single summary — each is an independent module with its own responsibilities, interfaces, and internal architecture. Sub-modules get nested subsections under their parent (e.g., 7.3.1 `src/auth/` under 7.3 `src/`).
+
+**Module Summary Table** (covering ALL modules — top-level, sub-modules, and logical modules discovered in Phase 2):
 
 ```markdown
-| Module Path | File Count | Primary Responsibility | Dependencies |
-|-------------|-----------|----------------------|--------------|
-| `src/api/` | 24 | HTTP request handling, routing | src/services/, middleware/ |
-| `src/services/` | 18 | Business logic layer | src/models/, common/ |
-| `src/models/` | 12 | Data models, ORM schemas | common/ |
-| `common/` | 8 | Shared utilities, types | — |
-| `middleware/` | 5 | Request pipeline, auth guards | src/auth/ |
-| `src/auth/` | 7 | Authentication & authorization | src/models/ |
-| `src/store/` | 9 | State management, caching | src/models/ |
-| `workers/` | 6 | Background job processing | src/services/, src/models/ |
+| Module | Directory | Depth | Files | Primary Responsibility | Depends On |
+|--------|-----------|-------|-------|----------------------|------------|
+| API | `src/api/` | sub-module | 24 | HTTP request handling, routing | src/services/, middleware/ |
+| Services | `src/services/` | sub-module | 18 | Business logic layer | src/models/, common/ |
+| Models | `src/models/` | sub-module | 12 | Data models, ORM schemas | common/ |
+| Common | `common/` | top-level | 8 | Shared utilities, types | — |
+| Middleware | `middleware/` | top-level | 5 | Request pipeline, auth guards | src/auth/ |
+| Auth | `src/auth/` | sub-module | 7 | Authentication & authorization | src/models/ |
+| Store | `src/store/` | sub-module | 9 | State management, caching | src/models/ |
+| Workers | `workers/` | top-level | 6 | Background job processing | src/services/, src/models/ |
+| Plugin System | *(cross-cutting)* | logical | 11 | Plugin registration and lifecycle | core, registry |
 ```
 
-For each discovered module (including sub-modules), provide a COMPLETE deep dive:
+For **every** module in the final combined list, provide a COMPLETE deep dive. Do not cap at a fixed number — if the codebase has 12 modules, document all 12; if it has 20, document all 20:
 
 #### Per-Module Template
 
@@ -1731,7 +1775,8 @@ Before completing architecture.md, verify these diagrams exist:
 
 Run this checklist before writing architecture.md:
 
-- [ ] **Page count**: Rendered output approaches 30+ pages (not 5-10)
+- [ ] **Page count**: Rendered output approaches 30+ pages (not 5-10). For a typical brownfield codebase, expect 800-1500+ lines of markdown. If your output is under 600 lines, you have almost certainly skipped modules or abbreviated sections — go back and expand.
+- [ ] **Module coverage**: EVERY module from the final combined list (structural candidates from step 1b Tier 1/Tier 2 + logical modules from Phase 2) has its own Section 7 subsection — no modules were dropped, capped, or merged. Sub-modules have nested subsections under their parent.
 - [ ] **Diagram count**: At least 5-10 Mermaid diagrams present
 - [ ] **Table population**: ALL tables have real data, not placeholders
 - [ ] **Code snippets**: Actual code from codebase, not pseudocode
@@ -2491,7 +2536,8 @@ Next steps:
 6. Review draft/architecture.md — human-friendly version for team onboarding
 7. Run `/draft:new-track` to start planning a feature
 8. Run `/draft:init --refresh` after significant codebase changes — refresh is now incremental (only stale files re-analyzed)
-9. Run `/draft:learn promote` to promote high-confidence patterns to Hard Guardrails"
+9. Run `/draft:init --refresh --force` to re-analyze with upgraded skill — deepens existing artifacts without requiring code changes
+10. Run `/draft:learn promote` to promote high-confidence patterns to Hard Guardrails"
 
 For **Greenfield** projects, announce:
 "Draft initialized successfully!

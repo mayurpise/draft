@@ -22,11 +22,11 @@ Commands use@draftsyntax:@draft init,@draft new-track,@draft implement. The same
 
 ## GitHub Copilot
 
-Copilot does not have a plugin system that can read skill files at runtime. Instead, Draft uses a.github/copilot-instructions.mdfile — a single, large generated file (15,000+ lines) that encodes the entire Draft methodology inline.
+Copilot does not have a plugin system that can read skill files at runtime. Instead, Draft uses a.github/copilot-instructions.mdfile — a single, large generated file (20,000+ lines) that encodes the entire Draft methodology inline.
 
 This file is produced by the build pipeline (scripts/build-integrations.sh) and includes:
 
-* All 25 skill definitions (minus frontmatter, plus syntax transforms)
+* All 28 skill definitions (minus frontmatter, plus syntax transforms)
 * All core reference files (methodology, knowledge base, shared procedures, templates, agent definitions)
 * Quality disciplines, communication style, and proactive behaviors
 * Intent mapping for natural language triggers
@@ -50,7 +50,7 @@ The transformation from source skills to platform-specific integrations is handl
 
 The pipeline works as follows:
 
-* Skill ordering— ASKILL_ORDERarray defines the 25 skills and their generation order. This order is independent of the alphabetical order inplugin.json.
+* Skill ordering— ASKILL_ORDERarray defines the 28 skills and their generation order. This order is independent of the alphabetical order inplugin.json.
 * Frontmatter extraction— Each skill's YAML frontmatter (name:anddescription:) is validated. The body is extracted viaextract_body(), which strips the frontmatter delimiters.
 * Body format validation— The body must follow a strict format: blank line,# Titleheading, blank line, then content. The build skips the first 3 body lines when inlining (the title is replaced by the integration's section header).
 * Syntax transformation— Platform-specific transforms are applied:/draft:commandbecomesdraft commandfor Copilot, agent references become@workspace.

@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Ongoing refinements to agent behavior protocols.
 
+### Added
+- **`--force` flag for `/draft:init --refresh`**: Bypasses freshness/commit checks and runs a full 5-phase re-analysis that builds on existing `architecture.md` as a baseline. Use when the init skill has been upgraded and existing artifacts need deeper analysis without source code changes.
+  - New `FORCE_MODE` detection and routing in Refresh Mode pre-check
+  - New step `0i-force` (Forced full re-analysis) with 5-step flow: read baseline, run 5-phase analysis, additive merge strategy, present enhancement plan, write on approval
+  - Updated early-exit message to suggest `--force` when no changes detected
+  - Metadata tracks whether refresh used `--force`
+
+### Changed
+- **Enhanced module discovery language**: All references to module detection now explicitly describe the final module list as the union of structural candidates (step 1b Tier 1 + Tier 2) and logical modules discovered during Phase 2 (steps 6-9b)
+- Step 1b annotated as "additive — supplements, does NOT replace, organic module discovery in Phase 2"
+- Step 9b expanded with logical module examples and union formula
+- Module Summary Table in Section 7 now includes "Depth" column (top-level, sub-module, logical)
+- Exhaustive Analysis Mandate updated with "No caps or limits" bullet and two-method module discovery description
+- Self-check checklist updated with module coverage verification including sub-module nesting
+- `core/templates/architecture.md` Section 6 description updated to reference combined module list
+
 ## [2.3.0] - 2026-04-05
 
 ### Added

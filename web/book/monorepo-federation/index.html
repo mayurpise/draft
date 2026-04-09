@@ -22,20 +22,6 @@
     <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
     <meta name="twitter:image:alt" content="Monorepo Federation — Draft Book">
     <link rel="canonical" href="https://getdraft.dev/book/monorepo-federation/">
-    <link rel="alternate" hreflang="en" href="https://getdraft.dev/book/monorepo-federation/">
-    <link rel="alternate" hreflang="x-default" href="https://getdraft.dev/book/monorepo-federation/">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://getdraft.dev/"},
-        {"@type": "ListItem", "position": 2, "name": "Book", "item": "https://getdraft.dev/book/"},
-        {"@type": "ListItem", "position": 3, "name": "Monorepo Federation", "item": "https://getdraft.dev/book/monorepo-federation/"}
-      ]
-    }
-    </script>
 
     <script type="application/ld+json">
     {
@@ -70,7 +56,6 @@
     </noscript>
 
     <link rel="stylesheet" href="../css/book.css">
-    <link rel="stylesheet" href="../css/audio-player.css">
 </head>
 <body data-chapter="monorepo-federation">
 
@@ -107,7 +92,6 @@
                     <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
                         <span class="ch-num">0.</span>What is Draft?
                     </a></li>
-                    
                 </ul>
             </div>
             <div class="sidebar-part">
@@ -217,13 +201,6 @@
         </aside>
 
         <main class="book-content">
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <ol>
-        <li><a href="/">Home</a></li>
-        <li><a href="/book/">Book</a></li>
-        <li aria-current="page">Monorepo Federation</li>
-      </ol>
-    </nav>
 <div class="chapter-wrapper">
     <h1>Monorepo Federation</h1>
     <p class="chapter-meta"><span class="part-name">Part VI: Enterprise</span> &middot; Chapter 18</p>
@@ -330,7 +307,7 @@
         <li><strong>tech-stack.md</strong> &mdash; Organizational standards derived from majority usage, approved variances, shared libraries</li>
     </ul>
 
-    <p>After generating <code>architecture.md</code>, the Condensation Subroutine runs to produce a root-level <code>.ai-context.md</code> &mdash; a token-optimized aggregate of all service knowledge.</p>
+    <p>After generating <code>architecture.md</code>, the Condensation Subroutine runs to produce a root-level <code>.ai-context.md</code> &mdash; a token-optimized aggregate of all service knowledge &mdash; and then derives <code>.ai-profile.md</code>, the ultra-compact Tier 0 profile.</p>
 
     <div class="figure">
         <div class="figure-content">
@@ -389,7 +366,7 @@
             <tr><th>Layer</th><th>Location</th><th>Contains</th><th>Purpose</th></tr>
         </thead>
         <tbody>
-            <tr><td>Root</td><td><code>draft/</code></td><td>Service index, dependency graph, tech matrix, synthesized product/architecture/tech-stack, aggregated <code>.ai-context.md</code></td><td>Cross-service decisions, system topology, organizational standards</td></tr>
+            <tr><td>Root</td><td><code>draft/</code></td><td>Service index, dependency graph, tech matrix, synthesized product/architecture/tech-stack, aggregated <code>.ai-context.md</code>, <code>.ai-profile.md</code></td><td>Cross-service decisions, system topology, organizational standards</td></tr>
             <tr><td>Service</td><td><code>&lt;service&gt;/draft/</code></td><td>Service-specific architecture, product, tech-stack, tracks, guardrails</td><td>Per-service implementation, feature work within a service</td></tr>
         </tbody>
     </table>
@@ -403,24 +380,23 @@
     <p>Running <code>/draft:index --init-missing</code> offers to initialize uninitialized services. For each one, Draft prompts with four options: <strong>y</strong> (initialize this service), <strong>n</strong> (skip), <strong>all</strong> (initialize all remaining), or <strong>skip-rest</strong> (skip all remaining). This makes it practical to bring an entire monorepo under Draft management incrementally.</p>
 
     <h2>Bughunt Mode</h2>
-    <p><code>/draft:index</code> also supports a bughunt aggregation mode. Running <code>/draft:index bughunt</code> executes <code>/draft:bughunt</code> sequentially across all initialized services (or a specified subset), then generates <code>draft/bughunt-summary.md</code> &mdash; an aggregate report showing bug counts by severity across all services, directories requiring immediate attention, and links to individual service reports.</p>
+    <p><code>/draft:index</code> also supports a bughunt aggregation mode. Running <code>/draft:index --bughunt</code> executes <code>/draft:bughunt</code> sequentially across all initialized services (or a specified subset), then generates <code>draft/bughunt-summary.md</code> &mdash; an aggregate report showing bug counts by severity across all services, directories requiring immediate attention, and links to individual service reports.</p>
+
+    <p>You can also target specific directories: <code>/draft:index --bughunt services/auth services/billing</code> runs bughunt only in those services. If no directories are specified, all initialized services are auto-discovered.</p>
+
+    <h2>Operational Safety</h2>
+    <p><code>/draft:index</code> includes several safety mechanisms for reliable operation across large monorepos:</p>
+    <ul>
+        <li><strong>Lockfile</strong> &mdash; Creates <code>draft/.index-lock</code> before starting with a cross-platform age check. If a lock exists and is less than 10 minutes old, the command warns and stops to prevent concurrent index runs. Stale locks (older than 10 minutes) are automatically removed.</li>
+        <li><strong>Run memory</strong> &mdash; Creates <code>draft/.state/run-memory.json</code> at start (<code>status: "in_progress"</code>), updates to <code>"completed"</code> on success or <code>"failed"</code> on error. On next invocation, detects interrupted previous runs.</li>
+        <li><strong>Placeholder detection</strong> &mdash; Files containing the <code>&lt;!-- AUTO-GENERATED BY DRAFT:INDEX --&gt;</code> marker are considered placeholders and can be overwritten without confirmation. Non-placeholder files (manually edited) require explicit user confirmation before overwriting.</li>
+    </ul>
 
     <div class="callout callout-concept">
         <div class="callout-title">When to Re-Index</div>
         <p>Re-run <code>/draft:index</code> after initializing a new service, after significant architecture changes to any service, before major cross-service planning, or as part of weekly documentation hygiene. The command preserves manual edits in sections marked with <code>&lt;!-- MANUAL START --&gt;</code> and <code>&lt;!-- MANUAL END --&gt;</code> comments.</p>
     </div>
 </div>
-
-
-    <nav class="related-chapters" aria-label="Related chapters">
-      <h3>Related Chapters</h3>
-      <ul>
-        <li><a href="/book/context-tiering/">Context Tiering</a> &mdash; Per-service context tiering in monorepos</li>
-        <li><a href="/book/getting-started/">Getting Started</a> &mdash; Initial setup that federation extends</li>
-        <li><a href="/book/jira-integration/">Jira Integration</a> &mdash; Cross-service ticket management</li>
-        <li><a href="/book/multi-ide-support/">Multi-IDE Support</a> &mdash; IDE support across monorepo services</li>
-      </ul>
-    </nav>
 
             <nav class="chapter-nav">
                 <a href="../pattern-learning/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Pattern Learning</span></a>
@@ -435,6 +411,5 @@
     </div>
 
     <script src="../js/book.js"></script>
-    <script src="../js/audio-player.js"></script>
 </body>
 </html>

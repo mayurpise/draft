@@ -22,20 +22,6 @@
     <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
     <meta name="twitter:image:alt" content="File Reference — Draft Book">
     <link rel="canonical" href="https://getdraft.dev/book/file-reference/">
-    <link rel="alternate" hreflang="en" href="https://getdraft.dev/book/file-reference/">
-    <link rel="alternate" hreflang="x-default" href="https://getdraft.dev/book/file-reference/">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://getdraft.dev/"},
-        {"@type": "ListItem", "position": 2, "name": "Book", "item": "https://getdraft.dev/book/"},
-        {"@type": "ListItem", "position": 3, "name": "File Reference", "item": "https://getdraft.dev/book/file-reference/"}
-      ]
-    }
-    </script>
 
     <script type="application/ld+json">
     {
@@ -70,7 +56,6 @@
     </noscript>
 
     <link rel="stylesheet" href="../css/book.css">
-    <link rel="stylesheet" href="../css/audio-player.css">
 </head>
 <body data-chapter="file-reference">
 
@@ -107,7 +92,6 @@
                     <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
                         <span class="ch-num">0.</span>What is Draft?
                     </a></li>
-                    
                 </ul>
             </div>
             <div class="sidebar-part">
@@ -217,13 +201,6 @@
         </aside>
 
         <main class="book-content">
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <ol>
-        <li><a href="/">Home</a></li>
-        <li><a href="/book/">Book</a></li>
-        <li aria-current="page">File Reference</li>
-      </ol>
-    </nav>
 <div class="chapter-wrapper">
     <h1>Appendix B: File Reference</h1>
     <p class="chapter-meta"><span class="part-name">Appendix</span></p>
@@ -336,7 +313,7 @@
                 <td>1000-3000 lines</td>
                 <td>Human &amp; AI</td>
                 <td><code>/draft:init</code></td>
-                <td><code>/draft:init refresh</code>, <code>/draft:decompose</code></td>
+                <td><code>/draft:init --refresh</code>, <code>/draft:decompose</code></td>
             </tr>
             <tr>
                 <td><code>.ai-context.md</code></td>
@@ -360,7 +337,7 @@
                 <td>50-150 lines</td>
                 <td>Human &amp; AI</td>
                 <td><code>/draft:init</code></td>
-                <td>Manual edits, <code>/draft:init refresh</code></td>
+                <td>Manual edits, <code>/draft:init --refresh</code></td>
             </tr>
             <tr>
                 <td><code>tech-stack.md</code></td>
@@ -418,7 +395,7 @@
                 <td>1-5 KB</td>
                 <td>AI (internal)</td>
                 <td><code>/draft:init</code></td>
-                <td><code>/draft:init refresh</code></td>
+                <td><code>/draft:init --refresh</code></td>
             </tr>
             <tr>
                 <td><code>signals.json</code></td>
@@ -426,15 +403,15 @@
                 <td>1-5 KB</td>
                 <td>AI (internal)</td>
                 <td><code>/draft:init</code></td>
-                <td><code>/draft:init refresh</code></td>
+                <td><code>/draft:init --refresh</code></td>
             </tr>
             <tr>
                 <td><code>run-memory.json</code></td>
                 <td>Cross-session continuity data. Records what happened in previous sessions to enable context persistence across agent invocations.</td>
                 <td>1-10 KB</td>
                 <td>AI (internal)</td>
-                <td>First agent invocation</td>
-                <td>Each session</td>
+                <td><code>/draft:init</code>, <code>/draft:index</code></td>
+                <td><code>/draft:init --refresh</code>, <code>/draft:index</code></td>
             </tr>
             <tr>
                 <td><code>facts.json</code></td>
@@ -442,7 +419,7 @@
                 <td>1-20 KB</td>
                 <td>AI (internal)</td>
                 <td><code>/draft:init</code></td>
-                <td><code>/draft:init refresh</code></td>
+                <td><code>/draft:init --refresh</code></td>
             </tr>
         </tbody>
     </table>
@@ -587,12 +564,20 @@
                 <td>Technology distribution across services with organizational standards and variances</td>
             </tr>
             <tr>
+                <td><code>draft/.ai-context.md</code></td>
+                <td>Token-optimized AI context aggregating all service knowledge (200-400 lines)</td>
+            </tr>
+            <tr>
+                <td><code>draft/.ai-profile.md</code></td>
+                <td>Ultra-compact Tier 0 profile for always-on injection (20-50 lines)</td>
+            </tr>
+            <tr>
                 <td><code>draft/config.yaml</code></td>
                 <td>Index configuration: service detection patterns, exclusions, re-index triggers</td>
             </tr>
             <tr>
                 <td><code>draft/bughunt-summary.md</code></td>
-                <td>Aggregate bughunt results across services (created by <code>/draft:index bughunt</code>)</td>
+                <td>Aggregate bughunt results across services (created by <code>/draft:index --bughunt</code>)</td>
             </tr>
             <tr>
                 <td><code>&lt;service&gt;/draft/manifest.json</code></td>
@@ -607,17 +592,6 @@
     </div>
 </div>
 
-
-    <nav class="related-chapters" aria-label="Related chapters">
-      <h3>Related Chapters</h3>
-      <ul>
-        <li><a href="/book/command-reference/">Command Reference</a> &mdash; Commands that generate these files</li>
-        <li><a href="/book/context-tiering/">Context Tiering</a> &mdash; How files map to context tiers</li>
-        <li><a href="/book/incremental-refresh/">Incremental Refresh</a> &mdash; How file freshness is tracked</li>
-        <li><a href="/book/getting-started/">Getting Started</a> &mdash; Files created during initial setup</li>
-      </ul>
-    </nav>
-
             <nav class="chapter-nav">
                 <a href="../command-reference/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Command Reference</span></a>
                 <div></div>
@@ -631,6 +605,5 @@
     </div>
 
     <script src="../js/book.js"></script>
-    <script src="../js/audio-player.js"></script>
 </body>
 </html>

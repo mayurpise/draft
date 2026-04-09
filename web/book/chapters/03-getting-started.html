@@ -73,7 +73,7 @@ $ curl -o .github/copilot-instructions.md \
     <p>Draft performs a five-phase analysis of your codebase. This is not a quick scan &mdash; it is an exhaustive, deep analysis designed to produce a permanent reference document that future AI sessions and human engineers will use instead of re-reading source code.</p>
 
     <h3>Phase 1: Discovery (Broad Scan)</h3>
-    <p>Draft maps your entire project structure. It reads the directory tree, identifies the file layout, and processes your build and dependency files &mdash; <code>package.json</code>, <code>go.mod</code>, <code>Cargo.toml</code>, <code>requirements.txt</code>, <code>pom.xml</code>, or whatever applies to your stack.</p>
+    <p>Draft maps your entire project structure. It reads the directory tree, identifies the file layout, and processes your build and dependency files &mdash; <code>package.json</code>, <code>go.mod</code>, <code>Cargo.toml</code>, <code>requirements.txt</code>, <code>pom.xml</code>, or whatever applies to your stack. It also scans first-level subdirectories to classify each as a module boundary (has source/build files) or skip target, building a module map that drives Section 7 deep dives.</p>
 
     <p>It then reads API definition files (protobuf, OpenAPI, GraphQL schemas, route decorators) and interface/type definition files to understand your public API and design intent.</p>
 
@@ -97,6 +97,8 @@ $ curl -o .github/copilot-instructions.md \
 
     <h3>Phase 2: Wiring (Trace the Graph)</h3>
     <p>Draft finds your application's entry point and traces the initialization sequence. From the top-level controller, app, or server, it follows how components are created, initialized, and wired together. It maps the registration code &mdash; where handlers, plugins, routes, and middleware are registered &mdash; and builds a dependency graph showing how the DI container, module system, or import graph connects everything.</p>
+
+    <p>Using the module map from Phase 1, Draft also traces <strong>inter-module dependencies</strong> &mdash; cross-directory imports between first-level subdirectories. This produces a directed dependency graph (e.g., <code>api/ &rarr; services/ &rarr; models/</code>) that feeds the Component Map, Core Modules deep dives, and Cross-Module Integration sections of <code>architecture.md</code>.</p>
 
     <h3>Phase 3: Depth (Trace the Flows)</h3>
     <p>For each major data flow, Draft starts at the entry point and follows the code through every processing stage to the output. It reads core module implementations to understand algorithms, error handling, retry logic, and state management. It identifies the concurrency model &mdash; thread pools, async executors, goroutines, worker processes &mdash; and maps safety checks including invariant assertions, validation logic, auth checks, and transaction boundaries.</p>
@@ -219,7 +221,7 @@ $ curl -o .github/copilot-instructions.md \
     <p>A 200-400 line document derived from <code>architecture.md</code>. It contains 15+ mandatory sections condensed for AI consumption: architecture overview, invariants, interface contracts, data flows, concurrency rules, error handling patterns, implementation catalogs, extension cookbooks, testing strategy, and glossary. This is what Draft commands load when implementing features.</p>
 
     <h3>.ai-profile.md (Always-On Profile)</h3>
-    <p>A 20-50 line ultra-compact profile that is injected into every AI interaction. Contains: language, framework, database, auth mechanism, API style, critical invariants, safety rules, active tracks, and recent changes. Even a simple task like "fix this typo" gets basic project awareness.</p>
+    <p>A 20-50 line ultra-compact profile that is injected into every AI interaction. Contains: language, framework, database, auth mechanism, API style, critical invariants, safety rules, active tracks, and recent changes. Even a simple task like "fix this typo" gets basic project awareness. This file is auto-refreshed whenever <code>architecture.md</code> or <code>.ai-context.md</code> is updated &mdash; including during <code>/draft:init --refresh</code>, <code>/draft:implement</code>, <code>/draft:decompose</code>, and <code>/draft:index</code>.</p>
 
     <h3>Configuration Files</h3>
     <ul>
@@ -305,7 +307,7 @@ $ curl -o .github/copilot-instructions.md \
     <h2>Refreshing Context</h2>
     <p>Your codebase changes over time. New modules get added, dependencies change, architectural decisions evolve. Draft handles this with incremental refresh:</p>
 
-    <pre class="terminal"><code>$ /draft:init refresh</code></pre>
+    <pre class="terminal"><code>$ /draft:init --refresh</code></pre>
 
     <p>Refresh uses the stored file hashes in <code>freshness.json</code> to identify exactly what changed since the last analysis. It only re-analyzes changed, new, and deleted files &mdash; unchanged files are skipped entirely. Signal classification is re-run and diffed against the baseline to detect structural drift. The architecture document, AI context, and profile are updated with targeted changes rather than a full regeneration.</p>
 

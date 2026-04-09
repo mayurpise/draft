@@ -77,7 +77,7 @@ Draft catalogs all external dependencies from build files and import statements.
 
 The final phase cross-references everything. Every component mentioned in one section must appear in all relevant sections. Every endpoint, handler, schema, and dependency is validated for completeness. Draft identifies recurring design patterns, then generates Mermaid diagrams after understanding the full picture.
 
-Draft's analysis mandate is explicit: read all relevant source files, enumerate all implementations, generate real diagrams with actual data. No sampling, no "and others," no placeholders. For codebases over 500 files, it focuses deep dives on the top 20 most-imported modules and summarizes others in tables.
+Draft's analysis mandate is explicit: read all relevant source files, enumerate all implementations, generate real diagrams with actual data. No sampling, no "and others," no placeholders. Every discovered module gets a full deep dive regardless of codebase size — larger codebases need more depth, not less.
 
 ## What Gets Created
 

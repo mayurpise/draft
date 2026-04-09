@@ -436,9 +436,9 @@ Draft auto-classifies the project:
 1. **Project discovery** — Classify as brownfield, greenfield, or monorepo
 2. **Architecture discovery (brownfield only)** — Five-phase analysis:
 
-   **Phase 1: Discovery** — Directory structure, build/dependency files, API definitions, interface/type files. Includes **signal classification** — categorizes all source files into 11 signal categories (`backend_routes`, `frontend_routes`, `components`, `services`, `data_models`, `auth_files`, `state_management`, `background_jobs`, `persistence`, `test_infra`, `config_files`). Signal counts drive adaptive section depth.
+   **Phase 1: Discovery** — Directory structure, build/dependency files, API definitions, interface/type files. Includes **subdirectory module detection** — scans first-level children, classifies each as MODULE (has source/build files) or SKIP, builds module map. Also includes **signal classification** — categorizes all source files into 11 signal categories (`backend_routes`, `frontend_routes`, `components`, `services`, `data_models`, `auth_files`, `state_management`, `background_jobs`, `persistence`, `test_infra`, `config_files`). Signal counts drive adaptive section depth.
 
-   **Phase 2: Wiring** — Entry points, orchestrator/controller initialization, registry/registration code, dependency wiring (DI, module system, import graph).
+   **Phase 2: Wiring** — Entry points, orchestrator/controller initialization, registry/registration code, dependency wiring (DI, module system, import graph). Includes **inter-module dependency mapping** — traces cross-directory imports between first-level subdirectories to build a directed dependency graph.
 
    **Phase 3: Depth** — Data flows end-to-end, core module implementations, concurrency model, safety checks (invariants, validation, auth).
 

@@ -55,10 +55,15 @@ synced_to_commit: "{FULL_SHA}"
 23. [Testing Infrastructure](#23-testing-infrastructure)
 24. [Known Technical Debt & Limitations](#24-known-technical-debt--limitations)
 25. [Glossary](#25-glossary)
+26. [Domain Model](#26-domain-model)
+27. [Execution Flow Mapping](#27-execution-flow-mapping)
+28. [Interaction Surfaces](#28-interaction-surfaces)
 - [Appendix A: File Structure Summary](#appendix-a-file-structure-summary)
 - [Appendix B: Data Source → Implementation Mapping](#appendix-b-data-source--implementation-mapping)
 - [Appendix C: Output Flow — Implementation to Target](#appendix-c-output-flow--implementation-to-target)
 - [Appendix D: Mermaid Sequence Diagrams — Critical Flows](#appendix-d-mermaid-sequence-diagrams--critical-flows)
+- [Appendix E: Dependency Graph Visualization](#appendix-e-dependency-graph-visualization)
+- [Appendix F: Context Index](#appendix-f-context-index)
 
 ---
 
@@ -122,7 +127,21 @@ flowchart TD
     C --> G
 ```
 
-### 3.2 Process Lifecycle
+### 3.2 Entry Points Catalog
+
+| Entry Point | Type | File | Function/Class | Trigger |
+|-------------|------|------|-----------------|---------|
+| `{name}` | {CLI/API/Scheduler/Event/Worker} | `{file}` | `{function}` | {how invoked} |
+
+### 3.3 Build & Runtime Artifacts
+
+| Artifact | Type | Path | Purpose |
+|----------|------|------|---------|
+| `{name}` | {Dockerfile/CI pipeline/Helm chart/Terraform/binary} | `{path}` | {purpose} |
+
+{Describe deployment topology: containers, serverless functions, static assets, etc.}
+
+### 3.4 Process Lifecycle
 
 {For services: startup to steady state. For libraries: import to teardown. For CLI: args to exit.}
 
@@ -184,7 +203,28 @@ flowchart LR
     C --> D
 ```
 
-### 5.3 Safety Mechanisms
+### 5.3 Data Ingress & Egress Points
+
+| Direction | Point | Protocol | Data Format | Rate/Volume |
+|-----------|-------|----------|-------------|-------------|
+| Ingress | `{endpoint/topic/file}` | {HTTP/gRPC/AMQP/file} | {JSON/protobuf/CSV} | {rate} |
+| Egress | `{endpoint/topic/file}` | {HTTP/gRPC/AMQP/file} | {JSON/protobuf/CSV} | {rate} |
+
+### 5.4 Serialization & Deserialization Boundaries
+
+| Boundary | Location | Format In | Format Out | Library |
+|----------|----------|-----------|------------|---------|
+| `{name}` | `{file}:{line}` | {format} | {format} | {library} |
+
+{Document where data changes shape: API controllers, message handlers, DB repositories, file parsers.}
+
+### 5.5 Schema Evolution & Data Contracts
+
+| Contract | Owner | Consumers | Versioning Strategy | Breaking Change Policy |
+|----------|-------|-----------|--------------------|-----------------------|
+| `{schema/proto/type}` | `{module}` | `{modules}` | {semver/field evolution/migration} | {policy} |
+
+### 5.6 Safety Mechanisms
 
 {Description of transactions, idempotency guards, version checks, distributed locks.}
 
@@ -242,7 +282,23 @@ stateDiagram-v2
 
 {Locks, mutexes, semaphores — granularity and ordering rules.}
 
-### 7.4 Common Concurrency Pitfalls
+### 7.4 Resource Management
+
+| Resource | Budget/Limit | Managed By | Exhaustion Behavior |
+|----------|-------------|------------|---------------------|
+| CPU | {limit} | {scheduler/pool} | {backpressure/queuing/rejection} |
+| Memory | {limit} | {allocator/GC/pool} | {OOM behavior/eviction policy} |
+| I/O | {limit} | {connection pool/rate limiter} | {queuing/timeout/circuit break} |
+| File Descriptors | {limit} | {OS/pool} | {error handling} |
+
+### 7.5 Scaling Characteristics
+
+- **Horizontal scaling**: {how the system scales out — stateless services, sharding, partitioning}
+- **Vertical scaling**: {bottlenecks that limit vertical scaling — memory-bound, CPU-bound, I/O-bound}
+- **Scaling triggers**: {metrics/thresholds that indicate scaling is needed}
+- **Scaling constraints**: {state affinity, ordering requirements, connection limits}
+
+### 7.6 Common Concurrency Pitfalls
 
 - {pitfall 1}
 - {pitfall 2}
@@ -323,6 +379,14 @@ stateDiagram-v2
 | Library | Usage |
 |---------|-------|
 | `{library}` | {usage} |
+
+### 11.3 Version Constraints & Compatibility Risks
+
+| Dependency | Current Version | Constraint | Risk | Notes |
+|-----------|----------------|------------|------|-------|
+| `{dep}` | `{version}` | {pinned/range/latest} | {High/Med/Low} | {EOL date, known CVEs, upgrade blockers} |
+
+{Identify dependencies that are: pinned to old versions, approaching EOL, have known security issues, or constrain upgrades of other dependencies.}
 
 ---
 
@@ -425,6 +489,14 @@ sequenceDiagram
 - **Liveness**: `{endpoint}`
 - **Readiness**: `{endpoint}`
 
+### Debug Surfaces
+
+| Surface | Type | Access | Purpose |
+|---------|------|--------|---------|
+| `{endpoint/flag/tool}` | {HTTP endpoint/CLI flag/env var/REPL} | {local/authenticated/admin} | {purpose} |
+
+{Document how developers inspect runtime state: debug endpoints, verbose logging modes, REPL access, profiling hooks, memory dumps, thread dumps.}
+
 ---
 
 ## 16. Error Handling & Failure Modes
@@ -453,6 +525,23 @@ sequenceDiagram
 ### Graceful Degradation
 
 {Behavior when dependencies unavailable.}
+
+### Error Propagation Paths
+
+```mermaid
+flowchart TD
+    A["{Error Origin}"] --> B{"{Decision Point}"}
+    B -->|"recoverable"| C["{Retry/Fallback}"]
+    B -->|"fatal"| D["{Error Response}"]
+    C --> E["{Recovery Action}"]
+    D --> F["{User/Caller Notification}"]
+```
+
+{For each major error category, trace the path from origin through handlers to final disposition. Show where errors are caught, transformed, logged, and surfaced.}
+
+| Error Category | Origin | Propagation Path | Final Handler | User-Visible Effect |
+|---------------|--------|------------------|---------------|---------------------|
+| `{category}` | `{file}:{line}` | {module} → {module} → {module} | `{handler}` | {effect} |
 
 ---
 
@@ -504,6 +593,33 @@ sequenceDiagram
 ### Scheduling Configuration
 
 {How recurring work is configured: cron, intervals, tickers.}
+
+### Environment Variable Hierarchy
+
+{Document the precedence order for configuration resolution.}
+
+| Priority | Source | Example | Override Behavior |
+|----------|--------|---------|-------------------|
+| 1 (highest) | {e.g., CLI flags} | `--port=3000` | {overrides all} |
+| 2 | {e.g., Environment variables} | `PORT=3000` | {overrides file-based config} |
+| 3 | {e.g., Config file} | `config.yaml` | {overrides defaults} |
+| 4 (lowest) | {e.g., Code defaults} | `const PORT = 8080` | {fallback} |
+
+### Feature Flags
+
+| Flag | Default | Source | Runtime Toggleable | Purpose |
+|------|---------|--------|-------------------|---------|
+| `{flag}` | {on/off} | {env/config/remote} | {Yes/No} | {purpose} |
+
+{Document the feature flag system: how flags are defined, evaluated, and toggled. Include any remote configuration services (LaunchDarkly, Split, etc.).}
+
+### Deployment-time vs Runtime Configuration
+
+| Parameter | When Resolved | Can Change At Runtime | Restart Required |
+|-----------|--------------|----------------------|-----------------|
+| `{param}` | {build/deploy/startup/runtime} | {Yes/No} | {Yes/No} |
+
+{Distinguish between configuration that is baked at build time, set at deployment, loaded at startup, or dynamically changeable at runtime.}
 
 ### Config Code
 
@@ -648,6 +764,22 @@ sequenceDiagram
 |----------|-------|----------|
 | `{file}` | {issue} | {High/Med/Low} |
 
+### High Churn Files
+
+{Identify files with the highest commit frequency — these are change hotspots that warrant extra test coverage and review attention.}
+
+| File | Commits (Last 6 Months) | Reason for Churn | Risk |
+|------|------------------------|------------------|------|
+| `{file}` | {N} | {frequent bug fixes/feature additions/config changes} | {High/Med/Low} |
+
+### Fragile Area Risk Map
+
+{Identify areas where changes frequently cause cascading failures or regressions.}
+
+| Area | Fragility Indicator | Blast Radius | Mitigation |
+|------|---------------------|-------------|------------|
+| `{module/file}` | {tight coupling/shared state/implicit contracts/no tests} | {local/cross-module/system-wide} | {test coverage/interface stabilization/decoupling} |
+
 ---
 
 ## 25. Glossary
@@ -655,6 +787,171 @@ sequenceDiagram
 | Term | Definition |
 |------|------------|
 | {term} | {1-2 sentence definition} |
+
+---
+
+## 26. Domain Model
+
+### 26.1 Core Entities & Relationships
+
+```mermaid
+erDiagram
+    {ENTITY_A} ||--o{ {ENTITY_B} : "{relationship}"
+    {ENTITY_B} }|--|| {ENTITY_C} : "{relationship}"
+    {ENTITY_A} ||--|| {ENTITY_D} : "{relationship}"
+```
+
+| Entity | Definition | Key Attributes | Lifecycle |
+|--------|-----------|----------------|-----------|
+| `{Entity}` | {what it represents in the domain} | `{attr1}`, `{attr2}`, `{attr3}` | {created → active → archived/deleted} |
+
+### 26.2 Domain Invariants & Constraints
+
+| Invariant | Entities Involved | Enforcement Location | Violation Consequence |
+|-----------|-------------------|---------------------|----------------------|
+| {rule} | `{Entity}`, `{Entity}` | `{file}:{line}` | {data corruption/invalid state/business rule violation} |
+
+### 26.3 Business Logic vs Infrastructure Boundaries
+
+{Identify where business rules live vs infrastructure/plumbing code. This enables safe refactoring — infrastructure can be swapped without touching business logic.}
+
+| Layer | Responsibility | Key Files | Depends On |
+|-------|---------------|-----------|------------|
+| Domain / Business Logic | {core rules, validation, calculations} | `{files}` | {nothing external — pure logic} |
+| Application / Use Cases | {orchestration, workflows, transactions} | `{files}` | {domain layer} |
+| Infrastructure | {DB, HTTP, messaging, file I/O} | `{files}` | {application layer} |
+| Presentation | {API routes, CLI handlers, UI} | `{files}` | {application layer} |
+
+### 26.4 Aggregate Boundaries
+
+{For DDD-style architectures: identify aggregate roots and their boundaries. For non-DDD: identify transactional consistency boundaries — groups of entities that must change together atomically.}
+
+| Aggregate / Boundary | Root Entity | Contains | Consistency Rule |
+|---------------------|-------------|----------|-----------------|
+| `{name}` | `{entity}` | `{entity1}`, `{entity2}` | {must be updated atomically / eventual consistency} |
+
+---
+
+## 27. Execution Flow Mapping
+
+### 27.1 End-to-End Request Lifecycle
+
+{Trace the complete lifecycle of a primary request from entry point through processing to response.}
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant {EntryPoint}
+    participant {Middleware}
+    participant {Handler}
+    participant {Service}
+    participant {Repository}
+    participant {Database}
+
+    Client->>{EntryPoint}: {request}
+    {EntryPoint}->>{Middleware}: {pass through}
+    {Middleware}->>{Handler}: {validated request}
+    {Handler}->>{Service}: {business operation}
+    {Service}->>{Repository}: {data operation}
+    {Repository}->>{Database}: {query}
+    {Database}-->>{Repository}: {result}
+    {Repository}-->>{Service}: {domain object}
+    {Service}-->>{Handler}: {result}
+    {Handler}-->>{Client}: {response}
+```
+
+### 27.2 Control Flow Paths
+
+#### Happy Path
+
+| Step | Component | Action | Output |
+|------|-----------|--------|--------|
+| 1 | `{component}` | {action} | {output} |
+| 2 | `{component}` | {action} | {output} |
+
+#### Failure Paths
+
+| Failure Point | Error Type | Handler | Recovery | User Effect |
+|--------------|-----------|---------|----------|-------------|
+| `{component}` | {error type} | `{handler}` | {retry/fallback/abort} | {error message/degraded service/timeout} |
+
+#### Retry & Fallback Flows
+
+```mermaid
+flowchart TD
+    A["{Operation}"] --> B{"{Success?}"}
+    B -->|"Yes"| C["{Continue}"]
+    B -->|"No"| D{"{Retries Left?}"}
+    D -->|"Yes"| E["{Backoff Wait}"] --> A
+    D -->|"No"| F{"{Fallback Available?}"}
+    F -->|"Yes"| G["{Fallback Path}"]
+    F -->|"No"| H["{Error Response}"]
+```
+
+### 27.3 State Transitions
+
+{For stateful systems: document all valid state transitions and their triggers.}
+
+```mermaid
+stateDiagram-v2
+    [*] --> {InitialState}
+    {InitialState} --> {State2}: {trigger}
+    {State2} --> {State3}: {trigger}
+    {State2} --> {ErrorState}: {failure}
+    {State3} --> [*]: {completion}
+    {ErrorState} --> {State2}: {retry}
+    {ErrorState} --> [*]: {abandon}
+```
+
+| From State | To State | Trigger | Guard Condition | Side Effects |
+|-----------|----------|---------|-----------------|-------------|
+| `{state}` | `{state}` | {event} | {condition} | {actions performed during transition} |
+
+---
+
+## 28. Interaction Surfaces
+
+### 28.1 Service-to-Service Communication
+
+| Source | Target | Protocol | Pattern | Payload | SLA |
+|--------|--------|----------|---------|---------|-----|
+| `{service}` | `{service}` | {REST/gRPC/AMQP/WebSocket/GraphQL} | {sync/async/pub-sub/request-reply} | {format} | {latency/throughput} |
+
+```mermaid
+graph LR
+    subgraph Internal["Internal Services"]
+        A["{Service A}"]
+        B["{Service B}"]
+        C["{Service C}"]
+    end
+    subgraph External["External Services"]
+        D["{External API}"]
+        E["{Third Party}"]
+    end
+    A -->|"REST"| B
+    B -->|"gRPC"| C
+    A -->|"AMQP"| C
+    B -->|"HTTPS"| D
+    C -->|"webhook"| E
+```
+
+### 28.2 External Integration Points
+
+| Integration | Direction | Protocol | Auth Method | Rate Limit | Circuit Breaker |
+|-------------|-----------|----------|-------------|------------|-----------------|
+| `{service}` | {inbound/outbound/bidirectional} | {protocol} | {API key/OAuth/mTLS} | {limit} | {Yes/No — threshold} |
+
+### 28.3 Human Interaction Layers
+
+| Interface | Type | Users | Entry Point | Key Flows |
+|-----------|------|-------|-------------|-----------|
+| `{name}` | {CLI/Web UI/Mobile/Admin Panel/Config File} | {user type} | `{file/URL}` | {primary user flows} |
+
+### 28.4 Event & Message Contracts
+
+| Event/Message | Publisher | Subscriber(s) | Schema | Delivery Guarantee |
+|---------------|-----------|---------------|--------|-------------------|
+| `{event}` | `{module}` | `{module1}`, `{module2}` | `{schema file/type}` | {at-most-once/at-least-once/exactly-once} |
 
 ---
 
@@ -703,6 +1000,87 @@ sequenceDiagram
     B-->>A: {response}
     deactivate B
 ```
+
+---
+
+## Appendix E: Dependency Graph Visualization
+
+### Internal Module Dependencies (Layered)
+
+```mermaid
+graph TD
+    subgraph Layer1["Presentation Layer"]
+        A["{Module A}"]
+        B["{Module B}"]
+    end
+    subgraph Layer2["Application Layer"]
+        C["{Module C}"]
+        D["{Module D}"]
+    end
+    subgraph Layer3["Domain Layer"]
+        E["{Module E}"]
+    end
+    subgraph Layer4["Infrastructure Layer"]
+        F["{Module F}"]
+        G["{Module G}"]
+    end
+    A --> C
+    B --> D
+    C --> E
+    D --> E
+    E -.-> F
+    E -.-> G
+```
+
+### Adjacency Matrix (Internal)
+
+| Module | Depends On | Depended By | Coupling Score |
+|--------|-----------|-------------|---------------|
+| `{module}` | `{dep1}`, `{dep2}` | `{dep1}`, `{dep2}` | {High/Med/Low} |
+
+### External Dependency Graph
+
+```mermaid
+graph LR
+    subgraph System["System Boundary"]
+        A["{Module A}"]
+        B["{Module B}"]
+    end
+    subgraph External["External"]
+        C[("{Database}")]
+        D["{API Service}"]
+        E["{Message Queue}"]
+    end
+    A -->|"v{version}"| C
+    B -->|"v{version}"| D
+    A -->|"v{version}"| E
+```
+
+| External Dependency | Version | Constraint | Consumers | Upgrade Risk |
+|--------------------|---------|------------|-----------|-------------|
+| `{dep}` | `{version}` | {pinned/range/latest} | `{modules}` | {breaking changes/deprecation/none} |
+
+---
+
+## Appendix F: Context Index
+
+{Machine-navigable index mapping every significant file to its role, dependencies, and entry points. This enables deterministic lookup: given a file, know exactly what it does and what depends on it.}
+
+| File | Responsibility | Module | Depends On | Depended By | Entry Points | Test Coverage |
+|------|---------------|--------|-----------|-------------|-------------|--------------|
+| `{path}` | {5-10 word description} | `{module}` | `{file1}`, `{file2}` | `{file1}`, `{file2}` | {CLI/API/scheduler/none} | `{test_file}` |
+
+### Responsibility Categories
+
+| Category | Files | Description |
+|----------|-------|-------------|
+| Entry Point | `{files}` | {application entry, CLI handlers, API route registration} |
+| Business Logic | `{files}` | {core domain logic, validation, calculations} |
+| Data Access | `{files}` | {repositories, ORM models, query builders} |
+| Infrastructure | `{files}` | {HTTP clients, message producers, file I/O} |
+| Configuration | `{files}` | {config loading, env parsing, feature flags} |
+| Testing | `{files}` | {test utilities, fixtures, mocks} |
+| Build/Deploy | `{files}` | {CI/CD, Dockerfiles, scripts} |
 
 ---
 

@@ -218,7 +218,7 @@
                 <rect x="160" y="5" width="400" height="270" rx="12" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow3)"/>
                 <text x="180" y="30" fill="#2563eb" font-size="14" font-weight="700">draft/</text>
                 <!-- Main files -->
-                <text x="200" y="52" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="52" fill="#1a1a2e" font-size="12" font-weight="600">architecture.md</text><text x="395" y="52" fill="#718096" font-size="10">Source of truth (25 sections)</text>
+                <text x="200" y="52" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="52" fill="#1a1a2e" font-size="12" font-weight="600">architecture.md</text><text x="395" y="52" fill="#718096" font-size="10">Source of truth (31 sections)</text>
                 <text x="200" y="72" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="72" fill="#1a1a2e" font-size="12">.ai-context.md</text><text x="395" y="72" fill="#718096" font-size="10">Token-optimized (200-400 lines)</text>
                 <text x="200" y="92" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="92" fill="#1a1a2e" font-size="12">.ai-profile.md</text><text x="395" y="92" fill="#718096" font-size="10">Always loaded (20-50 lines)</text>
                 <text x="200" y="112" fill="#718096" font-size="12">&#9500;&#9472;</text><text x="220" y="112" fill="#1a1a2e" font-size="12">product.md</text><text x="395" y="112" fill="#718096" font-size="10">Vision, users, goals</text>
@@ -391,7 +391,7 @@ $ curl -o .github/copilot-instructions.md \
                 <text x="658" y="116" text-anchor="middle" fill="rgba(255,255,255,0.65)" font-size="8">validate, generate</text>
 
                 <!-- Bottom output label -->
-                <text x="360" y="160" text-anchor="middle" fill="#718096" font-size="10" font-style="italic">Output: architecture.md (25 sections) + .ai-context.md + .ai-profile.md + configuration files</text>
+                <text x="360" y="160" text-anchor="middle" fill="#718096" font-size="10" font-style="italic">Output: architecture.md (31 sections) + .ai-context.md + .ai-profile.md + configuration files</text>
             </svg>
         </div>
         <div class="figure-caption">The five-phase analysis pipeline. Each phase builds on the previous, culminating in a comprehensive architecture document generated from real codebase data.</div>
@@ -406,7 +406,7 @@ $ curl -o .github/copilot-instructions.md \
     <p>After the five-phase analysis, Draft creates the <code>draft/</code> directory with these files:</p>
 
     <h3>architecture.md (Source of Truth)</h3>
-    <p>A comprehensive 25-section engineering reference with appendices. This is the primary artifact &mdash; designed for both human engineers and AI agents. It includes:</p>
+    <p>A comprehensive 31-section engineering reference with appendices. This is the primary artifact &mdash; designed for both human engineers and AI agents. It includes:</p>
     <ul>
         <li>Executive summary and system identity</li>
         <li>Component map and module documentation</li>
@@ -459,7 +459,7 @@ $ curl -o .github/copilot-instructions.md \
     <div class="callout callout-example">
         <div class="callout-title">The draft/ Directory</div>
         <pre><code>draft/
-&boxvr;&boxh; architecture.md      # 25-section engineering reference (source of truth)
+&boxvr;&boxh; architecture.md      # 31-section engineering reference (source of truth)
 &boxvr;&boxh; .ai-context.md       # 200-400 lines, token-optimized (derived)
 &boxvr;&boxh; .ai-profile.md       # 20-50 lines, always loaded (derived)
 &boxvr;&boxh; product.md           # Product vision and goals
@@ -514,7 +514,7 @@ $ curl -o .github/copilot-instructions.md \
 
     <p>Refresh uses the stored file hashes in <code>freshness.json</code> to identify exactly what changed since the last analysis. It only re-analyzes changed, new, and deleted files &mdash; unchanged files are skipped entirely. Signal classification is re-run and diffed against the baseline to detect structural drift. The architecture document, AI context, and profile are updated with targeted changes rather than a full regeneration.</p>
 
-    <p>If nothing changed, Draft short-circuits: "Architecture context is current. Nothing to refresh." No wasted tokens, no unnecessary work.</p>
+    <p>If nothing changed, Draft short-circuits: "Architecture context is current. Nothing to refresh." No wasted tokens, no unnecessary work. Use <code>--force</code> with <code>--refresh</code> to bypass this check and run a full re-analysis when the init skill has been upgraded &mdash; it builds on the existing architecture as a baseline rather than starting from scratch.</p>
 
     <h2>What Comes Next</h2>
     <p>You now have a project with full context, a track with a spec and plan, and an implementation workflow that keeps AI constrained to your architecture. The next chapters dive into each stage of the workflow in detail &mdash; how specifications are crafted, how plans are structured, how implementation works task by task, and how the review process catches what the AI missed.</p>

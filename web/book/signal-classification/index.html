@@ -372,7 +372,7 @@
 | state_management   |   0   | State Management (frontend state)         | SKIP      |
 | background_jobs    |   0   | Concurrency                               | SIMPLIFY  |</code></pre>
 
-    <p>The thresholds are simple: zero files means skip or simplify the section. One to two files means include the section but keep it brief. Three or more files means the section warrants deep, exhaustive treatment. This prevents Draft from generating empty boilerplate sections for concerns that do not exist in your project, while ensuring real concerns get thorough documentation.</p>
+    <p>The thresholds are simple: zero files means skip or simplify the section. One or more files means the section warrants full treatment — even a single signal file can reveal critical architecture (for example, one auth file still defines the entire security boundary). This prevents Draft from generating empty boilerplate sections for concerns that do not exist in your project, while ensuring real concerns get thorough documentation.</p>
 
     <div class="callout callout-concept">
         <div class="callout-title">Adaptive Sections</div>

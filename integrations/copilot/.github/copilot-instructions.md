@@ -659,7 +659,9 @@ Follow these steps in order. The specific files to look for depend on the langua
 
 1. **Map the directory tree**: Recursively list the project to understand the file layout. Note subdirectory groupings.
 
-1b. **Subdirectory module detection**: Scan each first-level subdirectory (depth=1) and classify it:
+1b. **Two-tier module detection**: Discover module boundaries using BOTH directory structure AND organic heuristics (imports, build files, DI wiring). The directory scan provides initial candidates; organic discovery refines and deepens them.
+
+   **Tier 1 — Top-level boundary scan**: Scan each first-level subdirectory and classify it:
 
    | Classification | Criteria | Action |
    |----------------|----------|--------|
@@ -669,15 +671,13 @@ Follow these steps in order. The specific files to look for depend on the langua
    **Exclude patterns:** `node_modules/`, `vendor/`, `.git/`, `dist/`, `build/`, `out/`, `__pycache__/`, `.next/`, `.cache/`, directories starting with `.`
 
    ```bash
-   # Example: scan first-level children
+   # Tier 1: scan first-level children for initial boundary candidates
    for dir in */; do
      dir_name="${dir%/}"
-     # Skip excluded directories
      case "$dir_name" in
        node_modules|vendor|dist|build|out|__pycache__|.git|.next|.cache) continue ;;
      esac
      [[ "$dir_name" == .* ]] && continue
-     # Count meaningful files
      file_count=$(find "$dir" -maxdepth 2 -type f \( -name '*.ts' -o -name '*.js' -o -name '*.py' -o -name '*.go' -o -name '*.rs' -o -name '*.java' -o -name '*.rb' -o -name '*.cs' -o -name '*.c' -o -name '*.cpp' -o -name '*.swift' -o -name '*.kt' \) 2>/dev/null | wc -l)
      has_build=$(ls "$dir"/{package.json,go.mod,Cargo.toml,pom.xml,build.gradle,pyproject.toml,requirements.txt,Makefile,CMakeLists.txt} 2>/dev/null | head -1)
      if [ "$file_count" -ge 1 ] || [ -n "$has_build" ]; then
@@ -688,7 +688,35 @@ Follow these steps in order. The specific files to look for depend on the langua
    done
    ```
 
-   **Hold the module map in memory** — it feeds Phase 2 step 10 (inter-module dependencies) and Section 7 (one deep-dive subsection per module).
+   **Tier 2 — Sub-module discovery within each MODULE**: For every Tier 1 MODULE candidate, recurse into its children to discover sub-modules. A first-level directory like `src/` is often NOT a single module — it may contain `src/auth/`, `src/api/`, `src/store/`, etc. that are each distinct modules with their own responsibilities.
+
+   Apply these heuristics to discover sub-modules within each Tier 1 MODULE:
+
+   - **Import-graph boundaries**: Trace import/require/use statements — groups of files that import each other heavily but have few external imports form a module
+   - **Build file markers**: Subdirectories with their own `package.json`, `go.mod`, `Cargo.toml`, `pom.xml`, `__init__.py`, `mod.rs`, or `index.ts`/`index.js` barrel files
+   - **DI container / wiring registration**: Components registered as distinct services, providers, or modules in DI frameworks (Spring `@Component`, Angular `@NgModule`, NestJS `@Module`, etc.)
+   - **Namespace / package declarations**: Java/Kotlin packages under `src/main/java/com/`, Python packages with `__init__.py`, Go packages, Rust `mod` declarations
+   - **Distinct responsibility clusters**: Directories like `auth/`, `api/`, `models/`, `services/`, `middleware/` within a parent directory each represent separate modules
+
+   ```bash
+   # Tier 2: for each MODULE, check for sub-modules
+   for module_dir in <MODULE directories from Tier 1>; do
+     for sub in "$module_dir"/*/; do
+       sub_name="${sub%/}"
+       sub_file_count=$(find "$sub" -maxdepth 2 -type f \( -name '*.ts' -o -name '*.js' -o -name '*.py' -o -name '*.go' -o -name '*.rs' -o -name '*.java' -o -name '*.rb' -o -name '*.cs' \) 2>/dev/null | wc -l)
+       has_sub_build=$(ls "$sub"/{package.json,go.mod,Cargo.toml,pom.xml,build.gradle,pyproject.toml,__init__.py,mod.rs,index.ts,index.js} 2>/dev/null | head -1)
+       if [ "$sub_file_count" -ge 1 ] || [ -n "$has_sub_build" ]; then
+         echo "  SUB-MODULE: $sub_name ($sub_file_count source files)"
+       fi
+     done
+   done
+   ```
+
+   **When a Tier 1 directory contains 2+ sub-modules, promote the sub-modules**: If `src/` contains `src/auth/`, `src/api/`, `src/store/` — the module map should list `src/auth/`, `src/api/`, `src/store/` as separate modules (not just `src/` as one monolithic entry). The parent directory becomes a grouping label, not a module.
+
+   **Cross-cutting concerns**: Shared utilities, middleware, and config directories that span multiple modules should still appear as their own module entries — they define integration boundaries even if they sit at a different directory level.
+
+   **Hold the module map in memory** — it feeds Phase 2 step 9b (inter-module dependencies) and Section 7 (one deep-dive subsection per module). The map will be refined during Phase 2 as import analysis and dependency wiring reveal additional module boundaries not visible from directory structure alone.
 
 2. **Read build / dependency files**: These reveal the module structure, dependencies, and targets. (See language guide above for which files.)
 
@@ -752,19 +780,20 @@ Follow these steps in order. The specific files to look for depend on the langua
 
 9. **Map the dependency wiring**: Find the DI container, context struct, module system, or import graph that connects components.
 
-10. **Inter-module dependency mapping**: Using the module map from step 1b, trace cross-directory imports between first-level subdirectories. Build a directed dependency graph showing which modules depend on which:
+9b. **Inter-module dependency mapping**: Using the module map from step 1b (including sub-modules from Tier 2), trace cross-module imports. Build a directed dependency graph showing which modules depend on which:
 
     ```
     Example dependency graph:
-      api/ → services/ → models/
-      api/ → middleware/
-      services/ → common/
-      workers/ → services/ → models/
+      src/api/ → src/services/ → src/models/
+      src/api/ → middleware/
+      src/services/ → common/
+      workers/ → src/services/ → src/models/
     ```
 
-    - Scan import/require/use statements in each MODULE directory
+    - Scan import/require/use statements in each MODULE and SUB-MODULE directory
     - Record edges: `source_module → imported_module`
     - Flag circular dependencies
+    - **Refine the module map**: If import analysis reveals module boundaries not caught by Tier 1/Tier 2 directory scanning (e.g., a flat directory where half the files import `auth` utilities and the other half import `api` utilities), split them into separate logical modules
     - This feeds Section 5.3 (Component Map), Section 7 (Core Modules), and Section 14 (Cross-Module Integration)
 
 #### Phase 3: Depth (Trace the Flows)
@@ -1031,21 +1060,24 @@ Document with diagram or prose: transactions, idempotency guards, version checks
 
 **Expected length: 8-15 pages (1-2 pages per module)**
 
-**MANDATE:** Every module candidate identified in Phase 1 step 1b MUST get its own deep-dive subsection below. Do not flatten distinct subdirectories into a single summary. If step 1b classified a directory as MODULE, it appears here as its own `7.X` section.
+**MANDATE:** Step 1b provides initial module candidates via directory scanning (Tier 1 + Tier 2). The final module list is refined during Phase 2 using import analysis and dependency wiring — it may include sub-modules discovered during deeper analysis that weren't visible from directory structure alone. Every module in the **final refined list** MUST get its own deep-dive subsection below. Do not flatten distinct sub-packages into a single summary (e.g., if `src/` contains `src/auth/`, `src/api/`, `src/store/`, each gets its own `7.X` section — not one section for `src/`).
 
-**Module Summary Table** (generated from step 1b module map):
+**Module Summary Table** (generated from refined module map after Phase 2):
 
 ```markdown
-| Directory | File Count | Primary Responsibility | Dependencies |
-|-----------|-----------|----------------------|--------------|
-| `api/` | 24 | HTTP request handling, routing | services/, middleware/ |
-| `services/` | 18 | Business logic layer | models/, common/ |
-| `models/` | 12 | Data models, ORM schemas | common/ |
+| Module Path | File Count | Primary Responsibility | Dependencies |
+|-------------|-----------|----------------------|--------------|
+| `src/api/` | 24 | HTTP request handling, routing | src/services/, middleware/ |
+| `src/services/` | 18 | Business logic layer | src/models/, common/ |
+| `src/models/` | 12 | Data models, ORM schemas | common/ |
 | `common/` | 8 | Shared utilities, types | — |
-| `workers/` | 6 | Background job processing | services/, models/ |
+| `middleware/` | 5 | Request pipeline, auth guards | src/auth/ |
+| `src/auth/` | 7 | Authentication & authorization | src/models/ |
+| `src/store/` | 9 | State management, caching | src/models/ |
+| `workers/` | 6 | Background job processing | src/services/, src/models/ |
 ```
 
-For each major internal module (typically 5–8), provide a COMPLETE deep dive:
+For each discovered module (including sub-modules), provide a COMPLETE deep dive:
 
 #### Per-Module Template
 

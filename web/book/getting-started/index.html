@@ -22,20 +22,6 @@
     <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
     <meta name="twitter:image:alt" content="Getting Started — Draft Book">
     <link rel="canonical" href="https://getdraft.dev/book/getting-started/">
-    <link rel="alternate" hreflang="en" href="https://getdraft.dev/book/getting-started/">
-    <link rel="alternate" hreflang="x-default" href="https://getdraft.dev/book/getting-started/">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://getdraft.dev/"},
-        {"@type": "ListItem", "position": 2, "name": "Book", "item": "https://getdraft.dev/book/"},
-        {"@type": "ListItem", "position": 3, "name": "Getting Started", "item": "https://getdraft.dev/book/getting-started/"}
-      ]
-    }
-    </script>
 
     <script type="application/ld+json">
     {
@@ -70,7 +56,6 @@
     </noscript>
 
     <link rel="stylesheet" href="../css/book.css">
-    <link rel="stylesheet" href="../css/audio-player.css">
 </head>
 <body data-chapter="getting-started">
 
@@ -107,7 +92,6 @@
                     <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
                         <span class="ch-num">0.</span>What is Draft?
                     </a></li>
-                    
                 </ul>
             </div>
             <div class="sidebar-part">
@@ -217,13 +201,6 @@
         </aside>
 
         <main class="book-content">
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <ol>
-        <li><a href="/">Home</a></li>
-        <li><a href="/book/">Book</a></li>
-        <li aria-current="page">Getting Started</li>
-      </ol>
-    </nav>
 <div class="chapter-wrapper">
     <h1>Getting Started</h1>
     <p class="chapter-meta"><span class="part-name">Part I: Foundation</span> &middot; Chapter 3</p>
@@ -531,7 +508,7 @@ $ curl -o .github/copilot-instructions.md \
     <h2>Refreshing Context</h2>
     <p>Your codebase changes over time. New modules get added, dependencies change, architectural decisions evolve. Draft handles this with incremental refresh:</p>
 
-    <pre class="terminal"><code>$ /draft:init refresh</code></pre>
+    <pre class="terminal"><code>$ /draft:init --refresh</code></pre>
 
     <p>Refresh uses the stored file hashes in <code>freshness.json</code> to identify exactly what changed since the last analysis. It only re-analyzes changed, new, and deleted files &mdash; unchanged files are skipped entirely. Signal classification is re-run and diffed against the baseline to detect structural drift. The architecture document, AI context, and profile are updated with targeted changes rather than a full regeneration.</p>
 
@@ -540,17 +517,6 @@ $ curl -o .github/copilot-instructions.md \
     <h2>What Comes Next</h2>
     <p>You now have a project with full context, a track with a spec and plan, and an implementation workflow that keeps AI constrained to your architecture. The next chapters dive into each stage of the workflow in detail &mdash; how specifications are crafted, how plans are structured, how implementation works task by task, and how the review process catches what the AI missed.</p>
 </div>
-
-
-    <nav class="related-chapters" aria-label="Related chapters">
-      <h3>Related Chapters</h3>
-      <ul>
-        <li><a href="/book/what-is-draft/">What is Draft?</a> &mdash; Overview of Draft and its 28 commands</li>
-        <li><a href="/book/specs-and-plans/">Specs &amp; Plans</a> &mdash; Deep dive into specification and plan creation</li>
-        <li><a href="/book/implementation/">Implementation</a> &mdash; Task-by-task implementation with TDD cycles</li>
-        <li><a href="/book/multi-ide-support/">Multi-IDE Support</a> &mdash; How Draft works across Claude Code, Copilot, Cursor, and more</li>
-      </ul>
-    </nav>
 
             <nav class="chapter-nav">
                 <a href="../context-driven-development/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Context-Driven Development</span></a>
@@ -565,6 +531,5 @@ $ curl -o .github/copilot-instructions.md \
     </div>
 
     <script src="../js/book.js"></script>
-    <script src="../js/audio-player.js"></script>
 </body>
 </html>

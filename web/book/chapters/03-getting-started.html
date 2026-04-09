@@ -305,7 +305,7 @@ $ curl -o .github/copilot-instructions.md \
     <h2>Refreshing Context</h2>
     <p>Your codebase changes over time. New modules get added, dependencies change, architectural decisions evolve. Draft handles this with incremental refresh:</p>
 
-    <pre class="terminal"><code>$ /draft:init refresh</code></pre>
+    <pre class="terminal"><code>$ /draft:init --refresh</code></pre>
 
     <p>Refresh uses the stored file hashes in <code>freshness.json</code> to identify exactly what changed since the last analysis. It only re-analyzes changed, new, and deleted files &mdash; unchanged files are skipped entirely. Signal classification is re-run and diffed against the baseline to detect structural drift. The architecture document, AI context, and profile are updated with targeted changes rather than a full regeneration.</p>
 

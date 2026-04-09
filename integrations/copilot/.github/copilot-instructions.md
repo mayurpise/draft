@@ -16830,7 +16830,7 @@ flowchart LR
 
 ## 6. Core Modules Deep Dive
 
-{For each major module (5-8), provide detailed analysis.}
+{For EVERY discovered module, provide detailed analysis. Do not cap the number of modules.}
 
 ### 6.1 {Module Name}
 

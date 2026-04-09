@@ -90,15 +90,15 @@
             </tr>
             <tr>
                 <td><code>/draft:init</code></td>
-                <td>Analyze codebase and generate context files, architecture docs, and state tracking</td>
-                <td><code>--refresh</code> &mdash; re-analyze and update existing context</td>
+                <td>5-phase codebase analysis: directory mapping with subdirectory module detection, signal classification, dependency wiring with inter-module import tracing, data flow analysis, and synthesis into architecture.md + .ai-context.md + .ai-profile.md</td>
+                <td><code>--refresh</code> &mdash; incremental update using file hashes and signal drift detection (early-exit after signal analysis, 100-file guardrail, run-memory resume)</td>
                 <td>None (run once per project)</td>
                 <td>3, 4, 5</td>
             </tr>
             <tr>
                 <td><code>/draft:index</code></td>
-                <td>Aggregate monorepo service contexts into root-level knowledge</td>
-                <td><code>--init-missing</code> &mdash; initialize uninitialized services; <code>--bughunt [dirs]</code> &mdash; run bughunt across services</td>
+                <td>Aggregate monorepo service contexts into root-level knowledge: service-index.md, dependency-graph.md, tech-matrix.md, synthesized product/architecture/tech-stack, .ai-context.md, .ai-profile.md</td>
+                <td><code>--init-missing</code> &mdash; initialize uninitialized services (y/n/all/skip-rest prompt); <code>--bughunt [dirs]</code> &mdash; run bughunt across services with aggregate summary</td>
                 <td><code>/draft:init</code> at root and at least one service</td>
                 <td>18</td>
             </tr>

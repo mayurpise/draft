@@ -301,6 +301,8 @@ $ curl -o .github/copilot-instructions.md \
     <h3>Phase 2: Wiring (Trace the Graph)</h3>
     <p>Draft finds your application's entry point and traces the initialization sequence. From the top-level controller, app, or server, it follows how components are created, initialized, and wired together. It maps the registration code &mdash; where handlers, plugins, routes, and middleware are registered &mdash; and builds a dependency graph showing how the DI container, module system, or import graph connects everything.</p>
 
+    <p>Using the module map from Phase 1, Draft also traces <strong>inter-module dependencies</strong> &mdash; cross-directory imports between first-level subdirectories. This produces a directed dependency graph (e.g., <code>api/ &rarr; services/ &rarr; models/</code>) that feeds the Component Map, Core Modules deep dives, and Cross-Module Integration sections of <code>architecture.md</code>.</p>
+
     <h3>Phase 3: Depth (Trace the Flows)</h3>
     <p>For each major data flow, Draft starts at the entry point and follows the code through every processing stage to the output. It reads core module implementations to understand algorithms, error handling, retry logic, and state management. It identifies the concurrency model &mdash; thread pools, async executors, goroutines, worker processes &mdash; and maps safety checks including invariant assertions, validation logic, auth checks, and transaction boundaries.</p>
 
@@ -422,7 +424,7 @@ $ curl -o .github/copilot-instructions.md \
     <p>A 200-400 line document derived from <code>architecture.md</code>. It contains 15+ mandatory sections condensed for AI consumption: architecture overview, invariants, interface contracts, data flows, concurrency rules, error handling patterns, implementation catalogs, extension cookbooks, testing strategy, and glossary. This is what Draft commands load when implementing features.</p>
 
     <h3>.ai-profile.md (Always-On Profile)</h3>
-    <p>A 20-50 line ultra-compact profile that is injected into every AI interaction. Contains: language, framework, database, auth mechanism, API style, critical invariants, safety rules, active tracks, and recent changes. Even a simple task like "fix this typo" gets basic project awareness.</p>
+    <p>A 20-50 line ultra-compact profile that is injected into every AI interaction. Contains: language, framework, database, auth mechanism, API style, critical invariants, safety rules, active tracks, and recent changes. Even a simple task like "fix this typo" gets basic project awareness. This file is auto-refreshed whenever <code>architecture.md</code> or <code>.ai-context.md</code> is updated &mdash; including during <code>/draft:init --refresh</code>, <code>/draft:implement</code>, <code>/draft:decompose</code>, and <code>/draft:index</code>.</p>
 
     <h3>Configuration Files</h3>
     <ul>

@@ -105,11 +105,14 @@
 
     <p>If a previous run has <code>status: "in_progress"</code>, the next invocation detects the incomplete state and offers to resume from the last checkpoint or start fresh. This prevents partial analysis from being silently treated as complete. Unresolved questions from previous runs are surfaced again &mdash; they persist until answered.</p>
 
+    <h2>Early-Exit After Signal Analysis</h2>
+    <p>When no files have changed, Draft runs signal re-classification <em>before</em> the early-exit check. The sequence is: (1) compute file hashes, (2) re-run signal classification and diff against baseline, (3) <em>then</em> check if both hash deltas and signal drift are empty. Only if both are clean does Draft short-circuit. This ordering ensures structural drift (e.g., file reorganization creating new signal categories) is never silently missed.</p>
+
     <h2>How Incremental Refresh Works</h2>
     <p>When you run <code>/draft:init --refresh</code>, Draft executes this sequence:</p>
 
     <ol>
-        <li><strong>State-aware pre-check</strong> &mdash; Load <code>run-memory.json</code> to detect interrupted runs. Load <code>freshness.json</code> to compute file-level deltas. Load <code>signals.json</code> to detect signal drift (new or removed architectural concerns).</li>
+        <li><strong>State-aware pre-check</strong> &mdash; Load <code>run-memory.json</code> to detect interrupted runs. Load <code>freshness.json</code> to compute file-level deltas. Load <code>signals.json</code> to detect signal drift (new or removed architectural concerns). <strong>Early-exit only if both hash deltas and signal drift are empty.</strong></li>
         <li><strong>Tech stack refresh</strong> &mdash; Re-scan <code>package.json</code>, <code>go.mod</code>, and other manifest files. Compare with <code>draft/tech-stack.md</code> and propose updates.</li>
         <li><strong>Architecture refresh</strong> &mdash; Read the <code>synced_to_commit</code> SHA from the existing <code>architecture.md</code> frontmatter. Get changed files since that commit. Categorize changes (added, modified, deleted, renamed). Perform targeted analysis on only the changed files.</li>
         <li><strong>Section mapping</strong> &mdash; Map changed files to affected architecture sections. New files affect Component Map, Implementation Catalog, and File Structure. Modified interfaces affect API Definitions and Interface Contracts. Changed dependencies affect the Dependency Graph. New tests affect Testing Infrastructure.</li>

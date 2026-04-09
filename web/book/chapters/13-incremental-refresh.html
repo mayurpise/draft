@@ -3,7 +3,7 @@
     <p class="chapter-meta"><span class="part-name">Part III: How Draft Thinks</span> &middot; Chapter 13</p>
     <p class="read-time">4 min read</p>
 
-    <p class="chapter-intro">Your project has been running Draft for three months. The codebase has gained two new modules, migrated from REST to GraphQL on one service, and swapped Redis for Memcached. The architecture document is now lying to the AI. You could re-run <code>/draft:init</code> from scratch &mdash; a full 5-phase analysis that re-reads every source file. Or you could run <code>/draft:init refresh</code> and let Draft figure out what actually changed, re-analyze only those files, and patch the existing documents. That is incremental refresh.</p>
+    <p class="chapter-intro">Your project has been running Draft for three months. The codebase has gained two new modules, migrated from REST to GraphQL on one service, and swapped Redis for Memcached. The architecture document is now lying to the AI. You could re-run <code>/draft:init</code> from scratch &mdash; a full 5-phase analysis that re-reads every source file. Or you could run <code>/draft:init --refresh</code> and let Draft figure out what actually changed, re-analyze only those files, and patch the existing documents. That is incremental refresh.</p>
 
     <div class="figure">
         <div class="figure-content">
@@ -53,7 +53,7 @@
     <p>Stale context is worse than no context. An AI operating with no context will at least read the actual code. An AI operating with stale context trusts the documentation and makes decisions based on information that is no longer true. Draft's incremental refresh exists to keep the cost of freshness low enough that teams actually do it.</p>
 
     <h2>Hash-Based Change Detection</h2>
-    <p>The foundation of incremental refresh is <code>draft/.state/freshness.json</code> &mdash; a file containing SHA-256 hashes of every source file analyzed during the last initialization or refresh. When you run <code>/draft:init refresh</code>, Draft recomputes hashes of current source files and diffs against the stored baseline.</p>
+    <p>The foundation of incremental refresh is <code>draft/.state/freshness.json</code> &mdash; a file containing SHA-256 hashes of every source file analyzed during the last initialization or refresh. When you run <code>/draft:init --refresh</code>, Draft recomputes hashes of current source files and diffs against the stored baseline.</p>
 
     <pre data-file="draft/.state/freshness.json"><code>{
   "generated_at": "2024-01-15T14:30:00Z",
@@ -105,11 +105,14 @@
 
     <p>If a previous run has <code>status: "in_progress"</code>, the next invocation detects the incomplete state and offers to resume from the last checkpoint or start fresh. This prevents partial analysis from being silently treated as complete. Unresolved questions from previous runs are surfaced again &mdash; they persist until answered.</p>
 
+    <h2>Early-Exit After Signal Analysis</h2>
+    <p>When no files have changed, Draft runs signal re-classification <em>before</em> the early-exit check. The sequence is: (1) compute file hashes, (2) re-run signal classification and diff against baseline, (3) <em>then</em> check if both hash deltas and signal drift are empty. Only if both are clean does Draft short-circuit. This ordering ensures structural drift (e.g., file reorganization creating new signal categories) is never silently missed.</p>
+
     <h2>How Incremental Refresh Works</h2>
-    <p>When you run <code>/draft:init refresh</code>, Draft executes this sequence:</p>
+    <p>When you run <code>/draft:init --refresh</code>, Draft executes this sequence:</p>
 
     <ol>
-        <li><strong>State-aware pre-check</strong> &mdash; Load <code>run-memory.json</code> to detect interrupted runs. Load <code>freshness.json</code> to compute file-level deltas. Load <code>signals.json</code> to detect signal drift (new or removed architectural concerns).</li>
+        <li><strong>State-aware pre-check</strong> &mdash; Load <code>run-memory.json</code> to detect interrupted runs. Load <code>freshness.json</code> to compute file-level deltas. Load <code>signals.json</code> to detect signal drift (new or removed architectural concerns). <strong>Early-exit only if both hash deltas and signal drift are empty.</strong></li>
         <li><strong>Tech stack refresh</strong> &mdash; Re-scan <code>package.json</code>, <code>go.mod</code>, and other manifest files. Compare with <code>draft/tech-stack.md</code> and propose updates.</li>
         <li><strong>Architecture refresh</strong> &mdash; Read the <code>synced_to_commit</code> SHA from the existing <code>architecture.md</code> frontmatter. Get changed files since that commit. Categorize changes (added, modified, deleted, renamed). Perform targeted analysis on only the changed files.</li>
         <li><strong>Section mapping</strong> &mdash; Map changed files to affected architecture sections. New files affect Component Map, Implementation Catalog, and File Structure. Modified interfaces affect API Definitions and Interface Contracts. Changed dependencies affect the Dependency Graph. New tests affect Testing Infrastructure.</li>
@@ -140,8 +143,8 @@
 
     <pre><code>| Scenario                         | Use                  |
 |----------------------------------|----------------------|
-| Added a few files, fixed bugs    | /draft:init refresh  |
-| New module, updated dependencies | /draft:init refresh  |
+| Added a few files, fixed bugs    | /draft:init --refresh  |
+| New module, updated dependencies | /draft:init --refresh  |
 | Major framework migration        | Full /draft:init     |
 | Monolith → microservice split    | Full /draft:init     |
 | Changed database technology      | Full /draft:init     |
@@ -162,7 +165,7 @@
                 <line x1="360" y1="10" x2="360" y2="330" stroke="#e2e8f0" stroke-width="1.5"/>
                 <!-- Incremental-safe label -->
                 <rect x="395" y="48" width="170" height="32" rx="8" fill="#059669" filter="url(#shadow7b)"/>
-                <text x="480" y="69" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">/draft:init refresh</text>
+                <text x="480" y="69" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">/draft:init --refresh</text>
                 <!-- Full-init label -->
                 <rect x="395" y="218" width="170" height="32" rx="8" fill="#d97706" filter="url(#shadow7b)"/>
                 <text x="480" y="239" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Full /draft:init</text>
@@ -223,14 +226,14 @@
     <div class="callout callout-example">
         <div class="callout-title">Practical Impact</div>
         <p>A 100,000-line codebase with 400 source files. Full <code>/draft:init</code> reads all 400 files, runs 5-phase analysis, generates a complete <code>architecture.md</code> and <code>.ai-context.md</code>. Time: roughly 2 minutes.</p>
-        <p>Two weeks later, 12 files have changed: 3 new API endpoints, 2 modified services, 4 new tests, 2 config updates, 1 deleted utility. <code>/draft:init refresh</code> computes file hashes (instant), identifies the 12-file delta, re-analyzes only those files, maps them to 4 affected sections, and patches the existing documents. Time: roughly 10 seconds.</p>
+        <p>Two weeks later, 12 files have changed: 3 new API endpoints, 2 modified services, 4 new tests, 2 config updates, 1 deleted utility. <code>/draft:init --refresh</code> computes file hashes (instant), identifies the 12-file delta, re-analyzes only those files, maps them to 4 affected sections, and patches the existing documents. Time: roughly 10 seconds.</p>
         <p>Same result quality. One-twelfth the cost. That difference is what makes teams actually keep their context current instead of letting it rot.</p>
     </div>
 
     <h2>Signal Drift Detection</h2>
     <p>Beyond file-level changes, incremental refresh also tracks structural drift through signal re-classification. If your project had zero authentication files last month and now has five, that is not just "new files" &mdash; it is a new architectural concern. Draft flags signal drift separately from file changes because it has different implications: new signal categories may require generating entirely new sections of <code>architecture.md</code>, not just updating existing ones.</p>
 
-    <pre class="terminal"><code>$ /draft:init refresh
+    <pre class="terminal"><code>$ /draft:init --refresh
 
 Signal drift detected:
   NEW:     auth_files (0 → 5) — Security Architecture needs generation

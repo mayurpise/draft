@@ -170,9 +170,9 @@ plan.md          →  "Phase 1: sortable, Phase 2: persist"
 
 Each layer narrows the solution space. By the time AI writes code, decisions are made.
 
-**Module detection**: Init scans first-level subdirectories to classify module boundaries, maps inter-module imports, and generates per-module deep dives in Section 7 of `architecture.md`.
+**Module detection**: Init uses two-tier module detection — Tier 1 scans top-level directories for initial boundaries, Tier 2 recurses into each to discover sub-modules using import graphs, build file markers, and DI wiring. Sub-modules are promoted when a parent directory contains 2+ children. The module map is refined during Phase 2 import analysis. Each discovered module gets a full deep dive in Section 7 of `architecture.md`.
 
-**Incremental refresh**: `/draft:init --refresh` uses stored file hashes and signal classification to only re-analyze what changed. Early-exit happens after signal analysis to catch structural drift. Cross-session continuity via `run-memory.json` enables resume from interrupted runs.
+**Incremental refresh**: `/draft:init --refresh` uses stored file hashes and signal classification to only re-analyze what changed. Early-exit happens after signal analysis to catch structural drift. Use `--force` to bypass freshness checks and force full re-analysis when methodology has been updated. Cross-session continuity via `run-memory.json` enables resume from interrupted runs.
 
 [Read methodology →](core/methodology.md#philosophy)
 

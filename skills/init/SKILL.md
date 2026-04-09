@@ -142,6 +142,7 @@ synced_to_commit: "a1b2c3d4e5f6789012345678901234567890abcd"
 
 Check for arguments:
 - `--refresh`: Update existing context without full re-init
+- `--force`: Used with `--refresh` — bypass freshness checks and force full 5-phase re-analysis. Use when the analysis methodology has changed (e.g., updated module detection, deeper signal classification) and you want to rebuild architecture.md on top of existing context with deeper analysis, even if no source files changed.
 
 ### Standard Init Check
 
@@ -241,8 +242,10 @@ If the user runs `/draft:init --refresh`:
    ```
 
    **c.1. Early-exit check (after signal analysis):**
-   If NO files changed (all hashes match AND no new/deleted files from step b) AND no signal drift detected (step c), announce:
-   "No source file changes detected since last init/refresh ({generated_at}). Architecture context is current. Nothing to refresh."
+   If `--force` flag is set, skip this check entirely — proceed directly to step d.
+
+   Otherwise, if NO files changed (all hashes match AND no new/deleted files from step b) AND no signal drift detected (step c), announce:
+   "No source file changes detected since last init/refresh ({generated_at}). Architecture context is current. Nothing to refresh. Use `--force` to re-analyze with current methodology."
    Stop here unless the user insists.
 
    > **Why after signal analysis:** Previously, the early-exit happened before signal classification, which meant structural drift (e.g., new auth files appearing) went undetected if file hashes happened to match.
@@ -257,7 +260,9 @@ If the user runs `/draft:init --refresh`:
 
 1. **Tech Stack Refresh**: Re-scan `package.json`, `go.mod`, etc. Compare with `draft/tech-stack.md`. Propose updates.
 
-2. **Architecture Refresh**: If `draft/architecture.md` exists, use metadata-based incremental analysis. If freshness state is available from step 0b, use file-level deltas to scope the refresh more precisely than git-diff alone:
+2. **Architecture Refresh**: If `--force` flag is set, skip incremental analysis and jump directly to step (i) — full 5-phase refresh. This re-runs the complete discovery pipeline (including two-tier module detection, signal classification, and dependency wiring) against the existing `architecture.md`, deepening and expanding it with current methodology. The existing content is used as a baseline to build upon, not discarded.
+
+   If `draft/architecture.md` exists and `--force` is NOT set, use metadata-based incremental analysis. If freshness state is available from step 0b, use file-level deltas to scope the refresh more precisely than git-diff alone:
 
    **a. Read synced commit from metadata:**
    ```bash
@@ -355,8 +360,9 @@ If the user runs `/draft:init --refresh`:
    - Also verify `.ai-profile.md` consistency: if `.ai-profile.md` is missing or its `synced_to_commit` differs from `.ai-context.md`, offer to regenerate it from the current `.ai-context.md`
 
    **i. Fallback to full refresh:**
-   Reached when step (a) detects a missing or invalid `synced_to_commit` SHA. Run full 5-phase architecture discovery instead of incremental analysis.
+   Reached when: (1) step (a) detects a missing or invalid `synced_to_commit` SHA, (2) `--force` flag is set, or (3) too many files changed (>100 guardrail from step e). Run full 5-phase architecture discovery (Phase 1 through Phase 5) instead of incremental analysis.
 
+   - **When `--force` is set and `architecture.md` exists:** Read the existing `architecture.md` first. Use it as a baseline — the full 5-phase analysis should deepen and expand existing sections (especially module detection via Tier 2 sub-module discovery), not start from scratch. Sections that were shallow due to previous methodology limitations should be expanded with deeper analysis. New modules discovered by the improved detection should be added as new `7.X` subsections.
    - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now
 
    **j. Update metadata after refresh:**

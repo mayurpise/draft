@@ -162,6 +162,7 @@ product.md       →  "Build a task manager"
 tech-stack.md    →  "React, TypeScript, Tailwind"
 architecture.md  →  Comprehensive: 25 sections + appendices, Mermaid diagrams (source of truth)
 .ai-context.md   →  200-400 lines: condensed from architecture.md (token-optimized AI context)
+.ai-profile.md   →  20-50 lines: ultra-compact always-on profile (active tracks, key constraints)
 .state/          →  freshness hashes, signal classification, run memory (incremental refresh)
 spec.md          →  "Add drag-and-drop reordering"
 plan.md          →  "Phase 1: sortable, Phase 2: persist"
@@ -169,7 +170,9 @@ plan.md          →  "Phase 1: sortable, Phase 2: persist"
 
 Each layer narrows the solution space. By the time AI writes code, decisions are made.
 
-**Incremental refresh**: After initial setup, `/draft:init --refresh` uses stored file hashes and signal classification to only re-analyze what changed — no full re-scan needed.
+**Module detection**: Init scans first-level subdirectories to classify module boundaries, maps inter-module imports, and generates per-module deep dives in Section 7 of `architecture.md`.
+
+**Incremental refresh**: `/draft:init --refresh` uses stored file hashes and signal classification to only re-analyze what changed. Early-exit happens after signal analysis to catch structural drift. Cross-session continuity via `run-memory.json` enables resume from interrupted runs.
 
 [Read methodology →](core/methodology.md#philosophy)
 

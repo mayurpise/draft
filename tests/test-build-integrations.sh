@@ -3,9 +3,9 @@
 #
 # What this tests:
 # - Build script exists and is executable
-# - Output files are generated (Copilot, Gemini)
+# - Output files are generated (Copilot)
 # - Output files have expected structure (> 100 lines)
-# - Syntax transformations are correct (/draft: → @draft for Gemini, → draft for Copilot)
+# - Syntax transformations are correct (/draft: → draft for Copilot)
 # - No @draft references in Copilot output
 # - Idempotency (rebuilds produce identical output)
 #

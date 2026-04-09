@@ -15,7 +15,7 @@ TEST_SCRIPTS = \
 
 help: ## Show this help message
 	@echo "Available targets:"
-	@echo "  make build   - Generate Copilot and Gemini integration files"
+	@echo "  make build   - Generate Copilot integration files"
 	@echo "  make test    - Run all tests"
 	@echo "  make lint    - Run shellcheck and markdownlint checks"
 	@echo "  make clean   - Clean build artifacts (currently none)"

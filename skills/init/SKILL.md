@@ -548,6 +548,37 @@ Follow these steps in order. The specific files to look for depend on the langua
 
 1. **Map the directory tree**: Recursively list the project to understand the file layout. Note subdirectory groupings.
 
+1b. **Subdirectory module detection**: Scan each first-level subdirectory (depth=1) and classify it:
+
+   | Classification | Criteria | Action |
+   |----------------|----------|--------|
+   | **MODULE** | Contains source files, build files (package.json, go.mod, Cargo.toml, etc.), or 5+ files | Include in module map |
+   | **SKIP** | Matches exclude pattern or contains no meaningful source | Exclude from analysis |
+
+   **Exclude patterns:** `node_modules/`, `vendor/`, `.git/`, `dist/`, `build/`, `out/`, `__pycache__/`, `.next/`, `.cache/`, directories starting with `.`
+
+   ```bash
+   # Example: scan first-level children
+   for dir in */; do
+     dir_name="${dir%/}"
+     # Skip excluded directories
+     case "$dir_name" in
+       node_modules|vendor|dist|build|out|__pycache__|.git|.next|.cache) continue ;;
+     esac
+     [[ "$dir_name" == .* ]] && continue
+     # Count meaningful files
+     file_count=$(find "$dir" -maxdepth 2 -type f \( -name '*.ts' -o -name '*.js' -o -name '*.py' -o -name '*.go' -o -name '*.rs' -o -name '*.java' -o -name '*.rb' -o -name '*.cs' -o -name '*.c' -o -name '*.cpp' -o -name '*.swift' -o -name '*.kt' \) 2>/dev/null | wc -l)
+     has_build=$(ls "$dir"/{package.json,go.mod,Cargo.toml,pom.xml,build.gradle,pyproject.toml,requirements.txt,Makefile,CMakeLists.txt} 2>/dev/null | head -1)
+     if [ "$file_count" -ge 5 ] || [ -n "$has_build" ]; then
+       echo "MODULE: $dir_name ($file_count source files)"
+     else
+       echo "SKIP: $dir_name ($file_count source files, no build file)"
+     fi
+   done
+   ```
+
+   **Hold the module map in memory** — it feeds Phase 2 step 10 (inter-module dependencies) and Section 7 (one deep-dive subsection per module).
+
 2. **Read build / dependency files**: These reveal the module structure, dependencies, and targets. (See language guide above for which files.)
 
 3. **Read API definition files**: These define the module's data model and service interfaces. (See language guide above for which files.)
@@ -609,6 +640,21 @@ Follow these steps in order. The specific files to look for depend on the langua
 8. **Find the registry / registration code**: Look for files that register handlers, plugins, routes, middleware, algorithms, etc. This reveals the full catalog.
 
 9. **Map the dependency wiring**: Find the DI container, context struct, module system, or import graph that connects components.
+
+10. **Inter-module dependency mapping**: Using the module map from step 1b, trace cross-directory imports between first-level subdirectories. Build a directed dependency graph showing which modules depend on which:
+
+    ```
+    Example dependency graph:
+      api/ → services/ → models/
+      api/ → middleware/
+      services/ → common/
+      workers/ → services/ → models/
+    ```
+
+    - Scan import/require/use statements in each MODULE directory
+    - Record edges: `source_module → imported_module`
+    - Flag circular dependencies
+    - This feeds Section 5.3 (Component Map), Section 7 (Core Modules), and Section 14 (Cross-Module Integration)
 
 #### Phase 3: Depth (Trace the Flows)
 
@@ -873,6 +919,20 @@ Document with diagram or prose: transactions, idempotency guards, version checks
 ### 7. Core Modules Deep Dive
 
 **Expected length: 8-15 pages (1-2 pages per module)**
+
+**MANDATE:** Every module candidate identified in Phase 1 step 1b MUST get its own deep-dive subsection below. Do not flatten distinct subdirectories into a single summary. If step 1b classified a directory as MODULE, it appears here as its own `7.X` section.
+
+**Module Summary Table** (generated from step 1b module map):
+
+```markdown
+| Directory | File Count | Primary Responsibility | Dependencies |
+|-----------|-----------|----------------------|--------------|
+| `api/` | 24 | HTTP request handling, routing | services/, middleware/ |
+| `services/` | 18 | Business logic layer | models/, common/ |
+| `models/` | 12 | Data models, ORM schemas | common/ |
+| `common/` | 8 | Shared utilities, types | — |
+| `workers/` | 6 | Background job processing | services/, models/ |
+```
 
 For each major internal module (typically 5–8), provide a COMPLETE deep dive:
 

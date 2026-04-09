@@ -142,6 +142,7 @@ synced_to_commit: "a1b2c3d4e5f6789012345678901234567890abcd"
 
 Check for arguments:
 - `--refresh`: Update existing context without full re-init
+- `--force`: Used with `--refresh` — bypass freshness checks and force full 5-phase re-analysis. Use when the analysis methodology has changed (e.g., updated module detection, deeper signal classification) and you want to rebuild architecture.md on top of existing context with deeper analysis, even if no source files changed.
 
 ### Standard Init Check
 
@@ -241,8 +242,10 @@ If the user runs `/draft:init --refresh`:
    ```
 
    **c.1. Early-exit check (after signal analysis):**
-   If NO files changed (all hashes match AND no new/deleted files from step b) AND no signal drift detected (step c), announce:
-   "No source file changes detected since last init/refresh ({generated_at}). Architecture context is current. Nothing to refresh."
+   If `--force` flag is set, skip this check entirely — proceed directly to step d.
+
+   Otherwise, if NO files changed (all hashes match AND no new/deleted files from step b) AND no signal drift detected (step c), announce:
+   "No source file changes detected since last init/refresh ({generated_at}). Architecture context is current. Nothing to refresh. Use `--force` to re-analyze with current methodology."
    Stop here unless the user insists.
 
    > **Why after signal analysis:** Previously, the early-exit happened before signal classification, which meant structural drift (e.g., new auth files appearing) went undetected if file hashes happened to match.
@@ -257,7 +260,9 @@ If the user runs `/draft:init --refresh`:
 
 1. **Tech Stack Refresh**: Re-scan `package.json`, `go.mod`, etc. Compare with `draft/tech-stack.md`. Propose updates.
 
-2. **Architecture Refresh**: If `draft/architecture.md` exists, use metadata-based incremental analysis. If freshness state is available from step 0b, use file-level deltas to scope the refresh more precisely than git-diff alone:
+2. **Architecture Refresh**: If `--force` flag is set, skip incremental analysis and jump directly to step (i) — full 5-phase refresh. This re-runs the complete discovery pipeline (including two-tier module detection, signal classification, and dependency wiring) against the existing `architecture.md`, deepening and expanding it with current methodology. The existing content is used as a baseline to build upon, not discarded.
+
+   If `draft/architecture.md` exists and `--force` is NOT set, use metadata-based incremental analysis. If freshness state is available from step 0b, use file-level deltas to scope the refresh more precisely than git-diff alone:
 
    **a. Read synced commit from metadata:**
    ```bash
@@ -355,8 +360,9 @@ If the user runs `/draft:init --refresh`:
    - Also verify `.ai-profile.md` consistency: if `.ai-profile.md` is missing or its `synced_to_commit` differs from `.ai-context.md`, offer to regenerate it from the current `.ai-context.md`
 
    **i. Fallback to full refresh:**
-   Reached when step (a) detects a missing or invalid `synced_to_commit` SHA. Run full 5-phase architecture discovery instead of incremental analysis.
+   Reached when: (1) step (a) detects a missing or invalid `synced_to_commit` SHA, (2) `--force` flag is set, or (3) too many files changed (>100 guardrail from step e). Run full 5-phase architecture discovery (Phase 1 through Phase 5) instead of incremental analysis.
 
+   - **When `--force` is set and `architecture.md` exists:** Read the existing `architecture.md` first. Use it as a baseline — the full 5-phase analysis should deepen and expand existing sections (especially module detection via Tier 2 sub-module discovery), not start from scratch. Sections that were shallow due to previous methodology limitations should be expanded with deeper analysis. New modules discovered by the improved detection should be added as new `7.X` subsections.
    - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now
 
    **j. Update metadata after refresh:**
@@ -546,7 +552,9 @@ Follow these steps in order. The specific files to look for depend on the langua
 
 1. **Map the directory tree**: Recursively list the project to understand the file layout. Note subdirectory groupings.
 
-1b. **Subdirectory module detection**: Scan each first-level subdirectory (depth=1) and classify it:
+1b. **Two-tier module detection**: Discover module boundaries using BOTH directory structure AND organic heuristics (imports, build files, DI wiring). The directory scan provides initial candidates; organic discovery refines and deepens them.
+
+   **Tier 1 — Top-level boundary scan**: Scan each first-level subdirectory and classify it:
 
    | Classification | Criteria | Action |
    |----------------|----------|--------|
@@ -556,15 +564,13 @@ Follow these steps in order. The specific files to look for depend on the langua
    **Exclude patterns:** `node_modules/`, `vendor/`, `.git/`, `dist/`, `build/`, `out/`, `__pycache__/`, `.next/`, `.cache/`, directories starting with `.`
 
    ```bash
-   # Example: scan first-level children
+   # Tier 1: scan first-level children for initial boundary candidates
    for dir in */; do
      dir_name="${dir%/}"
-     # Skip excluded directories
      case "$dir_name" in
        node_modules|vendor|dist|build|out|__pycache__|.git|.next|.cache) continue ;;
      esac
      [[ "$dir_name" == .* ]] && continue
-     # Count meaningful files
      file_count=$(find "$dir" -maxdepth 2 -type f \( -name '*.ts' -o -name '*.js' -o -name '*.py' -o -name '*.go' -o -name '*.rs' -o -name '*.java' -o -name '*.rb' -o -name '*.cs' -o -name '*.c' -o -name '*.cpp' -o -name '*.swift' -o -name '*.kt' \) 2>/dev/null | wc -l)
      has_build=$(ls "$dir"/{package.json,go.mod,Cargo.toml,pom.xml,build.gradle,pyproject.toml,requirements.txt,Makefile,CMakeLists.txt} 2>/dev/null | head -1)
      if [ "$file_count" -ge 1 ] || [ -n "$has_build" ]; then
@@ -575,7 +581,35 @@ Follow these steps in order. The specific files to look for depend on the langua
    done
    ```
 
-   **Hold the module map in memory** — it feeds Phase 2 step 10 (inter-module dependencies) and Section 7 (one deep-dive subsection per module).
+   **Tier 2 — Sub-module discovery within each MODULE**: For every Tier 1 MODULE candidate, recurse into its children to discover sub-modules. A first-level directory like `src/` is often NOT a single module — it may contain `src/auth/`, `src/api/`, `src/store/`, etc. that are each distinct modules with their own responsibilities.
+
+   Apply these heuristics to discover sub-modules within each Tier 1 MODULE:
+
+   - **Import-graph boundaries**: Trace import/require/use statements — groups of files that import each other heavily but have few external imports form a module
+   - **Build file markers**: Subdirectories with their own `package.json`, `go.mod`, `Cargo.toml`, `pom.xml`, `__init__.py`, `mod.rs`, or `index.ts`/`index.js` barrel files
+   - **DI container / wiring registration**: Components registered as distinct services, providers, or modules in DI frameworks (Spring `@Component`, Angular `@NgModule`, NestJS `@Module`, etc.)
+   - **Namespace / package declarations**: Java/Kotlin packages under `src/main/java/com/`, Python packages with `__init__.py`, Go packages, Rust `mod` declarations
+   - **Distinct responsibility clusters**: Directories like `auth/`, `api/`, `models/`, `services/`, `middleware/` within a parent directory each represent separate modules
+
+   ```bash
+   # Tier 2: for each MODULE, check for sub-modules
+   for module_dir in <MODULE directories from Tier 1>; do
+     for sub in "$module_dir"/*/; do
+       sub_name="${sub%/}"
+       sub_file_count=$(find "$sub" -maxdepth 2 -type f \( -name '*.ts' -o -name '*.js' -o -name '*.py' -o -name '*.go' -o -name '*.rs' -o -name '*.java' -o -name '*.rb' -o -name '*.cs' \) 2>/dev/null | wc -l)
+       has_sub_build=$(ls "$sub"/{package.json,go.mod,Cargo.toml,pom.xml,build.gradle,pyproject.toml,__init__.py,mod.rs,index.ts,index.js} 2>/dev/null | head -1)
+       if [ "$sub_file_count" -ge 1 ] || [ -n "$has_sub_build" ]; then
+         echo "  SUB-MODULE: $sub_name ($sub_file_count source files)"
+       fi
+     done
+   done
+   ```
+
+   **When a Tier 1 directory contains 2+ sub-modules, promote the sub-modules**: If `src/` contains `src/auth/`, `src/api/`, `src/store/` — the module map should list `src/auth/`, `src/api/`, `src/store/` as separate modules (not just `src/` as one monolithic entry). The parent directory becomes a grouping label, not a module.
+
+   **Cross-cutting concerns**: Shared utilities, middleware, and config directories that span multiple modules should still appear as their own module entries — they define integration boundaries even if they sit at a different directory level.
+
+   **Hold the module map in memory** — it feeds Phase 2 step 9b (inter-module dependencies) and Section 7 (one deep-dive subsection per module). The map will be refined during Phase 2 as import analysis and dependency wiring reveal additional module boundaries not visible from directory structure alone.
 
 2. **Read build / dependency files**: These reveal the module structure, dependencies, and targets. (See language guide above for which files.)
 
@@ -639,19 +673,20 @@ Follow these steps in order. The specific files to look for depend on the langua
 
 9. **Map the dependency wiring**: Find the DI container, context struct, module system, or import graph that connects components.
 
-10. **Inter-module dependency mapping**: Using the module map from step 1b, trace cross-directory imports between first-level subdirectories. Build a directed dependency graph showing which modules depend on which:
+9b. **Inter-module dependency mapping**: Using the module map from step 1b (including sub-modules from Tier 2), trace cross-module imports. Build a directed dependency graph showing which modules depend on which:
 
     ```
     Example dependency graph:
-      api/ → services/ → models/
-      api/ → middleware/
-      services/ → common/
-      workers/ → services/ → models/
+      src/api/ → src/services/ → src/models/
+      src/api/ → middleware/
+      src/services/ → common/
+      workers/ → src/services/ → src/models/
     ```
 
-    - Scan import/require/use statements in each MODULE directory
+    - Scan import/require/use statements in each MODULE and SUB-MODULE directory
     - Record edges: `source_module → imported_module`
     - Flag circular dependencies
+    - **Refine the module map**: If import analysis reveals module boundaries not caught by Tier 1/Tier 2 directory scanning (e.g., a flat directory where half the files import `auth` utilities and the other half import `api` utilities), split them into separate logical modules
     - This feeds Section 5.3 (Component Map), Section 7 (Core Modules), and Section 14 (Cross-Module Integration)
 
 #### Phase 3: Depth (Trace the Flows)
@@ -918,21 +953,24 @@ Document with diagram or prose: transactions, idempotency guards, version checks
 
 **Expected length: 8-15 pages (1-2 pages per module)**
 
-**MANDATE:** Every module candidate identified in Phase 1 step 1b MUST get its own deep-dive subsection below. Do not flatten distinct subdirectories into a single summary. If step 1b classified a directory as MODULE, it appears here as its own `7.X` section.
+**MANDATE:** Step 1b provides initial module candidates via directory scanning (Tier 1 + Tier 2). The final module list is refined during Phase 2 using import analysis and dependency wiring — it may include sub-modules discovered during deeper analysis that weren't visible from directory structure alone. Every module in the **final refined list** MUST get its own deep-dive subsection below. Do not flatten distinct sub-packages into a single summary (e.g., if `src/` contains `src/auth/`, `src/api/`, `src/store/`, each gets its own `7.X` section — not one section for `src/`).
 
-**Module Summary Table** (generated from step 1b module map):
+**Module Summary Table** (generated from refined module map after Phase 2):
 
 ```markdown
-| Directory | File Count | Primary Responsibility | Dependencies |
-|-----------|-----------|----------------------|--------------|
-| `api/` | 24 | HTTP request handling, routing | services/, middleware/ |
-| `services/` | 18 | Business logic layer | models/, common/ |
-| `models/` | 12 | Data models, ORM schemas | common/ |
+| Module Path | File Count | Primary Responsibility | Dependencies |
+|-------------|-----------|----------------------|--------------|
+| `src/api/` | 24 | HTTP request handling, routing | src/services/, middleware/ |
+| `src/services/` | 18 | Business logic layer | src/models/, common/ |
+| `src/models/` | 12 | Data models, ORM schemas | common/ |
 | `common/` | 8 | Shared utilities, types | — |
-| `workers/` | 6 | Background job processing | services/, models/ |
+| `middleware/` | 5 | Request pipeline, auth guards | src/auth/ |
+| `src/auth/` | 7 | Authentication & authorization | src/models/ |
+| `src/store/` | 9 | State management, caching | src/models/ |
+| `workers/` | 6 | Background job processing | src/services/, src/models/ |
 ```
 
-For each major internal module (typically 5–8), provide a COMPLETE deep dive:
+For each discovered module (including sub-modules), provide a COMPLETE deep dive:
 
 #### Per-Module Template
 

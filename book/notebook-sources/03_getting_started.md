@@ -85,7 +85,7 @@ After the five-phase analysis, Draft creates thedraft/directory with these files
 
 ### architecture.md (Source of Truth)
 
-A comprehensive 25-section engineering reference with appendices. This is the primary artifact — designed for both human engineers and AI agents. It includes:
+A comprehensive 31-section engineering reference with appendices. This is the primary artifact — designed for both human engineers and AI agents. It includes:
 
 * Executive summary and system identity
 * Component map and module documentation

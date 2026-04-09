@@ -104,12 +104,12 @@ The build script transforms skill content for platform compatibility:
 ## End-User Context
 
 When users run `/draft:init`, it creates a `draft/` directory in their project with:
-- **`architecture.md`** — Source of truth: 25-section comprehensive engineering reference
-- **`.ai-context.md`** — Token-optimized 200-400 line AI context (derived from architecture.md)
+- **`architecture.md`** — Source of truth: 31-section + 6-appendix system-level analysis covering 10 dimensions (structural decomposition, dependency graphs, execution flows, data flows, interaction surfaces, domain model, runtime behavior, configuration sensitivity, observability, failure modes). Includes 5 mandatory structured artifacts: system architecture diagram, execution flow diagrams, dependency graph visualization, data flow diagram, and context index.
+- **`.ai-context.md`** — Token-optimized 200-400 line AI context (derived from architecture.md) with DOMAIN, FLOWS, INTERACTIONS, DEPGRAPH, CONTEXT_INDEX, and RISK sections
 - **`.ai-profile.md`** — Ultra-compact 20-50 line always-injected profile (derived from .ai-context.md)
 - **`product.md`**, **`tech-stack.md`**, **`workflow.md`**, **`guardrails.md`** — Project config files
 - **`tracks/`** — Individual feature/fix tracks with `spec.md`, `plan.md`, `metadata.json`
-- **`.state/`** — Freshness hashes, signal classification, run memory for incremental refresh
+- **`.state/`** — Freshness hashes, signal classification, fact registry, run memory for incremental refresh
 
 Status markers in tracks: `[ ]` Pending, `[~]` In Progress, `[x]` Completed, `[!]` Blocked
 

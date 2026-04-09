@@ -255,7 +255,7 @@ synced_to_commit: "a1b2c3d4e5f6789012345678901234567890abcd"
 
 Check for arguments:
 - `--refresh`: Update existing context without full re-init
-- `--force`: Used with `--refresh` — bypass freshness checks and force full 5-phase re-analysis. Use when the analysis methodology has changed (e.g., updated module detection, deeper signal classification) and you want to rebuild architecture.md on top of existing context with deeper analysis, even if no source files changed.
+- `--force`: Used with `--refresh` — bypass freshness/commit checks and run a full 5-phase re-analysis that builds on top of the existing architecture.md. Use when the init skill itself has been upgraded and existing artifacts need deeper analysis without any source code changes.
 
 ### Standard Init Check
 
@@ -316,9 +316,11 @@ If `draft/.ai-context.md` exists WITHOUT `draft/architecture.md`:
 
 ### Refresh Mode
 
-If the user runs `draft init --refresh`:
+If the user runs `draft init --refresh` (optionally with `--force`):
 
 **0. State-Aware Pre-Check** (before any refresh work):
+
+   **Force mode detection:** If `--force` is present, set `FORCE_MODE=true`. Force mode skips freshness and signal early-exit checks (steps 0b-0c.1) and routes directly to a full 5-phase re-analysis (step 0i-force below) instead of incremental analysis. The existing `architecture.md` is used as a **baseline to build upon**, not discarded.
 
    **a. Check for interrupted previous run:**
    ```bash
@@ -354,11 +356,11 @@ If the user runs `draft init --refresh`:
      STABLE:  services (8 → 9), test_infra (15 → 16)
    ```
 
-   **c.1. Early-exit check (after signal analysis):**
-   If `--force` flag is set, skip this check entirely — proceed directly to step d.
+   **c.1 Early exit decision (after both freshness and signal checks):**
+   If `FORCE_MODE=true`: skip this check entirely — proceed to step 0d, then jump to step 0i-force (forced full re-analysis).
 
-   Otherwise, if NO files changed (all hashes match AND no new/deleted files from step b) AND no signal drift detected (step c), announce:
-   "No source file changes detected since last init/refresh ({generated_at}). Architecture context is current. Nothing to refresh. Use `--force` to re-analyze with current methodology."
+   If NO files changed (step 0b) AND no signal drift detected (step 0c), announce:
+   "No source file changes or structural drift detected since last init/refresh ({generated_at}). Architecture context is current. Nothing to refresh. Use `--force` to re-analyze with current skill version."
    Stop here unless the user insists.
 
    > **Why after signal analysis:** Previously, the early-exit happened before signal classification, which meant structural drift (e.g., new auth files appearing) went undetected if file hashes happened to match.
@@ -373,9 +375,9 @@ If the user runs `draft init --refresh`:
 
 1. **Tech Stack Refresh**: Re-scan `package.json`, `go.mod`, etc. Compare with `draft/tech-stack.md`. Propose updates.
 
-2. **Architecture Refresh**: If `--force` flag is set, skip incremental analysis and jump directly to step (i) — full 5-phase refresh. This re-runs the complete discovery pipeline (including two-tier module detection, signal classification, and dependency wiring) against the existing `architecture.md`, deepening and expanding it with current methodology. The existing content is used as a baseline to build upon, not discarded.
+2. **Architecture Refresh**: If `FORCE_MODE=true`, skip incremental analysis and jump directly to step 0i-force (forced full re-analysis). This re-runs the complete discovery pipeline (including two-tier module detection, signal classification, and dependency wiring) against the existing `architecture.md`, deepening and expanding it with current methodology. The existing content is used as a baseline to build upon, not discarded.
 
-   If `draft/architecture.md` exists and `--force` is NOT set, use metadata-based incremental analysis. If freshness state is available from step 0b, use file-level deltas to scope the refresh more precisely than git-diff alone:
+   If `draft/architecture.md` exists and `FORCE_MODE` is NOT set, use metadata-based incremental analysis. If freshness state is available from step 0b, use file-level deltas to scope the refresh more precisely than git-diff alone:
 
    **a. Read synced commit from metadata:**
    ```bash
@@ -473,14 +475,39 @@ If the user runs `draft init --refresh`:
    - Also verify `.ai-profile.md` consistency: if `.ai-profile.md` is missing or its `synced_to_commit` differs from `.ai-context.md`, offer to regenerate it from the current `.ai-context.md`
 
    **i. Fallback to full refresh:**
-   Reached when: (1) step (a) detects a missing or invalid `synced_to_commit` SHA, (2) `--force` flag is set, or (3) too many files changed (>100 guardrail from step e). Run full 5-phase architecture discovery (Phase 1 through Phase 5) instead of incremental analysis.
+   Reached when: (1) step (a) detects a missing or invalid `synced_to_commit` SHA, or (2) too many files changed (>100 guardrail from step e). Run full 5-phase architecture discovery (Phase 1 through Phase 5) instead of incremental analysis.
 
-   - **When `--force` is set and `architecture.md` exists:** Read the existing `architecture.md` first. Use it as a baseline — the full 5-phase analysis should deepen and expand existing sections (especially module detection via Tier 2 sub-module discovery), not start from scratch. Sections that were shallow due to previous methodology limitations should be expanded with deeper analysis. New modules discovered by the improved detection should be added as new `7.X` subsections.
    - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now
+
+   **i-force. Forced full re-analysis** (when `FORCE_MODE=true`):
+   This mode is for when the init skill itself has been upgraded and existing artifacts need deeper/broader analysis — even though no source code changed.
+
+   1. **Read existing `architecture.md`** as a baseline. Parse its structure: which sections exist, which modules were documented, what depth each section reached.
+   2. **Run the full 5-phase analysis** (Phase 1-5) against the codebase as if it were a fresh init — but with the existing architecture.md as reference context:
+      - **Module discovery**: Execute steps 1b (Tier 1 + Tier 2) and 9b fully. Compare the newly discovered module list against the modules documented in the existing architecture.md.
+      - **Gap identification**: Flag modules, sub-modules, or logical boundaries that exist in the new discovery but are missing or under-documented in the existing artifact.
+      - **Depth audit**: For each existing section, compare against current skill expectations (e.g., does Section 7 have sub-module subsections? Are all signal-driven sections present?).
+   3. **Merge strategy — additive, not destructive**:
+      - **Existing sections with adequate depth**: Preserve as-is (do not regenerate what already meets the current skill's quality bar)
+      - **Existing sections that are thin**: Expand in place with deeper analysis
+      - **Missing modules/sub-modules**: Add new Section 7 subsections for newly discovered modules
+      - **Missing sections**: Generate from scratch (e.g., new sub-module deep dives, inter-module dependency sections)
+      - **Structural changes**: Reformat to match current skill template (e.g., add Module Summary Table if missing, add sub-module nesting)
+   4. **Present the enhancement plan** to the user before writing:
+      ```
+      Force refresh analysis complete. Enhancement plan:
+        PRESERVE:  15 sections (adequate depth)
+        EXPAND:    4 sections (thin — adding depth)
+        ADD:       3 new sub-module deep dives (src/auth, src/api, src/store)
+        ADD:       1 new Module Summary Table
+        REFORMAT:  Section 7 (adding sub-module nesting)
+      Proceed? [Y/n]
+      ```
+   5. On approval, write the enhanced `architecture.md` and run the Condensation Subroutine.
 
    **j. Update metadata after refresh:**
    After successful refresh, update the YAML frontmatter in all modified files:
-   - `generated_by`: `draft:init --refresh`
+   - `generated_by`: `draft:init --refresh` (or `draft:init --refresh --force` if force mode)
    - `generated_at`: current timestamp
    - `git.*`: current git state
    - `synced_to_commit`: current HEAD SHA
@@ -537,14 +564,21 @@ Perform a **one-time, exhaustive analysis** of the existing codebase. This is NO
 ### Exhaustive Analysis Mandate
 
 **CRITICAL**: This analysis must be EXHAUSTIVE, not representative. Specifically:
-- **Read ALL relevant source files** — do not sample or skim
+- **Read ALL relevant source files** — do not sample or skim; there is no file-count ceiling
+- **Scan ALL directories** — no directory is too small or too large to analyze
 - **Enumerate ALL implementations** — no "and others", "etc.", or "similar patterns"
+- **Deep-dive ALL modules** — every module (top-level, sub-module, and logically discovered) gets a full subsection, regardless of how many exist
 - **Generate REAL Mermaid diagrams** — every section calling for a diagram MUST have one
 - **Include ACTUAL code snippets** — from the codebase, not pseudocode
 - **Populate ALL tables** — with real data, not placeholders or examples
 - **Target: comprehensive coverage** — shorter output indicates incomplete analysis
+- **No caps or limits** — do not limit analysis to "top N" modules, directories, or files for any reason
 
-Regardless of codebase size, deep-dive every discovered module. Larger codebases require MORE depth, not less — they have more integration points, more invariants, and more places for bugs to hide. Rank modules by the number of unique files that import/reference them (descending) and process them in that order, but do NOT skip or summarize any module.
+Regardless of codebase size, analyze ALL modules and ALL directories without caps or limits. The goal is a complete reference, not a sampled overview. Module discovery uses TWO complementary methods:
+1. **Structural scan** (Phase 1 step 1b): First-level subdirectories and their immediate children (Tier 1 + Tier 2) as module candidates
+2. **Organic discovery** (Phase 2 steps 6-9b): Import graphs, DI wiring, and dependency tracing to find logical modules — including nested packages, cross-cutting concerns, and boundaries that don't align with directory structure
+
+The final module list is the union of both. Every module — top-level, sub-module, or logically discovered — MUST receive a full deep dive in Section 7. Do not limit to a top-N subset or summarize lesser modules in a table.
 
 ### Execution Strategy for Depth
 
@@ -584,6 +618,10 @@ Not every codebase has every concept. Apply these rules:
 | Is containerized / has infra config | Add: Dockerfile, Kubernetes manifests, Helm charts, Terraform, CI/CD pipeline |
 | Is a single-threaded / simple module | Simplify Section 8 (Concurrency) to note "single-threaded" and skip detailed thread maps |
 | Has no configuration flags | Adapt Section 22 to cover whatever config mechanism exists (env vars, YAML, JSON, TOML, .env) |
+| Has no domain model / is pure infrastructure | Simplify Section 26 (Domain Model) — note "infrastructure-only, no domain entities" |
+| Is a single-service / no inter-service communication | Simplify Section 28 (Interaction Surfaces) — focus on human interaction layers and external APIs only |
+| Has no feature flags / remote config | Skip feature flags subsection in Section 22 |
+| Has no event/message system | Skip Section 28.4 (Event & Message Contracts) |
 
 ---
 
@@ -665,7 +703,7 @@ Follow these steps in order. The specific files to look for depend on the langua
 
 1. **Map the directory tree**: Recursively list the project to understand the file layout. Note subdirectory groupings.
 
-1b. **Two-tier module detection**: Discover module boundaries using BOTH directory structure AND organic heuristics (imports, build files, DI wiring). The directory scan provides initial candidates; organic discovery refines and deepens them.
+1b. **Two-tier module detection** *(additive — supplements, does NOT replace, organic module discovery in Phase 2)*: Discover module boundaries using BOTH directory structure AND organic heuristics (imports, build files, DI wiring). The directory scan provides initial candidates; organic discovery refines and deepens them.
 
    **Tier 1 — Top-level boundary scan**: Scan each first-level subdirectory and classify it:
 
@@ -722,7 +760,9 @@ Follow these steps in order. The specific files to look for depend on the langua
 
    **Cross-cutting concerns**: Shared utilities, middleware, and config directories that span multiple modules should still appear as their own module entries — they define integration boundaries even if they sit at a different directory level.
 
-   **Hold the module map in memory** — it feeds Phase 2 step 9b (inter-module dependencies) and Section 7 (one deep-dive subsection per module). The map will be refined during Phase 2 as import analysis and dependency wiring reveal additional module boundaries not visible from directory structure alone.
+   **IMPORTANT**: Step 1b provides the initial structural candidates only. Phase 2 (steps 6-9b) refines this list through import analysis, DI wiring, and dependency tracing — discovering additional logical modules that may not align with directory boundaries (e.g., cross-cutting concerns, virtual modules defined by import graphs). The **final module list** for Section 7 is the union of structural candidates (1b Tier 1 + Tier 2) and logical modules discovered in Phase 2.
+
+   **Hold the module map in memory** — it feeds Phase 2 step 9b (inter-module dependencies) and Section 7 (one deep-dive subsection per module).
 
 2. **Read build / dependency files**: These reveal the module structure, dependencies, and targets. (See language guide above for which files.)
 
@@ -745,6 +785,10 @@ Follow these steps in order. The specific files to look for depend on the langua
    | `persistence` | `repositories/`, `dao/`, `**/db/**`, ORM config files, migration directories | §19 State Management |
    | `test_infra` | `test/`, `tests/`, `__tests__/`, `*.test.*`, `*.spec.*`, test config files | §26 Testing Infrastructure |
    | `config_files` | `.env*`, `config/`, `*.config.*`, `application.yml`, `settings.*` | §22 Configuration |
+   | `domain_models` | `domain/`, `entities/`, `aggregates/`, `value-objects/`, DDD-style directories | §29 Domain Model |
+   | `messaging` | `events/`, `messages/`, `publishers/`, `subscribers/`, `handlers/`, event bus imports | §31 Interaction Surfaces, §30 Execution Flow |
+   | `infra_config` | `Dockerfile*`, `docker-compose*`, `.github/workflows/`, `k8s/`, `terraform/`, `helm/` | §4 Build Artifacts, §25 Build System |
+   | `feature_flags` | `flags/`, `features/`, LaunchDarkly/Split/Unleash imports, feature toggle patterns | §22 Configuration (Feature Flags) |
 
    **Procedure:**
 
@@ -786,51 +830,75 @@ Follow these steps in order. The specific files to look for depend on the langua
 
 9. **Map the dependency wiring**: Find the DI container, context struct, module system, or import graph that connects components.
 
-9b. **Inter-module dependency mapping**: Using the module map from step 1b (including sub-modules from Tier 2), trace cross-module imports. Build a directed dependency graph showing which modules depend on which:
+9b. **Map inter-module dependencies and refine module list**: Using the module candidates from step 1b (Tier 1 + Tier 2) AND the import graph / DI wiring from step 9, trace cross-directory imports and references. Build a directed dependency graph:
 
     ```
-    Example dependency graph:
+    Inter-Module Dependencies:
       src/api/ → src/services/ → src/models/
       src/api/ → middleware/
       src/services/ → common/
       workers/ → src/services/ → src/models/
+      src/api/ → src/auth/  (imports auth middleware)
+      src/api/ → src/store/ (imports data access layer)
     ```
 
-    - Scan import/require/use statements in each MODULE and SUB-MODULE directory
-    - Record edges: `source_module → imported_module`
-    - Flag circular dependencies
-    - **Refine the module map**: If import analysis reveals module boundaries not caught by Tier 1/Tier 2 directory scanning (e.g., a flat directory where half the files import `auth` utilities and the other half import `api` utilities), split them into separate logical modules
-    - This feeds Section 5.3 (Component Map), Section 7 (Core Modules), and Section 14 (Cross-Module Integration)
+    **Refine the module list**: During steps 6-9, you may discover logical modules that were not captured by the directory-based scan in step 1b. Examples:
+    - A cross-cutting "auth" concern spanning files in multiple directories
+    - A "plugin system" that lives across `core/`, `plugins/`, and `registry/`
+    - Virtual modules defined by import clusters rather than directory boundaries
+
+    **Add these to the final module list.** The final module list = structural candidates (1b Tier 1 + Tier 2) ∪ logical modules (Phase 2 discovery). This combined list drives Section 5.3 (Component Map), Section 7 (per-module deep dives), and Section 14 (Cross-Module Integration).
 
 #### Phase 3: Depth (Trace the Flows)
 
-10. **Trace data flows end-to-end**: For each major flow, start at the data source / entry point and follow the code through processing stages to the output.
+10. **Trace data flows end-to-end**: For each major flow, start at the data source / entry point and follow the code through processing stages to the output. Map data ingress/egress points, serialization boundaries, and transformation stages.
 
 11. **Read implementation files**: For core modules, read the implementation to understand algorithms, error handling, retry logic, and state management.
 
-12. **Identify concurrency model**: Find where thread pools, async executors, goroutines, or worker processes are created and what work is dispatched to each.
+12. **Identify concurrency model**: Find where thread pools, async executors, goroutines, or worker processes are created and what work is dispatched to each. Document resource budgets (connection pools, memory limits, file descriptor limits).
 
 13. **Find safety checks**: Look for invariant assertions, validation logic, auth checks, version checks, lock acquisitions, and transaction boundaries.
 
+13b. **Extract domain model**: Identify core business entities, their relationships, and the boundary between business logic and infrastructure code. Map aggregate boundaries — groups of entities that must change atomically. Document domain invariants distinct from technical invariants.
+
+13c. **Map execution flows**: For each major request type, trace the complete lifecycle: entry point → middleware → handler → service → repository → response. Document the happy path, failure paths, retry/fallback flows, and state transitions. Create control flow path tables.
+
+13d. **Map interaction surfaces**: Catalog all communication channels: service-to-service (REST, gRPC, messaging), external integrations (APIs, auth systems), and human interaction layers (CLI, UI, config inputs). Document event/message contracts with delivery guarantees.
+
 #### Phase 4: Periphery
 
-14. **Catalog external dependencies**: Check build/dependency files and import statements to map all external library and service dependencies.
+14. **Catalog external dependencies**: Check build/dependency files and import statements to map all external library and service dependencies. Identify version constraints, compatibility risks, and EOL timelines.
 
 15. **Examine test infrastructure**: Read test files and test utilities to understand the testing approach, mock patterns, and test harness.
 
-16. **Scan for configuration**: Find all configuration mechanisms (flags, env vars, config files, feature gates, constants).
+16. **Scan for configuration**: Find all configuration mechanisms (flags, env vars, config files, feature gates, constants). Document the env variable hierarchy, feature flag system, and deployment-time vs runtime config distinction.
+
+16b. **Catalog entry points and build artifacts**: Enumerate all entry points (CLI commands, API servers, schedulers, event handlers, workers). Catalog build/runtime artifacts (Dockerfiles, CI pipelines, Helm charts, Terraform configs).
 
 17. **Look for documentation**: Check for existing README, docs/, architecture decision records (ADRs), or inline comments that provide architectural context.
 
+17b. **Identify risk zones**: Find high-churn files (frequent commits), fragile areas (tight coupling, shared state, no tests), and error propagation paths. Assess blast radius for changes in each area. Catalog debug surfaces (debug endpoints, verbose modes, profiling hooks).
+
 #### Phase 5: Synthesis
 
-18. **Cross-reference**: Ensure every component mentioned in one section appears in all relevant sections (architecture, data flow, interaction matrix, etc.).
+18. **Cross-reference**: Ensure every component mentioned in one section appears in all relevant sections (architecture, data flow, interaction matrix, domain model, interaction surfaces, etc.).
 
 19. **Validate completeness**: Confirm ALL handlers / endpoints / plugins / schemas / dependencies are listed. Do not sample — enumerate exhaustively.
 
 20. **Identify patterns**: Look for recurring design patterns and document them.
 
 21. **Generate diagrams**: Create Mermaid diagrams AFTER understanding the full picture, not during exploration.
+
+21b. **Build required output artifacts**: Generate the 5 mandatory structured artifacts:
+   - **System Architecture Diagram** (Section 3.1): Components, connections, boundaries — the primary visual mental model
+   - **Execution Flow Diagrams** (Section 27): Sequence diagrams for key request lifecycles with happy/failure/retry paths
+   - **Dependency Graph Visualization** (Appendix E): Layered internal module graph + external dependency graph with version constraints
+   - **Data Flow Diagram** (Section 5): Sources → transformations → sinks with serialization boundaries
+   - **Context Index** (Appendix F): File → responsibility → dependencies → entry points mapping for every significant file
+
+21c. **Build domain model artifacts**: Generate entity-relationship diagram (Section 26), business/infrastructure boundary map, and aggregate boundary documentation.
+
+21d. **Build interaction surface map**: Generate service-to-service communication graph (Section 28), external integration catalog, and event/message contract registry.
 
 ---
 
@@ -840,7 +908,7 @@ Generate `draft/architecture.md` — a comprehensive human-readable engineering 
 
 **Output format**:
 - Markdown report with Mermaid diagrams, tables, and code blocks
-- **Target length: comprehensive** — cover all 25 sections + 4 appendices exhaustively
+- **Target length: comprehensive** — cover all 31 sections + 6 appendices exhaustively
 - Include a **Table of Contents** with numbered sections
 - End the document with: `"End of analysis. Queries should reference the .ai-context.md file for token efficiency."`
 
@@ -877,7 +945,7 @@ synced_to_commit: "{FULL_SHA}"
 1. [Executive Summary](#1-executive-summary)
 2. [AI Agent Quick Reference](#2-ai-agent-quick-reference)
 3. [System Identity & Purpose](#3-system-identity--purpose)
-... (continue with all 28 sections + appendices)
+... (continue with all 31 sections + 6 appendices)
 ```
 
 **Do NOT skip the YAML frontmatter. It enables incremental refresh tracking.**
@@ -1066,24 +1134,29 @@ Document with diagram or prose: transactions, idempotency guards, version checks
 
 **Expected length: 8-15 pages (1-2 pages per module)**
 
-**MANDATE:** Step 1b provides initial module candidates via directory scanning (Tier 1 + Tier 2). The final module list is refined during Phase 2 using import analysis and dependency wiring — it may include sub-modules discovered during deeper analysis that weren't visible from directory structure alone. Every module in the **final refined list** MUST get its own deep-dive subsection below. Do not flatten distinct sub-packages into a single summary (e.g., if `src/` contains `src/auth/`, `src/api/`, `src/store/`, each gets its own `7.X` section — not one section for `src/`).
+**CRITICAL: The final module list is the union of two discovery methods:**
+1. **Structural candidates** from Phase 1 step 1b (Tier 1 top-level directories + Tier 2 sub-modules within each top-level directory)
+2. **Logical modules** discovered during Phase 2 (steps 6-9b) through import analysis, DI wiring, and dependency tracing
 
-**Module Summary Table** (generated from refined module map after Phase 2):
+Every module in this combined list MUST receive its own subsection below. Do not flatten distinct directories or logical boundaries into a single summary — each is an independent module with its own responsibilities, interfaces, and internal architecture. Sub-modules get nested subsections under their parent (e.g., 7.3.1 `src/auth/` under 7.3 `src/`).
+
+**Module Summary Table** (covering ALL modules — top-level, sub-modules, and logical modules discovered in Phase 2):
 
 ```markdown
-| Module Path | File Count | Primary Responsibility | Dependencies |
-|-------------|-----------|----------------------|--------------|
-| `src/api/` | 24 | HTTP request handling, routing | src/services/, middleware/ |
-| `src/services/` | 18 | Business logic layer | src/models/, common/ |
-| `src/models/` | 12 | Data models, ORM schemas | common/ |
-| `common/` | 8 | Shared utilities, types | — |
-| `middleware/` | 5 | Request pipeline, auth guards | src/auth/ |
-| `src/auth/` | 7 | Authentication & authorization | src/models/ |
-| `src/store/` | 9 | State management, caching | src/models/ |
-| `workers/` | 6 | Background job processing | src/services/, src/models/ |
+| Module | Directory | Depth | Files | Primary Responsibility | Depends On |
+|--------|-----------|-------|-------|----------------------|------------|
+| API | `src/api/` | sub-module | 24 | HTTP request handling, routing | src/services/, middleware/ |
+| Services | `src/services/` | sub-module | 18 | Business logic layer | src/models/, common/ |
+| Models | `src/models/` | sub-module | 12 | Data models, ORM schemas | common/ |
+| Common | `common/` | top-level | 8 | Shared utilities, types | — |
+| Middleware | `middleware/` | top-level | 5 | Request pipeline, auth guards | src/auth/ |
+| Auth | `src/auth/` | sub-module | 7 | Authentication & authorization | src/models/ |
+| Store | `src/store/` | sub-module | 9 | State management, caching | src/models/ |
+| Workers | `workers/` | top-level | 6 | Background job processing | src/services/, src/models/ |
+| Plugin System | *(cross-cutting)* | logical | 11 | Plugin registration and lifecycle | core, registry |
 ```
 
-For each discovered module (including sub-modules), provide a COMPLETE deep dive:
+For **every** module in the final combined list, provide a COMPLETE deep dive. Do not cap at a fixed number — if the codebase has 12 modules, document all 12; if it has 20, document all 20:
 
 #### Per-Module Template
 
@@ -1681,6 +1754,98 @@ Include both technical terms and business/domain terms.
 
 ---
 
+### 29. Domain Model
+
+**Expected length: 2-4 pages with entity-relationship diagram**
+
+This section captures the system's domain knowledge — the business concepts, their relationships, and the invariants that govern them. It must clearly separate business logic from infrastructure code.
+
+#### 29.1 Core Entities & Relationships
+
+**MANDATORY: Generate a Mermaid `erDiagram`** showing all core entities and their relationships:
+```mermaid
+erDiagram
+    User ||--o{ Order : "places"
+    Order }|--|| Product : "contains"
+```
+
+Table of ALL entities with definitions, key attributes, and lifecycle states.
+
+#### 29.2 Domain Invariants & Constraints
+
+Business rules that must always hold true, distinct from technical invariants in Section 15:
+- Entity validation rules
+- Cross-entity consistency requirements
+- Business rule enforcement locations
+
+#### 29.3 Business Logic vs Infrastructure Boundaries
+
+**MANDATORY**: Identify and document the layered boundary between:
+- **Domain/Business Logic** — pure rules, validation, calculations (no I/O)
+- **Application/Use Cases** — orchestration, workflows, transactions
+- **Infrastructure** — DB, HTTP, messaging, file I/O
+- **Presentation** — API routes, CLI handlers, UI
+
+#### 29.4 Aggregate Boundaries
+
+For DDD-style architectures: aggregate roots and their boundaries.
+For non-DDD: transactional consistency boundaries — entities that must change together atomically.
+
+---
+
+### 30. Execution Flow Mapping
+
+**Expected length: 3-5 pages with 2-3 sequence diagrams**
+
+This section maps the complete end-to-end lifecycle of primary request types through the system. It must enable deterministic reconstruction of execution paths.
+
+#### 30.1 End-to-End Request Lifecycle
+
+**MANDATORY: Generate a Mermaid `sequenceDiagram`** for the primary request type, showing every participant from entry to response.
+
+Trace through: entry point → middleware → handler → service → repository → external calls → response construction → response delivery.
+
+#### 30.2 Control Flow Paths
+
+Document three path types for each major operation:
+- **Happy Path** — step-by-step table: component → action → output
+- **Failure Paths** — failure point → error type → handler → recovery → user effect
+- **Retry & Fallback Flows** — **MANDATORY flowchart** showing retry logic, backoff, and fallback decision trees
+
+#### 30.3 State Transitions
+
+**MANDATORY for stateful systems: Generate a Mermaid `stateDiagram-v2`** showing all valid state transitions with triggers and guard conditions.
+
+Table: from state → to state → trigger → guard condition → side effects.
+
+---
+
+### 31. Interaction Surfaces
+
+**Expected length: 2-3 pages with service communication diagram**
+
+This section catalogs ALL communication channels and interaction points in the system.
+
+#### 31.1 Service-to-Service Communication
+
+**MANDATORY: Generate a Mermaid `graph`** showing all inter-service communication with protocol labels on edges.
+
+Table of ALL service-to-service connections: source → target → protocol → pattern (sync/async/pub-sub) → payload → SLA.
+
+#### 31.2 External Integration Points
+
+Table: integration → direction → protocol → auth method → rate limit → circuit breaker configuration.
+
+#### 31.3 Human Interaction Layers
+
+Table: interface → type (CLI/Web UI/Mobile/Admin/Config) → users → entry point → key flows.
+
+#### 31.4 Event & Message Contracts
+
+Table: event/message → publisher → subscriber(s) → schema → delivery guarantee (at-most-once/at-least-once/exactly-once).
+
+---
+
 ### Appendix A: File Structure Summary
 
 Full directory tree using `├──` / `└──` notation. Each file or directory gets a brief inline annotation: `← description`. Go 2–3 levels deep for all subdirectories.
@@ -1758,21 +1923,62 @@ sequenceDiagram
 
 ---
 
+### Appendix E: Dependency Graph Visualization
+
+**MANDATORY: Provide layered dependency graphs** for both internal and external dependencies.
+
+#### Internal Module Dependencies (Layered)
+
+**Generate a Mermaid `graph TD`** with subgraphs for each architectural layer (Presentation, Application, Domain, Infrastructure). Show directional arrows for dependencies — arrows should point downward through layers. Dotted arrows for optional/indirect dependencies.
+
+Include an adjacency matrix table: module → depends on → depended by → coupling score (High/Med/Low).
+
+#### External Dependency Graph
+
+**Generate a Mermaid `graph LR`** showing system boundary with all external dependencies. Label edges with version constraints.
+
+Table: dependency → version → constraint type → consumers → upgrade risk.
+
+---
+
+### Appendix F: Context Index
+
+**MANDATORY: Machine-navigable file index** enabling deterministic lookup.
+
+For every significant file in the codebase (not generated/vendored files), provide:
+
+| File | Responsibility | Module | Depends On | Depended By | Entry Points | Test Coverage |
+|------|---------------|--------|-----------|-------------|-------------|--------------|
+
+Group files by responsibility category: Entry Point, Business Logic, Data Access, Infrastructure, Configuration, Testing, Build/Deploy.
+
+This index enables:
+- **Impact analysis**: Change file X → what else is affected?
+- **Navigation**: Need to modify behavior Y → which file?
+- **Coverage assessment**: File X → is it tested?
+
+---
+
 ### Expected Output Summary
 
 Before writing architecture.md, verify your output matches these expectations:
 
 | Metric | Minimum | Target |
 |--------|---------|--------|
-| **Depth** | 25 sections minimum | Comprehensive (25 sections + 4 appendices) |
-| **Mermaid diagrams** | 5 diagrams | 8-12 diagrams |
-| **Tables with data** | 15 tables | 20-30 tables |
+| **Depth** | 28 sections minimum | Comprehensive (31 sections + 6 appendices) |
+| **Mermaid diagrams** | 8 diagrams | 12-18 diagrams |
+| **Tables with data** | 20 tables | 30-40 tables |
 | **Code snippets** | 5 snippets | 10-15 snippets |
 | **File references** | 50 refs | 100+ refs |
 | **Invariants documented** | 8 | 10-15 |
 | **Modules deep-dived** | All discovered modules | All discovered modules (no cap) |
+| **Domain entities documented** | All core entities | All entities with relationships |
+| **Execution flows traced** | Primary request lifecycle | All major request types |
+| **Interaction surfaces cataloged** | All service connections | All connections + human interfaces |
+| **Context index entries** | All significant files | Every non-generated file |
+| **Dependency graph layers** | Internal + external | Internal (layered) + external (versioned) |
 
-**Completeness guidance:** All 25 sections + 4 appendices must be present. HIGH-priority sections require depth and diagrams. If any HIGH-priority section is thin, expand it before finalizing.
+**Completeness guidance:** All 31 sections + 6 appendices must be present. HIGH-priority sections require depth and diagrams. If any HIGH-priority section is thin, expand it before finalizing.
 
 ---
 
@@ -1823,10 +2029,15 @@ This table identifies which sections require the MOST depth and WHY. High-priori
 | 26 | Testing Infrastructure | High | No | Know how to test changes |
 | 27 | Tech Debt & Limitations | Medium | No | Avoid deprecated foundations |
 | 28 | Glossary | Medium | No | 15-30 domain terms |
+| 29 | Domain Model | **HIGH** | **YES: erDiagram** | **Core entities, relationships, business/infra boundaries** |
+| 30 | Execution Flow Mapping | **HIGH** | **YES: sequenceDiagram + stateDiagram + flowchart** | **Deterministic execution path reconstruction** |
+| 31 | Interaction Surfaces | **HIGH** | **YES: graph** | **All communication channels and integration points** |
 | A | File Structure | High | No | Full tree with annotations |
 | B | Data Source Mapping | High | No | Cross-reference: who reads what |
 | C | Output Flow Mapping | High | No | Cross-reference: who writes what |
 | D | Sequence Diagrams | **HIGH** | **YES: 2-3 diagrams** | Complex multi-step flows |
+| E | Dependency Graph Visualization | **HIGH** | **YES: layered graph** | **Internal + external dependency structure with versions** |
+| F | Context Index | **HIGH** | No | **File → responsibility → deps → entry points mapping** |
 
 ### Diagram Checklist
 
@@ -1838,19 +2049,31 @@ Before completing architecture.md, verify these diagrams exist:
 - [ ] **Section 7**: State machine for each stateful module (stateDiagram-v2)
 - [ ] **Section 11**: V2 architecture flowchart (if V1/V2 split exists)
 - [ ] **Section 14**: Sequence diagram for top 2-3 cross-module flows
+- [ ] **Section 18**: Error propagation path flowchart
+- [ ] **Section 29**: Entity-relationship diagram (erDiagram)
+- [ ] **Section 30**: Request lifecycle sequence diagram + retry/fallback flowchart + state transition diagram
+- [ ] **Section 31**: Service communication graph
 - [ ] **Appendix D**: 2-3 detailed sequence diagrams with payloads
+- [ ] **Appendix E**: Layered internal dependency graph + external dependency graph
 
 ### Self-Check Before Completion
 
 Run this checklist before writing architecture.md:
 
-- [ ] **Page count**: Rendered output approaches 30+ pages (not 5-10)
-- [ ] **Diagram count**: At least 5-10 Mermaid diagrams present
+- [ ] **Page count**: Rendered output approaches 40+ pages (not 5-10). For a typical brownfield codebase, expect 1000-2000+ lines of markdown. If your output is under 800 lines, you have almost certainly skipped modules or abbreviated sections — go back and expand.
+- [ ] **Module coverage**: EVERY module from the final combined list (structural candidates from step 1b Tier 1/Tier 2 + logical modules from Phase 2) has its own Section 7 subsection — no modules were dropped, capped, or merged. Sub-modules have nested subsections under their parent.
+- [ ] **Diagram count**: At least 8-15 Mermaid diagrams present
 - [ ] **Table population**: ALL tables have real data, not placeholders
 - [ ] **Code snippets**: Actual code from codebase, not pseudocode
 - [ ] **Exhaustive enumeration**: No "and others", "etc.", "similar to above"
 - [ ] **N/A sections**: Explicitly state why skipped, not silently omitted
 - [ ] **File references**: Every claim traceable to specific source file
+- [ ] **Domain model**: Section 29 has ER diagram, entity table, business/infra boundary map
+- [ ] **Execution flows**: Section 30 has request lifecycle sequence diagram, control flow paths, state transitions
+- [ ] **Interaction surfaces**: Section 31 has service communication graph, external integrations, human layers
+- [ ] **Dependency graphs**: Appendix E has layered internal graph + versioned external graph
+- [ ] **Context index**: Appendix F has file-level mapping for every significant file
+- [ ] **Required output artifacts**: All 5 mandatory artifacts present (architecture diagram, execution flows, dependency graph, data flow, context index)
 
 **After completing analysis: Write this content to `draft/architecture.md` using the Write tool. This is the PRIMARY output. Then run the Condensation Subroutine to derive .ai-context.md.**
 
@@ -2108,6 +2331,11 @@ Verify before writing:
 - [ ] Agent can find correct file for any modification
 - [ ] Agent knows test command and patterns
 - [ ] Agent knows V1/V2 boundary (if applicable)
+- [ ] Agent knows domain model entities and their relationships (DOMAIN section)
+- [ ] Agent can trace execution flow for primary request types (FLOWS section)
+- [ ] Agent knows all interaction surfaces and communication protocols (INTERACTIONS section)
+- [ ] Agent can assess dependency coupling and change impact (DEPGRAPH + CONTEXT_INDEX sections)
+- [ ] Agent knows risk zones — high churn files, fragile areas (RISK section)
 - [ ] No prose paragraphs (all structured data)
 - [ ] No references to architecture.md
 - [ ] 200-400 lines total
@@ -2267,18 +2495,23 @@ For each section of `architecture.md`, extract atomic facts:
 
 | Section(s) | Target Facts |
 |------------|-------------|
-| §4 Architecture Overview | Component topology facts |
+| §4 Architecture Overview | Component topology facts, entry points, build artifacts |
 | §5 Component Map | Ownership and interaction facts |
-| §6 Data Flow | Pipeline and flow facts |
+| §6 Data Flow | Pipeline, flow, ingress/egress, serialization boundary facts |
 | §7 Core Modules | Module responsibility and interface facts |
-| §8 Concurrency | Threading and safety rule facts |
+| §8 Concurrency | Threading, safety rule, resource management, scaling facts |
 | §12 API Definitions | Endpoint and schema facts |
-| §13 External Dependencies | Dependency relationship facts |
+| §13 External Dependencies | Dependency relationship and version constraint facts |
 | §15 Critical Invariants | Invariant facts (highest priority) |
-| §18 Error Handling | Error recovery and retry facts |
+| §18 Error Handling | Error recovery, retry, and error propagation path facts |
 | §19 State Management | Persistence and state facts |
 | §21 Design Patterns | Pattern usage facts |
-| §22 Configuration | Configuration mechanism facts |
+| §22 Configuration | Configuration mechanism, env hierarchy, feature flag facts |
+| §29 Domain Model | Entity relationship, domain invariant, business/infra boundary facts |
+| §30 Execution Flow | Request lifecycle, control flow, state transition facts |
+| §31 Interaction Surfaces | Service communication, external integration, event contract facts |
+| Appendix E | Dependency graph structure and coupling facts |
+| Appendix F | File-level responsibility and dependency facts |
 
 #### Step 2: Assign Temporal Metadata
 
@@ -2604,7 +2837,8 @@ Next steps:
 6. Review draft/architecture.md — human-friendly version for team onboarding
 7. Run `draft new-track` to start planning a feature
 8. Run `draft init --refresh` after significant codebase changes — refresh is now incremental (only stale files re-analyzed)
-9. Run `draft learn promote` to promote high-confidence patterns to Hard Guardrails"
+9. Run `draft init --refresh --force` to re-analyze with upgraded skill — deepens existing artifacts without requiring code changes
+10. Run `draft learn promote` to promote high-confidence patterns to Hard Guardrails"
 
 For **Greenfield** projects, announce:
 "Draft initialized successfully!
@@ -2686,6 +2920,12 @@ Transform each `architecture.md` section into machine-optimized format using thi
 | Build/Test | TEST + META | Extract exact commands |
 | File Structure | FILES | Concept-to-path mappings: `entry: path`, `config: path`, etc. |
 | Glossary | VOCAB | `term: definition` pairs |
+| Domain Model | DOMAIN | entities list, relationships as arrows, domain invariants, layer boundaries |
+| Execution Flow Mapping | FLOWS | `FLOW:{Name}` with happy/failure/retry paths, `STATES:{Entity}` with transitions |
+| Interaction Surfaces | INTERACTIONS | svc_to_svc arrows, external integrations, human layers, event contracts |
+| Appendix E: Dependency Graph | DEPGRAPH | Layer groupings, coupling matrix as pipe-separated rows |
+| Appendix F: Context Index | CONTEXT_INDEX | Pipe-separated rows: `file|responsibility|module|deps|entry_point` |
+| Tech Debt: Risk Zones | RISK | churn files list, fragile areas with reasons, error propagation paths |
 
 #### Step 4: Apply Compression
 
@@ -2703,11 +2943,16 @@ If the output exceeds 400 lines, cut sections in this order (bottom = cut first)
 |----------|---------|------|
 | 1 (never cut) | INVARIANTS | Safety critical — preserve every invariant |
 | 2 (never cut) | EXTEND | Agent productivity critical — preserve all cookbook steps |
-| 3 | GRAPH:* | Keep all component, dependency, and dataflow graphs |
-| 4 | INTERFACES | Keep all signatures |
-| 5 | CATALOG | Can abbreviate to top 20 entries per category |
-| 6 | CONFIG | Can abbreviate to `critical:Y` entries only |
-| 7 (cut first) | VOCAB | Can abbreviate to 10 most important terms |
+| 3 (never cut) | DOMAIN | Business logic boundaries — preserve entity relationships and domain invariants |
+| 4 | GRAPH:* | Keep all component, dependency, and dataflow graphs |
+| 5 | FLOWS | Keep primary request lifecycle and failure paths |
+| 6 | INTERACTIONS | Keep service-to-service and external integration maps |
+| 7 | INTERFACES | Keep all signatures |
+| 8 | DEPGRAPH + CONTEXT_INDEX | Can abbreviate CONTEXT_INDEX to entry points and high-coupling files only |
+| 9 | CATALOG | Can abbreviate to top 20 entries per category |
+| 10 | CONFIG | Can abbreviate to `critical:Y` entries only |
+| 11 | RISK | Can abbreviate to top 5 highest risk items |
+| 12 (cut first) | VOCAB | Can abbreviate to 10 most important terms |
 
 #### Step 6: Quality Check
 
@@ -13687,7 +13932,7 @@ Draft solves this through **Context-Driven Development**: structured documents t
 |----------|---------|----------|
 | `product.md` | Defines users, goals, success criteria, guidelines | AI building features nobody asked for |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
-| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
+| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 31 sections + 6 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
 | `.ai-profile.md` | **Derived from .ai-context.md.** 20-50 lines, ultra-compact always-injected project profile. Contains: language, framework, database, auth, API style, critical invariants, safety rules, active tracks, recent changes. Auto-refreshed on mutations. | AI needing full context for simple tasks |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary. Auto-refreshed on mutations. | AI re-analyzing codebase every session |
 | `workflow.md` | TDD preference, commit style, review process | AI skipping tests or making giant commits |
@@ -13995,7 +14240,7 @@ Located in `draft/` of the target project:
 |------|---------|
 | `product.md` | Product vision, users, goals, guidelines (optional section) |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
-| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices. Generated from 5-phase codebase analysis. |
+| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 31 sections + 6 appendices. Generated from 5-phase codebase analysis. |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context with 15+ mandatory sections. Consumed by all Draft commands and external AI tools. Auto-refreshed on mutations. |
 | `workflow.md` | TDD preferences, commit strategy, validation config |
 | `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns |
@@ -16654,6 +16899,59 @@ interface {ServiceName} {
 - Tests: `{path}`
 - Build: `{path}`
 
+## DOMAIN
+entities: [{Entity1}, {Entity2}, {Entity3}]
+relationships:
+  {Entity1} -[has_many]-> {Entity2}
+  {Entity2} -[belongs_to]-> {Entity3}
+invariants:
+  [BIZ] {name}: {rule} @{file}:{line}
+  [BIZ] {name}: {rule} @{file}:{line}
+boundaries:
+  domain: [{files}]
+  application: [{files}]
+  infrastructure: [{files}]
+  presentation: [{files}]
+
+## FLOWS
+FLOW:{PrimaryRequestType}
+  {entry} -> {middleware} -> {handler} -> {service} -> {repo} -> {db}
+  happy: {step1} -> {step2} -> {response}
+  failure: {step} -> {error_handler} -> {recovery}
+  retry: {operation} -> backoff({strategy}) -> max({N})
+STATES:{StatefulEntity}
+  {State1} --(event)--> {State2}
+  {State2} --(event)--> {State3} | {ErrorState}
+
+## INTERACTIONS
+svc_to_svc:
+  {ServiceA} -[{protocol}]-> {ServiceB}: {purpose}
+  {ServiceA} -[{protocol}]-> {ServiceC}: {purpose}
+external:
+  {Service} -[{protocol}]-> {ExternalAPI}: {purpose}, auth:{method}
+human:
+  {CLI|WebUI|Admin}: {entry_point} -> {key_flows}
+events:
+  {event}: {publisher} -> [{subscribers}], guarantee:{at-least-once|exactly-once}
+
+## DEPGRAPH
+layers:
+  presentation: [{modules}]
+  application: [{modules}]
+  domain: [{modules}]
+  infrastructure: [{modules}]
+coupling:
+  {module}|{depends_on}|{depended_by}|{High/Med/Low}
+
+## CONTEXT_INDEX
+{file}|{responsibility}|{module}|{depends_on}|{entry_point:Y/N}
+{file}|{responsibility}|{module}|{depends_on}|{entry_point:Y/N}
+
+## RISK
+churn: [{high_churn_file1}, {high_churn_file2}]
+fragile: [{fragile_area1}: {reason}, {fragile_area2}: {reason}]
+error_paths: {origin} -> {propagation} -> {handler}
+
 ## Glossary (Critical Terms Only)
 
 | Term | Definition |
@@ -16733,10 +17031,15 @@ synced_to_commit: "{FULL_SHA}"
 23. [Testing Infrastructure](#23-testing-infrastructure)
 24. [Known Technical Debt & Limitations](#24-known-technical-debt--limitations)
 25. [Glossary](#25-glossary)
+26. [Domain Model](#26-domain-model)
+27. [Execution Flow Mapping](#27-execution-flow-mapping)
+28. [Interaction Surfaces](#28-interaction-surfaces)
 - [Appendix A: File Structure Summary](#appendix-a-file-structure-summary)
 - [Appendix B: Data Source → Implementation Mapping](#appendix-b-data-source--implementation-mapping)
 - [Appendix C: Output Flow — Implementation to Target](#appendix-c-output-flow--implementation-to-target)
 - [Appendix D: Mermaid Sequence Diagrams — Critical Flows](#appendix-d-mermaid-sequence-diagrams--critical-flows)
+- [Appendix E: Dependency Graph Visualization](#appendix-e-dependency-graph-visualization)
+- [Appendix F: Context Index](#appendix-f-context-index)
 
 ---
 
@@ -16800,7 +17103,21 @@ flowchart TD
     C --> G
 ```
 
-### 3.2 Process Lifecycle
+### 3.2 Entry Points Catalog
+
+| Entry Point | Type | File | Function/Class | Trigger |
+|-------------|------|------|-----------------|---------|
+| `{name}` | {CLI/API/Scheduler/Event/Worker} | `{file}` | `{function}` | {how invoked} |
+
+### 3.3 Build & Runtime Artifacts
+
+| Artifact | Type | Path | Purpose |
+|----------|------|------|---------|
+| `{name}` | {Dockerfile/CI pipeline/Helm chart/Terraform/binary} | `{path}` | {purpose} |
+
+{Describe deployment topology: containers, serverless functions, static assets, etc.}
+
+### 3.4 Process Lifecycle
 
 {For services: startup to steady state. For libraries: import to teardown. For CLI: args to exit.}
 
@@ -16862,7 +17179,28 @@ flowchart LR
     C --> D
 ```
 
-### 5.3 Safety Mechanisms
+### 5.3 Data Ingress & Egress Points
+
+| Direction | Point | Protocol | Data Format | Rate/Volume |
+|-----------|-------|----------|-------------|-------------|
+| Ingress | `{endpoint/topic/file}` | {HTTP/gRPC/AMQP/file} | {JSON/protobuf/CSV} | {rate} |
+| Egress | `{endpoint/topic/file}` | {HTTP/gRPC/AMQP/file} | {JSON/protobuf/CSV} | {rate} |
+
+### 5.4 Serialization & Deserialization Boundaries
+
+| Boundary | Location | Format In | Format Out | Library |
+|----------|----------|-----------|------------|---------|
+| `{name}` | `{file}:{line}` | {format} | {format} | {library} |
+
+{Document where data changes shape: API controllers, message handlers, DB repositories, file parsers.}
+
+### 5.5 Schema Evolution & Data Contracts
+
+| Contract | Owner | Consumers | Versioning Strategy | Breaking Change Policy |
+|----------|-------|-----------|--------------------|-----------------------|
+| `{schema/proto/type}` | `{module}` | `{modules}` | {semver/field evolution/migration} | {policy} |
+
+### 5.6 Safety Mechanisms
 
 {Description of transactions, idempotency guards, version checks, distributed locks.}
 
@@ -16870,7 +17208,7 @@ flowchart LR
 
 ## 6. Core Modules Deep Dive
 
-{For EVERY discovered module, provide detailed analysis. Do not cap the number of modules.}
+{For EVERY module in the final combined list (structural candidates from step 1b Tier 1/Tier 2 + logical modules from Phase 2), provide detailed analysis. No cap on module count. Sub-modules get nested subsections under their parent.}
 
 ### 6.1 {Module Name}
 
@@ -16920,7 +17258,23 @@ stateDiagram-v2
 
 {Locks, mutexes, semaphores — granularity and ordering rules.}
 
-### 7.4 Common Concurrency Pitfalls
+### 7.4 Resource Management
+
+| Resource | Budget/Limit | Managed By | Exhaustion Behavior |
+|----------|-------------|------------|---------------------|
+| CPU | {limit} | {scheduler/pool} | {backpressure/queuing/rejection} |
+| Memory | {limit} | {allocator/GC/pool} | {OOM behavior/eviction policy} |
+| I/O | {limit} | {connection pool/rate limiter} | {queuing/timeout/circuit break} |
+| File Descriptors | {limit} | {OS/pool} | {error handling} |
+
+### 7.5 Scaling Characteristics
+
+- **Horizontal scaling**: {how the system scales out — stateless services, sharding, partitioning}
+- **Vertical scaling**: {bottlenecks that limit vertical scaling — memory-bound, CPU-bound, I/O-bound}
+- **Scaling triggers**: {metrics/thresholds that indicate scaling is needed}
+- **Scaling constraints**: {state affinity, ordering requirements, connection limits}
+
+### 7.6 Common Concurrency Pitfalls
 
 - {pitfall 1}
 - {pitfall 2}
@@ -17001,6 +17355,14 @@ stateDiagram-v2
 | Library | Usage |
 |---------|-------|
 | `{library}` | {usage} |
+
+### 11.3 Version Constraints & Compatibility Risks
+
+| Dependency | Current Version | Constraint | Risk | Notes |
+|-----------|----------------|------------|------|-------|
+| `{dep}` | `{version}` | {pinned/range/latest} | {High/Med/Low} | {EOL date, known CVEs, upgrade blockers} |
+
+{Identify dependencies that are: pinned to old versions, approaching EOL, have known security issues, or constrain upgrades of other dependencies.}
 
 ---
 
@@ -17103,6 +17465,14 @@ sequenceDiagram
 - **Liveness**: `{endpoint}`
 - **Readiness**: `{endpoint}`
 
+### Debug Surfaces
+
+| Surface | Type | Access | Purpose |
+|---------|------|--------|---------|
+| `{endpoint/flag/tool}` | {HTTP endpoint/CLI flag/env var/REPL} | {local/authenticated/admin} | {purpose} |
+
+{Document how developers inspect runtime state: debug endpoints, verbose logging modes, REPL access, profiling hooks, memory dumps, thread dumps.}
+
 ---
 
 ## 16. Error Handling & Failure Modes
@@ -17131,6 +17501,23 @@ sequenceDiagram
 ### Graceful Degradation
 
 {Behavior when dependencies unavailable.}
+
+### Error Propagation Paths
+
+```mermaid
+flowchart TD
+    A["{Error Origin}"] --> B{"{Decision Point}"}
+    B -->|"recoverable"| C["{Retry/Fallback}"]
+    B -->|"fatal"| D["{Error Response}"]
+    C --> E["{Recovery Action}"]
+    D --> F["{User/Caller Notification}"]
+```
+
+{For each major error category, trace the path from origin through handlers to final disposition. Show where errors are caught, transformed, logged, and surfaced.}
+
+| Error Category | Origin | Propagation Path | Final Handler | User-Visible Effect |
+|---------------|--------|------------------|---------------|---------------------|
+| `{category}` | `{file}:{line}` | {module} → {module} → {module} | `{handler}` | {effect} |
 
 ---
 
@@ -17182,6 +17569,33 @@ sequenceDiagram
 ### Scheduling Configuration
 
 {How recurring work is configured: cron, intervals, tickers.}
+
+### Environment Variable Hierarchy
+
+{Document the precedence order for configuration resolution.}
+
+| Priority | Source | Example | Override Behavior |
+|----------|--------|---------|-------------------|
+| 1 (highest) | {e.g., CLI flags} | `--port=3000` | {overrides all} |
+| 2 | {e.g., Environment variables} | `PORT=3000` | {overrides file-based config} |
+| 3 | {e.g., Config file} | `config.yaml` | {overrides defaults} |
+| 4 (lowest) | {e.g., Code defaults} | `const PORT = 8080` | {fallback} |
+
+### Feature Flags
+
+| Flag | Default | Source | Runtime Toggleable | Purpose |
+|------|---------|--------|-------------------|---------|
+| `{flag}` | {on/off} | {env/config/remote} | {Yes/No} | {purpose} |
+
+{Document the feature flag system: how flags are defined, evaluated, and toggled. Include any remote configuration services (LaunchDarkly, Split, etc.).}
+
+### Deployment-time vs Runtime Configuration
+
+| Parameter | When Resolved | Can Change At Runtime | Restart Required |
+|-----------|--------------|----------------------|-----------------|
+| `{param}` | {build/deploy/startup/runtime} | {Yes/No} | {Yes/No} |
+
+{Distinguish between configuration that is baked at build time, set at deployment, loaded at startup, or dynamically changeable at runtime.}
 
 ### Config Code
 
@@ -17326,6 +17740,22 @@ sequenceDiagram
 |----------|-------|----------|
 | `{file}` | {issue} | {High/Med/Low} |
 
+### High Churn Files
+
+{Identify files with the highest commit frequency — these are change hotspots that warrant extra test coverage and review attention.}
+
+| File | Commits (Last 6 Months) | Reason for Churn | Risk |
+|------|------------------------|------------------|------|
+| `{file}` | {N} | {frequent bug fixes/feature additions/config changes} | {High/Med/Low} |
+
+### Fragile Area Risk Map
+
+{Identify areas where changes frequently cause cascading failures or regressions.}
+
+| Area | Fragility Indicator | Blast Radius | Mitigation |
+|------|---------------------|-------------|------------|
+| `{module/file}` | {tight coupling/shared state/implicit contracts/no tests} | {local/cross-module/system-wide} | {test coverage/interface stabilization/decoupling} |
+
 ---
 
 ## 25. Glossary
@@ -17333,6 +17763,171 @@ sequenceDiagram
 | Term | Definition |
 |------|------------|
 | {term} | {1-2 sentence definition} |
+
+---
+
+## 26. Domain Model
+
+### 26.1 Core Entities & Relationships
+
+```mermaid
+erDiagram
+    {ENTITY_A} ||--o{ {ENTITY_B} : "{relationship}"
+    {ENTITY_B} }|--|| {ENTITY_C} : "{relationship}"
+    {ENTITY_A} ||--|| {ENTITY_D} : "{relationship}"
+```
+
+| Entity | Definition | Key Attributes | Lifecycle |
+|--------|-----------|----------------|-----------|
+| `{Entity}` | {what it represents in the domain} | `{attr1}`, `{attr2}`, `{attr3}` | {created → active → archived/deleted} |
+
+### 26.2 Domain Invariants & Constraints
+
+| Invariant | Entities Involved | Enforcement Location | Violation Consequence |
+|-----------|-------------------|---------------------|----------------------|
+| {rule} | `{Entity}`, `{Entity}` | `{file}:{line}` | {data corruption/invalid state/business rule violation} |
+
+### 26.3 Business Logic vs Infrastructure Boundaries
+
+{Identify where business rules live vs infrastructure/plumbing code. This enables safe refactoring — infrastructure can be swapped without touching business logic.}
+
+| Layer | Responsibility | Key Files | Depends On |
+|-------|---------------|-----------|------------|
+| Domain / Business Logic | {core rules, validation, calculations} | `{files}` | {nothing external — pure logic} |
+| Application / Use Cases | {orchestration, workflows, transactions} | `{files}` | {domain layer} |
+| Infrastructure | {DB, HTTP, messaging, file I/O} | `{files}` | {application layer} |
+| Presentation | {API routes, CLI handlers, UI} | `{files}` | {application layer} |
+
+### 26.4 Aggregate Boundaries
+
+{For DDD-style architectures: identify aggregate roots and their boundaries. For non-DDD: identify transactional consistency boundaries — groups of entities that must change together atomically.}
+
+| Aggregate / Boundary | Root Entity | Contains | Consistency Rule |
+|---------------------|-------------|----------|-----------------|
+| `{name}` | `{entity}` | `{entity1}`, `{entity2}` | {must be updated atomically / eventual consistency} |
+
+---
+
+## 27. Execution Flow Mapping
+
+### 27.1 End-to-End Request Lifecycle
+
+{Trace the complete lifecycle of a primary request from entry point through processing to response.}
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant {EntryPoint}
+    participant {Middleware}
+    participant {Handler}
+    participant {Service}
+    participant {Repository}
+    participant {Database}
+
+    Client->>{EntryPoint}: {request}
+    {EntryPoint}->>{Middleware}: {pass through}
+    {Middleware}->>{Handler}: {validated request}
+    {Handler}->>{Service}: {business operation}
+    {Service}->>{Repository}: {data operation}
+    {Repository}->>{Database}: {query}
+    {Database}-->>{Repository}: {result}
+    {Repository}-->>{Service}: {domain object}
+    {Service}-->>{Handler}: {result}
+    {Handler}-->>{Client}: {response}
+```
+
+### 27.2 Control Flow Paths
+
+#### Happy Path
+
+| Step | Component | Action | Output |
+|------|-----------|--------|--------|
+| 1 | `{component}` | {action} | {output} |
+| 2 | `{component}` | {action} | {output} |
+
+#### Failure Paths
+
+| Failure Point | Error Type | Handler | Recovery | User Effect |
+|--------------|-----------|---------|----------|-------------|
+| `{component}` | {error type} | `{handler}` | {retry/fallback/abort} | {error message/degraded service/timeout} |
+
+#### Retry & Fallback Flows
+
+```mermaid
+flowchart TD
+    A["{Operation}"] --> B{"{Success?}"}
+    B -->|"Yes"| C["{Continue}"]
+    B -->|"No"| D{"{Retries Left?}"}
+    D -->|"Yes"| E["{Backoff Wait}"] --> A
+    D -->|"No"| F{"{Fallback Available?}"}
+    F -->|"Yes"| G["{Fallback Path}"]
+    F -->|"No"| H["{Error Response}"]
+```
+
+### 27.3 State Transitions
+
+{For stateful systems: document all valid state transitions and their triggers.}
+
+```mermaid
+stateDiagram-v2
+    [*] --> {InitialState}
+    {InitialState} --> {State2}: {trigger}
+    {State2} --> {State3}: {trigger}
+    {State2} --> {ErrorState}: {failure}
+    {State3} --> [*]: {completion}
+    {ErrorState} --> {State2}: {retry}
+    {ErrorState} --> [*]: {abandon}
+```
+
+| From State | To State | Trigger | Guard Condition | Side Effects |
+|-----------|----------|---------|-----------------|-------------|
+| `{state}` | `{state}` | {event} | {condition} | {actions performed during transition} |
+
+---
+
+## 28. Interaction Surfaces
+
+### 28.1 Service-to-Service Communication
+
+| Source | Target | Protocol | Pattern | Payload | SLA |
+|--------|--------|----------|---------|---------|-----|
+| `{service}` | `{service}` | {REST/gRPC/AMQP/WebSocket/GraphQL} | {sync/async/pub-sub/request-reply} | {format} | {latency/throughput} |
+
+```mermaid
+graph LR
+    subgraph Internal["Internal Services"]
+        A["{Service A}"]
+        B["{Service B}"]
+        C["{Service C}"]
+    end
+    subgraph External["External Services"]
+        D["{External API}"]
+        E["{Third Party}"]
+    end
+    A -->|"REST"| B
+    B -->|"gRPC"| C
+    A -->|"AMQP"| C
+    B -->|"HTTPS"| D
+    C -->|"webhook"| E
+```
+
+### 28.2 External Integration Points
+
+| Integration | Direction | Protocol | Auth Method | Rate Limit | Circuit Breaker |
+|-------------|-----------|----------|-------------|------------|-----------------|
+| `{service}` | {inbound/outbound/bidirectional} | {protocol} | {API key/OAuth/mTLS} | {limit} | {Yes/No — threshold} |
+
+### 28.3 Human Interaction Layers
+
+| Interface | Type | Users | Entry Point | Key Flows |
+|-----------|------|-------|-------------|-----------|
+| `{name}` | {CLI/Web UI/Mobile/Admin Panel/Config File} | {user type} | `{file/URL}` | {primary user flows} |
+
+### 28.4 Event & Message Contracts
+
+| Event/Message | Publisher | Subscriber(s) | Schema | Delivery Guarantee |
+|---------------|-----------|---------------|--------|-------------------|
+| `{event}` | `{module}` | `{module1}`, `{module2}` | `{schema file/type}` | {at-most-once/at-least-once/exactly-once} |
 
 ---
 
@@ -17381,6 +17976,87 @@ sequenceDiagram
     B-->>A: {response}
     deactivate B
 ```
+
+---
+
+## Appendix E: Dependency Graph Visualization
+
+### Internal Module Dependencies (Layered)
+
+```mermaid
+graph TD
+    subgraph Layer1["Presentation Layer"]
+        A["{Module A}"]
+        B["{Module B}"]
+    end
+    subgraph Layer2["Application Layer"]
+        C["{Module C}"]
+        D["{Module D}"]
+    end
+    subgraph Layer3["Domain Layer"]
+        E["{Module E}"]
+    end
+    subgraph Layer4["Infrastructure Layer"]
+        F["{Module F}"]
+        G["{Module G}"]
+    end
+    A --> C
+    B --> D
+    C --> E
+    D --> E
+    E -.-> F
+    E -.-> G
+```
+
+### Adjacency Matrix (Internal)
+
+| Module | Depends On | Depended By | Coupling Score |
+|--------|-----------|-------------|---------------|
+| `{module}` | `{dep1}`, `{dep2}` | `{dep1}`, `{dep2}` | {High/Med/Low} |
+
+### External Dependency Graph
+
+```mermaid
+graph LR
+    subgraph System["System Boundary"]
+        A["{Module A}"]
+        B["{Module B}"]
+    end
+    subgraph External["External"]
+        C[("{Database}")]
+        D["{API Service}"]
+        E["{Message Queue}"]
+    end
+    A -->|"v{version}"| C
+    B -->|"v{version}"| D
+    A -->|"v{version}"| E
+```
+
+| External Dependency | Version | Constraint | Consumers | Upgrade Risk |
+|--------------------|---------|------------|-----------|-------------|
+| `{dep}` | `{version}` | {pinned/range/latest} | `{modules}` | {breaking changes/deprecation/none} |
+
+---
+
+## Appendix F: Context Index
+
+{Machine-navigable index mapping every significant file to its role, dependencies, and entry points. This enables deterministic lookup: given a file, know exactly what it does and what depends on it.}
+
+| File | Responsibility | Module | Depends On | Depended By | Entry Points | Test Coverage |
+|------|---------------|--------|-----------|-------------|-------------|--------------|
+| `{path}` | {5-10 word description} | `{module}` | `{file1}`, `{file2}` | `{file1}`, `{file2}` | {CLI/API/scheduler/none} | `{test_file}` |
+
+### Responsibility Categories
+
+| Category | Files | Description |
+|----------|-------|-------------|
+| Entry Point | `{files}` | {application entry, CLI handlers, API route registration} |
+| Business Logic | `{files}` | {core domain logic, validation, calculations} |
+| Data Access | `{files}` | {repositories, ORM models, query builders} |
+| Infrastructure | `{files}` | {HTTP clients, message producers, file I/O} |
+| Configuration | `{files}` | {config loading, env parsing, feature flags} |
+| Testing | `{files}` | {test utilities, fixtures, mocks} |
+| Build/Deploy | `{files}` | {CI/CD, Dockerfiles, scripts} |
 
 ---
 

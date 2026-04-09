@@ -195,6 +195,59 @@ interface {ServiceName} {
 - Tests: `{path}`
 - Build: `{path}`
 
+## DOMAIN
+entities: [{Entity1}, {Entity2}, {Entity3}]
+relationships:
+  {Entity1} -[has_many]-> {Entity2}
+  {Entity2} -[belongs_to]-> {Entity3}
+invariants:
+  [BIZ] {name}: {rule} @{file}:{line}
+  [BIZ] {name}: {rule} @{file}:{line}
+boundaries:
+  domain: [{files}]
+  application: [{files}]
+  infrastructure: [{files}]
+  presentation: [{files}]
+
+## FLOWS
+FLOW:{PrimaryRequestType}
+  {entry} -> {middleware} -> {handler} -> {service} -> {repo} -> {db}
+  happy: {step1} -> {step2} -> {response}
+  failure: {step} -> {error_handler} -> {recovery}
+  retry: {operation} -> backoff({strategy}) -> max({N})
+STATES:{StatefulEntity}
+  {State1} --(event)--> {State2}
+  {State2} --(event)--> {State3} | {ErrorState}
+
+## INTERACTIONS
+svc_to_svc:
+  {ServiceA} -[{protocol}]-> {ServiceB}: {purpose}
+  {ServiceA} -[{protocol}]-> {ServiceC}: {purpose}
+external:
+  {Service} -[{protocol}]-> {ExternalAPI}: {purpose}, auth:{method}
+human:
+  {CLI|WebUI|Admin}: {entry_point} -> {key_flows}
+events:
+  {event}: {publisher} -> [{subscribers}], guarantee:{at-least-once|exactly-once}
+
+## DEPGRAPH
+layers:
+  presentation: [{modules}]
+  application: [{modules}]
+  domain: [{modules}]
+  infrastructure: [{modules}]
+coupling:
+  {module}|{depends_on}|{depended_by}|{High/Med/Low}
+
+## CONTEXT_INDEX
+{file}|{responsibility}|{module}|{depends_on}|{entry_point:Y/N}
+{file}|{responsibility}|{module}|{depends_on}|{entry_point:Y/N}
+
+## RISK
+churn: [{high_churn_file1}, {high_churn_file2}]
+fragile: [{fragile_area1}: {reason}, {fragile_area2}: {reason}]
+error_paths: {origin} -> {propagation} -> {handler}
+
 ## Glossary (Critical Terms Only)
 
 | Term | Definition |

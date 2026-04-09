@@ -192,7 +192,7 @@ flowchart LR
 
 ## 6. Core Modules Deep Dive
 
-{For EVERY discovered module, provide detailed analysis. Do not cap the number of modules.}
+{For EVERY module in the final combined list (structural candidates from step 1b Tier 1/Tier 2 + logical modules from Phase 2), provide detailed analysis. No cap on module count. Sub-modules get nested subsections under their parent.}
 
 ### 6.1 {Module Name}
 

@@ -143,12 +143,13 @@
 
     <pre><code>| Scenario                         | Use                  |
 |----------------------------------|----------------------|
-| Added a few files, fixed bugs    | /draft:init --refresh  |
-| New module, updated dependencies | /draft:init --refresh  |
-| Major framework migration        | Full /draft:init     |
-| Monolith → microservice split    | Full /draft:init     |
-| Changed database technology      | Full /draft:init     |
-| Rewrote authentication system    | Full /draft:init     |</code></pre>
+| Added a few files, fixed bugs    | /draft:init --refresh          |
+| New module, updated dependencies | /draft:init --refresh          |
+| Init skill upgraded, no code changed | /draft:init --refresh --force |
+| Major framework migration        | Full /draft:init               |
+| Monolith → microservice split    | Full /draft:init               |
+| Changed database technology      | Full /draft:init               |
+| Rewrote authentication system    | Full /draft:init               |</code></pre>
 
     <p>The heuristic is straightforward: if the change affects the fundamental architecture (new paradigm, new database, new auth system), run a full init. If the change extends or modifies existing architecture, refresh is sufficient.</p>
 
@@ -222,6 +223,25 @@
         </ul>
         <p>Context that goes stale is worse than no context &mdash; it silently misguides every AI-assisted decision. Make refresh a habit, not an afterthought.</p>
     </div>
+
+    <h2>Force Mode: Re-Analysis Without Code Changes</h2>
+    <p>There is a third scenario that neither full init nor incremental refresh covers: the init skill itself gets upgraded. New module detection heuristics, deeper signal classification, expanded section templates &mdash; but your source code has not changed. Incremental refresh sees matching hashes and exits early. Full init from scratch discards your existing architecture document, including any manual refinements.</p>
+
+    <p>The <code>--force</code> flag solves this: <code>/draft:init --refresh --force</code>. Force mode bypasses the freshness and signal early-exit checks and runs a full 5-phase re-analysis &mdash; but it reads your existing <code>architecture.md</code> first and uses it as a baseline. The merge strategy is additive: sections with adequate depth are preserved, thin sections are expanded, newly discovered modules get their own deep-dive subsections, and the document is reformatted to match the current skill template.</p>
+
+    <p>Before writing any changes, force mode presents an enhancement plan showing exactly what will be preserved, expanded, added, and reformatted. You approve or reject the plan before anything is written.</p>
+
+    <pre class="terminal"><code>$ /draft:init --refresh --force
+
+Force refresh analysis complete. Enhancement plan:
+  PRESERVE:  15 sections (adequate depth)
+  EXPAND:    4 sections (thin — adding depth)
+  ADD:       3 new sub-module deep dives (src/auth, src/api, src/store)
+  ADD:       1 new Module Summary Table
+  REFORMAT:  Section 7 (adding sub-module nesting)
+Proceed? [Y/n]</code></pre>
+
+    <p>Use <code>--force</code> when the init skill has been updated with improved module detection or deeper analysis, when you want to retroactively apply methodology improvements to existing artifacts, or when you suspect the original analysis was shallow and want a deeper pass without losing existing work.</p>
 
     <div class="callout callout-example">
         <div class="callout-title">Practical Impact</div>

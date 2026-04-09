@@ -91,7 +91,7 @@
             <tr>
                 <td><code>/draft:init</code></td>
                 <td>5-phase codebase analysis: directory mapping with subdirectory module detection, signal classification, dependency wiring with inter-module import tracing, data flow analysis, and synthesis into architecture.md + .ai-context.md + .ai-profile.md</td>
-                <td><code>--refresh</code> &mdash; incremental update using file hashes and signal drift detection (early-exit after signal analysis, 100-file guardrail, run-memory resume)</td>
+                <td><code>--refresh</code> &mdash; incremental update using file hashes and signal drift detection (early-exit after signal analysis, 100-file guardrail, run-memory resume); <code>--force</code> &mdash; used with <code>--refresh</code> to bypass freshness checks and run full 5-phase re-analysis building on existing architecture.md (for skill upgrades)</td>
                 <td>None (run once per project)</td>
                 <td>3, 4, 5</td>
             </tr>

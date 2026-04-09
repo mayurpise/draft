@@ -70,6 +70,19 @@ The heuristic is straightforward: if the change affects the fundamental architec
 * Before starting a new track— stale context means the spec intake aligns to an outdated architecture. A 10-second refresh prevents a 30-minute rework.
 Context that goes stale is worse than no context — it silently misguides every AI-assisted decision. Make refresh a habit, not an afterthought.
 
+## Force Mode: Re-Analysis Without Code Changes
+
+There is a third scenario that neither full init nor incremental refresh covers: the init skill itself gets upgraded. New module detection heuristics, deeper signal classification, expanded section templates — but your source code has not changed. Incremental refresh sees matching hashes and exits early. Full init from scratch discards your existing architecture document, including any manual refinements.
+
+The `--force` flag solves this:/draft:init --refresh --force. Force mode bypasses the freshness and signal early-exit checks and runs a full 5-phase re-analysis — but it reads your existing `architecture.md` first and uses it as a baseline. The merge strategy is additive: sections with adequate depth are preserved, thin sections are expanded, newly discovered modules get their own deep-dive subsections, and the document is reformatted to match the current skill template.
+
+Before writing any changes, force mode presents an enhancement plan showing exactly what will be preserved, expanded, added, and reformatted. You approve or reject the plan before anything is written.
+
+Use `--force` when:
+* The init skill has been updated with improved module detection or deeper analysis
+* You want to retroactively apply methodology improvements to existing artifacts
+* You suspect the original analysis was shallow and want a deeper pass without losing existing work
+
 A 100,000-line codebase with 400 source files. Full/draft:initreads all 400 files, runs 5-phase analysis, generates a completearchitecture.mdand.ai-context.md. Time: roughly 2 minutes.
 
 Two weeks later, 12 files have changed: 3 new API endpoints, 2 modified services, 4 new tests, 2 config updates, 1 deleted utility./draft:init refreshcomputes file hashes (instant), identifies the 12-file delta, re-analyzes only those files, maps them to 4 affected sections, and patches the existing documents. Time: roughly 10 seconds.

@@ -37,26 +37,22 @@ skills/
 
 ### What plugin.json Contains
 
-The `plugin.json` file contains **metadata** and an explicit **skills array** listing all skill file paths:
+The `plugin.json` file contains **metadata** and a **skills directory path** pointing to the skills folder:
 
 ```json
 {
   "name": "draft",
   "description": "...",
-  "version": "2.0.0",
+  "version": "2.3.0",
   "author": { "name": "..." },
   "homepage": "...",
   "license": "MIT",
   "keywords": [...],
-  "skills": [
-    "skills/adr/SKILL.md",
-    "skills/bughunt/SKILL.md",
-    ...
-  ]
+  "skills": "./skills/"
 }
 ```
 
-**Note:** The `skills` array explicitly registers all skill files. Skills must also follow the directory convention (`skills/<name>/SKILL.md`).
+**Note:** The `skills` field uses a directory convention — Claude Code discovers all `SKILL.md` files under the specified directory. Skills must follow the naming convention (`skills/<name>/SKILL.md`).
 
 ### Verification
 
@@ -153,10 +149,10 @@ To add a new skill to the Draft plugin:
    }
    ```
 
-3. **Register in plugin.json:**
+3. **Verify plugin.json discovery:**
    ```bash
-   # Add to .claude-plugin/plugin.json "skills" array:
-   "skills/my-skill/SKILL.md"
+   # plugin.json uses directory convention ("skills": "./skills/")
+   # New skills are auto-discovered — no manual registration needed
    ```
 
 4. **Rebuild integrations:**
@@ -178,17 +174,17 @@ To add a new skill to the Draft plugin:
 
 ### Registration Model
 
-**Directory convention + explicit registration:**
+**Directory convention + auto-discovery:**
 - Skills follow a consistent directory structure (`skills/<name>/SKILL.md`)
-- Each skill is explicitly listed in `plugin.json`'s `skills` array
+- `plugin.json` uses a directory path (`"skills": "./skills/"`) for auto-discovery
 - The build script uses `SKILL_ORDER` for integration generation ordering
 
 **Tradeoffs:**
 - ⚠️ Skill must follow naming convention (`skills/<name>/SKILL.md`)
-- ⚠️ Must update both `plugin.json` and `SKILL_ORDER` in the build script
+- ⚠️ Must add to `SKILL_ORDER` in the build script for integration generation
 - ⚠️ Name collision possible if not careful
 
 ---
 
-**Last Updated:** 2026-03-19
-**Plugin Version:** 2.0.0
+**Last Updated:** 2026-04-10
+**Plugin Version:** 2.3.0

@@ -22,20 +22,6 @@
     <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
     <meta name="twitter:image:alt" content="Coverage — Draft Book">
     <link rel="canonical" href="https://getdraft.dev/book/coverage/">
-    <link rel="alternate" hreflang="en" href="https://getdraft.dev/book/coverage/">
-    <link rel="alternate" hreflang="x-default" href="https://getdraft.dev/book/coverage/">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://getdraft.dev/"},
-        {"@type": "ListItem", "position": 2, "name": "Book", "item": "https://getdraft.dev/book/"},
-        {"@type": "ListItem", "position": 3, "name": "Coverage", "item": "https://getdraft.dev/book/coverage/"}
-      ]
-    }
-    </script>
 
     <script type="application/ld+json">
     {
@@ -70,7 +56,6 @@
     </noscript>
 
     <link rel="stylesheet" href="../css/book.css">
-    <link rel="stylesheet" href="../css/audio-player.css">
 </head>
 <body data-chapter="coverage">
 
@@ -107,7 +92,6 @@
                     <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
                         <span class="ch-num">0.</span>What is Draft?
                     </a></li>
-                    
                 </ul>
             </div>
             <div class="sidebar-part">
@@ -217,13 +201,6 @@
         </aside>
 
         <main class="book-content">
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <ol>
-        <li><a href="/">Home</a></li>
-        <li><a href="/book/">Book</a></li>
-        <li aria-current="page">Coverage</li>
-      </ol>
-    </nav>
 <div class="chapter-wrapper">
     <h1>Coverage</h1>
     <p class="chapter-meta"><span class="part-name">Part IV: Quality</span> &middot; Chapter 14</p>
@@ -481,17 +458,6 @@ HIGH: Bug "Missing null check on user lookup" (bughunt #7)
     <p>Approved results are recorded in three places: the track's <code>plan.md</code> (coverage note on the relevant phase), <code>metadata.json</code> (machine-readable coverage data with timestamp), and a timestamped report file in <code>draft/tracks/&lt;id&gt;/</code> with a <code>-latest.md</code> symlink for quick access. Re-running coverage on the same module shows the delta: "Coverage improved from 87.3% to 96.2% (+8.9%)."</p>
 </div>
 
-
-    <nav class="related-chapters" aria-label="Related chapters">
-      <h3>Related Chapters</h3>
-      <ul>
-        <li><a href="/book/implementation/">Implementation</a> &mdash; The implementation phase coverage measures</li>
-        <li><a href="/book/deep-review/">Deep Review</a> &mdash; Deep review that complements coverage analysis</li>
-        <li><a href="/book/bug-hunt/">Bug Hunt</a> &mdash; Bug detection alongside coverage gaps</li>
-        <li><a href="/book/specs-and-plans/">Specs &amp; Plans</a> &mdash; The specs that define coverage targets</li>
-      </ul>
-    </nav>
-
             <nav class="chapter-nav">
                 <a href="../bug-hunt/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Bug Hunt</span></a>
                 <a href="../pattern-learning/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">Pattern Learning</span></a>
@@ -505,6 +471,5 @@ HIGH: Bug "Missing null check on user lookup" (bughunt #7)
     </div>
 
     <script src="../js/book.js"></script>
-    <script src="../js/audio-player.js"></script>
 </body>
 </html>

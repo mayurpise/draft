@@ -1,6 +1,6 @@
 # Skill Dependency Graph
 
-> Reference artifact mapping relationships between all 25 Draft skills. Not a skill itself.
+> Reference artifact mapping relationships between all 28 Draft skills. Not a skill itself.
 > Regenerate after adding/removing skills or changing cross-skill references.
 
 ---
@@ -14,7 +14,7 @@ init → new-track → implement → review
                        └───────────┘  (auto-invoked at phase boundaries)
 ```
 
-### Specialist Commands (21 commands)
+### Specialist Commands (24 commands)
 Grouped into subsystems that primary commands auto-invoke or that users invoke directly.
 
 ---
@@ -69,6 +69,12 @@ graph TD
     subgraph "Integration"
         jira-preview["/draft:jira-preview"]
         jira-create["/draft:jira-create"]
+    end
+
+    subgraph "Developer Experience"
+        assist-review["/draft:assist-review"]
+        impact["/draft:impact"]
+        tour["/draft:tour"]
     end
 
     subgraph "Navigation"
@@ -138,6 +144,12 @@ graph TD
     %% Architecture chain
     tech-debt -.->|prioritized items feed| new-track
 
+    %% Developer Experience chain
+    new-track --> assist-review
+    review -.->|human reviewer aid| assist-review
+    implement -.->|metrics feed| impact
+    init --> tour
+
     %% Monorepo chain
     init -.->|per-service| index
 ```
@@ -170,6 +182,9 @@ graph TD
 | `index` | init (per-service) | -- | service-index.md, dependency-graph.md, tech-matrix.md |
 | `jira-preview` | new-track | jira-create | jira-export-latest.md |
 | `jira-create` | jira-preview | -- | Creates Jira issues via API |
+| `assist-review` | init, new-track | review (human reviewer aid) | PR risk audit for human reviewers |
+| `impact` | init | -- | ROI analytics, friction metrics, timeline analysis |
+| `tour` | init | -- | Interactive architecture walk-through |
 | `draft` | -- | -- | Navigation only -- references all skills |
 
 ## Execution Chains

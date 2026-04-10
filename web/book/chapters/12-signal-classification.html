@@ -169,7 +169,7 @@
 | state_management   |   0   | State Management (frontend state)         | SKIP      |
 | background_jobs    |   0   | Concurrency                               | SIMPLIFY  |</code></pre>
 
-    <p>The thresholds are simple: zero files means skip or simplify the section. One or more files means the section warrants full treatment — even a single signal file can reveal critical architecture (for example, one auth file still defines the entire security boundary). This prevents Draft from generating empty boilerplate sections for concerns that do not exist in your project, while ensuring real concerns get thorough documentation.</p>
+    <p>The thresholds are simple: zero files means skip or simplify the section. One to two files means include the section but keep it brief. Three or more files means the section warrants deep, exhaustive treatment. This prevents Draft from generating empty boilerplate sections for concerns that do not exist in your project, while ensuring real concerns get thorough documentation.</p>
 
     <div class="callout callout-concept">
         <div class="callout-title">Adaptive Sections</div>
@@ -179,7 +179,7 @@
     <h2>Signal-to-Context Mapping</h2>
     <p>Signals do not just determine section depth in <code>architecture.md</code>. They flow through the entire context pipeline. When architecture is condensed into <code>.ai-context.md</code>, sections that received deep treatment produce more detailed entries. Sections that were skipped are absent from the condensed output. This means the 200-400 line AI context file is automatically tuned to your project's actual architectural concerns.</p>
 
-    <p>The signal state is also persisted to <code>draft/.state/signals.json</code> for incremental refresh tracking. On subsequent runs of <code>/draft:init --refresh</code>, Draft re-classifies signals and compares against the stored baseline:</p>
+    <p>The signal state is also persisted to <code>draft/.state/signals.json</code> for incremental refresh tracking. On subsequent runs of <code>/draft:init refresh</code>, Draft re-classifies signals and compares against the stored baseline:</p>
 
     <pre><code>Signal drift detected:
   NEW:     auth_files (0 → 5) — Security Architecture needs generation
@@ -223,6 +223,6 @@ $ find . -type f \( -path "*/routes/*" -o -path "*/handlers/*" \
 
     <div class="callout callout-tip">
         <div class="callout-title">Signals Are Discovery, Not Configuration</div>
-        <p>You do not configure signals. You do not tell Draft "this is a web app" or "skip the frontend sections." Draft discovers what your project contains by reading the file tree. If your project gains authentication files six months from now, the next <code>/draft:init --refresh</code> will detect the new signal category, flag it as structural drift, and generate the Security Architecture section for the first time. The architecture document evolves with your code.</p>
+        <p>You do not configure signals. You do not tell Draft "this is a web app" or "skip the frontend sections." Draft discovers what your project contains by reading the file tree. If your project gains authentication files six months from now, the next <code>/draft:init refresh</code> will detect the new signal category, flag it as structural drift, and generate the Security Architecture section for the first time. The architecture document evolves with your code.</p>
     </div>
 </div>

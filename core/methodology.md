@@ -65,7 +65,7 @@ Draft solves this through **Context-Driven Development**: structured documents t
 |----------|---------|----------|
 | `product.md` | Defines users, goals, success criteria, guidelines | AI building features nobody asked for |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
-| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 31 sections + 6 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
+| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
 | `.ai-profile.md` | **Derived from .ai-context.md.** 20-50 lines, ultra-compact always-injected project profile. Contains: language, framework, database, auth, API style, critical invariants, safety rules, active tracks, recent changes. Auto-refreshed on mutations. | AI needing full context for simple tasks |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary. Auto-refreshed on mutations. | AI re-analyzing codebase every session |
 | `workflow.md` | TDD preference, commit style, review process | AI skipping tests or making giant commits |
@@ -373,7 +373,7 @@ Located in `draft/` of the target project:
 |------|---------|
 | `product.md` | Product vision, users, goals, guidelines (optional section) |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
-| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 31 sections + 6 appendices. Generated from 5-phase codebase analysis. |
+| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices. Generated from 5-phase codebase analysis. |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context with 15+ mandatory sections. Consumed by all Draft commands and external AI tools. Auto-refreshed on mutations. |
 | `workflow.md` | TDD preferences, commit strategy, validation config |
 | `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns |
@@ -436,9 +436,9 @@ Draft auto-classifies the project:
 1. **Project discovery** — Classify as brownfield, greenfield, or monorepo
 2. **Architecture discovery (brownfield only)** — Five-phase analysis:
 
-   **Phase 1: Discovery** — Directory structure, build/dependency files, API definitions, interface/type files. Includes **subdirectory module detection** — scans first-level children, classifies each as MODULE (has source/build files) or SKIP, builds module map. Also includes **signal classification** — categorizes all source files into 11 signal categories (`backend_routes`, `frontend_routes`, `components`, `services`, `data_models`, `auth_files`, `state_management`, `background_jobs`, `persistence`, `test_infra`, `config_files`). Signal counts drive adaptive section depth.
+   **Phase 1: Discovery** — Directory structure, build/dependency files, API definitions, interface/type files. Includes **signal classification** — categorizes all source files into 11 signal categories (`backend_routes`, `frontend_routes`, `components`, `services`, `data_models`, `auth_files`, `state_management`, `background_jobs`, `persistence`, `test_infra`, `config_files`). Signal counts drive adaptive section depth.
 
-   **Phase 2: Wiring** — Entry points, orchestrator/controller initialization, registry/registration code, dependency wiring (DI, module system, import graph). Includes **inter-module dependency mapping** — traces cross-directory imports between first-level subdirectories to build a directed dependency graph.
+   **Phase 2: Wiring** — Entry points, orchestrator/controller initialization, registry/registration code, dependency wiring (DI, module system, import graph).
 
    **Phase 3: Depth** — Data flows end-to-end, core module implementations, concurrency model, safety checks (invariants, validation, auth).
 
@@ -463,15 +463,13 @@ Draft auto-classifies the project:
 
 > **Note:** Architecture features (module decomposition, stories, execution state, skeletons, chunk reviews) are automatically enabled when you run `/draft:decompose` on a track. File-based activation — no opt-in needed.
 
-If `draft/` already exists with context files, init reports "already initialized" and suggests using `/draft:init --refresh` or `/draft:new-track`.
+If `draft/` already exists with context files, init reports "already initialized" and suggests using `/draft:init refresh` or `/draft:new-track`.
 
-#### Refresh Mode (`/draft:init --refresh`)
+#### Refresh Mode (`/draft:init refresh`)
 
 Re-scans and updates existing context without starting from scratch. Uses stored state for incremental, targeted refresh.
 
-**Force flag** (`/draft:init --refresh --force`): Bypasses freshness checks and forces full 5-phase re-analysis. Use when the analysis methodology has been updated (e.g., improved module detection, deeper signal classification) and you want to rebuild `architecture.md` with deeper analysis even though no source files changed. The existing `architecture.md` is used as a baseline to build upon — sections are deepened and expanded, not discarded.
-
-0. **State-Aware Pre-Check** — Loads `draft/.state/freshness.json` and computes current file hashes. Loads `draft/.state/signals.json` and re-runs signal classification to detect structural drift (new signal categories appearing, e.g., auth files added for the first time). **Early-exit happens after signal analysis** (skipped when `--force` is set) — if all hashes match AND no signal drift detected, short-circuits: "Architecture context is current. Nothing to refresh." This ordering prevents missed structural drift that would go undetected if early-exit happened before signal classification. Checks `draft/.state/run-memory.json` for interrupted previous runs and offers resume.
+0. **State-Aware Pre-Check** — Loads `draft/.state/freshness.json` and computes current file hashes. If all hashes match (no changed/new/deleted files), short-circuits: "Architecture context is current. Nothing to refresh." Also loads `draft/.state/signals.json` to detect structural drift (new signal categories appearing, e.g., auth files added for the first time). Checks `draft/.state/run-memory.json` for interrupted previous runs and offers resume.
 1. **Tech Stack Refresh** — Re-scans `package.json`, `go.mod`, etc. Compares with existing `draft/tech-stack.md`. Proposes updates.
 2. **Architecture Refresh** — Uses file-level hash deltas (from freshness state) to scope re-analysis to only changed/new files. Detects new directories, removed components, changed integrations, new domain objects, new or merged modules. Updates mermaid diagrams. Preserves modules added by `/draft:decompose`. Presents changes for review before writing. After updating `architecture.md`, derives `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine.
 3. **Contradiction Detection** — If `facts.json` exists, performs fact-level diff against changed files. Detects superseded facts (contradictions), extended facts (refinements), and new facts. Generates a Fact Evolution Report showing confirmed/updated/extended/new/stale facts. Updates relationship edges in the knowledge graph.
@@ -495,21 +493,13 @@ Aggregates Draft context from multiple services in a monorepo into unified root-
    - `draft/dependency-graph.md` — Inter-service dependency topology
    - `draft/tech-matrix.md` — Technology distribution across services
    - `draft/product.md` — Synthesized product vision (if not exists)
-   - `draft/.ai-context.md` — Token-optimized system-of-systems context (200-400 lines)
-   - `draft/.ai-profile.md` — Ultra-compact Tier 0 profile (20-50 lines)
+   - `draft/.ai-context.md` — System-of-systems architecture view
    - `draft/tech-stack.md` — Org-wide technology standards
 
 #### Arguments
 
-- `--init-missing` — Run `/draft:init` on services that lack a `draft/` directory. Prompts interactively per service: `y` (initialize), `n` (skip), `all` (initialize all remaining), `skip-rest` (skip all remaining).
-- `--bughunt [dir1 dir2 ...]` — Run `/draft:bughunt` across subdirectories with `draft/` folders. If no directories specified, auto-discovers all. Generates aggregate summary at `draft/bughunt-summary.md` with per-service severity counts and links to individual reports.
-
-#### Operational Details
-
-- **Lockfile** — Creates `draft/.index-lock` before starting (with cross-platform age check via `stat -c %Y` / `stat -f %m`). If lock exists and is <10 minutes old, warns and stops. If >10 minutes old, removes stale lock and continues.
-- **Run memory** — Creates `draft/.state/run-memory.json` on start (`status: "in_progress"`), updates to `"completed"` on success or `"failed"` on error. Detects interrupted previous runs on next invocation.
-- **Placeholder detection** — Files containing `<!-- AUTO-GENERATED BY DRAFT:INDEX -->` are considered placeholders and may be overwritten without confirmation. Non-placeholder files require user confirmation.
-- **Profile generation** — After synthesizing `.ai-context.md`, derives `.ai-profile.md` (20-50 line ultra-compact Tier 0 profile) for always-on injection.
+- `init-missing` — Run `/draft:init` on services that lack a `draft/` directory
+- `bughunt [dir1 dir2 ...]` — Run `/draft:bughunt` across subdirectories with `draft/` folders. If no directories specified, auto-discovers all subdirectories with `draft/`. Generates summary report at `draft-index-bughunt-summary.md`.
 
 #### When to Use
 

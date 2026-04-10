@@ -62,7 +62,7 @@ Files matching.env*, files inconfig/, files matching*.config.*,application.yml, 
 
 Each signal category maps to specific sections ofarchitecture.md. The mapping is explicit:
 
-The thresholds are simple: zero files means skip or simplify the section. One or more files means the section warrants full treatment — even a single signal file can reveal critical architecture (for example, one auth file still defines the entire security boundary). This prevents Draft from generating empty boilerplate sections for concerns that do not exist in your project, while ensuring real concerns get thorough documentation.
+The thresholds are simple: zero files means skip or simplify the section. One to two files means include the section but keep it brief. Three or more files means the section warrants deep, exhaustive treatment. This prevents Draft from generating empty boilerplate sections for concerns that do not exist in your project, while ensuring real concerns get thorough documentation.
 
 Signal classification integrates with the Adaptive Sections system. If your codebase has no plugin, algorithm, or handler system, the Framework and Extension Points section is skipped entirely. If your project is a library with no running process, the Process Lifecycle section is adapted to "Usage Lifecycle." If your project is a frontend module, component hierarchy, route maps, state management, and styling system documentation are added. Signals drive what gets written — the architecture document is shaped by your actual code, not a generic template.
 

@@ -22,6 +22,20 @@
     <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
     <meta name="twitter:image:alt" content="Review Pipeline — Draft Book">
     <link rel="canonical" href="https://getdraft.dev/book/review-pipeline/">
+    <link rel="alternate" hreflang="en" href="https://getdraft.dev/book/review-pipeline/">
+    <link rel="alternate" hreflang="x-default" href="https://getdraft.dev/book/review-pipeline/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://getdraft.dev/"},
+        {"@type": "ListItem", "position": 2, "name": "Book", "item": "https://getdraft.dev/book/"},
+        {"@type": "ListItem", "position": 3, "name": "Review Pipeline", "item": "https://getdraft.dev/book/review-pipeline/"}
+      ]
+    }
+    </script>
 
     <script type="application/ld+json">
     {
@@ -56,6 +70,7 @@
     </noscript>
 
     <link rel="stylesheet" href="../css/book.css">
+    <link rel="stylesheet" href="../css/audio-player.css">
 </head>
 <body data-chapter="review-pipeline">
 
@@ -92,6 +107,7 @@
                     <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
                         <span class="ch-num">0.</span>What is Draft?
                     </a></li>
+                    
                 </ul>
             </div>
             <div class="sidebar-part">
@@ -201,6 +217,13 @@
         </aside>
 
         <main class="book-content">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="/">Home</a></li>
+        <li><a href="/book/">Book</a></li>
+        <li aria-current="page">Review Pipeline</li>
+      </ol>
+    </nav>
 <div class="chapter-wrapper">
     <h1>Review Pipeline</h1>
     <p class="chapter-meta"><span class="part-name">Part II: Track Lifecycle</span> &middot; Chapter 6</p>
@@ -486,6 +509,17 @@ Report: draft/tracks/add-oauth2/review-report-2026-03-30T1445.md</code></pre>
     <p>With code reviewed and issues resolved, the track nears completion. The next chapter covers the operational commands that manage tracks throughout their lifecycle &mdash; monitoring progress, handling mid-stream requirement changes, and safely rolling back work when needed.</p>
 </div>
 
+
+    <nav class="related-chapters" aria-label="Related chapters">
+      <h3>Related Chapters</h3>
+      <ul>
+        <li><a href="/book/implementation/">Implementation</a> &mdash; The implementation phase that review validates</li>
+        <li><a href="/book/deep-review/">Deep Review</a> &mdash; Production-grade ACID compliance audits</li>
+        <li><a href="/book/bug-hunt/">Bug Hunt</a> &mdash; 14-dimension bug hunting sweep</li>
+        <li><a href="/book/coverage/">Coverage</a> &mdash; Coverage analysis that complements the review process</li>
+      </ul>
+    </nav>
+
             <nav class="chapter-nav">
                 <a href="../implementation/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Implementation</span></a>
                 <a href="../managing-tracks/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">Managing Tracks</span></a>
@@ -499,5 +533,6 @@ Report: draft/tracks/add-oauth2/review-report-2026-03-30T1445.md</code></pre>
     </div>
 
     <script src="../js/book.js"></script>
+    <script src="../js/audio-player.js"></script>
 </body>
 </html>

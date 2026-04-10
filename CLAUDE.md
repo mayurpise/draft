@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides 28 slash commands organized in a two-tier architecture: 4 primary workflow commands (`/draft:init`, `/draft:new-track`, `/draft:implement`, `/draft:review`) with auto-invocation, plus 24 specialist commands for debugging (`/draft:debug`), operations (`/draft:deploy-checklist`, `/draft:incident-response`, `/draft:standup`), quality (`/draft:quick-review`, `/draft:testing-strategy`, `/draft:tech-debt`, `/draft:assist-review`), authoring (`/draft:documentation`), analytics (`/draft:impact`), onboarding (`/draft:tour`), and more (`/draft:status`, `/draft:revert`, `/draft:decompose`, `/draft:coverage`, `/draft:deep-review`, `/draft:bughunt`, `/draft:learn`, `/draft:adr`, `/draft:change`, `/draft:index`, `/draft:jira-preview`, `/draft:jira-create`). Run `/draft` for overview.
+Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides 25 slash commands organized in a two-tier architecture: 4 primary workflow commands (`/draft:init`, `/draft:new-track`, `/draft:implement`, `/draft:review`) with auto-invocation, plus 21 specialist commands for debugging (`/draft:debug`), operations (`/draft:deploy-checklist`, `/draft:incident-response`, `/draft:standup`), quality (`/draft:quick-review`, `/draft:testing-strategy`, `/draft:tech-debt`), authoring (`/draft:documentation`), and more (`/draft:status`, `/draft:revert`, `/draft:decompose`, `/draft:coverage`, `/draft:deep-review`, `/draft:bughunt`, `/draft:learn`, `/draft:adr`, `/draft:change`, `/draft:index`, `/draft:jira-preview`, `/draft:jira-create`). Run `/draft` for overview.
 
-The codebase is entirely markdown and bash — no application runtime. Skills (markdown files) are the source of truth, processed by a bash build script into platform-specific integration files for Copilot.
+The codebase is entirely markdown and bash — no application runtime. Skills (markdown files) are the source of truth, processed by a bash build script into platform-specific integration files for Copilot and Gemini.
 
 ## Build & Test Commands
 
@@ -32,13 +32,13 @@ Tests use a custom bash framework (`tests/test-helpers.sh`) with `assert()`, `pa
 ```
 skills/<name>/SKILL.md  ──┐
 core/methodology.md       ├──→  scripts/build-integrations.sh  ──→  integrations/copilot/.github/copilot-instructions.md
-core/shared/*.md          │                                          (20,000+ lines, auto-generated)
-core/templates/*.md       │
+core/shared/*.md          │                                          (15,000+ lines, auto-generated)
+core/templates/*.md       ├──→  (Gemini now uses bootstrap .gemini.md — no longer generated)
 core/agents/*.md          ──┘
 ```
 
 The build script (`scripts/build-integrations.sh`, ~700 lines) does:
-1. Reads each skill in `SKILL_ORDER` array order (28 skills, order matters)
+1. Reads each skill in `SKILL_ORDER` array order (25 skills, order matters)
 2. Validates YAML frontmatter (`name:` and `description:` required)
 3. Extracts body via `extract_body()`, skipping frontmatter
 4. Applies syntax transforms (`/draft:command` → `draft command` for Copilot)
@@ -94,22 +94,23 @@ The build script transforms skill content for platform compatibility:
 1. Create `skills/<skill-name>/SKILL.md` with frontmatter (kebab-case name, no path traversal chars)
 2. Add skill name to `SKILL_ORDER` array in `scripts/build-integrations.sh`
 3. Add display name and trigger to the case statements in the build script
-4. Run `make build && make test`
-5. Document in README.md
+4. Add `skills/<skill-name>/SKILL.md` to the `skills` array in `.claude-plugin/plugin.json`
+5. Run `make build && make test`
+6. Document in README.md
 
 ### Plugin Manifest
 
-`.claude-plugin/plugin.json` — registers skills with Claude Code. The `skills` field points to the `./skills/` directory for auto-discovery; `SKILL_ORDER` in the build script controls generation order for integrations.
+`.claude-plugin/plugin.json` — registers skills with Claude Code. The `skills` array lists paths alphabetically; `SKILL_ORDER` in the build script controls generation order (these are independent).
 
 ## End-User Context
 
 When users run `/draft:init`, it creates a `draft/` directory in their project with:
-- **`architecture.md`** — Source of truth: 31-section + 6-appendix system-level analysis covering 10 dimensions (structural decomposition, dependency graphs, execution flows, data flows, interaction surfaces, domain model, runtime behavior, configuration sensitivity, observability, failure modes). Includes 5 mandatory structured artifacts: system architecture diagram, execution flow diagrams, dependency graph visualization, data flow diagram, and context index.
-- **`.ai-context.md`** — Token-optimized 200-400 line AI context (derived from architecture.md) with DOMAIN, FLOWS, INTERACTIONS, DEPGRAPH, CONTEXT_INDEX, and RISK sections
+- **`architecture.md`** — Source of truth: 25-section comprehensive engineering reference
+- **`.ai-context.md`** — Token-optimized 200-400 line AI context (derived from architecture.md)
 - **`.ai-profile.md`** — Ultra-compact 20-50 line always-injected profile (derived from .ai-context.md)
 - **`product.md`**, **`tech-stack.md`**, **`workflow.md`**, **`guardrails.md`** — Project config files
 - **`tracks/`** — Individual feature/fix tracks with `spec.md`, `plan.md`, `metadata.json`
-- **`.state/`** — Freshness hashes, signal classification, fact registry, run memory for incremental refresh
+- **`.state/`** — Freshness hashes, signal classification, run memory for incremental refresh
 
 Status markers in tracks: `[ ]` Pending, `[~]` In Progress, `[x]` Completed, `[!]` Blocked
 

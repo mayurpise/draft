@@ -14,6 +14,7 @@
     <meta property="og:description" content="What Draft is, what it is not, who it is for, and what you get — 28 commands and 7 specialized agents for structured AI development.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://getdraft.dev/book/what-is-draft/">
+                    
     <meta property="og:image" content="https://getdraft.dev/social-preview.png">
     <meta property="og:image:alt" content="What is Draft? — Draft Book">
     <meta name="twitter:card" content="summary_large_image">
@@ -22,6 +23,22 @@
     <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
     <meta name="twitter:image:alt" content="What is Draft? — Draft Book">
     <link rel="canonical" href="https://getdraft.dev/book/what-is-draft/">
+    <link rel="alternate" hreflang="en" href="https://getdraft.dev/book/what-is-draft/">
+    <link rel="alternate" hreflang="x-default" href="https://getdraft.dev/book/what-is-draft/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://getdraft.dev/"},
+        {"@type": "ListItem", "position": 2, "name": "Book", "item": "https://getdraft.dev/book/"},
+        {"@type": "ListItem", "position": 3, "name": "What is Draft?", "item": "https://getdraft.dev/book/what-is-draft/"}
+      ]
+    }
+    </script>
+
+                    
 
     <script type="application/ld+json">
     {
@@ -30,6 +47,7 @@
       "headline": "What is Draft?",
       "description": "What Draft is, what it is not, who it is for, and what you get — 28 commands and 7 specialized agents for structured AI development.",
       "url": "https://getdraft.dev/book/what-is-draft/",
+                    
       "isPartOf": { "@type": "Book", "name": "The Draft Book", "url": "https://getdraft.dev/book/" },
       "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
       "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
@@ -56,8 +74,10 @@
     </noscript>
 
     <link rel="stylesheet" href="../css/book.css">
+    <link rel="stylesheet" href="../css/audio-player.css">
 </head>
 <body data-chapter="what-is-draft">
+                    
 
     <div class="reading-progress" id="reading-progress"></div>
     <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
@@ -89,9 +109,10 @@
             <div class="sidebar-part">
                 <div class="sidebar-part-title">Introduction</div>
                 <ul class="sidebar-chapters">
-                    <li><a href="../what-is-draft/" class="sidebar-chapter active" data-chapter="what-is-draft">
+                    <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
                         <span class="ch-num">0.</span>What is Draft?
                     </a></li>
+                    
                 </ul>
             </div>
             <div class="sidebar-part">
@@ -201,6 +222,13 @@
         </aside>
 
         <main class="book-content">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="/">Home</a></li>
+        <li><a href="/book/">Book</a></li>
+        <li aria-current="page">What is Draft?</li>
+      </ol>
+    </nav>
 <div class="chapter-wrapper">
     <h1>What is Draft?</h1>
     <p class="chapter-meta">Chapter 0</p>
@@ -386,6 +414,17 @@
     </div>
 </div>
 
+
+    <nav class="related-chapters" aria-label="Related chapters">
+      <h3>Related Chapters</h3>
+      <ul>
+        <li><a href="/book/the-problem/">The Problem</a> &mdash; Why AI coding assistants produce wrong code without structured methodology</li>
+        <li><a href="/book/context-driven-development/">Context-Driven Development</a> &mdash; The methodology that grounds every decision in explicit, reviewable documents</li>
+        <li><a href="/book/getting-started/">Getting Started</a> &mdash; Install Draft and run your first commands in five minutes</li>
+        <li><a href="/book/command-reference/">Command Reference</a> &mdash; Complete reference for all 28 Draft slash commands</li>
+      </ul>
+    </nav>
+
             <nav class="chapter-nav">
                 <div></div>
                 <a href="../the-problem/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">The Problem</span></a>
@@ -399,5 +438,6 @@
     </div>
 
     <script src="../js/book.js"></script>
+    <script src="../js/audio-player.js"></script>
 </body>
 </html>

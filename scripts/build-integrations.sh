@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Build integration files from skill sources
-# Generates: GitHub Copilot copilot-instructions.md
+# Generates: GitHub Copilot copilot-instructions.md + Gemini GEMINI.md
 #
 # Note: Cursor integration removed - Cursor now supports .claude/ plugin structure natively.
 # Use: Cursor > Settings > Rules, Skills, Subagents > Rules > New > Add from Github
@@ -52,9 +52,6 @@ SKILL_ORDER=(
     standup
     tech-debt
     testing-strategy
-    assist-review
-    impact
-    tour
 )
 
 get_skill_header() {
@@ -85,9 +82,6 @@ get_skill_header() {
         standup)           echo "Standup Command" ;;
         tech-debt)         echo "Tech Debt Command" ;;
         testing-strategy)  echo "Testing Strategy Command" ;;
-        assist-review)     echo "Assist Review Command" ;;
-        impact)            echo "Impact Command" ;;
-        tour)              echo "Tour Command" ;;
         *)            echo "$(echo "${skill:0:1}" | tr '[:lower:]' '[:upper:]')${skill:1} Command" ;;
     esac
 }
@@ -122,9 +116,6 @@ get_trigger() {
         standup)           echo "\"standup\" or \"${prefix}draft standup [date|week|save]\"" ;;
         tech-debt)         echo "\"tech debt\" or \"${prefix}draft tech-debt [path|track <id>]\"" ;;
         testing-strategy)  echo "\"test strategy\" or \"${prefix}draft testing-strategy [track <id>|path]\"" ;;
-        assist-review)     echo "\"assist review\" or \"${prefix}draft assist-review [track <id>]\"" ;;
-        impact)            echo "\"impact analysis\" or \"${prefix}draft impact\"" ;;
-        tour)              echo "\"tour codebase\" or \"${prefix}draft tour\"" ;;
         *)            echo "\"${prefix}draft $skill\"" ;;
     esac
 }
@@ -474,17 +465,6 @@ COMMON_HEADER
     echo "| \`${command_prefix} change <description>\` | Handle mid-track requirement changes |"
     echo "| \`${command_prefix} jira-preview [track-id]\` | Generate jira-export.md for review |"
     echo "| \`${command_prefix} jira-create [track-id]\` | Create Jira issues from export via MCP |"
-    echo "| \`${command_prefix} debug [description]\` | Systematic debugging with root cause analysis |"
-    echo "| \`${command_prefix} deploy-checklist [track <id>]\` | Pre-deployment verification checklist |"
-    echo "| \`${command_prefix} documentation [type]\` | Generate project documentation |"
-    echo "| \`${command_prefix} incident-response [action]\` | Incident management workflow |"
-    echo "| \`${command_prefix} quick-review [file\\|pr]\` | Lightweight code review |"
-    echo "| \`${command_prefix} standup [date\\|week\\|save]\` | Generate standup reports |"
-    echo "| \`${command_prefix} tech-debt [path]\` | Identify and track technical debt |"
-    echo "| \`${command_prefix} testing-strategy [target]\` | Design testing approach |"
-    echo "| \`${command_prefix} assist-review [track <id>]\` | Human-in-the-loop review assistant |"
-    echo "| \`${command_prefix} impact\` | Telemetry and analytics for track ROI |"
-    echo "| \`${command_prefix} tour\` | Interactive codebase onboarding tour |"
 
     # Rest of header (common)
     cat << 'COMMON_HEADER2'
@@ -511,17 +491,6 @@ Recognize these natural language patterns:
 | "preview jira", "export to jira" | Run jira-preview |
 | "create jira", "push to jira" | Run jira-create |
 | "document decision", "create ADR" | Create architecture decision record |
-| "debug bug", "investigate issue" | Run debug |
-| "deploy checklist", "pre-deploy check" | Run deploy-checklist |
-| "write docs", "generate documentation" | Run documentation |
-| "incident", "outage response" | Run incident-response |
-| "quick review", "review file" | Run quick-review |
-| "standup", "daily update" | Run standup |
-| "tech debt", "find debt" | Run tech-debt |
-| "test strategy", "testing approach" | Run testing-strategy |
-| "assist review", "help review PR" | Run assist-review |
-| "impact analysis", "track ROI" | Run impact |
-| "tour codebase", "onboard me" | Run tour |
 | "help", "what commands" | Show draft overview |
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |

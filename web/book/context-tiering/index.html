@@ -22,6 +22,20 @@
     <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
     <meta name="twitter:image:alt" content="Context Tiering — Draft Book">
     <link rel="canonical" href="https://getdraft.dev/book/context-tiering/">
+    <link rel="alternate" hreflang="en" href="https://getdraft.dev/book/context-tiering/">
+    <link rel="alternate" hreflang="x-default" href="https://getdraft.dev/book/context-tiering/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://getdraft.dev/"},
+        {"@type": "ListItem", "position": 2, "name": "Book", "item": "https://getdraft.dev/book/"},
+        {"@type": "ListItem", "position": 3, "name": "Context Tiering", "item": "https://getdraft.dev/book/context-tiering/"}
+      ]
+    }
+    </script>
 
     <script type="application/ld+json">
     {
@@ -56,6 +70,7 @@
     </noscript>
 
     <link rel="stylesheet" href="../css/book.css">
+    <link rel="stylesheet" href="../css/audio-player.css">
 </head>
 <body data-chapter="context-tiering">
 
@@ -92,6 +107,7 @@
                     <li><a href="../what-is-draft/" class="sidebar-chapter" data-chapter="what-is-draft">
                         <span class="ch-num">0.</span>What is Draft?
                     </a></li>
+                    
                 </ul>
             </div>
             <div class="sidebar-part">
@@ -201,6 +217,13 @@
         </aside>
 
         <main class="book-content">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="/">Home</a></li>
+        <li><a href="/book/">Book</a></li>
+        <li aria-current="page">Context Tiering</li>
+      </ol>
+    </nav>
 <div class="chapter-wrapper">
     <h1>Context Tiering</h1>
     <p class="chapter-meta"><span class="part-name">Part III: How Draft Thinks</span> &middot; Chapter 10</p>
@@ -230,7 +253,7 @@
                 <text x="360" y="192" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Tier 2</text>
                 <text x="590" y="175" fill="#059669" font-size="11" font-weight="600">architecture.md</text>
                 <text x="590" y="190" fill="#718096" font-size="10">Full document | Deep analysis</text>
-                <text x="590" y="205" fill="#718096" font-size="10">31 sections + appendices</text>
+                <text x="590" y="205" fill="#718096" font-size="10">25 sections + appendices</text>
             </svg>
         </div>
         <div class="figure-caption">Context tiering pyramid: smaller tiers load faster and are used more frequently. Each tier adds depth for tasks that need it.</div>
@@ -335,7 +358,7 @@ coverage: `npm run coverage` | target: 80% line coverage</code></pre>
     </div>
 
     <h2>Tier 2: The Full Architecture</h2>
-    <p>The file <code>draft/architecture.md</code> is the source of truth. It is a comprehensive, human-readable engineering reference with 31 sections and 6 appendices, complete with Mermaid diagrams, code snippets, interaction matrices, and state machine definitions. It exists for two audiences: AI agents performing deep analysis, and engineers who need to understand a module without reading source code.</p>
+    <p>The file <code>draft/architecture.md</code> is the source of truth. It is a comprehensive, human-readable engineering reference with 25 sections and 4 appendices, complete with Mermaid diagrams, code snippets, interaction matrices, and state machine definitions. It exists for two audiences: AI agents performing deep analysis, and engineers who need to understand a module without reading source code.</p>
 
     <p>Tier 2 is loaded only for deep analysis: <code>/draft:init</code> refresh, <code>/draft:deep-review</code>, <code>/draft:decompose</code>, and full architecture refreshes. Most day-to-day development never touches it. When it is loaded, it provides exhaustive context that Tier 1 intentionally omits: per-module state machines, thread safety annotations, the full implementation catalog, concurrency model details, and configuration reference tables.</p>
 
@@ -466,6 +489,17 @@ coverage: `npm run coverage` | target: 80% line coverage</code></pre>
     <p>The three-tier system also reflects a truth about information relevance: most of your project's architectural knowledge is irrelevant to any single task. Loading it anyway does not make the AI smarter. It makes it noisier. Focused context produces focused output.</p>
 </div>
 
+
+    <nav class="related-chapters" aria-label="Related chapters">
+      <h3>Related Chapters</h3>
+      <ul>
+        <li><a href="/book/agent-system/">The Agent System</a> &mdash; Agents that consume tiered context</li>
+        <li><a href="/book/signal-classification/">Signal Classification</a> &mdash; How files are classified to determine context depth</li>
+        <li><a href="/book/incremental-refresh/">Incremental Refresh</a> &mdash; How context tiers are kept fresh</li>
+        <li><a href="/book/context-driven-development/">Context-Driven Development</a> &mdash; The methodology that relies on tiered context</li>
+      </ul>
+    </nav>
+
             <nav class="chapter-nav">
                 <a href="../adrs/" class="chapter-nav-link chapter-nav-link--prev"><span class="chapter-nav-label">&larr; Previous</span><span class="chapter-nav-title">Architecture Decision Records</span></a>
                 <a href="../agent-system/" class="chapter-nav-link chapter-nav-link--next"><span class="chapter-nav-label">Next &rarr;</span><span class="chapter-nav-title">The Agent System</span></a>
@@ -479,5 +513,6 @@ coverage: `npm run coverage` | target: 80% line coverage</code></pre>
     </div>
 
     <script src="../js/book.js"></script>
+    <script src="../js/audio-player.js"></script>
 </body>
 </html>

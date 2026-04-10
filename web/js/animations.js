@@ -57,24 +57,16 @@
         });
     });
 
-    // Re-observe the newly classed elements
-    document.querySelectorAll(
-        '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-stagger, .pipeline'
-    ).forEach(function(el) {
-        if (!el.classList.contains('visible')) {
-            var observer = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            });
-            observer.observe(el);
-        }
-    });
+    // Re-observe the newly classed elements (reuse the single observer)
+    if (revealObserver) {
+        document.querySelectorAll(
+            '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-stagger, .pipeline'
+        ).forEach(function(el) {
+            if (!el.classList.contains('visible')) {
+                revealObserver.observe(el);
+            }
+        });
+    }
 
     // ============================================================
     // PARALLAX TILT ON BENTO CARDS

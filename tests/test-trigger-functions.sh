@@ -2,7 +2,9 @@
 # Test suite for trigger function coverage
 #
 # What this tests:
+# - Every skill in SKILL_ORDER has an explicit case entry in get_skill_header
 # - Every skill in SKILL_ORDER has an explicit case entry in get_trigger
+# - Gemini triggers contain @draft prefix
 # - Copilot triggers do NOT contain @draft prefix
 # - No skill falls through to the wildcard (*) case
 #

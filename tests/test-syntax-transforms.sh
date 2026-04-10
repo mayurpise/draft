@@ -2,6 +2,7 @@
 # Test suite for syntax transform functions
 #
 # What this tests:
+# - Gemini transform: /draft:command → @draft command
 # - Copilot transform: /draft:command → draft command, @draft → draft
 # - Edge cases: multiple occurrences, mid-sentence, backtick-wrapped
 #

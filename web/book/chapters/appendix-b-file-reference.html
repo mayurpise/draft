@@ -106,11 +106,11 @@
         <tbody>
             <tr>
                 <td><code>architecture.md</code></td>
-                <td>Comprehensive engineering reference with 31 sections. Source of truth for project architecture. Includes Mermaid diagrams, code snippets, module boundaries, data flows, and critical invariants.</td>
+                <td>Comprehensive engineering reference with 25 sections. Source of truth for project architecture. Includes Mermaid diagrams, code snippets, module boundaries, data flows, and critical invariants.</td>
                 <td>1000-3000 lines</td>
                 <td>Human &amp; AI</td>
                 <td><code>/draft:init</code></td>
-                <td><code>/draft:init --refresh</code>, <code>/draft:decompose</code></td>
+                <td><code>/draft:init refresh</code>, <code>/draft:decompose</code></td>
             </tr>
             <tr>
                 <td><code>.ai-context.md</code></td>
@@ -134,7 +134,7 @@
                 <td>50-150 lines</td>
                 <td>Human &amp; AI</td>
                 <td><code>/draft:init</code></td>
-                <td>Manual edits, <code>/draft:init --refresh</code></td>
+                <td>Manual edits, <code>/draft:init refresh</code></td>
             </tr>
             <tr>
                 <td><code>tech-stack.md</code></td>
@@ -192,7 +192,7 @@
                 <td>1-5 KB</td>
                 <td>AI (internal)</td>
                 <td><code>/draft:init</code></td>
-                <td><code>/draft:init --refresh</code></td>
+                <td><code>/draft:init refresh</code></td>
             </tr>
             <tr>
                 <td><code>signals.json</code></td>
@@ -200,15 +200,15 @@
                 <td>1-5 KB</td>
                 <td>AI (internal)</td>
                 <td><code>/draft:init</code></td>
-                <td><code>/draft:init --refresh</code></td>
+                <td><code>/draft:init refresh</code></td>
             </tr>
             <tr>
                 <td><code>run-memory.json</code></td>
                 <td>Cross-session continuity data. Records what happened in previous sessions to enable context persistence across agent invocations.</td>
                 <td>1-10 KB</td>
                 <td>AI (internal)</td>
-                <td><code>/draft:init</code>, <code>/draft:index</code></td>
-                <td><code>/draft:init --refresh</code>, <code>/draft:index</code></td>
+                <td>First agent invocation</td>
+                <td>Each session</td>
             </tr>
             <tr>
                 <td><code>facts.json</code></td>
@@ -216,7 +216,7 @@
                 <td>1-20 KB</td>
                 <td>AI (internal)</td>
                 <td><code>/draft:init</code></td>
-                <td><code>/draft:init --refresh</code></td>
+                <td><code>/draft:init refresh</code></td>
             </tr>
         </tbody>
     </table>
@@ -361,20 +361,12 @@
                 <td>Technology distribution across services with organizational standards and variances</td>
             </tr>
             <tr>
-                <td><code>draft/.ai-context.md</code></td>
-                <td>Token-optimized AI context aggregating all service knowledge (200-400 lines)</td>
-            </tr>
-            <tr>
-                <td><code>draft/.ai-profile.md</code></td>
-                <td>Ultra-compact Tier 0 profile for always-on injection (20-50 lines)</td>
-            </tr>
-            <tr>
                 <td><code>draft/config.yaml</code></td>
                 <td>Index configuration: service detection patterns, exclusions, re-index triggers</td>
             </tr>
             <tr>
                 <td><code>draft/bughunt-summary.md</code></td>
-                <td>Aggregate bughunt results across services (created by <code>/draft:index --bughunt</code>)</td>
+                <td>Aggregate bughunt results across services (created by <code>/draft:index bughunt</code>)</td>
             </tr>
             <tr>
                 <td><code>&lt;service&gt;/draft/manifest.json</code></td>

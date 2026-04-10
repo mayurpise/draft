@@ -31,7 +31,7 @@ done <<< "$SKILL_ORDER_RAW"
 extract_case_entries() {
     local func_name="$1"
     # Find the function, extract case entries (lines matching "skill-name)")
-    sed -n "/^${func_name}()/,/^}/p" "$BUILD_SCRIPT" | sed -n 's/^[[:space:]]*\([a-z0-9-]*\)).*$/\1/p' || true
+    sed -n "/^${func_name}()/,/^}/p" "$BUILD_SCRIPT" | sed -n 's/^[[:space:]]*\([a-z0-9][a-z0-9-]*\)).*$/\1/p' || true
 }
 
 TRIGGER_CASES=$(extract_case_entries "get_trigger")

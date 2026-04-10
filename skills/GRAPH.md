@@ -238,7 +238,7 @@ init → learn → (updates guardrails.md)
 | Condensation Subroutine (.ai-context.md regeneration) | `init` | implement, decompose, coverage, index |
 | Standard File Metadata (YAML frontmatter) | `init` | All skills that generate draft/ files |
 | Three-Stage Review | `review` | implement (at phase boundaries) |
-| Signal Classification | `init` | init --refresh, index (future) |
+| Signal Classification | `init` | init refresh, index (future) |
 | Pattern Learning | `core/shared/pattern-learning.md` | learn, bughunt, review, deep-review (updates guardrails.md) |
 | Context Loading | `core/shared/draft-context-loading.md` | All skills requiring draft/ context |
 | Cross-Skill Dispatch | `core/shared/cross-skill-dispatch.md` | bughunt, deep-review, implement, review |

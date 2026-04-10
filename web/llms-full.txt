@@ -144,7 +144,7 @@ When users run `/draft:init`, it creates a `draft/` directory in their project:
 
 ```
 draft/
-  architecture.md       — Source of truth: 31-section + 6-appendix system-level analysis (10 dimensions, 5 mandatory artifacts)
+  architecture.md       — Source of truth: 25-section comprehensive engineering reference
   .ai-context.md        — Token-optimized 200-400 line AI context (derived from architecture.md)
   .ai-profile.md        — Ultra-compact 20-50 line always-injected profile
   product.md            — Users, goals, success criteria, guidelines

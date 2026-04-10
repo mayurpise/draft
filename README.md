@@ -85,7 +85,7 @@ curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integr
 | Command | What It Does |
 |---------|--------------|
 | **`/draft`** | Overview, intent mapping, and command reference |
-| **`/draft:init`** | System-level codebase analysis: 31 sections + 6 appendices + 5 structured artifacts |
+| **`/draft:init`** | Analyze codebase, create context files + state tracking |
 | **`/draft:index`** | Aggregate monorepo service contexts |
 | **`/draft:new-track`** | Collaborative spec + plan with AI |
 | **`/draft:decompose`** | Module decomposition with dependency mapping |
@@ -145,8 +145,8 @@ curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integr
 │        Three-stage review (validation + spec + quality)     │
 └─────────────────────────────────────────────────────────────┘
 
-         /draft:init --refresh  ←── incremental: only re-analyze
-                                    files with changed hashes
+         /draft:init refresh  ←── incremental: only re-analyze
+                                   files with changed hashes
 ```
 
 [Full workflow →](core/methodology.md#core-workflow)
@@ -160,22 +160,16 @@ AI tools are fast but unstructured. Draft applies Context-Driven Development to 
 ```
 product.md       →  "Build a task manager"
 tech-stack.md    →  "React, TypeScript, Tailwind"
-architecture.md  →  31 sections + 6 appendices: domain model, execution flows, dependency graphs,
-                     interaction surfaces, context index (machine-usable system model)
+architecture.md  →  Comprehensive: 25 sections + appendices, Mermaid diagrams (source of truth)
 .ai-context.md   →  200-400 lines: condensed from architecture.md (token-optimized AI context)
-.ai-profile.md   →  20-50 lines: ultra-compact always-on profile (active tracks, key constraints)
-.state/          →  freshness hashes, signal classification, fact registry, run memory
+.state/          →  freshness hashes, signal classification, run memory (incremental refresh)
 spec.md          →  "Add drag-and-drop reordering"
 plan.md          →  "Phase 1: sortable, Phase 2: persist"
 ```
 
 Each layer narrows the solution space. By the time AI writes code, decisions are made.
 
-**System-level analysis**: Init produces a machine-usable mental model across 10 dimensions: structural decomposition, dependency graphs (static + dynamic), execution flow mapping, data flow analysis, interaction surfaces, domain model extraction, runtime behavior, configuration sensitivity, observability hooks, and failure mode/risk zone identification. The output includes 5 mandatory structured artifacts: system architecture diagram, execution flow diagrams, dependency graph visualization, data flow diagram, and a context index mapping every file to its responsibility, dependencies, and entry points.
-
-**Module detection**: Init uses two-tier module detection — Tier 1 scans top-level directories for initial boundaries, Tier 2 recurses into each to discover sub-modules using import graphs, build file markers, and DI wiring. Sub-modules are promoted when a parent directory contains 2+ children. The module map is refined during Phase 2 import analysis. Each discovered module gets a full deep dive in the architecture.
-
-**Incremental refresh**: `/draft:init --refresh` uses stored file hashes and signal classification to only re-analyze what changed. Early-exit happens after signal analysis to catch structural drift. Use `--force` to bypass freshness checks and force full re-analysis when methodology has been updated. Cross-session continuity via `run-memory.json` enables resume from interrupted runs.
+**Incremental refresh**: After initial setup, `/draft:init refresh` uses stored file hashes and signal classification to only re-analyze what changed — no full re-scan needed.
 
 [Read methodology →](core/methodology.md#philosophy)
 

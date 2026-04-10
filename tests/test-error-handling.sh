@@ -47,9 +47,8 @@ create_modified_script "$MODIFIED_SCRIPT"
 # Add a fake skill to SKILL_ORDER
 awk '/^SKILL_ORDER=\(/{print; print "    zzz-nonexistent-skill"; next}1' "$MODIFIED_SCRIPT" > "$MODIFIED_SCRIPT.tmp" && mv "$MODIFIED_SCRIPT.tmp" "$MODIFIED_SCRIPT" && chmod +x "$MODIFIED_SCRIPT"
 
-STDERR=$("$MODIFIED_SCRIPT" 2>&1 >/dev/null || true)
 EXIT_CODE=0
-"$MODIFIED_SCRIPT" > /dev/null 2>/dev/null || EXIT_CODE=$?
+STDERR=$("$MODIFIED_SCRIPT" 2>&1 >/dev/null) || EXIT_CODE=$?
 
 assert "Build exits non-zero when skill file is missing" \
     "$([[ "$EXIT_CODE" -ne 0 ]] && echo true || echo false)"
@@ -79,9 +78,8 @@ MODIFIED_SCRIPT2="$TMPDIR_BASE/modified-build2.sh"
 create_modified_script "$MODIFIED_SCRIPT2"
 awk '/^SKILL_ORDER=\(/{print; print "    zzz-test-bad-frontmatter"; next}1' "$MODIFIED_SCRIPT2" > "$MODIFIED_SCRIPT2.tmp" && mv "$MODIFIED_SCRIPT2.tmp" "$MODIFIED_SCRIPT2" && chmod +x "$MODIFIED_SCRIPT2"
 
-STDERR2=$("$MODIFIED_SCRIPT2" 2>&1 >/dev/null || true)
 EXIT_CODE2=0
-"$MODIFIED_SCRIPT2" > /dev/null 2>/dev/null || EXIT_CODE2=$?
+STDERR2=$("$MODIFIED_SCRIPT2" 2>&1 >/dev/null) || EXIT_CODE2=$?
 
 assert "Build exits non-zero for skill with missing description" \
     "$([[ "$EXIT_CODE2" -ne 0 ]] && echo true || echo false)"
@@ -101,9 +99,8 @@ create_modified_script "$MODIFIED_SCRIPT3"
 # Add an invalid skill name (uppercase)
 awk '/^SKILL_ORDER=\(/{print; print "    InvalidName"; next}1' "$MODIFIED_SCRIPT3" > "$MODIFIED_SCRIPT3.tmp" && mv "$MODIFIED_SCRIPT3.tmp" "$MODIFIED_SCRIPT3" && chmod +x "$MODIFIED_SCRIPT3"
 
-STDERR3=$("$MODIFIED_SCRIPT3" 2>&1 >/dev/null || true)
 EXIT_CODE3=0
-"$MODIFIED_SCRIPT3" > /dev/null 2>/dev/null || EXIT_CODE3=$?
+STDERR3=$("$MODIFIED_SCRIPT3" 2>&1 >/dev/null) || EXIT_CODE3=$?
 
 assert "Build exits non-zero for invalid skill name" \
     "$([[ "$EXIT_CODE3" -ne 0 ]] && echo true || echo false)"

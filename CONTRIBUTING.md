@@ -84,9 +84,10 @@ Execution instructions...
 ```
 
 2. The body **must** start with `# Title` followed by a blank line (build script skips first 3 body lines via `tail -n +4`)
-3. Run `./scripts/build-integrations.sh`
-4. Add the command to `README.md`
-5. Add a test if the skill has validatable behavior
+3. Add the skill name to `SKILL_ORDER` array and add header/trigger case entries in `scripts/build-integrations.sh`
+4. Run `make build && make test`
+5. Add the command to `README.md`
+6. Add a test if the skill has validatable behavior
 
 ## Source of Truth Hierarchy
 
@@ -102,4 +103,4 @@ Execution instructions...
 
 ## Code of Conduct
 
-This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
+This project follows the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).

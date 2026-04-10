@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides 25 slash commands organized in a two-tier architecture: 4 primary workflow commands (`/draft:init`, `/draft:new-track`, `/draft:implement`, `/draft:review`) with auto-invocation, plus 21 specialist commands for debugging (`/draft:debug`), operations (`/draft:deploy-checklist`, `/draft:incident-response`, `/draft:standup`), quality (`/draft:quick-review`, `/draft:testing-strategy`, `/draft:tech-debt`), authoring (`/draft:documentation`), and more (`/draft:status`, `/draft:revert`, `/draft:decompose`, `/draft:coverage`, `/draft:deep-review`, `/draft:bughunt`, `/draft:learn`, `/draft:adr`, `/draft:change`, `/draft:index`, `/draft:jira-preview`, `/draft:jira-create`). Run `/draft` for overview.
+Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides 28 slash commands organized in a two-tier architecture: 4 primary workflow commands (`/draft:init`, `/draft:new-track`, `/draft:implement`, `/draft:review`) with auto-invocation, plus 24 specialist commands for debugging (`/draft:debug`), operations (`/draft:deploy-checklist`, `/draft:incident-response`, `/draft:standup`), quality (`/draft:quick-review`, `/draft:testing-strategy`, `/draft:tech-debt`), authoring (`/draft:documentation`), DX (`/draft:assist-review`, `/draft:impact`, `/draft:tour`), and more (`/draft:status`, `/draft:revert`, `/draft:decompose`, `/draft:coverage`, `/draft:deep-review`, `/draft:bughunt`, `/draft:learn`, `/draft:adr`, `/draft:change`, `/draft:index`, `/draft:jira-preview`, `/draft:jira-create`). Run `/draft` for overview.
 
 The codebase is entirely markdown and bash — no application runtime. Skills (markdown files) are the source of truth, processed by a bash build script into platform-specific integration files for Copilot and Gemini.
 
@@ -38,7 +38,7 @@ core/agents/*.md          ──┘
 ```
 
 The build script (`scripts/build-integrations.sh`, ~700 lines) does:
-1. Reads each skill in `SKILL_ORDER` array order (25 skills, order matters)
+1. Reads each skill in `SKILL_ORDER` array order (28 skills, order matters)
 2. Validates YAML frontmatter (`name:` and `description:` required)
 3. Extracts body via `extract_body()`, skipping frontmatter
 4. Applies syntax transforms (`/draft:command` → `draft command` for Copilot)
@@ -94,13 +94,12 @@ The build script transforms skill content for platform compatibility:
 1. Create `skills/<skill-name>/SKILL.md` with frontmatter (kebab-case name, no path traversal chars)
 2. Add skill name to `SKILL_ORDER` array in `scripts/build-integrations.sh`
 3. Add display name and trigger to the case statements in the build script
-4. Add `skills/<skill-name>/SKILL.md` to the `skills` array in `.claude-plugin/plugin.json`
-5. Run `make build && make test`
-6. Document in README.md
+4. Run `make build && make test` (plugin.json auto-discovers skills via directory convention)
+5. Document in README.md
 
 ### Plugin Manifest
 
-`.claude-plugin/plugin.json` — registers skills with Claude Code. The `skills` array lists paths alphabetically; `SKILL_ORDER` in the build script controls generation order (these are independent).
+`.claude-plugin/plugin.json` — registers skills with Claude Code. The `skills` field uses a directory path (`"./skills/"`) for auto-discovery; `SKILL_ORDER` in the build script controls integration generation order (these are independent).
 
 ## End-User Context
 

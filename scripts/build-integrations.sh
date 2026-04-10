@@ -52,6 +52,9 @@ SKILL_ORDER=(
     standup
     tech-debt
     testing-strategy
+    assist-review
+    impact
+    tour
 )
 
 get_skill_header() {
@@ -82,6 +85,9 @@ get_skill_header() {
         standup)           echo "Standup Command" ;;
         tech-debt)         echo "Tech Debt Command" ;;
         testing-strategy)  echo "Testing Strategy Command" ;;
+        assist-review)     echo "Assist Review Command" ;;
+        impact)            echo "Impact Command" ;;
+        tour)              echo "Tour Command" ;;
         *)            echo "$(echo "${skill:0:1}" | tr '[:lower:]' '[:upper:]')${skill:1} Command" ;;
     esac
 }
@@ -116,6 +122,9 @@ get_trigger() {
         standup)           echo "\"standup\" or \"${prefix}draft standup [date|week|save]\"" ;;
         tech-debt)         echo "\"tech debt\" or \"${prefix}draft tech-debt [path|track <id>]\"" ;;
         testing-strategy)  echo "\"test strategy\" or \"${prefix}draft testing-strategy [track <id>|path]\"" ;;
+        assist-review)     echo "\"assist review\" or \"${prefix}draft assist-review [track <id>|pr <number>]\"" ;;
+        impact)            echo "\"impact report\" or \"${prefix}draft impact [track <id>|--all]\"" ;;
+        tour)              echo "\"tour codebase\" or \"${prefix}draft tour [module|--interactive]\"" ;;
         *)            echo "\"${prefix}draft $skill\"" ;;
     esac
 }
@@ -465,6 +474,9 @@ COMMON_HEADER
     echo "| \`${command_prefix} change <description>\` | Handle mid-track requirement changes |"
     echo "| \`${command_prefix} jira-preview [track-id]\` | Generate jira-export.md for review |"
     echo "| \`${command_prefix} jira-create [track-id]\` | Create Jira issues from export via MCP |"
+    echo "| \`${command_prefix} assist-review [track <id>]\` | Audit PR risks for human reviewers |"
+    echo "| \`${command_prefix} impact [track <id>]\` | ROI analytics and project friction metrics |"
+    echo "| \`${command_prefix} tour [module]\` | Interactive architecture walk-through |"
 
     # Rest of header (common)
     cat << 'COMMON_HEADER2'
@@ -491,6 +503,9 @@ Recognize these natural language patterns:
 | "preview jira", "export to jira" | Run jira-preview |
 | "create jira", "push to jira" | Run jira-create |
 | "document decision", "create ADR" | Create architecture decision record |
+| "assist review", "PR risks for reviewer" | Run assist-review |
+| "impact report", "ROI analytics" | Run impact |
+| "tour codebase", "walk me through" | Run tour |
 | "help", "what commands" | Show draft overview |
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |

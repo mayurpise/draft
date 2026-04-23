@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Execute tasks from the current track's plan using TDD workflow. Implements tasks phase by phase with progress tracking.
+description: "Executes tasks from the current track's plan using TDD workflow (red-green-refactor). Implements one task at a time, commits after each, runs three-stage review at phase boundaries, and tracks progress in plan.md. Use when the user asks to implement the next task, start coding, continue a plan, run test-driven development, or says 'start implementing'."
 ---
 
 # Implement Track
@@ -199,74 +199,19 @@ See `core/agents/architect.md` for execution state and skeleton guidelines.
 
 ### Step 3.0c: Production Robustness Patterns (REQUIRED)
 
-**Applies to all code generation** — architecture mode or not. These patterns are generation directives, not a post-hoc checklist. Apply them **while writing code**, not after.
+**Applies to all code generation** — architecture mode or not. Apply these patterns **while writing code**, not after.
 
-When your implementation hits any of these triggers, use the corresponding pattern. Do not write code that violates these and plan to "fix it later."
+Apply the relevant pattern when your implementation hits any of these categories. Skip categories that are N/A for the current task:
 
-#### Atomicity
+- **Atomicity** — Transactions/rollback for multi-step mutations, temp-file+rename for file writes, DB-first for paired DB+memory updates, finally/defer/RAII for resource cleanup
+- **Isolation** — Lock before mutating shared state, separate lifecycle locks from data locks, return copies not mutable references, never nest locks without documented ordering
+- **Durability** — Critical state recoverable from DB/disk alone, await all DB writes (no fire-and-forget), append-only for audit trails
+- **Defensive Boundaries** — Guard external numeric data with isFinite/isnan, validate API response fields before access, parameterized SQL only, allowlist dynamic SQL identifiers
+- **Idempotency** — Dedup keys for retryable operations, validate state transitions are legal, dedup alert emissions
+- **Fail-Closed** — Default to deny/restrictive on errors, treat missing data as deny, use restrictive defaults for missing config
+- **Resilience** — Exponential backoff with jitter for retries, cache stampede prevention, circuit breakers for external calls, graceful degradation for non-critical deps
 
-| Trigger | Required Pattern |
-|---------|-----------------|
-| Multi-step state mutation (DB + memory, multiple records) | Wrap in transaction or try/finally with rollback on failure |
-| File write | Write to temp file + atomic rename to target path. Never write directly to the target. |
-| DB write paired with in-memory state update | DB-first: persist to DB, update memory only on DB success. Never update memory optimistically. |
-| Resource acquisition (locks, file handles, connections, capital) | Release in `finally` / `defer` / RAII — never rely on happy-path-only cleanup |
-
-#### Isolation
-
-| Trigger | Required Pattern |
-|---------|-----------------|
-| Method mutates shared/instance state | Acquire the class's or module's existing lock before mutation |
-| Lifecycle operations (start/stop/reset/reconnect) | Use a dedicated lifecycle lock, separate from data locks |
-| Returning internal state to callers | Return a deep copy or frozen snapshot — never a mutable reference to internal state |
-| Acquiring a second lock while holding one | Follow documented lock ordering. If no ordering exists, do not nest locks — restructure to acquire sequentially. |
-| DB I/O while holding a state lock | Move DB I/O outside the lock scope. Lock only the in-memory mutation, not the I/O. |
-
-#### Durability
-
-| Trigger | Required Pattern |
-|---------|-----------------|
-| Critical state that must survive crashes | Ensure state is recoverable from DB/disk alone — no reliance on in-memory-only state for recovery |
-| Async DB write (fire-and-forget) | Await the write. Check return value or propagate exceptions. No fire-and-forget on data persistence. |
-| Event log / audit trail / fill history | Use append-only pattern where specified by architecture |
-
-#### Defensive Boundaries
-
-| Trigger | Required Pattern |
-|---------|-----------------|
-| External numeric data used in arithmetic | Guard with `isFinite()` / `isnan()` / equivalent before any calculation |
-| External API/webhook response consumed | Validate expected fields exist and have correct types before accessing nested properties |
-| SQL query with dynamic values | Parameterized queries only — zero string interpolation for values |
-| Dynamic column names, table names, or identifiers in SQL | Validate against an explicit allowlist — never pass user-controlled strings as identifiers |
-
-#### Idempotency
-
-| Trigger | Required Pattern |
-|---------|-----------------|
-| Operation that may be retried (network calls, queue consumers, webhook handlers) | Use a dedup key (UUID, request ID, fill ID) — check-before-write or upsert |
-| State transition (status changes, lifecycle events) | Validate the transition is legal from the current state. Reject terminal→terminal transitions. |
-| Alert / notification emission | Dedup on (alert_type, entity_id, time_window) to prevent re-firing on retries |
-
-#### Fail-Closed
-
-| Trigger | Required Pattern |
-|---------|-----------------|
-| Error path or exception handler that determines access/action | Default to the safe/restrictive/deny state — never default to permissive on error |
-| Missing data, null, or undefined where a decision depends on it | Treat as deny/reject/skip — not as allow/proceed |
-| Config or feature flag missing/unparseable | Use the restrictive default — system runs in safe mode, not open mode |
-
-#### Resilience
-
-| Trigger | Required Pattern |
-|---------|-----------------|
-| Any retry logic | Exponential backoff with jitter — never fixed-interval or immediate retries. Prevents retry storms. |
-| Cache population under high concurrency | Cache stampede prevention: use probabilistic early expiration or request coalescing to prevent thundering herd |
-| External dependency call (HTTP, RPC, DB to external service) | Circuit breaker pattern: track failure rate, open circuit on threshold, allow periodic probes to recover |
-| Non-critical dependency failure | Graceful degradation: return cached/default/partial result rather than failing the entire request |
-
-**Enforcement:** These patterns override convenience. If following a pattern makes the code more verbose, that's correct — the verbosity is the safety. If a pattern is genuinely N/A for the current task (e.g., no DB in a pure utility function), skip it — only apply relevant patterns.
-
-**If project invariants were loaded in Step 1:** Cross-reference them here. Project-specific invariants (lock ordering, concurrency model, consistency boundaries) take precedence over these general patterns when they conflict.
+**If project invariants were loaded in Step 1:** Project-specific invariants take precedence over these general patterns when they conflict.
 
 ---
 
@@ -276,17 +221,7 @@ For each task, follow this workflow based on `workflow.md`. If skeletons were ge
 
 ### Characterization Testing (Refactoring Existing Code Without Tests)
 
-When a task involves refactoring existing code that lacks test coverage, run this **before** the TDD cycle:
-
-1. **Identify seams** (Michael Feathers' technique):
-   - Object seams: interfaces where test doubles can be injected
-   - Link seams: module imports that can be swapped
-2. **Write characterization tests** that capture the current behavior as a baseline
-   - Run the existing code and record actual outputs for representative inputs
-   - These tests document "what it does now," not "what it should do"
-3. Proceed with the TDD cycle below for the new/changed behavior
-4. Characterization tests serve as a safety net — if they break during refactoring, the behavioral change is intentional or a regression
-- Reference: "Working Effectively with Legacy Code" (Michael Feathers)
+When refactoring code that lacks tests, write characterization tests first to capture current behavior as a baseline. Identify seams (interfaces for test doubles, swappable imports), record actual outputs for representative inputs, then proceed with the TDD cycle for new behavior.
 
 ### Step 2.7: Testing Strategy Loading
 
@@ -338,19 +273,7 @@ For bug tracks, check if `draft/tracks/<id>/rca.md` exists:
 - Reference: Google SWE Book Ch. 12, Google Testing Blog "Test Behavior, Not Implementation"
 
 **Property-Based Testing Checkpoint:**
-After writing example-based tests, consider whether property-based tests would add value:
-- For pure functions (no side effects, deterministic): suggest property-based tests
-- For mathematical operations: suggest algebraic properties (commutativity, associativity, identity)
-- For serialization: suggest round-trip property (serialize → deserialize = identity)
-- For sorting: suggest ordering, permutation, length-preservation properties
-- Tool recommendations by language:
-  - Python: Hypothesis (https://hypothesis.works/)
-  - JavaScript/TypeScript: fast-check (https://fast-check.dev/)
-  - Java: jqwik (https://jqwik.net/)
-  - Rust: proptest (https://github.com/proptest-rs/proptest)
-  - Go: rapid (https://github.com/flyingmutant/rapid)
-- Reference: Amazon ShardStore property-based testing
-- **Not mandatory** — skip if the function is not pure or properties are not obvious
+After writing example-based tests, consider property-based tests for pure functions (algebraic properties, round-trip serialization, sort invariants). Not mandatory — skip if properties are not obvious.
 
 **3b. GREEN - Implement Minimum Code**
 ```
@@ -361,21 +284,10 @@ After writing example-based tests, consider whether property-based tests would a
 ```
 
 **Observability Prompts (consider during implementation):**
-- Structured logging at key decision points (not just errors)
-- Metrics emission for latency-sensitive operations (counters, histograms)
-- Tracing span creation at service boundaries and significant internal operations
-- Error classification (transient vs permanent) for retry logic
-- These are prompts, not mandates — use engineering judgment on what's appropriate for the task
-- Reference: Netflix Full Cycle Developers
+Structured logging at decision points, metrics for latency-sensitive ops, tracing at service boundaries, error classification (transient vs permanent). Use engineering judgment — not mandatory for every task.
 
 **Contract Testing Checkpoint (Service Boundaries Only):**
-When implementing new API endpoints, message handlers, or service-to-service interfaces:
-- Suggest consumer-driven contract tests to verify interface compatibility
-- For REST APIs: suggest Pact (https://pact.io/) or Spring Cloud Contract
-- For GraphQL: suggest schema validation tests
-- For message queues: suggest schema registry validation
-- Skip for purely internal modules with no cross-service communication
-- Reference: ThoughtWorks Tech Radar, Pact documentation
+For new API endpoints or service-to-service interfaces, suggest consumer-driven contract tests. Skip for purely internal modules.
 
 **3c. REFACTOR - Clean with Tests Green**
 ```

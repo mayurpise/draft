@@ -1,6 +1,6 @@
 ---
 name: draft
-description: Context-Driven Development methodology overview. Shows available Draft commands and guides you to the right workflow.
+description: "Lists all Draft CLI commands, explains the Context-Driven Development workflow (init, new-track, implement, review), and recommends the appropriate next step. Use when the user asks about available Draft commands, needs help choosing a workflow step, or says 'what can Draft do', 'help', or 'show commands'."
 ---
 
 # Draft - Context-Driven Development
@@ -121,10 +121,6 @@ Four commands form an **audit spectrum** from quick to narrow to broad to deep:
 - **Suspicious of bugs across the codebase?** → `/draft:bughunt` — 14-dimension sweep with verification protocol
 - **Shipping a module to production?** → `/draft:deep-review` — ACID compliance, resilience, observability audit
 - **Want everything?** → `/draft:review full` (includes bughunt), then `/draft:deep-review` for critical modules
-
-### Relationship to Built-in Bug Hunt Agents
-
-Some AI tools provide built-in bug hunt agents (e.g., Claude Code's `bughunt` agent). These are **complementary** to `/draft:bughunt` — the built-in agents offer fast parallel sweeps with auto-fix, while Draft's bughunt adds context-aware analysis using your architecture, tech-stack, and product context for better false-positive elimination. For maximum coverage, run both.
 
 ## Context Files
 

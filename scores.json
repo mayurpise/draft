@@ -1,0 +1,33 @@
+{
+  "repo": "mayurpise/draft",
+  "skills": [
+    { "name": "draft", "before": 55, "after": 90 },
+    { "name": "review", "before": 54, "after": 81 },
+    { "name": "implement", "before": 58, "after": 84 },
+    { "name": "debug", "before": 81, "after": 94 },
+    { "name": "bughunt", "before": 54, "after": 81 },
+    { "name": "adr", "before": 58, "after": 58 },
+    { "name": "assist-review", "before": 40, "after": 40 },
+    { "name": "change", "before": 74, "after": 74 },
+    { "name": "coverage", "before": 65, "after": 65 },
+    { "name": "decompose", "before": 72, "after": 72 },
+    { "name": "deep-review", "before": 46, "after": 46 },
+    { "name": "deploy-checklist", "before": 64, "after": 64 },
+    { "name": "documentation", "before": 57, "after": 57 },
+    { "name": "impact", "before": 53, "after": 53 },
+    { "name": "incident-response", "before": 71, "after": 71 },
+    { "name": "index", "before": 71, "after": 71 },
+    { "name": "init", "before": 75, "after": 75 },
+    { "name": "jira-create", "before": 58, "after": 58 },
+    { "name": "jira-preview", "before": 65, "after": 65 },
+    { "name": "learn", "before": 61, "after": 61 },
+    { "name": "new-track", "before": 64, "after": 64 },
+    { "name": "quick-review", "before": 65, "after": 65 },
+    { "name": "revert", "before": 74, "after": 74 },
+    { "name": "standup", "before": 84, "after": 84 },
+    { "name": "status", "before": 78, "after": 78 },
+    { "name": "tech-debt", "before": 78, "after": 78 },
+    { "name": "testing-strategy", "before": 61, "after": 61 },
+    { "name": "tour", "before": 59, "after": 59 }
+  ]
+}

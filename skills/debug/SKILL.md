@@ -1,6 +1,6 @@
 ---
 name: debug
-description: Structured debugging session. Reproduce, isolate, diagnose, and fix bugs using systematic investigation. Invoked by /draft:new-track for bug tracks or directly for ad-hoc debugging.
+description: "Runs a structured debugging session: reproduces the bug, isolates the failing code path, forms and tests hypotheses one at a time, fixes with developer approval, and generates a debug report. Use when the user reports an error, crash, broken feature, exception, stack trace, or says 'not working', 'debug this', or 'investigate bug'. Invoked by /draft:new-track for bug tracks or directly for ad-hoc debugging."
 ---
 
 # Debug

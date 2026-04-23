@@ -1,6 +1,6 @@
 ---
 name: bughunt
-description: Exhaustive bug hunt using Draft context (architecture, tech-stack, product). Generates severity-ranked report with fixes. Optionally writes regression tests when a test framework exists.
+description: "Performs an exhaustive 14-dimension bug hunt across the codebase using Draft context (architecture, tech-stack, product) for false-positive elimination. Generates a severity-ranked report with code evidence, data flow traces, and suggested fixes. Optionally writes regression tests. Use when the user asks to find bugs, audit code for defects, scan for vulnerabilities, or says 'hunt bugs', 'find bugs', or 'code audit'."
 ---
 
 # Bug Hunt

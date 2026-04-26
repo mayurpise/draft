@@ -1,6 +1,6 @@
 ---
 name: review
-description: Standalone review orchestrator for track-level and project-level code review. Integrates reviewer agent and bughunt.
+description: "Orchestrates multi-file code reviews at track level (against spec.md acceptance criteria) or project level (uncommitted changes, file patterns, commit ranges). Runs three stages: automated validation, spec compliance, and code quality. Optionally integrates bughunt. Use when the user asks for a code review, PR review, wants to check code quality, or validate changes against requirements."
 ---
 
 # Code Review
@@ -295,24 +295,6 @@ For the files changed in the diff, perform static checks using `grep` or similar
 **Verdict:**
 - **PASS:** No critical issues found → Proceed to Stage 2
 - **FAIL:** ANY Critical issue found (e.g., circular dependency, hardcoded secret, raw SQL injection) → List the static analysis failures, generate the review report, and **STOP**. Do not proceed to Stage 2. This prevents wasting effort on structurally broken code.
-
-### SAST Tool Recommendations
-
-After completing Stage 1, recommend appropriate static analysis tools based on the project's `tech-stack.md`. Check if these tools are already configured in CI; if not, recommend adding them.
-
-| Language | Recommended Tools |
-|----------|-------------------|
-| JavaScript/TypeScript | ESLint with `eslint-plugin-security`, Semgrep |
-| Python | Bandit, Semgrep, pylint |
-| Java | Error Prone, SpotBugs, Semgrep |
-| Go | gosec, staticcheck |
-| Rust | `cargo clippy`, `cargo audit` |
-| C/C++ | Clang Static Analyzer, cppcheck |
-| Multi-language | Semgrep (https://semgrep.dev/), CodeQL (https://codeql.github.com/) |
-
-References: Meta Infer for CI integration patterns, Google Error Prone for compile-time analysis.
-
-Include tool recommendations in the review report under Stage 1 as a "Recommended Tooling" subsection. Only recommend tools relevant to the languages detected in the diff.
 
 ### Stage 2: Spec Compliance (Track-Level Only)
 
@@ -671,63 +653,14 @@ Next: Fix gaps and run /draft:review again.
 
 ## Error Handling
 
-### Missing Draft Directory
-
-```
-Error: Draft not initialized.
-Run /draft:init to set up Context-Driven Development.
-```
-
-### No Tracks Found
-
-```
-Error: No tracks found in draft/tracks.md
-Run /draft:new-track to create your first track.
-```
-
-### Track Not Found
-
-```
-Error: Track 'xyz' not found.
-
-Did you mean:
-1. add-review-command
-2. enterprise-readiness
-
-Use exact track ID or run /draft:status to see all tracks.
-```
-
-### Ambiguous Match
-
-```
-Multiple tracks match 'review':
-1. add-review-command - Add /draft:review Command [~]
-2. review-architecture-md - Review architecture.md [x]
-
-Select track (1-2):
-```
-
-### Invalid Git Range
-
-```
-Error: Invalid commit range 'main...feature'
-Git error: fatal: ambiguous argument 'feature': unknown revision
-
-Verify the range exists:
-  git log main...feature
-```
-
-### Missing Commits in Plan
-
-```
-⚠️  Warning: No commit SHAs found in plan.md
-
-Cannot determine commit range for review.
-
-Options:
-1. Manually specify range: /draft:review track <id> commits <range>
-2. Review uncommitted changes: /draft:review project
-```
+| Condition | Message |
+|-----------|---------|
+| No `draft/` directory | "Draft not initialized. Run `/draft:init`." |
+| No tracks in `draft/tracks.md` | "No tracks found. Run `/draft:new-track`." |
+| Track not found | Show closest matches by edit distance, suggest `/draft:status` |
+| Multiple track matches | Display numbered list, prompt selection |
+| Invalid git range | Show git error, suggest verifying with `git log` |
+| No commit SHAs in plan.md | Suggest manual range or `/draft:review project` |
 
 ---
 

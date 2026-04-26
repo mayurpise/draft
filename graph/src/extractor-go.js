@@ -80,8 +80,10 @@ function parseGoRegex(content, filePath, module, totalLines, functions, types, i
     const trimmed = line.trim();
     const lineNo  = i + 1;
 
-    // Skip comments
-    if (trimmed.startsWith('//') || trimmed.startsWith('*')) continue;
+    // Skip line comments and clear in-block comment continuations. Bare `*`
+    // alone (often used in /* ... */ blocks but never as Go code) is dropped;
+    // `*Foo` (pointer types) is preserved.
+    if (trimmed.startsWith('//') || trimmed === '*' || trimmed.startsWith('* ')) continue;
 
     // ── func declaration ────────────────────────────────────────────────────
     // Matches:

@@ -81,9 +81,11 @@ function loadHotspots(out) {
 function queryCallers(out, target) {
   if (!target) die('--symbol or --file required for callers mode');
 
-  // Dispatch: if target looks like a file path use include-edge logic,
-  // otherwise use the call index for function-level callers.
-  const looksLikeFile = target.includes('/') || /\.\w{1,6}$/.test(target);
+  // Dispatch: only treat as a file path when the target contains a slash. Bare
+  // names (even ones ending in a dot-token like `Foo.cc`) are ambiguous between
+  // a file at the repo root and a symbol — prefer the symbol path. Pass a path
+  // with `/` (e.g. `./Foo.cc`) to force file-callers mode.
+  const looksLikeFile = target.includes('/');
   if (looksLikeFile) {
     return queryFileCallers(out, target);
   } else {

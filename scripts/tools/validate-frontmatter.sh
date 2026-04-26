@@ -57,12 +57,14 @@ if [[ ! -f "$FILE" ]]; then
 fi
 
 IFS= read -r first_line <"$FILE" || true
+# Tolerate CRLF input (Windows-edited files): strip a trailing \r.
+first_line="${first_line%$'\r'}"
 if [[ "$first_line" != "---" ]]; then
     echo "ERROR: $FILE — missing opening '---' delimiter on line 1" >&2
     exit 1
 fi
 
-if ! awk 'NR > 1 && /^---$/ { found=1; exit } END { exit !found }' "$FILE"; then
+if ! awk 'NR > 1 && /^---\r?$/ { found=1; exit } END { exit !found }' "$FILE"; then
     echo "ERROR: $FILE — missing closing '---' delimiter" >&2
     exit 1
 fi

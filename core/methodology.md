@@ -28,27 +28,25 @@ Draft solves this through **Context-Driven Development**: structured documents t
 - [Status Markers](#status-markers)
 - [Plan Structure](#plan-structure)
 - [Command Workflows](#command-workflows)
-  - [/draft:init](#draftinit--initialize-project)
-  - [/draft:index](#draftindex--monorepo-service-index)
-  - [/draft:new-track](#draftnew-track--create-feature-track)
-  - [/draft:implement](#draftimplement--execute-tasks)
-  - [/draft:status](#draftstatus--show-progress)
-  - [/draft:revert](#draftrevert--git-aware-rollback)
-  - [/draft:decompose](#draftdecompose--module-decomposition)
-  - [/draft:coverage](#draftcoverage--code-coverage-report)
-  - [/draft:jira-preview](#draftjira-preview--preview-jira-issues)
-  - [/draft:jira-create](#draftjira-create--create-jira-issues)
-  - [/draft:adr](#draftadr--architecture-decision-records)
-  - [/draft:deep-review](#draftdeep-review--module-lifecycle-audit)
-  - [/draft:bughunt](#draftbughunt--exhaustive-bug-discovery)
-  - [/draft:review](#draftreview--code-review-orchestrator)
-  - [/draft:learn](#draftlearn--pattern-discovery--guardrails-update)
-  - [/draft:change](#draftchange--course-correction)
-  - [/draft:tour](#drafttour--interactive-onboarding)
-  - [/draft:impact](#draftimpact--telemetry--analytics)
-  - [/draft:assist-review](#draftassist-review--human-in-the-loop-gateway)
+  - [/draft:init](#codevinit--initialize-project)
+  - [/draft:index](#codevindex--monorepo-service-index)
+  - [/draft:new-track](#codevnew-track--create-feature-track)
+  - [/draft:implement](#codevimplement--execute-tasks)
+  - [/draft:status](#codevstatus--show-progress)
+  - [/draft:revert](#codevrevert--git-aware-rollback)
+  - [/draft:decompose](#codevdecompose--module-decomposition)
+  - [/draft:coverage](#codevcoverage--code-coverage-report)
+  - [/draft:jira-preview](#codevjira-preview--preview-jira-issues)
+  - [/draft:jira-create](#codevjira-create--create-jira-issues)
+  - [/draft:adr](#codevadr--architecture-decision-records)
+  - [/draft:deep-review](#codevdeep-review--module-lifecycle-audit)
+  - [/draft:bughunt](#codevbughunt--exhaustive-bug-discovery)
+  - [/draft:review](#codevreview--code-review-orchestrator)
+  - [/draft:learn](#codevlearn--pattern-discovery--guardrails-update)
+  - [/draft:change](#codevchange--course-correction)
 - [Architecture Mode](#architecture-mode)
-- [Coverage](#coverage)
+- [Code Coverage](#code-coverage)
+- [Concurrency](#concurrency)
 - [Jira Integration (Optional)](#jira-integration-optional)
 - [TDD Workflow (Optional)](#tdd-workflow-optional)
 - [Intent Mapping](#intent-mapping)
@@ -65,11 +63,11 @@ Draft solves this through **Context-Driven Development**: structured documents t
 |----------|---------|----------|
 | `product.md` | Defines users, goals, success criteria, guidelines | AI building features nobody asked for |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
-| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
+| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 28 sections + 5 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
 | `.ai-profile.md` | **Derived from .ai-context.md.** 20-50 lines, ultra-compact always-injected project profile. Contains: language, framework, database, auth, API style, critical invariants, safety rules, active tracks, recent changes. Auto-refreshed on mutations. | AI needing full context for simple tasks |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary. Auto-refreshed on mutations. | AI re-analyzing codebase every session |
 | `workflow.md` | TDD preference, commit style, review process | AI skipping tests or making giant commits |
-| `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns. Entries include dual-layer timestamps (discovered_at, established_at, last_verified, last_active) for temporal reasoning. | AI repeating false positives or missing known-bad patterns |
+| `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns. Entries include dual-layer timestamps (`discovered_at`, `established_at`, `last_verified_at`, `last_active_at`) for temporal reasoning. | AI repeating false positives or missing known-bad patterns |
 | `spec.md` | Acceptance criteria for a specific track | Scope creep, gold-plating |
 | `plan.md` | Ordered phases with verification steps | AI attempting everything at once |
 
@@ -93,16 +91,16 @@ Each layer narrows the solution space. By the time AI writes code, most decision
 
 ### Context Tiering
 
-Draft uses a three-tier context system inspired by memory architecture:
+Draft uses a layered context system inspired by memory tiering — see `core/shared/draft-context-loading.md` for the authoritative specification.
 
 ```
-Layer 0: .ai-profile.md     (20-50 lines)   — Always loaded. RAM-equivalent.
-Layer 1: .ai-context.md     (200-400 lines) — Loaded for most tasks. Working memory.
-Layer 2: architecture.md    (full document)  — Loaded for deep analysis. Long-term storage.
-        .state/facts.json  (atomic facts)   — Queried by relevance. Fact-level precision.
+Layer 0:   .ai-profile.md (20-50 lines)    — Always loaded. Minimum project context.
+Layer 1:   .ai-context.md (200-400 lines)  — Base context: boundaries, invariants, flows.
+Layer 1.5: draft/graph/*.jsonl             — Structural graph (when available).
+Layer 2:   draft/.state/facts.json         — Fact-level precision (queried by relevance).
 ```
 
-Simple tasks only need Layer 0. Implementation tasks load Layer 0 + relevant sections of Layer 1. Deep reviews and architecture refreshes access all layers. This relevance-scored loading ensures the right context for each task without wasting tokens.
+`architecture.md` is the source-of-truth document these layers are condensed from, not a layer itself. Simple tasks only need Layer 0. Implementation tasks load Layer 0+1 plus relevant graph/facts. Deep reviews access all layers. Relevance-scored loading keeps tokens bounded.
 
 ### Draft Command Workflow
 
@@ -120,6 +118,7 @@ graph TD
     G -->|Fail| E
     H -->|No| E
     H -->|Yes| I["Track Complete"]
+    I -->|"git push + PR"| U["GitHub PR"]
 
     J["/draft:status"] -.->|"Check anytime"| E
     K["/draft:revert"] -.->|"Undo if needed"| E
@@ -141,12 +140,6 @@ graph LR
     S --> PL["plan.md<br/><i>When & Order</i>"]
     PL --> Code["Implementation"]
 ```
-
-### Advanced DX Commands
-Draft natively tracks analytics and enables advanced workflows to lower reviewer friction via:
-- **`/draft:tour`** - Mentorship mode for codebase exploration.
-- **`/draft:impact`** - Friction mapping and ROI calculation using state metadata.
-- **`/draft:assist-review`** - Reduces cognitive load on PR reviews by tracking intent vs execution.
 
 ### Keeping AI Constrained
 
@@ -198,7 +191,7 @@ Draft's artifacts are designed for team collaboration through standard git workf
 
 1. **Project context** — Tech lead runs `/draft:init`. Team reviews `product.md`, `tech-stack.md`, and `workflow.md` via PR. Product managers review vision without reading code. Engineers review technical choices without context-switching into implementation.
 2. **Spec & plan** — Lead runs `/draft:new-track`. Team reviews `spec.md` (requirements, acceptance criteria) and `plan.md` (phased task breakdown, dependencies) via PR. Disagreements surface as markdown comments — resolved by editing a paragraph, not rewriting a module.
-3. **Architecture** — Lead runs `/draft:decompose`. Team reviews `architecture.md` (derived human-readable guide with module boundaries, API surfaces, dependency graph, implementation order) via PR. Senior engineers validate architecture without touching the codebase. `architecture.md` is the source of truth; `.ai-context.md` is derived from it for AI consumption.
+3. **Architecture** — Lead runs `/draft:decompose`. Team reviews `architecture.md` (derived human-readable guide with module boundaries, API surfaces, dependency graph, implementation order) via PR. Senior engineers validate architecture without touching the codebase. The machine-optimized `.ai-context.md` is the source of truth.
 4. **Work distribution** — Lead runs `/draft:jira-preview` and `/draft:jira-create`. Epics, stories, and sub-tasks are created from the approved plan. Individual team members pick up Jira stories and implement — with or without `/draft:implement`.
 5. **Implementation** — Only after all documents are merged does coding start. Every developer has full context: what to build (`spec.md`), in what order (`plan.md`), with what boundaries (`.ai-context.md` / `architecture.md`).
 
@@ -276,7 +269,7 @@ For critical product development, Draft isn't overhead — it's risk mitigation.
 claude plugin install draft
 
 # Or clone and install locally
-git clone https://github.com/mayurpise/draft.git ~/.claude/plugins/draft
+git clone <your-draft-repo-url> ~/.claude/plugins/draft
 ```
 
 ### Verify Installation
@@ -304,34 +297,9 @@ You should see the list of available Draft commands. If not, check that the plug
 /draft:status
 ```
 
-### GitHub Copilot Integration (Optional)
+### Supported Platforms
 
-Draft also works with GitHub Copilot via `copilot-instructions.md`:
-
-```bash
-# Download directly (no clone required)
-mkdir -p .github
-curl -o .github/copilot-instructions.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md
-
-# Or copy from a local clone
-cp ~/.claude/plugins/draft/integrations/copilot/.github/copilot-instructions.md /your-project/.github/
-```
-
-This gives Copilot the same methodology awareness. Commands use natural language (`draft init`, `draft new-track`) instead of `@` mentions.
-
-### Gemini Integration (Optional)
-
-Draft also works with Gemini Code Assist and Gemini CLI via `GEMINI.md`:
-
-```bash
-# Download directly (no clone required)
-curl -o GEMINI.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/GEMINI.md
-
-# Or copy from a local clone
-cp ~/.claude/plugins/draft/integrations/gemini/GEMINI.md /your-project/GEMINI.md
-```
-
-Place `GEMINI.md` at the root of your project. Commands use `@draft` syntax.
+Draft works with **Claude Code** (native `.claude-plugin/` support) and **Cursor** (supports `.claude/` plugin structure natively). No build pipeline required.
 
 ---
 
@@ -348,15 +316,20 @@ Context → Spec & Plan → Implement
 
 ## Tracks
 
-A **track** is a high-level unit of work (feature, bug fix, refactor). Each track contains:
+A **track** is a high-level unit of work (feature, bug fix, refactor). Each track contains `spec.md`, `plan.md`, `metadata.json`, and optionally `jira-export.md`.
+
+Two layouts are supported; both are valid:
 
 ```
-draft/tracks/<track-id>/
-├── spec.md          # Requirements and acceptance criteria
-├── plan.md          # Phased task breakdown
-├── metadata.json    # Status and timestamps
-└── jira-export.md   # Jira stories for export (optional)
+# Single-track project (default)           # Multi-track project
+draft/                                      draft/tracks/<track-id>/
+├── spec.md                                 ├── spec.md
+├── plan.md                                 ├── plan.md
+├── metadata.json                           ├── metadata.json
+└── jira-export.md (optional)               └── jira-export.md (optional)
 ```
+
+`/draft:new-track` selects the multi-track layout when a second track is created (existing `draft/spec.md` and `draft/plan.md` are migrated into `draft/tracks/<original-track-id>/`). Commands referring to "the active track" resolve to whichever layout is in use.
 
 ### Track Lifecycle
 
@@ -373,12 +346,13 @@ Located in `draft/` of the target project:
 |------|---------|
 | `product.md` | Product vision, users, goals, guidelines (optional section) |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
-| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices. Generated from 5-phase codebase analysis. |
+| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 28 sections + 5 appendices. Generated from 5-phase codebase analysis. |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context with 15+ mandatory sections. Consumed by all Draft commands and external AI tools. Auto-refreshed on mutations. |
 | `workflow.md` | TDD preferences, commit strategy, validation config |
 | `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns |
 | `jira.md` | Jira project configuration (optional) |
 | `tracks.md` | Master list of all tracks |
+| `.state/facts.json` | Atomic fact registry with temporal metadata and knowledge graph edges. Enables fact-level contradiction detection on refresh. |
 | `.state/freshness.json` | SHA-256 hashes of all analyzed source files. Enables file-level staleness detection for incremental refresh. |
 | `.state/signals.json` | Codebase signal classification (11 categories). Detects structural drift on refresh. |
 | `.state/run-memory.json` | Run metadata, resumable checkpoints, unresolved questions. Enables cross-session continuity. |
@@ -449,6 +423,7 @@ Draft auto-classifies the project:
    This produces `draft/architecture.md` (comprehensive human-readable reference), `draft/.ai-context.md` (200-400 line token-optimized context), and `draft/.ai-profile.md` (20-50 line ultra-compact always-on profile). All three become persistent context — every future track references them instead of re-analyzing the codebase.
 
 3. **Fact extraction** — Extracts atomic architectural facts into `draft/.state/facts.json` with dual-layer timestamps (`discovered_at`, `established_at`, `last_verified_at`, `last_active_at`), relationship edges (`updates`, `extends`, `derives`), and per-fact confidence scoring. Enables granular change tracking and contradiction detection on refresh.
+
 4. **State persistence** — Writes `draft/.state/` directory with four files:
    - `facts.json` — Atomic fact registry with temporal metadata and knowledge graph edges (enables fact-level contradiction detection on refresh)
    - `freshness.json` — SHA-256 hashes of all analyzed source files (enables file-level staleness detection on refresh)
@@ -728,7 +703,7 @@ Generates a `jira-export.md` file from the track's plan for review before creati
 | Phase | Story |
 | Task | Sub-task |
 
-Story points are auto-calculated from task count per phase (1-2 tasks = 1pt, 3-4 = 2pt, 5-6 = 3pt, 7+ = 5pt).
+Story points are auto-calculated from task count per phase — see the formula in the Jira Integration section below.
 
 The export file is editable — adjust points, descriptions, or sub-tasks before running `/draft:jira-create`.
 
@@ -774,6 +749,8 @@ ADRs are stored at `draft/adrs/NNNN-title.md` (e.g., `001-use-postgresql.md`). W
 
 `Proposed` (awaiting review) → `Accepted` (approved and in effect) → `Deprecated` (context changed) or `Superseded by ADR-XXX` (replaced by newer decision).
 
+---
+
 ### `/draft:deep-review` — Module Lifecycle Audit
 
 Perform an exhaustive end-to-end lifecycle review of a service, component, or module. Evaluates ACID compliance, architectural resilience, and production-grade enterprise quality.
@@ -782,19 +759,19 @@ Perform an exhaustive end-to-end lifecycle review of a service, component, or mo
 
 - **Module-level only:** `/draft:deep-review src/auth`
 
-Unlike standard review, this tool performs structural analysis and flags deep architectural flaws. It maintains a history file at `draft/deep-review-history.json` and generates per-module reports at `draft/deep-review-reports/<module-name>.md`. It does NOT auto-fix code.
+Unlike standard review, this tool performs structural analysis and flags deep architectural flaws. It maintains a history file at `draft/deep-review-history.json` and generates an actionable specification for fixes at `draft/deep-review-report.md`. It does NOT auto-fix code.
 
 ---
 
 ### `/draft:bughunt` — Exhaustive Bug Discovery
 
-Systematic bug hunt across 14 dimensions: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, tests, dependency & supply chain security, algorithmic complexity, and internationalization & localization.
+Systematic bug hunt across 11 dimensions: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, and tests.
 
 #### Process
 
 1. Load Draft context (architecture, tech-stack, product)
 2. For tracks: verify implementation matches spec requirements
-3. Analyze code across all 14 dimensions
+3. Analyze code across all 11 dimensions
 4. Verify each finding (trace code paths, check for mitigations, eliminate false positives)
 5. Generate severity-ranked report with fix recommendations
 6. Detect language and test framework (GTest, pytest, go test, Jest/Vitest, cargo test, JUnit)
@@ -914,7 +891,7 @@ Use when requirements shift after a track is already in progress:
 
 ## Architecture Mode
 
-Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `.ai-context.md` or `architecture.md` exists** - no manual configuration needed.
+Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `draft/tracks/<id>/.ai-context.md` exists** (created by `/draft:decompose`). Falls back to `draft/tracks/<id>/architecture.md` for legacy projects.
 
 **How it works:**
 1. Run `/draft:decompose` on a track → Creates `draft/tracks/<id>/architecture.md` (and derived `.ai-context.md`)
@@ -1035,7 +1012,7 @@ Coverage complements TDD — TDD is the process (write test, implement, refactor
 
 ## Jira Integration (Optional)
 
-Sync tracks to Jira with a three-step workflow:
+Sync tracks to Jira with a two-step workflow:
 
 1. **Preview** (`/draft:jira-preview`) - Generate `jira-export.md` with epic and stories
 2. **Review** - Adjust story points, descriptions, acceptance criteria as needed
@@ -1079,7 +1056,6 @@ Natural language patterns that map to Draft commands:
 | "requirements changed", "scope changed", "update the spec" | Handle mid-track requirement change |
 | "preview jira", "export to jira" | Preview Jira issues |
 | "create jira issues" | Create Jira issues via MCP |
-
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |
 
@@ -1089,190 +1065,35 @@ Natural language patterns that map to Draft commands:
 
 **Iron Law:** Evidence before claims, always.
 
-Every completion claim requires:
-1. Running verification command IN THE CURRENT MESSAGE
-2. Reading full output and confirming result
-3. Showing evidence with the claim
-4. Only then updating status markers
-
-**Never mark `[x]` without:**
-- Fresh test/build/lint run in this message
-- Confirmation that output shows success
-- Evidence visible in the response
+Every completion claim requires running the verification command in the current message, reading full output, showing evidence alongside the claim, and only then updating `[x]` status markers. No fresh run in this message → no check.
 
 ### Systematic Debugging
 
-**Iron Law:** No fixes without root cause investigation first.
-
-When blocked (`[!]`):
-1. **Investigate** - Read errors, reproduce, trace data flow (NO fixes yet)
-2. **Analyze** - Find similar working code, list differences
-3. **Hypothesize** - Single hypothesis, smallest possible test
-4. **Implement** - Regression test first, then fix, verify
-
-See `core/agents/debugger.md` for detailed process.
+**Iron Law:** No fixes without root cause investigation first. See `core/agents/debugger.md` for the four-phase process (Investigate → Analyze → Hypothesize → Implement).
 
 ### Root Cause Analysis (Bug Tracks)
 
-**Iron Law:** No fix without a confirmed root cause. No investigation without scope boundaries.
-
-For bug tracks (from Jira incidents, production bugs, regressions):
-1. **Reproduce & Scope** - Confirm bug, define blast radius, map to `.ai-context.md` modules
-2. **Trace & Analyze** - Follow data/control flow with `file:line` references, differential analysis
-3. **Hypothesize & Confirm** - One hypothesis at a time, log all results (including failures)
-4. **Fix & Prevent** - Regression test first, minimal fix within blast radius, blameless RCA summary
-
-Key practices (from Google SRE and distributed systems engineering):
-- **Blast radius first** — Know what's broken AND what isn't before investigating
-- **Differential analysis** — Compare working vs. failing cases systematically
-- **5 Whys** — Trace from symptom to systemic root cause
-- **Blameless RCA** — Focus on systems and processes, not individuals
-- **Code locality** — Every claim cites `file:line`, no hand-waving
-
-See `core/agents/rca.md` for detailed process.
+**Iron Law:** No fix without a confirmed root cause. No investigation without scope boundaries. See `core/agents/rca.md` for the four-phase RCA process, classification taxonomy, and distributed-systems considerations.
 
 ### Three-Stage Review
 
-At phase boundaries:
-1. **Stage 1: Automated Validation** - Fast static checks for architecture, security, and performance issues
-2. **Stage 2: Spec Compliance** - Did implementation match specification?
-3. **Stage 3: Code Quality** - Clean architecture, proper error handling, meaningful tests?
-
-See `core/agents/reviewer.md` for detailed process.
+At phase boundaries: Stage 1 automated validation → Stage 2 spec compliance → Stage 3 code quality. See `core/agents/reviewer.md` for the output template, stopping rules, and full process.
 
 ---
 
 ## Agents
 
-**Note:** Canonical agent behavior is defined in `core/agents/*.md`. This section provides summaries for reference. When in doubt, defer to the agent files.
+Canonical agent behavior lives in `core/agents/*.md` — those files are inlined at runtime. This table is a pointer index only; when in doubt, defer to the agent file.
 
-Draft includes seven specialized agent behaviors that activate during specific workflow phases.
-
-### Debugger Agent
-
-Activated when a task is blocked (`[!]`). Enforces root cause investigation before any fix attempts.
-
-**Four-Phase Process:**
-
-| Phase | Goal | Output |
-|-------|------|--------|
-| **1. Investigate** | Understand what's happening (NO fixes) | Failure description and reproduction steps |
-| **2. Analyze** | Find root cause, not symptoms | Root cause hypothesis with evidence |
-| **3. Hypothesize** | Test with minimal change | Confirmed root cause or return to Phase 2 |
-| **4. Implement** | Fix with confidence | Regression test + minimal fix + verification |
-
-**Anti-patterns:** "Quick fixes" without understanding, changing multiple things at once, skipping reproduction, deleting code to "test".
-
-**Escalation:** After 3 failed hypothesis cycles, document findings, list what's been eliminated, and ask for external input.
-
-See `core/agents/debugger.md` for the full process.
-
-### RCA Agent
-
-Activated for bug/RCA tracks created via `/draft:new-track`. Provides structured Root Cause Analysis methodology extending the debugger agent with practices from Google SRE postmortem culture and distributed systems debugging.
-
-**Four-Phase Process:**
-
-| Phase | Goal | Output |
-|-------|------|--------|
-| **1. Reproduce & Scope** | Confirm bug, define blast radius, map to `.ai-context.md` modules | Reproduction steps + scoped investigation area |
-| **2. Trace & Analyze** | Follow data/control flow to the divergence point | Flow trace with `file:line` references |
-| **3. Hypothesize & Confirm** | Test one hypothesis at a time, document all results | Confirmed root cause with evidence |
-| **4. Fix & Prevent** | Regression test first, minimal fix, RCA summary | Fix + test + blameless RCA document |
-
-**Key Techniques:**
-- **Differential Analysis** — Compare working vs. failing cases systematically
-- **5 Whys** — Trace from immediate cause to systemic root cause
-- **Blast Radius Scoping** — Define investigation boundaries before diving in
-- **Hypothesis Logging** — Track every hypothesis (failed ones narrow the search)
-- **Code Locality** — Every claim must cite `file:line`
-
-**Root Cause Classification:** logic error, race condition, data corruption, config error, dependency issue, missing validation, state management, resource exhaustion.
-
-**Anti-patterns:** Fixing symptoms without root cause, investigating the entire system, shotgun debugging, skipping failed hypothesis documentation, fixing adjacent issues "while we're here".
-
-See `core/agents/rca.md` for the full process including distributed systems considerations.
-
-### Reviewer Agent
-
-Activated at phase boundaries during `/draft:implement`. Performs a three-stage review before proceeding to the next phase.
-
-**Stage 1: Automated Validation** — Is the code structurally sound and secure?
-- Architecture conformance, dead code detection, circular dependencies
-- OWASP security scans (hardcoded secrets, SQL injection, XSS)
-- Performance anti-patterns (N+1 queries, blocking I/O, unbounded queries)
-
-If Stage 1 fails with critical issues, implementation resumes. Stage 2 does not run.
-
-**Stage 2: Spec Compliance** — Did they build what was specified?
-- Requirements coverage (all functional requirements implemented)
-- Scope adherence (no missing features, no scope creep)
-- Behavior correctness (edge cases, error scenarios, integration points)
-
-If Stage 2 fails, gaps are listed and implementation resumes. Stage 3 does not run.
-
-**Stage 3: Code Quality** — Is the code well-crafted?
-- Architecture (follows project patterns, separation of concerns)
-- Error handling (appropriate level, helpful user-facing errors)
-- Testing (tests real logic, edge case coverage, maintainability)
-- Maintainability (readable, no performance issues, no security vulnerabilities)
-
-**Issue Classification:**
-
-| Severity | Definition | Action |
-|----------|------------|--------|
-| **Critical** | Blocks release, breaks functionality, security issue | Must fix before proceeding |
-| **Important** | Degrades quality, technical debt | Should fix before phase complete |
-| **Minor** | Style, optimization, nice-to-have | Note for later, don't block |
-
-See `core/agents/reviewer.md` for the output template and full process.
-
-### Architect Agent
-
-Activated during `/draft:decompose` and `/draft:implement` (when architecture mode is enabled). Guides structured pre-implementation design.
-
-**Capabilities:**
-- **Module decomposition** — Single responsibility, 1-3 files per module, clear API boundaries, testable in isolation
-- **Dependency analysis** — Import mapping, cycle detection, topological sort for implementation order
-- **Story writing** — Natural-language algorithm descriptions (Input → Process → Output); 5-15 lines max; describes the algorithm, not the implementation
-- **Execution state design** — Define input/intermediate/output/error state variables before coding
-- **Function skeleton generation** — Complete signatures with types and docstrings, no implementation bodies, ordered by control flow
-
-**Story Lifecycle:**
-1. **Placeholder** — Created during `/draft:decompose` in `.ai-context.md`
-2. **Written** — Filled in during `/draft:implement` as code comments; developer approves
-3. **Updated** — Maintained when algorithms change during refactoring
-
-See `core/agents/architect.md` for module rules, API surface examples, and cycle-breaking framework.
-
-### Planner Agent
-
-Activated during `/draft:new-track` plan creation and `/draft:decompose`. Provides structured plan generation with phased task breakdown.
-
-**Capabilities:**
-- **Phase decomposition** — Break work into sequential phases with clear goals and verification criteria
-- **Task ordering** — Dependencies between tasks, topological sort for implementation sequence
-- **Integration with Architect Agent** — When `.ai-context.md` exists, aligns phases with module boundaries and dependency graph
-
-**Key Principles:**
-- Each phase should be independently verifiable
-- Tasks within a phase should be ordered by dependency
-- Phase boundaries are review checkpoints
-- Plan structure mirrors spec requirements for traceability
-
-See `core/agents/planner.md` for the full planning process and integration workflows.
-
-### Ops Agent
-
-Activated during `/draft:deploy-checklist`, `/draft:incident-response`, and `/draft:standup`. Enforces production-safety mindset with six principles: production-first thinking, blast-radius awareness, rollback readiness, communicate early, severity over speed, and blameless culture. Provides severity classification (SEV1-SEV4), rollback decision frameworks, and stakeholder communication templates.
-
-See `core/agents/ops.md` for the full operational safety protocol.
-
-### Writer Agent
-
-Activated during `/draft:documentation` across four modes: readme, runbook, api, and onboarding. Enforces audience-aware writing with six principles: audience first, progressive disclosure, link don't duplicate, maintain don't create, examples over explanations, and scannable structure. Adapts tone and detail level based on audience profiles (new team member, experienced developer, operator/SRE, external integrator).
-
-See `core/agents/writer.md` for the full writing process and documentation modes.
+| Agent | File | Role |
+|-------|------|------|
+| Debugger | `core/agents/debugger.md` | Activated on `[!]` blocked tasks. Four-phase root cause investigation. |
+| RCA | `core/agents/rca.md` | Activated for bug/RCA tracks. Structured SRE-style postmortem methodology. |
+| Reviewer | `core/agents/reviewer.md` | Activated at phase boundaries. Three-stage automated + spec + quality review. |
+| Architect | `core/agents/architect.md` | Activated in `/draft:decompose` and architecture-mode `/draft:implement`. Module decomposition, story writing, function skeletons. |
+| Planner | `core/agents/planner.md` | Activated during `/draft:new-track` and `/draft:decompose`. Phased plan generation. |
+| Writer | `core/agents/writer.md` | Activated during `/draft:documentation`. Doc generation and condensation. |
+| Ops | `core/agents/ops.md` | Activated for `/draft:incident-response`, `/draft:deploy-checklist`, `/draft:standup`. Hands off to RCA for deep investigation. |
 
 ---
 

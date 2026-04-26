@@ -1,6 +1,6 @@
 ---
 name: init
-description: Initialize Draft project context for Context-Driven Development. Run once per project to create product.md, tech-stack.md, workflow.md, tracks.md, architecture.md (brownfield), and .ai-context.md (derived). Always performs deep analysis.
+description: Initialize Draft project context for Context-Driven Development. Run once per project to create product.md, tech-stack.md, workflow.md, tracks.md, architecture.md (brownfield), .ai-context.md (derived), and .ai-profile.md (ultra-compact profile). Always performs deep analysis.
 ---
 
 # Draft Init
@@ -15,8 +15,62 @@ You are initializing a Draft project for Context-Driven Development.
 - Auto-generating tech-stack.md without verifying detected dependencies
 - Not presenting .ai-context.md for developer review before proceeding
 - Overwriting existing tracks.md (this destroys track history)
+- **Producing copy-paste module descriptions** — if 3+ modules share identical Responsibilities or description text, you have NOT analyzed the source files
+- **Writing architecture.md below the tier minimum** for the detected codebase tier — compute tier from Step 1.4.5 graph metrics (M, F, P); falling below the tier minimum indicates incomplete analysis, not conciseness
+- **Writing sequence diagrams under 15 lines** of Mermaid code — shallow diagrams without alt/opt blocks, payloads, and error paths are useless
+- **Writing module deep-dives under 100 lines each** — a module with hundreds of source files cannot be described in a paragraph
+- **Using "See X/" or "follow BUILD patterns"** as a substitute for reading actual source files and documenting real content
+- **Creating freeform sections** instead of the numbered 28-section template (e.g., "## Module deep-dive: X" instead of "## 7. Core Modules Deep Dive" with "#### 7.1 X" subsections) — the template structure is MANDATORY, graph data enriches it but does not replace it
+- **Capping sub-module depth** — sub-modules with 50+ files get the SAME analysis depth as top-level modules; there is NO page limit; a 100-page architecture.md for a large codebase is correct
 
 **Initialize once, refresh to update. Never overwrite without confirmation.**
+
+---
+
+## MANDATORY SECTION CHECKLIST — architecture.md
+
+> **READ THIS BEFORE WRITING A SINGLE LINE OF architecture.md.**
+> The document MUST use the EXACT numbered structure below. Freeform sections, renamed headings, or missing sections are FAILURES. Verify each item is present before considering architecture.md complete.
+
+```
+## 1.  Executive Summary
+## 2.  AI Agent Quick Reference
+## 3.  System Identity & Purpose
+## 4.  Architecture Overview
+## 5.  Component Map & Interactions
+## 6.  Data Flow — End to End
+## 7.  Core Modules Deep Dive
+## 8.  Concurrency Model & Thread Safety
+## 9.  Framework & Extension Points
+## 10. Full Catalog of Implementations
+## 11. Secondary Subsystem (V2 / Redesign)
+## 12. API & Interface Definitions
+## 13. External Dependencies
+## 14. Cross-Module Integration Points
+## 15. Critical Invariants & Safety Rules
+## 16. Security Architecture
+## 17. Observability & Telemetry
+## 18. Error Handling & Failure Modes
+## 19. State Management & Persistence
+## 20. Reusable Modules for Future Projects
+## 21. Key Design Patterns
+## 22. Configuration & Tuning
+## 23. Performance Characteristics & Hot Paths
+## 24. How to Extend — Step-by-Step Cookbooks
+## 25. Build System & Development Workflow
+## 26. Testing Infrastructure
+## 27. Known Technical Debt & Limitations
+## 28. Glossary
+### Appendix A: File Structure Summary
+### Appendix B: Data Source → Implementation Mapping
+### Appendix C: Output Flow — Implementation to Target
+### Appendix D: Mermaid Sequence Diagrams — Critical Flows
+### Appendix E: Proto Service Map (graph-derived)
+```
+
+**Self-check before finalizing**: Run a mental grep for `## 1.` through `## 28.` in your output. Any gap = incomplete document. Return and fill it.
+
+> **If you are a subagent** executing this step via a delegation prompt: your prompt is a SUMMARY. The full 28-section structure above is the AUTHORITATIVE requirement. Do not infer section names from the summary — use the exact headings listed here.
 
 ---
 
@@ -157,26 +211,22 @@ If `draft/` exists with context files:
 
 To prevent partial initialization from leaving a broken `draft/` directory:
 
-1. **Remove stale staging** if it exists from a previous failed init:
-   ```bash
-   rm -rf draft.tmp/
-   ```
-2. **Create staging directory** with all needed subdirectories:
-   ```bash
-   mkdir -p draft.tmp/tracks draft.tmp/.state
-   ```
-3. **Write all files to `draft.tmp/`** instead of `draft/` throughout Steps 1.5–6. Wherever these steps reference `draft/`, substitute `draft.tmp/` as the write target.
-4. **On success** (all files written and verified):
-   ```bash
-   mv draft.tmp/ draft/
-   ```
-5. **On failure** at any point:
-   ```bash
-   rm -rf draft.tmp/
-   ```
-   Announce the failure and stop — no half-initialized state left behind.
+1. **Stage all files** in a temporary directory (`draft.tmp/`) during init
+2. **On success**: `mv draft.tmp/ draft/` (atomic rename on POSIX)
+3. **On failure**: `rm -rf draft.tmp/` — no half-initialized state left behind
 
-> **Forced re-init:** If `draft/` exists and the user explicitly requests a fresh init (not refresh), confirm with user before proceeding. On confirmation, remove the existing directory (`rm -rf draft/`) before the final `mv draft.tmp/ draft/`.
+```bash
+# Before writing any files:
+mkdir -p draft.tmp/tracks
+
+# Write all files to draft.tmp/ instead of draft/
+# ... (product.md, tech-stack.md, workflow.md, tracks.md, architecture.md, .ai-context.md)
+
+# After all files are written and verified:
+mv draft.tmp/ draft/
+```
+
+> **Forced re-init:** If `draft/` exists and the user explicitly requests a fresh init (not refresh), confirm with user before removing the existing `draft/` directory.
 
 ### Monorepo Detection
 
@@ -297,45 +347,6 @@ If the user runs `/draft:init refresh`:
    - Preserve unchanged sections exactly as-is
    - Preserve modules added by `/draft:decompose` (planned modules)
 
-   **e.5. Contradiction Detection (Fact-Level Diff):**
-
-   If `draft/.state/facts.json` exists, perform fact-level contradiction analysis:
-
-   1. **Load existing facts** sourced from changed files:
-      ```bash
-      # Identify facts referencing changed files
-      # For each changed file, find facts with matching source_files entries
-      ```
-
-   2. **Re-extract facts** from the changed files using the same extraction procedure from Step 1.65.
-
-   3. **Compare new facts against existing facts** for each changed file:
-
-      | Comparison Result | Action |
-      |-------------------|--------|
-      | New fact matches existing fact | Update `last_verified_at` and `last_active_at` timestamps |
-      | New fact contradicts existing fact | Mark old fact with `superseded_by: "{new_fact_id}"`, mark new fact with `supersedes: "{old_fact_id}"`, add `updates` relationship |
-      | New fact extends existing fact | Add `extends` relationship, keep both facts active |
-      | Existing fact has no matching new fact | Check if source file still exists. If deleted: mark fact as `superseded_by: "deleted"`. If file exists but fact is gone: lower confidence to `medium`, add note |
-      | Entirely new fact (no existing match) | Add as new fact with current timestamps |
-
-   4. **Generate contradiction report** (shown to user during refresh):
-      ```
-      Fact Evolution Report:
-        CONFIRMED:    12 facts verified unchanged
-        UPDATED:       3 facts superseded by new information
-          - f-008: "Auth uses session cookies" → NOW: "Auth uses JWT tokens" (src/auth/middleware.ts changed)
-          - f-015: "Redis used for caching only" → NOW: "Redis used for caching and session storage"
-          - f-023: "API uses REST exclusively" → NOW: "API uses REST + WebSocket for real-time"
-        EXTENDED:      2 facts gained additional detail
-        NEW:           5 new facts discovered
-        STALE:         1 fact could not be re-verified (confidence lowered)
-      ```
-
-   5. **Update fact registry**: Write updated `draft/.state/facts.json` with all changes.
-
-   **Inspired by:** Supermemory's three relationship types (updates/extends/derives) for tracking knowledge evolution, and their contradiction resolution that marks old memories with `isLatest: false`.
-
    **f. Present incremental diff:**
    Show user:
    - Files analyzed: `N changed files since <date>`
@@ -344,14 +355,18 @@ If the user runs `/draft:init refresh`:
 
    **g. On user approval:**
    - Update only the affected sections in `draft/architecture.md`
-   - Regenerate `draft/.ai-context.md` using the Condensation Subroutine
+   - Regenerate `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine
 
    **h. On user rejection:**
    - No changes made to `draft/architecture.md`
    - However, verify `.ai-context.md` consistency: if `.ai-context.md` is missing or its `synced_to_commit` differs from `architecture.md`, offer to regenerate it from the current (unchanged) `architecture.md`
 
    **i. Fallback to full refresh:**
-   Reached when step (a) detects a missing or invalid `synced_to_commit` SHA. Run full 5-phase architecture discovery instead of incremental analysis.
+   If `synced_to_commit` is missing from metadata, or the commit SHA doesn't exist in git history:
+   ```bash
+   git cat-file -t <SYNCED_SHA> 2>/dev/null || echo "not found"
+   ```
+   If this returns "not found", run full 5-phase architecture discovery instead.
 
    - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now
 
@@ -364,18 +379,44 @@ If the user runs `/draft:init refresh`:
 
    **k. Refresh state files:**
    After successful architecture refresh, regenerate all state files:
+   - `draft/.state/facts.json` — re-extract atomic facts, perform contradiction detection (see step 2l)
    - `draft/.state/freshness.json` — recompute hashes of all source files (new baseline)
    - `draft/.state/signals.json` — re-run signal classification (update baseline)
-   - `draft/.state/facts.json` — update fact registry with contradiction detection results from step e.5 (if facts.json exists; if not, run Step 1.65 to generate initial registry)
    - `draft/.state/run-memory.json` — set `status: "completed"`, `completed_at: "{ISO_TIMESTAMP}"`, preserve `unresolved_questions`
 
-   **l. Refresh profile:**
-   Regenerate `draft/.ai-profile.md` using Step 1.6 (Profile Generation). Update dynamic context (active tracks, recent changes).
+   **l. Contradiction detection (if facts.json exists):**
+   If `draft/.state/facts.json` exists from a previous run, perform fact-level diff:
+
+   1. **Re-extract facts** from changed files identified in step 2b
+   2. **Compare against existing facts** sourced from those files:
+      - **CONFIRMED**: Fact still holds — update `last_verified_at` and `last_active_at`
+      - **UPDATED**: Fact changed (e.g., API endpoint renamed) — mark old fact with `superseded_by` edge, create new fact
+      - **EXTENDED**: Fact refined with new detail — add `extends` edge to original fact
+      - **NEW**: Fact not previously recorded — add with full timestamps
+      - **STALE**: Fact's source file was deleted — mark `last_active_at` as stale, reduce confidence
+   3. **Generate Fact Evolution Report** — display summary to user:
+      ```
+      Fact Evolution Report:
+        CONFIRMED:  N facts unchanged
+        UPDATED:    N facts superseded (old → new)
+        EXTENDED:   N facts refined
+        NEW:        N facts discovered
+        STALE:      N facts from deleted files
+      ```
+   4. **Update relationship edges** in `facts.json` knowledge graph
 
 3. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve**: Do NOT modify `draft/tracks.md` unless explicitly requested.
-6. **Pattern Re-Discovery**: Run `/draft:learn` (no arguments — full codebase scan) to update `draft/guardrails.md` with any new or changed patterns since the last init/refresh. This keeps learned conventions and anti-patterns in sync with codebase evolution.
+6. **Core Guardrails Backfill**: Before running pattern re-discovery, verify that `draft/guardrails.md` contains the C++/Systems Hard Guardrails from `core/guardrails.md` (G1.x–G7.x). These guardrails are mandatory for all C++ projects.
+
+   **Detection:** Check if `draft/guardrails.md` contains the marker `### C++/Systems — Object Lifecycle & Memory Safety` (the first C++ guardrail section heading).
+
+   - **If missing:** The file predates `core/guardrails.md`. Backfill by inserting the full C++/Systems Hard Guardrails sections from `core/templates/guardrails.md` (G1.x–G7.x, all pre-checked) into the `## Hard Guardrails` section of the existing `draft/guardrails.md`, after any existing general guardrails. Preserve all existing Hard Guardrails, Learned Conventions, and Learned Anti-Patterns. Announce: "Backfilled C++/Systems Hard Guardrails (G1.x–G7.x) from core/guardrails.md into draft/guardrails.md."
+   - **If present:** No action needed — guardrails are up to date.
+   - **If project has no C++ code:** Skip backfill. The guardrails only apply to C++ projects.
+
+7. **Pattern Re-Discovery**: Run `/draft:learn` (no arguments — full codebase scan) to update `draft/guardrails.md` with any new or changed patterns since the last init/refresh. This keeps learned conventions and anti-patterns in sync with codebase evolution.
 
 Stop here after refreshing. Continue to standard steps ONLY for fresh init.
 
@@ -399,13 +440,169 @@ If **Greenfield**: skip to Step 2 (Product Definition).
 
 ---
 
+## Step 1.4: Graph Analysis (Automated, Before Manual Discovery)
+
+**IMPORTANT**: Before reading any source files manually, run the graph builder to get precise structural data. This step is fast (seconds, not minutes) and dramatically accelerates all subsequent phases.
+
+**CRITICAL ORDERING**: Phase 0 (this step) MUST complete before writing any section of architecture.md. The graph provides: (a) exhaustive module list, (b) hotspot-ranked module priority, (c) authoritative proto API surface, (d) mermaid diagrams ready for slot injection, (e) codebase tier for .ai-context.md budget.
+
+### 1. Detect and run graph binary
+
+```bash
+# Find the graph binary shipped with the draft plugin.
+# Method 1: .draft-install-path breadcrumb (written by install.sh)
+# Method 2: search known install locations
+# Method 3: check if 'graph' is on PATH
+GRAPH_BIN=""
+
+# Method 1: breadcrumb file (most reliable — works on any machine)
+for breadcrumb in \
+    "$HOME/.cursor/plugins/local/draft/.draft-install-path" \
+    "$HOME/.claude-plugin/../.draft-install-path" \
+    ; do
+    if [ -f "$breadcrumb" ]; then
+        PLUGIN_ROOT="$(cat "$breadcrumb")"
+        if [ -x "$PLUGIN_ROOT/graph/bin/graph" ]; then
+            GRAPH_BIN="$PLUGIN_ROOT/graph/bin/graph"
+            break
+        fi
+    fi
+done
+
+# Method 2: search common install paths
+if [ -z "$GRAPH_BIN" ]; then
+    for candidate in \
+        "$HOME/.cursor/plugins/local/draft/graph/bin/graph" \
+        "$HOME/.claude-plugin/../graph/bin/graph" \
+        "graph/bin/graph" \
+        ; do
+        if [ -x "$candidate" ]; then
+            GRAPH_BIN="$candidate"
+            break
+        fi
+    done
+fi
+
+# Method 3: check PATH
+if [ -z "$GRAPH_BIN" ]; then
+    GRAPH_BIN="$(command -v graph 2>/dev/null || true)"
+fi
+
+# Run if found
+if [ -n "$GRAPH_BIN" ]; then
+    echo "Found graph binary: $GRAPH_BIN"
+    "$GRAPH_BIN" --repo . --out draft/graph/
+else
+    echo "Graph binary not found — skipping automated analysis"
+fi
+```
+
+Run the above bash script. If the graph binary is found, it will analyze the codebase and produce `draft/graph/` with all artifacts.
+
+### 2. If graph build succeeds, load the always-load artifacts
+
+Read these files to get structural context for all subsequent phases:
+- `draft/graph/schema.yaml` — module count, file count, edge count, language stats per module
+- `draft/graph/module-graph.jsonl` — all module nodes + weighted dependency edges
+- `draft/graph/proto-index.jsonl` — all proto services, RPCs, messages, enums
+- `draft/graph/hotspots.jsonl` — all complexity hotspots (files ranked by lines + fanIn * 50)
+
+### 3. Use graph data to accelerate Step 1.5
+
+- **Module boundaries**: Exact module list with file counts — skip manual directory tree mapping
+- **Dependency wiring**: Exact inter-module edges with weights — skip manual `#include` / import tracing
+- **Proto API surface**: Exact services, RPCs, and message definitions — skip manual proto discovery
+- **Hotspots**: Know which high-complexity, high-fanIn files to prioritize reading
+- **Language mix**: Exact `.cc`, `.h`, `.go`, `.proto`, `.py` counts per module
+- **Cycle detection**: Circular dependency paths between modules — flag for architecture.md
+
+### 4. Compute codebase tier and module priority
+
+**Step 1.4.5 — Compute Codebase Tier:**
+Read `draft/graph/schema.yaml`. Extract:
+- `M = stats.modules`
+- `F = stats.go_functions + stats.py_functions`
+- `P = stats.proto_rpcs`
+
+Apply tier table:
+
+| Tier | Label  | Condition                              | .ai-context.md Budget |
+|------|--------|----------------------------------------|-----------------------|
+| 1    | micro  | M≤5 AND F≤50 AND P≤10                 | 100–180 lines         |
+| 2    | small  | M≤15 AND F≤300 AND P≤30               | 180–280 lines         |
+| 3    | medium | M≤40 AND F≤1000 AND P≤100             | 280–400 lines         |
+| 4    | large  | M≤100 AND F≤5000 AND P≤500            | 400–600 lines         |
+| 5    | XL     | M>100 OR F>5000 OR P>500              | 600–900 lines         |
+
+Hold tier in memory. This governs: architecture.md length minimum, .ai-context.md budget, and module deep-dive depth.
+
+**Step 1.4.6 — Build Module Priority List:**
+From `draft/graph/hotspots.jsonl`: count hotspot files per module (group by `module` field).
+From `draft/graph/module-graph.jsonl`: count incoming edges per module (fan-in, from `kind: "edge"` records).
+Rank modules by: `(hotspot_count × 2) + fan_in_count`.
+Top-ranked modules drive Section 6 deep-dive ordering and depth. Modules ranked zero on both: summary treatment only.
+Hold ranked list in memory — it replaces directory scanning for module discovery.
+
+**Step 1.4.7 — Populate Graph Injection Slots:**
+Query for diagram content and write into architecture.md slots using the standard marker format.
+
+For Section 4.4 (module-deps slot):
+```bash
+"$GRAPH_BIN" --repo . --out draft/graph --query --mode mermaid --symbol module-deps
+```
+Parse JSON response: extract `.mermaid` string and `filtered` flag. Write between the markers:
+```
+<!-- GRAPH:module-deps:START -->
+```mermaid
+{diagram content}
+```
+{if filtered: Note: diagram filtered to top edges by weight — N of M total edges shown}
+<!-- GRAPH:module-deps:END -->
+```
+
+For Section 20 (hotspots slot):
+Read `draft/graph/hotspots.jsonl`, take top 10 by score, build markdown table:
+```
+<!-- GRAPH:hotspots:START -->
+| File | Lines | fanIn | Score |
+|------|-------|-------|-------|
+| {path} | {lines} | {fanIn} | {score} |
+...
+<!-- GRAPH:hotspots:END -->
+```
+
+For Appendix E (proto-map slot):
+```bash
+"$GRAPH_BIN" --repo . --out draft/graph --query --mode mermaid --symbol proto-map
+```
+Parse JSON response: extract `.mermaid` string. If no proto files (`stats.services == 0`), write placeholder. Otherwise write:
+```
+<!-- GRAPH:proto-map:START -->
+```mermaid
+{diagram content}
+```
+<!-- GRAPH:proto-map:END -->
+```
+
+**If slot markers are absent** (first run on a repo that has no prior slot structure): write the slot content at the designated location in the template. The markers are always present in `core/templates/architecture.md`, so this path is only hit if a user has an older pre-slot architecture.md.
+
+### 5. If graph binary not found or build fails
+
+Proceed with standard Step 1.5 manual discovery. No degradation — the 5-phase analysis works as before. Architecture.md length minimum defaults to tier-2 guidance (medium-depth treatment).
+
+See `core/shared/graph-query.md` for the full graph query subroutine reference.
+
+---
+
 ## Step 1.5: Architecture Discovery (Brownfield Only)
 
 Perform a **one-time, exhaustive analysis** of the existing codebase. This is NOT a summary — it is a comprehensive reference document that enables future AI agents and engineers to work without re-reading source files.
 
 **Outputs**:
 - `draft/architecture.md` — Human-readable, **comprehensive** engineering reference (PRIMARY)
-- `draft/.ai-context.md` — Token-optimized, 200-400 lines, condensed from architecture.md (DERIVED)
+- `draft/.ai-context.md` — Token-optimized, tier-scaled budget, condensed from architecture.md (DERIVED)
+- `draft/.ai-profile.md` — Ultra-compact, 20-50 lines, always-injected project profile (DERIVED)
+- `draft/graph/` — Knowledge graph artifacts (module-graph, proto-index, hotspots, per-module files) from Step 1.4
 
 **Target output**: A single self-contained reference document designed for **dual consumption**:
 1. **LLM / AI-agent context** — enabling future code changes, Q&A, and onboarding without re-reading source files.
@@ -423,7 +620,240 @@ Perform a **one-time, exhaustive analysis** of the existing codebase. This is NO
 
 If the codebase is large (200+ files), focus on the module boundaries but still enumerate exhaustively within each module.
 
-> **Large codebase guardrail:** If the codebase exceeds 500 source files, limit deep dives to the top 20 most-imported modules and summarize others in a table. Rank modules by the number of unique files that import/reference them (descending). For dynamic languages where static import counting is impractical, rank by file count within each module directory (larger modules first).
+> **Large codebase guardrail:** If the codebase exceeds 500 source files, limit Section 7 deep dives to the top 20 most-imported modules and summarize others in a table. Rank modules by the number of unique files that import/reference them (descending) — use `draft/graph/module-graph.jsonl` hub weights if graph data is available. For dynamic languages where static import counting is impractical, rank by file count within each module directory (larger modules first). **Even for summarized modules, enumerate immediate sub-directories with file counts** (one-line per sub-dir) — this is cheap with graph data and provides essential navigation context.
+
+### Parallel Analysis Protocol (Tiers 3–5)
+
+**MANDATORY for tiers 3–5 (medium / large / XL).** Uses Map → IR+Prose → Reduce: parallel reader agents each produce both structured IR metadata and full §7 deep-dive prose, then a synthesis agent composes the final document. Cuts wall clock by ~55% at XL tier while preserving depth — readers write the module narratives from source; synthesis assembles the cross-cutting sections.
+
+**For tiers 1–2 (micro / small): skip this protocol entirely.** Use the Sequential Generation Protocol below. At small scale, parallelism adds overhead with no speed benefit, and the IR intermediate step discards source-level depth that a direct sequential pass produces cheaply.
+
+> Full protocol details, IR schema, and prompt templates are in `core/shared/parallel-analysis.md`.
+
+#### Tier-Adaptive Agent Counts
+
+From the tier computed in Step 1.4.5, determine reader agent count:
+
+| Tier | Label  | Reader Agents                        | Strategy                             |
+|------|--------|--------------------------------------|--------------------------------------|
+| 1    | micro  | 1 (all modules in one agent)         | 1 reader → 1 synthesizer             |
+| 2    | small  | 1–2 (all or half modules each)       | 1–2 readers → 1 synthesizer          |
+| 3    | medium | 2–3 (ceil(M/6) agents)               | parallel readers → 1 synthesizer     |
+| 4    | large  | ceil(M/4) agents                     | parallel readers → 1 synthesizer + parallel finalizers |
+| 5    | XL     | ceil(M/4) agents                     | parallel readers → 1 synthesizer + parallel finalizers |
+
+For tiers 1–2, the "parallel" phase is just a single reader agent — no overhead, same clean IR boundary.
+For tier 3+, readers run simultaneously; wall clock = slowest reader, not the sum.
+
+#### Phase 0: Graph Data (already done in Step 1.4)
+
+The graph binary has already run. Use its output throughout this protocol:
+- `draft.tmp/graph/schema.yaml` — module list, file counts, tier metrics
+- `draft.tmp/graph/module-graph.jsonl` — fan-in counts per module (for grouping)
+- `draft.tmp/graph/hotspots.jsonl` — top hotspot files per module (feed to readers)
+
+#### Phase 1: Spawn Parallel Module Readers
+
+**Step 1: Group modules.**
+
+From `draft.tmp/graph/module-graph.jsonl`, extract all module names and their fan-in counts.
+Apply dependency-aware grouping (see `core/shared/parallel-analysis.md`).
+Use the modules-per-agent count from the tier table above (4 for tier 4/5; all modules in one agent for tier 1):
+- Assign highest fan-in modules to separate readers (tier 3+)
+- Co-locate coupled module pairs in the same reader
+- Target balanced token budgets across groups
+
+**Step 2: Build graph data summary per group.**
+
+For each reader group, prepare a compact summary from graph artifacts:
+```
+Modules: [execution, fill_processor, order_manager]
+Hotspot files:
+  execution/engine.go (847 lines, fanIn=12)
+  execution/router.go (412 lines, fanIn=8)
+  fill_processor/handler.go (623 lines, fanIn=5)
+Module edges (from module-graph.jsonl):
+  execution → [risk, data, services]
+  fill_processor → [execution, persistence]
+```
+
+**Step 3: Spawn all reader agents in parallel using the Agent tool.**
+
+Spawn `ceil(module_count / 4)` agents simultaneously. Use the Module Reader Prompt Template from `core/shared/parallel-analysis.md`, replacing:
+- `{MODULE_LIST}` — comma-separated module names for this agent
+- `{REPO_ROOT}` — absolute path to repository root
+- `{GRAPH_DATA_SUMMARY}` — the compact summary built in Step 2
+
+Each reader agent:
+- Reads source files in its assigned modules only
+- Outputs a JSON array of IR objects (one per module)
+- Produces NO prose, NO documentation
+
+**Critical constraints to include in reader prompts:**
+```
+MUST output IR JSON array only.
+MUST NOT write any documentation or architecture sections.
+MUST NOT read files outside assigned modules.
+Token budget: max 600 tokens per module in IR output.
+```
+
+**Step 4: Collect and validate reader outputs.**
+
+Each reader produces two outputs, separated by `## IR` and `## Deep-Dives` headings.
+
+After all readers complete:
+1. Extract the `## IR` section from each reader output and parse as JSON. If parse fails, retry that reader (see failure modes in `core/shared/parallel-analysis.md`).
+2. Check IR `token_budget_used` — if < 150 for a module with >20 files AND deep-dive for that module is < 100 lines, re-run that reader with explicit instruction to read more files.
+3. Concatenate all IR objects into a single JSON array → `draft.tmp/.state/reader-irs.json`
+4. Concatenate all `## Deep-Dives` sections from all readers → `draft.tmp/.state/reader-deep-dives.md`
+
+#### Phase 2: Synthesis
+
+Collect reader outputs before spawning synthesis:
+1. Parse and concatenate all IR JSON arrays → `draft.tmp/.state/reader-irs.json`
+2. Concatenate all reader deep-dive Markdown sections → `draft.tmp/.state/reader-deep-dives.md`
+
+Spawn a **single synthesis agent** with the Synthesis Coordinator Prompt from `core/shared/parallel-analysis.md`, replacing:
+- `{CONCATENATED_DEEP_DIVES}` — content of `draft.tmp/.state/reader-deep-dives.md`
+- `{CONCATENATED_IRS}` — content of `draft.tmp/.state/reader-irs.json`
+- `{GRAPH_DEPENDENCY_DIAGRAM}` — mermaid output from `--query --mode mermaid --symbol module-deps`
+- `{ARCHITECTURE_TEMPLATE_STRUCTURE}` — the 28-section outline from `core/templates/architecture.md`
+
+The synthesis agent:
+- Pastes reader deep-dives verbatim into Section 7 — does not rewrite them
+- Derives cross-cutting sections (component map, concurrency, error handling, invariants, extension points) from IR fields
+- Reads source directly for §6 Data Flow, §12 API, §14 Integration, §15 Invariants verification, §18 Patterns, §22 Config
+- Produces the full 28-section architecture.md
+
+**Source reading policy for synthesis agent (enforce in prompt):**
+```
+Read source for: §6 Data Flow, §12 API Definitions, §14 Integration Points,
+                 §15 Critical Invariants (verification), §18 Design Patterns, §22 Configuration
+
+All other sections: compose from reader deep-dives (§7) and IR fields.
+```
+
+#### Phase 3: Parallel Finalization
+
+Once `draft.tmp/architecture.md` is written, spawn two agents simultaneously:
+
+**Finalizer A — Context Derivation:**
+Run the Condensation Subroutine (defined later in this skill) to generate:
+- `draft.tmp/.ai-context.md`
+- `draft.tmp/.ai-profile.md`
+
+**Finalizer B — State Files:**
+Write all `.state/` artifacts from the concatenated IRs:
+- `draft.tmp/.state/facts.json` — extract atomic facts from IR fields (key_classes, invariants, state, error_handling)
+- `draft.tmp/.state/freshness.json` — compute hashes of all source files read (baseline for incremental refresh)
+- `draft.tmp/.state/signals.json` — derive signal classification from IR module roles and graph data
+- `draft.tmp/.state/run-memory.json` — set `status: "completed"`, record phase timings
+
+Finalizers A and B have no dependency on each other — run truly in parallel.
+
+#### Phase 4: Quality Gate
+
+After both finalizers complete, run the Completion Verification (defined later in this skill) against the standard hard minimum thresholds. If any metric fails:
+1. Identify the sparse sections (most likely cross-cutting sections: §14 Integration, §16 Security, §8 Concurrency)
+2. Request the synthesis agent to expand those sections, providing the relevant IR fields as targeted input
+3. Only proceed to atomic rename (`mv draft.tmp/ draft/`) after all metrics pass
+
+#### Failure Recovery
+
+If any reader agent fails to produce valid JSON after one retry:
+- Log which modules failed: `draft.tmp/.state/failed-readers.json`
+- Run those modules through the standard sequential analysis (Phase 3 in the Large Codebase Protocol below)
+- Merge the resulting content into the IR set before synthesis
+- The other readers' IRs remain valid — only the failed group needs re-work
+
+---
+
+### Sequential Generation Protocol (Primary for Tiers 1–2; Fallback for Tiers 3–5)
+
+**Use this protocol for tiers 1–2 (micro/small) as the primary path.** At small scale, direct sequential analysis produces deeper output than the parallel IR pipeline with less overhead.
+
+**Also use this protocol as fallback for tiers 3–5** if the Agent tool is unavailable, or if a reader agent fails entirely after retry. For 500+ file codebases running the fallback, limit sequential analysis to the top 20 modules by fan-in rank — the output will be shallower than parallel but still useful.
+
+#### Pass 1: Foundation (Sections 1–6)
+
+Generate Sections 1–6 (Executive Summary through Data Flow). Write the result to `draft/architecture.md`. These sections establish the structural skeleton: identity, topology diagrams, component map, and data flow diagrams. **Minimum 400 lines for Pass 1.**
+
+#### Pass 2: Module Deep Dives (Section 7) — One Module at a Time, with Sub-Modules
+
+**MANDATORY (graph-first)**: Use the ranked module list from Step 1.4.6 — do NOT re-discover modules by directory scanning if Phase 0 succeeded. The graph list is exhaustive. Read the top-3 hotspot files per module (from `draft/graph/hotspots.jsonl`) before writing its deep-dive.
+
+For each module in ranked order (hotspot_count × 2 + fan_in_count, descending), up to top 20:
+
+**Step A — Top-level module analysis:**
+1. **READ** `draft/graph/modules/{module_name}.jsonl` — extract sub-directory structure, file list with line counts
+2. **READ** `draft/graph/hotspots.jsonl` — identify high-complexity files in this module
+3. **READ** at least 3 key source files for this module: the interface/header, the main implementation, and one representative op/handler. For modules with 200+ files, read at least 5 source files.
+4. **CLASSIFY** each sub-directory by tier: Large (50+ files → full deep-dive), Medium (10-49 files → summary), Small (< 10 files → table row), Ops/Handler (→ operation catalog)
+5. **WRITE** the top-level module deep-dive: role, sub-module structure table, responsibilities, internal architecture diagram (showing sub-module relationships), notable mechanisms, error handling, thread safety
+
+**Step B — Sub-module deep-dives (within the same module):**
+
+**CRITICAL — Sub-modules get the SAME depth as top-level modules.** A sub-module with 200+ files is as complex as many standalone services. Do NOT abbreviate. There is NO page limit.
+
+For each Large sub-module (50+ files):
+1. **READ** 2-3 key source files from this sub-module (interface header, main impl, one op/handler). For sub-modules with 200+ files, read at least 5 source files.
+2. **WRITE** full sub-module deep-dive (`##### 7.X.Y`) using the SAME template as top-level modules: role, source files list, sub-sub-module structure table (if nested dirs exist), responsibilities (ALL, numbered), key operations/methods table (with signatures), state machine (if stateful), internal architecture diagram (if 100+ files), notable mechanisms, error handling, thread safety
+3. **RECURSE** — if the sub-module itself has Large sub-sub-modules (50+ files), apply this same step recursively at `###### 7.X.Y.Z` level
+
+For each Medium sub-module (10-49 files):
+1. **READ** 1-2 key source files (interface, one impl)
+2. **WRITE** summary sub-module deep-dive (`##### 7.X.Y`): role (2-3 sentences), key operations table (5+ entries with source file references), notable mechanisms, one interface/header code snippet
+
+For each Ops/Handler directory:
+1. **READ** file list from graph JSONL (no need to read each file — names and line counts are sufficient for the catalog)
+2. **WRITE** numbered operation catalog table enumerating ALL operations — no sampling, no "and others"
+
+**Step C — Verify and append:**
+1. **VERIFY** the complete module section (top-level + all sub-modules) is at least 100 lines (150+ for modules with 200+ files), contains UNIQUE description text, and all Large/Medium sub-modules have their own subsections
+2. **APPEND** the entire module section to `draft/architecture.md`
+
+Do NOT batch all 20 modules into one write. Process them sequentially so each module and its sub-modules get dedicated analysis attention. **No upper limit on Pass 2 length** — it scales with codebase complexity. A 14-module C++ codebase with deep sub-module hierarchies may produce 5000+ lines in Pass 2 alone. That is correct and expected.
+
+#### Pass 2 Completion Gate — MANDATORY before Pass 3
+
+**YOU MUST PRODUCE THIS TABLE before writing a single line of Pass 3.** Do not skip, summarize, or defer it.
+
+For every module written in Pass 2, count the lines in its section and fill in this table:
+
+```
+## Pass 2 Completion Report
+| Module | Lines written | Sub-modules covered | PASS / FAIL |
+|--------|--------------|---------------------|-------------|
+| foo/bar | 142 | fill_processor, scheduler | PASS |
+| foo/baz | 38  | none                | FAIL — below 100 line minimum |
+```
+
+**Rules:**
+- PASS threshold: ≥ 100 lines for any module with < 200 source files; ≥ 150 lines for modules with 200+ source files
+- A FAIL row means you MUST expand that module's section NOW, before continuing
+- If any row shows FAIL: re-read additional source files for that module and expand until the line count passes
+- If all rows PASS: print "All modules pass. Proceeding to Pass 3." and continue
+- **Omitting this table is the same as failing the gate** — Pass 3 MUST NOT start without it
+
+This gate exists because this skill requires exhaustive module coverage. Skipping modules or writing paragraph-level summaries is a violation of the Exhaustive Analysis Mandate, not an acceptable pragmatic trade-off.
+
+#### Pass 3: Remaining Sections (Sections 8–28 + Appendices)
+
+Generate Sections 8–28 and Appendices A–D. These cover concurrency, extensions, catalogs, APIs, dependencies, integration, invariants, security, observability, error handling, state, patterns, configuration, performance, cookbooks, build, testing, debt, glossary, and cross-reference appendices. **Minimum 600 lines for Pass 3.**
+
+Read additional source files as needed for each section — do not rely solely on what was read in earlier passes.
+
+#### Pass 4: Quality Gate Verification
+
+After all sections are written, run the Completion Verification (defined later in this skill) against hard minimum thresholds. If any metric fails:
+1. Identify the weakest sections
+2. Read additional source files for those sections
+3. Expand until all metrics pass
+4. Only then proceed to `.ai-context.md` generation
+
+**Minimum scale guidance:** Pass 1: 400+ lines, Pass 2: scales with modules (no cap), Pass 3: 600+ lines. For a 500+ file codebase with 10+ modules and deep sub-module hierarchies, total output of 5000-10000+ lines is expected and correct.
+
+---
 
 ### Execution Strategy for Depth
 
@@ -542,15 +972,15 @@ Follow these steps in order. The specific files to look for depend on the langua
 
 #### Phase 1: Discovery (Broad Scan)
 
-1. **Map the directory tree**: Recursively list the project to understand the file layout. Note subdirectory groupings.
+1. **Map the directory tree**: Recursively list the project to understand the file layout. Note subdirectory groupings. (If Step 1.4 graph analysis succeeded, use `draft.tmp/graph/schema.yaml` module list instead — it is exhaustive and includes file counts.)
 
 2. **Read build / dependency files**: These reveal the module structure, dependencies, and targets. (See language guide above for which files.)
 
-3. **Read API definition files**: These define the module's data model and service interfaces. (See language guide above for which files.)
+3. **Read API definition files**: These define the module's data model and service interfaces. (See language guide above for which files. If Step 1.4 succeeded, `draft.tmp/graph/proto-index.jsonl` already has all proto services, RPCs, and message definitions.)
 
 4. **Read interface / type definition files**: Class declarations, interface definitions, and type annotations reveal the public API and design intent.
 
-5. **Classify codebase signals**: Walk the file tree from step 1 and tag every file that matches one or more signal categories. This drives adaptive section depth in later phases — sections with strong signals get deep treatment, sections with no signals get marked SKIP.
+5. **Classify codebase signals**: Walk the file tree from step 1 and tag every file that matches one or more signal categories. This drives adaptive section depth in later phases — sections with strong signals get deep treatment, sections with no signals get marked SKIP. (If Step 1.4 succeeded, use module file counts and dependency edges to accelerate signal classification.)
 
    | Signal Category | Detection Patterns | Drives Section(s) |
    |----------------|-------------------|-------------------|
@@ -644,9 +1074,17 @@ Generate `draft/architecture.md` — a comprehensive human-readable engineering 
 
 **Output format**:
 - Markdown report with Mermaid diagrams, tables, and code blocks
-- **Target length: comprehensive** — cover all 25 sections + 4 appendices exhaustively
+- **Target length: comprehensive** — cover all 28 sections + 5 appendices exhaustively
 - Include a **Table of Contents** with numbered sections
 - End the document with: `"End of analysis. Queries should reference the .ai-context.md file for token efficiency."`
+
+**CRITICAL — Template Structure Compliance:**
+- The output MUST use the EXACT 28-section numbered structure defined below (## 1. through ## 28. plus Appendix A–E)
+- Do NOT create freeform/custom section names (e.g., "## Module deep-dive: X", "## Key architectural patterns")
+- Do NOT collapse multiple template sections into one
+- Do NOT skip section numbers — if a section does not apply, include the heading with "N/A — {reason}"
+- Graph data ENRICHES the template sections — it does not REPLACE the template structure
+- Sub-modules MUST receive the SAME depth of analysis as top-level modules — there is NO page limit; if the document reaches 100+ pages for a large codebase, that is correct and expected
 
 ### MANDATORY Header Format
 
@@ -784,6 +1222,21 @@ flowchart TD
     B --> E
 ```
 
+#### 4.4 Module Dependency Graph (graph-derived, auto-refreshed)
+
+Write the `GRAPH:module-deps` injection slot into architecture.md:
+
+If graph build succeeded (Step 1.4.7 completed), write the populated slot content using the diagram from Step 1.4.7. If filtered (>30 modules), include the filter note. Dashed edges indicate circular dependencies.
+
+If graph binary was not found: write the slot with placeholder body so draft:index can populate it later:
+```
+<!-- GRAPH:module-deps:START -->
+[Graph data unavailable — run draft:index to populate after graph binary is installed]
+<!-- GRAPH:module-deps:END -->
+```
+
+The slot markers MUST always be written — they are required for draft:index refresh to function.
+
 #### 4.2 Process Lifecycle (or Usage Lifecycle for libraries)
 
 Numbered steps from startup to steady state. Reference the entry-point source file.
@@ -868,9 +1321,13 @@ Document with diagram or prose: transactions, idempotency guards, version checks
 
 ### 7. Core Modules Deep Dive
 
-**Expected length: 8-15 pages (1-2 pages per module)**
+**Expected length: NO UPPER LIMIT — scales with codebase complexity.**
+- A 14-module codebase with sub-modules may produce 50+ pages for Section 7 alone. That is correct.
+- A sub-module with 50+ files gets the SAME depth as a top-level module (full deep-dive template).
+- Every sub-module at every nesting level gets dedicated analysis — do NOT summarize to save space.
+- If the document reaches 100 pages, that is a sign of thoroughness, not a problem.
 
-For each major internal module (typically 5–8), provide a COMPLETE deep dive:
+For each major internal module (typically 5–20), provide a COMPLETE deep dive:
 
 #### Per-Module Template
 
@@ -883,6 +1340,23 @@ For each major internal module (typically 5–8), provide a COMPLETE deep dive:
 - `path/to/main.file` — primary implementation
 - `path/to/types.file` — type definitions
 - `path/to/utils.file` — helpers
+
+**Sub-Module Structure** (for modules with sub-directories):
+
+| Sub-Module | Path | Files | Role |
+|------------|------|-------|------|
+| `master` | `module/master/` | 45cc, 38h | Scheduling, job management, coordination |
+| `slave` | `module/slave/` | 32cc, 28h | Task execution, data movement |
+| `ops` | `module/master/ops/` | 60cc, 60h | Individual operation implementations |
+| (enumerate ALL immediate sub-directories with source files) | | | |
+
+> **MANDATORY (graph data)**: Before writing ANY module deep-dive, you MUST:
+> 1. **READ** `draft/graph/modules/{module}.jsonl` — extract sub-directory structure from file paths in the JSONL records. Group files by their immediate sub-directory (e.g., `icebox/master/ops/foo.cc` → sub-module `master/ops`) and count files per sub-module. This provides exhaustive sub-module enumeration.
+> 2. **READ** `draft/graph/hotspots.jsonl` — filter for files in this module to identify high-complexity, high-fanIn files that deserve explicit mention.
+> 3. **READ** at least 3 key source files for this module: the primary interface/header (e.g., `*_interface.h`), the main implementation file, and one representative operation/handler. For modules with 200+ files, read at least 5 source files.
+> 4. **ONLY THEN** write the module section. If graph data does not exist, perform equivalent manual scanning.
+>
+> Skipping these reads produces copy-paste descriptions. Every module deep-dive MUST reflect actual source file content.
 
 **Responsibilities**:
 1. First responsibility with detail
@@ -901,6 +1375,8 @@ For each major internal module (typically 5–8), provide a COMPLETE deep dive:
 
 **Internal Architecture** (if complex):
 [Mermaid flowchart of subcomponents here]
+> For modules with sub-directories, show the sub-module relationships
+> as a flowchart (e.g., master → slave coordination, ops dispatch).
 
 **Notable Mechanisms**:
 - Caching: how and what is cached
@@ -913,7 +1389,143 @@ For each major internal module (typically 5–8), provide a COMPLETE deep dive:
 **Thread Safety**: Single-threaded / thread-safe / requires external synchronization.
 ```
 
-**MANDATORY for stateful modules**: Include a `stateDiagram-v2` showing state transitions:
+#### Sub-Module Depth Requirements
+
+**CRITICAL**: Do NOT stop at the top-level module. The per-module deep-dive template above applies **recursively** to significant sub-modules. A top-level module like `icebox/` (917 files) is really a system of sub-systems — `master/`, `slave/`, `client/`, `base/` — each of which is as large as a standalone module in a smaller project. Treating them as one-line table rows produces useless output.
+
+#### Tiered Sub-Module Analysis
+
+Apply the following tiers based on sub-module size (file count from graph data):
+
+| Sub-Module Size | Treatment | What to Produce |
+|----------------|-----------|-----------------|
+| **Large (50+ files)** | **Full deep-dive** — apply the SAME per-module template recursively | Role, source files, sub-sub-module table (if nested dirs), responsibilities, key operations table, state machine (if stateful), internal architecture diagram, notable mechanisms, error handling, thread safety |
+| **Medium (10–49 files)** | **Summary deep-dive** — abbreviated version of the template | Role (2-3 sentences), key operations table (5+ entries), notable mechanisms, one interface/header code snippet |
+| **Small (< 10 files)** | **Catalog entry** — one-line in parent's sub-module table | Path, file count, role description |
+| **Ops/Handler directories** | **Operation catalog** — regardless of size, enumerate ALL operations | Numbered table: operation name, source file, line count, one-line description |
+
+#### Mandatory Steps for Each Sub-Module
+
+1. **Enumerate immediate sub-directories** — list every sub-directory that contains source files, its file count, and a one-line role description
+2. **Classify each sub-directory by tier** — use file counts from graph data to determine Large / Medium / Small / Ops treatment
+3. **Apply the appropriate template for each tier** — Large sub-modules get their own `##### 7.X.Y {SubModuleName}` subsection with the full template; Medium sub-modules get a condensed subsection; Small sub-modules stay as table rows
+4. **Use graph data (MANDATORY when available)** — read `draft/graph/modules/{module}.jsonl` and group file records by sub-directory path to get exhaustive sub-module enumeration. This is not optional — graph data provides deterministic file lists that prevent incomplete enumeration
+5. **Document sub-module interfaces** — if sub-modules have distinct interfaces (e.g., `master/` vs `slave/`), describe their API boundary and interaction pattern
+6. **For ops/handler directories** — enumerate ALL operations in a numbered table regardless of directory size. These are the primary extension points engineers need to find.
+
+#### Per-Sub-Module Template (Large — 50+ files)
+
+Apply this template for each sub-module at the Large tier. Nest it under the parent module as `##### 7.X.Y`:
+
+```markdown
+##### 7.X.Y {ParentModule}/{SubModuleName}
+
+**Role**: What this sub-module does within the parent module.
+
+**Source Files** (key files — not exhaustive, see table for full list):
+- `path/to/interface.h` — public API
+- `path/to/impl.cc` — primary implementation
+- `path/to/types.h` — data types
+
+**Sub-Sub-Module Structure** (if nested directories exist):
+
+| Sub-Directory | Path | Files | Role |
+|---------------|------|-------|------|
+| `ops` | `module/submod/ops/` | 60cc, 60h | Operation implementations |
+| `test` | `module/submod/test/` | 25cc | Test suites |
+
+**Responsibilities**:
+1. {Unique responsibility 1 — what this sub-module does that its siblings don't}
+2. {Unique responsibility 2}
+3. {list ALL}
+
+**Key Operations / Methods**:
+
+| Op / Method | Signature | Description |
+|-------------|-----------|-------------|
+| `methodName` | `(input: Type) → ReturnType` | What it does |
+| (enumerate ALL public methods — at least 5 entries) | | |
+
+**Interaction with Sibling Sub-Modules**:
+- Calls `{sibling}/` for {purpose}
+- Called by `{sibling}/` when {trigger}
+- Shares `{base|common}/` types: {list key shared types}
+
+**State Machine** (if stateful):
+[Mermaid stateDiagram-v2]
+
+**Notable Mechanisms**: {caching, retry, batching, scheduling, etc.}
+
+**Error Handling**: How errors propagate within this sub-module and to the parent.
+```
+
+#### Per-Sub-Module Template (Medium — 10–49 files)
+
+```markdown
+##### 7.X.Y {ParentModule}/{SubModuleName}
+
+**Role**: {2-3 sentence description}.
+
+**Key Operations**:
+
+| Op / Method | Source File | Description |
+|-------------|-------------|-------------|
+| (at least 5 entries with real data) | | |
+
+**Notable Mechanisms**: {1-2 bullet points on key internal behavior}
+
+**Key Interface** (code snippet from actual source):
+```{language}
+// actual code from the interface header, 10-20 lines
+```
+```
+
+#### Operation Catalog Template (for ops/handler directories)
+
+Regardless of tier, any directory whose name contains `ops`, `handlers`, `executors`, `workers`, `actions`, or `commands` MUST get a full enumeration:
+
+```markdown
+##### 7.X.Y {Module}/{SubModule}/ops — Operation Catalog
+
+| # | Operation | Source File | Lines | Description |
+|---|-----------|-------------|-------|-------------|
+| 1 | `ArchiveFilesOp` | `icebox/master/ops/archive_files_op.cc` | 2100 | Archives files to cloud vault |
+| 2 | `CancelJobOp` | `icebox/master/ops/cancel_job_op.cc` | 450 | Cancels running archive job |
+| ... | (enumerate ALL — no sampling, no "and others") | | | |
+```
+
+Use `draft/graph/modules/{module}.jsonl` to get the complete file list with line counts. Use `draft/graph/hotspots.jsonl` to flag high-complexity operations.
+
+#### Example: Full Sub-Module Treatment for `icebox/` (917 files)
+
+For a module like `icebox/` with sub-directories `master/` (200+ files), `slave/` (150+ files), `client/` (20 files), `base/` (40 files):
+
+```
+#### 7.3 icebox
+  [Top-level module deep-dive: role, overall architecture diagram, cross-sub-module interaction]
+
+  ##### 7.3.1 icebox/master (Large — 200+ files → full deep-dive)
+    [Full template: role, responsibilities, key ops table, state machine, mechanisms]
+
+    ##### 7.3.1.1 icebox/master/ops — Operation Catalog
+      [Numbered table of ALL 60+ operations with file, lines, description]
+
+  ##### 7.3.2 icebox/slave (Large — 150+ files → full deep-dive)
+    [Full template: role, responsibilities, key ops table, mechanisms]
+
+    ##### 7.3.2.1 icebox/slave/ops — Operation Catalog
+      [Numbered table of ALL slave operations]
+
+  ##### 7.3.3 icebox/base (Medium — 40 files → summary deep-dive)
+    [Summary: role, key ops table, one code snippet]
+
+  ##### 7.3.4 icebox/client (Medium — 20 files → summary deep-dive)
+    [Summary: role, key ops table, interface snippet]
+```
+
+This produces 300–500+ lines for `icebox/` alone, which is proportional to its 917-file complexity.
+
+**MANDATORY for stateful modules and sub-modules**: Include a `stateDiagram-v2` showing state transitions:
 ```mermaid
 stateDiagram-v2
     [*] --> Idle
@@ -923,6 +1535,38 @@ stateDiagram-v2
     Failed --> Idle: retry()
     Completed --> [*]
 ```
+
+#### Section 7 Quality Gate (MANDATORY)
+
+After writing ALL module and sub-module deep-dives for Section 7, run these checks before proceeding to Section 8. **If any check fails, STOP and fix before continuing.**
+
+**Check 1 — Minimum depth per top-level module:**
+Count the lines in each top-level module subsection (from `#### 7.X` to the next `#### 7.Y`). If ANY deep-dived module has fewer than 60 lines (or fewer than 150 lines for modules with 200+ files), the analysis is incomplete. Go back, read the module's source files, and expand.
+
+**Check 2 — No duplicate descriptions (modules AND sub-modules):**
+Compare the Responsibilities and description text across ALL modules AND sub-modules. If 3 or more share more than 50% of their description text (e.g., identical sentences like "Implement subsystem ops, expose RPC stubs"), you have NOT analyzed the source files. For each duplicated entry:
+1. Read `draft/graph/modules/{module_name}.jsonl` to get its file list
+2. Read the module/sub-module's primary interface header and at least one implementation file
+3. Rewrite the description based on what it ACTUALLY does — what makes it UNIQUE from its siblings
+
+**Check 3 — Sub-module tables present:**
+For every module with more than 50 source files (check file count from graph data), verify a Sub-Module Structure table exists listing immediate sub-directories with file counts and roles. If missing, read the module's graph JSONL and generate the table.
+
+**Check 4 — Sub-module tiering applied:**
+For every sub-module listed in a Sub-Module Structure table, verify the correct tier treatment was applied:
+- Large sub-modules (50+ files): MUST have their own `##### 7.X.Y` subsection with the full deep-dive template (role, responsibilities, key ops, mechanisms, error handling)
+- Medium sub-modules (10-49 files): MUST have their own `##### 7.X.Y` subsection with summary (role, key ops table, one code snippet)
+- Ops/handler directories: MUST have a numbered operation catalog table enumerating ALL operations
+If any Large or Medium sub-module is missing its required subsection, generate it.
+
+**Check 5 — Key operations populated (modules AND sub-modules):**
+Each deep-dived module AND each Large/Medium sub-module MUST have a Key Operations / Methods table with at least 5 real entries (not placeholders). If a table has fewer than 5 entries, read additional source files.
+
+**Check 6 — Diagrams for complex modules:**
+Modules with more than 200 source files MUST have at least one internal architecture diagram (flowchart showing sub-module relationships and data flow between them). If missing, generate one from the sub-module dependency structure.
+
+**Check 7 — Operation catalogs complete:**
+For every ops/handler directory identified in sub-module tables, verify a numbered catalog exists enumerating ALL operations. Compare the count against graph data file counts. If the catalog has fewer entries than files in the directory, it is incomplete.
 
 ---
 
@@ -982,7 +1626,7 @@ Describe any type-erased, generic, or shared containers used across interfaces.
 
 ### 10. Full Catalog of Implementations
 
-_(Skip if Section 9 was skipped.)_
+_(Skip if Section 9 was skipped AND the codebase has no operation/handler pattern.)_
 
 #### 10.1 Legacy / V1 Implementations (if applicable)
 
@@ -999,6 +1643,28 @@ Table grouped by category:
 |----------|-----------------|
 
 **Include ALL implementations found in the codebase — enumerate exhaustively.**
+
+#### 10.3 Sub-Module Operation Catalogs
+
+**CRITICAL**: For large modules with operation/handler sub-directories (e.g., `icebox/master/ops/`, `magneto/vmware/`, `blob_store/blob_ops/`), enumerate ALL operation classes:
+
+```markdown
+##### 10.3.X {Module}/{SubModule} Operations
+
+| # | Operation | Source File | Lines | Description |
+|---|-----------|-------------|-------|-------------|
+| 1 | ArchiveFilesOp | `icebox/master/ops/archive_files_op.cc` | 2100 | Archives files to cloud vault |
+| 2 | CancelJobOp | `icebox/master/ops/cancel_job_op.cc` | 450 | Cancels running archive job |
+| (enumerate ALL — use graph hotspots.jsonl and per-module JSONL for file list and line counts) |
+```
+
+> **MANDATORY (graph data)**: Read `draft/graph/modules/{module}.jsonl` to get the complete file
+> list with line counts. Filter for files in operation sub-directories (paths containing `/ops/`,
+> `/handlers/`, `/executors/`, `/workers/`). Use `draft/graph/hotspots.jsonl` to flag
+> high-complexity operations (high line count or fanIn). Do NOT skip this step — incomplete
+> catalogs cause AI agents to reinvent existing functionality.
+
+**Why this matters**: Operation classes are the primary extension points in large systems. Engineers adding new functionality need to know what operations already exist, their complexity, and which files to use as templates. Missing even one operation from the catalog means the AI may suggest reinventing existing functionality.
 
 ---
 
@@ -1545,21 +2211,57 @@ sequenceDiagram
 
 ---
 
-### Expected Output Summary
+### Appendix E: Proto Service Map (graph-derived)
 
-Before writing architecture.md, verify your output matches these expectations:
+Write the `GRAPH:proto-map` injection slot into architecture.md.
 
-| Metric | Minimum | Target |
-|--------|---------|--------|
-| **Depth** | 25 sections minimum | Comprehensive (25 sections + 4 appendices) |
-| **Mermaid diagrams** | 5 diagrams | 8-12 diagrams |
-| **Tables with data** | 15 tables | 20-30 tables |
-| **Code snippets** | 5 snippets | 10-15 snippets |
-| **File references** | 50 refs | 100+ refs |
-| **Invariants documented** | 8 | 10-15 |
-| **Modules deep-dived** | 5 | 5-8 |
+If graph build succeeded and proto files exist (Step 1.4.7 completed), write the populated slot content using the diagram from Step 1.4.7.
 
-**Completeness guidance:** All 25 sections + 4 appendices must be present. HIGH-priority sections require depth and diagrams. If any HIGH-priority section is thin, expand it before finalizing.
+If graph binary was not found or no proto files exist, write the slot with placeholder:
+```
+<!-- GRAPH:proto-map:START -->
+[Graph data unavailable — run draft:index to populate after graph binary is installed]
+<!-- GRAPH:proto-map:END -->
+```
+
+The slot markers MUST always be written — they are required for draft:index refresh to function.
+
+---
+
+### Expected Output Summary — Hard Minimum Thresholds
+
+Before finalizing architecture.md, verify your output meets these quality gates. These are **depth and coverage checks** — the goal is a document that genuinely captures the codebase, not one that hits a line count by repeating names.
+
+**Depth gates (content quality — these matter most):**
+
+| Gate | FAIL condition | How to fix |
+|------|---------------|------------|
+| **Module coverage** | Any module in the top-20 fan-in list has no `#### 7.X` section | Add the missing deep-dive — read source if needed |
+| **Module depth** | Any top-level module section contains fewer than 150 words of prose (not counting tables/code) | Expand from source — re-read implementation files |
+| **Sub-module depth** | Any Large sub-module (50+ files) has no `##### 7.X.Y` section | Add sub-module deep-dive |
+| **No placeholder prose** | Any section contains "See X/", "similar to above", or bulleted file lists with no explanation | Replace with real content from source |
+| **Invariants grounded** | §15 lists fewer than 5 invariants traceable to actual source assertions or comments | Read source assertions; add real invariants |
+| **Data flow traced** | §6 contains no sequence diagram or step-by-step trace of at least one core request path | Read entry-point and pipeline source; write the trace |
+| **Code snippets real** | Any code block contains pseudocode or placeholder | Replace with actual code from source |
+| **All sections present** | Any of the 28 sections + 4 appendices is missing or contains only a heading | Fill with real content or state explicitly why it does not apply |
+
+**Coverage scale targets** (use as a sanity check, not a hard gate — a shorter document with real depth passes; a longer document with padding fails):
+
+| Tier | Label  | Expected scale of §7 | Expected total scale |
+|------|--------|----------------------|----------------------|
+| 1    | micro  | 3–5 modules × 150+ words | compact but complete |
+| 2    | small  | 5–10 modules × 150+ words | substantial |
+| 3    | medium | 10–15 modules × 200+ words | thorough |
+| 4    | large  | 15–20 modules × 250+ words | extensive |
+| 5    | XL     | 20+ modules × 300+ words | exhaustive |
+
+**A document that fails depth gates but hits line counts is still INCOMPLETE. A document that passes all depth gates but is shorter than expected is ACCEPTABLE.**
+
+**If any depth gate fails: re-read source for the failing sections and expand. Do NOT proceed to .ai-context.md generation until all depth gates pass.**
+
+**Checklist additions:**
+- [ ] Graph injection slots populated (GRAPH:module-deps, GRAPH:hotspots, GRAPH:proto-map) if schema.yaml exists
+- [ ] At least 28 + 5 appendices present (including new Appendix E)
 
 ---
 
@@ -1588,8 +2290,9 @@ This table identifies which sections require the MOST depth and WHY. High-priori
 | 4 | Architecture Overview | **HIGH** | **YES: flowchart TD** | Visual mental model — diagram is mandatory |
 | 5 | Component Map & Interactions | **HIGH** | **YES: flowchart + matrix** | Know what talks to what |
 | 6 | Data Flow — End to End | **HIGH** | **YES: multiple flowcharts** | Trace any request — separate diagram per major flow |
-| 7 | Core Modules Deep Dive | **HIGH** | **YES: stateDiagram per module** | 5-8 modules × full deep-dive each |
-| 8 | Concurrency Model | High | Optional | **Prevents race conditions** in generated code |
+| 7 | Core Modules Deep Dive | **HIGH** | **YES: stateDiagram per module + sub-module architecture** | Top 20 modules × full deep-dive each + recursive sub-module deep-dives (Large: full, Medium: summary, Ops: catalog) |
+| 3.3 | Initialization Sequence | **HIGH** | **YES: sequenceDiagram** | Startup failure diagnosis — init order, dependency gates, failure paths |
+| 8 | Concurrency Model | High | **YES: flowchart TD** | **Prevents wrong-executor bugs** in generated code — topology must be visible |
 | 9 | Framework & Extension Points | High | No | Understand the plugin architecture |
 | 10 | Full Catalog | **HIGH** | No | **Exhaustive enumeration** — no sampling |
 | 11 | Secondary Subsystem (V2) | Medium | YES: flowchart | Only if V1/V2 split exists |
@@ -1599,7 +2302,7 @@ This table identifies which sections require the MOST depth and WHY. High-priori
 | 15 | Critical Invariants | **HIGH** | No | **Prevents dangerous changes** — 8-15 invariants |
 | 16 | Security Architecture | Medium | No | Protocol & safety analysis |
 | 17 | Observability & Telemetry | Medium | No | Production readiness |
-| 18 | Error Handling & Failure Modes | High | No | Production debugging guide |
+| 18 | Error Handling & Failure Modes | High | **YES: flowchart TD** | Failure decision tree — AI agents need the visual, not just retry tables |
 | 19 | State Management | High | No | Crash recovery understanding |
 | 20 | Reusable Modules | Low | No | Engineer-facing only |
 | 21 | Key Design Patterns | High | No | **Code snippets required** — actual code |
@@ -1619,27 +2322,81 @@ This table identifies which sections require the MOST depth and WHY. High-priori
 
 Before completing architecture.md, verify these diagrams exist:
 
+- [ ] **Section 3.3**: Initialization sequence diagram — `sequenceDiagram` showing config load → dependency init → server bind → readiness gate, with `alt` blocks for each failure path
 - [ ] **Section 4.1**: High-level topology flowchart (flowchart TD)
 - [ ] **Section 5.1**: Initialization stages state machine (if applicable)
 - [ ] **Section 6**: Separate flowchart for EACH major data-flow path (typically 3-5 diagrams)
-- [ ] **Section 7**: State machine for each stateful module (stateDiagram-v2)
+- [ ] **Section 7**: State machine for each stateful module AND sub-module (stateDiagram-v2)
+- [ ] **Section 7**: Internal architecture diagram for modules with 200+ files (flowchart showing sub-module relationships)
+- [ ] **Section 7**: Sub-module interaction diagrams for Large sub-modules with sibling coordination patterns
+- [ ] **Section 7.4**: Execution topology diagram — `flowchart TD` mapping all thread pools / goroutines / actors and the queues / channels between them, with lock ordering annotated (or explicit "Single-threaded" statement if N/A)
 - [ ] **Section 11**: V2 architecture flowchart (if V1/V2 split exists)
 - [ ] **Section 14**: Sequence diagram for top 2-3 cross-module flows
+- [ ] **Section 16.2**: Failure decision tree — `flowchart TD` tracing error classification → retry → circuit breaker → fallback for the primary operation type
 - [ ] **Appendix D**: 2-3 detailed sequence diagrams with payloads
+
+### Anti-Pattern Detection (Run Before Writing)
+
+**MANDATORY**: Before writing architecture.md (or before finalizing each pass in the Large Codebase Generation Protocol), scan your draft for these FAILURE indicators. If ANY failure is detected, fix it BEFORE writing.
+
+**FAILURE 1 — Copy-Paste Modules:**
+Detection: 3+ modules in Section 7 share identical or near-identical Responsibilities, description, or "Anchor files" text.
+Example of failure: Multiple modules all saying "Responsibilities: Implement subsystem ops, expose RPC stubs, consume ComponentContext getters."
+Fix: For each duplicated module, read its actual source files (interface header + one implementation file minimum) and rewrite the description to reflect what the module UNIQUELY does. Every module in a codebase does something different — describe THAT difference.
+
+**FAILURE 2 — Skeleton Sequence Diagrams:**
+Detection: Any `sequenceDiagram` block has fewer than 15 lines of Mermaid code.
+Example of failure: A 5-line diagram showing `A->>B: request` / `B-->>A: response` with no payloads, no error paths, no conditional branches.
+Fix: Add actual payload descriptions on arrows, `alt`/`opt` blocks for conditional paths, `loop` blocks for retry logic, `Note` annotations for non-obvious steps. Target 25-40 lines per diagram.
+
+**FAILURE 3 — Empty Appendices:**
+Detection: Appendix B, C, or D tables have fewer than 10 data rows.
+Fix: Cross-reference ALL data sources (Appendix B), ALL implementation outputs (Appendix C), and add 2-3 detailed sequence diagrams to Appendix D. Use graph data (`module-graph.jsonl`, `proto-index.jsonl`) to enumerate exhaustively.
+
+**FAILURE 4 — Missing Sub-Modules:**
+Detection: A module with 100+ source files (check graph data) has no Sub-Module Structure table.
+Fix: Read `draft/graph/modules/{name}.jsonl`, group files by immediate sub-directory, and generate the table with file counts and one-line role descriptions per sub-directory.
+
+**FAILURE 4b — Shallow Sub-Module Treatment:**
+Detection: Large sub-modules (50+ files) listed only as table rows with no dedicated deep-dive subsection. Or ops/handler directories have no operation catalog.
+Example of failure: `icebox/master/` (200+ files) appears only as a row in icebox's sub-module table with "Scheduling, job management, coordination" — no `##### 7.X.Y` subsection, no key operations table, no responsibilities list.
+Fix: Apply the tiered sub-module analysis. For each Large sub-module, create a `##### 7.X.Y` subsection using the full sub-module deep-dive template. For each ops/handler directory, create a numbered operation catalog. Read the sub-module's interface header and implementation files before writing.
+
+**FAILURE 5 — Missing Operational Diagrams:**
+Detection: Any of these three diagrams is absent from the document:
+  - §3.3 initialization sequence diagram
+  - §7.4 execution topology diagram
+  - §16.2 failure decision tree
+Fix: These diagrams cannot be skipped. For single-threaded services with no concurrency, §7.4 must explicitly state "Single-threaded — no topology diagram" rather than omitting the section. For trivially simple error handling (no retries, no circuit breaker), §16.2 can be a minimal 3-node flowchart (attempt → success/error) — the section must still exist with a diagram.
+
+**FAILURE 6 — No Real Code:**
+Detection: Code snippets are generic patterns, pseudocode, or contain only comments / TODOs. No actual code from the codebase appears.
+Fix: Read actual source files and extract 10-30 line snippets that illustrate design patterns, error handling, or key interfaces. Include the file path and line range.
+
+**FAILURE 7 — Placeholder Tables:**
+Detection: Table cells contain only "See X/" directory references, "follow BUILD patterns", or similar deflections instead of real data.
+Fix: Read the referenced files and populate the table with specific names, types, signatures, descriptions, and file paths.
+
+---
 
 ### Self-Check Before Completion
 
 Run this checklist before writing architecture.md:
 
-- [ ] **Page count**: Rendered output approaches 30+ pages (not 5-10)
-- [ ] **Diagram count**: At least 5-10 Mermaid diagrams present
-- [ ] **Table population**: ALL tables have real data, not placeholders
-- [ ] **Code snippets**: Actual code from codebase, not pseudocode
-- [ ] **Exhaustive enumeration**: No "and others", "etc.", "similar to above"
+- [ ] **Line count**: At least 1500 lines (2500+ for 500+ file codebases)
+- [ ] **Diagram count**: At least 10 Mermaid diagrams present (15+ target)
+- [ ] **Table population**: ALL tables have real data, not placeholders — minimum 20 tables with 3+ data rows
+- [ ] **Code snippets**: At least 8 actual code snippets from codebase, not pseudocode
+- [ ] **Exhaustive enumeration**: No "and others", "etc.", "similar to above", "follow patterns"
 - [ ] **N/A sections**: Explicitly state why skipped, not silently omitted
-- [ ] **File references**: Every claim traceable to specific source file
+- [ ] **File references**: At least 100 backtick-quoted file path references
+- [ ] **Module uniqueness**: Every Section 7 module AND sub-module has UNIQUE description text — no copy-paste
+- [ ] **Sub-module depth**: Every Large sub-module (50+ files) has its own ##### deep-dive subsection; every ops/handler dir has a numbered catalog
+- [ ] **Sequence diagram depth**: Every sequence diagram has 15+ lines with payloads and alt/opt blocks
+- [ ] **Glossary completeness**: At least 20 terms defined
+- [ ] **Anti-patterns clear**: All anti-pattern checks above pass (including FAILURE 4b — Shallow Sub-Module Treatment)
 
-**After completing analysis: Write this content to `draft/architecture.md` using the Write tool. This is the PRIMARY output. Then run the Condensation Subroutine to derive .ai-context.md.**
+**After completing analysis AND passing all checks: Write this content to `draft/architecture.md` using the Write tool. This is the PRIMARY output. Then run the Condensation Subroutine to derive .ai-context.md.**
 
 ---
 
@@ -1908,13 +2665,13 @@ After completing the 5-phase analysis:
 1. **Gather git metadata FIRST**: Run these commands to collect current state:
    ```bash
    PROJECT_NAME=$(basename "$(pwd)")
-   GIT_BRANCH=$(git branch --show-current 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo "none")
+   GIT_BRANCH=$(git branch --show-current)
    GIT_REMOTE=$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || echo "none")
-   GIT_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "none")
-   GIT_COMMIT_SHORT=$(git rev-parse --short HEAD 2>/dev/null || echo "none")
-   GIT_COMMIT_DATE=$(git log -1 --format="%ci" 2>/dev/null || echo "none")
-   GIT_COMMIT_MSG=$(git log -1 --format="%s" 2>/dev/null || echo "none")
-   GIT_DIRTY=$([ -n "$(git status --porcelain 2>/dev/null)" ] && echo "true" || echo "false")
+   GIT_COMMIT=$(git rev-parse HEAD)
+   GIT_COMMIT_SHORT=$(git rev-parse --short HEAD)
+   GIT_COMMIT_DATE=$(git log -1 --format="%ci")
+   GIT_COMMIT_MSG=$(git log -1 --format="%s")
+   GIT_DIRTY=$([ -n "$(git status --porcelain)" ] && echo "true" || echo "false")
    ISO_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
    ```
 
@@ -1947,213 +2704,148 @@ After completing the 5-phase analysis:
    ... (then continue with full 28 sections + appendices)
    ```
 
-3. **Derive `draft/.ai-context.md`** with the SAME metadata header, then use the Condensation Subroutine to transform architecture.md content into machine-optimized format.
+3. **Run Completion Verification (MANDATORY)** — Before proceeding to `.ai-context.md`, verify architecture.md meets all hard minimums:
 
-4. **Present for review**: Show the user a summary of what was discovered before proceeding to Step 2.
+   ```
+   COMPLETION VERIFICATION — Score against Hard Minimum Thresholds:
+
+   Step 1: Count total lines in draft/architecture.md
+     → Hard minimum: 2000 (3000+ for 500+ file codebases using multi-pass protocol)
+     → PASS / FAIL: ___
+
+   Step 2: Count Mermaid diagram blocks (```mermaid)
+     → Hard minimum: 8
+     → PASS / FAIL: ___
+
+   Step 3: Count tables with 3+ data rows (including sub-module tables and op catalogs)
+     → Hard minimum: 25
+     → PASS / FAIL: ___
+
+   Step 4: Count non-Mermaid code blocks with actual source code
+     → Hard minimum: 8
+     → PASS / FAIL: ___
+
+   Step 5: Count backtick-quoted file path references
+     → Hard minimum: 100
+     → PASS / FAIL: ___
+
+   Step 6: Check Section 7 — verify UNIQUE descriptions at ALL levels
+     → Compare Responsibilities text across all modules AND sub-modules
+     → If 3+ entries (modules or sub-modules) share >50% of text: FAIL
+     → PASS / FAIL: ___
+
+   Step 7: Check Section 7 — verify sub-module tiering was applied
+     → Every module with 50+ files MUST have a sub-module structure table
+     → Every Large sub-module (50+ files) MUST have its own ##### deep-dive subsection
+     → Every Medium sub-module (10-49 files) MUST have its own ##### summary subsection
+     → Every ops/handler directory MUST have a numbered operation catalog
+     → PASS / FAIL: ___
+
+   Step 8: Check Section 15 — count invariants documented
+     → Hard minimum: 10
+     → PASS / FAIL: ___
+
+   Step 9: Check Appendix D — verify sequence diagrams have alt/opt blocks and 15+ lines each
+     → PASS / FAIL: ___
+
+   Step 10: Check Section 28 — count glossary terms
+     → Hard minimum: 20
+     → PASS / FAIL: ___
+
+   Step 11: Check Appendix B and C — count table rows
+     → Hard minimum: 10 rows each
+     → PASS / FAIL: ___
+
+   Step 12: Check operation catalogs — verify completeness
+     → For each ops/handler directory, compare catalog entry count against file count from graph data
+     → If catalog entries < 80% of actual files in the directory: FAIL
+     → PASS / FAIL: ___
+     → PASS / FAIL: ___
+
+   OVERALL: If ANY step is FAIL, identify the weakest sections and expand them.
+   Do NOT proceed to .ai-context.md until ALL steps PASS.
+   ```
+
+   If any verification step fails:
+   - Read additional source files relevant to the failing sections
+   - Expand the weak sections with real content
+   - Re-run verification
+   - Repeat until all steps pass
+
+4. **Derive `draft/.ai-context.md`** with the SAME metadata header, then use the Condensation Subroutine to transform architecture.md content into machine-optimized format.
+
+5. **Derive `draft/.ai-profile.md`** — ultra-compact 20-50 line always-injected profile using the Profile Generation Subroutine (defined at the end of this skill).
+
+6. **Present for review**: Show the user a summary of what was discovered, including the Completion Verification scores, before proceeding to Step 2.
 
 **CRITICAL**:
 - Do NOT skip the YAML frontmatter metadata block — it enables incremental refresh
-- Generate architecture.md FIRST, then derive .ai-context.md from it
-- Both files MUST have the metadata header at the very top
+- Do NOT skip the Completion Verification — it catches shallow output before it becomes permanent
+- Generate architecture.md FIRST, verify it meets thresholds, then derive .ai-context.md, then .ai-profile.md
+- All three files MUST have the metadata header at the very top
 
 ---
 
-> **Note:** After generating or updating `architecture.md`, run the **Condensation Subroutine** (defined at the end of this skill) to derive `.ai-context.md`.
-
-## Step 1.6: Generate Project Profile (Brownfield Only)
-
-After generating `.ai-context.md`, derive `draft/.ai-profile.md` — a compact, always-injected "RAM layer" of the most critical project facts. This file provides the minimum context every Draft command needs, reducing token usage for simple tasks while `.ai-context.md` provides deeper context on demand.
-
-**Inspired by:** Supermemory's User Profiles — static facts + dynamic context, always fresh, ~50ms retrieval.
-
-### Design Principles
-
-- **Ultra-compact**: 20-50 lines maximum
-- **Always injected**: Every Draft command loads this first, before deciding if deeper context is needed
-- **Auto-refreshed**: Regenerated whenever `.ai-context.md` changes
-- **Two layers**: Static facts (change rarely) + dynamic context (changes frequently)
-
-### Procedure
-
-#### Step 1: Extract Static Facts from `.ai-context.md`
-
-Read `draft/.ai-context.md` and extract:
-
-| Field | Source Section | Example |
-|-------|--------------|---------|
-| `LANG` | `## META` → `lang` | `TypeScript 5.3` |
-| `FRAMEWORK` | `## META` → detected from deps | `Next.js 14 (app router)` |
-| `DB` | `## GRAPH:DEPENDENCIES` → database deps | `PostgreSQL + Prisma` |
-| `AUTH` | `## INVARIANTS` → security invariants | `NextAuth v5, JWT` |
-| `API` | `## META` → `type` + route patterns | `REST, /api/** routes` |
-| `TEST` | `## TEST` → test commands | `Vitest + React Testing Library` |
-| `DEPLOY` | `## CONFIG` → deployment config | `Vercel` |
-| `BUILD` | `## META` → `build` | `npm run build` |
-| `ENTRY` | `## META` → `entry` | `src/index.ts -> main()` |
-
-#### Step 2: Extract Critical Invariants
-
-From `## INVARIANTS`, extract the top 3-5 most critical invariants (prioritize `[DATA]` and `[SEC]` categories). Write as single-line rules.
-
-#### Step 3: Extract Safety Rules
-
-From `## INVARIANTS` or Section 2 of `architecture.md` ("Never" rules), extract 2-3 absolute prohibitions.
-
-#### Step 4: Gather Dynamic Context
-
-```bash
-# Active tracks
-grep -E "^\s*-\s*\[~\]" draft/tracks.md 2>/dev/null | head -5
-
-# Recent changes (last 5 commits, excluding draft/ changes)
-git log --oneline -5 --no-merges -- . ':!draft/' 2>/dev/null
-```
-
-#### Step 5: Write Profile
-
-Write `draft/.ai-profile.md` using the template from `core/templates/ai-profile.md`. The file should be 20-50 lines.
-
-**Called by:** `/draft:init`, `/draft:init refresh`, Condensation Subroutine, `/draft:implement`
-
----
-
-## Step 1.65: Extract Fact Registry (Brownfield Only)
-
-After generating `architecture.md` and `.ai-context.md`, extract atomic facts into `draft/.state/facts.json` — a structured registry of individual architectural facts that enables granular change tracking, contradiction detection, and knowledge evolution.
-
-**Inspired by:** Supermemory's Atomic Memories — singular facts with high signal-to-noise ratio, connected via relationship edges, with temporal metadata.
-
-### Design Principles
-
-- **Atomic**: Each fact is a single, verifiable statement about the codebase
-- **Traceable**: Every fact links to source files and the commit where it was observed
-- **Temporal**: Dual-layer timestamps track when facts were discovered vs. when patterns were established
-- **Relational**: Facts connect via `updates`, `extends`, and `derives` relationship edges
-- **Evolvable**: Contradictions are tracked, not overwritten — old facts marked as superseded
-
-### Fact Categories
-
-| Category | What It Captures | Example |
-|----------|-----------------|---------|
-| `data-flow` | How data moves through the system | "All API responses pass through ResponseSerializer" |
-| `architecture` | Structural decisions and boundaries | "Auth module has no direct database access" |
-| `invariant` | Safety rules and constraints | "All DB writes must be in transactions" |
-| `dependency` | External service/library relationships | "Payment service depends on Stripe SDK v12" |
-| `concurrency` | Threading, async, locking rules | "Redis operations use connection pooling with max 10" |
-| `api-contract` | Interface definitions and protocols | "POST /users returns 201 with {id, email}" |
-| `configuration` | Config mechanisms and critical settings | "Feature flags loaded from LaunchDarkly at startup" |
-| `testing` | Test infrastructure and conventions | "Integration tests use testcontainers for PostgreSQL" |
-| `security` | Auth, authz, input validation patterns | "JWT tokens validated by middleware on all /api routes" |
-| `pattern` | Recurring design patterns | "Repository pattern used for all database access" |
-
-### Extraction Procedure
-
-#### Step 1: Parse Architecture Sections
-
-For each section of `architecture.md`, extract atomic facts:
-
-| Section(s) | Target Facts |
-|------------|-------------|
-| §4 Architecture Overview | Component topology facts |
-| §5 Component Map | Ownership and interaction facts |
-| §6 Data Flow | Pipeline and flow facts |
-| §7 Core Modules | Module responsibility and interface facts |
-| §8 Concurrency | Threading and safety rule facts |
-| §12 API Definitions | Endpoint and schema facts |
-| §13 External Dependencies | Dependency relationship facts |
-| §15 Critical Invariants | Invariant facts (highest priority) |
-| §18 Error Handling | Error recovery and retry facts |
-| §19 State Management | Persistence and state facts |
-| §21 Design Patterns | Pattern usage facts |
-| §22 Configuration | Configuration mechanism facts |
-
-#### Step 2: Assign Temporal Metadata
-
-For each extracted fact, determine two timestamps:
-
-| Timestamp | Meaning | How to Determine |
-|-----------|---------|-----------------|
-| `discovered_at` | When Draft first observed this fact | Current timestamp (ISO 8601) |
-| `established_at` | When this pattern/fact was actually introduced in the codebase | Use `git log --follow -1 --format="%ci"` on the primary source file, or `git blame` on the specific line referenced in the fact |
-| `last_verified_at` | When this fact was last confirmed still true | Current timestamp (ISO 8601) |
-| `last_active_at` | When source files containing this fact were last modified | `git log -1 --format="%ci" -- {source_file}` |
-
-#### Step 3: Detect Relationships Between Facts
-
-For each new fact, check if it relates to existing facts:
-
-| Relationship | Meaning | Detection |
-|-------------|---------|-----------|
-| `updates` | New fact supersedes an old fact (contradiction) | Same category + same source files + different statement |
-| `extends` | New fact adds detail to an existing fact | Same category + overlapping source files + compatible statement |
-| `derives` | New fact is inferred from combining other facts | Cross-category inference (e.g., auth middleware + rate limiting = API security posture) |
-
-#### Step 4: Write Fact Registry
-
-Write `draft/.state/facts.json`:
-
-```json
-{
-  "version": 1,
-  "generated_at": "{ISO_TIMESTAMP}",
-  "git_commit": "{FULL_SHA}",
-  "total_facts": 0,
-  "facts": [
-    {
-      "id": "f-001",
-      "category": "invariant",
-      "statement": "All database writes must be wrapped in transactions",
-      "source_files": ["src/db/repository.ts:45", "src/db/transaction.ts:12"],
-      "source_commit": "{FULL_SHA}",
-      "discovered_at": "{ISO_TIMESTAMP}",
-      "established_at": "2024-06-15T10:00:00Z",
-      "last_verified_at": "{ISO_TIMESTAMP}",
-      "last_active_at": "2025-03-28T14:00:00Z",
-      "confidence": "high",
-      "access_count": 0,
-      "supersedes": null,
-      "superseded_by": null
-    }
-  ],
-  "relationships": [
-    {
-      "from": "f-001",
-      "to": "f-015",
-      "type": "extends",
-      "reason": "Added connection pooling details to database access pattern"
-    }
-  ]
-}
-```
-
-### Fact Registry Constraints
-
-- **Target**: 50-150 facts for a typical project (fewer for small projects, more for large)
-- **Priority extraction order**: invariants > architecture > data-flow > api-contract > security > concurrency > dependency > pattern > configuration > testing
-- **Maximum per category**: 20 facts (focus on the most significant)
-- **Minimum evidence**: Each fact must reference at least one source file
-- **No duplicates**: Check `statement` similarity before adding — if >90% similar to existing fact, update the existing fact instead
-
----
+> **Note:** After generating or updating `architecture.md`, run the **Completion Verification** above, then the **Condensation Subroutine** (defined at the end of this skill) to derive `.ai-context.md`.
 
 ## Step 1.7: Persist State (Brownfield Only)
 
 **Skip for Greenfield projects** — there are no source files to hash and no signals to classify. Greenfield projects only get `run-memory.json` (written during Completion).
 
-After generating `architecture.md` and `.ai-context.md`, persist three state files to `draft/.state/` for incremental refresh and cross-session continuity.
+After generating `architecture.md`, `.ai-context.md`, and `.ai-profile.md`, persist four state files to `draft/.state/` for incremental refresh and cross-session continuity.
+
+### 1.7.0 Fact Registry (`draft/.state/facts.json`)
+
+Extract atomic architectural facts discovered during Phases 1-5. Each fact is a single, verifiable claim about the codebase with dual-layer timestamps and relationship edges.
+
+```json
+{
+  "generated_at": "{ISO_TIMESTAMP}",
+  "git_commit": "{FULL_SHA}",
+  "total_facts": 0,
+  "categories": ["data-flow", "architecture", "invariant", "dependency", "api", "security", "concurrency", "configuration", "testing", "convention"],
+  "facts": [
+    {
+      "id": "fact-001",
+      "category": "architecture",
+      "statement": "Express app uses service layer pattern — routes delegate to services, services access repositories",
+      "confidence": 0.95,
+      "source_files": ["src/routes/users.ts", "src/services/user.service.ts", "src/repositories/user.repo.ts"],
+      "discovered_at": "{ISO_TIMESTAMP}",
+      "established_at": "{ISO_TIMESTAMP from git blame}",
+      "last_verified_at": "{ISO_TIMESTAMP}",
+      "last_active_at": "{ISO_TIMESTAMP from file modification}",
+      "access_count": 0,
+      "edges": {
+        "updates": [],
+        "extends": [],
+        "derives": ["fact-003"],
+        "superseded_by": null
+      }
+    }
+  ]
+}
+```
+
+**Fact categories:**
+- `data-flow` — How data moves through the system
+- `architecture` — Structural patterns and module organization
+- `invariant` — Rules that must always hold true
+- `dependency` — External service and library dependencies
+- `api` — Endpoint definitions and contracts
+- `security` — Auth, authz, crypto, and access control patterns
+- `concurrency` — Thread safety, async patterns, lock ordering
+- `configuration` — Config mechanisms and critical settings
+- `testing` — Test infrastructure and patterns
+- `convention` — Coding conventions and naming patterns
+
+**Target:** 50-150 facts per typical project. Focus on facts that are actionable for AI agents making code changes.
 
 ### 1.7.1 Freshness State (`draft/.state/freshness.json`)
 
 Compute SHA-256 hashes of all source files analyzed during Phases 1-5. This enables **file-level staleness detection** on subsequent refreshes — more granular than `synced_to_commit` which only detects that _some_ commits happened.
 
 ```bash
-# Detect platform hash command (sha256sum on Linux, shasum -a 256 on macOS)
-if command -v sha256sum >/dev/null 2>&1; then
-  HASH_CMD="sha256sum"
-else
-  HASH_CMD="shasum -a 256"
-fi
-
 # Generate SHA-256 hashes for all analyzed source files (exclude draft/, node_modules/, .git/, vendor/)
 find . -type f \
   ! -path "./draft/*" ! -path "./.git/*" ! -path "*/node_modules/*" ! -path "*/vendor/*" \
@@ -2165,7 +2857,7 @@ find . -type f \
      -o -name "*.proto" -o -name "*.graphql" -o -name "*.gql" \
      -o -name "*.yaml" -o -name "*.yml" -o -name "*.toml" -o -name "*.json" \
      -o -name "*.sql" -o -name "*.md" -o -name "Dockerfile" -o -name "Makefile" \) \
-  -exec $HASH_CMD {} \; 2>/dev/null | sort -k2
+  -exec sha256sum {} \; 2>/dev/null | sort -k2
 ```
 
 Write `draft/.state/freshness.json`:
@@ -2228,7 +2920,7 @@ Persist run state for cross-session continuity. If `draft:init` is interrupted m
   "phases_completed": ["phase_1", "phase_2", "phase_3"],
   "phases_remaining": ["phase_4", "phase_5"],
   "files_analyzed": 142,
-  "files_generated": ["draft/architecture.md", "draft/.ai-context.md"],
+  "files_generated": ["draft/architecture.md", "draft/.ai-context.md", "draft/.ai-profile.md"],
   "unresolved_questions": [
     "Could not determine if src/legacy/ is actively used or deprecated",
     "Multiple auth patterns detected — unclear which is canonical"
@@ -2299,7 +2991,7 @@ Create `draft/guardrails.md` using the template from `core/templates/guardrails.
 
 **Include the Standard File Metadata header at the top of the file.**
 
-Ask which hard guardrails to enable (check items that apply to this project). The Learned Conventions and Learned Anti-Patterns sections start empty — they are populated automatically by the learn step at the end of init (brownfield only) and by quality commands over time.
+The template includes general hard guardrails (Git, Code Quality, Security, Testing) — ask which to enable for this project. The Learned Conventions and Learned Anti-Patterns sections start empty — they are populated automatically by the learn step at the end of init (brownfield only) and by quality commands over time.
 
 ## Step 5: Initialize Tracks
 
@@ -2334,9 +3026,7 @@ synced_to_commit: "{FULL_SHA}"
 <!-- No archived tracks -->
 ```
 
-## Step 6: Verify Directory Structure
-
-Ensure the directory structure exists (already created by Atomic File Staging or earlier steps):
+## Step 6: Create Directory Structure
 
 ```bash
 mkdir -p draft/tracks draft/.state
@@ -2363,15 +3053,15 @@ For **Brownfield** projects, announce:
 "Draft initialized successfully with comprehensive analysis!
 
 Created:
-- draft/.ai-profile.md (20-50 lines — always-injected compact project profile)
-- draft/.ai-context.md (200-400 lines — token-optimized AI context, self-contained)
-- draft/architecture.md (comprehensive human-readable engineering reference)
+- draft/.ai-profile.md (20-50 lines — ultra-compact always-injected profile, Tier 0)
+- draft/.ai-context.md (200-400 lines — token-optimized AI context, self-contained, Tier 1)
+- draft/architecture.md (comprehensive human-readable engineering reference, Tier 2)
 - draft/product.md
 - draft/tech-stack.md
 - draft/workflow.md
 - draft/guardrails.md (populated with learned conventions and anti-patterns from codebase scan)
 - draft/tracks.md
-- draft/.state/facts.json (atomic fact registry with temporal metadata and relationship graph)
+- draft/.state/facts.json (atomic fact registry with knowledge graph edges)
 - draft/.state/freshness.json (file-level hash baseline for incremental refresh)
 - draft/.state/signals.json (codebase signal classification)
 - draft/.state/run-memory.json (run metadata and unresolved questions)
@@ -2416,7 +3106,9 @@ Next steps:
 
 ## Condensation Subroutine
 
-This is a self-contained, callable procedure for generating `draft/.ai-context.md` from `draft/architecture.md`. Any skill that mutates `architecture.md` should execute this subroutine afterward to keep the derived context file in sync.
+> This subroutine is also available at `core/shared/condensation.md` for cross-skill reference.
+
+This is a self-contained, callable procedure for generating `draft/.ai-context.md` and `draft/.ai-profile.md` from `draft/architecture.md`. Any skill that mutates `architecture.md` should execute this subroutine afterward to keep the derived context files in sync.
 
 **Called by:** `/draft:init`, `/draft:init refresh`, `/draft:implement`, `/draft:decompose`, `/draft:coverage`, `/draft:index`
 
@@ -2425,20 +3117,35 @@ This is a self-contained, callable procedure for generating `draft/.ai-context.m
 | Input | Path | Description |
 |-------|------|-------------|
 | architecture.md | `draft/architecture.md` | Comprehensive human-readable engineering reference (source of truth) |
+| schema.yaml | `draft/graph/schema.yaml` | Graph metrics for tier computation (optional — skip if absent) |
 
 ### Outputs
 
 | Output | Path | Description |
 |--------|------|-------------|
-| .ai-context.md | `draft/.ai-context.md` | Token-optimized, machine-readable AI context (200-400 lines) |
-| .ai-profile.md | `draft/.ai-profile.md` | Ultra-compact always-injected project profile (20-50 lines) |
+| .ai-context.md | `draft/.ai-context.md` | Token-optimized, machine-readable AI context (tier-scaled budget) |
+| .ai-profile.md | `draft/.ai-profile.md` | Ultra-compact, always-injected project profile (20-50 lines) |
 
 ### Target Size
 
-- **Minimum**: 200 lines
-- **Maximum**: 400 lines
-- Under 200 lines indicates incomplete condensation — go back and ensure all sections are represented
-- Over 400 lines indicates insufficient compression — apply prioritization rules below
+Compute tier from `draft/graph/schema.yaml` after graph build:
+
+  M = stats.modules
+  F = stats.go_functions + stats.py_functions
+  P = stats.proto_rpcs
+
+| Tier | Label  | Condition                              | Budget        |
+|------|--------|----------------------------------------|---------------|
+| 1    | micro  | M≤5 AND F≤50 AND P≤10                 | 100–180 lines |
+| 2    | small  | M≤15 AND F≤300 AND P≤30               | 180–280 lines |
+| 3    | medium | M≤40 AND F≤1000 AND P≤100             | 280–400 lines |
+| 4    | large  | M≤100 AND F≤5000 AND P≤500            | 400–600 lines |
+| 5    | XL     | M>100 OR F>5000 OR P>500              | 600–900 lines |
+
+If `schema.yaml` does not exist: default to tier 2 (180–280 lines).
+
+- Below tier minimum: incomplete condensation — ensure all sections are represented
+- Above tier maximum: insufficient compression — apply prioritization rules below
 
 ### Procedure
 
@@ -2474,6 +3181,29 @@ Transform each `architecture.md` section into machine-optimized format using thi
 | File Structure | FILES | Concept-to-path mappings: `entry: path`, `config: path`, etc. |
 | Glossary | VOCAB | `term: definition` pairs |
 
+#### Step 3.5: Generate Graph Summary Sections
+
+If `draft/graph/schema.yaml` exists, generate these three sections from graph JSONL:
+
+**GRAPH:MODULES** (tier ≥ 2 only):
+- Read `draft/graph/module-graph.jsonl`, extract `kind: "node"` records and `kind: "edge"` records
+- For each node: `{name}|{sizeKB}KB|{lang_counts} → {comma-separated target modules}`
+- `lang_counts` = `go:N,proto:N,cc:N` from node.files (omit zero-count languages)
+- `deps` = edge targets where `source == this module name`
+- Order by sizeKB descending
+- Omit this section entirely for tier-1 codebases (≤5 modules) where Component Graph is sufficient
+
+**GRAPH:HOTSPOTS** (all tiers):
+- Read `draft/graph/hotspots.jsonl`, take top 10 by score (score = lines + fanIn × 50)
+- Format: `{file}|{lines}L|fanIn:{fanIn}`
+- Always include regardless of tier
+
+**GRAPH:CYCLES** (all tiers):
+- Inspect `draft/graph/module-graph.jsonl` edges; detect cycles using DFS
+- Output `None ✓` if no cycles
+- Otherwise output each cycle path on its own line: `"A → B → C → A"`
+- Always include — absence is positive signal that architecture is acyclic
+
 #### Step 4: Apply Compression
 
 - Remove all prose paragraphs — use structured key-value pairs instead
@@ -2484,13 +3214,16 @@ Transform each `architecture.md` section into machine-optimized format using thi
 
 #### Step 5: Prioritize Content
 
-If the output exceeds 400 lines, cut sections in this order (bottom = cut first):
+If the output exceeds the tier maximum, cut sections in this order (bottom = cut first):
 
 | Priority | Section | Rule |
 |----------|---------|------|
 | 1 (never cut) | INVARIANTS | Safety critical — preserve every invariant |
 | 2 (never cut) | EXTEND | Agent productivity critical — preserve all cookbook steps |
+| 3 (keep) | GRAPH:HOTSPOTS | Always include — needed for impact awareness |
+| 3 (keep) | GRAPH:CYCLES | Always include — always 1-2 lines; absence is signal |
 | 3 | GRAPH:* | Keep all component, dependency, and dataflow graphs |
+| 4 (scale) | GRAPH:MODULES | Include tier ≥ 2; omit for tier 1 |
 | 4 | INTERFACES | Keep all signatures |
 | 5 | CATALOG | Can abbreviate to top 20 entries per category |
 | 6 | CONFIG | Can abbreviate to `critical:Y` entries only |
@@ -2505,20 +3238,14 @@ Before writing `draft/.ai-context.md`, verify:
 - [ ] No references to `architecture.md` (file must be self-contained)
 - [ ] All invariants from architecture.md are preserved
 - [ ] Extension cookbooks are complete (an agent can follow them without other files)
-- [ ] Output is within 200-400 lines
+- [ ] Output is within tier budget bounds (compute from schema.yaml or default tier 2)
+- [ ] GRAPH:HOTSPOTS present (or note "No hotspot data available" if graph absent)
+- [ ] GRAPH:CYCLES present ("None ✓" or cycle list; or note if graph absent)
 - [ ] YAML frontmatter metadata is present at the top
 
 #### Step 7: Write Output
 
 Write the completed content to `draft/.ai-context.md`.
-
-#### Step 8: Regenerate Profile
-
-After writing `.ai-context.md`, regenerate `draft/.ai-profile.md` using Step 1.6 (Profile Generation). This ensures the profile always reflects the latest condensed context.
-
-#### Step 9: Update Fact Registry (if exists)
-
-If `draft/.state/facts.json` exists, update `last_verified_at` timestamps for facts whose source sections in `architecture.md` were modified. This keeps the fact registry in sync with architecture changes without requiring full re-extraction.
 
 ### Example Transformation
 
@@ -2553,33 +3280,87 @@ AuthService.Logic -[PostgreSQL]-> UserDB
 ### Reference for Other Skills
 
 Other skills that mutate `draft/architecture.md` should invoke this subroutine with:
-> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine defined in `core/shared/condensation.md`."
+> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine defined in `/draft:init`."
 
-> This subroutine is also available at `core/shared/condensation.md` for cross-skill reference.
+---
+
+## Profile Generation Subroutine
+
+This is a self-contained procedure for generating `draft/.ai-profile.md` from `draft/.ai-context.md`. Run after every Condensation Subroutine execution.
+
+### Purpose
+
+The profile is the **Tier 0 context** — an ultra-compact 20-50 line file always loaded by every Draft command. It provides the absolute minimum context needed for simple tasks (quick edits, config changes, small fixes) without requiring the full `.ai-context.md`.
+
+### Procedure
+
+#### Step 1: Read Source
+
+Read `draft/.ai-context.md`. Extract the YAML frontmatter metadata block.
+
+#### Step 2: Write YAML Frontmatter
+
+Start `draft/.ai-profile.md` with an updated YAML frontmatter block. Copy all `git.*` and `synced_to_commit` fields. Set:
+- `generated_by`: the calling command (e.g., `draft:init`, `draft:implement`)
+- `generated_at`: current ISO 8601 timestamp
+
+#### Step 3: Extract Profile Content
+
+From `.ai-context.md`, extract:
+
+1. **Stack** — Language, framework, database, auth method, API style, test framework, deploy target, build command, entry point (from `## META`)
+2. **INVARIANTS** — Top 3-5 critical invariants with `file:line` references (from `## INVARIANTS`)
+3. **NEVER** — 2-3 safety rules — the most dangerous things that must never happen (from `## INVARIANTS` or architecture.md safety rules)
+4. **Active Tracks** — List of currently active track IDs and one-line descriptions (from `draft/tracks.md`)
+5. **Recent Changes** — Last 3-5 significant commits (from `git log --oneline -5`)
+
+#### Step 4: Write Output
+
+Write to `draft/.ai-profile.md` using the template from `core/templates/ai-profile.md`.
+
+#### Step 5: Size Check
+
+- **Minimum**: 20 lines
+- **Maximum**: 50 lines
+- If over 50 lines, trim Recent Changes and reduce INVARIANTS to top 3
+
+---
 
 ## Cross-Skill Dispatch
 
-### Brownfield Projects
-When architectural debt is detected during discovery (outdated deps, complex coupling, missing tests):
-- Suggest: "Run `/draft:tech-debt` to catalog and prioritize the debt discovered during initialization"
+After initialization completes, suggest relevant follow-up skills based on project type:
 
-### All Projects — Post-Init Suggestions
-At completion, present categorized suggestions:
+### Brownfield Projects (Debt Signals Detected)
 
-**Start building:**
-- "Run `/draft:new-track` to create your first feature or bug fix track"
+If during architecture discovery (Step 1.5), anti-patterns or technical debt signals are detected in signal classification:
 
-**Quality & Testing:**
-- "Run `/draft:testing-strategy` to design a test strategy for this project"
-- "Run `/draft:bughunt` for initial codebase health check"
+```
+"Detected architectural debt patterns in this codebase. Consider running:
+  → /draft:tech-debt — Catalog and prioritize existing technical debt"
+```
 
-**Documentation:**
-- "Run `/draft:documentation readme` to generate or update the project README"
+### All Projects (Post-Init Suggestions)
 
-**Debugging & Operations:**
-- "Run `/draft:debug` for ad-hoc debugging sessions"
-- "Run `/draft:standup` to generate standup summaries from git activity"
+At completion (Step 6), after announcing next steps, present categorized follow-up skills:
+
+```
+What's Next:
+─────────────────────────────
+Start building:
+  → /draft:new-track "description" — Start a feature, bug fix, or refactor
+
+Quality & Testing:
+  → /draft:testing-strategy — Establish test coverage targets and testing pyramid
+  → /draft:tech-debt — Catalog technical debt (recommended for brownfield projects)
+
+Documentation:
+  → /draft:documentation readme — Generate README from discovered context
+
+Debugging & Operations:
+  → /draft:debug — Investigate a specific bug
+  → /draft:standup — Generate standup from recent activity
+```
 
 ### Jira Sync
-If Jira MCP is available and project has Jira integration configured:
-- Sync initialization artifacts via `core/shared/jira-sync.md`
+
+If Jira MCP is available and a project ticket is linked, sync initialization artifacts via `core/shared/jira-sync.md`.

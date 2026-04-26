@@ -19,6 +19,8 @@ MARKETPLACE_JSON="$ROOT_DIR/.claude-plugin/marketplace.json"
 SKILLS_DIR="$ROOT_DIR/skills"
 
 source "$SCRIPT_DIR/test-helpers.sh"
+# Source lib.sh for canonical SKILL_ORDER
+source "$ROOT_DIR/scripts/lib.sh"
 
 # Check if jq is available; if not, use python3 as fallback
 json_get() {
@@ -29,16 +31,16 @@ json_get() {
     elif command -v python3 &>/dev/null; then
         python3 -c "
 import json, sys
-with open('$file') as f:
+with open(sys.argv[1]) as f:
     data = json.load(f)
-keys = '$query'.strip('.').split('.')
+keys = sys.argv[2].strip('.').split('.')
 for k in keys:
     if k.startswith('[') and k.endswith(']'):
         data = data[int(k[1:-1])]
     else:
         data = data[k]
 print(data)
-" 2>/dev/null
+" "$file" "$query" 2>/dev/null
     else
         echo "ERROR"
     fi
@@ -49,7 +51,7 @@ json_valid() {
     if command -v jq &>/dev/null; then
         jq empty "$file" 2>/dev/null
     elif command -v python3 &>/dev/null; then
-        python3 -c "import json; json.load(open('$file'))" 2>/dev/null
+        python3 -c "import json, sys; json.load(open(sys.argv[1]))" "$file" 2>/dev/null
     else
         return 1
     fi
@@ -82,34 +84,38 @@ if [[ -f "$PLUGIN_JSON" ]]; then
     assert "plugin.json has 'version' field" \
         "$([[ -n "$PLUGIN_VERSION" && "$PLUGIN_VERSION" != "null" ]] && echo true || echo false)"
 
+    # author.name and license are optional for internal forks
     PLUGIN_AUTHOR=$(json_get "$PLUGIN_JSON" ".author.name")
-    assert "plugin.json has 'author.name' field" \
-        "$([[ -n "$PLUGIN_AUTHOR" && "$PLUGIN_AUTHOR" != "null" ]] && echo true || echo false)"
+    if [[ -n "$PLUGIN_AUTHOR" && "$PLUGIN_AUTHOR" != "null" ]]; then
+        echo "  INFO: plugin.json has 'author.name' field: $PLUGIN_AUTHOR"
+    fi
 
     PLUGIN_LICENSE=$(json_get "$PLUGIN_JSON" ".license")
-    assert "plugin.json has 'license' field" \
-        "$([[ -n "$PLUGIN_LICENSE" && "$PLUGIN_LICENSE" != "null" ]] && echo true || echo false)"
+    if [[ -n "$PLUGIN_LICENSE" && "$PLUGIN_LICENSE" != "null" ]]; then
+        echo "  INFO: plugin.json has 'license' field: $PLUGIN_LICENSE"
+    fi
 fi
 
-# --- marketplace.json exists and is valid JSON ---
+# --- marketplace.json (optional for internal forks) ---
 echo ""
 echo "## marketplace.json validity"
-assert "marketplace.json exists" \
-    "$([[ -f "$MARKETPLACE_JSON" ]] && echo true || echo false)"
+if [[ -f "$MARKETPLACE_JSON" ]]; then
+    assert "marketplace.json is valid JSON" \
+        "$(json_valid "$MARKETPLACE_JSON" && echo true || echo false)"
 
-assert "marketplace.json is valid JSON" \
-    "$(json_valid "$MARKETPLACE_JSON" && echo true || echo false)"
-
-# --- Version consistency ---
-echo ""
-echo "## Version consistency"
-if [[ -f "$PLUGIN_JSON" && -f "$MARKETPLACE_JSON" ]]; then
-    PLUGIN_VERSION=$(json_get "$PLUGIN_JSON" ".version")
-    MARKETPLACE_VERSION=$(json_get "$MARKETPLACE_JSON" ".plugins.[0].version")
-    echo "  plugin.json version: $PLUGIN_VERSION"
-    echo "  marketplace.json version: $MARKETPLACE_VERSION"
-    assert "Versions match between plugin.json and marketplace.json" \
-        "$([[ "$PLUGIN_VERSION" == "$MARKETPLACE_VERSION" ]] && echo true || echo false)"
+    # --- Version consistency ---
+    echo ""
+    echo "## Version consistency"
+    if [[ -f "$PLUGIN_JSON" ]]; then
+        PLUGIN_VERSION=$(json_get "$PLUGIN_JSON" ".version")
+        MARKETPLACE_VERSION=$(json_get "$MARKETPLACE_JSON" ".plugins.[0].version")
+        echo "  plugin.json version: $PLUGIN_VERSION"
+        echo "  marketplace.json version: $MARKETPLACE_VERSION"
+        assert "Versions match between plugin.json and marketplace.json" \
+            "$([[ "$PLUGIN_VERSION" == "$MARKETPLACE_VERSION" ]] && echo true || echo false)"
+    fi
+else
+    echo "  INFO: marketplace.json not present (optional for internal forks)"
 fi
 
 # --- Plugin name matches skills directory ---
@@ -122,6 +128,26 @@ if [[ -f "$PLUGIN_JSON" ]]; then
         "$([[ -d "$SKILLS_DIR/$PLUGIN_NAME" ]] && echo true || echo false)"
 fi
 
+# --- Skills on disk cross-validation ---
+echo ""
+echo "## Skills directory completeness"
+
+# Every SKILL_ORDER entry should have a SKILL.md on disk
+ALL_ON_DISK=true
+for order_skill in "${SKILL_ORDER[@]}"; do
+    expected_file="$SKILLS_DIR/$order_skill/SKILL.md"
+    if [[ ! -f "$expected_file" ]]; then
+        echo "  MISSING on disk: skills/$order_skill/SKILL.md"
+        ALL_ON_DISK=false
+    fi
+done
+assert "Every SKILL_ORDER entry has a SKILL.md on disk" "$ALL_ON_DISK"
+
+# Count skill directories on disk vs SKILL_ORDER
+DISK_SKILL_COUNT=$(find "$SKILLS_DIR" -maxdepth 2 -name "SKILL.md" | wc -l)
+assert "Skill count on disk (${DISK_SKILL_COUNT}) matches SKILL_ORDER count (${#SKILL_ORDER[@]})" \
+    "$([[ "$DISK_SKILL_COUNT" -eq "${#SKILL_ORDER[@]}" ]] && echo true || echo false)"
+
 # --- Marketplace plugin name matches plugin.json ---
 echo ""
 echo "## Marketplace-plugin name consistency"
@@ -130,9 +156,11 @@ if [[ -f "$PLUGIN_JSON" && -f "$MARKETPLACE_JSON" ]]; then
     MARKETPLACE_PLUGIN_NAME=$(json_get "$MARKETPLACE_JSON" ".plugins.[0].name")
     assert "marketplace.json plugin name matches plugin.json name" \
         "$([[ "$PLUGIN_NAME" == "$MARKETPLACE_PLUGIN_NAME" ]] && echo true || echo false)"
+else
+    echo "  INFO: Skipped (marketplace.json not present)"
 fi
 
 # --- Summary ---
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="
-exit $FAIL
+exit "$FAIL"

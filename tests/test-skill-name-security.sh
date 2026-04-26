@@ -17,12 +17,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
 source "$SCRIPT_DIR/test-helpers.sh"
-
-# The validation regex from build-integrations.sh (kebab-case enforcement)
-is_valid_skill_name() {
-    local name="$1"
-    [[ "$name" =~ ^[a-z][a-z0-9]*(-[a-z0-9]+)*$ ]]
-}
+# Source lib.sh for canonical is_valid_skill_name and SKILLS_DIR
+source "$ROOT_DIR/scripts/lib.sh"
 
 echo "=== Skill name security validation tests ==="
 echo ""
@@ -83,7 +79,6 @@ assert "Rejects '' (empty string)" \
 # --- All real skill directory names are valid ---
 echo ""
 echo "## Real skill directory names"
-SKILLS_DIR="$ROOT_DIR/skills"
 ALL_VALID=true
 for skill_dir in "$SKILLS_DIR"/*/; do
     skill_name=$(basename "$skill_dir")
@@ -111,4 +106,4 @@ assert "Rejects 'a--b' (consecutive hyphens)" \
 # --- Summary ---
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="
-exit $FAIL
+exit "$FAIL"

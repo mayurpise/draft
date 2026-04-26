@@ -1,122 +1,127 @@
 # Cross-Skill Dispatch Convention
 
-Standard convention for how Draft skills invoke, offer, or suggest other skills during execution.
+Standard convention for how Draft skills invoke, offer, or suggest other skills. All Tier 1 orchestrators and cross-referencing skills follow this pattern.
 
-**Referenced by:** All Tier 1 orchestrators (`/draft:init`, `/draft:new-track`, `/draft:implement`, `/draft:review`)
-
----
+Convention spec implemented by: All Tier 1 orchestrators (`init`, `new-track`, `implement`, `review`, `upload`), and Tier 2 skills that cross-reference others. Skills implement this dispatch convention independently; see `skills/GRAPH.md` for the full dependency graph.
 
 ## Dispatch Tiers
 
 ### Tier 1: Auto-Invoke (Silent)
 
-Skills at this tier are loaded or executed automatically without user confirmation. The user is not prompted.
+Execute without user confirmation. Used for passive context enrichment and established patterns.
 
-| Trigger | Auto-Invoked Action |
-|---------|-------------------|
-| Any skill that needs project context | Load `core/shared/draft-context-loading.md` |
-| `/draft:implement` completes with quality signals | Feed quality results to `/draft:learn` |
-| `/draft:new-track` or `/draft:implement` with Jira key | Sync to Jira via `core/shared/jira-sync.md` |
-| `/draft:bughunt` or `/draft:debug` identifies root cause | Load `core/agents/rca.md` protocol |
+- Load `testing-strategy.md` if it exists (context enrichment)
+- Feed quality results to `/draft:learn` (established pattern)
+- Sync artifacts to Jira via `core/shared/jira-sync.md` when ticket is linked
+- Load `rca.md` into bug track implementation context
+
+**Convention:** No announcement needed. Log in track metadata if applicable.
 
 ### Tier 2: Offer (Ask with Default)
 
-Skills at this tier are presented to the user with a yes/no prompt. Default is to proceed.
+Present a choice with a recommended default. Used when the skill adds significant value but the user may want to skip.
 
-**Format:** "Run `/draft:skill-name` to `benefit`? [Y/n]"
+Format:
+```
+"Run /draft:<skill> to <benefit>? [Y/n]"
+```
 
-| Trigger | Offer |
-|---------|-------|
-| `/draft:implement` encounters failing tests | "Run `/draft:debug` to investigate test failures? [Y/n]" |
-| At phase boundary in `/draft:implement` | "Run `/draft:quick-review` for lightweight check? [Y/n]" |
-| `/draft:implement` detects accumulating shortcuts | "Run `/draft:tech-debt` to log debt items? [Y/n]" |
+Examples:
+- "Run `/draft:debug` to investigate before writing the spec? [Y/n]" — bug tracks in new-track
+- "Run full three-stage review or `/draft:quick-review` for lightweight check? [full]" — phase boundaries in implement
+- "Run `/draft:tech-debt` to scope this refactor? [Y/n]" — refactor tracks in new-track
+
+**Convention:** Default answer in brackets. Enter accepts default.
 
 ### Tier 3: Suggest (Announce, Don't Block)
 
-Skills at this tier are mentioned in output but execution is not offered. The user must invoke manually.
+Announce availability at completion without blocking. Used for optional follow-up actions.
 
-**Format:** "Consider running `/draft:skill-name` to `benefit`."
+Format:
+```
+"Consider running `/draft:<skill>` to <benefit>."
+```
 
-| Trigger | Suggestion |
-|---------|-----------|
-| `/draft:implement` completes a large track | "Consider running `/draft:deep-review` for a production-grade audit." |
-| `/draft:bughunt` finds systemic patterns | "Consider running `/draft:learn` to capture these patterns." |
-| `/draft:review` flags architecture concerns | "Consider running `/draft:adr` to document this decision." |
+Examples:
+- "Consider running `/draft:tech-debt` to catalog debt found during review."
+- "Consider running `/draft:documentation api` to document new endpoints."
+- "Consider running `/draft:adr` to record this design decision."
+
+**Convention:** Grouped in a "What's Next" or "Suggestions" section at skill completion.
 
 ### Tier 4: Detect + Auto-Feed (Smart Context Injection)
 
-Skills at this tier automatically inject relevant context into the target skill without invoking it. The context is available when the user eventually runs the target skill.
+Automatically detect when output from one skill is useful to another and inject it as context. No user interaction.
 
-| Source Skill | Output Artifact | Target Skill | Injection Method |
-|-------------|----------------|-------------|-----------------|
-| `/draft:bughunt` | `bughunt-report.md` | `/draft:implement` | Loaded as context when implementing bug fix track |
-| `/draft:review` | Review findings | `/draft:learn` | Quality signals extracted and fed to pattern learning |
-| `/draft:deep-review` | Audit report | `/draft:implement` | Findings loaded as constraints for next implementation |
-| `/draft:decompose` | Subtask breakdown | `/draft:new-track` | Subtasks offered as new tracks |
-| `/draft:coverage` | Coverage gaps | `/draft:implement` | Gaps loaded as pending work items |
-| `/draft:incident-response` | Incident timeline | `/draft:learn` | Incident patterns captured for prevention |
+| Source Skill | Output | Target Skill | How Injected |
+|---|---|---|---|
+| `/draft:debug` | Debug Report | `/draft:new-track` | Fed into spec.md "Reproduction" and "Root Cause Hypothesis" sections |
+| `/draft:incident-response` | Postmortem | `/draft:new-track` | Fed into bug track spec context |
+| `/draft:tech-debt` | Debt Report | `/draft:new-track` | Fed into refactor track spec scope |
+| `/draft:testing-strategy` | Strategy Doc | `/draft:implement` | Loaded into TDD context (coverage targets, test boundaries) |
+| `/draft:debug` + RCA agent | `rca.md` | `/draft:implement` | Loaded as investigation context for bug fix implementation |
 
----
+**Convention:** Check for artifact existence before injection. If not found, skip silently.
 
-## Primary Dispatch Registry
+## Dispatch Registry
 
-This registry covers primary orchestrator dispatches. Individual skills document additional dispatch points in their `## Cross-Skill Dispatch` sections.
+Complete registry of all cross-skill dispatch points:
 
-| Orchestrator | Dispatch Point | Target | Tier |
-|-------------|---------------|--------|------|
-| `/draft:init` | Monorepo detected | `/draft:index` | 3 — Suggest |
-| `/draft:init` | Jira key provided | Jira sync | 1 — Auto |
-| `/draft:new-track` | Track created | `/draft:decompose` | 2 — Offer |
-| `/draft:new-track` | Jira key provided | Jira sync | 1 — Auto |
-| `/draft:implement` | Before coding | Context loading | 1 — Auto |
-| `/draft:implement` | Tests failing | `/draft:debug` | 2 — Offer |
-| `/draft:implement` | After completion | pattern-learning.md | 1 — Auto |
-| `/draft:implement` | After completion | `/draft:review` | 2 — Offer |
-| `/draft:implement` | Large track done | `/draft:deep-review` | 3 — Suggest |
-| `/draft:implement` | Jira key exists | Jira sync | 1 — Auto |
-| `/draft:review` | Architecture concern | `/draft:adr` | 3 — Suggest |
-| `/draft:review` | Quality signals | pattern-learning.md | 1 — Auto |
-| `/draft:review` | Jira key exists | Jira sync | 1 — Auto |
-| `/draft:bughunt` | Root cause found | `core/agents/rca.md` | 1 — Auto |
-| `/draft:bughunt` | Systemic pattern | `/draft:learn` | 3 — Suggest |
-| `/draft:bughunt` | Jira key exists | Jira sync | 1 — Auto |
-
----
+| Orchestrator | When | Dispatches | Tier |
+|---|---|---|---|
+| `init` | Brownfield + debt signals detected | `tech-debt` | Suggest |
+| `init` | After generating tech-stack.md | `testing-strategy` | Suggest |
+| `init` | At completion | `documentation readme` | Suggest |
+| `new-track` | Bug track detected | `debug` | Offer |
+| `new-track` | Incident/outage keywords | `incident-response postmortem` | Detect + Suggest |
+| `new-track` | Refactor track | `tech-debt` | Offer |
+| `new-track` | New technology / arch shift | `adr` | Detect + Suggest |
+| `new-track` | Plan generation (feature) | `testing-strategy` task, `deploy-checklist` task, `documentation` task | Auto-embed |
+| `implement` | Blocked task | `debug` | Offer (replaces inline debugger) |
+| `implement` | Before TDD (first task) | `testing-strategy` load | Auto-Invoke |
+| `implement` | Bug track before tests | Ask developer | Offer (test guardrail) |
+| `implement` | Phase boundary | `quick-review` | Offer |
+| `implement` | Track completion | `deploy-checklist`, `documentation`, `tech-debt`, `adr` | Suggest |
+| `review` | After Stage 3 | `coverage` | Auto-Invoke |
+| `review` | At completion (quality findings) | `tech-debt`, `documentation` | Suggest |
+| `upload` | Pre-upload | `deploy-checklist` | Auto-Invoke |
+| `upload` | New APIs detected | `documentation api` | Detect + Suggest |
+| `upload` | Post-upload success | Jira comment | Auto-Invoke |
+| `decompose` | After module decomposition | `testing-strategy`, `documentation api` | Suggest |
+| `decompose` | Dependency cycles detected | `tech-debt` | Detect + Suggest |
+| `decompose` | Module boundary decisions | `adr` | Auto-Invoke |
+| `bughunt` | Critical bugs found | `debug` | Suggest |
+| `deep-review` | Architecture debt found | `tech-debt`, `adr` | Suggest |
 
 ## Implementation Pattern
 
-When implementing dispatch in a skill, follow this template:
+Skills implementing dispatch should follow this pattern:
 
 ```markdown
-## Dispatch Points
+## Cross-Skill Dispatch
 
-<!-- Tier 1: Auto-invoke -->
-Load context: `core/shared/draft-context-loading.md`
-Sync to Jira: `core/shared/jira-sync.md` (if Jira key present)
+At this point, check for dispatch opportunities:
 
-<!-- Tier 2: Offer -->
-If {condition}:
-  Ask: "Run `/draft:skill-name` to {benefit}? [Y/n]"
-  If yes: invoke skill
-  If no: continue
+### Auto-Invoke
+- [list auto-invoke actions relevant to this skill]
 
-<!-- Tier 3: Suggest -->
-If {condition}:
-  Output: "Consider running `/draft:skill-name` to {benefit}."
+### Offer
+- [list offer actions relevant to this skill]
 
-<!-- Tier 4: Context injection -->
-If {artifact} exists:
-  Load as context for next relevant skill invocation
+### Suggest (at completion)
+- [list suggest actions relevant to this skill]
 ```
-
----
 
 ## Test Writing Guardrail
 
-**Never auto-write tests in bug/debug/RCA workflows.**
+**In bug/debug/RCA workflows:** Never auto-write unit tests. Always ask the developer first.
 
-When `/draft:bughunt`, `/draft:debug`, or the RCA agent identifies a bug:
-- Diagnose and fix the bug
-- Do **not** generate test files automatically
-- If tests would help, use Tier 2 dispatch: "Write regression tests for this fix? [Y/n]"
-- Rationale: Auto-generated tests in debug context often test the wrong thing (the symptom, not the cause)
+Applies to: `/draft:debug`, `/draft:implement` (bug tracks), auto-triage pipeline, `/draft:bughunt`
+Does NOT apply to: Feature tracks with TDD enabled, `/draft:coverage`
+
+```
+If track type is "bugfix" OR current context is debug/RCA:
+  BEFORE writing any test file:
+    ASK: "Want me to write [regression/unit] tests for [description]? [Y/n]"
+    If declined: skip test writing, note in plan.md: "Tests: developer-handled"
+```

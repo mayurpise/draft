@@ -1,40 +1,48 @@
 ---
 name: impact
-description: Telemetry and analytics suite generating project-wide insights for engineering managers by parsing execution timestamps, revert history, and phase tracking.
+description: Telemetry and analytics suite generating project-wide insights by parsing execution timestamps, revert history, and phase tracking.
 ---
 
-# Draft Impact: Telemetry & Analytics
+# Draft Impact: Track Telemetry & Analytics
 
-Generate clear, actionable analytics demonstrating Context-Driven Development ROI and highlighting friction points across tracks.
+Generate a project-wide impact report measuring Context-Driven Development effectiveness across all tracks.
 
 ## Red Flags - STOP if you're:
-- Executing code profiling or coverage stats instead of Track impact stats.
-- Re-writing the tracker logic instead of reading locally available state objects.
-- Guessing timelines when timestamps are missing.
+- Profiling code coverage instead of measuring track-level impact.
+- Rewriting tracker logic when local state objects are available for inspection.
+- Generating reports without reading existing track metadata first.
 
 ---
 
-## Execution Breakdown
+## Execution Constraints
 
-1. **Load State Logic:**
-   - Scan `draft/tracks.md` to map all existing project tracks.
-   - For every track present, read `draft/tracks/<id>/metadata.json`.
-2. **Compute ROI Timelines:**
-   - Determine duration delta between state instantiations (Planning → Implement → Review).
-   - Display a phase-level bottleneck flag if `In Progress [~]` status exceeded 14 days without an update.
-3. **Friction Analysis:**
-   - Scan global git commit logs or `plan.md` tasks for `/draft:revert` occurrences.
-   - High revert volumes indicate poor `spec.md` boundaries. Suggest updating `draft/product.md` with tighter constraints if revert counts are exceptionally high.
-4. **Generate Report Template:**
-   Use the following markdown structure:
-   ```markdown
-   # DX Impact Analysis
-   **Total CDD Tracks:** [count]
-   **Average Delivery Pace:** [avg time from track start to complete]
-   
-   ### Friction Hotspots
-   - [Track XYZ]: [N] Reverts. *Recommendation: Refine boundary clarity in spec.*
-   
-   ### AI Impact
-   By forcing intent alignment via `plan.md`, `[X]` merge conflicts or architectural misses were avoided during the Planning stages.
-   ```
+1. **Load Track State:**
+   - Read all `draft/tracks.md` entries.
+   - For each track, read `metadata.json` to extract: `created_at`, `updated`, `status`, phase counts, task counts.
+   - If no tracks exist, report "No tracks found. Run `/draft:new-track` to create your first track."
+
+2. **Compute Metrics:**
+   - **Delivery Pace:** Average elapsed time from track creation to completion (planning → implementation → review).
+   - **Phase Duration:** Time spent in each phase (planning, implementation, review). Flag any phase exceeding 14 days without updates.
+   - **Completion Rate:** Ratio of completed tracks to total tracks.
+   - **Task Granularity:** Average tasks per track. Flag tracks with fewer than 3 tasks (under-decomposed) or more than 30 (over-decomposed).
+
+3. **Friction Detection:**
+   - Scan `git log` for revert commits associated with each track.
+   - High revert count (>2 per track) signals unclear specification boundaries.
+   - Flag tracks that moved backward (e.g., from implementation back to planning).
+
+4. **Architectural Impact:**
+   - Count ADRs created (`draft/adrs/`).
+   - Count guardrail entries added via `/draft:learn`.
+   - Count modules decomposed via `/draft:decompose`.
+
+5. **Report Output:**
+   Generate a Markdown report with sections:
+   - **Summary:** Total tracks, completed, in-progress, abandoned.
+   - **Delivery Pace:** Average and median track duration.
+   - **Friction Hotspots:** Tracks with highest revert counts, longest stalls, or phase regressions.
+   - **CDD Adoption:** ADR count, guardrail growth, decomposition usage.
+   - **Recommendations:** Actionable suggestions based on detected friction patterns.
+
+---

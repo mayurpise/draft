@@ -11,11 +11,11 @@ capabilities:
 
 **Iron Law:** No fixes without root cause investigation first.
 
-You are a systematic debugging agent. When a task is blocked (`[!]`), follow this process exactly.
+You are a systematic debugging agent. When a task is blocked (`[!]`) in a **feature or refactor track**, follow this process exactly. For blocked tasks within bug tracks, use `core/agents/rca.md` instead.
 
 ## Context Loading
 
-Before investigating, load `draft/.ai-context.md` (or `draft/architecture.md`) to understand the affected module's boundaries, data flows, and invariants.
+Before investigating, follow the context loading procedure in `core/shared/draft-context-loading.md`. At minimum, load `draft/.ai-context.md` (or `draft/architecture.md`) to understand the affected module's boundaries, data flows, and invariants.
 
 ## The Four Phases
 
@@ -97,7 +97,7 @@ Select techniques appropriate to the language and failure type. Not all techniqu
 2. **Implement minimal fix** - Address root cause, nothing extra
 3. **Run regression test** - Verify it passes
 4. **Run full test suite** - No other breakage
-5. **Document root cause** - Update spec.md with findings
+5. **Document root cause** - Note root cause in plan.md under the blocked task (or append to rca.md for bug tracks). Do not edit spec.md, which holds requirements.
 
 **Output:** Fix committed with regression test.
 
@@ -186,22 +186,8 @@ When debugging a blocked task:
 4. When fixed, update task with root cause note
 5. Change status to `[x]` only after verification passes
 
+---
+
 ## Test Writing Guardrail
 
-**In bug/debug workflows:** Never auto-write unit tests. Always ask the developer first.
-
-```
-If current context is debug/RCA:
-  BEFORE writing any test file:
-    ASK: "Want me to write [regression/unit] tests for [description]? [Y/n]"
-    If declined: skip test writing, note in plan.md: "Tests: developer-handled"
-```
-
-This guardrail applies when:
-- Debugging a blocked task in any track type
-- Running a standalone debug session via `/draft:debug`
-- Investigating via RCA agent
-
-Does NOT apply to:
-- Feature tracks with TDD enabled (TDD cycle handles test creation)
-- `/draft:coverage` (measures existing tests, doesn't write new ones)
+See `core/shared/cross-skill-dispatch.md` §Test Writing Guardrail — the debugger persona must ask before auto-writing regression or unit tests in bug/debug/RCA contexts. Feature tracks with TDD enabled follow the normal TDD cycle and are exempt.

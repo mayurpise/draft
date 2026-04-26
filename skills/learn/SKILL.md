@@ -52,6 +52,14 @@ If it exists, read it and internalize:
 - Current Learned Conventions (existing entries)
 - Current Learned Anti-Patterns (existing entries)
 
+**Then verify core guardrails integrity (backfill if missing):**
+
+Check if `draft/guardrails.md` contains the C++/Systems Hard Guardrails from `core/guardrails.md`. Detection: look for the marker heading `### C++/Systems — Object Lifecycle & Memory Safety`.
+
+- **If missing AND project contains C++ code:** The file predates `core/guardrails.md`. Backfill by inserting the full C++/Systems Hard Guardrails sections from `core/templates/guardrails.md` (G1.x–G7.x, all pre-checked `[x]`) into the `## Hard Guardrails` section, after any existing general guardrails. Preserve all existing entries. Announce: "Backfilled C++/Systems Hard Guardrails (G1.x–G7.x) from core/guardrails.md into draft/guardrails.md."
+- **If missing AND project has no C++ code:** Skip — these guardrails only apply to C++ projects.
+- **If present:** No action — core guardrails already integrated.
+
 ### 1.2: Check for Legacy Guardrails (migration path)
 
 If `draft/guardrails.md` does NOT exist:
@@ -190,6 +198,58 @@ For each candidate pattern:
 
 ---
 
+### 2.6: Git History Signal Mining
+
+Mine git commit history for pattern signals that code scanning misses. Run only if the project is a git repository.
+
+```bash
+git log --oneline --no-merges -500
+```
+
+Scan the output for recurring message patterns (3+ occurrences of the same type):
+
+| Commit pattern | Signal |
+|---------------|--------|
+| `fix: don't X` / `fix: never X` | Team keeps violating X → anti-pattern candidate |
+| `refactor: replace X with Y` | X is declining, Y is the replacement → mark X as `declining: true` |
+| `chore: enforce X` / `chore: add X check` | X is being formalized → convention candidate |
+| `revert: ` followed by same topic 3+ times | That topic is consistently problematic → anti-pattern candidate |
+
+**Rules:**
+- Do NOT add git-only signals as standalone entries. Use them only to adjust confidence of patterns already found in Step 2.2.
+- If a pattern appears in both commit history AND code (3+ occurrences): increase confidence by one level.
+- If a pattern appears only in commit history but not in current code: note as `historically_recurring: true` — do not add as active anti-pattern.
+
+**Recency weighting** — for each candidate pattern from Step 2.2, check when the files containing it were last modified:
+
+```bash
+git log --follow --oneline -1 -- {file_containing_pattern}
+```
+
+- Modified within 90 days AND pattern persists → add `recently_active: true` to the entry
+- Not modified in 12+ months → add `stale: true` — lower enforcement priority
+
+---
+
+### 2.7: Graph-Aware Severity Enrichment
+
+If `draft/graph/hotspots.jsonl` exists, derive objective severity for all anti-pattern candidates based on the fanIn of files where the pattern was found.
+
+For each anti-pattern candidate from Step 2.2:
+1. Check if any evidence files appear in `draft/graph/hotspots.jsonl`
+2. Take the highest fanIn value across all evidence files:
+   - fanIn ≥ 10 → `graph_severity: critical` (breakage propagates to many callers)
+   - fanIn 5–9 → `graph_severity: high`
+   - fanIn 1–4 → `graph_severity: medium`
+   - fanIn 0 or file not in hotspots.jsonl → `graph_severity: low`
+3. If no graph data exists → `graph_severity: unresolved`
+
+Collect all evidence files with fanIn ≥ 5 for the `high_fanin_files` field.
+
+When `graph_severity` differs from the subjectively assigned `severity`, use `graph_severity` as the enforcement priority in quality commands — it is objective and reproducible.
+
+---
+
 ## Step 3: Apply Confidence Threshold
 
 Follow the threshold from `core/shared/pattern-learning.md`:
@@ -271,6 +331,8 @@ Follow the write procedure in `core/shared/pattern-learning.md`:
 3. For existing patterns: update evidence count, confidence, `last_verified`
 4. Update YAML frontmatter `synced_to_commit`
 
+**Cap enforcement:** Maintain a maximum of 50 learned entries per section. If at capacity, replace the oldest `medium` confidence entry that has not been re-verified in 90+ days (per `core/shared/pattern-learning.md`).
+
 ### Entry Format — Convention
 
 ```markdown
@@ -279,9 +341,9 @@ Follow the write procedure in `core/shared/pattern-learning.md`:
 - **Confidence:** high | medium
 - **Evidence:** Found in N files — `path/file1.ext:line`, `path/file2.ext:line`, `path/file3.ext:line`
 - **Discovered at:** YYYY-MM-DD (when Draft first observed this pattern)
-- **Established at:** ~YYYY-MM-DD (when this pattern was introduced, via git blame)
+- **Established at:** YYYY-MM-DD (when the pattern entered the codebase, via git blame)
 - **Last verified:** YYYY-MM-DD
-- **Last active:** YYYY-MM-DD (when source files using this pattern were last modified)
+- **Last active:** YYYY-MM-DD (when source files containing this pattern were last modified)
 - **Discovered by:** draft:learn on YYYY-MM-DD
 - **Description:** [What the pattern is and why it's intentional]
 ```
@@ -292,26 +354,19 @@ Follow the write procedure in `core/shared/pattern-learning.md`:
 ### [Anti-Pattern Name]
 - **Category:** security | reliability | performance | correctness | concurrency
 - **Severity:** critical | high | medium
+- **graph_severity:** critical | high | medium | low | unresolved  (fanIn-derived from Step 2.7; "unresolved" if no graph data)
+- **high_fanin_files:** `path/file.go` (fanIn:12), `path/other.go` (fanIn:7)  (omit line if none meet fanIn ≥ 5)
 - **Evidence:** Found in N files — `path/file1.ext:line`, `path/file2.ext:line`
 - **Discovered at:** YYYY-MM-DD (when Draft first observed this pattern)
-- **Established at:** ~YYYY-MM-DD (when this pattern was introduced, via git blame)
+- **Established at:** YYYY-MM-DD (when the pattern entered the codebase, via git blame)
 - **Last verified:** YYYY-MM-DD
-- **Last active:** YYYY-MM-DD (when source files using this pattern were last modified)
+- **Last active:** YYYY-MM-DD (when source files containing this pattern were last modified)
+- **recently_active:** true | false  (true if any evidence file modified within 90 days)
+- **stale:** true | false  (true if all evidence files unmodified for 12+ months)
 - **Discovered by:** draft:learn on YYYY-MM-DD
 - **Description:** [What the pattern is and why it's problematic]
 - **Suggested fix:** [Brief description of the correct approach]
 ```
-
-### Determining Temporal Metadata
-
-When writing entries, gather dual-layer timestamps:
-
-1. **Discovered at**: Today's date (when the pattern scan runs)
-2. **Established at**: Run `git blame` on one of the evidence files and find the oldest commit date for the pattern-relevant lines. Use approximate date (`~YYYY-MM-DD`).
-3. **Last verified**: Today's date
-4. **Last active**: Run `git log -1 --format="%ad" --date=short -- {evidence_file}` on each evidence file and take the most recent date
-
-This enables temporal reasoning: if `established_at` is old but `last_active` is recent, the pattern is well-established and actively used. If `last_active` is >6 months old, the pattern may be declining (cross-reference with Step 2.3 temporal analysis).
 
 ---
 
@@ -375,8 +430,6 @@ After `/draft:learn` populates guardrails.md, all quality commands automatically
 | **Learned Anti-Patterns** | Always flag these patterns as bugs |
 | **Unchecked Hard Guardrails** | Ignore (not enforced) |
 
-Maintain a maximum of 50 learned entries per section. If at capacity, replace the oldest medium confidence entry that has not been re-verified in 90+ days.
-
 This creates a **continuous improvement loop**:
 1. Quality command runs → discovers patterns → updates guardrails.md
 2. Next quality command run → reads updated guardrails.md → fewer false positives, catches known-bad patterns
@@ -394,10 +447,3 @@ This creates a **continuous improvement loop**:
 | Learn framework defaults as conventions | Only learn project-specific patterns |
 | Remove entries on re-scan | Update evidence/dates, never delete |
 | Learn from test/mock code | Focus on production source code |
-
-## Cross-Skill Dispatch
-
-- **Related shared procedure:** `core/shared/pattern-learning.md` is run inline by `/draft:implement`, `/draft:review`, `/draft:bughunt`, and `/draft:deep-review` to update `draft/guardrails.md` automatically. The `/draft:learn` skill provides a deeper, standalone pattern scan beyond what the inline procedure captures.
-- **Fed by:** `/draft:bughunt` (systemic patterns), `/draft:deep-review` (architecture patterns), `/draft:incident-response` (incident patterns)
-- **Updates:** `draft/guardrails.md` with learned conventions and anti-patterns
-- **No downstream dispatch** — learn is a terminal skill that updates guardrails for all quality skills to consume

@@ -68,6 +68,8 @@ Read and follow the base procedure in `core/shared/draft-context-loading.md`.
 - **Leverage Storage Topology** — Identify data loss risks at each tier (cache eviction without writeback, event log gaps, missing archive)
 - **Leverage Consistency Boundaries** — Find bugs at eventual consistency seams (stale reads, lost events, missing reconciliation)
 - **Leverage Failure Recovery Matrix** — Verify idempotency claims, check for partial failure states without recovery paths
+- **Leverage Graph Data** (if `draft/graph/` exists) — Load `module-graph.jsonl` for dependency awareness. Flag imports from unexpected modules (not in established dependency edges). Flag code in modules involved in dependency cycles as higher risk. Use `hotspots.jsonl` to prioritize analysis of high-complexity, high-fanIn files. See `core/shared/graph-query.md`.
+- **Leverage Learned Anti-Patterns** — If `draft/guardrails.md` exists, read the `## Learned Anti-Patterns` section. During the bug sweep, when a bug matches a learned anti-pattern, prefix the report entry with `[KNOWN-ANTI-PATTERN: {pattern name}]`. This distinguishes recurring documented patterns from newly discovered bugs, and signals that a systemic fix may be needed rather than a one-off patch.
 
 ### 2. Confirm Scope
 
@@ -870,9 +872,9 @@ func TestProcessInputRejectsMaliciousScript(t *testing.T) {
 ```
 
 Severity levels:
-- **Critical** - Data loss, security vulnerability, crashes in production, incorrect behavior affecting users
-- **Important** - Significant performance issues, edge case bugs, minor UX issues
-- **Minor** - Code quality concerns, maintainability issues, minor inconsistencies, cleanup opportunities
+- **Critical** — Blocks release, breaks functionality, security issue
+- **Important** — Degrades quality, creates tech debt
+- **Minor** — Style, optimization, edge cases
 
 ## Report Generation
 
@@ -1023,20 +1025,31 @@ Bugs that cannot have automated regression tests (config issues, documentation, 
 - **Use native frameworks** — pytest for Python, `go test` for Go, GTest for C++, Jest/Vitest for JS/TS, `cargo test` for Rust, JUnit for Java — never force a foreign test framework
 - **Learn from findings** — After report generation, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with newly discovered conventions and anti-patterns
 
+---
+
 ## Cross-Skill Dispatch
 
-- **Auto-invoked by:** `/draft:review` (with `--full` or `with-bughunt` flag)
-- **Suggests at completion:**
-  - If critical bugs found: "Run `/draft:debug` to investigate critical bugs with structured debugging"
-  - If regression suspected: use `git bisect` to find the exact commit that introduced this bug
-- If systemic patterns found: "Consider running `/draft:learn` to capture these patterns into guardrails"
-- **Feeds into:** `/draft:jira-preview` (bughunt report enriches Jira export)
-- **Jira sync:** If ticket linked, attach bughunt report and post comment: "[draft] bughunt-complete: Found {n} issues ({critical} critical, {important} important)" via `core/shared/jira-sync.md`
+### Suggestions at Completion
+
+After bughunt report generation:
+
+**If critical bugs found:**
+```
+"Critical bugs found. Consider:
+  → /draft:debug — Run structured debug session on critical finding #{n}
+  → git bisect — Find the exact commit that introduced the bug"
+```
 
 ### Test Writing Guardrail
 
-When generating regression tests during bughunt, follow the standard guardrail:
-- Always ask the developer before writing regression tests for bugs found
-- Format: "Want me to write regression tests for bugs #{list}? [Y/n]"
-- If declined: mark as "Tests: developer-handled" in the report
-- This guardrail does NOT apply to the regression test suite section which documents test recommendations (not actual test files)
+When offering to write regression tests for found bugs:
+```
+ASK: "Want me to write regression tests for the {n} bugs found? [Y/n]"
+```
+Never auto-write tests — always ask first.
+
+### Jira Sync
+
+If Jira ticket linked, sync via `core/shared/jira-sync.md`:
+- Attach `bughunt-report-latest.md` to ticket
+- Post comment: "[draft] bughunt-complete: Found {n} issues — {critical} critical, {major} major."

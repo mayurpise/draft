@@ -1,136 +1,95 @@
 ---
-project: "{PROJECT}"
+project: "{PROJECT_NAME}"
 track_id: "{TRACK_ID}"
-jira_key: "{JIRA_KEY}"
-generated: "{ISO_TIMESTAMP}"
+jira_ticket: "{JIRA_KEY}"
+generated_by: "draft:new-track"
+generated_at: "{ISO_TIMESTAMP}"
 git:
-  branch: "{GIT_BRANCH}"
-  remote: "{GIT_REMOTE}"
-  commit: "{GIT_COMMIT}"
-  author: "{GIT_AUTHOR}"
-  timestamp: "{GIT_TIMESTAMP}"
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
 ---
 
 # Root Cause Analysis: {TITLE}
 
 | Field | Value |
 |-------|-------|
-| **Branch** | `{GIT_BRANCH}` |
-| **Commit** | `{GIT_COMMIT}` |
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
 | **Generated** | {ISO_TIMESTAMP} |
-| **Synced To** | {JIRA_KEY} |
-
----
+| **Synced To** | `{FULL_SHA}` |
 
 ## Summary
 
-<!-- 2-3 sentence description of what happened, what was affected, and the resolution status -->
-
-{SUMMARY}
-
----
+[1-2 sentence root cause statement with `file:line` references]
 
 ## Classification
 
-| Attribute | Value |
-|-----------|-------|
-| **Type** | {BUG_TYPE: regression / logic-error / race-condition / integration-failure / data-corruption / config-error / performance-degradation} |
-| **Severity** | {SEVERITY: SEV1 / SEV2 / SEV3 / SEV4} |
-| **Detection Lag** | {DETECTION_LAG: time between introduction and detection} |
-| **SLO Impact** | {SLO_IMPACT: which SLOs were affected and by how much} |
-
----
+- **Type:** [logic error | race condition | data corruption | config error | dependency issue | missing validation | state management | resource exhaustion]
+- **Severity:** [SEV1 | SEV2 | SEV3 | SEV4]
+- **Detection Lag:** [when introduced vs when detected]
+- **SLO Impact:** [which SLOs affected, by how much]
 
 ## Evidence Gathered
 
-| # | Evidence | Source | Relevance |
-|---|----------|--------|-----------|
-| 1 | {EVIDENCE_1} | {SOURCE_1} | {RELEVANCE_1} |
-| 2 | {EVIDENCE_2} | {SOURCE_2} | {RELEVANCE_2} |
-| 3 | {EVIDENCE_3} | {SOURCE_3} | {RELEVANCE_3} |
-
----
+| Source | URL/Path | Key Finding |
+|--------|----------|-------------|
+| Jira ticket | {JIRA_KEY} | [reproduction steps, reporter context] |
+| Logs | [ssh path or URL] | [relevant log lines] |
+| Dashboard | [URL] | [metric anomaly] |
+| Code | [file:line] | [relevant code section] |
 
 ## Timeline
 
-| Time | Event | Actor |
-|------|-------|-------|
-| {T0} | {TRIGGERING_EVENT} | {ACTOR} |
-| {T1} | {DETECTION_EVENT} | {ACTOR} |
-| {T2} | {INVESTIGATION_START} | {ACTOR} |
-| {T3} | {MITIGATION_APPLIED} | {ACTOR} |
-| {T4} | {RESOLUTION_CONFIRMED} | {ACTOR} |
-
----
+| When | What |
+|------|------|
+| [date] | Bug introduced (commit SHA if known) |
+| [date] | Bug detected / reported |
+| [date] | Investigation started |
+| [date] | Root cause confirmed |
+| [date] | Fix deployed |
 
 ## 5 Whys
 
-1. **Why did the issue occur?**
-   {WHY_1}
-
-2. **Why did {WHY_1_SHORT} happen?**
-   {WHY_2}
-
-3. **Why did {WHY_2_SHORT} happen?**
-   {WHY_3}
-
-4. **Why did {WHY_3_SHORT} happen?**
-   {WHY_4}
-
-5. **Why did {WHY_4_SHORT} happen?**
-   {WHY_5} ← **Root Cause**
-
----
+1. Why did [symptom]? → Because [cause 1]
+2. Why [cause 1]? → Because [cause 2]
+3. Why [cause 2]? → Because [cause 3]
+4. Why [cause 3]? → Because [cause 4]
+5. Why [cause 4]? → Because [root cause]
 
 ## Blast Radius
 
-<!-- What was affected by this issue? Scope the impact precisely. -->
-
-- **Users affected:** {USER_IMPACT}
-- **Services affected:** {SERVICE_IMPACT}
-- **Data affected:** {DATA_IMPACT}
-- **Duration:** {DURATION}
-
----
+- **Affected modules:** [from .ai-context.md service map]
+- **Affected users/flows:** [from product.md user journeys]
+- **Data impact:** [any data corruption or loss]
+- **SLO budget consumed:** [percentage of error budget burned]
 
 ## Prevention Items
 
-### Detection Improvements
+### Detection Improvement
+- [ ] [monitoring/alerting improvement to catch this sooner]
 
-- [ ] {DETECTION_IMPROVEMENT_1}
-- [ ] {DETECTION_IMPROVEMENT_2}
+### Process Improvement
+- [ ] [review/testing improvement to prevent this class of bug]
 
-### Process Improvements
+### Code Improvement
+- [ ] [guard/validation to add in code]
 
-- [ ] {PROCESS_IMPROVEMENT_1}
-- [ ] {PROCESS_IMPROVEMENT_2}
-
-### Code Improvements
-
-- [ ] {CODE_IMPROVEMENT_1}
-- [ ] {CODE_IMPROVEMENT_2}
-
-### Architecture Improvements
-
-- [ ] {ARCHITECTURE_IMPROVEMENT_1}
-- [ ] {ARCHITECTURE_IMPROVEMENT_2}
-
----
+### Architecture Improvement
+- [ ] [structural change if needed to make this class of bug impossible]
 
 ## Proposed Fix
 
-<!-- Describe the fix, rationale, and files to modify -->
-
-**Approach:** {FIX_DESCRIPTION}
-
-**Rationale:** {FIX_RATIONALE}
+[Brief description of the fix approach — developer reviews before implementation]
 
 **Files to modify:**
+- `file1:line` — [change description]
+- `file2:line` — [change description]
 
-- `{FILE_1}` — {CHANGE_1}
-- `{FILE_2}` — {CHANGE_2}
-- `{FILE_3}` — {CHANGE_3}
-
----
-
-*generated_by: draft:auto-triage*
+**Regression test:**
+- [Description of regression test to write — pending developer approval]

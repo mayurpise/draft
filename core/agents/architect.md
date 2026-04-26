@@ -74,7 +74,7 @@ Represent API surfaces using the conventions of the project's primary language:
   - `pub struct CreateUserInput { pub name: String, pub email: String }`
 ```
 
-Use the project's primary language from `tech-stack.md`. Include function signatures with types, exported interfaces/traits/protocols, and key data structures.
+Use the project's primary language from `draft/tech-stack.md`. Include function signatures with types, exported interfaces/traits/protocols, and key data structures.
 
 ### Ingredients
 

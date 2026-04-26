@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
 #
 # Build integration files from skill sources
-# Generates: GitHub Copilot copilot-instructions.md + Gemini GEMINI.md
+# Generates: GitHub Copilot copilot-instructions.md
 #
-# Note: Cursor integration removed - Cursor now supports .claude/ plugin structure natively.
-# Use: Cursor > Settings > Rules, Skills, Subagents > Rules > New > Add from Github
+# Note: Cursor integration removed - Cursor now supports .claude-plugin/ structure natively.
 #
 # Skills are the single source of truth for all integrations.
 #
 # Adding a new skill:
 #   1. Create skills/<name>/SKILL.md
-#   2. Add the skill name to SKILL_ORDER array below
-#   3. Add display name and trigger to the case statements
+#   2. Add the skill name to SKILL_ORDER array in lib.sh
+#   3. Add display name and trigger to the case statements below
 #   4. Run this script
 #
 
@@ -20,181 +19,97 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 SKILLS_DIR="$ROOT_DIR/skills"
+CORE_DIR="$ROOT_DIR/core"
 COPILOT_OUTPUT="$ROOT_DIR/integrations/copilot/.github/copilot-instructions.md"
 
-# ─────────────────────────────────────────────────────────
-# Shared: skill ordering and metadata
-# ─────────────────────────────────────────────────────────
+# Source shared library for SKILL_ORDER, CORE_FILES, extract_body
+source "$SCRIPT_DIR/lib.sh"
 
-SKILL_ORDER=(
-    draft
-    init
-    index
-    new-track
-    decompose
-    implement
-    coverage
-    bughunt
-    review
-    deep-review
-    learn
-    adr
-    status
-    revert
-    change
-    jira-preview
-    jira-create
-    debug
-    deploy-checklist
-    documentation
-    incident-response
-    quick-review
-    standup
-    tech-debt
-    testing-strategy
-    assist-review
-    impact
-    tour
-)
+# ─────────────────────────────────────────────────────────
+# Skill metadata: display headers
+# ─────────────────────────────────────────────────────────
 
 get_skill_header() {
     local skill="$1"
     case "$skill" in
-        draft)        echo "Draft Overview" ;;
-        init)         echo "Init Command" ;;
-        index)        echo "Index Command" ;;
-        new-track)    echo "New Track Command" ;;
-        decompose)    echo "Decompose Command" ;;
-        implement)    echo "Implement Command" ;;
-        coverage)     echo "Coverage Command" ;;
-        bughunt)      echo "Bug Hunt Command" ;;
-        review)       echo "Review Command" ;;
-        deep-review)  echo "Deep Review Command" ;;
-        learn)        echo "Learn Command" ;;
-        adr)          echo "ADR Command" ;;
-        status)       echo "Status Command" ;;
-        revert)       echo "Revert Command" ;;
-        change)       echo "Change Command" ;;
-        jira-preview) echo "Jira Preview Command" ;;
-        jira-create)       echo "Jira Create Command" ;;
-        debug)             echo "Debug Command" ;;
+        draft)             echo "Draft Overview" ;;
+        init)              echo "Init Command" ;;
+        index)             echo "Index Command" ;;
+        new-track)         echo "New Track Command" ;;
+        decompose)         echo "Decompose Command" ;;
+        implement)         echo "Implement Command" ;;
+        coverage)          echo "Coverage Command" ;;
         deploy-checklist)  echo "Deploy Checklist Command" ;;
-        documentation)     echo "Documentation Command" ;;
-        incident-response) echo "Incident Response Command" ;;
+        bughunt)           echo "Bug Hunt Command" ;;
+        review)            echo "Review Command" ;;
         quick-review)      echo "Quick Review Command" ;;
+        deep-review)       echo "Deep Review Command" ;;
+        testing-strategy)  echo "Testing Strategy Command" ;;
+        learn)             echo "Learn Command" ;;
+        adr)               echo "ADR Command" ;;
+        debug)             echo "Debug Command" ;;
         standup)           echo "Standup Command" ;;
         tech-debt)         echo "Tech Debt Command" ;;
-        testing-strategy)  echo "Testing Strategy Command" ;;
-        assist-review)     echo "Assist Review Command" ;;
-        impact)            echo "Impact Command" ;;
+        incident-response) echo "Incident Response Command" ;;
+        documentation)     echo "Documentation Command" ;;
+        status)            echo "Status Command" ;;
+        revert)            echo "Revert Command" ;;
+        change)            echo "Change Command" ;;
+        jira-preview)      echo "Jira Preview Command" ;;
+        jira-create)       echo "Jira Create Command" ;;
         tour)              echo "Tour Command" ;;
-        *)            echo "$(echo "${skill:0:1}" | tr '[:lower:]' '[:upper:]')${skill:1} Command" ;;
+        impact)            echo "Impact Command" ;;
+        assist-review)     echo "Assist Review Command" ;;
+        *)                 echo "$(echo "${skill:0:1}" | tr '[:lower:]' '[:upper:]')${skill:1} Command" ;;
     esac
 }
 
-# Common logic for trigger generation
-get_trigger() {
-    local skill="$1"
-    local prefix="$2"
-    case "$skill" in
-        draft)        echo "\"help\" or \"${prefix}draft\"" ;;
-        init)         echo "\"init draft\" or \"${prefix}draft init [refresh]\"" ;;
-        index)        echo "\"index services\" or \"${prefix}draft index [--init-missing]\"" ;;
-        new-track)    echo "\"new feature\" or \"${prefix}draft new-track <description>\"" ;;
-        decompose)    echo "\"break into modules\" or \"${prefix}draft decompose\"" ;;
-        implement)    echo "\"implement\" or \"${prefix}draft implement\"" ;;
-        coverage)     echo "\"check coverage\" or \"${prefix}draft coverage\"" ;;
-        bughunt)      echo "\"hunt bugs\" or \"${prefix}draft bughunt [--track <id>]\"" ;;
-        review)       echo "\"review code\" or \"${prefix}draft review [--track <id>] [--full]\"" ;;
-        deep-review)  echo "\"deep review\" or \"${prefix}draft deep-review [module]\"" ;;
-        learn)        echo "\"learn patterns\" or \"${prefix}draft learn [promote|migrate|path]\"" ;;
-        adr)          echo "\"document decision\" or \"${prefix}draft adr [title]\"" ;;
-        status)       echo "\"status\" or \"${prefix}draft status\"" ;;
-        revert)       echo "\"revert\" or \"${prefix}draft revert\"" ;;
-        change)       echo "\"handle change\" or \"${prefix}draft change <description>\"" ;;
-        jira-preview) echo "\"preview jira\" or \"${prefix}draft jira-preview [track-id]\"" ;;
-        jira-create)       echo "\"create jira\" or \"${prefix}draft jira-create [track-id]\"" ;;
-        debug)             echo "\"debug bug\" or \"${prefix}draft debug [description|track <id>]\"" ;;
-        deploy-checklist)  echo "\"deploy checklist\" or \"${prefix}draft deploy-checklist [track <id>]\"" ;;
-        documentation)     echo "\"write docs\" or \"${prefix}draft documentation [readme|runbook|api|onboarding]\"" ;;
-        incident-response) echo "\"incident\" or \"${prefix}draft incident-response [new|update|postmortem]\"" ;;
-        quick-review)      echo "\"quick review\" or \"${prefix}draft quick-review [file|pr <number>]\"" ;;
-        standup)           echo "\"standup\" or \"${prefix}draft standup [date|week|save]\"" ;;
-        tech-debt)         echo "\"tech debt\" or \"${prefix}draft tech-debt [path|track <id>]\"" ;;
-        testing-strategy)  echo "\"test strategy\" or \"${prefix}draft testing-strategy [track <id>|path]\"" ;;
-        assist-review)     echo "\"assist review\" or \"${prefix}draft assist-review [track <id>|pr <number>]\"" ;;
-        impact)            echo "\"impact report\" or \"${prefix}draft impact [track <id>|--all]\"" ;;
-        tour)              echo "\"tour codebase\" or \"${prefix}draft tour [module|--interactive]\"" ;;
-        *)            echo "\"${prefix}draft $skill\"" ;;
-    esac
-}
+# ─────────────────────────────────────────────────────────
+# Skill metadata: triggers (natural language → command)
+# ─────────────────────────────────────────────────────────
 
-# Gemini uses @draft syntax
-# (Removed Gemini trigger)
-
-
-# Copilot uses natural language (no @ mentions)
 get_copilot_trigger() {
-    get_trigger "$1" ""
+    local skill="$1"
+    case "$skill" in
+        draft)             echo "\"help\" or \"draft\"" ;;
+        init)              echo "\"init draft\" or \"draft init [refresh]\"" ;;
+        index)             echo "\"index services\" or \"draft index [--init-missing]\"" ;;
+        new-track)         echo "\"new feature\" or \"draft new-track <description>\"" ;;
+        decompose)         echo "\"break into modules\" or \"draft decompose\"" ;;
+        implement)         echo "\"implement\" or \"draft implement\"" ;;
+        coverage)          echo "\"check coverage\" or \"draft coverage\"" ;;
+        deploy-checklist)  echo "\"deploy checklist\" or \"draft deploy-checklist [track <id>]\"" ;;
+        bughunt)           echo "\"hunt bugs\" or \"draft bughunt [--track <id>]\"" ;;
+        review)            echo "\"review code\" or \"draft review [--track <id>] [--full]\"" ;;
+        quick-review)      echo "\"quick review\" or \"draft quick-review [file|pr <number>]\"" ;;
+        deep-review)       echo "\"deep review\" or \"draft deep-review [module]\"" ;;
+        testing-strategy)  echo "\"test strategy\" or \"draft testing-strategy [track <id>|path]\"" ;;
+        learn)             echo "\"learn patterns\" or \"draft learn [promote|migrate|path]\"" ;;
+        adr)               echo "\"document decision\" or \"draft adr [title]\"" ;;
+        debug)             echo "\"debug bug\" or \"draft debug [description|track <id>]\"" ;;
+        standup)           echo "\"standup\" or \"draft standup [date|week|save]\"" ;;
+        tech-debt)         echo "\"tech debt\" or \"draft tech-debt [path|track <id>]\"" ;;
+        incident-response) echo "\"incident\" or \"draft incident-response [new|update|postmortem]\"" ;;
+        documentation)     echo "\"write docs\" or \"draft documentation [readme|runbook|api|onboarding]\"" ;;
+        status)            echo "\"status\" or \"draft status\"" ;;
+        revert)            echo "\"revert\" or \"draft revert\"" ;;
+        change)            echo "\"handle change\" or \"draft change <description>\"" ;;
+        jira-preview)      echo "\"preview jira\" or \"draft jira-preview [track-id]\"" ;;
+        jira-create)       echo "\"create jira\" or \"draft jira-create [track-id]\"" ;;
+        tour)              echo "\"tour\" or \"draft tour\"" ;;
+        impact)            echo "\"impact\" or \"draft impact\"" ;;
+        assist-review)     echo "\"assist review\" or \"draft assist-review\"" ;;
+        *)                 echo "\"draft $skill\"" ;;
+    esac
 }
 
 # ─────────────────────────────────────────────────────────
-# Shared: content extraction and transforms
+# Syntax transforms for Copilot (no slash commands or @mentions)
 # ─────────────────────────────────────────────────────────
 
-# Extract body content from a SKILL.md file (strip YAML frontmatter)
-extract_body() {
-    local file="$1"
-
-    # Check that file starts with frontmatter delimiter
-    if [[ "$(head -1 "$file")" != "---" ]]; then
-        echo "ERROR: Missing YAML frontmatter in $file" >&2
-        echo "  Skill files must start with --- delimiter on line 1" >&2
-        return 1
-    fi
-
-    # Extract and validate frontmatter (awk stops at closing ---, naturally bounded)
-    local frontmatter
-    frontmatter=$(awk '
-        /^---$/ { if (!seen_first) { seen_first=1; next } else { exit } }
-        seen_first { print }
-    ' "$file")
-
-    # Validate required fields
-    if ! echo "$frontmatter" | grep -q "^name:"; then
-        echo "ERROR: Missing 'name:' field in frontmatter of $file" >&2
-        return 1
-    fi
-
-    if ! echo "$frontmatter" | grep -q "^description:"; then
-        echo "ERROR: Missing 'description:' field in frontmatter of $file" >&2
-        return 1
-    fi
-
-    # Extract body (existing logic)
-    awk '
-        BEGIN { in_frontmatter = 0; found_end = 0 }
-        /^---$/ {
-            if (in_frontmatter == 0) {
-                in_frontmatter = 1
-                next
-            } else if (found_end == 0) {
-                found_end = 1
-                next
-            }
-        }
-        found_end == 1 { print }
-    ' "$file"
-}
-
-# Gemini transform: /draft: → @draft
-# (Removed Gemini transform)
-
-
-# Copilot transform: /draft: → draft (no @)
 transform_copilot_syntax() {
     sed -E \
-        -e 's|/draft:([a-z0-9-]+)|draft \1|g' \
+        -e 's|/draft:([a-z0-9<>-]+)|draft \1|g' \
         -e 's|@draft([^a-z0-9_-])|draft\1|g' \
         -e 's|@draft$|draft|g' \
         -e 's|`@draft`|`draft`|g' \
@@ -204,55 +119,9 @@ transform_copilot_syntax() {
 }
 
 # ─────────────────────────────────────────────────────────
-# Shared: core files to inline
+# Emit all core reference files as appendices
 # ─────────────────────────────────────────────────────────
 
-CORE_DIR="$ROOT_DIR/core"
-
-# Core files referenced by skills - inline into integrations
-CORE_FILES=(
-    # Methodology
-    "methodology.md"
-    "knowledge-base.md"
-    # Shared procedures
-    "shared/draft-context-loading.md"
-    "shared/git-report-metadata.md"
-    "shared/pattern-learning.md"
-    "shared/condensation.md"
-    "shared/cross-skill-dispatch.md"
-    "shared/jira-sync.md"
-    # Templates
-    "templates/guardrails.md"
-    "templates/intake-questions.md"
-    "templates/ai-context.md"
-    "templates/architecture.md"
-    "templates/jira.md"
-    "templates/product.md"
-    "templates/tech-stack.md"
-    "templates/workflow.md"
-    "templates/spec.md"
-    "templates/plan.md"
-    # Index templates (monorepo)
-    "templates/service-index.md"
-    "templates/dependency-graph.md"
-    "templates/tech-matrix.md"
-    "templates/root-product.md"
-    "templates/root-architecture.md"
-    "templates/root-tech-stack.md"
-    # Agents
-    "agents/architect.md"
-    "agents/debugger.md"
-    "agents/planner.md"
-    "agents/rca.md"
-    "agents/reviewer.md"
-    "agents/ops.md"
-    "agents/writer.md"
-    # Templates (RCA)
-    "templates/rca.md"
-)
-
-# Emit all core files as appendices
-# Takes transform function as argument to apply correct syntax
 emit_core_files() {
     local transform_fn="$1"
 
@@ -274,7 +143,6 @@ emit_core_files() {
             echo ""
             echo "<core-file path=\"core/${core_file}\">"
             echo ""
-            # Apply transform to core file content
             "$transform_fn" < "$full_path"
             echo ""
             echo "</core-file>"
@@ -287,7 +155,7 @@ emit_core_files() {
 }
 
 # ─────────────────────────────────────────────────────────
-# Shared: quality disciplines, communication, behaviors
+# Shared content blocks
 # ─────────────────────────────────────────────────────────
 
 emit_quality_disciplines() {
@@ -413,16 +281,11 @@ PROACTIVE
 }
 
 # ─────────────────────────────────────────────────────────
-# Shared integration builder
+# Build the copilot-instructions.md
 # ─────────────────────────────────────────────────────────
 
-build_integration() {
-    local command_prefix="$1"        # "@draft" | "draft"
-    local get_trigger_fn="$2"        # "get_gemini_trigger" | "get_copilot_trigger"
-    local transform_fn="$3"          # "transform_gemini_syntax" | "transform_copilot_syntax"
-    local story_marker="$4"          # "@draft" | "draft"
-
-    # Header (common for all integrations)
+build_copilot() {
+    # ── Header ────────────────────────────────────────────
     cat << 'COMMON_HEADER'
 # Draft - Context-Driven Development
 
@@ -444,11 +307,13 @@ Every feature follows this lifecycle:
 
 When `draft/` exists in the project, always consider:
 - `draft/.ai-context.md` - Source of truth for AI agents (dense codebase understanding)
-- `draft/architecture.md` - Human-readable engineering guide (derived from .ai-context.md)
+- `draft/.ai-profile.md` - Ultra-compact profile (always loaded, 20-50 lines)
+- `draft/architecture.md` - Human-readable engineering guide (source of truth)
 - `draft/product.md` - Product vision and goals
 - `draft/tech-stack.md` - Technical constraints
 - `draft/workflow.md` - TDD and commit preferences
 - `draft/tracks.md` - Active work items
+- `draft/guardrails.md` - Hard rules and learned patterns
 
 ## Available Commands
 
@@ -456,29 +321,37 @@ When `draft/` exists in the project, always consider:
 |---------|---------|
 COMMON_HEADER
 
-    # Command table with parameterized prefix
-    echo "| \`${command_prefix}\` | Show overview and available commands |"
-    echo "| \`${command_prefix} init\` | Initialize project (run once) |"
-    echo "| \`${command_prefix} index [--init-missing]\` | Aggregate monorepo service contexts |"
-    echo "| \`${command_prefix} new-track <description>\` | Create feature/bug track |"
-    echo "| \`${command_prefix} decompose\` | Module decomposition with dependency mapping |"
-    echo "| \`${command_prefix} implement\` | Execute tasks from plan |"
-    echo "| \`${command_prefix} coverage\` | Code coverage report (target 95%+) |"
-    echo "| \`${command_prefix} bughunt [--track <id>]\` | Systematic bug discovery |"
-    echo "| \`${command_prefix} review [--track <id>]\` | Three-stage code review |"
-    echo "| \`${command_prefix} deep-review [module]\` | Exhaustive production-grade module audit |"
-    echo "| \`${command_prefix} learn [promote\\|migrate]\` | Discover coding patterns, update guardrails |"
-    echo "| \`${command_prefix} adr [title]\` | Architecture Decision Records |"
-    echo "| \`${command_prefix} status\` | Show progress overview |"
-    echo "| \`${command_prefix} revert\` | Git-aware rollback |"
-    echo "| \`${command_prefix} change <description>\` | Handle mid-track requirement changes |"
-    echo "| \`${command_prefix} jira-preview [track-id]\` | Generate jira-export.md for review |"
-    echo "| \`${command_prefix} jira-create [track-id]\` | Create Jira issues from export via MCP |"
-    echo "| \`${command_prefix} assist-review [track <id>]\` | Audit PR risks for human reviewers |"
-    echo "| \`${command_prefix} impact [track <id>]\` | ROI analytics and project friction metrics |"
-    echo "| \`${command_prefix} tour [module]\` | Interactive architecture walk-through |"
+    # Command table
+    echo "| \`draft\` | Show overview and available commands |"
+    echo "| \`draft init\` | Initialize project (run once) |"
+    echo "| \`draft index [--init-missing]\` | Aggregate monorepo service contexts |"
+    echo "| \`draft new-track <description>\` | Create feature/bug track |"
+    echo "| \`draft decompose\` | Module decomposition with dependency mapping |"
+    echo "| \`draft implement\` | Execute tasks from plan |"
+    echo "| \`draft coverage\` | Code coverage report (target 95%+) |"
+    echo "| \`draft deploy-checklist [track <id>]\` | Pre-deployment verification checklist |"
+    echo "| \`draft bughunt [--track <id>]\` | Systematic bug discovery |"
+    echo "| \`draft review [--track <id>]\` | Three-stage code review |"
+    echo "| \`draft quick-review [file|pr <number>]\` | Lightweight 4-dimension review |"
+    echo "| \`draft deep-review [module]\` | Exhaustive production-grade module audit |"
+    echo "| \`draft testing-strategy [track <id>|path]\` | Design test strategy with coverage targets |"
+    echo "| \`draft learn [promote\\|migrate]\` | Discover coding patterns, update guardrails |"
+    echo "| \`draft adr [title]\` | Architecture Decision Records |"
+    echo "| \`draft debug [description|track <id>]\` | Structured debugging session |"
+    echo "| \`draft standup [date|week|save]\` | Generate standup summary |"
+    echo "| \`draft tech-debt [path|track <id>]\` | Identify and prioritize tech debt |"
+    echo "| \`draft incident-response [new|update|postmortem]\` | Incident management lifecycle |"
+    echo "| \`draft documentation [readme|runbook|api|onboarding]\` | Technical documentation |"
+    echo "| \`draft status\` | Show progress overview |"
+    echo "| \`draft revert\` | Git-aware rollback |"
+    echo "| \`draft change <description>\` | Handle mid-track requirement changes |"
+    echo "| \`draft jira-preview [track-id]\` | Generate jira-export.md for review |"
+    echo "| \`draft jira-create [track-id]\` | Create Jira issues from export via MCP |"
+    echo "| \`draft tour\` | Interactive onboarding tour |"
+    echo "| \`draft impact\` | Telemetry and analytics insights |"
+    echo "| \`draft assist-review\` | Assist human reviewers with architectural risk audit |"
 
-    # Rest of header (common)
+    # Rest of common header
     cat << 'COMMON_HEADER2'
 
 ## Intent Mapping
@@ -493,19 +366,27 @@ Recognize these natural language patterns:
 | "break into modules", "decompose" | Run decompose |
 | "start implementing" | Execute implement |
 | "check coverage", "test coverage" | Run coverage |
-| "hunt bugs", "find bugs" | Run bug hunt |
+| "deploy checklist", "pre-deploy check" | Run deploy-checklist |
+| "hunt bugs", "find bugs" | Run bughunt |
 | "review code", "review track", "check quality" | Run review |
+| "quick review", "lightweight review" | Run quick-review |
 | "deep review", "production audit", "module audit" | Run deep-review |
+| "test strategy", "plan tests" | Run testing-strategy |
 | "learn patterns", "update guardrails", "discover conventions" | Run learn |
+| "document decision", "create ADR" | Create architecture decision record |
+| "debug bug", "investigate issue" | Run debug |
+| "standup", "daily summary" | Run standup |
+| "tech debt", "identify debt" | Run tech-debt |
+| "incident", "outage", "postmortem" | Run incident-response |
+| "write docs", "document" | Run documentation |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
 | "requirements changed", "scope changed", "update the spec" | Run change |
 | "preview jira", "export to jira" | Run jira-preview |
 | "create jira", "push to jira" | Run jira-create |
-| "document decision", "create ADR" | Create architecture decision record |
-| "assist review", "PR risks for reviewer" | Run assist-review |
-| "impact report", "ROI analytics" | Run impact |
-| "tour codebase", "walk me through" | Run tour |
+| "tour", "onboard me" | Run tour |
+| "impact", "analytics" | Run impact |
+| "assist review", "help reviewer" | Run assist-review |
 | "help", "what commands" | Show draft overview |
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |
@@ -529,23 +410,23 @@ Recognize and use these throughout plan.md:
 
 COMMON_HEADER2
 
-    # Skill loop with parameterized trigger and transform functions
+    # ── Skill loop ────────────────────────────────────────
     for skill in "${SKILL_ORDER[@]}"; do
         # Skip 'draft' skill — its content (commands table, core workflow,
-        # status markers) is already covered by the static COMMON_HEADER above.
+        # status markers) is already covered by the static header above.
         if [[ "$skill" == "draft" ]]; then
             continue
         fi
 
         # Validate skill name format (security: prevent path traversal)
         if [[ ! "$skill" =~ ^[a-z][a-z0-9]*(-[a-z0-9]+)*$ ]]; then
-            echo "ERROR: Invalid skill name '$skill' (must be kebab-case: start with letter, no leading/trailing hyphens)" >&2
+            echo "ERROR: Invalid skill name '$skill' (must be kebab-case)" >&2
             exit 1
         fi
 
         local skill_file="$SKILLS_DIR/$skill/SKILL.md"
         if [[ -f "$skill_file" ]]; then
-            # Extract body once and cache (avoids double file read + inconsistent error handling)
+            # Extract body once and cache
             local skill_body
             skill_body=$(extract_body "$skill_file")
 
@@ -567,9 +448,10 @@ COMMON_HEADER2
             echo ""
             echo "## $(get_skill_header "$skill")"
             echo ""
-            echo "When user says $($get_trigger_fn "$skill"):"
+            echo "When user says $(get_copilot_trigger "$skill"):"
             echo ""
-            echo "$skill_body" | "$transform_fn" | tail -n +4
+            # Emit body from line 4 onward (skip blank, title, blank)
+            echo "$skill_body" | transform_copilot_syntax | tail -n +4
         else
             echo "" >&2
             echo "ERROR: Skill file not found: $skill_file" >&2
@@ -577,15 +459,16 @@ COMMON_HEADER2
         fi
     done
 
+    # ── Quality disciplines ───────────────────────────────
     echo ""
     echo "---"
     echo ""
 
     emit_quality_disciplines
 
-    # Story lifecycle with parameterized command marker
-    echo "1. Placeholder during \`${story_marker} decompose\` → \"[placeholder]\" in architecture.md"
-    echo "2. Written during \`${story_marker} implement\` → code comment at file top, summary in architecture.md"
+    # Story lifecycle with draft command
+    echo "1. Placeholder during \`draft decompose\` → \"[placeholder]\" in architecture.md"
+    echo "2. Written during \`draft implement\` → code comment at file top, summary in architecture.md"
     echo "3. Updated during refactoring → code comment is source of truth"
     echo ""
     echo "### Red Flags - STOP if you're:"
@@ -596,6 +479,7 @@ COMMON_HEADER2
     echo "- Reporting status without reading actual files"
     echo ""
 
+    # ── Communication and behaviors ───────────────────────
     echo ""
     echo "---"
     echo ""
@@ -603,41 +487,23 @@ COMMON_HEADER2
     emit_communication
     emit_proactive
 
-    # Inline core files for integrations that can't access core/ at runtime
-    emit_core_files "$transform_fn"
+    # ── Inline core files ─────────────────────────────────
+    emit_core_files "transform_copilot_syntax"
 
     # Completeness sentinel — verified by verify_output
     echo ""
-    echo "<!-- DRAFT_BUILD_COMPLETE -->"
+    echo "<!-- CODEV_BUILD_COMPLETE -->"
 }
 
 # ─────────────────────────────────────────────────────────
-# Copilot: build copilot-instructions.md
-# ─────────────────────────────────────────────────────────
-
-build_copilot() {
-    build_integration "draft" "get_copilot_trigger" "transform_copilot_syntax" "draft"
-}
-
-# ─────────────────────────────────────────────────────────
-# Gemini: build GEMINI.md
-# ─────────────────────────────────────────────────────────
-
-# (Removed build_gemini)
-
-
-# ─────────────────────────────────────────────────────────
-# Verification helpers
+# Verification
 # ─────────────────────────────────────────────────────────
 
 verify_output() {
-    local label="$1"
-    local output_file="$2"
-    local expect_at_draft="$3"  # "yes" or "no"
+    local output_file="$1"
 
-    local line_count old_syntax_count at_draft_count
-    # Single pass with awk to count lines and check patterns
-    read -r line_count old_syntax_count at_draft_count < <(awk '
+    local line_count old_syntax_count at_codev_count
+    read -r line_count old_syntax_count at_codev_count < <(awk '
         {
             total_lines++
             if (/\/draft:/) old_count++
@@ -650,15 +516,15 @@ verify_output() {
 
     echo "  Lines: $line_count"
 
-    # Verify completeness sentinel (catches truncated output from disk-full etc.)
-    if ! tail -5 "$output_file" | grep -q "DRAFT_BUILD_COMPLETE"; then
+    # Verify completeness sentinel
+    if ! tail -5 "$output_file" | grep -q "CODEV_BUILD_COMPLETE"; then
         echo "  FAIL: Missing completeness sentinel — output may be truncated" >&2
         return 1
     fi
 
-    # Verify minimum line count (a valid build is always >1000 lines)
+    # Verify minimum line count
     if [[ "$line_count" -lt 1000 ]]; then
-        echo "  FAIL: Output too small ($line_count lines, expected >1000) — likely truncated or incomplete" >&2
+        echo "  FAIL: Output too small ($line_count lines, expected >1000) — likely truncated" >&2
         return 1
     fi
 
@@ -673,27 +539,22 @@ verify_output() {
 
     # Verify no /draft: references remain
     if [[ "$old_syntax_count" -gt 0 ]]; then
-        echo "  WARNING: Found $old_syntax_count '/draft:' references (should be 0)"
+        echo "  WARNING: Found $old_syntax_count '/draft:' references (should be 0)" >&2
         return 1
     else
         echo "  Syntax check: OK (no /draft: references)"
     fi
 
-    # Verify @draft presence based on integration type
-    if [[ "$expect_at_draft" == "yes" ]]; then
-        echo "  Found $at_draft_count '@draft' references"
+    # Verify no @draft references remain
+    if [[ "$at_codev_count" -gt 0 ]]; then
+        echo "  WARNING: Found $at_codev_count '@draft' references (should be 0)" >&2
+        echo "  Offending lines:" >&2
+        grep -n '@draft' "$output_file" | head -5 >&2
+        return 1
     else
-        if [[ "$at_draft_count" -gt 0 ]]; then
-            echo "  WARNING: Found $at_draft_count '@draft' references (should be 0 for $label)" >&2
-            echo "  Offending lines:" >&2
-            grep -n '@draft' "$output_file" | head -5 >&2
-            return 1
-        else
-            echo "  Syntax check: OK (no @draft references)"
-        fi
+        echo "  Syntax check: OK (no @draft references)"
     fi
 
-    # Note: Agent references to core/agents/*.md are now preserved (not stripped)
     echo "  Agent refs: preserved (not stripped)"
 
     return 0
@@ -706,10 +567,8 @@ verify_output() {
 main() {
     echo "Building integrations from skills..."
     echo ""
-    echo "Note: Cursor integration removed - Cursor now supports .claude/ plugin structure natively."
-    echo ""
 
-    # Ensure output directories exist
+    # Ensure output directory exists
     mkdir -p "$(dirname "$COPILOT_OUTPUT")"
 
     local start_seconds=$SECONDS
@@ -721,7 +580,7 @@ main() {
     trap 'rm -f "$copilot_tmp"' EXIT
     build_copilot > "$copilot_tmp"
     echo "  Generated: $COPILOT_OUTPUT"
-    if verify_output "Copilot" "$copilot_tmp" "no"; then
+    if verify_output "$copilot_tmp"; then
         mv "$copilot_tmp" "$COPILOT_OUTPUT"
         trap - EXIT
     else

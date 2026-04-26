@@ -169,6 +169,19 @@ If task exceeds 5 iterations:
 
 ---
 
+## Toolchain
+
+### VCS
+- [x] git + GitHub Pull Requests
+
+### MCP Auto-Connect (optional)
+- [ ] Jira MCP — for ticket linking via `/draft:jira-preview` / `/draft:jira-create`
+- [ ] Confluence MCP — for design-doc and runbook lookups
+
+> **How to configure:** Check the MCP boxes above to enable optional integrations. See `core/shared/vcs-commands.md` for git command conventions used across skills.
+
+---
+
 ## Guardrails
 
 > **See `draft/guardrails.md`** — Hard guardrails, learned conventions, and learned anti-patterns are managed in the dedicated guardrails file. Run `/draft:learn` to discover patterns and update guardrails.

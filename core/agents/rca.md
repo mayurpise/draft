@@ -178,7 +178,7 @@ Once you find the immediate cause, ask "why" to find the root:
    - Follow commit conventions from `draft/workflow.md` and guardrails from `draft/guardrails.md`
 4. **Write RCA summary** — Concise, factual, blameless:
 
-```markdown
+````markdown
 ## Root Cause Analysis
 
 **Bug:** [1-line description]
@@ -244,7 +244,7 @@ Classify each prevention item into one of four categories. This taxonomy enables
 - [ ] [e.g., add circuit breaker between services A and B]
 
 **Reference:** Google SRE Workbook: Postmortem Analysis — categorized prevention items enable teams to identify systemic gaps (e.g., "80% of our incidents need detection improvements").
-```
+````
 
 ---
 
@@ -296,6 +296,12 @@ If after 3 hypothesis cycles the root cause is not confirmed:
 | Write vague root causes ("timing issue") | Be specific: what, where, why, `file:line` |
 | Skip the regression test | No fix without a test that proves it |
 
+## Test Writing Guardrail
+
+See `core/shared/cross-skill-dispatch.md` §Test Writing Guardrail — RCA must ask before auto-writing regression or unit tests. Developers may prefer to author their own regression tests so the failure mode is internalized; honor that preference.
+
+---
+
 ## Integration with Draft
 
 1. Bug tracks use the `bugfix` type in `metadata.json`
@@ -306,16 +312,3 @@ If after 3 hypothesis cycles the root cause is not confirmed:
 6. The debugger agent (`core/agents/debugger.md`) handles blocked tasks within any track; the RCA agent handles the overall investigation flow for bug tracks
 
 **Decision rule:** For blocked tasks within bug tracks, follow the RCA agent (investigation context is already established). The debugger agent applies to blocked tasks in feature and refactor tracks.
-
-## Test Writing Guardrail
-
-**In RCA workflows:** Never auto-write regression tests. Always ask the developer first.
-
-```
-If current context is RCA investigation:
-  BEFORE writing any test file:
-    ASK: "Root cause confirmed: [summary]. Want me to write a regression test? [Y/n]"
-    If declined: skip test writing, note in plan.md: "Tests: developer-handled"
-```
-
-This guardrail ensures the developer maintains control over the test suite during sensitive bug fix workflows where incorrect tests could mask the real issue or create false confidence.

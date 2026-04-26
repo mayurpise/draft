@@ -1,32 +1,40 @@
-.PHONY: build clean help test lint
+.PHONY: clean help test build-integrations
 .DEFAULT_GOAL := help
 
 TEST_SCRIPTS = \
-	./tests/test-build-integrations.sh \
 	./tests/test-skill-frontmatter.sh \
 	./tests/test-skill-name-security.sh \
-	./tests/test-syntax-transforms.sh \
 	./tests/test-skill-order.sh \
+	./tests/test-skill-headers.sh \
 	./tests/test-core-files.sh \
 	./tests/test-plugin-manifest.sh \
+	./tests/test-build-integrations.sh \
+	./tests/test-syntax-transforms.sh \
 	./tests/test-trigger-functions.sh \
-	./tests/test-skill-headers.sh \
-	./tests/test-error-handling.sh
+	./tests/test-error-handling.sh \
+	./tests/test-tools-registered.sh \
+	./tests/test-tools-conventions.sh \
+	./tests/test-tools-git-metadata.sh \
+	./tests/test-tools-classify-files.sh \
+	./tests/test-tools-parse-git-log.sh \
+	./tests/test-tools-scan-markers.sh \
+	./tests/test-tools-hotspot-rank.sh \
+	./tests/test-tools-cycle-detect.sh \
+	./tests/test-tools-parse-reports.sh \
+	./tests/test-tools-detect-test-framework.sh \
+	./tests/test-tools-run-coverage.sh \
+	./tests/test-tools-freshness-check.sh \
+	./tests/test-tools-adr-index.sh \
+	./tests/test-tools-manage-symlinks.sh \
+	./tests/test-tools-mermaid-from-graph.sh \
+	./tests/test-tools-validate-frontmatter.sh
 
 help: ## Show this help message
 	@echo "Available targets:"
-	@echo "  make build   - Generate Copilot and Gemini integration files"
-	@echo "  make test    - Run all tests"
-	@echo "  make lint    - Run shellcheck and markdownlint checks"
-	@echo "  make clean   - Clean build artifacts (currently none)"
-	@echo "  make help    - Show this message"
-
-build: ## Generate integration files and book pages
-	./scripts/build-integrations.sh
-	./scripts/build-book.sh
-
-lint: ## Run linters (shellcheck and markdownlint)
-	./scripts/lint.sh
+	@echo "  make test               - Run all tests"
+	@echo "  make build-integrations - Build Copilot instructions"
+	@echo "  make clean              - Clean build artifacts"
+	@echo "  make help               - Show this message"
 
 test: ## Run all tests
 	@FAILED_SUITES=""; \
@@ -47,5 +55,9 @@ test: ## Run all tests
 		exit 1; \
 	fi
 
+build-integrations: ## Build Copilot copilot-instructions.md from skill sources
+	@./scripts/build-integrations.sh
+
 clean: ## Clean build artifacts
-	@echo "Nothing to clean"
+	@rm -f integrations/copilot/.github/copilot-instructions.md
+	@echo "Cleaned integration build artifacts"

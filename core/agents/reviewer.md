@@ -252,3 +252,5 @@ At phase boundary in `/draft:implement`:
 4. If Stage 2 passes, run Stage 3: Code quality
 5. Document findings in plan.md under phase
 6. Only proceed to next phase if review passes
+
+Also invoked by `/draft:review` for standalone track/project review.

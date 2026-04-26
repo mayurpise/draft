@@ -102,6 +102,9 @@ If confirmed:
 
 Maintain a list of successfully reverted commits during execution.
 
+Read `draft/workflow.md` → `## Toolchain` section for VCS CLI. See `core/shared/vcs-commands.md` for the full command mapping.
+
+**git mode:**
 ```bash
 # Revert each commit in reverse order (newest first)
 git revert --no-commit <commit1>
@@ -129,7 +132,7 @@ On conflict, report: "Successfully reverted: [list]. Conflict on: [sha]. Run `gi
 
 3. Update `draft/tracks.md` if track status changed
 
-4. **Stale reports:** After revert, existing `review-report-latest.md` and `bughunt-report-latest.md` for the track are stale. Resolve symlinks first via `readlink -f review-report-latest.md` and `readlink -f bughunt-report-latest.md`, then add a warning header to the resolved files (the actual timestamped files): `> **WARNING: This report predates a revert operation and may be stale. Re-run the review/bughunt.**` Or delete them if the revert is substantial.
+4. **Stale reports:** After revert, existing `review-report-latest.md` and `bughunt-report-latest.md` for the track are stale. Resolve symlink targets first: `readlink -f review-report-latest.md` and `readlink -f bughunt-report-latest.md`. Add a warning header to the symlink targets (the actual timestamped files): `> **WARNING: This report predates a revert operation and may be stale. Re-run the review/bughunt.**` Or delete them if the revert is substantial.
 
 ## Step 6: Confirm
 

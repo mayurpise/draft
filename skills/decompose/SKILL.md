@@ -51,6 +51,10 @@ git log -1 --format="%s"
 git status --porcelain | head -1
 ```
 
+For track-scoped decomposition, also derive the human-readable track title used in the `track-architecture.md` H1:
+
+- `{TRACK_TITLE}` — first-level heading text from the active track's `spec.md` (the `# ...` line). If `spec.md` has no H1, fall back to the `{TRACK_ID}`.
+
 ### Metadata Template
 
 Insert this YAML frontmatter block at the **top of every generated file**:
@@ -80,9 +84,15 @@ synced_to_commit: "{FULL_SHA}"
 
 ## Step 1: Determine Scope
 
-Check for an argument:
+Parse `$ARGUMENTS` for flags first, then strip them before interpreting the remaining text as scope:
+
+- `--lld` → **LLD mode** — generate Section 6 (Low-Level Design) in addition to HLD. Strip from arguments before scope detection.
+
+Scope detection (on stripped arguments):
 - `project` or no argument with no active track → **Project-wide** decomposition → `draft/.ai-context.md`
 - Track ID or active track exists → **Track-scoped** decomposition → `draft/tracks/<id>/architecture.md`
+
+**LLD auto-trigger:** Even without `--lld`, LLD is generated automatically when any module in Step 3 is marked `Complexity: High`. Tell the developer when this triggers: "One or more modules are High complexity — generating LLD automatically."
 
 ## Step 2: Load Context
 
@@ -125,6 +135,18 @@ ls -d src/*/ lib/*/ app/*/ packages/*/ 2>/dev/null
 
 **What to ignore:** `node_modules/`, `__pycache__/`, `target/`, `dist/`, `build/`, `.git/`, vendored dependencies. Always respect `.gitignore` and `.claudeignore`.
 
+### Graph-Accelerated Discovery (if `draft/graph/` exists)
+
+When graph data is available, use it as the primary source for module discovery instead of manual scanning:
+
+- **Module boundaries**: Load `draft/graph/module-graph.jsonl` — exact module list with file counts per language (`.cc`, `.h`, `.go`, `.proto`, `.py`)
+- **Dependency edges**: Weighted inter-module dependencies with exact include counts — replaces manual import tracing
+- **Cycle detection**: Circular dependency paths already computed — use for identifying tight coupling and decomposition candidates
+- **Hotspots**: Load `draft/graph/hotspots.jsonl` — high-complexity files that may need further decomposition
+- **Per-module detail**: Load `draft/graph/modules/<name>.jsonl` for file-level graphs within modules of interest
+
+This data is deterministic and exhaustive. Prefer it over heuristic scanning when available. See `core/shared/graph-query.md`.
+
 ## Step 3: Module Identification
 
 Propose a module breakdown through dialogue:
@@ -139,10 +161,10 @@ For each module, define:
 
 ### Module Guidelines (see `core/agents/architect.md`)
 
-- Each module should have a single responsibility
-- Target 1-3 files per module
-- Every module needs a clear API boundary
-- **Minimal Coupling** — Modules should communicate through interfaces, not internals. Prefer explicit contracts over shared state.
+1. Each module should have a single responsibility
+2. Target 1-3 files per module
+3. Every module needs a clear API boundary
+4. **Minimal Coupling** — communicate through interfaces, not internals
 - Modules should be testable in isolation
 - Each module typically contains: API, control flow, execution state, functions
 
@@ -223,14 +245,30 @@ Parallel opportunities: config and database can start after logging.
 
 ## Step 5: Generate Architecture Context
 
-Write the architecture document using the template from `core/templates/architecture.md`:
+Template selection depends on scope:
+
+- **Project-wide** → `core/templates/architecture.md` (full 25-section reference)
+- **Track-scoped** → `core/templates/track-architecture.md` (HLD-focused, with optional LLD block)
 
 **Location:**
 - Project-wide: Update `draft/architecture.md` with the module changes, then run the Condensation Subroutine (defined in `core/shared/condensation.md`) to regenerate `draft/.ai-context.md`
 - Track-scoped: `draft/tracks/<id>/architecture.md`
 
-**Contents:**
-- Overview section (what the system/feature does, inputs, outputs, constraints)
+### Step 5a: HLD Generation (Track-Scoped, Always)
+
+For track-scoped decomposition, populate these HLD sections in the track-architecture template — do not leave placeholders:
+
+1. **§1 Overview** — pull from `spec.md` (Problem Statement, Technical Approach, Non-Functional Requirements). Name integration points from `draft/.ai-context.md`.
+2. **§2 Module Breakdown** — one block per module from Step 3, including status (`New` / `Modified` / `Existing`), responsibility, files, API surface, deps, complexity.
+3. **§3.1 Component Diagram** — Mermaid `flowchart TD` with three subgraphs: modules in scope, existing system modules this track touches, external collaborators (DB, queue, third-party API). Label edges with transport type when non-obvious.
+4. **§3.2 Data Flow** — Mermaid `flowchart LR` tracing the primary data transformation: input → validation → logic → persistence → output. Add a separate read-path diagram if the track has both.
+5. **§3.3 Sequence Diagrams** — one `sequenceDiagram` per acceptance criterion that crosses more than one module. Include at minimum: (a) the happy-path flow, (b) one error/failure path. Annotate gates and invariants with `Note over`.
+6. **§3.4 State Machine** — Mermaid `stateDiagram-v2` only if the track introduces or mutates stateful entities. Omit the section when not applicable — do not emit empty diagrams.
+7. **§4 Dependency Analysis** — from Step 4. ASCII graph + table with a `Cycle?` column.
+8. **§5 Implementation Order** — from Step 4 (topological sort + parallel opportunities).
+
+### Contents (common to both templates)
+
 - Module definitions with all fields from Step 3
 - Dependency diagram from Step 4
 - Dependency table from Step 4
@@ -238,6 +276,27 @@ Write the architecture document using the template from `core/templates/architec
 - Story placeholder per module (see `core/agents/architect.md` Story Lifecycle for how this gets populated during `/draft:implement`)
 - Status marker per module (`[ ] Not Started`)
 - Notes section for architecture decisions
+
+### Step 5b: LLD Generation (Gated)
+
+**Trigger:** `--lld` flag was passed in Step 1 **OR** any module in §2 has `Complexity: High`.
+
+**Skip condition:** None of the above. Leave §6 with the stub: _"LLD not generated. Run `/draft:decompose --lld` to expand."_
+
+When triggered, populate §6 of the track-architecture template. Refer to `core/agents/architect.md` for contract-design conventions.
+
+- **§6.1 Per-Module API Contracts** — for every module marked `New` or `Modified`, list every public function/method with: language-appropriate signature, param constraints, return shape, error types. Document preconditions, postconditions, and invariants (thread safety, idempotency, ordering).
+- **§6.2 Data Models & Schemas** — concrete type definitions for every new/modified entity. Fill the field table (type, nullability, default, validation). Include storage location, indexes/keys, and schema-migration path if this is a breaking change.
+- **§6.3 Error Handling & Retry Semantics** — one row per operation with non-trivial error handling. Classify each error (transient / permanent / timeout), specify retry policy, backoff, max attempts, fallback. Call out circuit-breaker thresholds and idempotency keys.
+- **§6.4 Algorithm Pseudocode** — include only for genuinely non-trivial logic. Skip for straightforward CRUD. Declare inputs, outputs, time/space complexity. Enumerate edge cases.
+
+### CHECKPOINT (MANDATORY)
+
+**STOP.** Present the generated `track-architecture.md` to the developer. Call out:
+- Which sections were populated vs. omitted (and why — e.g., "no state machine — track is stateless")
+- Whether LLD was generated, and the trigger (`--lld` flag or auto-triggered by High-complexity module X)
+
+**Wait for developer approval before proceeding to Step 6.**
 
 ## Step 6: Update Plan (Track-Scoped Only)
 
@@ -336,12 +395,37 @@ When revisiting decomposition (running `/draft:decompose` on an existing `.ai-co
 3. Follow the same checkpoint process for changes
 4. Update the document, preserving completed module statuses and stories
 
+---
+
 ## Cross-Skill Dispatch
 
-- **Suggested by:** `/draft:new-track` (large feature tracks)
-- **At completion, suggests:**
-  - "Run `/draft:testing-strategy` to design test plans for decomposed modules"
-  - "Run `/draft:documentation api` to document new module APIs"
-  - If design decisions were made: "Run `/draft:adr` to record the decomposition rationale"
-- **Dependency cycle detection:** If decomposition reveals dependency cycles or high coupling, suggest: "Run `/draft:tech-debt` to catalog and prioritize the coupling issues"
-- **ADR auto-invocation:** When decomposition involves breaking a monolith or major architectural boundary change, auto-invoke `/draft:adr` to record the decision
+### After Module Decomposition
+
+After defining module boundaries and interfaces:
+
+```
+"Decomposition complete. Consider:
+
+Testing:
+  → /draft:testing-strategy — Define per-module test boundaries and integration test strategy
+
+Documentation:
+  → /draft:documentation api <module> — Document public module interfaces
+
+Architecture:
+  → /draft:adr "Module boundary decisions for {project}" — Record decomposition rationale"
+```
+
+### Dependency Cycle Detection
+
+If dependency analysis (Step 4) detects cycles or high coupling:
+```
+"Detected dependency cycles / high coupling. Consider:
+  → /draft:tech-debt — Catalog architecture debt and prioritize remediation"
+```
+
+### ADR Auto-Invocation
+
+When decomposition involves breaking a monolith, choosing module boundaries, or extracting services:
+- Auto-invoke: "This decomposition is a significant architectural decision. Creating ADR to document rationale."
+- Invoke `/draft:adr "Module boundary decisions for {project}"`

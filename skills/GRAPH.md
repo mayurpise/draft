@@ -1,6 +1,6 @@
 # Skill Dependency Graph
 
-> Reference artifact mapping relationships between all 28 Draft skills. Not a skill itself.
+> Reference artifact mapping relationships between all Draft skills. Not a skill itself.
 > Regenerate after adding/removing skills or changing cross-skill references.
 
 ---
@@ -14,7 +14,7 @@ init → new-track → implement → review
                        └───────────┘  (auto-invoked at phase boundaries)
 ```
 
-### Specialist Commands (24 commands)
+### Specialist Commands
 Grouped into subsystems that primary commands auto-invoke or that users invoke directly.
 
 ---
@@ -54,6 +54,7 @@ graph TD
         adr["/draft:adr"]
         index["/draft:index"]
         tech-debt["/draft:tech-debt"]
+        impact["/draft:impact"]
     end
 
     subgraph "Operations"
@@ -71,9 +72,8 @@ graph TD
         jira-create["/draft:jira-create"]
     end
 
-    subgraph "Developer Experience"
+    subgraph "DX"
         assist-review["/draft:assist-review"]
-        impact["/draft:impact"]
         tour["/draft:tour"]
     end
 
@@ -111,9 +111,6 @@ graph TD
     implement --> debug
     implement -.->|calls Condensation Subroutine| init
 
-    %% Debugging flow
-    debug -.->|fix feeds| implement
-
     %% Quality chain
     review -.->|with-bughunt flag| bughunt
     review -.->|fast alternative| quick-review
@@ -143,12 +140,8 @@ graph TD
 
     %% Architecture chain
     tech-debt -.->|prioritized items feed| new-track
-
-    %% Developer Experience chain
-    new-track --> assist-review
-    review -.->|human reviewer aid| assist-review
-    implement -.->|metrics feed| impact
-    init --> tour
+    impact -.->|reads graph| new-track
+    impact -.->|reads graph| implement
 
     %% Monorepo chain
     init -.->|per-service| index
@@ -158,7 +151,7 @@ graph TD
 
 | Skill | Requires | Required By | Shared Artifacts |
 |-------|----------|-------------|-----------------|
-| `init` | -- | all others | architecture.md, .ai-context.md, product.md, tech-stack.md, guardrails.md, .state/* |
+| `init` | -- | all others | architecture.md, .ai-context.md, .ai-profile.md, product.md, tech-stack.md, guardrails.md, .state/* |
 | `new-track` | init | implement, review, change, revert, coverage, decompose, jira-preview, status, debug | spec.md, plan.md, metadata.json |
 | `implement` | init, new-track | review (triggers at phase boundaries) | Modifies source code; regenerates .ai-context.md |
 | `review` | init, new-track | implement (called at phase boundaries) | review-report-latest.md |
@@ -174,40 +167,41 @@ graph TD
 | `status` | init | standup (reads) | Read-only (tracks.md, plan.md, metadata.json) |
 | `learn` | init | -- | Updates guardrails.md (conventions, anti-patterns) |
 | `adr` | init | deep-review (suggests) | Creates ADR files in draft/adrs/ |
-| `tech-debt` | init | deep-review (suggests), new-track (feeds prioritized items) | draft/tech-debt-report.md |
+| `tech-debt` | init | deep-review (suggests), new-track (feeds prioritized items) | draft/tech-debt-report-latest.md |
+| `impact` | init, graph | new-track, implement | Reads graph; emits blast-radius reports |
 | `deploy-checklist` | init | -- | deploy-checklist.md |
-| `incident-response` | init | -- | incident-timeline.md, post-incident report |
+| `incident-response` | init | -- | incident-<timestamp>.md, postmortem-<timestamp>.md |
 | `standup` | init | -- | standup summary (reads status, git log) |
 | `documentation` | init | deep-review (suggests), incident-response (feeds) | Generated docs, runbooks |
 | `index` | init (per-service) | -- | service-index.md, dependency-graph.md, tech-matrix.md |
 | `jira-preview` | new-track | jira-create | jira-export-latest.md |
 | `jira-create` | jira-preview | -- | Creates Jira issues via API |
-| `assist-review` | init, new-track | review (human reviewer aid) | PR risk audit for human reviewers |
-| `impact` | init | -- | ROI analytics, friction metrics, timeline analysis |
-| `tour` | init | -- | Interactive architecture walk-through |
+| `assist-review` | init | -- | Inline PR review assistance |
+| `tour` | init | -- | Read-only architecture walk |
 | `draft` | -- | -- | Navigation only -- references all skills |
 
 ## Execution Chains
 
 ### Standard Development Flow
 ```
-init → new-track → implement → review → (done)
+init → new-track → implement → review → (git push + PR)
                        ↑           |
-                       └───────────┘  (iterate at phase boundaries)
+                       └───────────┘
+                    (iterate at phase boundaries)
 ```
 
 ### Bug Fix Flow
 ```
-new-track (bug) → debug → implement → review → (done)
-                    ↑          |
-                    └──────────┘ (iterate if fix incomplete)
+new-track (bug) → debug → implement → review
+                    ↑                      |
+                    └──────────────────────┘ (iterate if fix incomplete)
 ```
 
 ### Incident Response Flow
 ```
-incident-response → debug → implement → review → (done)
-        |                                   |
-        └→ documentation (post-incident)    └→ deploy-checklist (auto)
+incident-response → debug → implement → review
+        |
+        └→ documentation (post-incident report)
 ```
 
 ### Operations Flow
@@ -250,7 +244,7 @@ init → learn → (updates guardrails.md)
 
 | Subroutine | Defined In | Called By |
 |------------|-----------|----------|
-| Condensation Subroutine (.ai-context.md regeneration) | `init` | implement, decompose, coverage, index |
+| Condensation Subroutine (.ai-context.md regeneration) | `core/shared/condensation.md` | implement, decompose, coverage, index |
 | Standard File Metadata (YAML frontmatter) | `init` | All skills that generate draft/ files |
 | Three-Stage Review | `review` | implement (at phase boundaries) |
 | Signal Classification | `init` | init refresh, index (future) |
@@ -258,6 +252,8 @@ init → learn → (updates guardrails.md)
 | Context Loading | `core/shared/draft-context-loading.md` | All skills requiring draft/ context |
 | Cross-Skill Dispatch | `core/shared/cross-skill-dispatch.md` | bughunt, deep-review, implement, review |
 | Jira Sync | `core/shared/jira-sync.md` | bughunt, review, implement (when ticket linked) |
+| Graph Query | `core/shared/graph-query.md` | init, implement, bughunt, review, debug, decompose, index, impact |
+| Graph Mermaid | `graph/src/mermaid.js` | init (injects module-deps + proto-map into architecture.md) |
 
 ## Artifact Flow
 
@@ -272,6 +268,8 @@ init → learn → (updates guardrails.md)
   init ──────────►  │  architecture.md ──► .ai-context.md         │
                     │  product.md  tech-stack.md  guardrails.md   │
                     │  workflow.md  tracks.md  tech-debt.md       │
+                    │  graph/ (module-graph, hotspots, proto,      │
+                    │         module-deps.mermaid, proto-map..)   │
                     └──────────────────┬──────────────────────────┘
                                        │ read by all skills
            ┌───────────────────────────┼───────────────────────┐
@@ -286,20 +284,13 @@ init → learn → (updates guardrails.md)
          ▼                     ▼          ▼
     implement             jira-preview  debug
     ┌──────────┐          ┌──────────┐  ┌──────────┐
-    │  code    │          │export.md │  │session.md│
-    │ changes  │          └────┬─────┘  └────┬─────┘
-    └────┬─────┘               │             │
-         │                     ▼             ▼
-         ▼                jira-create   implement
-      review              ┌──────────┐  (fix feeds back)
+    │  code    │          │export.md │  │report.md │
+    │ changes  │          └────┬─────┘  └──────────┘
+    └────┬─────┘               │
+         │                     ▼
+         ▼                jira-create
+      review              ┌──────────┐
     ┌──────────┐          │Jira API  │
     │report.md │          └──────────┘
-    └────┬─────┘
-         │
-         ▼
-      deploy-checklist
-    ┌──────────────┐
-    │pre-flight    │
-    │verification  │
-    └──────────────┘
+    └──────────┘
 ```

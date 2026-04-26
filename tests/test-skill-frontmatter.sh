@@ -2,10 +2,10 @@
 # Test suite for SKILL.md frontmatter and body format validation
 #
 # What this tests:
-# - Build script rejects skills with missing YAML frontmatter delimiters
-# - Build script rejects skills with missing 'name:' field
-# - Build script rejects skills with missing 'description:' field
-# - Build script rejects skills with invalid body format (must be: blank, # Title, blank)
+# - Rejects skills with missing YAML frontmatter delimiters
+# - Rejects skills with missing 'name:' field
+# - Rejects skills with missing 'description:' field
+# - Rejects skills with invalid body format (must be: blank, # Title, blank)
 # - All real skills pass frontmatter validation
 #
 # Usage:
@@ -14,7 +14,6 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-BUILD_SCRIPT="$ROOT_DIR/scripts/build-integrations.sh"
 SKILLS_DIR="$ROOT_DIR/skills"
 TMPDIR_BASE="$(mktemp -d)"
 
@@ -25,48 +24,39 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Helper: create a temporary skill directory with given SKILL.md content,
-# patch SKILL_ORDER to only include this skill, and run the build.
-# Returns 0 if build succeeds, 1 if it fails.
-run_build_with_skill() {
-    local skill_name="$1"
-    local skill_content="$2"
-    local tmpdir="$TMPDIR_BASE/$skill_name"
-    mkdir -p "$tmpdir/skills/$skill_name"
-    mkdir -p "$tmpdir/integrations/copilot/.github"
-    mkdir -p "$tmpdir/integrations/gemini"
-    mkdir -p "$tmpdir/core/templates"
-    mkdir -p "$tmpdir/core/agents"
-
-    echo "$skill_content" > "$tmpdir/skills/$skill_name/SKILL.md"
-
-    # Create a minimal build script that tests just extract_body + validation
-    # by sourcing the relevant functions from the real build script
-    cat > "$tmpdir/test-runner.sh" << RUNNER
+# Create a single test-runner that sources the canonical lib.sh functions.
+# Used by both synthetic and real skill validation.
+RUNNER="$TMPDIR_BASE/test-runner.sh"
+cat > "$RUNNER" << RUNNER_SCRIPT
 #!/usr/bin/env bash
 set -euo pipefail
 
 SKILL_FILE="\$1"
 
-source "$SCRIPT_DIR/test-helpers.sh"
+source "$ROOT_DIR/scripts/lib.sh"
 
-# Run extract_body
-BODY=\$(extract_body "\$SKILL_FILE") || exit 1
+# Run extract_body (validates frontmatter: delimiters, name:, description:)
+extract_body "\$SKILL_FILE" > /dev/null || exit 1
 
-# Validate body format: line 1 blank, line 2 starts with #, line 3 blank
-line1=\$(echo "\$BODY" | sed -n '1p')
-line2=\$(echo "\$BODY" | sed -n '2p')
-line3=\$(echo "\$BODY" | sed -n '3p')
-if [[ -n "\$line1" ]] || [[ ! "\$line2" =~ ^#\  ]] || [[ -n "\$line3" ]]; then
-    echo "ERROR: Body format invalid" >&2
-    exit 1
-fi
+# Validate body format using canonical lib.sh function
+SKILL_NAME="\$(basename "\$(dirname "\$SKILL_FILE")")"
+validate_skill_body_format "\$SKILL_NAME" "\$SKILL_FILE" || exit 1
 
 echo "OK"
-RUNNER
-    chmod +x "$tmpdir/test-runner.sh"
+RUNNER_SCRIPT
+chmod +x "$RUNNER"
 
-    "$tmpdir/test-runner.sh" "$tmpdir/skills/$skill_name/SKILL.md" >/dev/null 2>/dev/null
+# Helper: create a temporary skill directory with given SKILL.md content
+# and run the canonical validation. Returns 0 if valid, 1 if invalid.
+run_build_with_skill() {
+    local skill_name="$1"
+    local skill_content="$2"
+    local tmpdir="$TMPDIR_BASE/$skill_name"
+    mkdir -p "$tmpdir/skills/$skill_name"
+
+    echo "$skill_content" > "$tmpdir/skills/$skill_name/SKILL.md"
+
+    "$RUNNER" "$tmpdir/skills/$skill_name/SKILL.md" >/dev/null 2>/dev/null
 }
 
 echo "=== SKILL.md frontmatter & body format tests ==="
@@ -182,25 +172,19 @@ assert "Accepts valid skill with correct frontmatter and body" \
 echo ""
 echo "## Real skill validation"
 ALL_REAL_PASS=true
-RUNNER="$TMPDIR_BASE/no-delimiters/test-runner.sh"
-if [[ ! -x "$RUNNER" ]]; then
-    echo "  FAIL: test-runner.sh was not created by earlier test — cannot validate real skills"
-    ALL_REAL_PASS=false
-else
-    for skill_dir in "$SKILLS_DIR"/*/; do
-        skill_name=$(basename "$skill_dir")
-        skill_file="$skill_dir/SKILL.md"
-        if [[ -f "$skill_file" ]]; then
-            if ! "$RUNNER" "$skill_file" > /dev/null 2>&1; then
-                echo "  FAIL: Real skill '$skill_name' failed validation"
-                ALL_REAL_PASS=false
-            fi
+for skill_dir in "$SKILLS_DIR"/*/; do
+    skill_name=$(basename "$skill_dir")
+    skill_file="$skill_dir/SKILL.md"
+    if [[ -f "$skill_file" ]]; then
+        if ! "$RUNNER" "$skill_file" > /dev/null 2>&1; then
+            echo "  FAIL: Real skill '$skill_name' failed validation"
+            ALL_REAL_PASS=false
         fi
-    done
-fi
+    fi
+done
 assert "All real skills (skills/*) pass frontmatter + body validation" "$ALL_REAL_PASS"
 
 # --- Summary ---
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="
-exit $FAIL
+exit "$FAIL"

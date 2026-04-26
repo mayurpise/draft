@@ -162,6 +162,7 @@
 
     <!-- Site CSS -->
     <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/redesign-v24.css">
     <link rel="stylesheet" href="../css/layout.css">
     <link rel="stylesheet" href="../css/components.css">
 
@@ -486,6 +487,9 @@
             margin: 0 0.4rem;
         }
     </style>
+    <script>
+    (function(){try{var t=localStorage.getItem('draft-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)t='dark';if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+    </script>
 </head>
 <body>
     <div id="cursor-glow" aria-hidden="true"></div>
@@ -736,5 +740,6 @@
             toggle.addEventListener('click', () => nav.classList.toggle('open'));
         }
     </script>
+    <script src="../js/theme-toggle.js"></script>
 </body>
 </html>

@@ -631,6 +631,156 @@
 }
 
 /* ─────────────────────────────────────────────
+   8b. DARK MODE — fix hardcoded white surfaces
+   ─────────────────────────────────────────────
+   Several legacy components use rgba(255,255,255,X) directly
+   instead of token variables, which produces opaque white slabs
+   on the dark canvas. Override each so they pick up the dark
+   surface tokens. Light-mode behavior is unchanged.
+*/
+[data-theme="dark"] .top-nav.scrolled {
+    background: rgba(13, 17, 22, 0.85);
+    border-bottom-color: var(--border);
+}
+[data-theme="dark"] .top-nav.open {
+    background: rgba(13, 17, 22, 0.97);
+    border-bottom-color: var(--border);
+}
+
+/* Glass cards: the most-used surface across the site */
+[data-theme="dark"] .glass-card {
+    background: rgba(22, 27, 36, 0.7);
+    border-color: var(--glass-border);
+}
+
+/* Install-section tabs (sticky tab bar) */
+[data-theme="dark"] .install-tab.active {
+    background: var(--bg-tertiary);
+    border-color: var(--border);
+}
+[data-theme="dark"] .install-tab:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* "Works with" platform pills row, etc. */
+[data-theme="dark"] .platform-pills,
+[data-theme="dark"] .arch-strip,
+[data-theme="dark"] .feature-pill-row,
+[data-theme="dark"] .install-summary {
+    background: rgba(22, 27, 36, 0.7);
+    backdrop-filter: blur(16px);
+    border-color: var(--glass-border);
+}
+
+/* v2.4 redesign cards explicitly use --bg-primary; verify the
+   token cascade reaches them — defensive override for clarity */
+[data-theme="dark"] .persona-card {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+}
+[data-theme="dark"] .persona-card:hover {
+    background: var(--bg-tertiary);
+}
+[data-theme="dark"] .vs-table-wrap {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+}
+[data-theme="dark"] .vs-table thead th,
+[data-theme="dark"] .vs-table th[scope="row"] {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-bottom-color: var(--border);
+}
+[data-theme="dark"] .vs-cell {
+    border-bottom-color: var(--border);
+    border-left-color: var(--border);
+}
+[data-theme="dark"] .playground {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+}
+[data-theme="dark"] .playground-tabs {
+    background: var(--bg-tertiary);
+    border-bottom-color: var(--border);
+}
+[data-theme="dark"] .playground-tab {
+    border-right-color: var(--border);
+    color: var(--text-secondary);
+}
+[data-theme="dark"] .playground-tab:hover {
+    background: rgba(163, 113, 247, 0.08);
+}
+[data-theme="dark"] .playground-tab.is-active {
+    background: var(--bg-secondary);
+}
+[data-theme="dark"] .playground-foot {
+    background: var(--bg-tertiary);
+    border-top-color: var(--border);
+}
+[data-theme="dark"] .hero-extras {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+}
+[data-theme="dark"] .hero-extra-divider {
+    background: var(--border);
+}
+[data-theme="dark"] .theme-toggle {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+}
+
+/* Stat strip dividers and labels readability */
+[data-theme="dark"] .hero-stat-divider {
+    background: var(--border);
+}
+[data-theme="dark"] .hero-stat-num {
+    color: var(--text-primary);
+}
+[data-theme="dark"] .hero-stat-label {
+    color: var(--text-muted);
+}
+
+/* Section glows are mostly fine but slightly stronger in dark */
+[data-theme="dark"] .section-glow {
+    opacity: 0.55;
+}
+
+/* Cmd cards (commands section) don't share .glass-card */
+[data-theme="dark"] .cmd-card {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+}
+[data-theme="dark"] .cmd-card:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--accent-violet);
+}
+
+/* Quote/blockquote surfaces */
+[data-theme="dark"] blockquote {
+    background: var(--bg-secondary);
+    border-left-color: var(--accent-violet);
+}
+
+/* Inputs, buttons that fall through to white */
+[data-theme="dark"] .btn-secondary,
+[data-theme="dark"] .btn-tertiary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--border);
+}
+[data-theme="dark"] .btn-secondary:hover,
+[data-theme="dark"] .btn-tertiary:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--accent-violet);
+    color: var(--text-primary);
+}
+
+/* Section labels (small caps tag above each section heading) */
+[data-theme="dark"] .section-label {
+    color: var(--accent-violet);
+}
+
+/* ─────────────────────────────────────────────
    9. HERO COMPRESSION OVERRIDES
    ───────────────────────────────────────────── */
 .hero-content {

@@ -27,7 +27,6 @@ If `draft/` directory exists, read and internalize these files in order:
 | 3 | `draft/product.md` | Product vision, user flows, requirements, **Guidelines** | — |
 | 4 | `draft/workflow.md` | Team conventions, testing preferences | — |
 | 5 | `draft/guardrails.md` | Hard guardrails, **Learned Conventions**, **Learned Anti-Patterns** | `draft/workflow.md` `## Guardrails` (legacy) |
-| — | `core/guardrails.md` *(plugin-inlined)* | C++ Hard Guardrails — always enforced for C++ code | — |
 
 ### Layer 1.5: Graph Context (When Available)
 
@@ -156,7 +155,7 @@ When `draft/.state/facts.json` exists, also load relevant facts:
 
 Patterns listed here are **intentional design decisions**. Do NOT flag these as bugs, issues, or violations. They represent deliberate trade-offs documented by the team.
 
-### Guardrails (`guardrails.md` + `core/guardrails.md`)
+### Guardrails (`draft/guardrails.md`)
 
 Project-level `draft/guardrails.md` has three sections with different enforcement behavior:
 

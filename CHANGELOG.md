@@ -8,6 +8,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Ongoing refinements to agent behavior protocols.
 
+## [2.4.0] - 2026-04-26
+
+### Added
+
+- **Knowledge graph engine** (`graph/`) — Pure Node.js + tree-sitter WASM. Indexes Go, Python, TypeScript/JS, C/C++, proto. ctags fallback for Java/Rust/Ruby/Swift/Kotlin/PHP/etc. CLI exposes 6 query modes:
+  - `--mode callers` — file-level (include graph) and function-level (call index) callers.
+  - `--mode impact` — transitive blast radius with depth grouping and **file-class dimension** (code/test/doc/config).
+  - `--mode hotspots` — complexity × fan-in ranking.
+  - `--mode modules` — inter-module dependency graph with hub detection.
+  - `--mode cycles` — circular dependency detection (iterative DFS, cycle-stable).
+  - `--mode mermaid` — module-deps and proto-map diagrams as fenced code blocks ready for embedding.
+- **Confidence markers on call edges** — every `*-call` JSONL record carries `confidence: direct | inferred`. Direct = bare-identifier callee (`foo()`, `Foo::bar()`); inferred = member/attribute/field call where the receiver collapses (`obj.foo()`). Skills weight findings accordingly.
+- **Atomic incremental graph builds** — per-module SHA-256 hashing in `hashes.json`. Output writes to a temp directory then renames into place; readers never see partial state.
+- **14 deterministic shell helpers** under `scripts/tools/`:
+  - `git-metadata.sh`, `parse-git-log.sh` — git introspection emitting JSON.
+  - `classify-files.sh` — language + category classification with broad ignore set (`.terraform`, `_build`, `.svelte-kit`, `.dart_tool`, `Pods`, `cdk.out`, `.turbo`, `.parcel-cache`, `.nuxt`, `.vercel`, `.pnpm-store`, plus the standard set).
+  - `hotspot-rank.sh`, `cycle-detect.sh`, `mermaid-from-graph.sh` — graph wrappers with graceful degradation.
+  - `freshness-check.sh`, `manage-symlinks.sh`, `parse-reports.sh`, `adr-index.sh`, `validate-frontmatter.sh`, `scan-markers.sh`, `detect-test-framework.sh`, `run-coverage.sh`.
+  - All emit JSON, follow uniform exit-code contract (0 = success, 1 = invocation error, 2 = upstream-data missing), degrade gracefully.
+- **Track-level impact memory** — `metadata.json` schema gains an `impact` block (`files_touched`, `modules_touched`, `downstream_files`, `downstream_modules`, `max_depth`, `by_category`, `computed_at`). Written by `/draft:implement` on phase complete; read by `/draft:new-track` to surface overlap warnings when a new track touches modules recently changed by a completed track.
+- **Shared procedures** — `core/shared/graph-query.md` (canonical graph CLI reference), `core/shared/parallel-analysis.md` (Map/Reduce IR-based parallel codebase analysis for large repos — ~60% wall-clock cut at XL tier).
+- **16 new tool tests** under `tests/test-tools-*.sh` plus a registry test (`tests/test-tools-registered.sh`) and a conventions test (`tests/test-tools-conventions.sh`).
+- **`make build` and `make lint` Makefile targets** — `make build` is an explicit alias for `make build-integrations`; `make lint` runs `scripts/lint.sh`.
+
+### Changed
+
+- **Methodology and skills refreshed** with deeper guidance and "Red Flags — STOP if you're..." preambles; `architecture.md` template expanded from 25 sections to 28 sections + 5 appendices.
+- **Build script** (`scripts/build-integrations.sh`) refactored to source shared definitions from `scripts/lib.sh` (`SKILL_ORDER`, `CORE_FILES`, `TOOLS`).
+- **Copilot syntax transform** hardened — kebab-case skill names only (no over-match for `<>`), email-shaped tokens (`foo@draft.com`) preserved, alternation delimiters fixed.
+- **TS module-edge resolution** in graph writer now resolves multi-segment relative imports (`../../shared/foo`) against the source file's directory rather than stripping a single `../`.
+- **JSON escape helper** in `scripts/tools/_lib.sh` now strips ASCII control characters so adversarial filenames can't produce invalid JSON.
+- **Glob exclude patterns** in graph engine now anchor to full-string match (`*.pem` no longer matches `foo.pem.txt`).
+- **`#draftXXX` TOC anchors** in `core/methodology.md` corrected (16 entries) to match actual `### /draft:X` heading slugs.
+
+### Fixed
+
+- **CI's `make build` invocation** — added the missing target so re-enabling auto-triggers won't fail with "No rule to make target 'build'".
+- **Duplicate `workflow_dispatch:` keys** in `.github/workflows/pages.yml` — would have failed `check-yaml`.
+- **`.h` C++ detection by substring** in graph engine — was triggering on any header containing `class ` (comments, identifiers, strings); now requires a real `class Name {`/`class Name :` pattern.
+- **Mermaid loader CRLF handling** — graph mermaid generator now tolerates Windows-edited JSONL.
+- **`.tsx` files with no TSX parser** — route straight to regex extractor instead of producing partial output through the TS parser.
+- **`/draft:` callers dispatch** — bare symbols ending in extension-like tokens (e.g. `Foo.cc`) no longer mis-route to file-callers mode.
+- **`parse-git-log.sh` scope match** — uses `BASH_REMATCH[0]` so unanchored patterns extract just the matched token, not the whole scope. `${var:N:-N}` substring syntax replaced for macOS Bash 3.2 compatibility.
+- **`validate-frontmatter.sh` CRLF handling** — opening `---` line and closing-marker check now tolerate `\r`.
+- **`detect-test-framework.sh` substring match** — vitest/jest/mocha detection now requires the `"name":` JSON dependency-key shape, no longer triggers on description text.
+- **Stale doc counts** — README, CLAUDE.md, methodology.md aligned with actual codebase: 28 skills, 38 core reference files, 20 templates.
+
+### Removed
+
+- Three company-specific skills (`upload`, `regression`, `epic-status`) and their cross-references — Draft is GitHub-first; users wanting bisect should use `git bisect` directly.
+- `core/guardrails.md` (company C++ systems-programming rules) and the C++ guardrails backfill paths in `learn`/`init` — six broken refs cleaned up.
+- All `cot` CLI / Gerrit branches in `core/shared/vcs-commands.md` — rewritten as git + GitHub conventions only.
+
 ## [2.3.0] - 2026-04-05
 
 ### Added

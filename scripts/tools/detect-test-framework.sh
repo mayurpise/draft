@@ -98,11 +98,13 @@ fi
 if [[ -f package.json ]]; then
     PKG_JSON="$(<package.json)"
     JS_FRAMEWORK=""
-    if [[ "$PKG_JSON" == *'"vitest"'* ]]; then
+    # Match dependency-key patterns only ("foo": "...") so that descriptions /
+    # keywords / titles containing the framework name don't yield false positives.
+    if echo "$PKG_JSON" | grep -qE '"vitest"[[:space:]]*:[[:space:]]*"'; then
         JS_FRAMEWORK="vitest"
-    elif [[ "$PKG_JSON" == *'"jest"'* ]]; then
+    elif echo "$PKG_JSON" | grep -qE '"jest"[[:space:]]*:[[:space:]]*"'; then
         JS_FRAMEWORK="jest"
-    elif [[ "$PKG_JSON" == *'"mocha"'* ]]; then
+    elif echo "$PKG_JSON" | grep -qE '"mocha"[[:space:]]*:[[:space:]]*"'; then
         JS_FRAMEWORK="mocha"
     fi
     if [[ -n "$JS_FRAMEWORK" ]]; then

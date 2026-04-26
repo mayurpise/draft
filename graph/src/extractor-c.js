@@ -56,7 +56,12 @@ async function buildCIndex(repo, excludeRes = [], allFiles = null) {
     catch (_) { continue; }
 
     const totalLines = countLinesFromContent(content);
-    const isCpp      = CPP_EXTS.has(ext) || (ext === '.h' && content.includes('class '));
+    // C++ detection: known C++ extensions, or a .h file containing a real class
+    // declaration. Use a word-boundary check anchored on `class` followed by an
+    // identifier and a class-body opener — avoids false positives from comments,
+    // strings, or identifiers like `class_t` / `subclass`.
+    const isCpp = CPP_EXTS.has(ext) ||
+      (ext === '.h' && /\bclass\s+\w+\s*[:{]/.test(content));
 
     if (isCpp && _parsers.cpp) {
       parseCTreeSitter(content, rel, module, totalLines, functions, types, calls, _parsers.cpp, 'cpp');

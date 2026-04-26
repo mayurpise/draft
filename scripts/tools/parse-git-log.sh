@@ -92,16 +92,20 @@ process_commit() {
     # Track ID detection
     track_id="null"
     if [[ -n "$SCOPE_PATTERN" && "$scope" != "null" ]]; then
-        scope_val="${scope:1:-1}"  # strip surrounding quotes
+        # Strip the surrounding JSON quotes the previous step added back.
+        scope_val="${scope#\"}"
+        scope_val="${scope_val%\"}"
         if [[ "$scope_val" =~ $SCOPE_PATTERN ]]; then
-            track_id="\"$(json_escape "$scope_val")\""
+            # Use the matched substring, not the whole scope, so unanchored
+            # patterns extract just the relevant token.
+            track_id="\"$(json_escape "${BASH_REMATCH[0]}")\""
         fi
     fi
     # Look for [TRACK-XXX] or (TRACK-XXX) tokens in subject
     if [[ "$track_id" == "null" ]]; then
         token="$(printf '%s' "$clean_subject" | grep -oE '[[(][A-Z]+-[0-9]+[])]' | head -1 || true)"
         if [[ -n "$token" ]]; then
-            inner="${token:1:-1}"
+            inner="${token:1:${#token}-2}"
             track_id="\"$(json_escape "$inner")\""
         fi
     fi

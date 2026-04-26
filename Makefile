@@ -1,4 +1,4 @@
-.PHONY: clean help test build-integrations
+.PHONY: clean help test build build-integrations lint
 .DEFAULT_GOAL := help
 
 TEST_SCRIPTS = \
@@ -32,7 +32,9 @@ TEST_SCRIPTS = \
 help: ## Show this help message
 	@echo "Available targets:"
 	@echo "  make test               - Run all tests"
+	@echo "  make build              - Build integrations (alias for build-integrations)"
 	@echo "  make build-integrations - Build Copilot instructions"
+	@echo "  make lint               - Run shellcheck + markdownlint"
 	@echo "  make clean              - Clean build artifacts"
 	@echo "  make help               - Show this message"
 
@@ -55,8 +57,13 @@ test: ## Run all tests
 		exit 1; \
 	fi
 
+build: build-integrations ## Build integrations (alias for build-integrations)
+
 build-integrations: ## Build Copilot copilot-instructions.md from skill sources
 	@./scripts/build-integrations.sh
+
+lint: ## Run shellcheck and markdownlint
+	@./scripts/lint.sh
 
 clean: ## Clean build artifacts
 	@rm -f integrations/copilot/.github/copilot-instructions.md

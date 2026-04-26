@@ -55,7 +55,7 @@
         "Security validation (OWASP Top 10)",
         "TDD workflow enforcement",
         "Jira integration",
-        "Epic qualification pipeline via MCP (Jira + Gerrit/GitHub/GitLab)",
+        "Knowledge graph engine with impact analysis and confidence-tagged call edges",
         "Git-aware rollback",
         "Incremental refresh with file-level freshness tracking",
         "Codebase signal detection (11 categories) for adaptive analysis",
@@ -77,7 +77,7 @@
           "name": "What is Draft?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Draft is a free, open-source plugin that adds Context-Driven Development to AI coding agents. It provides 25 commands covering spec-driven planning, TDD enforcement, 3-stage code review, 14-dimension bug hunting, and architecture discovery for Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Gemini."
+            "text": "Draft is a free, open-source plugin that adds Context-Driven Development to AI coding agents. It provides 28 commands covering spec-driven planning, TDD enforcement, 3-stage code review, 14-dimension bug hunting, and architecture discovery for Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Gemini."
           }
         },
         {
@@ -149,7 +149,7 @@
           "name": "Does Draft support Jira integration?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. /draft:jira-preview generates a Jira export file mapping tracks to epics, phases to stories, and tasks to sub-tasks with auto-generated story points. /draft:jira-create pushes these issues to Jira via MCP. Draft also supports epic qualification pipelines combining Jira, Gerrit, and GitHub data."
+            "text": "Yes. /draft:jira-preview generates a Jira export file mapping tracks to epics, phases to stories, and tasks to sub-tasks with auto-generated story points. /draft:jira-create pushes these issues to Jira via MCP."
           }
         }
       ]
@@ -367,7 +367,7 @@
                 <div class="glass-card init-phase">
                     <div class="init-phase-num init-phase-num--violet">5</div>
                     <h3>Synthesis</h3>
-                    <p>Cross-reference, completeness validation, pattern identification, Mermaid diagram generation. Produces <strong>architecture.md</strong> (25 sections + 4 appendices) and derives <strong>.ai-context.md</strong> (200-400 lines, token-optimized).</p>
+                    <p>Cross-reference, completeness validation, pattern identification, Mermaid diagram generation. Produces <strong>architecture.md</strong> (28 sections + 5 appendices) and derives <strong>.ai-context.md</strong> (200-400 lines, token-optimized).</p>
                 </div>
             </div>
 
@@ -455,9 +455,9 @@
                         <span class="bento-tag">5-Phase Analysis</span>
                     </div>
                     <h3>Architecture Discovery</h3>
-                    <p>Deep codebase analysis generating a comprehensive engineering reference with 25 sections, Mermaid diagrams, data state machines, and consistency boundaries. Derives a 200-400 line machine-optimized .ai-context.md for all AI agents. Classifies files into 11 signal categories for adaptive analysis depth.</p>
+                    <p>Deep codebase analysis generating a comprehensive engineering reference with 28 sections + 5 appendices, Mermaid diagrams, data state machines, and consistency boundaries. Derives a 200-400 line machine-optimized .ai-context.md for all AI agents. Classifies files into 11 signal categories for adaptive analysis depth.</p>
                     <div class="bento-stats">
-                        <span>25 sections</span><span>11 signals</span><span>Incremental refresh</span>
+                        <span>28 sections</span><span>11 signals</span><span>Incremental refresh</span>
                     </div>
                 </div>
 
@@ -537,6 +537,51 @@
                 </div>
 
                 <!-- Card 8: Enterprise Ready (full-width) -->
+                <!-- Card: Knowledge Graph Engine (wide) -->
+                <div class="glass-card bento-card bento-wide" data-accent="violet">
+                    <div class="bento-header">
+                        <div class="bento-icon bento-icon--violet">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="9" y1="6" x2="15" y2="6"/><line x1="6" y1="9" x2="6" y2="15"/><line x1="18" y1="9" x2="18" y2="15"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+                        </div>
+                        <span class="bento-tag">v2.4 &middot; Built-in</span>
+                    </div>
+                    <h3>Knowledge Graph Engine</h3>
+                    <p>Tree-sitter parsers for Go, Python, TS/JS, C/C++ &middot; ctags fallback for Java/Rust/Ruby/Swift. Six query modes &mdash; <strong>callers</strong>, <strong>impact</strong>, <strong>hotspots</strong>, <strong>modules</strong>, <strong>cycles</strong>, <strong>mermaid</strong>. Atomic incremental builds via per-module SHA-256 hashing. Call edges carry confidence markers (<code>direct</code> vs <code>inferred</code>); impact queries break results down by code/test/doc/config. Powers <code>/draft:impact</code>, enriches <code>/draft:bughunt</code> and <code>/draft:review</code>.</p>
+                    <div class="bento-stats">
+                        <span>9 languages</span><span>6 query modes</span><span>Atomic incremental</span><span>Confidence-tagged</span>
+                    </div>
+                </div>
+
+                <!-- Card: Track Impact Memory -->
+                <div class="glass-card bento-card" data-accent="amber">
+                    <div class="bento-header">
+                        <div class="bento-icon bento-icon--amber">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <span class="bento-tag">v2.4</span>
+                    </div>
+                    <h3>Track Impact Memory</h3>
+                    <p>Each completed track records its blast radius in <code>metadata.json</code> &mdash; files touched, modules affected, downstream count, by-category breakdown. <code>/draft:new-track</code> reads recent tracks' impact during context load and surfaces overlap warnings before you even write a spec.</p>
+                    <div class="bento-stats">
+                        <span>Auto-recorded</span><span>Overlap detection</span>
+                    </div>
+                </div>
+
+                <!-- Card: Deterministic Tools -->
+                <div class="glass-card bento-card" data-accent="emerald">
+                    <div class="bento-header">
+                        <div class="bento-icon bento-icon--emerald">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                        </div>
+                        <span class="bento-tag">14 helpers</span>
+                    </div>
+                    <h3>Deterministic Helpers</h3>
+                    <p>Skills delegate mechanical work to 14 shell tools under <code>scripts/tools/</code> &mdash; git metadata, file classification, hotspot ranking, cycle detection, freshness checks, ADR indexing, test-framework detection, and more. Uniform JSON output and exit-code contract; graceful degradation when input is missing.</p>
+                    <div class="bento-stats">
+                        <span>JSON contract</span><span>Reproducible</span>
+                    </div>
+                </div>
+
                 <div class="glass-card bento-card bento-full" data-accent="cyan">
                     <div class="bento-header">
                         <div class="bento-icon bento-icon--cyan">
@@ -891,7 +936,7 @@
                 <div class="dual-divider"></div>
                 <div class="glass-card dual-card">
                     <h4>architecture.md</h4>
-                    <p class="dual-meta">Human-readable &middot; 25 sections + appendices</p>
+                    <p class="dual-meta">Human-readable &middot; 28 sections + 5 appendices</p>
                     <p>Prose paragraphs, annotated Mermaid diagrams, onboarding framing. Source of truth — all mutations happen here. For engineers, leads, and PR reviewers.</p>
                 </div>
                 <div class="dual-divider"></div>
@@ -1091,7 +1136,7 @@
                 <details class="faq-item glass-card">
                     <summary class="faq-question">What is Draft?</summary>
                     <div class="faq-answer">
-                        <p>Draft is a free, open-source plugin that adds Context-Driven Development to AI coding agents. It provides 25 commands covering spec-driven planning, TDD enforcement, 3-stage code review, 14-dimension bug hunting, and architecture discovery for Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Gemini.</p>
+                        <p>Draft is a free, open-source plugin that adds Context-Driven Development to AI coding agents. It provides 28 commands covering spec-driven planning, TDD enforcement, 3-stage code review, 14-dimension bug hunting, and architecture discovery for Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Gemini.</p>
                     </div>
                 </details>
 
@@ -1154,7 +1199,7 @@
                 <details class="faq-item glass-card">
                     <summary class="faq-question">Does Draft support Jira integration?</summary>
                     <div class="faq-answer">
-                        <p>Yes. <code>/draft:jira-preview</code> generates a Jira export file mapping tracks to epics, phases to stories, and tasks to sub-tasks with auto-generated story points. <code>/draft:jira-create</code> pushes these issues to Jira via MCP. Draft also supports epic qualification pipelines combining Jira, Gerrit, and GitHub data.</p>
+                        <p>Yes. <code>/draft:jira-preview</code> generates a Jira export file mapping tracks to epics, phases to stories, and tasks to sub-tasks with auto-generated story points. <code>/draft:jira-create</code> pushes these issues to Jira via MCP.</p>
                     </div>
                 </details>
             </div>

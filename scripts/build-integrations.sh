@@ -108,13 +108,18 @@ get_copilot_trigger() {
 # ─────────────────────────────────────────────────────────
 
 transform_copilot_syntax() {
+    # Skill names are kebab-case: [a-z][a-z0-9-]*. Reject anything else so
+    # placeholder-laden examples like "/draft:<id>" or addresses like
+    # "foo@draft.com" don't get mangled. Use `#` as the sed delimiter so the
+    # alternations in `(^|...)` don't collide with `|`.
     sed -E \
-        -e 's|/draft:([a-z0-9<>-]+)|draft \1|g' \
-        -e 's|@draft([^a-z0-9_-])|draft\1|g' \
-        -e 's|@draft$|draft|g' \
-        -e 's|`@draft`|`draft`|g' \
-        -e 's|`@draft |`draft |g' \
-        -e 's#@(architect|debugger|planner|rca|reviewer|ops|writer)([^a-z0-9_-])#@workspace\2#g' \
+        -e 's#/draft:(<[a-z-]+>)#draft \1#g' \
+        -e 's#/draft:([a-z][a-z0-9-]*)#draft \1#g' \
+        -e 's#(^|[^[:alnum:]_.-])@draft([^[:alnum:]_.-])#\1draft\2#g' \
+        -e 's#(^|[^[:alnum:]_.-])@draft$#\1draft#g' \
+        -e 's#`@draft`#`draft`#g' \
+        -e 's#`@draft #`draft #g' \
+        -e 's#@(architect|debugger|planner|rca|reviewer|ops|writer)([^[:alnum:]_-])#@workspace\2#g' \
         -e 's#@(architect|debugger|planner|rca|reviewer|ops|writer)$#@workspace#g'
 }
 

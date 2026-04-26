@@ -144,7 +144,7 @@ When users run `/draft:init`, it creates a `draft/` directory in their project:
 
 ```
 draft/
-  architecture.md       — Source of truth: 25-section comprehensive engineering reference
+  architecture.md       — Source of truth: 28-section comprehensive engineering reference + 5 appendices
   .ai-context.md        — Token-optimized 200-400 line AI context (derived from architecture.md)
   .ai-profile.md        — Ultra-compact 20-50 line always-injected profile
   product.md            — Users, goals, success criteria, guidelines
@@ -155,14 +155,64 @@ draft/
     <track-id>/
       spec.md           — Acceptance criteria for this track
       plan.md           — Ordered phases with verification steps
-      metadata.json     — Track metadata and status
+      metadata.json     — Track metadata, status, and impact memory (files_touched,
+                          modules_touched, downstream_files, by_category)
   .state/
     freshness hashes    — File-level change detection for incremental refresh
     signal classification — Codebase signal detection across 11 categories
     run memory          — Cross-session continuity with resumable checkpoints
+  graph/                — Knowledge-graph output (when graph engine is run)
+    schema.yaml         — Build metadata + module list
+    module-graph.jsonl  — Inter-module dependency edges (always-load)
+    hotspots.jsonl      — Complexity x fan-in ranking (always-load)
+    proto-index.jsonl   — Proto services, RPCs, messages, enums
+    *-index.jsonl       — Per-language indexes (go, python, ts, c)
+    call-index.jsonl    — Intra-file call edges (with confidence: direct|inferred)
+    modules/<name>.jsonl — Per-module file graph
 ```
 
 Status markers in tracks: `[ ]` Pending, `[~]` In Progress, `[x]` Completed, `[!]` Blocked.
+
+## Knowledge Graph Engine
+
+Draft ships a built-in graph engine (`graph/`) — pure Node.js + tree-sitter WASM, no daemon, no external service. Languages: Go, Python, TypeScript/JS, C/C++, proto (tree-sitter); Java, Rust, Ruby, Swift, Kotlin, PHP (universal-ctags fallback).
+
+CLI:
+
+```
+graph --repo <path>                     # Build graph from scratch
+graph --repo <path> --incremental       # Skip unchanged modules (per-module SHA-256)
+graph --repo <path> --query --mode <m>  # Query existing graph
+
+# Query modes
+graph --query --file src/auth/login.go --mode callers     # Who depends on this file
+graph --query --symbol buildIndex      --mode callers     # Who calls this function
+graph --query --file src/auth/login.go --mode impact      # Blast radius (with by_category)
+graph --query --mode hotspots                              # Top complexity files
+graph --query --mode modules                               # Inter-module dependency graph
+graph --query --mode cycles                                # Circular dependencies
+graph --query --mode mermaid                               # Module-deps + proto-map diagrams
+```
+
+Each call edge in the call-index carries a confidence marker: `direct` (bare-identifier callee) or `inferred` (member call where the receiver collapses). Skills weight findings accordingly.
+
+## Deterministic Helper Tools
+
+Skills delegate mechanical work to 14 shell helpers under `scripts/tools/`:
+
+- `git-metadata.sh`, `parse-git-log.sh` — git introspection
+- `classify-files.sh` — language + category (code/test/doc/config) classification
+- `hotspot-rank.sh`, `cycle-detect.sh`, `mermaid-from-graph.sh` — graph wrappers
+- `freshness-check.sh` — file-hash freshness verification
+- `manage-symlinks.sh` — keep `*-latest.md` symlinks pointing at the newest report
+- `parse-reports.sh` — extract structured findings from skill reports
+- `adr-index.sh` — index ADR files
+- `validate-frontmatter.sh` — YAML frontmatter validation
+- `scan-markers.sh` — TODO/FIXME/HACK marker scanning
+- `detect-test-framework.sh` — auto-detect Jest, Vitest, pytest, go test, etc.
+- `run-coverage.sh` — language-aware coverage runner
+
+All emit JSON, follow uniform exit-code contract (0 = success, 1 = invocation error, 2 = upstream-data missing), degrade gracefully.
 
 ## Key Differentiators
 
@@ -173,6 +223,8 @@ Status markers in tracks: `[ ]` Pending, `[~]` In Progress, `[x]` Completed, `[!
 - **Platform-agnostic:** Same methodology across Claude Code, Cursor, Copilot, Gemini, Antigravity IDE
 - **TDD enforcement:** RED → GREEN → REFACTOR cycle with verification
 - **14-dimension bug hunting:** Exhaustive defect discovery beyond simple linting
+- **Built-in code intelligence:** Knowledge graph engine + 14 deterministic helpers — no external services required
+- **Track impact memory:** Each completed track records its blast radius; new tracks get overlap warnings during context load
 - **ACID compliance audits:** Enterprise-grade module lifecycle reviews
 - **7 specialized agents:** Purpose-built behaviors for architecture, debugging, planning, review, RCA, operations, and documentation
 - **Pattern learning:** Auto-discovers coding conventions and updates guardrails

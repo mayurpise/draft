@@ -206,12 +206,47 @@
     <!-- Changelog entries -->
     <main class="changelog-content">
 
+        <!-- v2.4 -->
+        <article class="changelog-entry">
+            <div class="changelog-entry-header">
+                <span class="changelog-version">v2.4</span>
+                <span class="changelog-date">2026-04-26</span>
+                <span class="changelog-tag changelog-tag--latest">Latest</span>
+            </div>
+            <div class="changelog-category">Code Intelligence</div>
+            <ul class="changelog-changes">
+                <li><strong>Knowledge graph engine</strong> &mdash; tree-sitter parsers for Go, Python, TS/JS, C/C++ + ctags fallback for Java/Rust/Ruby/Swift. Six query modes: callers, impact, hotspots, modules, cycles, mermaid.</li>
+                <li><strong>Confidence-tagged call edges</strong> &mdash; every call edge marked <code>direct</code> (bare identifier) or <code>inferred</code> (member call) so review/bughunt can weight findings.</li>
+                <li><strong>Atomic incremental builds</strong> via per-module SHA-256 hashing &mdash; only changed modules re-extract.</li>
+                <li><strong>Track impact memory</strong> in <code>metadata.json</code> &mdash; each completed track records files touched, modules affected, downstream count, by-category breakdown. <code>/draft:new-track</code> surfaces overlap warnings during context load.</li>
+            </ul>
+            <div class="changelog-category">Tooling</div>
+            <ul class="changelog-changes">
+                <li><strong>14 deterministic shell helpers</strong> under <code>scripts/tools/</code> &mdash; git metadata, file classification, hotspot ranking, cycle detection, freshness checks, ADR indexing, test-framework detection, more. Uniform JSON output and exit-code contract; graceful degradation.</li>
+                <li><strong>16 new tool tests</strong> bringing the suite to 25 total.</li>
+                <li><code>make build</code> and <code>make lint</code> Makefile targets added.</li>
+            </ul>
+            <div class="changelog-category">Methodology</div>
+            <ul class="changelog-changes">
+                <li>Refreshed all 28 skills with deeper guidance and "Red Flags &mdash; STOP if you're..." preambles.</li>
+                <li><code>architecture.md</code> template expanded from 25 sections to <strong>28 sections + 5 appendices</strong> with tier-based output minimums for large codebases.</li>
+                <li>New shared procedures: <code>graph-query.md</code>, <code>parallel-analysis.md</code> (Map/Reduce IR &mdash; ~60% wall-clock cut at XL tier).</li>
+            </ul>
+            <div class="changelog-category">Fixes</div>
+            <ul class="changelog-changes">
+                <li>Hardened Copilot syntax transform: kebab-case skill names only, email-shaped tokens preserved.</li>
+                <li>TS module-edge resolution correctly resolves multi-segment relative imports.</li>
+                <li>JSON escape helper strips ASCII control characters.</li>
+                <li>Glob exclude patterns anchored to full-string match.</li>
+                <li>16 stale TOC anchors fixed in methodology.md.</li>
+            </ul>
+        </article>
+
         <!-- v1.2 -->
         <article class="changelog-entry">
             <div class="changelog-entry-header">
                 <span class="changelog-version">v1.2</span>
                 <span class="changelog-date">2026-04-05</span>
-                <span class="changelog-tag changelog-tag--latest">Latest</span>
             </div>
             <div class="changelog-category">Book &amp; Audiobook</div>
             <ul class="changelog-changes">
@@ -271,7 +306,7 @@
             </ul>
             <div class="changelog-category">Build Pipeline</div>
             <ul class="changelog-changes">
-                <li>Build script processing 25 skills with YAML frontmatter validation</li>
+                <li>Build script processing 28 skills with YAML frontmatter validation</li>
                 <li>Syntax transforms for platform-specific integration files</li>
                 <li>10 test suites with custom bash test framework</li>
             </ul>

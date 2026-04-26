@@ -53,6 +53,7 @@
     </noscript>
 
     <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/redesign-v24.css">
     <link rel="stylesheet" href="../css/layout.css">
     <link rel="stylesheet" href="../css/components.css">
 
@@ -174,6 +175,9 @@
             }
         }
     </style>
+    <script>
+    (function(){try{var t=localStorage.getItem('draft-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)t='dark';if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+    </script>
 </head>
 <body>
     <!-- Top navigation -->
@@ -371,5 +375,6 @@
         // Apply on load
         if (window.scrollY > 20) topNav.classList.add('scrolled');
     </script>
+    <script src="../js/theme-toggle.js"></script>
 </body>
 </html>

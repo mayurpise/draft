@@ -216,19 +216,74 @@ See `core/agents/architect.md` for execution state and skeleton guidelines.
 
 ### Step 3.0c: Production Robustness Patterns (REQUIRED)
 
-**Applies to all code generation** — architecture mode or not. Apply these patterns **while writing code**, not after.
+**Applies to all code generation** — architecture mode or not. These patterns are generation directives, not a post-hoc checklist. Apply them **while writing code**, not after.
 
-Apply the relevant pattern when your implementation hits any of these categories. Skip categories that are N/A for the current task:
+When your implementation hits any of these triggers, use the corresponding pattern. Do not write code that violates these and plan to "fix it later."
 
-- **Atomicity** — Transactions/rollback for multi-step mutations, temp-file+rename for file writes, DB-first for paired DB+memory updates, finally/defer/RAII for resource cleanup
-- **Isolation** — Lock before mutating shared state, separate lifecycle locks from data locks, return copies not mutable references, never nest locks without documented ordering
-- **Durability** — Critical state recoverable from DB/disk alone, await all DB writes (no fire-and-forget), append-only for audit trails
-- **Defensive Boundaries** — Guard external numeric data with isFinite/isnan, validate API response fields before access, parameterized SQL only, allowlist dynamic SQL identifiers
-- **Idempotency** — Dedup keys for retryable operations, validate state transitions are legal, dedup alert emissions
-- **Fail-Closed** — Default to deny/restrictive on errors, treat missing data as deny, use restrictive defaults for missing config
-- **Resilience** — Exponential backoff with jitter for retries, cache stampede prevention, circuit breakers for external calls, graceful degradation for non-critical deps
+#### Atomicity
 
-**If project invariants were loaded in Step 1:** Project-specific invariants take precedence over these general patterns when they conflict.
+| Trigger | Required Pattern |
+|---------|-----------------|
+| Multi-step state mutation (DB + memory, multiple records) | Wrap in transaction or try/finally with rollback on failure |
+| File write | Write to temp file + atomic rename to target path. Never write directly to the target. |
+| DB write paired with in-memory state update | DB-first: persist to DB, update memory only on DB success. Never update memory optimistically. |
+| Resource acquisition (locks, file handles, connections, capital) | Release in `finally` / `defer` / RAII — never rely on happy-path-only cleanup |
+
+#### Isolation
+
+| Trigger | Required Pattern |
+|---------|-----------------|
+| Method mutates shared/instance state | Acquire the class's or module's existing lock before mutation |
+| Lifecycle operations (start/stop/reset/reconnect) | Use a dedicated lifecycle lock, separate from data locks |
+| Returning internal state to callers | Return a deep copy or frozen snapshot — never a mutable reference to internal state |
+| Acquiring a second lock while holding one | Follow documented lock ordering. If no ordering exists, do not nest locks — restructure to acquire sequentially. |
+| DB I/O while holding a state lock | Move DB I/O outside the lock scope. Lock only the in-memory mutation, not the I/O. |
+
+#### Durability
+
+| Trigger | Required Pattern |
+|---------|-----------------|
+| Critical state that must survive crashes | Ensure state is recoverable from DB/disk alone — no reliance on in-memory-only state for recovery |
+| Async DB write (fire-and-forget) | Await the write. Check return value or propagate exceptions. No fire-and-forget on data persistence. |
+| Event log / audit trail / fill history | Use append-only pattern where specified by architecture |
+
+#### Defensive Boundaries
+
+| Trigger | Required Pattern |
+|---------|-----------------|
+| External numeric data used in arithmetic | Guard with `isFinite()` / `isnan()` / equivalent before any calculation |
+| External API/webhook response consumed | Validate expected fields exist and have correct types before accessing nested properties |
+| SQL query with dynamic values | Parameterized queries only — zero string interpolation for values |
+| Dynamic column names, table names, or identifiers in SQL | Validate against an explicit allowlist — never pass user-controlled strings as identifiers |
+
+#### Idempotency
+
+| Trigger | Required Pattern |
+|---------|-----------------|
+| Operation that may be retried (network calls, queue consumers, webhook handlers) | Use a dedup key (UUID, request ID, fill ID) — check-before-write or upsert |
+| State transition (status changes, lifecycle events) | Validate the transition is legal from the current state. Reject terminal→terminal transitions. |
+| Alert / notification emission | Dedup on (alert_type, entity_id, time_window) to prevent re-firing on retries |
+
+#### Fail-Closed
+
+| Trigger | Required Pattern |
+|---------|-----------------|
+| Error path or exception handler that determines access/action | Default to the safe/restrictive/deny state — never default to permissive on error |
+| Missing data, null, or undefined where a decision depends on it | Treat as deny/reject/skip — not as allow/proceed |
+| Config or feature flag missing/unparseable | Use the restrictive default — system runs in safe mode, not open mode |
+
+#### Resilience
+
+| Trigger | Required Pattern |
+|---------|-----------------|
+| Any retry logic | Exponential backoff with jitter — never fixed-interval or immediate retries. Prevents retry storms. |
+| Cache population under high concurrency | Cache stampede prevention: use probabilistic early expiration or request coalescing to prevent thundering herd |
+| External dependency call (HTTP, RPC, DB to external service) | Circuit breaker pattern: track failure rate, open circuit on threshold, allow periodic probes to recover |
+| Non-critical dependency failure | Graceful degradation: return cached/default/partial result rather than failing the entire request |
+
+**Enforcement:** These patterns override convenience. If following a pattern makes the code more verbose, that's correct — the verbosity is the safety. If a pattern is genuinely N/A for the current task (e.g., no DB in a pure utility function), skip it — only apply relevant patterns.
+
+**If project invariants were loaded in Step 1:** Cross-reference them here. Project-specific invariants (lock ordering, concurrency model, consistency boundaries) take precedence over these general patterns when they conflict.
 
 ---
 

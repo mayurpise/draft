@@ -1,10 +1,10 @@
 # Draft
 
-> Free, open-source Context-Driven Development plugin for AI coding agents.
+> Code intelligence built into your AI coding agent. Free, open-source, MIT.
 
-Draft is a methodology and plugin that structures AI coding agents around human decision-making. It enforces specifications before code, phased execution plans, TDD workflows, and three-stage code review — ensuring AI outputs remain aligned, predictable, and production-ready.
+Draft is a plugin that adds a knowledge graph engine, spec-driven planning, and a three-stage review pipeline to AI coding agents — so they stop guessing and start executing pre-approved work, grounded in real understanding of your codebase.
 
-Draft works with Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Google Gemini. It provides 28 slash commands, 7 specialized agents, 14-dimension bug hunting, ACID compliance audits, and a built-in **knowledge graph engine** (tree-sitter for Go/Python/TS/JS/C/C++ + ctags fallback) that powers blast-radius and impact analysis across the toolchain.
+Draft works with Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Google Gemini. It provides 28 slash commands, 7 specialized agents, 14-dimension bug hunting, ACID-style module audits, and a built-in **knowledge graph engine** (tree-sitter for Go/Python/TS/JS/C/C++, ctags fallback for Java/Rust/Ruby/Swift) with six query modes — callers, impact, hotspots, modules, cycles, mermaid.
 
 ## Installation
 

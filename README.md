@@ -113,7 +113,34 @@ curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integr
 | **`/draft:impact`** | ROI analytics tracking friction and timeline metrics |
 | **`/draft:assist-review`** | Summarize intent and highlight structural PR risks for reviewers |
 
-[See all 28 commands →](core/methodology.md#command-workflows)
+[See full command reference →](core/methodology.md#command-workflows)
+
+---
+
+## Built-in Code Intelligence
+
+Draft ships with a **knowledge graph engine** that gives every command precise structural context — module boundaries, call graphs, dependencies, hotspots — without you having to install or configure anything.
+
+```bash
+graph --repo . --query --file src/auth/login.go --mode impact
+# → blast radius: which files, which modules, which tests/docs/configs
+```
+
+| Capability | What it provides |
+|---|---|
+| **Multi-language extraction** | Tree-sitter parsers for Go, Python, TypeScript/JS, C/C++, proto + ctags fallback for Java/Rust/Ruby/Swift |
+| **Call graph with confidence** | Every call edge tagged `direct` (bare identifier) or `inferred` (member call) so review/bughunt can weight findings |
+| **Impact analysis** | Blast-radius BFS with file-class dimension (code/test/doc/config) — answers *"what breaks if I change this?"* |
+| **Cycle detection** | Iterative DFS — flags circular module dependencies before they bite |
+| **Hotspot ranking** | Complexity × fan-in score so high-risk files get extra scrutiny |
+| **Atomic incremental builds** | Per-module SHA-256 hashing; only changed modules re-extract |
+| **Track impact memory** | `metadata.json.impact` snapshots each completed track's blast radius — `/draft:new-track` flags overlap with recent work |
+
+The graph powers `/draft:impact`, enriches `/draft:bughunt` and `/draft:review`, and is consumed by skills via `core/shared/graph-query.md`. See [graph/](graph/) for the engine source.
+
+### Deterministic helper tools
+
+Skills also call into **14 shell helpers** under `scripts/tools/` for mechanical work — git metadata, file classification, test-framework detection, hotspot ranking, freshness checks, ADR indexing. All emit JSON, follow a uniform exit-code contract, and degrade gracefully when their input source is unavailable.
 
 ---
 
@@ -160,7 +187,7 @@ AI tools are fast but unstructured. Draft applies Context-Driven Development to 
 ```
 product.md       →  "Build a task manager"
 tech-stack.md    →  "React, TypeScript, Tailwind"
-architecture.md  →  Comprehensive: 25 sections + appendices, Mermaid diagrams (source of truth)
+architecture.md  →  Comprehensive: 28 sections + 5 appendices, Mermaid diagrams (source of truth)
 .ai-context.md   →  200-400 lines: condensed from architecture.md (token-optimized AI context)
 .state/          →  freshness hashes, signal classification, run memory (incremental refresh)
 spec.md          →  "Add drag-and-drop reordering"

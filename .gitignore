@@ -16,6 +16,14 @@ integrations/copilot/.github/copilot-instructions.md.*
 *.zip
 *.tar.gz
 
+# Claude Code session state
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+.claude/worktrees/
+.claude/tasks/
+.claude/teams/
+.claude/tasks.json
+
 # Dependencies
 node_modules/
 

@@ -6,21 +6,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Draft is a Claude Code plugin that implements Context-Driven Development methodology. It provides 28 slash commands organized in a two-tier architecture: 4 primary workflow commands (`/draft:init`, `/draft:new-track`, `/draft:implement`, `/draft:review`) with auto-invocation, plus 24 specialist commands for debugging (`/draft:debug`), operations (`/draft:deploy-checklist`, `/draft:incident-response`, `/draft:standup`), quality (`/draft:quick-review`, `/draft:testing-strategy`, `/draft:tech-debt`), authoring (`/draft:documentation`), DX (`/draft:assist-review`, `/draft:impact`, `/draft:tour`), and more (`/draft:status`, `/draft:revert`, `/draft:decompose`, `/draft:coverage`, `/draft:deep-review`, `/draft:bughunt`, `/draft:learn`, `/draft:adr`, `/draft:change`, `/draft:index`, `/draft:jira-preview`, `/draft:jira-create`). Run `/draft` for overview.
 
-The codebase is entirely markdown and bash — no application runtime. Skills (markdown files) are the source of truth, processed by a bash build script into platform-specific integration files for Copilot and Gemini.
+Draft also ships a **knowledge graph engine** under `graph/` (Node.js + tree-sitter WASM) and **14 deterministic shell helpers** under `scripts/tools/`. Skills are markdown (source of truth, processed by a bash build script into platform-specific integration files for Copilot and Gemini); the graph engine and shell helpers handle mechanical work that markdown can't.
 
 ## Build & Test Commands
 
 ```bash
-make build              # Generate integration files from skills (runs scripts/build-integrations.sh)
-make test               # Run all 10 test suites
-make lint               # Run shellcheck + markdownlint (requires shellcheck, markdownlint-cli)
+make build              # Generate integration files from skills
+make build-integrations # Same as above (explicit target)
+make test               # Run all 25 test suites (skills, build, tools)
+make lint               # Run shellcheck + markdownlint
+make clean              # Remove generated integrations
 
 # Run a single test
 ./tests/test-skill-frontmatter.sh
 ./tests/test-build-integrations.sh
+./tests/test-tools-classify-files.sh
 # etc. — any test in tests/ is independently executable
 
-# Prerequisites: Bash 4.0+, shellcheck, markdownlint-cli
+# Graph engine
+cd graph && npm install && node build.js   # Rebuild dist/bundle.cjs after src/ changes
+./graph/bin/graph --repo . --out draft/graph
+./graph/bin/graph --repo . --query --mode hotspots
+./graph/bin/graph --repo . --query --file <path> --mode impact
+
+# Prerequisites: Bash 4.0+, Node 18+, shellcheck, markdownlint-cli (lint only)
 ```
 
 Tests use a custom bash framework (`tests/test-helpers.sh`) with `assert()`, `pass()`, `fail()` helpers. No external test runner.
@@ -32,18 +41,20 @@ Tests use a custom bash framework (`tests/test-helpers.sh`) with `assert()`, `pa
 ```
 skills/<name>/SKILL.md  ──┐
 core/methodology.md       ├──→  scripts/build-integrations.sh  ──→  integrations/copilot/.github/copilot-instructions.md
-core/shared/*.md          │                                          (15,000+ lines, auto-generated)
-core/templates/*.md       ├──→  (Gemini now uses bootstrap .gemini.md — no longer generated)
+core/shared/*.md          │                                          (~21,000 lines, auto-generated)
+core/templates/*.md       ├──→  (Gemini uses bootstrap .gemini.md — no longer generated)
 core/agents/*.md          ──┘
 ```
 
-The build script (`scripts/build-integrations.sh`, ~700 lines) does:
-1. Reads each skill in `SKILL_ORDER` array order (28 skills, order matters)
+The build script (`scripts/build-integrations.sh`) reads `SKILL_ORDER`, `CORE_FILES`, and `TOOLS` from `scripts/lib.sh` (sourced) and:
+1. Iterates `SKILL_ORDER` (28 skills, order matters)
 2. Validates YAML frontmatter (`name:` and `description:` required)
-3. Extracts body via `extract_body()`, skipping frontmatter
-4. Applies syntax transforms (`/draft:command` → `draft command` for Copilot)
-5. Inlines 29 core reference files (methodology, shared procedures, templates, agents)
-6. Runs `verify_output()` — checks line count, completeness sentinel, syntax correctness
+3. Validates body format: blank, `# Title`, blank, then content
+4. Extracts body via `extract_body()`, skipping frontmatter
+5. Applies syntax transforms (`/draft:command` → `draft command`; `@architect`, `@debugger`, etc. → `@workspace` for Copilot)
+6. Inlines 38 core reference files (methodology, shared procedures, templates, agents)
+7. Writes atomically to a temp file then renames into place
+8. Runs `verify_output()` — line count, completeness, syntax
 
 ### Source of Truth Hierarchy
 
@@ -53,10 +64,13 @@ The build script (`scripts/build-integrations.sh`, ~700 lines) does:
 
 ### Key Directories
 
-- **`core/shared/`** — Shared procedures loaded by skills (context loading, git metadata, pattern learning, cross-skill dispatch, Jira sync)
+- **`core/shared/`** — Shared procedures loaded by skills (context loading, git metadata, pattern learning, cross-skill dispatch, Jira sync, **graph queries**, **parallel analysis**, VCS commands)
 - **`core/agents/`** — Behavioral protocols for specialized agents (architect, debugger, planner, rca, reviewer, ops, writer)
-- **`core/templates/`** — 18 templates for files that `/draft:init` generates in user projects
-- **`web/`** — Static website deployed to GitHub Pages (`getdraft.dev`), deployed via `.github/workflows/pages.yml`
+- **`core/templates/`** — 20 templates for files that `/draft:init` generates in user projects
+- **`graph/`** — Knowledge graph engine (Node.js + tree-sitter WASM). Source in `graph/src/`, pre-built bundle in `graph/dist/bundle.cjs`, CLI shim at `graph/bin/graph`.
+- **`scripts/tools/`** — 14 deterministic shell helpers (git-metadata, classify-files, hotspot-rank, cycle-detect, etc.). Skills call these for mechanical work.
+- **`scripts/lib.sh`** — Shared definitions sourced by build script: `SKILL_ORDER`, `CORE_FILES`, `TOOLS`.
+- **`web/`** — Static website deployed to GitHub Pages (`getdraft.dev`), deployed via `.github/workflows/pages.yml`. Includes the 23-chapter Draft Book under `web/book/`.
 - **`draft/`** — Dogfooding: Draft's own context files, generated by running `/draft:init` on this repo
 
 ### Skill File Format (strict)
@@ -92,10 +106,18 @@ The build script transforms skill content for platform compatibility:
 ### Adding a New Skill
 
 1. Create `skills/<skill-name>/SKILL.md` with frontmatter (kebab-case name, no path traversal chars)
-2. Add skill name to `SKILL_ORDER` array in `scripts/build-integrations.sh`
-3. Add display name and trigger to the case statements in the build script
+2. Add skill name to `SKILL_ORDER` in `scripts/lib.sh`
+3. Add a case entry in `get_skill_header()` AND `get_copilot_trigger()` in `scripts/build-integrations.sh` (both case statements are coverage-checked by `tests/test-trigger-functions.sh`)
 4. Run `make build && make test` (plugin.json auto-discovers skills via directory convention)
-5. Document in README.md
+5. Document in README.md and CHANGELOG.md
+
+### Adding a New Tool
+
+1. Create `scripts/tools/<tool-name>.sh` (kebab-case, lowercase)
+2. Add to `TOOLS` array in `scripts/lib.sh`
+3. Add to the `EXPECTED_TOOLS` allowlist in `tests/test-tools-registered.sh`
+4. Create a test at `tests/test-tools-<tool-name>.sh` and add it to `TEST_SCRIPTS` in `Makefile`
+5. Run `make test`
 
 ### Plugin Manifest
 
@@ -104,12 +126,13 @@ The build script transforms skill content for platform compatibility:
 ## End-User Context
 
 When users run `/draft:init`, it creates a `draft/` directory in their project with:
-- **`architecture.md`** — Source of truth: 25-section comprehensive engineering reference
+- **`architecture.md`** — Source of truth: 28-section comprehensive engineering reference + 5 appendices, with Mermaid diagrams
 - **`.ai-context.md`** — Token-optimized 200-400 line AI context (derived from architecture.md)
 - **`.ai-profile.md`** — Ultra-compact 20-50 line always-injected profile (derived from .ai-context.md)
 - **`product.md`**, **`tech-stack.md`**, **`workflow.md`**, **`guardrails.md`** — Project config files
-- **`tracks/`** — Individual feature/fix tracks with `spec.md`, `plan.md`, `metadata.json`
+- **`tracks/`** — Individual feature/fix tracks with `spec.md`, `plan.md`, `metadata.json` (now includes `impact` block: files_touched, modules_touched, downstream_files, by_category)
 - **`.state/`** — Freshness hashes, signal classification, run memory for incremental refresh
+- **`graph/`** — Knowledge-graph output (when graph engine is run): module-graph.jsonl, hotspots.jsonl, proto-index.jsonl, language-specific indexes, per-module files, mermaid diagrams
 
 Status markers in tracks: `[ ]` Pending, `[~]` In Progress, `[x]` Completed, `[!]` Blocked
 

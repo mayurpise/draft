@@ -24,6 +24,9 @@
 # Exit codes: 0 fresh, 1 invocation error, 2 stale (still emits JSON).
 set -euo pipefail
 
+# shellcheck source=_lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/_lib.sh"
+
 STATE_FILE=""
 ROOT="."
 
@@ -124,10 +127,7 @@ json_array() {
     local first=true
     for x in "${arr[@]}"; do
         if $first; then first=false; else printf ','; fi
-        # Escape quotes.
-        escaped="${x//\\/\\\\}"
-        escaped="${escaped//\"/\\\"}"
-        printf '"%s"' "$escaped"
+        printf '"%s"' "$(json_escape "$x")"
     done
     printf ']'
 }
@@ -136,7 +136,7 @@ printf '{"fresh":%s,"stale_files":%s,"missing_files":%s,"reason":"%s"}\n' \
     "$fresh" \
     "$(json_array "${stale[@]+"${stale[@]}"}")" \
     "$(json_array "${missing[@]+"${missing[@]}"}")" \
-    "$reason"
+    "$(json_escape "$reason")"
 
 if [[ "$fresh" == "false" ]]; then
     exit 2

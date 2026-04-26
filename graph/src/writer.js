@@ -68,7 +68,14 @@ function writeGraph({ out, existingOut = out, repo, modules, includeGraph, proto
   for (const imp of (tsIndex.imports || [])) {
     const srcModule = imp.module;
     if (!srcModule || !imp.from) continue;
-    const segments = imp.from.replace(/^\.\.?\//, '').split('/');
+    let importPath = imp.from;
+    // Resolve relative paths against the importing file's directory so that
+    // `../../shared/foo` from `a/b/c.ts` correctly maps to `shared/foo`.
+    if (importPath.startsWith('./') || importPath.startsWith('../')) {
+      const baseDir = imp.file ? path.posix.dirname(imp.file.split(path.sep).join('/')) : srcModule;
+      importPath = path.posix.normalize(path.posix.join(baseDir, importPath));
+    }
+    const segments = importPath.split('/').filter(s => s && s !== '.');
     let matched = null;
     for (let len = segments.length; len >= 1; len--) {
       const candidate = segments.slice(0, len).join('/');

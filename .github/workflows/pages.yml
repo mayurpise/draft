@@ -4,10 +4,8 @@ name: Deploy static content to Pages
 # CI disabled on 2026-04-20 pending billing/scope decisions.
 # Re-enable by restoring the original `on:` triggers from git history.
 on:
-  workflow_dispatch: {}
-
   # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:

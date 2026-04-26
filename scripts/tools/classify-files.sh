@@ -59,6 +59,8 @@ EXCLUDE_DIRS=(
     .git node_modules dist build out .next .venv venv __pycache__
     target vendor third_party .mypy_cache .pytest_cache coverage
     .cache .tox .gradle .idea .vscode
+    .terraform _build .svelte-kit .dart_tool Pods cdk.out
+    .turbo .parcel-cache .nuxt .vercel .pnpm-store
 )
 
 lang_for() {

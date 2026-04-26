@@ -52,14 +52,6 @@ If it exists, read it and internalize:
 - Current Learned Conventions (existing entries)
 - Current Learned Anti-Patterns (existing entries)
 
-**Then verify core guardrails integrity (backfill if missing):**
-
-Check if `draft/guardrails.md` contains the C++/Systems Hard Guardrails from `core/guardrails.md`. Detection: look for the marker heading `### C++/Systems — Object Lifecycle & Memory Safety`.
-
-- **If missing AND project contains C++ code:** The file predates `core/guardrails.md`. Backfill by inserting the full C++/Systems Hard Guardrails sections from `core/templates/guardrails.md` (G1.x–G7.x, all pre-checked `[x]`) into the `## Hard Guardrails` section, after any existing general guardrails. Preserve all existing entries. Announce: "Backfilled C++/Systems Hard Guardrails (G1.x–G7.x) from core/guardrails.md into draft/guardrails.md."
-- **If missing AND project has no C++ code:** Skip — these guardrails only apply to C++ projects.
-- **If present:** No action — core guardrails already integrated.
-
 ### 1.2: Check for Legacy Guardrails (migration path)
 
 If `draft/guardrails.md` does NOT exist:

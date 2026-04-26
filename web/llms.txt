@@ -4,7 +4,7 @@
 
 Draft is a methodology and plugin that structures AI coding agents around human decision-making. It enforces specifications before code, phased execution plans, TDD workflows, and three-stage code review — ensuring AI outputs remain aligned, predictable, and production-ready.
 
-Draft works with Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Google Gemini. It provides 28 slash commands, 7 specialized agents, 14-dimension bug hunting, and ACID compliance audits.
+Draft works with Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Google Gemini. It provides 28 slash commands, 7 specialized agents, 14-dimension bug hunting, ACID compliance audits, and a built-in **knowledge graph engine** (tree-sitter for Go/Python/TS/JS/C/C++ + ctags fallback) that powers blast-radius and impact analysis across the toolchain.
 
 ## Installation
 
@@ -27,10 +27,12 @@ For Cursor, Copilot, Gemini, and Antigravity IDE, see the getting started guide.
 ## Key Concepts
 
 - **Context-Driven Development (CDD):** Structured documents constrain and guide AI behavior
-- **Tracks:** Isolated units of work with spec.md, plan.md, and status markers
+- **Tracks:** Isolated units of work with spec.md, plan.md, metadata.json (now includes blast-radius impact memory)
 - **7 Specialized Agents:** Architect, Debugger, Planner, Reviewer, RCA, Ops, Writer
 - **ACID Compliance:** Enterprise-grade module lifecycle audits
 - **Incremental Refresh:** File-hash-based re-analysis of only changed files
+- **Knowledge Graph Engine:** Tree-sitter extractors + ctags fallback. Six query modes (callers, impact, hotspots, modules, cycles, mermaid). Confidence-tagged call edges. Atomic incremental builds.
+- **Deterministic Tools:** 14 shell helpers under `scripts/tools/` for mechanical work — git metadata, file classification, hotspot ranking, freshness checks, ADR indexing.
 
 ## Links
 

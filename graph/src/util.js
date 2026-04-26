@@ -143,7 +143,9 @@ function compileExcludes(patterns) {
       .replace(/\*\*/g, '<<<GLOBSTAR>>>')
       .replace(/\*/g, '[^/]*')
       .replace(/<<<GLOBSTAR>>>/g, '.*');
-    return new RegExp(escaped);
+    // Anchor to full-string match so `*.pem` doesn't match `foo.pem.txt` and
+    // `*/test/*` doesn't match `/usr/contest/foo`.
+    return new RegExp('^' + escaped + '$');
   });
 }
 
@@ -260,8 +262,8 @@ function countLines(filePath) {
 /** Count lines from an in-memory buffer/string without re-reading from disk. */
 function countLinesFromContent(content) {
   if (!content) return 0;
-  // +1 matches the old countLines (which counted \n chars); trailing newline
-  // already contributes. Keeping the semantic of countLines for compatibility.
+  // Mirrors countLines(): counts \n bytes only. Files without a trailing
+  // newline therefore report N-1 lines, matching the on-disk implementation.
   let count = 0;
   for (let i = 0; i < content.length; i++) {
     if (content.charCodeAt(i) === 10) count++;

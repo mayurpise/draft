@@ -8,48 +8,55 @@
 (function () {
     'use strict';
 
+    /* Fixtures simulate a typical TypeScript webapp codebase — auth, API,
+       payments, a database layer — so the numbers and shapes feel plausible
+       to any developer browsing the page. Real graph engine output, real
+       schema; the data is illustrative. */
     var fixtures = {
         impact: {
-            cmd: 'graph --query --file core/methodology.md --mode impact',
+            cmd: 'graph --query --file src/auth/login.ts --mode impact',
             json: {
-                target: 'core/methodology.md',
+                target: 'src/auth/login.ts',
                 impact: {
-                    files: 31,
-                    modules: 4,
-                    affected_modules: ['skills', 'integrations', 'web', 'tests'],
-                    by_category: { code: 14, test: 8, doc: 7, config: 2 },
+                    files: 47,
+                    modules: 6,
+                    affected_modules: ['api', 'middleware', 'pages', 'lib', 'components', 'tests'],
+                    by_category: { code: 22, test: 14, doc: 6, config: 5 },
                     files_by_depth: {
                         '1': [
-                            'skills/init/SKILL.md',
-                            'skills/new-track/SKILL.md',
-                            'skills/implement/SKILL.md'
+                            'src/api/session/route.ts',
+                            'src/api/auth/[...nextauth]/route.ts',
+                            'src/middleware/requireAuth.ts',
+                            'src/lib/auth/jwt.ts'
                         ],
                         '2': [
-                            'integrations/copilot/.github/copilot-instructions.md',
-                            'web/index.html'
+                            'src/pages/dashboard.tsx',
+                            'src/pages/account/settings.tsx',
+                            'src/components/UserMenu.tsx',
+                            'tests/auth/login.spec.ts'
                         ],
-                        '3': ['tests/test-skill-frontmatter.sh']
+                        '3': [
+                            'tests/e2e/checkout.spec.ts',
+                            'docs/runbooks/auth-incident.md'
+                        ]
                     }
                 },
-                warning: null
+                warning: 'High blast radius: 47 files affected. Consider scoping the change or coordinating with the API and payments teams.'
             }
         },
         callers: {
-            cmd: 'graph --query --symbol queryImpact --mode callers',
+            cmd: 'graph --query --symbol verifyJWT --mode callers',
             json: {
-                target: 'queryImpact',
+                target: 'verifyJWT',
                 callers: [
-                    {
-                        func: 'query',
-                        file: 'graph/src/query.js',
-                        module: 'graph',
-                        line: 27,
-                        kind: 'ts-call',
-                        confidence: 'direct'
-                    }
+                    { func: 'requireAuth',     file: 'src/middleware/requireAuth.ts',          module: 'middleware', line: 24, kind: 'ts-call', confidence: 'direct' },
+                    { func: 'authenticate',    file: 'src/api/session/route.ts',               module: 'api',        line: 41, kind: 'ts-call', confidence: 'direct' },
+                    { func: 'refreshSession',  file: 'src/api/session/route.ts',               module: 'api',        line: 87, kind: 'ts-call', confidence: 'direct' },
+                    { func: 'getCurrentUser',  file: 'src/lib/server/getCurrentUser.ts',       module: 'lib',        line: 18, kind: 'ts-call', confidence: 'direct' },
+                    { func: 'checkApiKey',     file: 'src/api/webhooks/stripe.ts',             module: 'api',        line: 12, kind: 'ts-call', confidence: 'inferred' }
                 ],
-                total: 1,
-                by_module: { graph: 1 },
+                total: 5,
+                by_module: { middleware: 1, api: 3, lib: 1 },
                 note: 'intra-file call edges only; cross-file resolution requires type information'
             }
         },
@@ -57,52 +64,58 @@
             cmd: 'graph --query --mode hotspots',
             json: {
                 hotspots: [
-                    { id: 'skills/init/SKILL.md',           module: 'skills', lines: 3267, fanIn: 22 },
-                    { id: 'core/methodology.md',            module: 'core',   lines: 1117, fanIn: 28 },
-                    { id: 'skills/new-track/SKILL.md',      module: 'skills', lines:  843, fanIn: 14 },
-                    { id: 'skills/review/SKILL.md',         module: 'skills', lines:  827, fanIn: 12 },
-                    { id: 'skills/implement/SKILL.md',      module: 'skills', lines:  693, fanIn: 18 },
-                    { id: 'skills/index/SKILL.md',          module: 'skills', lines:  878, fanIn:  8 },
-                    { id: 'skills/decompose/SKILL.md',      module: 'skills', lines:  431, fanIn: 11 },
-                    { id: 'core/shared/graph-query.md',     module: 'core',   lines:  234, fanIn: 16 }
+                    { id: 'src/lib/db/connection.ts',          module: 'lib',         lines:  624, fanIn: 38 },
+                    { id: 'src/api/users/[id]/route.ts',       module: 'api',         lines:  892, fanIn: 24 },
+                    { id: 'src/lib/auth/jwt.ts',               module: 'lib',         lines:  411, fanIn: 22 },
+                    { id: 'src/middleware/requireAuth.ts',     module: 'middleware',  lines:  287, fanIn: 19 },
+                    { id: 'src/lib/payments/stripe.ts',        module: 'lib',         lines:  738, fanIn: 17 },
+                    { id: 'src/components/Layout.tsx',         module: 'components',  lines:  512, fanIn: 16 },
+                    { id: 'src/lib/server/getCurrentUser.ts',  module: 'lib',         lines:  198, fanIn: 14 },
+                    { id: 'src/api/checkout/route.ts',         module: 'api',         lines: 1043, fanIn: 11 }
                 ]
             }
         },
         cycles: {
             cmd: 'graph --query --mode cycles',
             json: {
-                cycles: [],
-                count: 0,
-                message: 'No circular dependencies detected.'
+                cycles: [
+                    ['lib', 'api', 'lib'],
+                    ['components', 'lib', 'utils', 'components']
+                ],
+                count: 2,
+                warning: '2 circular dependency cycle(s) detected. These indicate tight coupling.'
             }
         },
         modules: {
             cmd: 'graph --query --mode modules',
             json: {
                 modules: [
-                    { kind: 'node', id: 'skills',       sizeKB: 412 },
-                    { kind: 'node', id: 'core',         sizeKB: 198 },
-                    { kind: 'node', id: 'graph',        sizeKB: 156 },
-                    { kind: 'node', id: 'scripts',      sizeKB:  47 },
-                    { kind: 'node', id: 'tests',        sizeKB:  38 },
-                    { kind: 'node', id: 'integrations', sizeKB: 524 }
+                    { kind: 'node', id: 'src',         sizeKB: 1284 },
+                    { kind: 'node', id: 'lib',         sizeKB:  712 },
+                    { kind: 'node', id: 'api',         sizeKB:  504 },
+                    { kind: 'node', id: 'components',  sizeKB:  486 },
+                    { kind: 'node', id: 'middleware',  sizeKB:   94 },
+                    { kind: 'node', id: 'pages',       sizeKB:  318 },
+                    { kind: 'node', id: 'tests',       sizeKB:  442 }
                 ],
                 dependencies: [
-                    { kind: 'edge', source: 'skills',       target: 'core',   weight: 178 },
-                    { kind: 'edge', source: 'integrations', target: 'skills', weight:  56 },
-                    { kind: 'edge', source: 'integrations', target: 'core',   weight:  38 },
-                    { kind: 'edge', source: 'tests',        target: 'scripts', weight: 24 },
-                    { kind: 'edge', source: 'scripts',      target: 'graph',  weight:  9 }
+                    { kind: 'edge', source: 'pages',       target: 'components', weight: 124 },
+                    { kind: 'edge', source: 'api',         target: 'lib',        weight: 218 },
+                    { kind: 'edge', source: 'middleware',  target: 'lib',        weight:  47 },
+                    { kind: 'edge', source: 'components',  target: 'lib',        weight:  91 },
+                    { kind: 'edge', source: 'pages',       target: 'lib',        weight:  62 },
+                    { kind: 'edge', source: 'tests',       target: 'lib',        weight: 156 },
+                    { kind: 'edge', source: 'tests',       target: 'api',        weight:  88 }
                 ],
                 cycles: [],
                 summary: {
-                    modules: 6,
-                    edges:   5,
+                    modules: 7,
+                    edges:   7,
                     cycles:  0,
                     hub_modules: [
-                        { module: 'core',   dependents_weight: 216 },
-                        { module: 'skills', dependents_weight:  56 },
-                        { module: 'graph',  dependents_weight:   9 }
+                        { module: 'lib',        dependents_weight: 574 },
+                        { module: 'components', dependents_weight: 124 },
+                        { module: 'api',        dependents_weight:  88 }
                     ]
                 }
             }
@@ -114,19 +127,25 @@
                 '## Module Dependencies\n\n' +
                 '```mermaid\n' +
                 'graph LR\n' +
-                '    integrations --> skills\n' +
-                '    integrations --> core\n' +
-                '    skills --> core\n' +
-                '    tests --> scripts\n' +
-                '    scripts --> graph\n' +
+                '    pages --> components\n' +
+                '    pages --> lib\n' +
+                '    api --> lib\n' +
+                '    middleware --> lib\n' +
+                '    components --> lib\n' +
+                '    tests --> lib\n' +
+                '    tests --> api\n' +
                 '    classDef hub fill:#7c3aed,stroke:#5b21b6,color:#fff\n' +
-                '    class core hub\n' +
+                '    class lib hub\n' +
                 '```\n\n' +
-                '## Proto Service Map\n\n' +
+                '## API Surface\n\n' +
                 '```mermaid\n' +
                 'graph TD\n' +
-                '    %% No proto files in this repo —\n' +
-                '    %% map is empty\n' +
+                '    Client -->|POST /auth/login| login[login.ts]\n' +
+                '    Client -->|GET /api/users/:id| users[users/route.ts]\n' +
+                '    Client -->|POST /api/checkout| checkout[checkout/route.ts]\n' +
+                '    login --> jwt[lib/auth/jwt.ts]\n' +
+                '    users --> db[lib/db/connection.ts]\n' +
+                '    checkout --> stripe[lib/payments/stripe.ts]\n' +
                 '```\n'
         }
     };

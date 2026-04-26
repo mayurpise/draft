@@ -1,8 +1,8 @@
 <h1 align="center">Draft</h1>
 
 <p align="center">
-  <strong>Ship fast. Ship right.</strong><br>
-  Context-Driven Development for AI-powered software engineering.
+  <strong>Code intelligence built into your AI coding agent.</strong><br>
+  A knowledge graph + spec-driven planning + three-stage review. One plugin. Free forever.
 </p>
 
 <p align="center">
@@ -21,7 +21,7 @@
 
 ---
 
-AI agents for every stage of the software development lifecycle — architected around human decision-making. Draft drives collaborative design through structured requirements gathering, trade-off analysis, and specification review before execution begins. It then delivers implementation, testing, code review, and validation — all grounded in deep codebase context with full traceability.
+Draft adds a knowledge graph engine, structured planning, and a three-stage review pipeline to your AI coding agent — so it stops guessing and starts executing pre-approved work, grounded in real understanding of your codebase. Twenty-eight commands cover every stage of the development lifecycle, from architecture discovery to incident response, with full traceability through git-tracked specs and plans.
 
 Works with **Claude Code**, **Cursor**, **GitHub Copilot**, and **Gemini**.
 

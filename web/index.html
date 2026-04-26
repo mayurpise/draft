@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Draft — Context-Driven Development Plugin for Claude Code, Copilot &amp; Gemini</title>
-    <meta name="description" content="Free, open-source plugin that adds spec-driven development, TDD enforcement, 14-dimension bug hunting, ACID audits, and architecture discovery to Claude Code, GitHub Copilot, and Gemini. Ship fast. Ship right.">
+    <title>Draft — Code Intelligence Built Into Your AI Coding Agent</title>
+    <meta name="description" content="Free open-source plugin for Claude Code, Cursor, Copilot, Antigravity, and Gemini. Built-in knowledge graph engine, spec-driven planning, three-stage review, 14-dimension bug hunting. 28 commands, 9 languages, MIT.">
     <meta name="author" content="mayurpise">
-    <meta name="theme-color" content="#2563eb">
-    <meta name="keywords" content="claude code plugin, ai code review, ai tdd workflow, context-driven development, spec-driven development, ai architecture documentation, ai bug hunting, claude code, github copilot plugin, gemini plugin, ai development methodology, code quality automation, ACID compliance, open source developer tools, cursor ai plugin, ai coding agent, ai spec driven development, incremental refresh, codebase signal detection, skill dependency graph">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="keywords" content="claude code plugin, code intelligence, knowledge graph, ai code review, ai tdd, context-driven development, spec-driven development, tree-sitter, callers, blast radius, hotspots, ai bug hunting, github copilot plugin, gemini plugin, cursor ai plugin, antigravity ide, ai coding agent, ACID audit, open source developer tools, MIT licensed">
     <meta name="robots" content="index, follow">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <meta property="og:title" content="Draft — Spec-Driven Development for AI Coding Agents">
-    <meta property="og:description" content="Free plugin for Claude Code, Copilot &amp; Gemini. Adds specs, plans, TDD, 3-stage code review, 14-dimension bug hunting, and ACID audits. Stop AI from guessing — make it execute pre-approved work.">
+    <meta property="og:title" content="Draft — Code Intelligence for Your AI Coding Agent">
+    <meta property="og:description" content="Knowledge graph engine, spec-driven planning, three-stage review &mdash; in one plugin for Claude Code, Cursor, Copilot, Antigravity, and Gemini. 28 commands, 9 languages, free forever.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://getdraft.dev">
     <meta property="og:image" content="https://getdraft.dev/social-preview.png">
-    <meta property="og:image:alt" content="Draft: Context-Driven Development Plugin for AI Coding Agents">
+    <meta property="og:image:alt" content="Draft: Code intelligence built into your AI coding agent">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Draft — Spec-Driven Development for AI Coding Agents">
-    <meta name="twitter:description" content="Free plugin for Claude Code, Copilot &amp; Gemini. Specs before code, TDD enforcement, 14-dimension bug hunting, ACID audits. Open source.">
+    <meta name="twitter:title" content="Draft — Code Intelligence for Your AI Coding Agent">
+    <meta name="twitter:description" content="Knowledge graph + spec-driven planning + three-stage review. One plugin for Claude Code, Cursor, Copilot, Antigravity, Gemini. 28 commands. Free forever.">
     <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
-    <meta name="twitter:image:alt" content="Draft: Context-Driven Development Plugin for AI Coding Agents">
+    <meta name="twitter:image:alt" content="Draft: Code intelligence built into your AI coding agent">
     <link rel="canonical" href="https://getdraft.dev">
     <link rel="alternate" hreflang="en" href="https://getdraft.dev/">
     <link rel="alternate" hreflang="x-default" href="https://getdraft.dev/">
@@ -33,7 +33,7 @@
       "name": "Draft",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Linux, macOS, Windows",
-      "description": "Free, open-source plugin that adds spec-driven development, TDD enforcement, 14-dimension bug hunting, ACID audits, and architecture discovery to Claude Code, GitHub Copilot, and Gemini.",
+      "description": "Free open-source plugin bringing built-in code intelligence to AI coding agents: knowledge graph engine with six query modes, spec-driven planning, three-stage review, 14-dimension bug hunting, ACID audits. For Claude Code, Cursor, GitHub Copilot, Antigravity IDE, and Gemini.",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
       "author": {
         "@type": "Person",
@@ -177,6 +177,12 @@
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/redesign-v24.css">
+
+    <!-- Theme: apply early to prevent flash of wrong theme -->
+    <script>
+    (function(){try{var t=localStorage.getItem('draft-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)t='dark';if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+    </script>
 </head>
 <body>
     <!-- Cursor glow orb -->
@@ -224,35 +230,48 @@
     <section id="hero" class="section hero-section">
         <canvas id="hero-canvas" aria-hidden="true"></canvas>
         <div class="hero-content">
-            <div class="badge">
-                <span class="badge-dot"></span>
-                Context-Driven Development
-            </div>
-            <h1>Ship fast.<br><span class="gradient-text">Ship right.</span></h1>
-            <p class="tagline">AI coding agents guess at requirements, pick arbitrary approaches, and skip verification. Draft makes them <strong>execute pre-approved work</strong> — clear specifications, phased plans, TDD enforcement, and 3-stage code review.</p>
+            <a href="#changelog-strip" class="release-pill">
+                <span class="release-pill-tag">v2.4</span>
+                <span class="release-pill-text">Knowledge graph engine, 14 deterministic helpers, track impact memory</span>
+                <span class="release-pill-arrow">→</span>
+            </a>
+            <h1>Code intelligence built into your<br><span class="gradient-text">AI coding agent</span>.</h1>
+            <p class="tagline">A knowledge graph that maps your repo. Spec-driven planning. Three-stage review. <strong>Twenty-eight commands</strong>, one plugin, free forever &mdash; for Claude Code, Cursor, Copilot, Antigravity, and Gemini.</p>
             <div class="hero-actions">
-                <a href="#install" class="btn btn-primary">Get Started</a>
-                <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                    Star on GitHub
+                <a href="#install" class="btn btn-primary">Install for your IDE</a>
+                <a href="#playground" class="btn btn-secondary">See it in 60 seconds</a>
+                <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="btn btn-tertiary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    Star
                 </a>
-                <a href="book/" class="btn btn-secondary">Read the Book</a>
+            </div>
+            <div class="hero-extras">
+                <a href="book/" class="hero-extra-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    Read the book
+                </a>
+                <span class="hero-extra-divider"></span>
+                <a href="book/audio/" class="hero-extra-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-7h3v5z"/><path d="M3 19a2 2 0 0 0 2 2h1v-7H3v5z"/></svg>
+                    Listen instead
+                    <span class="hero-extra-tag">~8h</span>
+                </a>
             </div>
             <!-- Hero stats strip -->
             <div class="hero-stats">
                 <div class="hero-stat">
-                    <span class="hero-stat-num">25</span>
+                    <span class="hero-stat-num">28</span>
                     <span class="hero-stat-label">Commands</span>
                 </div>
                 <div class="hero-stat-divider"></div>
                 <div class="hero-stat">
-                    <span class="hero-stat-num">7</span>
-                    <span class="hero-stat-label">Agents</span>
+                    <span class="hero-stat-num">9</span>
+                    <span class="hero-stat-label">Languages</span>
                 </div>
                 <div class="hero-stat-divider"></div>
                 <div class="hero-stat">
-                    <span class="hero-stat-num">14</span>
-                    <span class="hero-stat-label">Bug Dimensions</span>
+                    <span class="hero-stat-num">6</span>
+                    <span class="hero-stat-label">Graph Modes</span>
                 </div>
                 <div class="hero-stat-divider"></div>
                 <div class="hero-stat">
@@ -261,15 +280,36 @@
                 </div>
                 <div class="hero-stat-divider"></div>
                 <div class="hero-stat">
-                    <span class="hero-stat-num">$0</span>
-                    <span class="hero-stat-label">Forever</span>
+                    <span class="hero-stat-num">MIT</span>
+                    <span class="hero-stat-label">License</span>
                 </div>
             </div>
-            <p class="hero-sub">Works with <strong>Claude Code</strong>, <strong>Cursor</strong>, <strong>GitHub Copilot</strong>, <strong>Antigravity IDE</strong> &amp; <strong>Gemini</strong></p>
         </div>
         <div class="scroll-indicator">
             <div class="scroll-arrow"></div>
             <span>Explore</span>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- v2.4 RELEASE STRIP                                           -->
+    <!-- ============================================================ -->
+    <section id="changelog-strip" class="release-strip">
+        <div class="release-strip-inner">
+            <div class="release-strip-meta">
+                <span class="release-strip-tag">Latest</span>
+                <span class="release-strip-version">v2.4 &middot; April 26, 2026</span>
+            </div>
+            <div class="release-strip-headline">
+                <h3>Draft 2.4 ships built-in code intelligence</h3>
+                <p>Knowledge graph engine. 14 deterministic helpers. Track-level impact memory. Confidence-tagged call edges. <a href="changelog/" class="link-cyan">View full changelog &rarr;</a></p>
+            </div>
+            <div class="release-strip-tags">
+                <span class="release-strip-pill">Tree-sitter graph</span>
+                <span class="release-strip-pill">Atomic incremental</span>
+                <span class="release-strip-pill">28 sections</span>
+                <span class="release-strip-pill">Free forever</span>
+            </div>
         </div>
     </section>
 
@@ -328,6 +368,199 @@
                         <li>PR-reviewable planning artifacts</li>
                     </ul>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- INTERACTIVE PLAYGROUND — Knowledge Graph Demo                -->
+    <!-- ============================================================ -->
+    <section id="playground" class="section section-playground">
+        <div class="section-glow section-glow--violet"></div>
+        <div class="section-inner">
+            <span class="section-label">v2.4 &middot; Built-in</span>
+            <h2>Your repo, <span class="text-violet">queryable.</span></h2>
+            <p class="section-subtitle">Draft ships a knowledge graph engine that maps every module, call, dependency, and hotspot in your codebase. Six query modes. No daemon. No external service. Try the queries below &mdash; these are real outputs from running Draft against itself.</p>
+
+            <div class="playground">
+                <div class="playground-tabs" role="tablist" aria-label="Graph query modes">
+                    <button type="button" class="playground-tab is-active" data-tab="impact" role="tab" aria-selected="true">
+                        <span class="playground-tab-label">impact</span>
+                        <span class="playground-tab-hint">Blast radius</span>
+                    </button>
+                    <button type="button" class="playground-tab" data-tab="callers" role="tab" aria-selected="false">
+                        <span class="playground-tab-label">callers</span>
+                        <span class="playground-tab-hint">Who depends</span>
+                    </button>
+                    <button type="button" class="playground-tab" data-tab="hotspots" role="tab" aria-selected="false">
+                        <span class="playground-tab-label">hotspots</span>
+                        <span class="playground-tab-hint">Complexity rank</span>
+                    </button>
+                    <button type="button" class="playground-tab" data-tab="cycles" role="tab" aria-selected="false">
+                        <span class="playground-tab-label">cycles</span>
+                        <span class="playground-tab-hint">Circular deps</span>
+                    </button>
+                    <button type="button" class="playground-tab" data-tab="modules" role="tab" aria-selected="false">
+                        <span class="playground-tab-label">modules</span>
+                        <span class="playground-tab-hint">Topology</span>
+                    </button>
+                    <button type="button" class="playground-tab" data-tab="mermaid" role="tab" aria-selected="false">
+                        <span class="playground-tab-label">mermaid</span>
+                        <span class="playground-tab-hint">Diagrams</span>
+                    </button>
+                </div>
+
+                <div class="playground-pane">
+                    <div class="playground-prompt">
+                        <span class="playground-prompt-cursor">$</span>
+                        <code class="playground-prompt-cmd" id="playground-cmd">graph --query --file core/methodology.md --mode impact</code>
+                    </div>
+                    <pre class="playground-output" id="playground-output" aria-live="polite"></pre>
+                </div>
+
+                <div class="playground-foot">
+                    <p class="playground-foot-text">
+                        <strong>Tree-sitter</strong> parsers for Go, Python, TS/JS, C/C++ &middot; <strong>ctags</strong> fallback for Java/Rust/Ruby/Swift &middot; <strong>Atomic incremental builds</strong> via per-module SHA-256
+                    </p>
+                    <a href="book/multi-ide-support/" class="btn btn-tertiary btn-sm">How the engine works &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- COMPARISON TABLE                                             -->
+    <!-- ============================================================ -->
+    <section id="vs" class="section section-vs">
+        <div class="section-glow section-glow--cyan"></div>
+        <div class="section-inner">
+            <span class="section-label">Positioning</span>
+            <h2>The only one with <span class="text-violet">all three.</span></h2>
+            <p class="section-subtitle">Most tools cover one corner of AI-assisted development. Draft brings methodology, codebase intelligence, and verification together in one plugin.</p>
+
+            <div class="vs-table-wrap">
+                <table class="vs-table" aria-label="Feature comparison">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="vs-th-feature">&nbsp;</th>
+                            <th scope="col" class="vs-th-draft">Draft</th>
+                            <th scope="col">Cursor / Copilot / Aider</th>
+                            <th scope="col">Sourcegraph / GitNexus</th>
+                            <th scope="col">ChatPRD / specStory</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Spec-driven planning</th>
+                            <td class="vs-cell vs-yes">Specs &amp; phased plans before code</td>
+                            <td class="vs-cell vs-no">No</td>
+                            <td class="vs-cell vs-no">No</td>
+                            <td class="vs-cell vs-yes">Yes</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Knowledge graph engine</th>
+                            <td class="vs-cell vs-yes">Built-in tree-sitter, 6 query modes</td>
+                            <td class="vs-cell vs-partial">Indexes only</td>
+                            <td class="vs-cell vs-yes">Yes (separate service)</td>
+                            <td class="vs-cell vs-no">No</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Three-stage code review</th>
+                            <td class="vs-cell vs-yes">Validation &middot; spec compliance &middot; quality</td>
+                            <td class="vs-cell vs-partial">Inline diff suggestions</td>
+                            <td class="vs-cell vs-no">No</td>
+                            <td class="vs-cell vs-no">No</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Bug discovery</th>
+                            <td class="vs-cell vs-yes">14-dimension sweep + taint tracking</td>
+                            <td class="vs-cell vs-partial">Per-file hints</td>
+                            <td class="vs-cell vs-no">No</td>
+                            <td class="vs-cell vs-no">No</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">ACID-style audits</th>
+                            <td class="vs-cell vs-yes">Module lifecycle deep-review</td>
+                            <td class="vs-cell vs-no">No</td>
+                            <td class="vs-cell vs-no">No</td>
+                            <td class="vs-cell vs-no">No</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Multi-IDE</th>
+                            <td class="vs-cell vs-yes">Claude, Cursor, Copilot, Antigravity, Gemini</td>
+                            <td class="vs-cell vs-partial">Each tool, separately</td>
+                            <td class="vs-cell vs-partial">Editor extensions</td>
+                            <td class="vs-cell vs-partial">Web-only mostly</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Persistent context</th>
+                            <td class="vs-cell vs-yes">Git-tracked spec/plan/architecture</td>
+                            <td class="vs-cell vs-no">Session-bound</td>
+                            <td class="vs-cell vs-partial">Index, not artifacts</td>
+                            <td class="vs-cell vs-partial">App-bound</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Price</th>
+                            <td class="vs-cell vs-yes">Free, MIT, no telemetry</td>
+                            <td class="vs-cell vs-partial">Subscription</td>
+                            <td class="vs-cell vs-partial">SaaS</td>
+                            <td class="vs-cell vs-partial">Subscription</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="vs-foot-note">Comparison reflects Draft 2.4 vs. publicly-documented features of named alternatives as of April 2026. Draft is the open-source plugin you install once and own forever.</p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- PERSONA CARDS                                                -->
+    <!-- ============================================================ -->
+    <section id="personas" class="section section-personas">
+        <div class="section-glow section-glow--emerald"></div>
+        <div class="section-inner">
+            <span class="section-label">Who it's for</span>
+            <h2>Three jobs. <span class="text-emerald">One plugin.</span></h2>
+
+            <div class="persona-grid">
+                <a href="book/getting-started/" class="persona-card persona-card--cyan">
+                    <div class="persona-card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-14L4 7m8 4v10m0-10L4 7m0 0v10l8 4"/></svg></div>
+                    <h3>Solo developers</h3>
+                    <p class="persona-claim">Stop re-explaining your codebase to AI.</p>
+                    <p class="persona-detail"><code>/draft:init</code> generates an architecture reference once. Every subsequent agent interaction starts with full context. New tracks load only what's relevant.</p>
+                    <ul class="persona-bullets">
+                        <li>5-phase codebase analysis</li>
+                        <li>Token-optimized AI context</li>
+                        <li>Incremental refresh on file change</li>
+                    </ul>
+                    <span class="persona-card-link">Start here &rarr;</span>
+                </a>
+
+                <a href="book/deep-review/" class="persona-card persona-card--violet">
+                    <div class="persona-card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+                    <h3>Team leads</h3>
+                    <p class="persona-claim">Spec-driven planning + ACID-grade audits.</p>
+                    <p class="persona-detail">Every track ships with a reviewable spec, a phased plan, and three-stage code review. Module audits enforce atomicity, consistency, isolation, and durability.</p>
+                    <ul class="persona-bullets">
+                        <li>Three-stage review pipeline</li>
+                        <li>Module lifecycle deep-review</li>
+                        <li>Pattern learning &amp; guardrails</li>
+                    </ul>
+                    <span class="persona-card-link">See the review pipeline &rarr;</span>
+                </a>
+
+                <a href="book/multi-ide-support/" class="persona-card persona-card--amber">
+                    <div class="persona-card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="9" y1="6" x2="15" y2="6"/><line x1="6" y1="9" x2="6" y2="15"/><line x1="18" y1="9" x2="18" y2="15"/><line x1="9" y1="18" x2="15" y2="18"/></svg></div>
+                    <h3>Platform engineers</h3>
+                    <p class="persona-claim">Knowledge graph + 14 deterministic helpers.</p>
+                    <p class="persona-detail">Tree-sitter parsers for 9 languages. Atomic incremental builds. Confidence-tagged call edges. Track-level impact memory. Skills delegate mechanical work to JSON-emitting shell tools.</p>
+                    <ul class="persona-bullets">
+                        <li>Six graph query modes</li>
+                        <li>Per-module SHA-256 hashing</li>
+                        <li>Uniform exit-code contract</li>
+                    </ul>
+                    <span class="persona-card-link">Read the architecture &rarr;</span>
+                </a>
             </div>
         </div>
     </section>
@@ -1241,7 +1474,9 @@
 
     <script src="js/canvas.js"></script>
     <script src="js/terminal.js"></script>
+    <script src="js/playground.js"></script>
     <script src="js/animations.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/theme-toggle.js"></script>
 </body>
 </html>

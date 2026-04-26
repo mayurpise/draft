@@ -761,6 +761,60 @@
     border-left-color: var(--accent-violet);
 }
 
+/* ─────────────────────────────────────────────
+   8c. DARK MODE — terminal mockups, code blocks,
+       hero-stats strip
+   ─────────────────────────────────────────────
+   These three components used hardcoded #e9ecef /
+   #f5f7f9 / rgba(255,255,255,0.8) backgrounds to
+   simulate light-themed UI chrome. In dark mode
+   they read as glaring white slabs. Re-skin them
+   with dark surfaces — terminal mockups still keep
+   their Mac-window framing (red/yellow/green dots
+   stay) but on a dark canvas.
+*/
+
+/* Terminal mockup (hero terminal, install demos) */
+[data-theme="dark"] .terminal-header {
+    background: var(--bg-tertiary);
+    border-bottom-color: var(--border);
+}
+[data-theme="dark"] .terminal-body {
+    background: #0d1117;          /* match the playground's pane */
+    color: #c9d1d9;
+}
+[data-theme="dark"] .terminal-title {
+    color: var(--text-muted);
+}
+
+/* Code block (Install section "Claude Code CLI" panel etc.) */
+[data-theme="dark"] .code-header {
+    background: var(--bg-tertiary);
+    border-bottom-color: var(--border);
+}
+[data-theme="dark"] .code-block pre {
+    background: #0d1117;
+    color: #c9d1d9;
+}
+[data-theme="dark"] .code-filename {
+    color: var(--text-muted);
+}
+
+/* Hero stats strip — currently rgba(255,255,255,0.8) */
+[data-theme="dark"] .hero-stats {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* Install tab hover/active state already overridden above; ensure
+   the active state border matches dark border tone */
+[data-theme="dark"] .install-tab.active {
+    color: var(--accent-violet);
+    background: var(--bg-tertiary);
+    border-color: var(--border);
+}
+
 /* Inputs, buttons that fall through to white */
 [data-theme="dark"] .btn-secondary,
 [data-theme="dark"] .btn-tertiary {

@@ -296,6 +296,24 @@ For the files changed in the diff, perform static checks using `grep` or similar
 - **PASS:** No critical issues found → Proceed to Stage 2
 - **FAIL:** ANY Critical issue found (e.g., circular dependency, hardcoded secret, raw SQL injection) → List the static analysis failures, generate the review report, and **STOP**. Do not proceed to Stage 2. This prevents wasting effort on structurally broken code.
 
+### SAST Tool Recommendations
+
+After completing Stage 1, recommend appropriate static analysis tools based on the project's `tech-stack.md`. Check if these tools are already configured in CI; if not, recommend adding them.
+
+| Language | Recommended Tools |
+|----------|-------------------|
+| JavaScript/TypeScript | ESLint with `eslint-plugin-security`, Semgrep |
+| Python | Bandit, Semgrep, pylint |
+| Java | Error Prone, SpotBugs, Semgrep |
+| Go | gosec, staticcheck |
+| Rust | `cargo clippy`, `cargo audit` |
+| C/C++ | Clang Static Analyzer, cppcheck |
+| Multi-language | Semgrep (https://semgrep.dev/), CodeQL (https://codeql.github.com/) |
+
+References: Meta Infer for CI integration patterns, Google Error Prone for compile-time analysis.
+
+Include tool recommendations in the review report under Stage 1 as a "Recommended Tooling" subsection. Only recommend tools relevant to the languages detected in the diff.
+
 ### Stage 2: Spec Compliance (Track-Level Only)
 
 **Skip for project-level reviews (no spec exists)**

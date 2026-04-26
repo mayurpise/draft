@@ -5912,17 +5912,7 @@ For each task, follow this workflow based on `workflow.md`. If skeletons were ge
 
 ### Characterization Testing (Refactoring Existing Code Without Tests)
 
-When a task involves refactoring existing code that lacks test coverage, run this **before** the TDD cycle:
-
-1. **Identify seams** (Michael Feathers' technique):
-   - Object seams: interfaces where test doubles can be injected
-   - Link seams: module imports that can be swapped
-2. **Write characterization tests** that capture the current behavior as a baseline
-   - Run the existing code and record actual outputs for representative inputs
-   - These tests document "what it does now," not "what it should do"
-3. Proceed with the TDD cycle below for the new/changed behavior
-4. Characterization tests serve as a safety net — if they break during refactoring, the behavioral change is intentional or a regression
-- Reference: "Working Effectively with Legacy Code" (Michael Feathers)
+When refactoring code that lacks tests, write characterization tests first to capture current behavior as a baseline. Identify seams (interfaces for test doubles, swappable imports), record actual outputs for representative inputs, then proceed with the TDD cycle for new behavior.
 
 ### If TDD Enabled:
 
@@ -5947,19 +5937,7 @@ When a task involves refactoring existing code that lacks test coverage, run thi
 - Reference: Google SWE Book Ch. 12, Google Testing Blog "Test Behavior, Not Implementation"
 
 **Property-Based Testing Checkpoint:**
-After writing example-based tests, consider whether property-based tests would add value:
-- For pure functions (no side effects, deterministic): suggest property-based tests
-- For mathematical operations: suggest algebraic properties (commutativity, associativity, identity)
-- For serialization: suggest round-trip property (serialize → deserialize = identity)
-- For sorting: suggest ordering, permutation, length-preservation properties
-- Tool recommendations by language:
-  - Python: Hypothesis (https://hypothesis.works/)
-  - JavaScript/TypeScript: fast-check (https://fast-check.dev/)
-  - Java: jqwik (https://jqwik.net/)
-  - Rust: proptest (https://github.com/proptest-rs/proptest)
-  - Go: rapid (https://github.com/flyingmutant/rapid)
-- Reference: Amazon ShardStore property-based testing
-- **Not mandatory** — skip if the function is not pure or properties are not obvious
+After writing example-based tests, consider property-based tests for pure functions (algebraic properties, round-trip serialization, sort invariants). Not mandatory — skip if properties are not obvious.
 
 **3b. GREEN - Implement Minimum Code**
 ```
@@ -5970,21 +5948,10 @@ After writing example-based tests, consider whether property-based tests would a
 ```
 
 **Observability Prompts (consider during implementation):**
-- Structured logging at key decision points (not just errors)
-- Metrics emission for latency-sensitive operations (counters, histograms)
-- Tracing span creation at service boundaries and significant internal operations
-- Error classification (transient vs permanent) for retry logic
-- These are prompts, not mandates — use engineering judgment on what's appropriate for the task
-- Reference: Netflix Full Cycle Developers
+Structured logging at decision points, metrics for latency-sensitive ops, tracing at service boundaries, error classification (transient vs permanent). Use engineering judgment — not mandatory for every task.
 
 **Contract Testing Checkpoint (Service Boundaries Only):**
-When implementing new API endpoints, message handlers, or service-to-service interfaces:
-- Suggest consumer-driven contract tests to verify interface compatibility
-- For REST APIs: suggest Pact (https://pact.io/) or Spring Cloud Contract
-- For GraphQL: suggest schema validation tests
-- For message queues: suggest schema registry validation
-- Skip for purely internal modules with no cross-service communication
-- Reference: ThoughtWorks Tech Radar, Pact documentation
+For new API endpoints or service-to-service interfaces, suggest consumer-driven contract tests. Skip for purely internal modules.
 
 **3c. REFACTOR - Clean with Tests Green**
 ```
@@ -8538,63 +8505,14 @@ Next: Fix gaps and run draft review again.
 
 ## Error Handling
 
-### Missing Draft Directory
-
-```
-Error: Draft not initialized.
-Run draft init to set up Context-Driven Development.
-```
-
-### No Tracks Found
-
-```
-Error: No tracks found in draft/tracks.md
-Run draft new-track to create your first track.
-```
-
-### Track Not Found
-
-```
-Error: Track 'xyz' not found.
-
-Did you mean:
-1. add-review-command
-2. enterprise-readiness
-
-Use exact track ID or run draft status to see all tracks.
-```
-
-### Ambiguous Match
-
-```
-Multiple tracks match 'review':
-1. add-review-command - Add draft review Command [~]
-2. review-architecture-md - Review architecture.md [x]
-
-Select track (1-2):
-```
-
-### Invalid Git Range
-
-```
-Error: Invalid commit range 'main...feature'
-Git error: fatal: ambiguous argument 'feature': unknown revision
-
-Verify the range exists:
-  git log main...feature
-```
-
-### Missing Commits in Plan
-
-```
-⚠️  Warning: No commit SHAs found in plan.md
-
-Cannot determine commit range for review.
-
-Options:
-1. Manually specify range: draft review track <id> commits <range>
-2. Review uncommitted changes: draft review project
-```
+| Condition | Message |
+|-----------|---------|
+| No `draft/` directory | "Draft not initialized. Run `draft init`." |
+| No tracks in `draft/tracks.md` | "No tracks found. Run `draft new-track`." |
+| Track not found | Show closest matches by edit distance, suggest `draft status` |
+| Multiple track matches | Display numbered list, prompt selection |
+| Invalid git range | Show git error, suggest verifying with `git log` |
+| No commit SHAs in plan.md | Suggest manual range or `draft review project` |
 
 ---
 

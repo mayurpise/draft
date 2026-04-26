@@ -523,15 +523,7 @@ If the user runs `draft init refresh`:
 3. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve**: Do NOT modify `draft/tracks.md` unless explicitly requested.
-6. **Core Guardrails Backfill**: Before running pattern re-discovery, verify that `draft/guardrails.md` contains the C++/Systems Hard Guardrails from `core/guardrails.md` (G1.x–G7.x). These guardrails are mandatory for all C++ projects.
-
-   **Detection:** Check if `draft/guardrails.md` contains the marker `### C++/Systems — Object Lifecycle & Memory Safety` (the first C++ guardrail section heading).
-
-   - **If missing:** The file predates `core/guardrails.md`. Backfill by inserting the full C++/Systems Hard Guardrails sections from `core/templates/guardrails.md` (G1.x–G7.x, all pre-checked) into the `## Hard Guardrails` section of the existing `draft/guardrails.md`, after any existing general guardrails. Preserve all existing Hard Guardrails, Learned Conventions, and Learned Anti-Patterns. Announce: "Backfilled C++/Systems Hard Guardrails (G1.x–G7.x) from core/guardrails.md into draft/guardrails.md."
-   - **If present:** No action needed — guardrails are up to date.
-   - **If project has no C++ code:** Skip backfill. The guardrails only apply to C++ projects.
-
-7. **Pattern Re-Discovery**: Run `draft learn` (no arguments — full codebase scan) to update `draft/guardrails.md` with any new or changed patterns since the last init/refresh. This keeps learned conventions and anti-patterns in sync with codebase evolution.
+6. **Pattern Re-Discovery**: Run `draft learn` (no arguments — full codebase scan) to update `draft/guardrails.md` with any new or changed patterns since the last init/refresh. This keeps learned conventions and anti-patterns in sync with codebase evolution.
 
 Stop here after refreshing. Continue to standard steps ONLY for fresh init.
 
@@ -9335,14 +9327,6 @@ If it exists, read it and internalize:
 - Current Learned Conventions (existing entries)
 - Current Learned Anti-Patterns (existing entries)
 
-**Then verify core guardrails integrity (backfill if missing):**
-
-Check if `draft/guardrails.md` contains the C++/Systems Hard Guardrails from `core/guardrails.md`. Detection: look for the marker heading `### C++/Systems — Object Lifecycle & Memory Safety`.
-
-- **If missing AND project contains C++ code:** The file predates `core/guardrails.md`. Backfill by inserting the full C++/Systems Hard Guardrails sections from `core/templates/guardrails.md` (G1.x–G7.x, all pre-checked `[x]`) into the `## Hard Guardrails` section, after any existing general guardrails. Preserve all existing entries. Announce: "Backfilled C++/Systems Hard Guardrails (G1.x–G7.x) from core/guardrails.md into draft/guardrails.md."
-- **If missing AND project has no C++ code:** Skip — these guardrails only apply to C++ projects.
-- **If present:** No action — core guardrails already integrated.
-
 ### 1.2: Check for Legacy Guardrails (migration path)
 
 If `draft/guardrails.md` does NOT exist:
@@ -12705,22 +12689,22 @@ Draft solves this through **Context-Driven Development**: structured documents t
 - [Status Markers](#status-markers)
 - [Plan Structure](#plan-structure)
 - [Command Workflows](#command-workflows)
-  - [draft init](#codevinit--initialize-project)
-  - [draft index](#codevindex--monorepo-service-index)
-  - [draft new-track](#codevnew-track--create-feature-track)
-  - [draft implement](#codevimplement--execute-tasks)
-  - [draft status](#codevstatus--show-progress)
-  - [draft revert](#codevrevert--git-aware-rollback)
-  - [draft decompose](#codevdecompose--module-decomposition)
-  - [draft coverage](#codevcoverage--code-coverage-report)
-  - [draft jira-preview](#codevjira-preview--preview-jira-issues)
-  - [draft jira-create](#codevjira-create--create-jira-issues)
-  - [draft adr](#codevadr--architecture-decision-records)
-  - [draft deep-review](#codevdeep-review--module-lifecycle-audit)
-  - [draft bughunt](#codevbughunt--exhaustive-bug-discovery)
-  - [draft review](#codevreview--code-review-orchestrator)
-  - [draft learn](#codevlearn--pattern-discovery--guardrails-update)
-  - [draft change](#codevchange--course-correction)
+  - [draft init](#draftinit--initialize-project)
+  - [draft index](#draftindex--monorepo-service-index)
+  - [draft new-track](#draftnew-track--create-feature-track)
+  - [draft implement](#draftimplement--execute-tasks)
+  - [draft status](#draftstatus--show-progress)
+  - [draft revert](#draftrevert--git-aware-rollback)
+  - [draft decompose](#draftdecompose--module-decomposition)
+  - [draft coverage](#draftcoverage--code-coverage-report)
+  - [draft jira-preview](#draftjira-preview--preview-jira-issues)
+  - [draft jira-create](#draftjira-create--create-jira-issues)
+  - [draft adr](#draftadr--architecture-decision-records)
+  - [draft deep-review](#draftdeep-review--module-lifecycle-audit)
+  - [draft bughunt](#draftbughunt--exhaustive-bug-discovery)
+  - [draft review](#draftreview--code-review-orchestrator)
+  - [draft learn](#draftlearn--pattern-discovery--guardrails-update)
+  - [draft change](#draftchange--course-correction)
 - [Architecture Mode](#architecture-mode)
 - [Code Coverage](#code-coverage)
 - [Concurrency](#concurrency)
@@ -13969,7 +13953,6 @@ If `draft/` directory exists, read and internalize these files in order:
 | 3 | `draft/product.md` | Product vision, user flows, requirements, **Guidelines** | — |
 | 4 | `draft/workflow.md` | Team conventions, testing preferences | — |
 | 5 | `draft/guardrails.md` | Hard guardrails, **Learned Conventions**, **Learned Anti-Patterns** | `draft/workflow.md` `## Guardrails` (legacy) |
-| — | `core/guardrails.md` *(plugin-inlined)* | C++ Hard Guardrails — always enforced for C++ code | — |
 
 ### Layer 1.5: Graph Context (When Available)
 
@@ -14098,7 +14081,7 @@ When `draft/.state/facts.json` exists, also load relevant facts:
 
 Patterns listed here are **intentional design decisions**. Do NOT flag these as bugs, issues, or violations. They represent deliberate trade-offs documented by the team.
 
-### Guardrails (`guardrails.md` + `core/guardrails.md`)
+### Guardrails (`draft/guardrails.md`)
 
 Project-level `draft/guardrails.md` has three sections with different enforcement behavior:
 

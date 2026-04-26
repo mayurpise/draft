@@ -408,15 +408,7 @@ If the user runs `/draft:init refresh`:
 3. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve**: Do NOT modify `draft/tracks.md` unless explicitly requested.
-6. **Core Guardrails Backfill**: Before running pattern re-discovery, verify that `draft/guardrails.md` contains the C++/Systems Hard Guardrails from `core/guardrails.md` (G1.x–G7.x). These guardrails are mandatory for all C++ projects.
-
-   **Detection:** Check if `draft/guardrails.md` contains the marker `### C++/Systems — Object Lifecycle & Memory Safety` (the first C++ guardrail section heading).
-
-   - **If missing:** The file predates `core/guardrails.md`. Backfill by inserting the full C++/Systems Hard Guardrails sections from `core/templates/guardrails.md` (G1.x–G7.x, all pre-checked) into the `## Hard Guardrails` section of the existing `draft/guardrails.md`, after any existing general guardrails. Preserve all existing Hard Guardrails, Learned Conventions, and Learned Anti-Patterns. Announce: "Backfilled C++/Systems Hard Guardrails (G1.x–G7.x) from core/guardrails.md into draft/guardrails.md."
-   - **If present:** No action needed — guardrails are up to date.
-   - **If project has no C++ code:** Skip backfill. The guardrails only apply to C++ projects.
-
-7. **Pattern Re-Discovery**: Run `/draft:learn` (no arguments — full codebase scan) to update `draft/guardrails.md` with any new or changed patterns since the last init/refresh. This keeps learned conventions and anti-patterns in sync with codebase evolution.
+6. **Pattern Re-Discovery**: Run `/draft:learn` (no arguments — full codebase scan) to update `draft/guardrails.md` with any new or changed patterns since the last init/refresh. This keeps learned conventions and anti-patterns in sync with codebase evolution.
 
 Stop here after refreshing. Continue to standard steps ONLY for fresh init.
 

@@ -26,6 +26,7 @@ function loadJsonl(filePath) {
   if (!fs.existsSync(filePath)) return [];
   return fs.readFileSync(filePath, 'utf8')
     .split('\n')
+    .map(line => line.replace(/\r$/, ''))  // tolerate CRLF
     .filter(Boolean)
     .map(line => { try { return JSON.parse(line); } catch (_) { return null; } })
     .filter(Boolean);

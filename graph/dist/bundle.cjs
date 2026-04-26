@@ -141,7 +141,7 @@ var require_util = __commonJS({
     function compileExcludes2(patterns) {
       return patterns.map((p) => {
         const escaped = p.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*\*/g, "<<<GLOBSTAR>>>").replace(/\*/g, "[^/]*").replace(/<<<GLOBSTAR>>>/g, ".*");
-        return new RegExp(escaped);
+        return new RegExp("^" + escaped + "$");
       });
     }
     function shouldExclude(filePath, excludeRes2) {
@@ -576,7 +576,7 @@ var require_extractor_go = __commonJS({
         const line = lines[i];
         const trimmed = line.trim();
         const lineNo = i + 1;
-        if (trimmed.startsWith("//") || trimmed.startsWith("*")) continue;
+        if (trimmed.startsWith("//") || trimmed === "*" || trimmed.startsWith("* ")) continue;
         const funcMatch = trimmed.match(
           /^func\s+(?:\([^)]*\)\s+)?(\w+)\s*\(/
         );
@@ -1100,7 +1100,7 @@ var require_extractor_ts = __commonJS({
       }
     }
     function parseTsTreeSitter(content, filePath, module3, totalLines, functions, classes, imports, calls, useTsx) {
-      const parser = useTsx ? _parsers.tsx || _parsers.ts : _parsers.ts || _parsers.tsx;
+      const parser = useTsx ? _parsers.tsx : _parsers.ts || _parsers.tsx;
       if (!parser) {
         parseTsRegex(content, filePath, module3, totalLines, functions, classes, imports);
         return;
@@ -1425,7 +1425,7 @@ var require_extractor_c = __commonJS({
           continue;
         }
         const totalLines = countLinesFromContent(content);
-        const isCpp = CPP_EXTS.has(ext) || ext === ".h" && content.includes("class ");
+        const isCpp = CPP_EXTS.has(ext) || ext === ".h" && /\bclass\s+\w+\s*[:{]/.test(content);
         if (isCpp && _parsers.cpp) {
           parseCTreeSitter(content, rel, module3, totalLines, functions, types, calls, _parsers.cpp, "cpp");
         } else if (!isCpp && _parsers.c) {
@@ -1823,7 +1823,7 @@ var require_mermaid = __commonJS({
     var WEIGHT_DIVISOR = 10;
     function loadJsonl(filePath) {
       if (!fs2.existsSync(filePath)) return [];
-      return fs2.readFileSync(filePath, "utf8").split("\n").filter(Boolean).map((line) => {
+      return fs2.readFileSync(filePath, "utf8").split("\n").map((line) => line.replace(/\r$/, "")).filter(Boolean).map((line) => {
         try {
           return JSON.parse(line);
         } catch (_) {
@@ -2092,7 +2092,12 @@ var require_writer = __commonJS({
       for (const imp of tsIndex.imports || []) {
         const srcModule = imp.module;
         if (!srcModule || !imp.from) continue;
-        const segments = imp.from.replace(/^\.\.?\//, "").split("/");
+        let importPath = imp.from;
+        if (importPath.startsWith("./") || importPath.startsWith("../")) {
+          const baseDir = imp.file ? path2.posix.dirname(imp.file.split(path2.sep).join("/")) : srcModule;
+          importPath = path2.posix.normalize(path2.posix.join(baseDir, importPath));
+        }
+        const segments = importPath.split("/").filter((s) => s && s !== ".");
         let matched = null;
         for (let len = segments.length; len >= 1; len--) {
           const candidate = segments.slice(0, len).join("/");
@@ -2705,7 +2710,7 @@ var require_query = __commonJS({
     }
     function queryCallers(out, target) {
       if (!target) die2("--symbol or --file required for callers mode");
-      const looksLikeFile = target.includes("/") || /\.\w{1,6}$/.test(target);
+      const looksLikeFile = target.includes("/");
       if (looksLikeFile) {
         return queryFileCallers(out, target);
       } else {

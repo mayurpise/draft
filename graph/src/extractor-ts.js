@@ -112,7 +112,10 @@ async function tryLoadParsers() {
 }
 
 function parseTsTreeSitter(content, filePath, module, totalLines, functions, classes, imports, calls, useTsx) {
-  const parser = useTsx ? (_parsers.tsx || _parsers.ts) : (_parsers.ts || _parsers.tsx);
+  // For .tsx/.jsx files the TS parser will choke on JSX. Skip the cross-grammar
+  // fallback and route straight to the regex extractor so we don't emit half a
+  // file's symbols and zero call edges.
+  const parser = useTsx ? _parsers.tsx : (_parsers.ts || _parsers.tsx);
   if (!parser) {
     parseTsRegex(content, filePath, module, totalLines, functions, classes, imports);
     return;

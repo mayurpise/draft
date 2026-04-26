@@ -1,3 +1,19 @@
+---
+project: "{PROJECT_NAME}"
+module: "{MODULE_NAME or 'root'}"
+generated_by: "draft:new-track"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Intake Questions
 
 Structured questions for track creation. **Ask ONE question at a time.** Wait for user response before proceeding. Update drafts progressively.
@@ -154,7 +170,7 @@ Structured questions for track creation. **Ask ONE question at a time.** Wait fo
 > "How does this fit with the current architecture?"
 
 **After response, contribute:**
-- Cross-reference .ai-context.md (or architecture.md) for integration points
+- Cross-reference `draft/.ai-context.md` (or `draft/architecture.md`) for integration points
 - Identify affected modules/components
 - Reference: Clean Architecture boundaries, module coupling
 - Flag: "This will touch [modules]. Consider [integration pattern]..."
@@ -230,7 +246,7 @@ Structured questions for track creation. **Ask ONE question at a time.** Wait fo
 
 **After response, contribute:**
 - List implicit assumptions explicitly
-- Fact-check against tech-stack.md and .ai-context.md
+- Fact-check against `draft/tech-stack.md` and `draft/.ai-context.md`
 - Reference: Pre-mortem technique
 - "I'm assuming [X]. If that's wrong, [consequence]..."
 

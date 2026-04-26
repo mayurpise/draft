@@ -18,11 +18,13 @@ Every feature follows this lifecycle:
 
 When `draft/` exists in the project, always consider:
 - `draft/.ai-context.md` - Source of truth for AI agents (dense codebase understanding)
-- `draft/architecture.md` - Human-readable engineering guide (derived from .ai-context.md)
+- `draft/.ai-profile.md` - Ultra-compact profile (always loaded, 20-50 lines)
+- `draft/architecture.md` - Human-readable engineering guide (source of truth)
 - `draft/product.md` - Product vision and goals
 - `draft/tech-stack.md` - Technical constraints
 - `draft/workflow.md` - TDD and commit preferences
 - `draft/tracks.md` - Active work items
+- `draft/guardrails.md` - Hard rules and learned patterns
 
 ## Available Commands
 
@@ -35,19 +37,27 @@ When `draft/` exists in the project, always consider:
 | `draft decompose` | Module decomposition with dependency mapping |
 | `draft implement` | Execute tasks from plan |
 | `draft coverage` | Code coverage report (target 95%+) |
+| `draft deploy-checklist [track <id>]` | Pre-deployment verification checklist |
 | `draft bughunt [--track <id>]` | Systematic bug discovery |
 | `draft review [--track <id>]` | Three-stage code review |
+| `draft quick-review [file|pr <number>]` | Lightweight 4-dimension review |
 | `draft deep-review [module]` | Exhaustive production-grade module audit |
+| `draft testing-strategy [track <id>|path]` | Design test strategy with coverage targets |
 | `draft learn [promote\|migrate]` | Discover coding patterns, update guardrails |
 | `draft adr [title]` | Architecture Decision Records |
+| `draft debug [description|track <id>]` | Structured debugging session |
+| `draft standup [date|week|save]` | Generate standup summary |
+| `draft tech-debt [path|track <id>]` | Identify and prioritize tech debt |
+| `draft incident-response [new|update|postmortem]` | Incident management lifecycle |
+| `draft documentation [readme|runbook|api|onboarding]` | Technical documentation |
 | `draft status` | Show progress overview |
 | `draft revert` | Git-aware rollback |
 | `draft change <description>` | Handle mid-track requirement changes |
 | `draft jira-preview [track-id]` | Generate jira-export.md for review |
 | `draft jira-create [track-id]` | Create Jira issues from export via MCP |
-| `draft assist-review [track <id>]` | Audit PR risks for human reviewers |
-| `draft impact [track <id>]` | ROI analytics and project friction metrics |
-| `draft tour [module]` | Interactive architecture walk-through |
+| `draft tour` | Interactive onboarding tour |
+| `draft impact` | Telemetry and analytics insights |
+| `draft assist-review` | Assist human reviewers with architectural risk audit |
 
 ## Intent Mapping
 
@@ -61,19 +71,27 @@ Recognize these natural language patterns:
 | "break into modules", "decompose" | Run decompose |
 | "start implementing" | Execute implement |
 | "check coverage", "test coverage" | Run coverage |
-| "hunt bugs", "find bugs" | Run bug hunt |
+| "deploy checklist", "pre-deploy check" | Run deploy-checklist |
+| "hunt bugs", "find bugs" | Run bughunt |
 | "review code", "review track", "check quality" | Run review |
+| "quick review", "lightweight review" | Run quick-review |
 | "deep review", "production audit", "module audit" | Run deep-review |
+| "test strategy", "plan tests" | Run testing-strategy |
 | "learn patterns", "update guardrails", "discover conventions" | Run learn |
+| "document decision", "create ADR" | Create architecture decision record |
+| "debug bug", "investigate issue" | Run debug |
+| "standup", "daily summary" | Run standup |
+| "tech debt", "identify debt" | Run tech-debt |
+| "incident", "outage", "postmortem" | Run incident-response |
+| "write docs", "document" | Run documentation |
 | "what's the status" | Show status |
 | "undo", "revert" | Run revert |
 | "requirements changed", "scope changed", "update the spec" | Run change |
 | "preview jira", "export to jira" | Run jira-preview |
 | "create jira", "push to jira" | Run jira-create |
-| "document decision", "create ADR" | Create architecture decision record |
-| "assist review", "PR risks for reviewer" | Run assist-review |
-| "impact report", "ROI analytics" | Run impact |
-| "tour codebase", "walk me through" | Run tour |
+| "tour", "onboard me" | Run tour |
+| "impact", "analytics" | Run impact |
+| "assist review", "help reviewer" | Run assist-review |
 | "help", "what commands" | Show draft overview |
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |
@@ -112,8 +130,62 @@ You are initializing a Draft project for Context-Driven Development.
 - Auto-generating tech-stack.md without verifying detected dependencies
 - Not presenting .ai-context.md for developer review before proceeding
 - Overwriting existing tracks.md (this destroys track history)
+- **Producing copy-paste module descriptions** — if 3+ modules share identical Responsibilities or description text, you have NOT analyzed the source files
+- **Writing architecture.md below the tier minimum** for the detected codebase tier — compute tier from Step 1.4.5 graph metrics (M, F, P); falling below the tier minimum indicates incomplete analysis, not conciseness
+- **Writing sequence diagrams under 15 lines** of Mermaid code — shallow diagrams without alt/opt blocks, payloads, and error paths are useless
+- **Writing module deep-dives under 100 lines each** — a module with hundreds of source files cannot be described in a paragraph
+- **Using "See X/" or "follow BUILD patterns"** as a substitute for reading actual source files and documenting real content
+- **Creating freeform sections** instead of the numbered 28-section template (e.g., "## Module deep-dive: X" instead of "## 7. Core Modules Deep Dive" with "#### 7.1 X" subsections) — the template structure is MANDATORY, graph data enriches it but does not replace it
+- **Capping sub-module depth** — sub-modules with 50+ files get the SAME analysis depth as top-level modules; there is NO page limit; a 100-page architecture.md for a large codebase is correct
 
 **Initialize once, refresh to update. Never overwrite without confirmation.**
+
+---
+
+## MANDATORY SECTION CHECKLIST — architecture.md
+
+> **READ THIS BEFORE WRITING A SINGLE LINE OF architecture.md.**
+> The document MUST use the EXACT numbered structure below. Freeform sections, renamed headings, or missing sections are FAILURES. Verify each item is present before considering architecture.md complete.
+
+```
+## 1.  Executive Summary
+## 2.  AI Agent Quick Reference
+## 3.  System Identity & Purpose
+## 4.  Architecture Overview
+## 5.  Component Map & Interactions
+## 6.  Data Flow — End to End
+## 7.  Core Modules Deep Dive
+## 8.  Concurrency Model & Thread Safety
+## 9.  Framework & Extension Points
+## 10. Full Catalog of Implementations
+## 11. Secondary Subsystem (V2 / Redesign)
+## 12. API & Interface Definitions
+## 13. External Dependencies
+## 14. Cross-Module Integration Points
+## 15. Critical Invariants & Safety Rules
+## 16. Security Architecture
+## 17. Observability & Telemetry
+## 18. Error Handling & Failure Modes
+## 19. State Management & Persistence
+## 20. Reusable Modules for Future Projects
+## 21. Key Design Patterns
+## 22. Configuration & Tuning
+## 23. Performance Characteristics & Hot Paths
+## 24. How to Extend — Step-by-Step Cookbooks
+## 25. Build System & Development Workflow
+## 26. Testing Infrastructure
+## 27. Known Technical Debt & Limitations
+## 28. Glossary
+### Appendix A: File Structure Summary
+### Appendix B: Data Source → Implementation Mapping
+### Appendix C: Output Flow — Implementation to Target
+### Appendix D: Mermaid Sequence Diagrams — Critical Flows
+### Appendix E: Proto Service Map (graph-derived)
+```
+
+**Self-check before finalizing**: Run a mental grep for `## 1.` through `## 28.` in your output. Any gap = incomplete document. Return and fill it.
+
+> **If you are a subagent** executing this step via a delegation prompt: your prompt is a SUMMARY. The full 28-section structure above is the AUTHORITATIVE requirement. Do not infer section names from the summary — use the exact headings listed here.
 
 ---
 
@@ -254,26 +326,22 @@ If `draft/` exists with context files:
 
 To prevent partial initialization from leaving a broken `draft/` directory:
 
-1. **Remove stale staging** if it exists from a previous failed init:
-   ```bash
-   rm -rf draft.tmp/
-   ```
-2. **Create staging directory** with all needed subdirectories:
-   ```bash
-   mkdir -p draft.tmp/tracks draft.tmp/.state
-   ```
-3. **Write all files to `draft.tmp/`** instead of `draft/` throughout Steps 1.5–6. Wherever these steps reference `draft/`, substitute `draft.tmp/` as the write target.
-4. **On success** (all files written and verified):
-   ```bash
-   mv draft.tmp/ draft/
-   ```
-5. **On failure** at any point:
-   ```bash
-   rm -rf draft.tmp/
-   ```
-   Announce the failure and stop — no half-initialized state left behind.
+1. **Stage all files** in a temporary directory (`draft.tmp/`) during init
+2. **On success**: `mv draft.tmp/ draft/` (atomic rename on POSIX)
+3. **On failure**: `rm -rf draft.tmp/` — no half-initialized state left behind
 
-> **Forced re-init:** If `draft/` exists and the user explicitly requests a fresh init (not refresh), confirm with user before proceeding. On confirmation, remove the existing directory (`rm -rf draft/`) before the final `mv draft.tmp/ draft/`.
+```bash
+# Before writing any files:
+mkdir -p draft.tmp/tracks
+
+# Write all files to draft.tmp/ instead of draft/
+# ... (product.md, tech-stack.md, workflow.md, tracks.md, architecture.md, .ai-context.md)
+
+# After all files are written and verified:
+mv draft.tmp/ draft/
+```
+
+> **Forced re-init:** If `draft/` exists and the user explicitly requests a fresh init (not refresh), confirm with user before removing the existing `draft/` directory.
 
 ### Monorepo Detection
 
@@ -394,45 +462,6 @@ If the user runs `draft init refresh`:
    - Preserve unchanged sections exactly as-is
    - Preserve modules added by `draft decompose` (planned modules)
 
-   **e.5. Contradiction Detection (Fact-Level Diff):**
-
-   If `draft/.state/facts.json` exists, perform fact-level contradiction analysis:
-
-   1. **Load existing facts** sourced from changed files:
-      ```bash
-      # Identify facts referencing changed files
-      # For each changed file, find facts with matching source_files entries
-      ```
-
-   2. **Re-extract facts** from the changed files using the same extraction procedure from Step 1.65.
-
-   3. **Compare new facts against existing facts** for each changed file:
-
-      | Comparison Result | Action |
-      |-------------------|--------|
-      | New fact matches existing fact | Update `last_verified_at` and `last_active_at` timestamps |
-      | New fact contradicts existing fact | Mark old fact with `superseded_by: "{new_fact_id}"`, mark new fact with `supersedes: "{old_fact_id}"`, add `updates` relationship |
-      | New fact extends existing fact | Add `extends` relationship, keep both facts active |
-      | Existing fact has no matching new fact | Check if source file still exists. If deleted: mark fact as `superseded_by: "deleted"`. If file exists but fact is gone: lower confidence to `medium`, add note |
-      | Entirely new fact (no existing match) | Add as new fact with current timestamps |
-
-   4. **Generate contradiction report** (shown to user during refresh):
-      ```
-      Fact Evolution Report:
-        CONFIRMED:    12 facts verified unchanged
-        UPDATED:       3 facts superseded by new information
-          - f-008: "Auth uses session cookies" → NOW: "Auth uses JWT tokens" (src/auth/middleware.ts changed)
-          - f-015: "Redis used for caching only" → NOW: "Redis used for caching and session storage"
-          - f-023: "API uses REST exclusively" → NOW: "API uses REST + WebSocket for real-time"
-        EXTENDED:      2 facts gained additional detail
-        NEW:           5 new facts discovered
-        STALE:         1 fact could not be re-verified (confidence lowered)
-      ```
-
-   5. **Update fact registry**: Write updated `draft/.state/facts.json` with all changes.
-
-   **Inspired by:** Supermemory's three relationship types (updates/extends/derives) for tracking knowledge evolution, and their contradiction resolution that marks old memories with `isLatest: false`.
-
    **f. Present incremental diff:**
    Show user:
    - Files analyzed: `N changed files since <date>`
@@ -441,14 +470,18 @@ If the user runs `draft init refresh`:
 
    **g. On user approval:**
    - Update only the affected sections in `draft/architecture.md`
-   - Regenerate `draft/.ai-context.md` using the Condensation Subroutine
+   - Regenerate `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine
 
    **h. On user rejection:**
    - No changes made to `draft/architecture.md`
    - However, verify `.ai-context.md` consistency: if `.ai-context.md` is missing or its `synced_to_commit` differs from `architecture.md`, offer to regenerate it from the current (unchanged) `architecture.md`
 
    **i. Fallback to full refresh:**
-   Reached when step (a) detects a missing or invalid `synced_to_commit` SHA. Run full 5-phase architecture discovery instead of incremental analysis.
+   If `synced_to_commit` is missing from metadata, or the commit SHA doesn't exist in git history:
+   ```bash
+   git cat-file -t <SYNCED_SHA> 2>/dev/null || echo "not found"
+   ```
+   If this returns "not found", run full 5-phase architecture discovery instead.
 
    - If `draft/architecture.md` does NOT exist and the project is brownfield, offer to generate it now
 
@@ -461,18 +494,44 @@ If the user runs `draft init refresh`:
 
    **k. Refresh state files:**
    After successful architecture refresh, regenerate all state files:
+   - `draft/.state/facts.json` — re-extract atomic facts, perform contradiction detection (see step 2l)
    - `draft/.state/freshness.json` — recompute hashes of all source files (new baseline)
    - `draft/.state/signals.json` — re-run signal classification (update baseline)
-   - `draft/.state/facts.json` — update fact registry with contradiction detection results from step e.5 (if facts.json exists; if not, run Step 1.65 to generate initial registry)
    - `draft/.state/run-memory.json` — set `status: "completed"`, `completed_at: "{ISO_TIMESTAMP}"`, preserve `unresolved_questions`
 
-   **l. Refresh profile:**
-   Regenerate `draft/.ai-profile.md` using Step 1.6 (Profile Generation). Update dynamic context (active tracks, recent changes).
+   **l. Contradiction detection (if facts.json exists):**
+   If `draft/.state/facts.json` exists from a previous run, perform fact-level diff:
+
+   1. **Re-extract facts** from changed files identified in step 2b
+   2. **Compare against existing facts** sourced from those files:
+      - **CONFIRMED**: Fact still holds — update `last_verified_at` and `last_active_at`
+      - **UPDATED**: Fact changed (e.g., API endpoint renamed) — mark old fact with `superseded_by` edge, create new fact
+      - **EXTENDED**: Fact refined with new detail — add `extends` edge to original fact
+      - **NEW**: Fact not previously recorded — add with full timestamps
+      - **STALE**: Fact's source file was deleted — mark `last_active_at` as stale, reduce confidence
+   3. **Generate Fact Evolution Report** — display summary to user:
+      ```
+      Fact Evolution Report:
+        CONFIRMED:  N facts unchanged
+        UPDATED:    N facts superseded (old → new)
+        EXTENDED:   N facts refined
+        NEW:        N facts discovered
+        STALE:      N facts from deleted files
+      ```
+   4. **Update relationship edges** in `facts.json` knowledge graph
 
 3. **Product Refinement**: Ask if product vision/goals in `draft/product.md` need updates.
 4. **Workflow Review**: Ask if `draft/workflow.md` settings (TDD, commits) need changing.
 5. **Preserve**: Do NOT modify `draft/tracks.md` unless explicitly requested.
-6. **Pattern Re-Discovery**: Run `draft learn` (no arguments — full codebase scan) to update `draft/guardrails.md` with any new or changed patterns since the last init/refresh. This keeps learned conventions and anti-patterns in sync with codebase evolution.
+6. **Core Guardrails Backfill**: Before running pattern re-discovery, verify that `draft/guardrails.md` contains the C++/Systems Hard Guardrails from `core/guardrails.md` (G1.x–G7.x). These guardrails are mandatory for all C++ projects.
+
+   **Detection:** Check if `draft/guardrails.md` contains the marker `### C++/Systems — Object Lifecycle & Memory Safety` (the first C++ guardrail section heading).
+
+   - **If missing:** The file predates `core/guardrails.md`. Backfill by inserting the full C++/Systems Hard Guardrails sections from `core/templates/guardrails.md` (G1.x–G7.x, all pre-checked) into the `## Hard Guardrails` section of the existing `draft/guardrails.md`, after any existing general guardrails. Preserve all existing Hard Guardrails, Learned Conventions, and Learned Anti-Patterns. Announce: "Backfilled C++/Systems Hard Guardrails (G1.x–G7.x) from core/guardrails.md into draft/guardrails.md."
+   - **If present:** No action needed — guardrails are up to date.
+   - **If project has no C++ code:** Skip backfill. The guardrails only apply to C++ projects.
+
+7. **Pattern Re-Discovery**: Run `draft learn` (no arguments — full codebase scan) to update `draft/guardrails.md` with any new or changed patterns since the last init/refresh. This keeps learned conventions and anti-patterns in sync with codebase evolution.
 
 Stop here after refreshing. Continue to standard steps ONLY for fresh init.
 
@@ -496,13 +555,169 @@ If **Greenfield**: skip to Step 2 (Product Definition).
 
 ---
 
+## Step 1.4: Graph Analysis (Automated, Before Manual Discovery)
+
+**IMPORTANT**: Before reading any source files manually, run the graph builder to get precise structural data. This step is fast (seconds, not minutes) and dramatically accelerates all subsequent phases.
+
+**CRITICAL ORDERING**: Phase 0 (this step) MUST complete before writing any section of architecture.md. The graph provides: (a) exhaustive module list, (b) hotspot-ranked module priority, (c) authoritative proto API surface, (d) mermaid diagrams ready for slot injection, (e) codebase tier for .ai-context.md budget.
+
+### 1. Detect and run graph binary
+
+```bash
+# Find the graph binary shipped with the draft plugin.
+# Method 1: .draft-install-path breadcrumb (written by install.sh)
+# Method 2: search known install locations
+# Method 3: check if 'graph' is on PATH
+GRAPH_BIN=""
+
+# Method 1: breadcrumb file (most reliable — works on any machine)
+for breadcrumb in \
+    "$HOME/.cursor/plugins/local/draft/.draft-install-path" \
+    "$HOME/.claude-plugin/../.draft-install-path" \
+    ; do
+    if [ -f "$breadcrumb" ]; then
+        PLUGIN_ROOT="$(cat "$breadcrumb")"
+        if [ -x "$PLUGIN_ROOT/graph/bin/graph" ]; then
+            GRAPH_BIN="$PLUGIN_ROOT/graph/bin/graph"
+            break
+        fi
+    fi
+done
+
+# Method 2: search common install paths
+if [ -z "$GRAPH_BIN" ]; then
+    for candidate in \
+        "$HOME/.cursor/plugins/local/draft/graph/bin/graph" \
+        "$HOME/.claude-plugin/../graph/bin/graph" \
+        "graph/bin/graph" \
+        ; do
+        if [ -x "$candidate" ]; then
+            GRAPH_BIN="$candidate"
+            break
+        fi
+    done
+fi
+
+# Method 3: check PATH
+if [ -z "$GRAPH_BIN" ]; then
+    GRAPH_BIN="$(command -v graph 2>/dev/null || true)"
+fi
+
+# Run if found
+if [ -n "$GRAPH_BIN" ]; then
+    echo "Found graph binary: $GRAPH_BIN"
+    "$GRAPH_BIN" --repo . --out draft/graph/
+else
+    echo "Graph binary not found — skipping automated analysis"
+fi
+```
+
+Run the above bash script. If the graph binary is found, it will analyze the codebase and produce `draft/graph/` with all artifacts.
+
+### 2. If graph build succeeds, load the always-load artifacts
+
+Read these files to get structural context for all subsequent phases:
+- `draft/graph/schema.yaml` — module count, file count, edge count, language stats per module
+- `draft/graph/module-graph.jsonl` — all module nodes + weighted dependency edges
+- `draft/graph/proto-index.jsonl` — all proto services, RPCs, messages, enums
+- `draft/graph/hotspots.jsonl` — all complexity hotspots (files ranked by lines + fanIn * 50)
+
+### 3. Use graph data to accelerate Step 1.5
+
+- **Module boundaries**: Exact module list with file counts — skip manual directory tree mapping
+- **Dependency wiring**: Exact inter-module edges with weights — skip manual `#include` / import tracing
+- **Proto API surface**: Exact services, RPCs, and message definitions — skip manual proto discovery
+- **Hotspots**: Know which high-complexity, high-fanIn files to prioritize reading
+- **Language mix**: Exact `.cc`, `.h`, `.go`, `.proto`, `.py` counts per module
+- **Cycle detection**: Circular dependency paths between modules — flag for architecture.md
+
+### 4. Compute codebase tier and module priority
+
+**Step 1.4.5 — Compute Codebase Tier:**
+Read `draft/graph/schema.yaml`. Extract:
+- `M = stats.modules`
+- `F = stats.go_functions + stats.py_functions`
+- `P = stats.proto_rpcs`
+
+Apply tier table:
+
+| Tier | Label  | Condition                              | .ai-context.md Budget |
+|------|--------|----------------------------------------|-----------------------|
+| 1    | micro  | M≤5 AND F≤50 AND P≤10                 | 100–180 lines         |
+| 2    | small  | M≤15 AND F≤300 AND P≤30               | 180–280 lines         |
+| 3    | medium | M≤40 AND F≤1000 AND P≤100             | 280–400 lines         |
+| 4    | large  | M≤100 AND F≤5000 AND P≤500            | 400–600 lines         |
+| 5    | XL     | M>100 OR F>5000 OR P>500              | 600–900 lines         |
+
+Hold tier in memory. This governs: architecture.md length minimum, .ai-context.md budget, and module deep-dive depth.
+
+**Step 1.4.6 — Build Module Priority List:**
+From `draft/graph/hotspots.jsonl`: count hotspot files per module (group by `module` field).
+From `draft/graph/module-graph.jsonl`: count incoming edges per module (fan-in, from `kind: "edge"` records).
+Rank modules by: `(hotspot_count × 2) + fan_in_count`.
+Top-ranked modules drive Section 6 deep-dive ordering and depth. Modules ranked zero on both: summary treatment only.
+Hold ranked list in memory — it replaces directory scanning for module discovery.
+
+**Step 1.4.7 — Populate Graph Injection Slots:**
+Query for diagram content and write into architecture.md slots using the standard marker format.
+
+For Section 4.4 (module-deps slot):
+```bash
+"$GRAPH_BIN" --repo . --out draft/graph --query --mode mermaid --symbol module-deps
+```
+Parse JSON response: extract `.mermaid` string and `filtered` flag. Write between the markers:
+```
+<!-- GRAPH:module-deps:START -->
+```mermaid
+{diagram content}
+```
+{if filtered: Note: diagram filtered to top edges by weight — N of M total edges shown}
+<!-- GRAPH:module-deps:END -->
+```
+
+For Section 20 (hotspots slot):
+Read `draft/graph/hotspots.jsonl`, take top 10 by score, build markdown table:
+```
+<!-- GRAPH:hotspots:START -->
+| File | Lines | fanIn | Score |
+|------|-------|-------|-------|
+| {path} | {lines} | {fanIn} | {score} |
+...
+<!-- GRAPH:hotspots:END -->
+```
+
+For Appendix E (proto-map slot):
+```bash
+"$GRAPH_BIN" --repo . --out draft/graph --query --mode mermaid --symbol proto-map
+```
+Parse JSON response: extract `.mermaid` string. If no proto files (`stats.services == 0`), write placeholder. Otherwise write:
+```
+<!-- GRAPH:proto-map:START -->
+```mermaid
+{diagram content}
+```
+<!-- GRAPH:proto-map:END -->
+```
+
+**If slot markers are absent** (first run on a repo that has no prior slot structure): write the slot content at the designated location in the template. The markers are always present in `core/templates/architecture.md`, so this path is only hit if a user has an older pre-slot architecture.md.
+
+### 5. If graph binary not found or build fails
+
+Proceed with standard Step 1.5 manual discovery. No degradation — the 5-phase analysis works as before. Architecture.md length minimum defaults to tier-2 guidance (medium-depth treatment).
+
+See `core/shared/graph-query.md` for the full graph query subroutine reference.
+
+---
+
 ## Step 1.5: Architecture Discovery (Brownfield Only)
 
 Perform a **one-time, exhaustive analysis** of the existing codebase. This is NOT a summary — it is a comprehensive reference document that enables future AI agents and engineers to work without re-reading source files.
 
 **Outputs**:
 - `draft/architecture.md` — Human-readable, **comprehensive** engineering reference (PRIMARY)
-- `draft/.ai-context.md` — Token-optimized, 200-400 lines, condensed from architecture.md (DERIVED)
+- `draft/.ai-context.md` — Token-optimized, tier-scaled budget, condensed from architecture.md (DERIVED)
+- `draft/.ai-profile.md` — Ultra-compact, 20-50 lines, always-injected project profile (DERIVED)
+- `draft/graph/` — Knowledge graph artifacts (module-graph, proto-index, hotspots, per-module files) from Step 1.4
 
 **Target output**: A single self-contained reference document designed for **dual consumption**:
 1. **LLM / AI-agent context** — enabling future code changes, Q&A, and onboarding without re-reading source files.
@@ -520,7 +735,240 @@ Perform a **one-time, exhaustive analysis** of the existing codebase. This is NO
 
 If the codebase is large (200+ files), focus on the module boundaries but still enumerate exhaustively within each module.
 
-> **Large codebase guardrail:** If the codebase exceeds 500 source files, limit deep dives to the top 20 most-imported modules and summarize others in a table. Rank modules by the number of unique files that import/reference them (descending). For dynamic languages where static import counting is impractical, rank by file count within each module directory (larger modules first).
+> **Large codebase guardrail:** If the codebase exceeds 500 source files, limit Section 7 deep dives to the top 20 most-imported modules and summarize others in a table. Rank modules by the number of unique files that import/reference them (descending) — use `draft/graph/module-graph.jsonl` hub weights if graph data is available. For dynamic languages where static import counting is impractical, rank by file count within each module directory (larger modules first). **Even for summarized modules, enumerate immediate sub-directories with file counts** (one-line per sub-dir) — this is cheap with graph data and provides essential navigation context.
+
+### Parallel Analysis Protocol (Tiers 3–5)
+
+**MANDATORY for tiers 3–5 (medium / large / XL).** Uses Map → IR+Prose → Reduce: parallel reader agents each produce both structured IR metadata and full §7 deep-dive prose, then a synthesis agent composes the final document. Cuts wall clock by ~55% at XL tier while preserving depth — readers write the module narratives from source; synthesis assembles the cross-cutting sections.
+
+**For tiers 1–2 (micro / small): skip this protocol entirely.** Use the Sequential Generation Protocol below. At small scale, parallelism adds overhead with no speed benefit, and the IR intermediate step discards source-level depth that a direct sequential pass produces cheaply.
+
+> Full protocol details, IR schema, and prompt templates are in `core/shared/parallel-analysis.md`.
+
+#### Tier-Adaptive Agent Counts
+
+From the tier computed in Step 1.4.5, determine reader agent count:
+
+| Tier | Label  | Reader Agents                        | Strategy                             |
+|------|--------|--------------------------------------|--------------------------------------|
+| 1    | micro  | 1 (all modules in one agent)         | 1 reader → 1 synthesizer             |
+| 2    | small  | 1–2 (all or half modules each)       | 1–2 readers → 1 synthesizer          |
+| 3    | medium | 2–3 (ceil(M/6) agents)               | parallel readers → 1 synthesizer     |
+| 4    | large  | ceil(M/4) agents                     | parallel readers → 1 synthesizer + parallel finalizers |
+| 5    | XL     | ceil(M/4) agents                     | parallel readers → 1 synthesizer + parallel finalizers |
+
+For tiers 1–2, the "parallel" phase is just a single reader agent — no overhead, same clean IR boundary.
+For tier 3+, readers run simultaneously; wall clock = slowest reader, not the sum.
+
+#### Phase 0: Graph Data (already done in Step 1.4)
+
+The graph binary has already run. Use its output throughout this protocol:
+- `draft.tmp/graph/schema.yaml` — module list, file counts, tier metrics
+- `draft.tmp/graph/module-graph.jsonl` — fan-in counts per module (for grouping)
+- `draft.tmp/graph/hotspots.jsonl` — top hotspot files per module (feed to readers)
+
+#### Phase 1: Spawn Parallel Module Readers
+
+**Step 1: Group modules.**
+
+From `draft.tmp/graph/module-graph.jsonl`, extract all module names and their fan-in counts.
+Apply dependency-aware grouping (see `core/shared/parallel-analysis.md`).
+Use the modules-per-agent count from the tier table above (4 for tier 4/5; all modules in one agent for tier 1):
+- Assign highest fan-in modules to separate readers (tier 3+)
+- Co-locate coupled module pairs in the same reader
+- Target balanced token budgets across groups
+
+**Step 2: Build graph data summary per group.**
+
+For each reader group, prepare a compact summary from graph artifacts:
+```
+Modules: [execution, fill_processor, order_manager]
+Hotspot files:
+  execution/engine.go (847 lines, fanIn=12)
+  execution/router.go (412 lines, fanIn=8)
+  fill_processor/handler.go (623 lines, fanIn=5)
+Module edges (from module-graph.jsonl):
+  execution → [risk, data, services]
+  fill_processor → [execution, persistence]
+```
+
+**Step 3: Spawn all reader agents in parallel using the Agent tool.**
+
+Spawn `ceil(module_count / 4)` agents simultaneously. Use the Module Reader Prompt Template from `core/shared/parallel-analysis.md`, replacing:
+- `{MODULE_LIST}` — comma-separated module names for this agent
+- `{REPO_ROOT}` — absolute path to repository root
+- `{GRAPH_DATA_SUMMARY}` — the compact summary built in Step 2
+
+Each reader agent:
+- Reads source files in its assigned modules only
+- Outputs a JSON array of IR objects (one per module)
+- Produces NO prose, NO documentation
+
+**Critical constraints to include in reader prompts:**
+```
+MUST output IR JSON array only.
+MUST NOT write any documentation or architecture sections.
+MUST NOT read files outside assigned modules.
+Token budget: max 600 tokens per module in IR output.
+```
+
+**Step 4: Collect and validate reader outputs.**
+
+Each reader produces two outputs, separated by `## IR` and `## Deep-Dives` headings.
+
+After all readers complete:
+1. Extract the `## IR` section from each reader output and parse as JSON. If parse fails, retry that reader (see failure modes in `core/shared/parallel-analysis.md`).
+2. Check IR `token_budget_used` — if < 150 for a module with >20 files AND deep-dive for that module is < 100 lines, re-run that reader with explicit instruction to read more files.
+3. Concatenate all IR objects into a single JSON array → `draft.tmp/.state/reader-irs.json`
+4. Concatenate all `## Deep-Dives` sections from all readers → `draft.tmp/.state/reader-deep-dives.md`
+
+#### Phase 2: Synthesis
+
+Collect reader outputs before spawning synthesis:
+1. Parse and concatenate all IR JSON arrays → `draft.tmp/.state/reader-irs.json`
+2. Concatenate all reader deep-dive Markdown sections → `draft.tmp/.state/reader-deep-dives.md`
+
+Spawn a **single synthesis agent** with the Synthesis Coordinator Prompt from `core/shared/parallel-analysis.md`, replacing:
+- `{CONCATENATED_DEEP_DIVES}` — content of `draft.tmp/.state/reader-deep-dives.md`
+- `{CONCATENATED_IRS}` — content of `draft.tmp/.state/reader-irs.json`
+- `{GRAPH_DEPENDENCY_DIAGRAM}` — mermaid output from `--query --mode mermaid --symbol module-deps`
+- `{ARCHITECTURE_TEMPLATE_STRUCTURE}` — the 28-section outline from `core/templates/architecture.md`
+
+The synthesis agent:
+- Pastes reader deep-dives verbatim into Section 7 — does not rewrite them
+- Derives cross-cutting sections (component map, concurrency, error handling, invariants, extension points) from IR fields
+- Reads source directly for §6 Data Flow, §12 API, §14 Integration, §15 Invariants verification, §18 Patterns, §22 Config
+- Produces the full 28-section architecture.md
+
+**Source reading policy for synthesis agent (enforce in prompt):**
+```
+Read source for: §6 Data Flow, §12 API Definitions, §14 Integration Points,
+                 §15 Critical Invariants (verification), §18 Design Patterns, §22 Configuration
+
+All other sections: compose from reader deep-dives (§7) and IR fields.
+```
+
+#### Phase 3: Parallel Finalization
+
+Once `draft.tmp/architecture.md` is written, spawn two agents simultaneously:
+
+**Finalizer A — Context Derivation:**
+Run the Condensation Subroutine (defined later in this skill) to generate:
+- `draft.tmp/.ai-context.md`
+- `draft.tmp/.ai-profile.md`
+
+**Finalizer B — State Files:**
+Write all `.state/` artifacts from the concatenated IRs:
+- `draft.tmp/.state/facts.json` — extract atomic facts from IR fields (key_classes, invariants, state, error_handling)
+- `draft.tmp/.state/freshness.json` — compute hashes of all source files read (baseline for incremental refresh)
+- `draft.tmp/.state/signals.json` — derive signal classification from IR module roles and graph data
+- `draft.tmp/.state/run-memory.json` — set `status: "completed"`, record phase timings
+
+Finalizers A and B have no dependency on each other — run truly in parallel.
+
+#### Phase 4: Quality Gate
+
+After both finalizers complete, run the Completion Verification (defined later in this skill) against the standard hard minimum thresholds. If any metric fails:
+1. Identify the sparse sections (most likely cross-cutting sections: §14 Integration, §16 Security, §8 Concurrency)
+2. Request the synthesis agent to expand those sections, providing the relevant IR fields as targeted input
+3. Only proceed to atomic rename (`mv draft.tmp/ draft/`) after all metrics pass
+
+#### Failure Recovery
+
+If any reader agent fails to produce valid JSON after one retry:
+- Log which modules failed: `draft.tmp/.state/failed-readers.json`
+- Run those modules through the standard sequential analysis (Phase 3 in the Large Codebase Protocol below)
+- Merge the resulting content into the IR set before synthesis
+- The other readers' IRs remain valid — only the failed group needs re-work
+
+---
+
+### Sequential Generation Protocol (Primary for Tiers 1–2; Fallback for Tiers 3–5)
+
+**Use this protocol for tiers 1–2 (micro/small) as the primary path.** At small scale, direct sequential analysis produces deeper output than the parallel IR pipeline with less overhead.
+
+**Also use this protocol as fallback for tiers 3–5** if the Agent tool is unavailable, or if a reader agent fails entirely after retry. For 500+ file codebases running the fallback, limit sequential analysis to the top 20 modules by fan-in rank — the output will be shallower than parallel but still useful.
+
+#### Pass 1: Foundation (Sections 1–6)
+
+Generate Sections 1–6 (Executive Summary through Data Flow). Write the result to `draft/architecture.md`. These sections establish the structural skeleton: identity, topology diagrams, component map, and data flow diagrams. **Minimum 400 lines for Pass 1.**
+
+#### Pass 2: Module Deep Dives (Section 7) — One Module at a Time, with Sub-Modules
+
+**MANDATORY (graph-first)**: Use the ranked module list from Step 1.4.6 — do NOT re-discover modules by directory scanning if Phase 0 succeeded. The graph list is exhaustive. Read the top-3 hotspot files per module (from `draft/graph/hotspots.jsonl`) before writing its deep-dive.
+
+For each module in ranked order (hotspot_count × 2 + fan_in_count, descending), up to top 20:
+
+**Step A — Top-level module analysis:**
+1. **READ** `draft/graph/modules/{module_name}.jsonl` — extract sub-directory structure, file list with line counts
+2. **READ** `draft/graph/hotspots.jsonl` — identify high-complexity files in this module
+3. **READ** at least 3 key source files for this module: the interface/header, the main implementation, and one representative op/handler. For modules with 200+ files, read at least 5 source files.
+4. **CLASSIFY** each sub-directory by tier: Large (50+ files → full deep-dive), Medium (10-49 files → summary), Small (< 10 files → table row), Ops/Handler (→ operation catalog)
+5. **WRITE** the top-level module deep-dive: role, sub-module structure table, responsibilities, internal architecture diagram (showing sub-module relationships), notable mechanisms, error handling, thread safety
+
+**Step B — Sub-module deep-dives (within the same module):**
+
+**CRITICAL — Sub-modules get the SAME depth as top-level modules.** A sub-module with 200+ files is as complex as many standalone services. Do NOT abbreviate. There is NO page limit.
+
+For each Large sub-module (50+ files):
+1. **READ** 2-3 key source files from this sub-module (interface header, main impl, one op/handler). For sub-modules with 200+ files, read at least 5 source files.
+2. **WRITE** full sub-module deep-dive (`##### 7.X.Y`) using the SAME template as top-level modules: role, source files list, sub-sub-module structure table (if nested dirs exist), responsibilities (ALL, numbered), key operations/methods table (with signatures), state machine (if stateful), internal architecture diagram (if 100+ files), notable mechanisms, error handling, thread safety
+3. **RECURSE** — if the sub-module itself has Large sub-sub-modules (50+ files), apply this same step recursively at `###### 7.X.Y.Z` level
+
+For each Medium sub-module (10-49 files):
+1. **READ** 1-2 key source files (interface, one impl)
+2. **WRITE** summary sub-module deep-dive (`##### 7.X.Y`): role (2-3 sentences), key operations table (5+ entries with source file references), notable mechanisms, one interface/header code snippet
+
+For each Ops/Handler directory:
+1. **READ** file list from graph JSONL (no need to read each file — names and line counts are sufficient for the catalog)
+2. **WRITE** numbered operation catalog table enumerating ALL operations — no sampling, no "and others"
+
+**Step C — Verify and append:**
+1. **VERIFY** the complete module section (top-level + all sub-modules) is at least 100 lines (150+ for modules with 200+ files), contains UNIQUE description text, and all Large/Medium sub-modules have their own subsections
+2. **APPEND** the entire module section to `draft/architecture.md`
+
+Do NOT batch all 20 modules into one write. Process them sequentially so each module and its sub-modules get dedicated analysis attention. **No upper limit on Pass 2 length** — it scales with codebase complexity. A 14-module C++ codebase with deep sub-module hierarchies may produce 5000+ lines in Pass 2 alone. That is correct and expected.
+
+#### Pass 2 Completion Gate — MANDATORY before Pass 3
+
+**YOU MUST PRODUCE THIS TABLE before writing a single line of Pass 3.** Do not skip, summarize, or defer it.
+
+For every module written in Pass 2, count the lines in its section and fill in this table:
+
+```
+## Pass 2 Completion Report
+| Module | Lines written | Sub-modules covered | PASS / FAIL |
+|--------|--------------|---------------------|-------------|
+| foo/bar | 142 | fill_processor, scheduler | PASS |
+| foo/baz | 38  | none                | FAIL — below 100 line minimum |
+```
+
+**Rules:**
+- PASS threshold: ≥ 100 lines for any module with < 200 source files; ≥ 150 lines for modules with 200+ source files
+- A FAIL row means you MUST expand that module's section NOW, before continuing
+- If any row shows FAIL: re-read additional source files for that module and expand until the line count passes
+- If all rows PASS: print "All modules pass. Proceeding to Pass 3." and continue
+- **Omitting this table is the same as failing the gate** — Pass 3 MUST NOT start without it
+
+This gate exists because this skill requires exhaustive module coverage. Skipping modules or writing paragraph-level summaries is a violation of the Exhaustive Analysis Mandate, not an acceptable pragmatic trade-off.
+
+#### Pass 3: Remaining Sections (Sections 8–28 + Appendices)
+
+Generate Sections 8–28 and Appendices A–D. These cover concurrency, extensions, catalogs, APIs, dependencies, integration, invariants, security, observability, error handling, state, patterns, configuration, performance, cookbooks, build, testing, debt, glossary, and cross-reference appendices. **Minimum 600 lines for Pass 3.**
+
+Read additional source files as needed for each section — do not rely solely on what was read in earlier passes.
+
+#### Pass 4: Quality Gate Verification
+
+After all sections are written, run the Completion Verification (defined later in this skill) against hard minimum thresholds. If any metric fails:
+1. Identify the weakest sections
+2. Read additional source files for those sections
+3. Expand until all metrics pass
+4. Only then proceed to `.ai-context.md` generation
+
+**Minimum scale guidance:** Pass 1: 400+ lines, Pass 2: scales with modules (no cap), Pass 3: 600+ lines. For a 500+ file codebase with 10+ modules and deep sub-module hierarchies, total output of 5000-10000+ lines is expected and correct.
+
+---
 
 ### Execution Strategy for Depth
 
@@ -639,15 +1087,15 @@ Follow these steps in order. The specific files to look for depend on the langua
 
 #### Phase 1: Discovery (Broad Scan)
 
-1. **Map the directory tree**: Recursively list the project to understand the file layout. Note subdirectory groupings.
+1. **Map the directory tree**: Recursively list the project to understand the file layout. Note subdirectory groupings. (If Step 1.4 graph analysis succeeded, use `draft.tmp/graph/schema.yaml` module list instead — it is exhaustive and includes file counts.)
 
 2. **Read build / dependency files**: These reveal the module structure, dependencies, and targets. (See language guide above for which files.)
 
-3. **Read API definition files**: These define the module's data model and service interfaces. (See language guide above for which files.)
+3. **Read API definition files**: These define the module's data model and service interfaces. (See language guide above for which files. If Step 1.4 succeeded, `draft.tmp/graph/proto-index.jsonl` already has all proto services, RPCs, and message definitions.)
 
 4. **Read interface / type definition files**: Class declarations, interface definitions, and type annotations reveal the public API and design intent.
 
-5. **Classify codebase signals**: Walk the file tree from step 1 and tag every file that matches one or more signal categories. This drives adaptive section depth in later phases — sections with strong signals get deep treatment, sections with no signals get marked SKIP.
+5. **Classify codebase signals**: Walk the file tree from step 1 and tag every file that matches one or more signal categories. This drives adaptive section depth in later phases — sections with strong signals get deep treatment, sections with no signals get marked SKIP. (If Step 1.4 succeeded, use module file counts and dependency edges to accelerate signal classification.)
 
    | Signal Category | Detection Patterns | Drives Section(s) |
    |----------------|-------------------|-------------------|
@@ -741,9 +1189,17 @@ Generate `draft/architecture.md` — a comprehensive human-readable engineering 
 
 **Output format**:
 - Markdown report with Mermaid diagrams, tables, and code blocks
-- **Target length: comprehensive** — cover all 25 sections + 4 appendices exhaustively
+- **Target length: comprehensive** — cover all 28 sections + 5 appendices exhaustively
 - Include a **Table of Contents** with numbered sections
 - End the document with: `"End of analysis. Queries should reference the .ai-context.md file for token efficiency."`
+
+**CRITICAL — Template Structure Compliance:**
+- The output MUST use the EXACT 28-section numbered structure defined below (## 1. through ## 28. plus Appendix A–E)
+- Do NOT create freeform/custom section names (e.g., "## Module deep-dive: X", "## Key architectural patterns")
+- Do NOT collapse multiple template sections into one
+- Do NOT skip section numbers — if a section does not apply, include the heading with "N/A — {reason}"
+- Graph data ENRICHES the template sections — it does not REPLACE the template structure
+- Sub-modules MUST receive the SAME depth of analysis as top-level modules — there is NO page limit; if the document reaches 100+ pages for a large codebase, that is correct and expected
 
 ### MANDATORY Header Format
 
@@ -881,6 +1337,21 @@ flowchart TD
     B --> E
 ```
 
+#### 4.4 Module Dependency Graph (graph-derived, auto-refreshed)
+
+Write the `GRAPH:module-deps` injection slot into architecture.md:
+
+If graph build succeeded (Step 1.4.7 completed), write the populated slot content using the diagram from Step 1.4.7. If filtered (>30 modules), include the filter note. Dashed edges indicate circular dependencies.
+
+If graph binary was not found: write the slot with placeholder body so draft:index can populate it later:
+```
+<!-- GRAPH:module-deps:START -->
+[Graph data unavailable — run draft:index to populate after graph binary is installed]
+<!-- GRAPH:module-deps:END -->
+```
+
+The slot markers MUST always be written — they are required for draft:index refresh to function.
+
 #### 4.2 Process Lifecycle (or Usage Lifecycle for libraries)
 
 Numbered steps from startup to steady state. Reference the entry-point source file.
@@ -965,9 +1436,13 @@ Document with diagram or prose: transactions, idempotency guards, version checks
 
 ### 7. Core Modules Deep Dive
 
-**Expected length: 8-15 pages (1-2 pages per module)**
+**Expected length: NO UPPER LIMIT — scales with codebase complexity.**
+- A 14-module codebase with sub-modules may produce 50+ pages for Section 7 alone. That is correct.
+- A sub-module with 50+ files gets the SAME depth as a top-level module (full deep-dive template).
+- Every sub-module at every nesting level gets dedicated analysis — do NOT summarize to save space.
+- If the document reaches 100 pages, that is a sign of thoroughness, not a problem.
 
-For each major internal module (typically 5–8), provide a COMPLETE deep dive:
+For each major internal module (typically 5–20), provide a COMPLETE deep dive:
 
 #### Per-Module Template
 
@@ -980,6 +1455,23 @@ For each major internal module (typically 5–8), provide a COMPLETE deep dive:
 - `path/to/main.file` — primary implementation
 - `path/to/types.file` — type definitions
 - `path/to/utils.file` — helpers
+
+**Sub-Module Structure** (for modules with sub-directories):
+
+| Sub-Module | Path | Files | Role |
+|------------|------|-------|------|
+| `master` | `module/master/` | 45cc, 38h | Scheduling, job management, coordination |
+| `slave` | `module/slave/` | 32cc, 28h | Task execution, data movement |
+| `ops` | `module/master/ops/` | 60cc, 60h | Individual operation implementations |
+| (enumerate ALL immediate sub-directories with source files) | | | |
+
+> **MANDATORY (graph data)**: Before writing ANY module deep-dive, you MUST:
+> 1. **READ** `draft/graph/modules/{module}.jsonl` — extract sub-directory structure from file paths in the JSONL records. Group files by their immediate sub-directory (e.g., `icebox/master/ops/foo.cc` → sub-module `master/ops`) and count files per sub-module. This provides exhaustive sub-module enumeration.
+> 2. **READ** `draft/graph/hotspots.jsonl` — filter for files in this module to identify high-complexity, high-fanIn files that deserve explicit mention.
+> 3. **READ** at least 3 key source files for this module: the primary interface/header (e.g., `*_interface.h`), the main implementation file, and one representative operation/handler. For modules with 200+ files, read at least 5 source files.
+> 4. **ONLY THEN** write the module section. If graph data does not exist, perform equivalent manual scanning.
+>
+> Skipping these reads produces copy-paste descriptions. Every module deep-dive MUST reflect actual source file content.
 
 **Responsibilities**:
 1. First responsibility with detail
@@ -998,6 +1490,8 @@ For each major internal module (typically 5–8), provide a COMPLETE deep dive:
 
 **Internal Architecture** (if complex):
 [Mermaid flowchart of subcomponents here]
+> For modules with sub-directories, show the sub-module relationships
+> as a flowchart (e.g., master → slave coordination, ops dispatch).
 
 **Notable Mechanisms**:
 - Caching: how and what is cached
@@ -1010,7 +1504,143 @@ For each major internal module (typically 5–8), provide a COMPLETE deep dive:
 **Thread Safety**: Single-threaded / thread-safe / requires external synchronization.
 ```
 
-**MANDATORY for stateful modules**: Include a `stateDiagram-v2` showing state transitions:
+#### Sub-Module Depth Requirements
+
+**CRITICAL**: Do NOT stop at the top-level module. The per-module deep-dive template above applies **recursively** to significant sub-modules. A top-level module like `icebox/` (917 files) is really a system of sub-systems — `master/`, `slave/`, `client/`, `base/` — each of which is as large as a standalone module in a smaller project. Treating them as one-line table rows produces useless output.
+
+#### Tiered Sub-Module Analysis
+
+Apply the following tiers based on sub-module size (file count from graph data):
+
+| Sub-Module Size | Treatment | What to Produce |
+|----------------|-----------|-----------------|
+| **Large (50+ files)** | **Full deep-dive** — apply the SAME per-module template recursively | Role, source files, sub-sub-module table (if nested dirs), responsibilities, key operations table, state machine (if stateful), internal architecture diagram, notable mechanisms, error handling, thread safety |
+| **Medium (10–49 files)** | **Summary deep-dive** — abbreviated version of the template | Role (2-3 sentences), key operations table (5+ entries), notable mechanisms, one interface/header code snippet |
+| **Small (< 10 files)** | **Catalog entry** — one-line in parent's sub-module table | Path, file count, role description |
+| **Ops/Handler directories** | **Operation catalog** — regardless of size, enumerate ALL operations | Numbered table: operation name, source file, line count, one-line description |
+
+#### Mandatory Steps for Each Sub-Module
+
+1. **Enumerate immediate sub-directories** — list every sub-directory that contains source files, its file count, and a one-line role description
+2. **Classify each sub-directory by tier** — use file counts from graph data to determine Large / Medium / Small / Ops treatment
+3. **Apply the appropriate template for each tier** — Large sub-modules get their own `##### 7.X.Y {SubModuleName}` subsection with the full template; Medium sub-modules get a condensed subsection; Small sub-modules stay as table rows
+4. **Use graph data (MANDATORY when available)** — read `draft/graph/modules/{module}.jsonl` and group file records by sub-directory path to get exhaustive sub-module enumeration. This is not optional — graph data provides deterministic file lists that prevent incomplete enumeration
+5. **Document sub-module interfaces** — if sub-modules have distinct interfaces (e.g., `master/` vs `slave/`), describe their API boundary and interaction pattern
+6. **For ops/handler directories** — enumerate ALL operations in a numbered table regardless of directory size. These are the primary extension points engineers need to find.
+
+#### Per-Sub-Module Template (Large — 50+ files)
+
+Apply this template for each sub-module at the Large tier. Nest it under the parent module as `##### 7.X.Y`:
+
+```markdown
+##### 7.X.Y {ParentModule}/{SubModuleName}
+
+**Role**: What this sub-module does within the parent module.
+
+**Source Files** (key files — not exhaustive, see table for full list):
+- `path/to/interface.h` — public API
+- `path/to/impl.cc` — primary implementation
+- `path/to/types.h` — data types
+
+**Sub-Sub-Module Structure** (if nested directories exist):
+
+| Sub-Directory | Path | Files | Role |
+|---------------|------|-------|------|
+| `ops` | `module/submod/ops/` | 60cc, 60h | Operation implementations |
+| `test` | `module/submod/test/` | 25cc | Test suites |
+
+**Responsibilities**:
+1. {Unique responsibility 1 — what this sub-module does that its siblings don't}
+2. {Unique responsibility 2}
+3. {list ALL}
+
+**Key Operations / Methods**:
+
+| Op / Method | Signature | Description |
+|-------------|-----------|-------------|
+| `methodName` | `(input: Type) → ReturnType` | What it does |
+| (enumerate ALL public methods — at least 5 entries) | | |
+
+**Interaction with Sibling Sub-Modules**:
+- Calls `{sibling}/` for {purpose}
+- Called by `{sibling}/` when {trigger}
+- Shares `{base|common}/` types: {list key shared types}
+
+**State Machine** (if stateful):
+[Mermaid stateDiagram-v2]
+
+**Notable Mechanisms**: {caching, retry, batching, scheduling, etc.}
+
+**Error Handling**: How errors propagate within this sub-module and to the parent.
+```
+
+#### Per-Sub-Module Template (Medium — 10–49 files)
+
+```markdown
+##### 7.X.Y {ParentModule}/{SubModuleName}
+
+**Role**: {2-3 sentence description}.
+
+**Key Operations**:
+
+| Op / Method | Source File | Description |
+|-------------|-------------|-------------|
+| (at least 5 entries with real data) | | |
+
+**Notable Mechanisms**: {1-2 bullet points on key internal behavior}
+
+**Key Interface** (code snippet from actual source):
+```{language}
+// actual code from the interface header, 10-20 lines
+```
+```
+
+#### Operation Catalog Template (for ops/handler directories)
+
+Regardless of tier, any directory whose name contains `ops`, `handlers`, `executors`, `workers`, `actions`, or `commands` MUST get a full enumeration:
+
+```markdown
+##### 7.X.Y {Module}/{SubModule}/ops — Operation Catalog
+
+| # | Operation | Source File | Lines | Description |
+|---|-----------|-------------|-------|-------------|
+| 1 | `ArchiveFilesOp` | `icebox/master/ops/archive_files_op.cc` | 2100 | Archives files to cloud vault |
+| 2 | `CancelJobOp` | `icebox/master/ops/cancel_job_op.cc` | 450 | Cancels running archive job |
+| ... | (enumerate ALL — no sampling, no "and others") | | | |
+```
+
+Use `draft/graph/modules/{module}.jsonl` to get the complete file list with line counts. Use `draft/graph/hotspots.jsonl` to flag high-complexity operations.
+
+#### Example: Full Sub-Module Treatment for `icebox/` (917 files)
+
+For a module like `icebox/` with sub-directories `master/` (200+ files), `slave/` (150+ files), `client/` (20 files), `base/` (40 files):
+
+```
+#### 7.3 icebox
+  [Top-level module deep-dive: role, overall architecture diagram, cross-sub-module interaction]
+
+  ##### 7.3.1 icebox/master (Large — 200+ files → full deep-dive)
+    [Full template: role, responsibilities, key ops table, state machine, mechanisms]
+
+    ##### 7.3.1.1 icebox/master/ops — Operation Catalog
+      [Numbered table of ALL 60+ operations with file, lines, description]
+
+  ##### 7.3.2 icebox/slave (Large — 150+ files → full deep-dive)
+    [Full template: role, responsibilities, key ops table, mechanisms]
+
+    ##### 7.3.2.1 icebox/slave/ops — Operation Catalog
+      [Numbered table of ALL slave operations]
+
+  ##### 7.3.3 icebox/base (Medium — 40 files → summary deep-dive)
+    [Summary: role, key ops table, one code snippet]
+
+  ##### 7.3.4 icebox/client (Medium — 20 files → summary deep-dive)
+    [Summary: role, key ops table, interface snippet]
+```
+
+This produces 300–500+ lines for `icebox/` alone, which is proportional to its 917-file complexity.
+
+**MANDATORY for stateful modules and sub-modules**: Include a `stateDiagram-v2` showing state transitions:
 ```mermaid
 stateDiagram-v2
     [*] --> Idle
@@ -1020,6 +1650,38 @@ stateDiagram-v2
     Failed --> Idle: retry()
     Completed --> [*]
 ```
+
+#### Section 7 Quality Gate (MANDATORY)
+
+After writing ALL module and sub-module deep-dives for Section 7, run these checks before proceeding to Section 8. **If any check fails, STOP and fix before continuing.**
+
+**Check 1 — Minimum depth per top-level module:**
+Count the lines in each top-level module subsection (from `#### 7.X` to the next `#### 7.Y`). If ANY deep-dived module has fewer than 60 lines (or fewer than 150 lines for modules with 200+ files), the analysis is incomplete. Go back, read the module's source files, and expand.
+
+**Check 2 — No duplicate descriptions (modules AND sub-modules):**
+Compare the Responsibilities and description text across ALL modules AND sub-modules. If 3 or more share more than 50% of their description text (e.g., identical sentences like "Implement subsystem ops, expose RPC stubs"), you have NOT analyzed the source files. For each duplicated entry:
+1. Read `draft/graph/modules/{module_name}.jsonl` to get its file list
+2. Read the module/sub-module's primary interface header and at least one implementation file
+3. Rewrite the description based on what it ACTUALLY does — what makes it UNIQUE from its siblings
+
+**Check 3 — Sub-module tables present:**
+For every module with more than 50 source files (check file count from graph data), verify a Sub-Module Structure table exists listing immediate sub-directories with file counts and roles. If missing, read the module's graph JSONL and generate the table.
+
+**Check 4 — Sub-module tiering applied:**
+For every sub-module listed in a Sub-Module Structure table, verify the correct tier treatment was applied:
+- Large sub-modules (50+ files): MUST have their own `##### 7.X.Y` subsection with the full deep-dive template (role, responsibilities, key ops, mechanisms, error handling)
+- Medium sub-modules (10-49 files): MUST have their own `##### 7.X.Y` subsection with summary (role, key ops table, one code snippet)
+- Ops/handler directories: MUST have a numbered operation catalog table enumerating ALL operations
+If any Large or Medium sub-module is missing its required subsection, generate it.
+
+**Check 5 — Key operations populated (modules AND sub-modules):**
+Each deep-dived module AND each Large/Medium sub-module MUST have a Key Operations / Methods table with at least 5 real entries (not placeholders). If a table has fewer than 5 entries, read additional source files.
+
+**Check 6 — Diagrams for complex modules:**
+Modules with more than 200 source files MUST have at least one internal architecture diagram (flowchart showing sub-module relationships and data flow between them). If missing, generate one from the sub-module dependency structure.
+
+**Check 7 — Operation catalogs complete:**
+For every ops/handler directory identified in sub-module tables, verify a numbered catalog exists enumerating ALL operations. Compare the count against graph data file counts. If the catalog has fewer entries than files in the directory, it is incomplete.
 
 ---
 
@@ -1079,7 +1741,7 @@ Describe any type-erased, generic, or shared containers used across interfaces.
 
 ### 10. Full Catalog of Implementations
 
-_(Skip if Section 9 was skipped.)_
+_(Skip if Section 9 was skipped AND the codebase has no operation/handler pattern.)_
 
 #### 10.1 Legacy / V1 Implementations (if applicable)
 
@@ -1096,6 +1758,28 @@ Table grouped by category:
 |----------|-----------------|
 
 **Include ALL implementations found in the codebase — enumerate exhaustively.**
+
+#### 10.3 Sub-Module Operation Catalogs
+
+**CRITICAL**: For large modules with operation/handler sub-directories (e.g., `icebox/master/ops/`, `magneto/vmware/`, `blob_store/blob_ops/`), enumerate ALL operation classes:
+
+```markdown
+##### 10.3.X {Module}/{SubModule} Operations
+
+| # | Operation | Source File | Lines | Description |
+|---|-----------|-------------|-------|-------------|
+| 1 | ArchiveFilesOp | `icebox/master/ops/archive_files_op.cc` | 2100 | Archives files to cloud vault |
+| 2 | CancelJobOp | `icebox/master/ops/cancel_job_op.cc` | 450 | Cancels running archive job |
+| (enumerate ALL — use graph hotspots.jsonl and per-module JSONL for file list and line counts) |
+```
+
+> **MANDATORY (graph data)**: Read `draft/graph/modules/{module}.jsonl` to get the complete file
+> list with line counts. Filter for files in operation sub-directories (paths containing `/ops/`,
+> `/handlers/`, `/executors/`, `/workers/`). Use `draft/graph/hotspots.jsonl` to flag
+> high-complexity operations (high line count or fanIn). Do NOT skip this step — incomplete
+> catalogs cause AI agents to reinvent existing functionality.
+
+**Why this matters**: Operation classes are the primary extension points in large systems. Engineers adding new functionality need to know what operations already exist, their complexity, and which files to use as templates. Missing even one operation from the catalog means the AI may suggest reinventing existing functionality.
 
 ---
 
@@ -1642,21 +2326,57 @@ sequenceDiagram
 
 ---
 
-### Expected Output Summary
+### Appendix E: Proto Service Map (graph-derived)
 
-Before writing architecture.md, verify your output matches these expectations:
+Write the `GRAPH:proto-map` injection slot into architecture.md.
 
-| Metric | Minimum | Target |
-|--------|---------|--------|
-| **Depth** | 25 sections minimum | Comprehensive (25 sections + 4 appendices) |
-| **Mermaid diagrams** | 5 diagrams | 8-12 diagrams |
-| **Tables with data** | 15 tables | 20-30 tables |
-| **Code snippets** | 5 snippets | 10-15 snippets |
-| **File references** | 50 refs | 100+ refs |
-| **Invariants documented** | 8 | 10-15 |
-| **Modules deep-dived** | 5 | 5-8 |
+If graph build succeeded and proto files exist (Step 1.4.7 completed), write the populated slot content using the diagram from Step 1.4.7.
 
-**Completeness guidance:** All 25 sections + 4 appendices must be present. HIGH-priority sections require depth and diagrams. If any HIGH-priority section is thin, expand it before finalizing.
+If graph binary was not found or no proto files exist, write the slot with placeholder:
+```
+<!-- GRAPH:proto-map:START -->
+[Graph data unavailable — run draft:index to populate after graph binary is installed]
+<!-- GRAPH:proto-map:END -->
+```
+
+The slot markers MUST always be written — they are required for draft:index refresh to function.
+
+---
+
+### Expected Output Summary — Hard Minimum Thresholds
+
+Before finalizing architecture.md, verify your output meets these quality gates. These are **depth and coverage checks** — the goal is a document that genuinely captures the codebase, not one that hits a line count by repeating names.
+
+**Depth gates (content quality — these matter most):**
+
+| Gate | FAIL condition | How to fix |
+|------|---------------|------------|
+| **Module coverage** | Any module in the top-20 fan-in list has no `#### 7.X` section | Add the missing deep-dive — read source if needed |
+| **Module depth** | Any top-level module section contains fewer than 150 words of prose (not counting tables/code) | Expand from source — re-read implementation files |
+| **Sub-module depth** | Any Large sub-module (50+ files) has no `##### 7.X.Y` section | Add sub-module deep-dive |
+| **No placeholder prose** | Any section contains "See X/", "similar to above", or bulleted file lists with no explanation | Replace with real content from source |
+| **Invariants grounded** | §15 lists fewer than 5 invariants traceable to actual source assertions or comments | Read source assertions; add real invariants |
+| **Data flow traced** | §6 contains no sequence diagram or step-by-step trace of at least one core request path | Read entry-point and pipeline source; write the trace |
+| **Code snippets real** | Any code block contains pseudocode or placeholder | Replace with actual code from source |
+| **All sections present** | Any of the 28 sections + 4 appendices is missing or contains only a heading | Fill with real content or state explicitly why it does not apply |
+
+**Coverage scale targets** (use as a sanity check, not a hard gate — a shorter document with real depth passes; a longer document with padding fails):
+
+| Tier | Label  | Expected scale of §7 | Expected total scale |
+|------|--------|----------------------|----------------------|
+| 1    | micro  | 3–5 modules × 150+ words | compact but complete |
+| 2    | small  | 5–10 modules × 150+ words | substantial |
+| 3    | medium | 10–15 modules × 200+ words | thorough |
+| 4    | large  | 15–20 modules × 250+ words | extensive |
+| 5    | XL     | 20+ modules × 300+ words | exhaustive |
+
+**A document that fails depth gates but hits line counts is still INCOMPLETE. A document that passes all depth gates but is shorter than expected is ACCEPTABLE.**
+
+**If any depth gate fails: re-read source for the failing sections and expand. Do NOT proceed to .ai-context.md generation until all depth gates pass.**
+
+**Checklist additions:**
+- [ ] Graph injection slots populated (GRAPH:module-deps, GRAPH:hotspots, GRAPH:proto-map) if schema.yaml exists
+- [ ] At least 28 + 5 appendices present (including new Appendix E)
 
 ---
 
@@ -1685,8 +2405,9 @@ This table identifies which sections require the MOST depth and WHY. High-priori
 | 4 | Architecture Overview | **HIGH** | **YES: flowchart TD** | Visual mental model — diagram is mandatory |
 | 5 | Component Map & Interactions | **HIGH** | **YES: flowchart + matrix** | Know what talks to what |
 | 6 | Data Flow — End to End | **HIGH** | **YES: multiple flowcharts** | Trace any request — separate diagram per major flow |
-| 7 | Core Modules Deep Dive | **HIGH** | **YES: stateDiagram per module** | 5-8 modules × full deep-dive each |
-| 8 | Concurrency Model | High | Optional | **Prevents race conditions** in generated code |
+| 7 | Core Modules Deep Dive | **HIGH** | **YES: stateDiagram per module + sub-module architecture** | Top 20 modules × full deep-dive each + recursive sub-module deep-dives (Large: full, Medium: summary, Ops: catalog) |
+| 3.3 | Initialization Sequence | **HIGH** | **YES: sequenceDiagram** | Startup failure diagnosis — init order, dependency gates, failure paths |
+| 8 | Concurrency Model | High | **YES: flowchart TD** | **Prevents wrong-executor bugs** in generated code — topology must be visible |
 | 9 | Framework & Extension Points | High | No | Understand the plugin architecture |
 | 10 | Full Catalog | **HIGH** | No | **Exhaustive enumeration** — no sampling |
 | 11 | Secondary Subsystem (V2) | Medium | YES: flowchart | Only if V1/V2 split exists |
@@ -1696,7 +2417,7 @@ This table identifies which sections require the MOST depth and WHY. High-priori
 | 15 | Critical Invariants | **HIGH** | No | **Prevents dangerous changes** — 8-15 invariants |
 | 16 | Security Architecture | Medium | No | Protocol & safety analysis |
 | 17 | Observability & Telemetry | Medium | No | Production readiness |
-| 18 | Error Handling & Failure Modes | High | No | Production debugging guide |
+| 18 | Error Handling & Failure Modes | High | **YES: flowchart TD** | Failure decision tree — AI agents need the visual, not just retry tables |
 | 19 | State Management | High | No | Crash recovery understanding |
 | 20 | Reusable Modules | Low | No | Engineer-facing only |
 | 21 | Key Design Patterns | High | No | **Code snippets required** — actual code |
@@ -1716,27 +2437,81 @@ This table identifies which sections require the MOST depth and WHY. High-priori
 
 Before completing architecture.md, verify these diagrams exist:
 
+- [ ] **Section 3.3**: Initialization sequence diagram — `sequenceDiagram` showing config load → dependency init → server bind → readiness gate, with `alt` blocks for each failure path
 - [ ] **Section 4.1**: High-level topology flowchart (flowchart TD)
 - [ ] **Section 5.1**: Initialization stages state machine (if applicable)
 - [ ] **Section 6**: Separate flowchart for EACH major data-flow path (typically 3-5 diagrams)
-- [ ] **Section 7**: State machine for each stateful module (stateDiagram-v2)
+- [ ] **Section 7**: State machine for each stateful module AND sub-module (stateDiagram-v2)
+- [ ] **Section 7**: Internal architecture diagram for modules with 200+ files (flowchart showing sub-module relationships)
+- [ ] **Section 7**: Sub-module interaction diagrams for Large sub-modules with sibling coordination patterns
+- [ ] **Section 7.4**: Execution topology diagram — `flowchart TD` mapping all thread pools / goroutines / actors and the queues / channels between them, with lock ordering annotated (or explicit "Single-threaded" statement if N/A)
 - [ ] **Section 11**: V2 architecture flowchart (if V1/V2 split exists)
 - [ ] **Section 14**: Sequence diagram for top 2-3 cross-module flows
+- [ ] **Section 16.2**: Failure decision tree — `flowchart TD` tracing error classification → retry → circuit breaker → fallback for the primary operation type
 - [ ] **Appendix D**: 2-3 detailed sequence diagrams with payloads
+
+### Anti-Pattern Detection (Run Before Writing)
+
+**MANDATORY**: Before writing architecture.md (or before finalizing each pass in the Large Codebase Generation Protocol), scan your draft for these FAILURE indicators. If ANY failure is detected, fix it BEFORE writing.
+
+**FAILURE 1 — Copy-Paste Modules:**
+Detection: 3+ modules in Section 7 share identical or near-identical Responsibilities, description, or "Anchor files" text.
+Example of failure: Multiple modules all saying "Responsibilities: Implement subsystem ops, expose RPC stubs, consume ComponentContext getters."
+Fix: For each duplicated module, read its actual source files (interface header + one implementation file minimum) and rewrite the description to reflect what the module UNIQUELY does. Every module in a codebase does something different — describe THAT difference.
+
+**FAILURE 2 — Skeleton Sequence Diagrams:**
+Detection: Any `sequenceDiagram` block has fewer than 15 lines of Mermaid code.
+Example of failure: A 5-line diagram showing `A->>B: request` / `B-->>A: response` with no payloads, no error paths, no conditional branches.
+Fix: Add actual payload descriptions on arrows, `alt`/`opt` blocks for conditional paths, `loop` blocks for retry logic, `Note` annotations for non-obvious steps. Target 25-40 lines per diagram.
+
+**FAILURE 3 — Empty Appendices:**
+Detection: Appendix B, C, or D tables have fewer than 10 data rows.
+Fix: Cross-reference ALL data sources (Appendix B), ALL implementation outputs (Appendix C), and add 2-3 detailed sequence diagrams to Appendix D. Use graph data (`module-graph.jsonl`, `proto-index.jsonl`) to enumerate exhaustively.
+
+**FAILURE 4 — Missing Sub-Modules:**
+Detection: A module with 100+ source files (check graph data) has no Sub-Module Structure table.
+Fix: Read `draft/graph/modules/{name}.jsonl`, group files by immediate sub-directory, and generate the table with file counts and one-line role descriptions per sub-directory.
+
+**FAILURE 4b — Shallow Sub-Module Treatment:**
+Detection: Large sub-modules (50+ files) listed only as table rows with no dedicated deep-dive subsection. Or ops/handler directories have no operation catalog.
+Example of failure: `icebox/master/` (200+ files) appears only as a row in icebox's sub-module table with "Scheduling, job management, coordination" — no `##### 7.X.Y` subsection, no key operations table, no responsibilities list.
+Fix: Apply the tiered sub-module analysis. For each Large sub-module, create a `##### 7.X.Y` subsection using the full sub-module deep-dive template. For each ops/handler directory, create a numbered operation catalog. Read the sub-module's interface header and implementation files before writing.
+
+**FAILURE 5 — Missing Operational Diagrams:**
+Detection: Any of these three diagrams is absent from the document:
+  - §3.3 initialization sequence diagram
+  - §7.4 execution topology diagram
+  - §16.2 failure decision tree
+Fix: These diagrams cannot be skipped. For single-threaded services with no concurrency, §7.4 must explicitly state "Single-threaded — no topology diagram" rather than omitting the section. For trivially simple error handling (no retries, no circuit breaker), §16.2 can be a minimal 3-node flowchart (attempt → success/error) — the section must still exist with a diagram.
+
+**FAILURE 6 — No Real Code:**
+Detection: Code snippets are generic patterns, pseudocode, or contain only comments / TODOs. No actual code from the codebase appears.
+Fix: Read actual source files and extract 10-30 line snippets that illustrate design patterns, error handling, or key interfaces. Include the file path and line range.
+
+**FAILURE 7 — Placeholder Tables:**
+Detection: Table cells contain only "See X/" directory references, "follow BUILD patterns", or similar deflections instead of real data.
+Fix: Read the referenced files and populate the table with specific names, types, signatures, descriptions, and file paths.
+
+---
 
 ### Self-Check Before Completion
 
 Run this checklist before writing architecture.md:
 
-- [ ] **Page count**: Rendered output approaches 30+ pages (not 5-10)
-- [ ] **Diagram count**: At least 5-10 Mermaid diagrams present
-- [ ] **Table population**: ALL tables have real data, not placeholders
-- [ ] **Code snippets**: Actual code from codebase, not pseudocode
-- [ ] **Exhaustive enumeration**: No "and others", "etc.", "similar to above"
+- [ ] **Line count**: At least 1500 lines (2500+ for 500+ file codebases)
+- [ ] **Diagram count**: At least 10 Mermaid diagrams present (15+ target)
+- [ ] **Table population**: ALL tables have real data, not placeholders — minimum 20 tables with 3+ data rows
+- [ ] **Code snippets**: At least 8 actual code snippets from codebase, not pseudocode
+- [ ] **Exhaustive enumeration**: No "and others", "etc.", "similar to above", "follow patterns"
 - [ ] **N/A sections**: Explicitly state why skipped, not silently omitted
-- [ ] **File references**: Every claim traceable to specific source file
+- [ ] **File references**: At least 100 backtick-quoted file path references
+- [ ] **Module uniqueness**: Every Section 7 module AND sub-module has UNIQUE description text — no copy-paste
+- [ ] **Sub-module depth**: Every Large sub-module (50+ files) has its own ##### deep-dive subsection; every ops/handler dir has a numbered catalog
+- [ ] **Sequence diagram depth**: Every sequence diagram has 15+ lines with payloads and alt/opt blocks
+- [ ] **Glossary completeness**: At least 20 terms defined
+- [ ] **Anti-patterns clear**: All anti-pattern checks above pass (including FAILURE 4b — Shallow Sub-Module Treatment)
 
-**After completing analysis: Write this content to `draft/architecture.md` using the Write tool. This is the PRIMARY output. Then run the Condensation Subroutine to derive .ai-context.md.**
+**After completing analysis AND passing all checks: Write this content to `draft/architecture.md` using the Write tool. This is the PRIMARY output. Then run the Condensation Subroutine to derive .ai-context.md.**
 
 ---
 
@@ -2005,13 +2780,13 @@ After completing the 5-phase analysis:
 1. **Gather git metadata FIRST**: Run these commands to collect current state:
    ```bash
    PROJECT_NAME=$(basename "$(pwd)")
-   GIT_BRANCH=$(git branch --show-current 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo "none")
+   GIT_BRANCH=$(git branch --show-current)
    GIT_REMOTE=$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || echo "none")
-   GIT_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "none")
-   GIT_COMMIT_SHORT=$(git rev-parse --short HEAD 2>/dev/null || echo "none")
-   GIT_COMMIT_DATE=$(git log -1 --format="%ci" 2>/dev/null || echo "none")
-   GIT_COMMIT_MSG=$(git log -1 --format="%s" 2>/dev/null || echo "none")
-   GIT_DIRTY=$([ -n "$(git status --porcelain 2>/dev/null)" ] && echo "true" || echo "false")
+   GIT_COMMIT=$(git rev-parse HEAD)
+   GIT_COMMIT_SHORT=$(git rev-parse --short HEAD)
+   GIT_COMMIT_DATE=$(git log -1 --format="%ci")
+   GIT_COMMIT_MSG=$(git log -1 --format="%s")
+   GIT_DIRTY=$([ -n "$(git status --porcelain)" ] && echo "true" || echo "false")
    ISO_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
    ```
 
@@ -2044,213 +2819,148 @@ After completing the 5-phase analysis:
    ... (then continue with full 28 sections + appendices)
    ```
 
-3. **Derive `draft/.ai-context.md`** with the SAME metadata header, then use the Condensation Subroutine to transform architecture.md content into machine-optimized format.
+3. **Run Completion Verification (MANDATORY)** — Before proceeding to `.ai-context.md`, verify architecture.md meets all hard minimums:
 
-4. **Present for review**: Show the user a summary of what was discovered before proceeding to Step 2.
+   ```
+   COMPLETION VERIFICATION — Score against Hard Minimum Thresholds:
+
+   Step 1: Count total lines in draft/architecture.md
+     → Hard minimum: 2000 (3000+ for 500+ file codebases using multi-pass protocol)
+     → PASS / FAIL: ___
+
+   Step 2: Count Mermaid diagram blocks (```mermaid)
+     → Hard minimum: 8
+     → PASS / FAIL: ___
+
+   Step 3: Count tables with 3+ data rows (including sub-module tables and op catalogs)
+     → Hard minimum: 25
+     → PASS / FAIL: ___
+
+   Step 4: Count non-Mermaid code blocks with actual source code
+     → Hard minimum: 8
+     → PASS / FAIL: ___
+
+   Step 5: Count backtick-quoted file path references
+     → Hard minimum: 100
+     → PASS / FAIL: ___
+
+   Step 6: Check Section 7 — verify UNIQUE descriptions at ALL levels
+     → Compare Responsibilities text across all modules AND sub-modules
+     → If 3+ entries (modules or sub-modules) share >50% of text: FAIL
+     → PASS / FAIL: ___
+
+   Step 7: Check Section 7 — verify sub-module tiering was applied
+     → Every module with 50+ files MUST have a sub-module structure table
+     → Every Large sub-module (50+ files) MUST have its own ##### deep-dive subsection
+     → Every Medium sub-module (10-49 files) MUST have its own ##### summary subsection
+     → Every ops/handler directory MUST have a numbered operation catalog
+     → PASS / FAIL: ___
+
+   Step 8: Check Section 15 — count invariants documented
+     → Hard minimum: 10
+     → PASS / FAIL: ___
+
+   Step 9: Check Appendix D — verify sequence diagrams have alt/opt blocks and 15+ lines each
+     → PASS / FAIL: ___
+
+   Step 10: Check Section 28 — count glossary terms
+     → Hard minimum: 20
+     → PASS / FAIL: ___
+
+   Step 11: Check Appendix B and C — count table rows
+     → Hard minimum: 10 rows each
+     → PASS / FAIL: ___
+
+   Step 12: Check operation catalogs — verify completeness
+     → For each ops/handler directory, compare catalog entry count against file count from graph data
+     → If catalog entries < 80% of actual files in the directory: FAIL
+     → PASS / FAIL: ___
+     → PASS / FAIL: ___
+
+   OVERALL: If ANY step is FAIL, identify the weakest sections and expand them.
+   Do NOT proceed to .ai-context.md until ALL steps PASS.
+   ```
+
+   If any verification step fails:
+   - Read additional source files relevant to the failing sections
+   - Expand the weak sections with real content
+   - Re-run verification
+   - Repeat until all steps pass
+
+4. **Derive `draft/.ai-context.md`** with the SAME metadata header, then use the Condensation Subroutine to transform architecture.md content into machine-optimized format.
+
+5. **Derive `draft/.ai-profile.md`** — ultra-compact 20-50 line always-injected profile using the Profile Generation Subroutine (defined at the end of this skill).
+
+6. **Present for review**: Show the user a summary of what was discovered, including the Completion Verification scores, before proceeding to Step 2.
 
 **CRITICAL**:
 - Do NOT skip the YAML frontmatter metadata block — it enables incremental refresh
-- Generate architecture.md FIRST, then derive .ai-context.md from it
-- Both files MUST have the metadata header at the very top
+- Do NOT skip the Completion Verification — it catches shallow output before it becomes permanent
+- Generate architecture.md FIRST, verify it meets thresholds, then derive .ai-context.md, then .ai-profile.md
+- All three files MUST have the metadata header at the very top
 
 ---
 
-> **Note:** After generating or updating `architecture.md`, run the **Condensation Subroutine** (defined at the end of this skill) to derive `.ai-context.md`.
-
-## Step 1.6: Generate Project Profile (Brownfield Only)
-
-After generating `.ai-context.md`, derive `draft/.ai-profile.md` — a compact, always-injected "RAM layer" of the most critical project facts. This file provides the minimum context every Draft command needs, reducing token usage for simple tasks while `.ai-context.md` provides deeper context on demand.
-
-**Inspired by:** Supermemory's User Profiles — static facts + dynamic context, always fresh, ~50ms retrieval.
-
-### Design Principles
-
-- **Ultra-compact**: 20-50 lines maximum
-- **Always injected**: Every Draft command loads this first, before deciding if deeper context is needed
-- **Auto-refreshed**: Regenerated whenever `.ai-context.md` changes
-- **Two layers**: Static facts (change rarely) + dynamic context (changes frequently)
-
-### Procedure
-
-#### Step 1: Extract Static Facts from `.ai-context.md`
-
-Read `draft/.ai-context.md` and extract:
-
-| Field | Source Section | Example |
-|-------|--------------|---------|
-| `LANG` | `## META` → `lang` | `TypeScript 5.3` |
-| `FRAMEWORK` | `## META` → detected from deps | `Next.js 14 (app router)` |
-| `DB` | `## GRAPH:DEPENDENCIES` → database deps | `PostgreSQL + Prisma` |
-| `AUTH` | `## INVARIANTS` → security invariants | `NextAuth v5, JWT` |
-| `API` | `## META` → `type` + route patterns | `REST, /api/** routes` |
-| `TEST` | `## TEST` → test commands | `Vitest + React Testing Library` |
-| `DEPLOY` | `## CONFIG` → deployment config | `Vercel` |
-| `BUILD` | `## META` → `build` | `npm run build` |
-| `ENTRY` | `## META` → `entry` | `src/index.ts -> main()` |
-
-#### Step 2: Extract Critical Invariants
-
-From `## INVARIANTS`, extract the top 3-5 most critical invariants (prioritize `[DATA]` and `[SEC]` categories). Write as single-line rules.
-
-#### Step 3: Extract Safety Rules
-
-From `## INVARIANTS` or Section 2 of `architecture.md` ("Never" rules), extract 2-3 absolute prohibitions.
-
-#### Step 4: Gather Dynamic Context
-
-```bash
-# Active tracks
-grep -E "^\s*-\s*\[~\]" draft/tracks.md 2>/dev/null | head -5
-
-# Recent changes (last 5 commits, excluding draft/ changes)
-git log --oneline -5 --no-merges -- . ':!draft/' 2>/dev/null
-```
-
-#### Step 5: Write Profile
-
-Write `draft/.ai-profile.md` using the template from `core/templates/ai-profile.md`. The file should be 20-50 lines.
-
-**Called by:** `draft init`, `draft init refresh`, Condensation Subroutine, `draft implement`
-
----
-
-## Step 1.65: Extract Fact Registry (Brownfield Only)
-
-After generating `architecture.md` and `.ai-context.md`, extract atomic facts into `draft/.state/facts.json` — a structured registry of individual architectural facts that enables granular change tracking, contradiction detection, and knowledge evolution.
-
-**Inspired by:** Supermemory's Atomic Memories — singular facts with high signal-to-noise ratio, connected via relationship edges, with temporal metadata.
-
-### Design Principles
-
-- **Atomic**: Each fact is a single, verifiable statement about the codebase
-- **Traceable**: Every fact links to source files and the commit where it was observed
-- **Temporal**: Dual-layer timestamps track when facts were discovered vs. when patterns were established
-- **Relational**: Facts connect via `updates`, `extends`, and `derives` relationship edges
-- **Evolvable**: Contradictions are tracked, not overwritten — old facts marked as superseded
-
-### Fact Categories
-
-| Category | What It Captures | Example |
-|----------|-----------------|---------|
-| `data-flow` | How data moves through the system | "All API responses pass through ResponseSerializer" |
-| `architecture` | Structural decisions and boundaries | "Auth module has no direct database access" |
-| `invariant` | Safety rules and constraints | "All DB writes must be in transactions" |
-| `dependency` | External service/library relationships | "Payment service depends on Stripe SDK v12" |
-| `concurrency` | Threading, async, locking rules | "Redis operations use connection pooling with max 10" |
-| `api-contract` | Interface definitions and protocols | "POST /users returns 201 with {id, email}" |
-| `configuration` | Config mechanisms and critical settings | "Feature flags loaded from LaunchDarkly at startup" |
-| `testing` | Test infrastructure and conventions | "Integration tests use testcontainers for PostgreSQL" |
-| `security` | Auth, authz, input validation patterns | "JWT tokens validated by middleware on all /api routes" |
-| `pattern` | Recurring design patterns | "Repository pattern used for all database access" |
-
-### Extraction Procedure
-
-#### Step 1: Parse Architecture Sections
-
-For each section of `architecture.md`, extract atomic facts:
-
-| Section(s) | Target Facts |
-|------------|-------------|
-| §4 Architecture Overview | Component topology facts |
-| §5 Component Map | Ownership and interaction facts |
-| §6 Data Flow | Pipeline and flow facts |
-| §7 Core Modules | Module responsibility and interface facts |
-| §8 Concurrency | Threading and safety rule facts |
-| §12 API Definitions | Endpoint and schema facts |
-| §13 External Dependencies | Dependency relationship facts |
-| §15 Critical Invariants | Invariant facts (highest priority) |
-| §18 Error Handling | Error recovery and retry facts |
-| §19 State Management | Persistence and state facts |
-| §21 Design Patterns | Pattern usage facts |
-| §22 Configuration | Configuration mechanism facts |
-
-#### Step 2: Assign Temporal Metadata
-
-For each extracted fact, determine two timestamps:
-
-| Timestamp | Meaning | How to Determine |
-|-----------|---------|-----------------|
-| `discovered_at` | When Draft first observed this fact | Current timestamp (ISO 8601) |
-| `established_at` | When this pattern/fact was actually introduced in the codebase | Use `git log --follow -1 --format="%ci"` on the primary source file, or `git blame` on the specific line referenced in the fact |
-| `last_verified_at` | When this fact was last confirmed still true | Current timestamp (ISO 8601) |
-| `last_active_at` | When source files containing this fact were last modified | `git log -1 --format="%ci" -- {source_file}` |
-
-#### Step 3: Detect Relationships Between Facts
-
-For each new fact, check if it relates to existing facts:
-
-| Relationship | Meaning | Detection |
-|-------------|---------|-----------|
-| `updates` | New fact supersedes an old fact (contradiction) | Same category + same source files + different statement |
-| `extends` | New fact adds detail to an existing fact | Same category + overlapping source files + compatible statement |
-| `derives` | New fact is inferred from combining other facts | Cross-category inference (e.g., auth middleware + rate limiting = API security posture) |
-
-#### Step 4: Write Fact Registry
-
-Write `draft/.state/facts.json`:
-
-```json
-{
-  "version": 1,
-  "generated_at": "{ISO_TIMESTAMP}",
-  "git_commit": "{FULL_SHA}",
-  "total_facts": 0,
-  "facts": [
-    {
-      "id": "f-001",
-      "category": "invariant",
-      "statement": "All database writes must be wrapped in transactions",
-      "source_files": ["src/db/repository.ts:45", "src/db/transaction.ts:12"],
-      "source_commit": "{FULL_SHA}",
-      "discovered_at": "{ISO_TIMESTAMP}",
-      "established_at": "2024-06-15T10:00:00Z",
-      "last_verified_at": "{ISO_TIMESTAMP}",
-      "last_active_at": "2025-03-28T14:00:00Z",
-      "confidence": "high",
-      "access_count": 0,
-      "supersedes": null,
-      "superseded_by": null
-    }
-  ],
-  "relationships": [
-    {
-      "from": "f-001",
-      "to": "f-015",
-      "type": "extends",
-      "reason": "Added connection pooling details to database access pattern"
-    }
-  ]
-}
-```
-
-### Fact Registry Constraints
-
-- **Target**: 50-150 facts for a typical project (fewer for small projects, more for large)
-- **Priority extraction order**: invariants > architecture > data-flow > api-contract > security > concurrency > dependency > pattern > configuration > testing
-- **Maximum per category**: 20 facts (focus on the most significant)
-- **Minimum evidence**: Each fact must reference at least one source file
-- **No duplicates**: Check `statement` similarity before adding — if >90% similar to existing fact, update the existing fact instead
-
----
+> **Note:** After generating or updating `architecture.md`, run the **Completion Verification** above, then the **Condensation Subroutine** (defined at the end of this skill) to derive `.ai-context.md`.
 
 ## Step 1.7: Persist State (Brownfield Only)
 
 **Skip for Greenfield projects** — there are no source files to hash and no signals to classify. Greenfield projects only get `run-memory.json` (written during Completion).
 
-After generating `architecture.md` and `.ai-context.md`, persist three state files to `draft/.state/` for incremental refresh and cross-session continuity.
+After generating `architecture.md`, `.ai-context.md`, and `.ai-profile.md`, persist four state files to `draft/.state/` for incremental refresh and cross-session continuity.
+
+### 1.7.0 Fact Registry (`draft/.state/facts.json`)
+
+Extract atomic architectural facts discovered during Phases 1-5. Each fact is a single, verifiable claim about the codebase with dual-layer timestamps and relationship edges.
+
+```json
+{
+  "generated_at": "{ISO_TIMESTAMP}",
+  "git_commit": "{FULL_SHA}",
+  "total_facts": 0,
+  "categories": ["data-flow", "architecture", "invariant", "dependency", "api", "security", "concurrency", "configuration", "testing", "convention"],
+  "facts": [
+    {
+      "id": "fact-001",
+      "category": "architecture",
+      "statement": "Express app uses service layer pattern — routes delegate to services, services access repositories",
+      "confidence": 0.95,
+      "source_files": ["src/routes/users.ts", "src/services/user.service.ts", "src/repositories/user.repo.ts"],
+      "discovered_at": "{ISO_TIMESTAMP}",
+      "established_at": "{ISO_TIMESTAMP from git blame}",
+      "last_verified_at": "{ISO_TIMESTAMP}",
+      "last_active_at": "{ISO_TIMESTAMP from file modification}",
+      "access_count": 0,
+      "edges": {
+        "updates": [],
+        "extends": [],
+        "derives": ["fact-003"],
+        "superseded_by": null
+      }
+    }
+  ]
+}
+```
+
+**Fact categories:**
+- `data-flow` — How data moves through the system
+- `architecture` — Structural patterns and module organization
+- `invariant` — Rules that must always hold true
+- `dependency` — External service and library dependencies
+- `api` — Endpoint definitions and contracts
+- `security` — Auth, authz, crypto, and access control patterns
+- `concurrency` — Thread safety, async patterns, lock ordering
+- `configuration` — Config mechanisms and critical settings
+- `testing` — Test infrastructure and patterns
+- `convention` — Coding conventions and naming patterns
+
+**Target:** 50-150 facts per typical project. Focus on facts that are actionable for AI agents making code changes.
 
 ### 1.7.1 Freshness State (`draft/.state/freshness.json`)
 
 Compute SHA-256 hashes of all source files analyzed during Phases 1-5. This enables **file-level staleness detection** on subsequent refreshes — more granular than `synced_to_commit` which only detects that _some_ commits happened.
 
 ```bash
-# Detect platform hash command (sha256sum on Linux, shasum -a 256 on macOS)
-if command -v sha256sum >/dev/null 2>&1; then
-  HASH_CMD="sha256sum"
-else
-  HASH_CMD="shasum -a 256"
-fi
-
 # Generate SHA-256 hashes for all analyzed source files (exclude draft/, node_modules/, .git/, vendor/)
 find . -type f \
   ! -path "./draft/*" ! -path "./.git/*" ! -path "*/node_modules/*" ! -path "*/vendor/*" \
@@ -2262,7 +2972,7 @@ find . -type f \
      -o -name "*.proto" -o -name "*.graphql" -o -name "*.gql" \
      -o -name "*.yaml" -o -name "*.yml" -o -name "*.toml" -o -name "*.json" \
      -o -name "*.sql" -o -name "*.md" -o -name "Dockerfile" -o -name "Makefile" \) \
-  -exec $HASH_CMD {} \; 2>/dev/null | sort -k2
+  -exec sha256sum {} \; 2>/dev/null | sort -k2
 ```
 
 Write `draft/.state/freshness.json`:
@@ -2325,7 +3035,7 @@ Persist run state for cross-session continuity. If `draft:init` is interrupted m
   "phases_completed": ["phase_1", "phase_2", "phase_3"],
   "phases_remaining": ["phase_4", "phase_5"],
   "files_analyzed": 142,
-  "files_generated": ["draft/architecture.md", "draft/.ai-context.md"],
+  "files_generated": ["draft/architecture.md", "draft/.ai-context.md", "draft/.ai-profile.md"],
   "unresolved_questions": [
     "Could not determine if src/legacy/ is actively used or deprecated",
     "Multiple auth patterns detected — unclear which is canonical"
@@ -2396,7 +3106,7 @@ Create `draft/guardrails.md` using the template from `core/templates/guardrails.
 
 **Include the Standard File Metadata header at the top of the file.**
 
-Ask which hard guardrails to enable (check items that apply to this project). The Learned Conventions and Learned Anti-Patterns sections start empty — they are populated automatically by the learn step at the end of init (brownfield only) and by quality commands over time.
+The template includes general hard guardrails (Git, Code Quality, Security, Testing) — ask which to enable for this project. The Learned Conventions and Learned Anti-Patterns sections start empty — they are populated automatically by the learn step at the end of init (brownfield only) and by quality commands over time.
 
 ## Step 5: Initialize Tracks
 
@@ -2431,9 +3141,7 @@ synced_to_commit: "{FULL_SHA}"
 <!-- No archived tracks -->
 ```
 
-## Step 6: Verify Directory Structure
-
-Ensure the directory structure exists (already created by Atomic File Staging or earlier steps):
+## Step 6: Create Directory Structure
 
 ```bash
 mkdir -p draft/tracks draft/.state
@@ -2460,15 +3168,15 @@ For **Brownfield** projects, announce:
 "Draft initialized successfully with comprehensive analysis!
 
 Created:
-- draft/.ai-profile.md (20-50 lines — always-injected compact project profile)
-- draft/.ai-context.md (200-400 lines — token-optimized AI context, self-contained)
-- draft/architecture.md (comprehensive human-readable engineering reference)
+- draft/.ai-profile.md (20-50 lines — ultra-compact always-injected profile, Tier 0)
+- draft/.ai-context.md (200-400 lines — token-optimized AI context, self-contained, Tier 1)
+- draft/architecture.md (comprehensive human-readable engineering reference, Tier 2)
 - draft/product.md
 - draft/tech-stack.md
 - draft/workflow.md
 - draft/guardrails.md (populated with learned conventions and anti-patterns from codebase scan)
 - draft/tracks.md
-- draft/.state/facts.json (atomic fact registry with temporal metadata and relationship graph)
+- draft/.state/facts.json (atomic fact registry with knowledge graph edges)
 - draft/.state/freshness.json (file-level hash baseline for incremental refresh)
 - draft/.state/signals.json (codebase signal classification)
 - draft/.state/run-memory.json (run metadata and unresolved questions)
@@ -2513,7 +3221,9 @@ Next steps:
 
 ## Condensation Subroutine
 
-This is a self-contained, callable procedure for generating `draft/.ai-context.md` from `draft/architecture.md`. Any skill that mutates `architecture.md` should execute this subroutine afterward to keep the derived context file in sync.
+> This subroutine is also available at `core/shared/condensation.md` for cross-skill reference.
+
+This is a self-contained, callable procedure for generating `draft/.ai-context.md` and `draft/.ai-profile.md` from `draft/architecture.md`. Any skill that mutates `architecture.md` should execute this subroutine afterward to keep the derived context files in sync.
 
 **Called by:** `draft init`, `draft init refresh`, `draft implement`, `draft decompose`, `draft coverage`, `draft index`
 
@@ -2522,20 +3232,35 @@ This is a self-contained, callable procedure for generating `draft/.ai-context.m
 | Input | Path | Description |
 |-------|------|-------------|
 | architecture.md | `draft/architecture.md` | Comprehensive human-readable engineering reference (source of truth) |
+| schema.yaml | `draft/graph/schema.yaml` | Graph metrics for tier computation (optional — skip if absent) |
 
 ### Outputs
 
 | Output | Path | Description |
 |--------|------|-------------|
-| .ai-context.md | `draft/.ai-context.md` | Token-optimized, machine-readable AI context (200-400 lines) |
-| .ai-profile.md | `draft/.ai-profile.md` | Ultra-compact always-injected project profile (20-50 lines) |
+| .ai-context.md | `draft/.ai-context.md` | Token-optimized, machine-readable AI context (tier-scaled budget) |
+| .ai-profile.md | `draft/.ai-profile.md` | Ultra-compact, always-injected project profile (20-50 lines) |
 
 ### Target Size
 
-- **Minimum**: 200 lines
-- **Maximum**: 400 lines
-- Under 200 lines indicates incomplete condensation — go back and ensure all sections are represented
-- Over 400 lines indicates insufficient compression — apply prioritization rules below
+Compute tier from `draft/graph/schema.yaml` after graph build:
+
+  M = stats.modules
+  F = stats.go_functions + stats.py_functions
+  P = stats.proto_rpcs
+
+| Tier | Label  | Condition                              | Budget        |
+|------|--------|----------------------------------------|---------------|
+| 1    | micro  | M≤5 AND F≤50 AND P≤10                 | 100–180 lines |
+| 2    | small  | M≤15 AND F≤300 AND P≤30               | 180–280 lines |
+| 3    | medium | M≤40 AND F≤1000 AND P≤100             | 280–400 lines |
+| 4    | large  | M≤100 AND F≤5000 AND P≤500            | 400–600 lines |
+| 5    | XL     | M>100 OR F>5000 OR P>500              | 600–900 lines |
+
+If `schema.yaml` does not exist: default to tier 2 (180–280 lines).
+
+- Below tier minimum: incomplete condensation — ensure all sections are represented
+- Above tier maximum: insufficient compression — apply prioritization rules below
 
 ### Procedure
 
@@ -2571,6 +3296,29 @@ Transform each `architecture.md` section into machine-optimized format using thi
 | File Structure | FILES | Concept-to-path mappings: `entry: path`, `config: path`, etc. |
 | Glossary | VOCAB | `term: definition` pairs |
 
+#### Step 3.5: Generate Graph Summary Sections
+
+If `draft/graph/schema.yaml` exists, generate these three sections from graph JSONL:
+
+**GRAPH:MODULES** (tier ≥ 2 only):
+- Read `draft/graph/module-graph.jsonl`, extract `kind: "node"` records and `kind: "edge"` records
+- For each node: `{name}|{sizeKB}KB|{lang_counts} → {comma-separated target modules}`
+- `lang_counts` = `go:N,proto:N,cc:N` from node.files (omit zero-count languages)
+- `deps` = edge targets where `source == this module name`
+- Order by sizeKB descending
+- Omit this section entirely for tier-1 codebases (≤5 modules) where Component Graph is sufficient
+
+**GRAPH:HOTSPOTS** (all tiers):
+- Read `draft/graph/hotspots.jsonl`, take top 10 by score (score = lines + fanIn × 50)
+- Format: `{file}|{lines}L|fanIn:{fanIn}`
+- Always include regardless of tier
+
+**GRAPH:CYCLES** (all tiers):
+- Inspect `draft/graph/module-graph.jsonl` edges; detect cycles using DFS
+- Output `None ✓` if no cycles
+- Otherwise output each cycle path on its own line: `"A → B → C → A"`
+- Always include — absence is positive signal that architecture is acyclic
+
 #### Step 4: Apply Compression
 
 - Remove all prose paragraphs — use structured key-value pairs instead
@@ -2581,13 +3329,16 @@ Transform each `architecture.md` section into machine-optimized format using thi
 
 #### Step 5: Prioritize Content
 
-If the output exceeds 400 lines, cut sections in this order (bottom = cut first):
+If the output exceeds the tier maximum, cut sections in this order (bottom = cut first):
 
 | Priority | Section | Rule |
 |----------|---------|------|
 | 1 (never cut) | INVARIANTS | Safety critical — preserve every invariant |
 | 2 (never cut) | EXTEND | Agent productivity critical — preserve all cookbook steps |
+| 3 (keep) | GRAPH:HOTSPOTS | Always include — needed for impact awareness |
+| 3 (keep) | GRAPH:CYCLES | Always include — always 1-2 lines; absence is signal |
 | 3 | GRAPH:* | Keep all component, dependency, and dataflow graphs |
+| 4 (scale) | GRAPH:MODULES | Include tier ≥ 2; omit for tier 1 |
 | 4 | INTERFACES | Keep all signatures |
 | 5 | CATALOG | Can abbreviate to top 20 entries per category |
 | 6 | CONFIG | Can abbreviate to `critical:Y` entries only |
@@ -2602,20 +3353,14 @@ Before writing `draft/.ai-context.md`, verify:
 - [ ] No references to `architecture.md` (file must be self-contained)
 - [ ] All invariants from architecture.md are preserved
 - [ ] Extension cookbooks are complete (an agent can follow them without other files)
-- [ ] Output is within 200-400 lines
+- [ ] Output is within tier budget bounds (compute from schema.yaml or default tier 2)
+- [ ] GRAPH:HOTSPOTS present (or note "No hotspot data available" if graph absent)
+- [ ] GRAPH:CYCLES present ("None ✓" or cycle list; or note if graph absent)
 - [ ] YAML frontmatter metadata is present at the top
 
 #### Step 7: Write Output
 
 Write the completed content to `draft/.ai-context.md`.
-
-#### Step 8: Regenerate Profile
-
-After writing `.ai-context.md`, regenerate `draft/.ai-profile.md` using Step 1.6 (Profile Generation). This ensures the profile always reflects the latest condensed context.
-
-#### Step 9: Update Fact Registry (if exists)
-
-If `draft/.state/facts.json` exists, update `last_verified_at` timestamps for facts whose source sections in `architecture.md` were modified. This keeps the fact registry in sync with architecture changes without requiring full re-extraction.
 
 ### Example Transformation
 
@@ -2650,36 +3395,90 @@ AuthService.Logic -[PostgreSQL]-> UserDB
 ### Reference for Other Skills
 
 Other skills that mutate `draft/architecture.md` should invoke this subroutine with:
-> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine defined in `core/shared/condensation.md`."
+> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine defined in `draft init`."
 
-> This subroutine is also available at `core/shared/condensation.md` for cross-skill reference.
+---
+
+## Profile Generation Subroutine
+
+This is a self-contained procedure for generating `draft/.ai-profile.md` from `draft/.ai-context.md`. Run after every Condensation Subroutine execution.
+
+### Purpose
+
+The profile is the **Tier 0 context** — an ultra-compact 20-50 line file always loaded by every Draft command. It provides the absolute minimum context needed for simple tasks (quick edits, config changes, small fixes) without requiring the full `.ai-context.md`.
+
+### Procedure
+
+#### Step 1: Read Source
+
+Read `draft/.ai-context.md`. Extract the YAML frontmatter metadata block.
+
+#### Step 2: Write YAML Frontmatter
+
+Start `draft/.ai-profile.md` with an updated YAML frontmatter block. Copy all `git.*` and `synced_to_commit` fields. Set:
+- `generated_by`: the calling command (e.g., `draft:init`, `draft:implement`)
+- `generated_at`: current ISO 8601 timestamp
+
+#### Step 3: Extract Profile Content
+
+From `.ai-context.md`, extract:
+
+1. **Stack** — Language, framework, database, auth method, API style, test framework, deploy target, build command, entry point (from `## META`)
+2. **INVARIANTS** — Top 3-5 critical invariants with `file:line` references (from `## INVARIANTS`)
+3. **NEVER** — 2-3 safety rules — the most dangerous things that must never happen (from `## INVARIANTS` or architecture.md safety rules)
+4. **Active Tracks** — List of currently active track IDs and one-line descriptions (from `draft/tracks.md`)
+5. **Recent Changes** — Last 3-5 significant commits (from `git log --oneline -5`)
+
+#### Step 4: Write Output
+
+Write to `draft/.ai-profile.md` using the template from `core/templates/ai-profile.md`.
+
+#### Step 5: Size Check
+
+- **Minimum**: 20 lines
+- **Maximum**: 50 lines
+- If over 50 lines, trim Recent Changes and reduce INVARIANTS to top 3
+
+---
 
 ## Cross-Skill Dispatch
 
-### Brownfield Projects
-When architectural debt is detected during discovery (outdated deps, complex coupling, missing tests):
-- Suggest: "Run `draft tech-debt` to catalog and prioritize the debt discovered during initialization"
+After initialization completes, suggest relevant follow-up skills based on project type:
 
-### All Projects — Post-Init Suggestions
-At completion, present categorized suggestions:
+### Brownfield Projects (Debt Signals Detected)
 
-**Start building:**
-- "Run `draft new-track` to create your first feature or bug fix track"
+If during architecture discovery (Step 1.5), anti-patterns or technical debt signals are detected in signal classification:
 
-**Quality & Testing:**
-- "Run `draft testing-strategy` to design a test strategy for this project"
-- "Run `draft bughunt` for initial codebase health check"
+```
+"Detected architectural debt patterns in this codebase. Consider running:
+  → draft tech-debt — Catalog and prioritize existing technical debt"
+```
 
-**Documentation:**
-- "Run `draft documentation readme` to generate or update the project README"
+### All Projects (Post-Init Suggestions)
 
-**Debugging & Operations:**
-- "Run `draft debug` for ad-hoc debugging sessions"
-- "Run `draft standup` to generate standup summaries from git activity"
+At completion (Step 6), after announcing next steps, present categorized follow-up skills:
+
+```
+What's Next:
+─────────────────────────────
+Start building:
+  → draft new-track "description" — Start a feature, bug fix, or refactor
+
+Quality & Testing:
+  → draft testing-strategy — Establish test coverage targets and testing pyramid
+  → draft tech-debt — Catalog technical debt (recommended for brownfield projects)
+
+Documentation:
+  → draft documentation readme — Generate README from discovered context
+
+Debugging & Operations:
+  → draft debug — Investigate a specific bug
+  → draft standup — Generate standup from recent activity
+```
 
 ### Jira Sync
-If Jira MCP is available and project has Jira integration configured:
-- Sync initialization artifacts via `core/shared/jira-sync.md`
+
+If Jira MCP is available and a project ticket is linked, sync initialization artifacts via `core/shared/jira-sync.md`.
 
 ---
 
@@ -3085,6 +3884,11 @@ Analyze extracted data to build dependency graph:
 1. Look for service name references in each service's architecture.md
 2. Look for API client imports or service URLs in tech-stack.md
 3. Look for mentions in product.md that reference other services
+4. **Graph-enriched detection** (if individual services have `draft/graph/` directories):
+   - Read each service's `draft/graph/proto-index.jsonl` to map which service defines vs consumes which RPCs
+   - Cross-reference proto consumers with proto producers to build precise inter-service dependency edges
+   - Read `draft/graph/module-graph.jsonl` per service for internal module structure
+   - This provides deterministic, code-level dependency data that supplements the heuristic name-matching above
 
 Build a dependency map:
 ```
@@ -3095,15 +3899,7 @@ api-gateway: [auth-service, billing-service]
 
 ### Step 6.1b: Cycle Detection
 
-Perform a depth-first walk of the dependency graph to detect circular dependencies:
-1. For each service, follow its `dependencies` array recursively
-2. Track visited nodes in the current path
-3. If a service appears in its own dependency chain, emit a WARNING in `dependency-graph.md`:
-   ```
-   WARNING: Circular dependency detected: A → B → C → A
-   ```
-4. Mark the cycle in `manifest.json` with `"circular": true` on the affected services
-5. Cycles are non-fatal — continue processing, but flag them prominently
+**Cycle detection:** Walk the dependency graph depth-first from each service. If a cycle is detected (service A depends on B depends on ... depends on A), emit a `> WARNING: Circular dependency detected: A → B → ... → A` line in `dependency-graph.md`, mark the back-edge with `circular: true` in `manifest.json`'s dependency entry, and continue processing. Do not fail on cycles — report and proceed.
 
 ### Step 6.2: Resolve Dependents (Reverse Lookup)
 
@@ -3297,7 +4093,7 @@ Read all service product.md files and synthesize:
 # Architecture: [Org/Product Name]
 
 > Synthesized from X service contexts by `draft index` on <date>.
-> This is a system-of-systems view. For service internals, see individual service drafts.
+> This is a system-of-systems view. For service internals, see individual service contexts.
 
 ## System Overview
 
@@ -3374,7 +4170,7 @@ graph TD
 
 ## Notes
 
-- For detailed service architecture, navigate to individual service drafts
+- For detailed service architecture, navigate to individual service contexts
 - This file is regenerable via `draft index`
 - Manual edits to non-synthesized sections will be preserved on re-index
 ```
@@ -3425,7 +4221,7 @@ graph TD
 
 ### 7.7 Synthesize `draft/.ai-context.md` (if not exists or is placeholder)
 
-After generating `draft/architecture.md`, derive a condensed `draft/.ai-context.md` using the Condensation Subroutine (defined in `core/shared/condensation.md`). This provides a token-optimized, self-contained AI context file at the root level aggregating all service knowledge.
+After generating `draft/architecture.md`, derive a condensed `draft/.ai-context.md` using the Condensation Subroutine (as defined in `core/shared/condensation.md`). This provides a token-optimized, self-contained AI context file at the root level aggregating all service knowledge.
 
 - Read the synthesized `draft/architecture.md`
 - Condense into 200-400 lines covering: system overview, service catalog, inter-service dependencies, shared infrastructure, cross-cutting patterns, critical invariants, and entry points
@@ -3462,6 +4258,36 @@ reindex_triggers:
   - "service added"
   - "service removed"
   - "weekly"
+```
+
+## Step 8.5: Refresh Graph Injection Slots
+
+For each initialized service with both `draft/architecture.md` AND `draft/graph/schema.yaml`:
+
+**A. Read current `architecture.md` into memory.**
+
+**B. Regenerate slot content from graph JSONL:**
+- `GRAPH:module-deps` → run `graph --repo . --out draft/graph --query --mode mermaid --symbol module-deps`
+  Parse JSON response, extract `.mermaid` string + `filtered` flag + stats
+- `GRAPH:proto-map` → run `graph --repo . --out draft/graph --query --mode mermaid --symbol proto-map`
+  Parse JSON response, extract `.mermaid` string + stats
+- `GRAPH:hotspots` → read `draft/graph/hotspots.jsonl`, build top-10 markdown table:
+  `| File | Lines | fanIn | Score |` with one row per hotspot, ordered by score descending
+
+**C. For each slot, find `<!-- GRAPH:{id}:START -->` ... `<!-- GRAPH:{id}:END -->` markers.**
+Replace entire block (inclusive of markers) with regenerated content.
+If a marker pair is absent (legacy file): insert slot at the designated position and log:
+`"Injected GRAPH:{id} slot into architecture.md (slot was absent — legacy file upgraded)"`
+
+**D. Write updated `architecture.md` back to disk.**
+Update frontmatter: `generated_by = "draft:index"`, `generated_at = now`.
+
+**E. Re-run Condensation Subroutine** (condensation.md) to propagate updated hotspot data into `.ai-context.md` GRAPH:HOTSPOTS and recompute tier budget. If `.ai-profile.md` exists, regenerate via Profile Generation Subroutine.
+
+**F. Report per service:**
+```
+✓ <service>: refreshed 3 graph slots (module-deps, proto-map, hotspots)
+✓ <service>: regenerated .ai-context.md (tier N, {lines} lines)
 ```
 
 ## Step 9: Completion Report
@@ -3527,6 +4353,8 @@ When regenerating, the skill:
 3. Preserves those sections while updating auto-generated parts
 4. Sections between `<!-- MANUAL START -->` and `<!-- MANUAL END -->` are never overwritten
 
+**Graph injection slots** (`<!-- GRAPH:...:START -->` / `<!-- GRAPH:...:END -->`) are ALWAYS overwritten during refresh — they are auto-managed. Never place manual content between these markers. Use `<!-- MANUAL START -->` / `<!-- MANUAL END -->` for content you want preserved near a slot.
+
 ---
 
 ## New Track Command
@@ -3570,6 +4398,12 @@ If missing, tell user: "Project not initialized. Run `draft init` first."
 - Read `draft/workflow.md` — TDD preference, commit conventions, review process
 - Read `draft/guardrails.md` (if exists) — hard guardrails, learned conventions, learned anti-patterns
 - Read `draft/tracks.md` — existing tracks to check for overlap or dependencies
+- **Scan recent track impact memory** (overlap detection): for each completed track in `draft/tracks/*/metadata.json` updated within the last 30 days, read the `impact` block (if present). Build a map `module → [recent_track_ids]`. After Step 4 (scope distillation), once the candidate modules for the new track are known, intersect them with this map. If overlap exists, surface it in the intake summary:
+  ```
+  Overlap warning: track <id> recently touched modules <A>, <B>.
+  Review draft/tracks/<id>/metadata.json#impact before proceeding.
+  ```
+  This is informational, not blocking — the user decides whether to proceed, depend on the prior track, or rebase scope.
 
 4. Load guidance references:
 - Read `core/templates/intake-questions.md` — structured questions for intake
@@ -3581,18 +4415,15 @@ Create a short, kebab-case ID from the description (use the stripped description
 - "Add user authentication" → `add-user-auth`
 - "Fix login bug" → `fix-login-bug`
 
-If the description is empty (e.g., `--quick` with no text), ask the user: "What should this track be called? (brief description)"
-
-Check if `draft/tracks/<track_id>/` already exists. If collision detected, append `-<ISO-date>` suffix (e.g., `feature-auth-2026-02-21`). If the suffixed path also exists, append `-2`, `-3`, etc. until a free path is found.
+Check if `draft/tracks/<track_id>/` already exists. If collision detected, append `-<ISO-date>` suffix (e.g., `feature-auth-2026-02-21`). Verify the suffixed path is also free before proceeding.
 
 ### Branch Creation (Toolchain-Aware)
 
-Read `draft/workflow.md` → `## Toolchain` section to determine VCS mode:
-- **git mode:** `git checkout -b <track_id>`
-- **cot mode with Jira ticket:** `cot checkout -t <JIRA_ID> -s <track_id>`
-- **cot mode without Jira ticket:** `cot checkout <track_id>`
+See `core/shared/vcs-commands.md` for command conventions.
 
-If no toolchain section found, default to git mode.
+```bash
+git checkout -b <track_id>
+```
 
 ## Step 1.5: Quick Mode Path (`--quick` only)
 
@@ -3603,7 +4434,7 @@ Skip all intake conversation. Ask only two questions:
 1. "What exactly needs to change? (1-2 sentences)"
 2. "How will you know it's done? (list acceptance criteria)"
 
-Then create the track directory and generate both files directly:
+Then generate both files directly:
 
 ```bash
 mkdir -p draft/tracks/<track_id>
@@ -3668,22 +4499,18 @@ Next: draft implement
 
 Create the track directory and draft files immediately with skeleton structure:
 
-```bash
-mkdir -p draft/tracks/<track_id>
-```
-
 ### Create `draft/tracks/<track_id>/spec-draft.md`:
 
 **MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
 
 ```bash
-git branch --show-current 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo "none"  # LOCAL_BRANCH
+git branch --show-current                    # LOCAL_BRANCH
 git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
-git rev-parse HEAD 2>/dev/null || echo "none"                      # FULL_SHA
-git rev-parse --short HEAD 2>/dev/null || echo "none"              # SHORT_SHA
-git log -1 --format=%ci HEAD 2>/dev/null || echo "none"            # COMMIT_DATE
-git log -1 --format=%s HEAD 2>/dev/null || echo "none"             # COMMIT_MESSAGE
-git status --porcelain 2>/dev/null | head -1 | wc -l               # 0 = clean, >0 = dirty
+git rev-parse HEAD                           # FULL_SHA
+git rev-parse --short HEAD                   # SHORT_SHA
+git log -1 --format=%ci HEAD                 # COMMIT_DATE
+git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
+git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
 ```
 
 ```markdown
@@ -3968,21 +4795,27 @@ After each answer:
 
 **Checkpoint:** "Acceptance criteria so far: [list]. Missing anything?"
 
-### Step 3A.5: Cross-Skill Integration
+---
 
-At this point, check for cross-skill dispatch opportunities:
+### Step 3A.5: Cross-Skill Integration (Feature/Refactor)
 
-**Refactor Tracks → Tech-Debt Offer:**
-If track type is "refactor" (detected from description keywords: refactor, clean up, reorganize, migrate, upgrade):
+#### Refactor Tracks → Tech-Debt Offer
+
+If track type is refactor:
 ```
-"Run `draft tech-debt` to scope this refactor before writing the spec? [Y/n]"
+"Want to run a tech-debt analysis to prioritize what to address?
+  → draft tech-debt scans 6 debt categories with prioritization
+  Run tech-debt analysis? [Y/n]"
 ```
-- If accepted: run tech-debt analysis, feed findings into spec scope section
-- If declined: proceed with manual scoping
+If accepted: invoke `draft tech-debt`, use its prioritized output to scope the refactor spec.
 
-**Design Decision Detection → ADR Suggestion:**
-If the spec involves any of: new technology adoption, architectural boundary changes, API redesign, data model changes:
-- Suggest: "This involves a significant design decision. Run `draft adr` to document it? [Y/n]"
+#### Design Decision Detection → ADR Suggestion
+
+If spec introduces technology not in `tech-stack.md` or changes service boundaries in `.ai-context.md`:
+```
+"This involves a significant design decision. Consider running:
+  → draft adr to document the architectural decision"
+```
 
 ---
 
@@ -4018,46 +4851,74 @@ AI contribution: Suggest investigation approach, reference debugging patterns.
 
 Update spec-draft.md with bug-specific structure after gathering sufficient context.
 
-### Step 3B.5: Auto-Triage Pipeline
-
-For bug tracks, execute this automated triage pipeline:
+### Step 3B.5: Auto-Triage Pipeline (Bug Tracks)
 
 **Trigger:** Track type is bug/RCA AND any of: Jira ticket ID found, description contains "incident", "outage", "SEV", "regression", "crash".
 
-If trigger conditions not met, skip to Step 4.
+When triggered, execute the auto-triage pipeline before proceeding to Step 4:
 
-1. **Gather External Context:**
-   - If Jira ticket provided: pull via MCP (`get_issue()`, `get_issue_description()`, `get_issue_comments()`)
-   - Extract URLs, log paths, stack traces, reproduction steps, affected services
-   - Use `curl`/`wget` to fetch any URLs mentioned (dashboards, error pages, API responses)
-   - Use `ssh` to access log locations on remote nodes (if paths like `/home/log/`, node IPs mentioned)
+#### Triage Step 1: Gather External Context
 
-2. **Offer Debug Session:**
-   "Run `draft debug` to investigate before writing the spec? [Y/n]"
-   - If accepted: launch debug session, feed findings back into spec
-   - If declined: proceed with spec generation from available context
+If Jira ticket provided:
+1. Pull ticket via Jira MCP: `get_issue()`, `get_issue_description()`, `get_issue_comments()`
+2. Extract from ticket: URLs, log paths, stack traces, reproduction steps, affected services
+3. Use `curl`/`wget` to fetch any URLs mentioned (dashboards, error pages, API responses)
+4. Use `ssh` to access log locations on remote nodes (if paths like `/home/log/`, node IPs mentioned)
+5. Collect all gathered data into a triage context bundle
 
-3. **RCA Analysis (if sufficient context):**
-   - Apply 5 Whys methodology (reference `core/agents/rca.md`)
-   - Classify root cause type
-   - Assess blast radius using `.ai-context.md` module boundaries
+#### Triage Step 2: Offer Debug Session
 
-4. **Generate rca.md:**
-   - Save to `draft/tracks/<id>/rca.md` using `core/templates/rca.md` template
-   - This feeds into `draft implement` as investigation context
+```
+"Bug track detected with [Jira context / error description]. Run a structured debug session before writing the spec?
+  → draft debug will help reproduce and isolate the issue
+  Run debug session? [Y/n]"
+```
 
-5. **Jira Sync:**
-   - If ticket linked: attach rca.md and post comment via `core/shared/jira-sync.md`
+If accepted:
+- Invoke `draft debug` with gathered triage context
+- Feed the Debug Report into spec-draft.md "Reproduction" and "Root Cause Hypothesis" sections
 
-6. **Developer Checkpoint:**
-   "Root cause hypothesis: [summary]. Blast radius: [scope]. Proceed with spec generation? [Y/n]"
-   - "Want me to write regression tests for this? [Y/n]"
+#### Triage Step 3: RCA Analysis
+
+If debug session produced findings:
+- Invoke RCA agent methodology from `core/agents/rca.md`
+- Perform 5 Whys analysis using debug findings
+- Assess blast radius from `.ai-context.md`
+- Quantify SLO impact
+
+#### Triage Step 4: Generate rca.md
+
+Create `draft/tracks/<track_id>/rca.md` using the template from `core/templates/rca.md`:
+- Include root cause, classification, timeline, evidence, prevention items
+- Include YAML frontmatter with git metadata
+- Link to debug report and gathered evidence
+
+#### Triage Step 5: Sync to Jira
+
+If Jira ticket linked, sync via `core/shared/jira-sync.md`:
+- Attach `rca.md` to ticket
+- Post comment: "[draft] rca-complete: Root cause identified — {1-line summary}. Prevention: {count} items."
+
+#### Triage Step 6: Developer Checkpoint
+
+```
+"RCA complete. Findings:
+  Root cause: {summary}
+  Classification: {type}
+  Blast radius: {affected modules}
+
+  → Want me to write regression tests for this? [Y/n]
+  → Ready to proceed with the fix? [Y/n]"
+```
+
+Only proceed to spec/plan generation after developer approval.
 
 ### Step 3B.6: Incident Context Detection
 
-Check if incident keywords detected in description (outage, incident, P0, SEV1, production down):
-- If postmortem exists: load as context for spec generation
-- Suggest: "Consider running `draft incident-response postmortem` for formal post-incident analysis"
+If track description contains "incident", "outage", "SEV", or "postmortem":
+- Check for existing postmortem: `ls draft/tracks/*/incident-*.md 2>/dev/null`
+- If none found, suggest: "Run `draft incident-response postmortem` first to capture incident context."
+- If found, feed postmortem findings into spec-draft.md.
 
 ---
 
@@ -4160,6 +5021,19 @@ Use fixed 3-phase structure:
 
 Reference `core/agents/rca.md` for detailed process.
 
+### Conditional Plan Tasks (Auto-Embedded)
+
+Based on track context, automatically include these tasks in the appropriate plan phase:
+
+- **If track modifies production code:** Add final task in last phase:
+  `- [ ] Run draft deploy-checklist before deploying`
+
+- **If spec mentions new APIs, services, or components:** Add documentation task:
+  `- [ ] Update documentation (run draft documentation api|runbook)`
+
+- **If testing-strategy.md exists or TDD enabled:** Add in Phase 1:
+  `- [ ] Verify testing strategy covers this track (run draft testing-strategy if not done)`
+
 Present plan-draft.md for review.
 
 ---
@@ -4222,11 +5096,7 @@ Count all `- [ ]` task lines in `plan.md` and set `tasks.total` in `metadata.jso
 Before updating tracks.md, verify metadata.json was written successfully:
 
 ```bash
-# Validate JSON (try python3 first, fall back to node, then jq)
-cat draft/tracks/<track_id>/metadata.json | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null \
-  || node -e "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'))" < draft/tracks/<track_id>/metadata.json 2>/dev/null \
-  || jq . draft/tracks/<track_id>/metadata.json >/dev/null 2>&1 \
-  || echo "INVALID"
+cat draft/tracks/<track_id>/metadata.json | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null || echo "INVALID"
 ```
 
 If invalid or missing:
@@ -4290,20 +5160,40 @@ Key decisions documented in spec.md Conversation Log.
 
 Next: Review the spec and plan, then run `draft implement` to begin."
 
+---
+
 ## Cross-Skill Dispatch
 
-### Conditional Plan Tasks
-When generating plan.md, auto-embed these tasks based on context:
-- All tracks: add "Run `draft testing-strategy`" task if no testing strategy exists
-- Feature tracks with new APIs: add "Run `draft documentation api`" task
-- All tracks: add "Run `draft deploy-checklist`" as a final pre-deployment verification task
+### Jira Sync at Completion
 
-### At Completion
-- **Jira sync:** If ticket linked, attach spec.md and plan.md, post comment: "[draft] spec-complete: Specification and plan generated for track {id}" via `core/shared/jira-sync.md`
-- **Bug tracks:** "Run `draft debug track {id}` to begin structured investigation"
-- **Feature tracks:** "Review the spec and plan, then run `draft implement` to begin"
-- If track scope is large or involves multiple modules: "Run `draft decompose` to break this into modules? [Y/n]"
-- **Refactor tracks:** "Run `draft tech-debt` to catalog debt items before implementation"
+If Jira ticket is linked (from spec.md or metadata.json), sync via `core/shared/jira-sync.md`:
+- Attach `spec.md` and `plan.md` to ticket
+- Post comment: "[draft] spec-complete: Specification and plan generated for track {id}. {phase_count} phases, {task_count} tasks."
+
+### Completion Suggestions
+
+Based on track type, suggest relevant follow-ups:
+
+**Bug tracks:**
+```
+"Track ready for implementation. Also consider:
+  → draft incident-response postmortem — If this bug caused an incident
+  → git bisect — Find the exact commit that introduced this bug"
+```
+
+**Feature tracks:**
+```
+"Track ready for implementation.
+  Next: draft implement
+  Also: draft testing-strategy — Define test approach for this feature"
+```
+
+**Refactor tracks:**
+```
+"Track ready for implementation.
+  Next: draft implement
+  Also: draft adr — Document refactoring decisions"
+```
 
 ---
 
@@ -4357,6 +5247,10 @@ git log -1 --format="%s"
 git status --porcelain | head -1
 ```
 
+For track-scoped decomposition, also derive the human-readable track title used in the `track-architecture.md` H1:
+
+- `{TRACK_TITLE}` — first-level heading text from the active track's `spec.md` (the `# ...` line). If `spec.md` has no H1, fall back to the `{TRACK_ID}`.
+
 ### Metadata Template
 
 Insert this YAML frontmatter block at the **top of every generated file**:
@@ -4386,9 +5280,15 @@ synced_to_commit: "{FULL_SHA}"
 
 ## Step 1: Determine Scope
 
-Check for an argument:
+Parse `$ARGUMENTS` for flags first, then strip them before interpreting the remaining text as scope:
+
+- `--lld` → **LLD mode** — generate Section 6 (Low-Level Design) in addition to HLD. Strip from arguments before scope detection.
+
+Scope detection (on stripped arguments):
 - `project` or no argument with no active track → **Project-wide** decomposition → `draft/.ai-context.md`
 - Track ID or active track exists → **Track-scoped** decomposition → `draft/tracks/<id>/architecture.md`
+
+**LLD auto-trigger:** Even without `--lld`, LLD is generated automatically when any module in Step 3 is marked `Complexity: High`. Tell the developer when this triggers: "One or more modules are High complexity — generating LLD automatically."
 
 ## Step 2: Load Context
 
@@ -4431,6 +5331,18 @@ ls -d src/*/ lib/*/ app/*/ packages/*/ 2>/dev/null
 
 **What to ignore:** `node_modules/`, `__pycache__/`, `target/`, `dist/`, `build/`, `.git/`, vendored dependencies. Always respect `.gitignore` and `.claudeignore`.
 
+### Graph-Accelerated Discovery (if `draft/graph/` exists)
+
+When graph data is available, use it as the primary source for module discovery instead of manual scanning:
+
+- **Module boundaries**: Load `draft/graph/module-graph.jsonl` — exact module list with file counts per language (`.cc`, `.h`, `.go`, `.proto`, `.py`)
+- **Dependency edges**: Weighted inter-module dependencies with exact include counts — replaces manual import tracing
+- **Cycle detection**: Circular dependency paths already computed — use for identifying tight coupling and decomposition candidates
+- **Hotspots**: Load `draft/graph/hotspots.jsonl` — high-complexity files that may need further decomposition
+- **Per-module detail**: Load `draft/graph/modules/<name>.jsonl` for file-level graphs within modules of interest
+
+This data is deterministic and exhaustive. Prefer it over heuristic scanning when available. See `core/shared/graph-query.md`.
+
 ## Step 3: Module Identification
 
 Propose a module breakdown through dialogue:
@@ -4445,10 +5357,10 @@ For each module, define:
 
 ### Module Guidelines (see `core/agents/architect.md`)
 
-- Each module should have a single responsibility
-- Target 1-3 files per module
-- Every module needs a clear API boundary
-- **Minimal Coupling** — Modules should communicate through interfaces, not internals. Prefer explicit contracts over shared state.
+1. Each module should have a single responsibility
+2. Target 1-3 files per module
+3. Every module needs a clear API boundary
+4. **Minimal Coupling** — communicate through interfaces, not internals
 - Modules should be testable in isolation
 - Each module typically contains: API, control flow, execution state, functions
 
@@ -4529,14 +5441,30 @@ Parallel opportunities: config and database can start after logging.
 
 ## Step 5: Generate Architecture Context
 
-Write the architecture document using the template from `core/templates/architecture.md`:
+Template selection depends on scope:
+
+- **Project-wide** → `core/templates/architecture.md` (full 25-section reference)
+- **Track-scoped** → `core/templates/track-architecture.md` (HLD-focused, with optional LLD block)
 
 **Location:**
 - Project-wide: Update `draft/architecture.md` with the module changes, then run the Condensation Subroutine (defined in `core/shared/condensation.md`) to regenerate `draft/.ai-context.md`
 - Track-scoped: `draft/tracks/<id>/architecture.md`
 
-**Contents:**
-- Overview section (what the system/feature does, inputs, outputs, constraints)
+### Step 5a: HLD Generation (Track-Scoped, Always)
+
+For track-scoped decomposition, populate these HLD sections in the track-architecture template — do not leave placeholders:
+
+1. **§1 Overview** — pull from `spec.md` (Problem Statement, Technical Approach, Non-Functional Requirements). Name integration points from `draft/.ai-context.md`.
+2. **§2 Module Breakdown** — one block per module from Step 3, including status (`New` / `Modified` / `Existing`), responsibility, files, API surface, deps, complexity.
+3. **§3.1 Component Diagram** — Mermaid `flowchart TD` with three subgraphs: modules in scope, existing system modules this track touches, external collaborators (DB, queue, third-party API). Label edges with transport type when non-obvious.
+4. **§3.2 Data Flow** — Mermaid `flowchart LR` tracing the primary data transformation: input → validation → logic → persistence → output. Add a separate read-path diagram if the track has both.
+5. **§3.3 Sequence Diagrams** — one `sequenceDiagram` per acceptance criterion that crosses more than one module. Include at minimum: (a) the happy-path flow, (b) one error/failure path. Annotate gates and invariants with `Note over`.
+6. **§3.4 State Machine** — Mermaid `stateDiagram-v2` only if the track introduces or mutates stateful entities. Omit the section when not applicable — do not emit empty diagrams.
+7. **§4 Dependency Analysis** — from Step 4. ASCII graph + table with a `Cycle?` column.
+8. **§5 Implementation Order** — from Step 4 (topological sort + parallel opportunities).
+
+### Contents (common to both templates)
+
 - Module definitions with all fields from Step 3
 - Dependency diagram from Step 4
 - Dependency table from Step 4
@@ -4544,6 +5472,27 @@ Write the architecture document using the template from `core/templates/architec
 - Story placeholder per module (see `core/agents/architect.md` Story Lifecycle for how this gets populated during `draft implement`)
 - Status marker per module (`[ ] Not Started`)
 - Notes section for architecture decisions
+
+### Step 5b: LLD Generation (Gated)
+
+**Trigger:** `--lld` flag was passed in Step 1 **OR** any module in §2 has `Complexity: High`.
+
+**Skip condition:** None of the above. Leave §6 with the stub: _"LLD not generated. Run `draft decompose --lld` to expand."_
+
+When triggered, populate §6 of the track-architecture template. Refer to `core/agents/architect.md` for contract-design conventions.
+
+- **§6.1 Per-Module API Contracts** — for every module marked `New` or `Modified`, list every public function/method with: language-appropriate signature, param constraints, return shape, error types. Document preconditions, postconditions, and invariants (thread safety, idempotency, ordering).
+- **§6.2 Data Models & Schemas** — concrete type definitions for every new/modified entity. Fill the field table (type, nullability, default, validation). Include storage location, indexes/keys, and schema-migration path if this is a breaking change.
+- **§6.3 Error Handling & Retry Semantics** — one row per operation with non-trivial error handling. Classify each error (transient / permanent / timeout), specify retry policy, backoff, max attempts, fallback. Call out circuit-breaker thresholds and idempotency keys.
+- **§6.4 Algorithm Pseudocode** — include only for genuinely non-trivial logic. Skip for straightforward CRUD. Declare inputs, outputs, time/space complexity. Enumerate edge cases.
+
+### CHECKPOINT (MANDATORY)
+
+**STOP.** Present the generated `track-architecture.md` to the developer. Call out:
+- Which sections were populated vs. omitted (and why — e.g., "no state machine — track is stateless")
+- Whether LLD was generated, and the trigger (`--lld` flag or auto-triggered by High-complexity module X)
+
+**Wait for developer approval before proceeding to Step 6.**
 
 ## Step 6: Update Plan (Track-Scoped Only)
 
@@ -4642,15 +5591,40 @@ When revisiting decomposition (running `draft decompose` on an existing `.ai-con
 3. Follow the same checkpoint process for changes
 4. Update the document, preserving completed module statuses and stories
 
+---
+
 ## Cross-Skill Dispatch
 
-- **Suggested by:** `draft new-track` (large feature tracks)
-- **At completion, suggests:**
-  - "Run `draft testing-strategy` to design test plans for decomposed modules"
-  - "Run `draft documentation api` to document new module APIs"
-  - If design decisions were made: "Run `draft adr` to record the decomposition rationale"
-- **Dependency cycle detection:** If decomposition reveals dependency cycles or high coupling, suggest: "Run `draft tech-debt` to catalog and prioritize the coupling issues"
-- **ADR auto-invocation:** When decomposition involves breaking a monolith or major architectural boundary change, auto-invoke `draft adr` to record the decision
+### After Module Decomposition
+
+After defining module boundaries and interfaces:
+
+```
+"Decomposition complete. Consider:
+
+Testing:
+  → draft testing-strategy — Define per-module test boundaries and integration test strategy
+
+Documentation:
+  → draft documentation api <module> — Document public module interfaces
+
+Architecture:
+  → draft adr "Module boundary decisions for {project}" — Record decomposition rationale"
+```
+
+### Dependency Cycle Detection
+
+If dependency analysis (Step 4) detects cycles or high coupling:
+```
+"Detected dependency cycles / high coupling. Consider:
+  → draft tech-debt — Catalog architecture debt and prioritize remediation"
+```
+
+### ADR Auto-Invocation
+
+When decomposition involves breaking a monolith, choosing module boundaries, or extracting services:
+- Auto-invoke: "This decomposition is a significant architectural decision. Creating ADR to document rationale."
+- Invoke `draft adr "Module boundary decisions for {project}"`
 
 ---
 
@@ -4696,6 +5670,12 @@ Draft skills are designed for single-agent, single-track execution. Do not run m
    - Identify which invariants reference files this task will modify (same file or same module)
    - Keep matching invariants as **active constraints** for this task — these govern code generation, not just review
    - If invariants reference lock ordering, fail-closed behavior, or data integrity rules: these are non-negotiable during implementation
+9. **Load graph context** (if `draft/graph/schema.yaml` exists):
+   - Read `draft/graph/hotspots.jsonl` — check if any files this task will modify appear as hotspots
+   - If modifying a hotspot file (high fanIn), warn: "This task modifies {file} (fanIn={N}). Changes here affect many downstream files. Consider running a graph impact query."
+   - Read `draft/graph/modules/<module>.jsonl` for the module(s) being modified — gives file-level dependency context
+   - See `core/shared/graph-query.md` for on-demand query subroutines (callers, impact)
+10. Update the track's entry in `draft/tracks.md` from `[ ]` to `[~]` In Progress
 
 If no active track found:
 - Tell user: "No active track found. Run `draft new-track` to create one."
@@ -4704,7 +5684,6 @@ If no active track found:
 - Automatically enabled when `.ai-context.md` or `architecture.md` exists (file-based, no flag needed)
 - Track-level architecture.md created by `draft decompose`
 - Project-level `.ai-context.md` created by `draft init`
-9. **Update track status**: Update the track's entry in `draft/tracks.md` from `[ ]` to `[~] In Progress` (if not already in progress)
 
 ## Step 1.5: Readiness Gate (Fresh Start Only)
 
@@ -4721,7 +5700,7 @@ For each acceptance criterion in `spec.md`:
 ### Sync Check (if `.ai-context.md` exists)
 
 Compare the `synced_to_commit` values in the YAML frontmatter of `spec.md` and `plan.md`.
-- **Skip if** either file has no YAML frontmatter or no `synced_to_commit` field (quick-mode tracks omit it). If skipped, note: "Sync check skipped — quick-mode track (no frontmatter)."
+- **Skip if** either file has no YAML frontmatter or no `synced_to_commit` field (quick-mode tracks omit it).
 - If they differ: "⚠️ Spec and plan were synced to different commits — verify they are still aligned."
 
 ### Result
@@ -4734,6 +5713,25 @@ Readiness issues found (see above). Proceed anyway or update first? [proceed/upd
 - `update` → stop here and let the user refine spec or plan before re-running
 
 **No issues:** Print `Readiness check passed.` and continue to Step 2.
+
+## Step 1.7: Testing Strategy Loading
+
+Before starting TDD cycle for the first task:
+
+1. Check for testing strategy:
+   - Track-level: `draft/tracks/<id>/testing-strategy.md`
+   - Project-level: `draft/testing-strategy.md` or `draft/testing-strategy-latest.md`
+2. If found: load coverage targets, test boundaries, and strategy into TDD context
+3. If not found and TDD is enabled: suggest "Run `draft testing-strategy` to define test approach"
+
+### Bug Track Test Guardrail
+
+If track type is `bugfix` (from metadata.json):
+```
+BEFORE writing any test file:
+  ASK: "This is a bug fix track. Want me to write tests as part of the fix? [Y/n]"
+  If declined: skip TDD cycle, note in plan.md: "Tests: developer-handled"
+```
 
 ## Step 2: Find Next Task
 
@@ -4749,18 +5747,11 @@ Scan `plan.md` for the first uncompleted task:
 - "Resolve the blockage manually before continuing implementation"
 - Do NOT attempt to implement blocked tasks
 
-If resuming `[~]` task, check for partial work:
-1. **Detect existing changes**: Run `git diff --name-only` and `git diff --cached --name-only` to find uncommitted files related to this task
-2. **Check for partial implementation**: Read the task description, then scan the target files for TODO/FIXME markers or incomplete implementations
-3. **Assess state**: Does the partial work compile/pass lint? Run a quick validation (`build` or `lint` if available)
-4. **Decision**:
-   - If partial work is substantial and valid → continue from where it left off
-   - If partial work is broken or minimal → ask user: "Found partial work for this task. Continue from current state or start fresh?"
-   - If no partial work detected (task was just marked `[~]` but nothing changed) → proceed as new task
+If resuming `[~]` task, check for partial work.
 
 ## Step 2.5: Write Story (Architecture Mode Only)
 
-**Activation:** Only runs when architecture mode is enabled (Step 1.6) — i.e., any of `draft/tracks/<id>/architecture.md`, `draft/.ai-context.md`, or `draft/architecture.md` exists.
+**Activation:** Only runs when `.ai-context.md` or `architecture.md` exists (track-level or project-level).
 
 When the next task involves creating or substantially modifying a code file:
 
@@ -4802,7 +5793,7 @@ See `core/agents/architect.md` for story writing guidelines.
 
 ### Step 3.0: Design Before Code (Architecture Mode Only)
 
-**Activation:** Only runs when architecture mode is enabled (Step 1.6) — i.e., any of `draft/tracks/<id>/architecture.md`, `draft/.ai-context.md`, or `draft/architecture.md` exists.
+**Activation:** Only runs when `.ai-context.md` or `architecture.md` exists (track-level or project-level).
 **Skip for trivial tasks** - Config updates, type-only changes, single-function tasks where the design is obvious.
 
 #### 3.0a. Execution State Design
@@ -4941,33 +5932,6 @@ When a task involves refactoring existing code that lacks test coverage, run thi
 4. Characterization tests serve as a safety net — if they break during refactoring, the behavioral change is intentional or a regression
 - Reference: "Working Effectively with Legacy Code" (Michael Feathers)
 
-### Step 2.7: Testing Strategy Loading
-
-Before starting the TDD cycle, check for testing strategy context:
-
-1. Check for track-level strategy: `draft/tracks/<id>/testing-strategy.md`
-2. If not found, check project-level: `draft/testing-strategy.md`
-3. If found, load coverage targets and test boundaries as TDD context
-4. If not found, proceed with default TDD approach
-
-### Bug Track Test Guardrail
-
-If the current track type is `bugfix` (from `metadata.json`):
-
-**STOP** before writing any test:
-```
-ASK: "Root cause confirmed: [summary]. Want me to write a regression test for this fix? [Y/n]"
-```
-- If accepted: write regression test first (fails before fix, passes after)
-- If declined: note "Tests: developer-handled" in plan.md and proceed to fix
-
-### Bug Track RCA Integration
-
-For bug tracks, check if `draft/tracks/<id>/rca.md` exists:
-- If found: load as investigation context for the fix implementation
-- This provides root cause analysis, blast radius, and prevention items from the auto-triage pipeline
-- After fix is verified: update `draft/tracks/<id>/rca.md` Prevention Items with actual fix details
-
 ### If TDD Enabled:
 
 **Iron Law:** No production code without a failing test first.
@@ -5050,23 +6014,13 @@ When implementing new API endpoints, message handlers, or service-to-service int
 **3a. Implement**
 ```
 1. Implement the task as specified
-2. Run existing test suite if one exists (do NOT skip existing tests even when TDD is off)
-3. If no test suite exists, perform manual verification:
-   - For API changes: test with a sample request/response
-   - For UI changes: describe the visual state before and after
-   - For logic changes: trace through at least one happy path and one error path
-4. Show verification evidence (test output, screenshot, or trace)
-5. Announce: "Implementation complete — verified by [method]"
+2. Test manually or run existing tests
+3. Announce: "Implementation complete"
 ```
-
-**Minimum quality bar (even without TDD):**
-- Existing tests must still pass — never break them
-- New code must compile/lint without errors
-- Edge cases listed in spec.md must be addressed (not just the happy path)
 
 ### Implementation Chunk Limit (Architecture Mode Only)
 
-**Activation:** Only when architecture mode is enabled (Step 1.6).
+**Activation:** Only when `.ai-context.md` or `architecture.md` exists (track-level or project-level).
 
 If the implementation diff for a task exceeds **~200 lines**:
 
@@ -5096,22 +6050,17 @@ After completing each task:
    - Stage only files changed by this task (never `git add .`)
    - `git add <specific files>`
    - Verify staged changes exist before committing: `git diff --cached --quiet`. If nothing staged, skip the commit step.
-   - `git commit -m "type(<track_id>): task description"`
-   - **If commit fails:**
-     - Pre-commit hook failure → read hook output, fix the flagged issues, re-stage, and retry commit (do NOT use `--no-verify`)
-     - Lock file error (`index.lock`) → check for concurrent git processes; if none, remove the lock file and retry
-     - Other git error → report the error to user, mark task as `[~]` (in progress, not complete), do NOT proceed
+   - `git commit -m "type(<track_id>): task description"` (Conventional Commits — see `core/shared/vcs-commands.md`)
+   - If a Jira ticket is linked in `spec.md`, reference it in the commit body: `Refs: <JIRA_ID>`.
    - Get commit SHA: `git rev-parse --short HEAD`
    - Do NOT proceed to the next task without committing
    - Do NOT batch multiple tasks into one commit
 
 2. Update `plan.md`:
    - Change `[ ]` to `[x]` for the completed task
-   - Add the commit SHA next to the task: `[x] Task description [abc1234]`
+   - Add the commit SHA next to the task: `[x] Task description (abc1234)`
 
 3. Update `metadata.json`:
-   - Read current `metadata.json` first — verify `tasks.completed` is a number
-   - If malformed or missing: HALT with "metadata.json is corrupted — expected tasks.completed to be a number, got: [actual value]"
    - Increment `tasks.completed`
    - Update `updated` timestamp
 
@@ -5119,20 +6068,14 @@ After completing each task:
    - Read back `plan.md` - confirm task marked `[x]` with SHA
    - Read back `metadata.json` - confirm `tasks.completed` incremented
    - If EITHER verification fails:
-     - **First**, revert the task marker in `plan.md` from `[x]` to `[!]` (do not leave it as `[x]` if metadata is inconsistent)
-     - Add recovery message: "State update failed after commit <SHA>. Recovery: manually mark task `[x]` in plan.md line X, update metadata.json tasks.completed to Y"
-     - Specify which file(s) failed: plan.md, metadata.json, or both
+     - Mark task as `[!]` Blocked in plan.md
+     - Add recovery message: "State update failed after commit <SHA>. Recovery: manually edit plan.md line X to mark `[x]`, update metadata.json tasks.completed to Y"
      - HALT - require manual intervention before continuing
 
 5. If `.ai-context.md` or `architecture.md` exists for the track:
    - Update module status markers (`[ ]` → `[~]` when first task in module starts, `[~]` → `[x]` when all tasks complete)
    - Fill in Story placeholders with the approved story from Step 2.5
-   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.commit_message` to current HEAD. Update `draft/architecture.md` with structural changes, then run the Condensation Subroutine to regenerate `draft/.ai-context.md`:
-     1. Read the updated `draft/architecture.md`
-     2. Condense it into the token-optimized `.ai-context.md` format (see `core/templates/ai-context.md` for the target structure)
-     3. Preserve all `## INVARIANTS` and `## CONCURRENCY` sections verbatim (safety-critical, never summarize)
-     4. Update `synced_to_commit` in `.ai-context.md` frontmatter to match current HEAD
-     5. Full procedure details: `skills/init/SKILL.md` → "Condensation Subroutine" section
+   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.commit_message` to current HEAD. Update `draft/architecture.md` with structural changes, then run the Condensation Subroutine (defined in `core/shared/condensation.md`) to regenerate `draft/.ai-context.md`.
 
 ## Verification Gate (REQUIRED)
 
@@ -5156,16 +6099,9 @@ Before marking ANY task/phase/track complete:
 
 ---
 
-## Step 4.6: Phase Boundary Detection
-
-After completing Step 4 for each task, check whether the completed task was the **last task in its phase**:
-- Re-read `plan.md` and scan the current phase's task list
-- If ALL tasks in the current phase are now `[x]` → proceed to Step 5 (Phase Boundary Check)
-- If uncompleted tasks remain in the phase → return to Step 2 (Find Next Task)
-
 ## Step 5: Phase Boundary Check
 
-When all tasks in a phase are `[x]` (detected in Step 4.6):
+When all tasks in a phase are `[x]`:
 
 1. Announce: "Phase N complete. Running three-stage review."
 
@@ -5189,15 +6125,47 @@ When all tasks in a phase are `[x]` (detected in Step 4.6):
 
 See `core/agents/reviewer.md` for detailed review process.
 
+### Quick Review Alternative
+
+At phase boundaries, offer the lightweight alternative:
+```
+"Phase {N} complete. Review options:
+  1. Full three-stage review (recommended) — spec compliance + security + quality
+  2. draft quick-review — lightweight 4-dimension check (faster)
+  Choose [1/2, default: 1]:"
+```
+If quick-review chosen, invoke `draft quick-review` with the phase's changed files.
+
 2. Run verification steps from plan (tests, builds)
 3. Present review findings to user
 4. If review passes (no Critical issues):
    - Update phase status in plan
    - Update `metadata.json` phases.completed
+   - **Refresh blast-radius memory** (see "Impact Memory" subsection below)
    - Proceed to next phase
 5. If Critical/Important issues found:
    - Document issues in plan.md
    - Fix before proceeding (don't skip)
+
+### Impact Memory (blast-radius snapshot)
+
+After a phase passes review, refresh `metadata.json.impact` so future tracks can detect overlap with this work.
+
+1. **Compute touched files:** From `plan.md`, find the first commit SHA recorded for this track (earliest `[x]` line with `(<sha>)`). Run:
+   ```bash
+   git diff --name-only <first_sha>^..HEAD
+   ```
+   That is the `files_touched` list. Derive `modules_touched` as the unique top-level path segments (e.g. `auth/login.go` → `auth`).
+
+2. **Compute downstream blast radius (graph-aware, optional):** If `draft/graph/schema.yaml` exists, for each file in `files_touched` query:
+   ```bash
+   graph --repo . --out draft/graph --query --file <path> --mode impact
+   ```
+   Aggregate across all files: `downstream_files` = total unique downstream files (deduped), `downstream_modules` = union of `affected_modules`, `max_depth` = max across queries, `by_category` = sum of each query's `by_category`. If the graph is absent, leave these fields as zeros / empty arrays — the snapshot still records the directly-touched files.
+
+3. **Write metadata.json** with the populated `impact` block and `computed_at` set to the current timestamp.
+
+This snapshot is consumed by `draft new-track` to surface overlap warnings when a new track touches the same modules as a recently completed track.
 
 ## Step 6: Track Completion
 
@@ -5210,7 +6178,7 @@ When all phases complete:
      ## Review Settings
      - [x] Auto-review at track completion
      ```
-   - If enabled, invoke the review skill: `draft review track <track_id>` (this is a Draft skill invocation, not a shell command)
+   - If enabled, run `draft review track <track_id>`
    - Check review results:
      - If block-on-failure enabled AND critical issues found → HALT, require fixes
      - Otherwise, document warnings and continue
@@ -5218,14 +6186,8 @@ When all phases complete:
 2. Update `plan.md` status to `[x] Completed`
 3. Update `metadata.json` status to `"completed"`
 4. Update `draft/tracks.md`:
-   - Remove the track entry from `## Active` section
-   - Add to `## Completed` section using this format:
-     ```markdown
-     - [x] **<track_id>** — <title> (completed YYYY-MM-DD)
-     ```
-   - If no `## Completed` section exists, create it below `## Active`
-
-   **Write order (important for recovery):** plan.md first → metadata.json second → tracks.md last. If interrupted mid-update, `plan.md` is the source of truth — recovery reads plan.md status and reconstructs metadata.json and tracks.md from it.
+   - Move from Active to Completed section
+   - Add completion date
 
 5. **Verify completion state consistency (CRITICAL):**
    - Read back `plan.md` - confirm status `[x] Completed`
@@ -5253,15 +6215,6 @@ All acceptance criteria from spec.md should be verified.
 
 Next: Run `draft status` to see project overview."
 
-## Session Recovery
-
-If resuming `draft implement` in a new session (context was lost mid-implementation):
-
-1. **Detect state**: Read `plan.md` — find the first `[~]` or `[ ]` task. Check `metadata.json` for `tasks.completed` count.
-2. **Check git state**: Run `git log --oneline -5` and `git status` to verify last committed task matches plan.md's last `[x]` entry.
-3. **Reconcile mismatches**: If plan.md shows `[x]` for a task but no matching commit SHA exists in git log, the state update succeeded but the commit was lost (or vice versa). Fix the mismatch before continuing.
-4. **Resume**: Skip to Step 2 (Find Next Task). The readiness gate (Step 1.5) will be skipped automatically since `[x]` tasks exist.
-
 ## Error Handling
 
 **If blocked:**
@@ -5274,6 +6227,12 @@ If resuming `draft implement` in a new session (context was lost mid-implementat
   4. **Implement** - Regression test first, then fix
 - Do NOT attempt random fixes
 - Document root cause when found
+
+**Recommended:** Instead of inline debugging, invoke `draft debug` skill for a structured session:
+```
+"Task blocked: {description}. Run draft debug for structured investigation? [Y/n]"
+```
+The debug skill provides: Reproduce → Isolate → Diagnose → Fix methodology with debug report output.
 
 **If test fails unexpectedly:**
 - Don't mark complete
@@ -5325,32 +6284,46 @@ Phase Progress: N/M tasks
 Overall: X% complete
 ```
 
+---
+
 ## Cross-Skill Dispatch
 
-### At Phase Boundaries
-- **Review Offer:** At each phase boundary, present options:
-  ```
-  Phase {N} complete. Review options:
-    1. Full three-stage review (recommended)
-    2. draft quick-review — lightweight 4-dimension check (faster)
-    Choose [1/2, default: 1]:
-  ```
-- **Debug for Blocked Tasks:** When a task is marked `[!]` Blocked, instead of inline debugging, offer:
-  ```
-  Task blocked: {description}. Run draft debug for structured investigation? [Y/n]
-  ```
+### At Track Completion (Step 6)
 
-### At Track Completion
-Based on context, suggest relevant follow-ups:
-- If track modifies production code: "Run `draft deploy-checklist` to verify deployment readiness"
-- If track added new APIs or services: "Run `draft documentation api` to document new endpoints"
-- If implementation contains TODO/FIXME/HACK comments: "Run `draft tech-debt` to catalog debt items"
-- If new patterns or dependencies were introduced: "Run `draft adr` to record the decisions"
-- If testing strategy exists: "Run `draft coverage` to verify test targets were met"
+After announcing track completion, suggest relevant follow-ups based on context:
 
-### Jira Sync
-If a Jira ticket is linked in `metadata.json`:
-- At completion: post comment "[draft] implementation-complete: {n} tasks done across {m} phases" via `core/shared/jira-sync.md`
+**If track modifies production code:**
+```
+"Track complete! Consider:
+  → draft deploy-checklist — Pre-deployment verification"
+```
+
+**If track added new APIs/services/components:**
+```
+  → draft documentation — Update documentation for new components"
+```
+
+**If implementation contains TODO/FIXME/HACK comments:**
+```
+  → draft tech-debt — Catalog any new technical debt introduced"
+```
+
+**If new patterns or dependencies not in tech-stack.md:**
+```
+  → draft adr — Document this design decision"
+```
+
+### Jira Sync at Completion
+
+If Jira ticket linked, sync via `core/shared/jira-sync.md`:
+- Post comment: "[draft] implementation-complete: All {n} tasks done. Ready for review."
+
+### Bug Track with rca.md
+
+If implementing a bug track and `draft/tracks/<id>/rca.md` exists:
+- Load rca.md as context for the implementation
+- Reference root cause, blast radius, and prevention items during fix
+- After fix: update rca.md "Proposed Fix" section with actual fix details
 
 ---
 
@@ -5376,7 +6349,7 @@ You are computing and reporting code coverage for the active track or a specific
 2. Find active track from `draft/tracks.md`
 3. If track has `architecture.md` (track-level) or project has `.ai-context.md`, identify current module for scoping
 4. Look for `coverage_target` in `draft/workflow.md`. Check for per-module targets first (see Per-Module Coverage Enforcement below); if absent, default to 95%.
-5. Check if `draft/tracks/<id>/bughunt-report-latest.md` exists for cross-referencing (see Coverage-Bughunt Cross-Reference below)
+5. Check if `draft/tracks/<id>/bughunt-report-latest.md` (track scope) or `draft/bughunt-report-latest.md` (project scope) exists for cross-referencing (see Coverage-Bughunt Cross-Reference below)
 
 If no active track and no argument provided:
 - Tell user: "No active track. Provide a path or track ID, or run `draft new-track` first."
@@ -5450,7 +6423,9 @@ src/auth/jwt.ts:78       Defensive null check (unreachable via public API)
 ═══════════════════════════════════════════════════════════
 ```
 
-## Step 5b: Branch/Condition Coverage (Optional)
+## Step 6: Branch/Condition Coverage (Optional)
+
+If the project's test framework supports branch/condition coverage (e.g., Istanbul, coverage.py branch mode), execute this step. Otherwise skip to Step 7.
 
 Beyond line coverage, evaluate branch coverage for modules with complex conditional logic:
 
@@ -5467,7 +6442,7 @@ Beyond line coverage, evaluate branch coverage for modules with complex conditio
 
 Include branch coverage percentage in the report alongside line coverage when branch analysis is performed.
 
-## Step 6: Analyze Gaps
+## Step 7: Analyze Gaps
 
 For files below target (using per-module targets when configured — see Per-Module Coverage Enforcement):
 
@@ -5490,7 +6465,7 @@ For files below target (using per-module targets when configured — see Per-Mod
       - Expected: throws AuthError with code TOKEN_EXPIRED
    ```
 
-## Step 6b: Characterization Testing (Brownfield/Legacy Code)
+## Step 7b: Characterization Testing (Brownfield/Legacy Code)
 
 When encountering modules with 0% or very low coverage that need refactoring, do not attempt to write unit tests for untested legacy code directly. Instead, apply the Golden Master / Approval Testing approach (ref: Michael Feathers, "Working Effectively with Legacy Code"):
 
@@ -5506,7 +6481,7 @@ When encountering modules with 0% or very low coverage that need refactoring, do
 
 Present characterization testing recommendations in the gap analysis when applicable.
 
-## Step 6c: Mutation Testing Awareness
+## Step 7c: Mutation Testing Awareness
 
 After measuring line coverage (and branch coverage if applicable), prompt the engineer to consider mutation testing for critical modules. Mutation testing introduces small code changes (mutants) into the source; if existing tests still pass, the mutant "survived," indicating weak test assertions even at high line coverage.
 
@@ -5529,7 +6504,7 @@ After measuring line coverage (and branch coverage if applicable), prompt the en
 
 Include mutation testing recommendations in the report when applicable, but do not block coverage completion on mutation analysis — it is advisory.
 
-## Step 6d: Coverage-Bughunt Cross-Reference
+## Step 7d: Coverage-Bughunt Cross-Reference
 
 If a bughunt report exists (`draft/tracks/<id>/bughunt-report-latest.md` or `draft/bughunt-report-latest.md`):
 
@@ -5591,7 +6566,7 @@ src/utils/logger.ts       75.0%  [infrastructure: 70%]  PASS
 src/generated/api.ts       —     [generated: excluded]
 ```
 
-## Step 7: Developer Review
+## Step 8: Developer Review
 
 ### CHECKPOINT (MANDATORY)
 
@@ -5605,7 +6580,7 @@ Ask developer:
 
 **Wait for developer approval before recording results.**
 
-## Step 8: Record Results
+## Step 9: Record Results
 
 After developer approves:
 
@@ -5666,6 +6641,183 @@ When coverage is run again on the same track/module:
 2. Show delta: "Coverage improved from 87.3% to 96.2% (+8.9%)"
 3. Highlight newly covered lines
 4. Update all records with latest results
+
+---
+
+## Deploy Checklist Command
+
+When user says "deploy checklist" or "draft deploy-checklist [track <id>]":
+
+You are generating a pre-deployment verification checklist customized to this project's technology stack.
+
+## Red Flags — STOP if you're:
+
+- Deploying without a rollback plan
+- Skipping database migration verification
+- Deploying on Friday without explicit team approval
+- Pushing to production without monitoring in place
+- Ignoring failed checklist items marked as critical
+
+**Every deployment needs a rollback plan. No exceptions.**
+
+---
+
+## Pre-Check
+
+### 0. Capture Git Context
+
+Before starting, capture the current git state:
+
+```bash
+git branch --show-current    # Current branch name
+git rev-parse --short HEAD   # Current commit hash
+```
+
+Store this for the checklist header. The checklist is scoped to this specific branch/commit.
+
+### 1. Verify Draft Context
+
+```bash
+ls draft/ 2>/dev/null
+```
+
+If `draft/` doesn't exist, this skill can still run standalone — generate a generic checklist.
+
+### 2. Load Draft Context (if available)
+
+Read and follow the base procedure in `core/shared/draft-context-loading.md`.
+
+## Step 1: Parse Arguments
+
+Check for arguments:
+- `draft deploy-checklist` — Interactive: detect active track or ask for service name
+- `draft deploy-checklist <service>` — Generate checklist for named service
+- `draft deploy-checklist track <id>` — Generate from track's change scope
+
+If a track is active: read `draft/tracks/<id>/spec.md` and `plan.md` for change scope.
+
+## Step 2: Load Context
+
+1. Read `draft/tech-stack.md` — Identify deployment-relevant tech:
+   - Database type (migrations needed?)
+   - Container orchestration (K8s, Docker Compose?)
+   - CI/CD pipeline details
+   - Feature flag system
+   - Monitoring/alerting stack
+2. Read `draft/workflow.md` — Deployment conventions and verification gates
+3. Read `draft/.ai-context.md` — Service topology, dependencies
+
+## Step 3: Generate Checklist
+
+Generate a three-phase checklist customized to the project's tech stack. Adapt items based on what the project actually uses — omit irrelevant items (e.g., skip database items if there is no database) and add project-specific items discovered in context.
+
+### Phase 1: Pre-Deploy
+
+- [ ] **Tests:** All tests passing in CI
+- [ ] **Review:** Code reviewed and approved
+- [ ] **Migrations:** Database migrations tested on staging (if applicable)
+- [ ] **Migration Rollback:** Down-migration verified (if applicable)
+- [ ] **Feature Flags:** New features behind flags (if applicable)
+- [ ] **Config:** Environment variables and secrets verified for target environment
+- [ ] **Dependencies:** No known vulnerable dependencies (`npm audit` / `pip audit` / equivalent)
+- [ ] **Monitoring:** Alerting rules configured for new endpoints/services
+- [ ] **Rollback Plan:** Documented and tested (see Rollback Triggers below)
+- [ ] **Communication:** Team notified of deployment window
+- [ ] **Backup:** Database backup taken (if schema changes)
+- [ ] **Changelog:** Release notes or changelog updated
+- [ ] **API Compatibility:** Breaking changes documented and consumers notified
+
+### Phase 2: Deploy
+
+- [ ] **Method:** [Canary / Blue-Green / Rolling / Direct] — specify strategy
+- [ ] **Sequence:** Deploy order for multi-service changes documented
+- [ ] **Monitoring Dashboard:** [URL] open during deployment
+- [ ] **Smoke Tests:** Ready to run post-deploy
+- [ ] **Rollback Command:** `[specific rollback command]` ready to execute
+- [ ] **Health Checks:** Endpoints responding before traffic shift
+- [ ] **Traffic Shift:** Gradual rollout percentage plan (if canary/blue-green)
+- [ ] **Deployment Log:** Recording start time and each step completion
+
+### Phase 3: Post-Deploy
+
+- [ ] **Smoke Tests:** All passing
+- [ ] **Error Rate:** Below threshold ([X]% — from baseline)
+- [ ] **Latency:** Below threshold ([X]ms — p95 from baseline)
+- [ ] **Logs:** No unexpected errors in first 15 minutes
+- [ ] **Feature Verification:** New features working as expected
+- [ ] **Data Integrity:** No data corruption indicators
+- [ ] **Dependency Health:** Downstream services unaffected
+- [ ] **Cleanup:** Feature flags toggled, old code paths removed (if applicable)
+- [ ] **Documentation:** Runbook updated if operational procedures changed
+- [ ] **Notification:** Team notified of successful deployment
+
+### Rollback Triggers
+
+Initiate rollback if ANY of these occur:
+- Error rate exceeds 2x baseline
+- p95 latency exceeds 3x baseline
+- Data corruption detected
+- Critical user-facing functionality broken
+- Deployment stuck in partial state for >10 minutes
+- Health check failures on >10% of instances
+- Memory or CPU exceeding safe thresholds on deployed instances
+
+### Rollback Procedure
+
+1. Execute rollback command (documented in Phase 2)
+2. Verify previous version is serving traffic
+3. Confirm error rates return to baseline
+4. Investigate root cause before re-attempting deployment
+5. Post-mortem if rollback was triggered by data corruption or user impact
+
+## Step 4: Present and Track
+
+Present the checklist interactively. For each critical item (marked **bold**):
+- If unchecked and user wants to proceed: warn "Critical item unchecked: [item]. Are you sure? [y/N]"
+- Default: stop and address critical items
+
+Allow the user to:
+- Check off items as they complete them
+- Add custom items specific to this deployment
+- Mark items as N/A with justification
+
+## Step 5: Save Output
+
+**MANDATORY: Include YAML frontmatter with git metadata.** Follow `core/shared/git-report-metadata.md`.
+
+Include the report header table immediately after frontmatter:
+
+```markdown
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+```
+
+Save to:
+- Track-scoped: `draft/tracks/<id>/deploy-checklist.md`
+- Standalone: `draft/deploy-checklist-<timestamp>.md` with symlink `deploy-checklist-latest.md`
+
+```bash
+TIMESTAMP=$(date +%Y-%m-%dT%H%M)
+# Example: draft/deploy-checklist-2026-03-15T1430.md
+ln -sf deploy-checklist-${TIMESTAMP}.md draft/deploy-checklist-latest.md
+```
+
+## Cross-Skill Dispatch
+
+- **Invoked manually before deployment.**
+- **References:** `core/agents/ops.md` for production-safety mindset
+- **Jira sync:** If ticket linked, attach checklist and post comment via `core/shared/jira-sync.md`
+- **MCP:** GitHub MCP / `gh` CLI for PR details, Jira MCP for ticket context
+
+## Error Handling
+
+**If no tech-stack.md:** Generate generic checklist with all items, note: "Customize after running `draft init`"
+**If no active track:** Generate standalone checklist, ask which service/release
+**If no workflow.md:** Use sensible defaults, recommend documenting deployment conventions
 
 ---
 
@@ -5736,6 +6888,8 @@ Read and follow the base procedure in `core/shared/draft-context-loading.md`.
 - **Leverage Storage Topology** — Identify data loss risks at each tier (cache eviction without writeback, event log gaps, missing archive)
 - **Leverage Consistency Boundaries** — Find bugs at eventual consistency seams (stale reads, lost events, missing reconciliation)
 - **Leverage Failure Recovery Matrix** — Verify idempotency claims, check for partial failure states without recovery paths
+- **Leverage Graph Data** (if `draft/graph/` exists) — Load `module-graph.jsonl` for dependency awareness. Flag imports from unexpected modules (not in established dependency edges). Flag code in modules involved in dependency cycles as higher risk. Use `hotspots.jsonl` to prioritize analysis of high-complexity, high-fanIn files. See `core/shared/graph-query.md`.
+- **Leverage Learned Anti-Patterns** — If `draft/guardrails.md` exists, read the `## Learned Anti-Patterns` section. During the bug sweep, when a bug matches a learned anti-pattern, prefix the report entry with `[KNOWN-ANTI-PATTERN: {pattern name}]`. This distinguishes recurring documented patterns from newly discovered bugs, and signals that a systemic fix may be needed rather than a one-off patch.
 
 ### 2. Confirm Scope
 
@@ -6538,9 +7692,9 @@ func TestProcessInputRejectsMaliciousScript(t *testing.T) {
 ```
 
 Severity levels:
-- **Critical** - Data loss, security vulnerability, crashes in production, incorrect behavior affecting users
-- **Important** - Significant performance issues, edge case bugs, minor UX issues
-- **Minor** - Code quality concerns, maintainability issues, minor inconsistencies, cleanup opportunities
+- **Critical** — Blocks release, breaks functionality, security issue
+- **Important** — Degrades quality, creates tech debt
+- **Minor** — Style, optimization, edge cases
 
 ## Report Generation
 
@@ -6691,23 +7845,34 @@ Bugs that cannot have automated regression tests (config issues, documentation, 
 - **Use native frameworks** — pytest for Python, `go test` for Go, GTest for C++, Jest/Vitest for JS/TS, `cargo test` for Rust, JUnit for Java — never force a foreign test framework
 - **Learn from findings** — After report generation, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with newly discovered conventions and anti-patterns
 
+---
+
 ## Cross-Skill Dispatch
 
-- **Auto-invoked by:** `draft review` (with `--full` or `with-bughunt` flag)
-- **Suggests at completion:**
-  - If critical bugs found: "Run `draft debug` to investigate critical bugs with structured debugging"
-  - If regression suspected: use `git bisect` to find the exact commit that introduced this bug
-- If systemic patterns found: "Consider running `draft learn` to capture these patterns into guardrails"
-- **Feeds into:** `draft jira-preview` (bughunt report enriches Jira export)
-- **Jira sync:** If ticket linked, attach bughunt report and post comment: "[draft] bughunt-complete: Found {n} issues ({critical} critical, {important} important)" via `core/shared/jira-sync.md`
+### Suggestions at Completion
+
+After bughunt report generation:
+
+**If critical bugs found:**
+```
+"Critical bugs found. Consider:
+  → draft debug — Run structured debug session on critical finding #{n}
+  → git bisect — Find the exact commit that introduced the bug"
+```
 
 ### Test Writing Guardrail
 
-When generating regression tests during bughunt, follow the standard guardrail:
-- Always ask the developer before writing regression tests for bugs found
-- Format: "Want me to write regression tests for bugs #{list}? [Y/n]"
-- If declined: mark as "Tests: developer-handled" in the report
-- This guardrail does NOT apply to the regression test suite section which documents test recommendations (not actual test files)
+When offering to write regression tests for found bugs:
+```
+ASK: "Want me to write regression tests for the {n} bugs found? [Y/n]"
+```
+Never auto-write tests — always ask first.
+
+### Jira Sync
+
+If Jira ticket linked, sync via `core/shared/jira-sync.md`:
+- Attach `bughunt-report-latest.md` to ticket
+- Post comment: "[draft] bughunt-complete: Found {n} issues — {critical} critical, {major} major."
 
 ---
 
@@ -6880,7 +8045,7 @@ Once track is resolved:
 For project-level reviews (no track context):
 
 1. **Load Draft context (if available):**
-   Follow the base procedure in `core/shared/draft-context-loading.md`. Honor Accepted Patterns and enforce Guardrails as defined there.
+   Read and follow the base procedure in `core/shared/draft-context-loading.md`.
 
 2. **Note limitations:**
    - No spec.md → Skip Stage 1 (spec compliance)
@@ -6946,6 +8111,12 @@ For the files changed in the diff, perform static checks using `grep` or similar
 1. **Architecture Conformance:** Search for pattern violations documented in `draft/.ai-context.md`. (e.g. `import * from 'database'` in a React component).
 2. **Dead Code:** Check for newly exported functions/classes in the diff that have 0 references across the codebase.
 3. **Dependency Cycles:** Trace the import chains for new imports to ensure no circular dependencies (e.g., A → B → C → A) are introduced.
+4. **Graph Boundary Check** (if `draft/graph/module-graph.jsonl` exists):
+   - For each changed file, identify its module from the graph
+   - Check if any new cross-module includes were added in the diff
+   - Verify they follow the established dependency direction from `module-graph.jsonl` edges
+   - Flag reverse-direction dependencies (module A now depends on module B, but only B→A existed before) as "Potential architecture violation — new dependency direction"
+   - Check if changes introduce files in modules listed in graph cycles — flag as higher risk
 4. **Security Scan (OWASP):** Scan the diff for:
    - Hardcoded secrets and API keys
    - SQL injection risks (string concatenation in queries)
@@ -7079,7 +8250,7 @@ For each flagged function, report: file path, function name, estimated complexit
 
 #### Adversarial Pass (When Zero Findings)
 
-If Stage 3 produces zero findings across all four dimensions, do NOT accept "clean" without one more look. Ask these 5 questions explicitly:
+If Stage 3 produces zero findings across all four dimensions, do NOT accept "clean" without one more look. Ask these 7 questions explicitly:
 
 1. **Error paths** — Is every error/exception handled? Are any failure modes silently swallowed?
 2. **Edge cases** — Are there boundary conditions (empty input, max values, concurrent access) not covered by tests?
@@ -7229,9 +8400,9 @@ ln -sf review-report-<timestamp>.md draft/tracks/<id>/review-report-latest.md
 ## Integrations
 
 ### Bug Hunt Results
-- **Critical bugs:** N found
-- **High severity:** N found
-- **Medium severity:** N found
+- **Critical:** N found
+- **Important:** N found
+- **Minor:** N found
 - Full report: `./bughunt-report-latest.md`
 
 ---
@@ -7496,16 +8667,211 @@ draft review commits main...feature-branch
 draft review track my-feature with-bughunt
 ```
 
+---
+
 ## Cross-Skill Dispatch
 
-- **Auto-invokes:** `draft coverage` after Stage 3 if TDD is enabled for the track
-- **At completion, suggests based on findings:**
-  - If tech debt patterns found: "Run `draft tech-debt` to catalog and prioritize debt items"
-  - If documentation gaps: "Run `draft documentation` to address documentation findings"
-  - If design decisions need recording: "Run `draft adr` to document architectural decisions"
-- If architecture concerns found in review: "Consider running `draft deep-review` for a production-grade module audit"
-- If review passes and track modifies production code: "Consider running `draft deploy-checklist` before deployment"
-- **Jira sync:** If ticket linked, attach review report and post comment: "[draft] review-complete: {verdict} — {n} findings ({critical} critical)" via `core/shared/jira-sync.md`
+### Auto-Invoke at Completion
+
+- **Coverage check:** If TDD enabled in workflow.md, auto-run `draft coverage` and include results in review report
+
+### Suggestions at Completion
+
+After review completion, based on findings:
+
+**If significant code quality findings:**
+```
+"Review complete. Consider:
+  → draft tech-debt — Catalog and prioritize the technical debt found"
+```
+
+**If new public APIs lack documentation:**
+```
+  → draft documentation api — Document new API endpoints"
+```
+
+**If undocumented design decisions discovered:**
+```
+  → draft adr — Record architectural decisions found during review"
+```
+
+### Jira Sync
+
+If Jira ticket linked, sync via `core/shared/jira-sync.md`:
+- Attach `review-report-latest.md` to ticket
+- Post comment: "[draft] review-complete: {PASS/FAIL}. {n} findings: {critical} critical, {suggestions} suggestions."
+
+---
+
+## Quick Review Command
+
+When user says "quick review" or "draft quick-review [file|pr <number>]":
+
+You are performing a lightweight, ad-hoc code review. This is the fast alternative to `draft review` — no track context needed, focused on a specific PR, diff, or file set.
+
+## Red Flags — STOP if you're:
+
+- Reviewing without reading the code first
+- Providing generic feedback not grounded in the actual code
+- Missing security implications in authentication/authorization code
+- Ignoring error handling paths
+- Reviewing a whole module when asked for a specific file
+
+**Read the code. Ground every finding in a specific line.**
+
+---
+
+## Pre-Check
+
+### 0. Capture Git Context
+
+Before starting, capture the current git state:
+
+```bash
+git branch --show-current    # Current branch name
+git rev-parse --short HEAD   # Current commit hash
+```
+
+Store this for the review report header. The review is scoped to this specific branch/commit.
+
+### 1. Load Draft Context (if available)
+
+```bash
+ls draft/ 2>/dev/null
+```
+
+If `draft/` exists, read and follow `core/shared/draft-context-loading.md`. This enriches review with project patterns, guardrails, and accepted patterns from `tech-stack.md`.
+
+If no draft context, proceed with generic review — still valuable.
+
+## Step 1: Parse Arguments
+
+Check for arguments:
+- `draft quick-review` — Review staged changes (`git diff --cached`) or current branch diff
+- `draft quick-review <file>` — Review specific file(s)
+- `draft quick-review <PR-URL>` — Review a pull request (via GitHub MCP / `gh` CLI)
+- `draft quick-review <commit-range>` — Review specific commits
+
+Determine the diff to review:
+1. If PR URL: fetch via GitHub MCP or `gh pr diff <num>`
+2. If file path: read the file(s)
+3. If commit range: `git diff <range>`
+4. Default: `git diff HEAD~1..HEAD` (last commit)
+
+## Step 2: Four-Dimension Review
+
+Review the code across four dimensions. For each finding, cite the specific `file:line`.
+
+### Dimension 1: Security
+
+- Authentication/authorization gaps
+- Input validation and sanitization
+- SQL injection, XSS, CSRF vulnerabilities
+- Secrets or credentials in code
+- OWASP Top 10 patterns
+- Insecure deserialization
+
+### Dimension 2: Performance
+
+- N+1 query patterns
+- Missing indexes for frequent queries
+- Unnecessary allocations in hot paths
+- Missing caching opportunities
+- Unbounded loops or recursion
+- Large payload serialization
+
+### Dimension 3: Correctness
+
+- Logic errors, off-by-one, null handling
+- Race conditions in concurrent code
+- Error handling gaps (uncaught exceptions, missing error paths)
+- Edge cases not covered
+- State management issues
+- Contract violations (API, type, invariant)
+
+### Dimension 4: Maintainability
+
+- Code clarity and naming
+- DRY violations (repeated logic)
+- Dead code or unreachable paths
+- Missing or misleading comments
+- Test coverage for new logic
+- Consistency with project patterns (from tech-stack.md if available)
+
+## Step 3: Classify Findings
+
+Classify each finding:
+
+| Severity | Action | Description |
+|----------|--------|-------------|
+| Critical | Must fix before merge | Security vulnerabilities, data corruption risks, crashes |
+| Important | Should fix | Performance issues, logic bugs, error handling gaps |
+| Suggestion | Nice to have | Style improvements, refactoring opportunities, documentation |
+
+## Step 4: Generate Review Report
+
+Present findings organized by severity:
+
+```markdown
+## Quick Review: {scope description}
+
+**Reviewer:** Draft Quick Review
+**Scope:** {files/PR/commits reviewed}
+**Date:** {ISO_TIMESTAMP}
+
+### Summary
+- Critical: {count}
+- Important: {count}
+- Suggestion: {count}
+
+### Verdict: {PASS | PASS WITH NOTES | NEEDS CHANGES}
+
+### Findings
+
+#### Critical
+1. **[finding title]** — `file:line`
+   [description and recommendation]
+
+#### Important
+...
+
+#### Suggestion
+...
+
+### What Went Well
+[2-3 positive observations about the code — good patterns, clean logic, thorough error handling]
+```
+
+If track-scoped, save to `draft/tracks/<id>/quick-review-<timestamp>.md`.
+
+**MANDATORY: Include YAML frontmatter with git metadata when saving.** Follow `core/shared/git-report-metadata.md`.
+
+Include the report header table immediately after frontmatter:
+
+```markdown
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+```
+
+## Cross-Skill Dispatch
+
+- **Offered by:** `draft implement` at phase boundaries as lightweight alternative to full review
+- **Escalates to:** `draft review` if critical findings require deeper analysis
+- **Feeds into:** `draft learn` (findings update guardrails via pattern learning)
+- **Suggests at completion:**
+  - If many findings: "Consider running `draft review` for full three-stage analysis"
+  - If security findings: "Consider running `draft deep-review` for security audit"
+- **Jira sync:** If ticket linked, attach review and post summary via `core/shared/jira-sync.md`
+
+## Error Handling
+
+**If no diff/file found:** "No changes to review. Specify a file, PR URL, or commit range."
+**If MCP unavailable for PR:** Fall back to local git diff. "GitHub MCP and `gh` CLI unavailable. Reviewing local diff instead."
+**If no draft context:** Proceed with generic review patterns. Note: "Review enriched when draft context is available (run `draft init`)."
 
 ---
 
@@ -7559,6 +8925,7 @@ If `.ai-context.md` is missing, check for `draft/architecture.md` as a fallback 
 
 ### Phase 1: Context & Structural Analysis
 - Load Draft context following the procedure in `core/shared/draft-context-loading.md`. Use loaded context to understand intended boundaries and critical invariants.
+- **Load Learned Anti-Patterns** — If `draft/guardrails.md` exists, read the `## Learned Anti-Patterns` section before analysis begins. During the audit, when an issue matches a learned anti-pattern, prefix the finding with `[KNOWN-ANTI-PATTERN: {pattern name}]`. This separates newly discovered issues from documented recurring patterns and allows the report to recommend systemic remediation rather than isolated fixes.
 - Map the module's full dependency graph (imports, injected services, external calls)
 - Trace the complete lifecycle: initialization → processing → persistence → cleanup
 - Identify all entry points and exit paths
@@ -7700,14 +9067,220 @@ Skip pattern learning if the analysis found zero findings.
 
 After generating the report, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with patterns discovered during this module audit. Module-level reviews often reveal architecture and concurrency conventions that are valuable for future analysis.
 
+---
+
 ## Cross-Skill Dispatch
 
-- **Suggested by:** `draft review` (when deep architectural issues suspected), `draft implement` (track completion for critical modules)
-- **At completion, suggests based on findings:**
-  - If architecture debt found: "Run `draft tech-debt` to catalog and prioritize the debt items"
-  - If design decisions need recording: "Run `draft adr` to document the architectural decisions"
-  - If documentation gaps found: "Run `draft documentation runbook` to create operational documentation"
-- **Jira sync:** If ticket linked, attach deep-review report and post summary via `core/shared/jira-sync.md`
+### Suggestions at Completion
+
+After deep-review audit completion:
+
+**If architecture debt found:**
+```
+"Architecture debt identified in module audit. Consider:
+  → draft tech-debt — Catalog and prioritize the architecture debt
+  → draft adr — Document undiscovered design decisions found during review"
+```
+
+**If documentation gaps found:**
+```
+  → draft documentation runbook — Generate operational runbook for this module"
+```
+
+---
+
+## Testing Strategy Command
+
+When user says "test strategy" or "draft testing-strategy [track <id>|path]":
+
+You are designing a testing strategy and test plan for this project or track.
+
+## Red Flags — STOP if you're:
+
+- Writing a strategy without understanding the codebase
+- Setting unrealistic coverage targets (100% is rarely appropriate)
+- Focusing only on unit tests and ignoring integration/E2E
+- Ignoring existing test infrastructure and conventions
+- Not considering the testing pyramid for this project's architecture
+
+**A good testing strategy matches the architecture. Not every project needs the same pyramid.**
+
+---
+
+## Pre-Check
+
+### 0. Capture Git Context
+
+Before starting, capture the current git state:
+
+```bash
+git branch --show-current    # Current branch name
+git rev-parse --short HEAD   # Current commit hash
+```
+
+Store this for the report header. The strategy is scoped to this specific branch/commit.
+
+### 1. Verify Draft Context
+
+```bash
+ls draft/ 2>/dev/null
+```
+
+If `draft/` doesn't exist, this skill can still run standalone with reduced context.
+
+### 2. Load Draft Context (if available)
+
+Read and follow the base procedure in `core/shared/draft-context-loading.md`.
+
+## Step 1: Parse Arguments
+
+- `draft testing-strategy` — Project-wide strategy (default if no active track)
+- `draft testing-strategy track <id>` — Track-scoped strategy
+- `draft testing-strategy module <name>` — Module-scoped strategy
+
+## Step 2: Analyze Codebase
+
+1. **Identify component types:**
+   - APIs (REST, GraphQL, gRPC)
+   - Data pipelines (ETL, streaming)
+   - Frontend (React, Vue, etc.)
+   - Infrastructure (Terraform, K8s configs)
+   - Libraries/SDKs
+   - CLI tools
+
+2. **Discover existing tests:**
+   ```bash
+   find . -name "*test*" -o -name "*spec*" | head -50
+   ```
+   Identify: test frameworks, test directories, existing coverage config, test runners.
+
+3. **Assess current coverage:**
+   Check for existing coverage reports or configuration:
+   ```bash
+   ls coverage/ .nyc_output/ htmlcov/ .coverage 2>/dev/null
+   ```
+
+4. **Read project context:**
+   - `draft/tech-stack.md` — Test frameworks, testing conventions
+   - `draft/workflow.md` — TDD preferences (strict/flexible/none)
+   - `draft/.ai-context.md` — INVARIANTS section (critical paths), module boundaries, concurrency model
+   - `draft/guardrails.md` — Anti-patterns that need test coverage
+   - `draft/product.md` — Critical user flows that demand E2E tests
+
+## Step 3: Design Strategy
+
+### Testing Pyramid
+
+Tailor to the project architecture:
+
+```
+        ┌─────────┐
+        │  E2E    │  Few, critical paths only
+        ├─────────┤
+        │ Integr. │  Service boundaries, DB, APIs
+        ├─────────┤
+        │  Unit   │  Business logic, utilities
+        └─────────┘
+```
+
+Adjust the pyramid shape per architecture. A microservices backend may need a wider integration band. A UI-heavy app may need more E2E. A library may be almost entirely unit tests.
+
+### Per-Component Strategy
+
+| Component Type | Unit | Integration | E2E | Focus |
+|---------------|------|-------------|-----|-------|
+| API endpoints | Input validation, handlers | DB queries, auth | Critical flows | Contract testing |
+| Data pipelines | Transform logic | Source/sink connections | Full pipeline | Data integrity |
+| Frontend | Component rendering, hooks | API integration | User journeys | Visual regression |
+| Infrastructure | Config validation | Resource provisioning | Deployment | Drift detection |
+| Libraries | Public API surface | Cross-module | Consumer scenarios | Backward compat |
+| CLI tools | Argument parsing, logic | File I/O, system calls | Full workflows | Exit codes, output |
+
+### Coverage Targets
+
+Set realistic targets based on component criticality:
+- **Critical paths** (from .ai-context.md INVARIANTS): 95%+
+- **Business logic**: 85-90%
+- **Utilities/helpers**: 80%
+- **Infrastructure/config**: 70%
+- **Generated code**: Exclude from targets
+- **Vendor/third-party wrappers**: 60%
+
+### Test Quality Guidelines
+
+Coverage alone is insufficient. Include guidance on:
+- **Assertion density:** At least one meaningful assertion per test (not just "doesn't throw")
+- **Boundary testing:** Edge cases, empty inputs, max values, off-by-one
+- **Error paths:** Test failure modes, not just happy paths
+- **Isolation:** Unit tests must not depend on external services, filesystem, or network
+- **Determinism:** No time-dependent, order-dependent, or flaky tests
+- **Naming:** Test names describe the scenario and expected outcome
+
+## Step 4: Gap Analysis
+
+Compare current state to targets:
+1. Run test discovery to count existing tests per module
+2. Identify modules with zero test coverage
+3. Identify critical paths (from INVARIANTS) without integration tests
+4. Identify user flows (from product.md) without E2E coverage
+5. Identify anti-patterns (from guardrails.md) without regression tests
+6. Prioritize gaps by risk: high-risk untested > low-risk untested
+
+Present as a gap matrix:
+
+| Module | Current Tests | Target | Gap | Risk | Priority |
+|--------|--------------|--------|-----|------|----------|
+| ... | ... | ... | ... | ... | ... |
+
+## Step 5: Generate Test Plan
+
+Priority test cases to write, ordered by impact:
+
+1. Tests for critical invariants (from .ai-context.md)
+2. Tests for anti-patterns (from guardrails.md) — regression prevention
+3. Integration tests for service boundaries
+4. E2E tests for critical user flows (from product.md)
+5. Regression tests for known bugs
+6. Property-based tests for complex business logic (if framework supports it)
+7. Performance tests for latency-sensitive paths
+
+For each priority test, specify:
+- **What:** Description of the test scenario
+- **Why:** Which invariant, anti-pattern, or flow it protects
+- **How:** Test type (unit/integration/E2E), framework, key assertions
+- **Where:** File path where the test should live
+
+## Step 6: Save Output
+
+**MANDATORY: Include YAML frontmatter with git metadata.** Follow `core/shared/git-report-metadata.md`.
+
+Include the report header table immediately after frontmatter:
+
+```markdown
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+```
+
+Save to:
+- Project-wide: `draft/testing-strategy.md`
+- Track-scoped: `draft/tracks/<id>/testing-strategy.md`
+
+## Cross-Skill Dispatch
+
+- **Auto-loaded by:** `draft implement` (before TDD cycle)
+- **Suggested by:** `draft decompose` (after module definition), `draft init` (after setup)
+- **Feeds into:** `draft coverage` (measurement against targets set here)
+- **References:** `draft bughunt` findings as regression test candidates
+
+## Error Handling
+
+**If no test infrastructure found:** Recommend test framework based on tech-stack.md, include setup steps needed before tests can be written
+**If no draft context:** Generate generic strategy, suggest running `draft init` for better results
+**If conflicting test patterns found:** Document both patterns, recommend consolidation as a tech-debt item
 
 ---
 
@@ -7761,6 +9334,14 @@ If it exists, read it and internalize:
 - Current Hard Guardrails (checked items)
 - Current Learned Conventions (existing entries)
 - Current Learned Anti-Patterns (existing entries)
+
+**Then verify core guardrails integrity (backfill if missing):**
+
+Check if `draft/guardrails.md` contains the C++/Systems Hard Guardrails from `core/guardrails.md`. Detection: look for the marker heading `### C++/Systems — Object Lifecycle & Memory Safety`.
+
+- **If missing AND project contains C++ code:** The file predates `core/guardrails.md`. Backfill by inserting the full C++/Systems Hard Guardrails sections from `core/templates/guardrails.md` (G1.x–G7.x, all pre-checked `[x]`) into the `## Hard Guardrails` section, after any existing general guardrails. Preserve all existing entries. Announce: "Backfilled C++/Systems Hard Guardrails (G1.x–G7.x) from core/guardrails.md into draft/guardrails.md."
+- **If missing AND project has no C++ code:** Skip — these guardrails only apply to C++ projects.
+- **If present:** No action — core guardrails already integrated.
 
 ### 1.2: Check for Legacy Guardrails (migration path)
 
@@ -7900,6 +9481,58 @@ For each candidate pattern:
 
 ---
 
+### 2.6: Git History Signal Mining
+
+Mine git commit history for pattern signals that code scanning misses. Run only if the project is a git repository.
+
+```bash
+git log --oneline --no-merges -500
+```
+
+Scan the output for recurring message patterns (3+ occurrences of the same type):
+
+| Commit pattern | Signal |
+|---------------|--------|
+| `fix: don't X` / `fix: never X` | Team keeps violating X → anti-pattern candidate |
+| `refactor: replace X with Y` | X is declining, Y is the replacement → mark X as `declining: true` |
+| `chore: enforce X` / `chore: add X check` | X is being formalized → convention candidate |
+| `revert: ` followed by same topic 3+ times | That topic is consistently problematic → anti-pattern candidate |
+
+**Rules:**
+- Do NOT add git-only signals as standalone entries. Use them only to adjust confidence of patterns already found in Step 2.2.
+- If a pattern appears in both commit history AND code (3+ occurrences): increase confidence by one level.
+- If a pattern appears only in commit history but not in current code: note as `historically_recurring: true` — do not add as active anti-pattern.
+
+**Recency weighting** — for each candidate pattern from Step 2.2, check when the files containing it were last modified:
+
+```bash
+git log --follow --oneline -1 -- {file_containing_pattern}
+```
+
+- Modified within 90 days AND pattern persists → add `recently_active: true` to the entry
+- Not modified in 12+ months → add `stale: true` — lower enforcement priority
+
+---
+
+### 2.7: Graph-Aware Severity Enrichment
+
+If `draft/graph/hotspots.jsonl` exists, derive objective severity for all anti-pattern candidates based on the fanIn of files where the pattern was found.
+
+For each anti-pattern candidate from Step 2.2:
+1. Check if any evidence files appear in `draft/graph/hotspots.jsonl`
+2. Take the highest fanIn value across all evidence files:
+   - fanIn ≥ 10 → `graph_severity: critical` (breakage propagates to many callers)
+   - fanIn 5–9 → `graph_severity: high`
+   - fanIn 1–4 → `graph_severity: medium`
+   - fanIn 0 or file not in hotspots.jsonl → `graph_severity: low`
+3. If no graph data exists → `graph_severity: unresolved`
+
+Collect all evidence files with fanIn ≥ 5 for the `high_fanin_files` field.
+
+When `graph_severity` differs from the subjectively assigned `severity`, use `graph_severity` as the enforcement priority in quality commands — it is objective and reproducible.
+
+---
+
 ## Step 3: Apply Confidence Threshold
 
 Follow the threshold from `core/shared/pattern-learning.md`:
@@ -7981,6 +9614,8 @@ Follow the write procedure in `core/shared/pattern-learning.md`:
 3. For existing patterns: update evidence count, confidence, `last_verified`
 4. Update YAML frontmatter `synced_to_commit`
 
+**Cap enforcement:** Maintain a maximum of 50 learned entries per section. If at capacity, replace the oldest `medium` confidence entry that has not been re-verified in 90+ days (per `core/shared/pattern-learning.md`).
+
 ### Entry Format — Convention
 
 ```markdown
@@ -7989,9 +9624,9 @@ Follow the write procedure in `core/shared/pattern-learning.md`:
 - **Confidence:** high | medium
 - **Evidence:** Found in N files — `path/file1.ext:line`, `path/file2.ext:line`, `path/file3.ext:line`
 - **Discovered at:** YYYY-MM-DD (when Draft first observed this pattern)
-- **Established at:** ~YYYY-MM-DD (when this pattern was introduced, via git blame)
+- **Established at:** YYYY-MM-DD (when the pattern entered the codebase, via git blame)
 - **Last verified:** YYYY-MM-DD
-- **Last active:** YYYY-MM-DD (when source files using this pattern were last modified)
+- **Last active:** YYYY-MM-DD (when source files containing this pattern were last modified)
 - **Discovered by:** draft:learn on YYYY-MM-DD
 - **Description:** [What the pattern is and why it's intentional]
 ```
@@ -8002,26 +9637,19 @@ Follow the write procedure in `core/shared/pattern-learning.md`:
 ### [Anti-Pattern Name]
 - **Category:** security | reliability | performance | correctness | concurrency
 - **Severity:** critical | high | medium
+- **graph_severity:** critical | high | medium | low | unresolved  (fanIn-derived from Step 2.7; "unresolved" if no graph data)
+- **high_fanin_files:** `path/file.go` (fanIn:12), `path/other.go` (fanIn:7)  (omit line if none meet fanIn ≥ 5)
 - **Evidence:** Found in N files — `path/file1.ext:line`, `path/file2.ext:line`
 - **Discovered at:** YYYY-MM-DD (when Draft first observed this pattern)
-- **Established at:** ~YYYY-MM-DD (when this pattern was introduced, via git blame)
+- **Established at:** YYYY-MM-DD (when the pattern entered the codebase, via git blame)
 - **Last verified:** YYYY-MM-DD
-- **Last active:** YYYY-MM-DD (when source files using this pattern were last modified)
+- **Last active:** YYYY-MM-DD (when source files containing this pattern were last modified)
+- **recently_active:** true | false  (true if any evidence file modified within 90 days)
+- **stale:** true | false  (true if all evidence files unmodified for 12+ months)
 - **Discovered by:** draft:learn on YYYY-MM-DD
 - **Description:** [What the pattern is and why it's problematic]
 - **Suggested fix:** [Brief description of the correct approach]
 ```
-
-### Determining Temporal Metadata
-
-When writing entries, gather dual-layer timestamps:
-
-1. **Discovered at**: Today's date (when the pattern scan runs)
-2. **Established at**: Run `git blame` on one of the evidence files and find the oldest commit date for the pattern-relevant lines. Use approximate date (`~YYYY-MM-DD`).
-3. **Last verified**: Today's date
-4. **Last active**: Run `git log -1 --format="%ad" --date=short -- {evidence_file}` on each evidence file and take the most recent date
-
-This enables temporal reasoning: if `established_at` is old but `last_active` is recent, the pattern is well-established and actively used. If `last_active` is >6 months old, the pattern may be declining (cross-reference with Step 2.3 temporal analysis).
 
 ---
 
@@ -8085,8 +9713,6 @@ After `draft learn` populates guardrails.md, all quality commands automatically:
 | **Learned Anti-Patterns** | Always flag these patterns as bugs |
 | **Unchecked Hard Guardrails** | Ignore (not enforced) |
 
-Maintain a maximum of 50 learned entries per section. If at capacity, replace the oldest medium confidence entry that has not been re-verified in 90+ days.
-
 This creates a **continuous improvement loop**:
 1. Quality command runs → discovers patterns → updates guardrails.md
 2. Next quality command run → reads updated guardrails.md → fewer false positives, catches known-bad patterns
@@ -8104,13 +9730,6 @@ This creates a **continuous improvement loop**:
 | Learn framework defaults as conventions | Only learn project-specific patterns |
 | Remove entries on re-scan | Update evidence/dates, never delete |
 | Learn from test/mock code | Focus on production source code |
-
-## Cross-Skill Dispatch
-
-- **Related shared procedure:** `core/shared/pattern-learning.md` is run inline by `draft implement`, `draft review`, `draft bughunt`, and `draft deep-review` to update `draft/guardrails.md` automatically. The `draft learn` skill provides a deeper, standalone pattern scan beyond what the inline procedure captures.
-- **Fed by:** `draft bughunt` (systemic patterns), `draft deep-review` (architecture patterns), `draft incident-response` (incident patterns)
-- **Updates:** `draft/guardrails.md` with learned conventions and anti-patterns
-- **No downstream dispatch** — learn is a terminal skill that updates guardrails for all quality skills to consume
 
 ---
 
@@ -8190,6 +9809,103 @@ If argument is `supersede <number>`:
 5. In the NEW ADR's References section, add: "Supersedes ADR-<old_number>"
 6. Stop here after updating.
 
+### Evaluate Mode
+
+If argument starts with `evaluate`:
+- `draft adr evaluate <proposal or description>` — Evaluate a design proposal
+
+1. Read the proposal (from arguments, pasted text, file path, or ask user to describe)
+2. Load project context: `draft/tech-stack.md`, `draft/.ai-context.md`, `draft/architecture.md`
+3. Check existing ADRs in `draft/adrs/` for related decisions
+4. Evaluate against six dimensions:
+   - **Architecture alignment:** Does it fit current patterns?
+   - **Tech stack consistency:** Does it introduce technology not in tech-stack.md?
+   - **Invariant impact:** Does it affect critical invariants from .ai-context.md?
+   - **Scalability:** How does it scale with data/users/team growth?
+   - **Operational complexity:** What new operational burden does it add?
+   - **Team familiarity:** Does the team have experience with this approach?
+
+5. Output evaluation report (do not save to file — display directly):
+
+```
+# Design Evaluation: <Title>
+
+## Summary
+[1-2 sentence assessment]
+
+## Alignment Analysis
+| Dimension | Assessment | Notes |
+|-----------|------------|-------|
+| Architecture alignment | ✅ Aligned / ⚠️ Partial / ❌ Conflict | [detail] |
+| Tech stack consistency | ✅/⚠️/❌ | [detail] |
+| Invariant impact | ✅/⚠️/❌ | [detail] |
+| Scalability | ✅/⚠️/❌ | [detail] |
+| Operational complexity | ✅/⚠️/❌ | [detail] |
+| Team familiarity | ✅/⚠️/❌ | [detail] |
+
+## Risks
+- [Risk and mitigation strategy]
+
+## Recommendation
+[Accept as-is / Accept with modifications / Reconsider approach / Reject — with reasoning]
+
+## Next Steps
+If this leads to a decision: `draft adr "<decision title>"` to document it
+If this needs a full design: `draft adr design "<system>"` to design it
+```
+
+Stop here after evaluation.
+
+### Design Mode
+
+If argument starts with `design`:
+- `draft adr design <system or component>` — Full system/component design
+
+1. Gather requirements:
+   - Ask user or extract from arguments: What does it need to do?
+   - **Functional requirements** — Features and behaviors
+   - **Non-functional requirements** — Scale, latency, availability, cost targets
+   - **Constraints** — Team size, timeline, existing tech stack (from `draft/tech-stack.md`)
+
+2. Load project context: same as ADR creation (Step 3 of main flow)
+
+3. Design using 5-section framework:
+
+   **Section 1: Requirements**
+   - Functional requirements (bulleted list)
+   - Non-functional requirements (table: dimension, target, rationale)
+   - Constraints and assumptions
+
+   **Section 2: High-Level Design**
+   - Component diagram (ASCII)
+   - Data flow description
+   - API contracts (key endpoints/interfaces)
+   - Storage choices with rationale
+
+   **Section 3: Deep Dive**
+   - Data model design (key entities and relationships)
+   - API endpoint design (REST/GraphQL/gRPC with examples)
+   - Caching strategy (what, where, TTL, invalidation)
+   - Queue/event design (if applicable)
+   - Error handling and retry logic
+
+   **Section 4: Scale & Reliability**
+   - Load estimation (requests/sec, data growth)
+   - Scaling strategy (horizontal vs vertical)
+   - Failover and redundancy
+   - Monitoring and alerting requirements
+
+   **Section 5: Trade-off Analysis**
+   - Key trade-offs made (table: decision, alternative, why this choice)
+   - What to revisit as the system grows
+   - Risks and mitigations
+
+4. Determine design document number using same ADR numbering (Step 4 of main flow)
+5. Save to `draft/adrs/<number>-design-<kebab-case-title>.md` with YAML frontmatter and git metadata (same format as ADR creation, Step 5)
+6. Present for review (same as Step 6 of main flow)
+
+Stop here after design.
+
 ## Step 2: Gather Decision Context
 
 If in interactive mode (no title provided), ask:
@@ -8201,6 +9917,8 @@ If in interactive mode (no title provided), ask:
 If title provided, proceed directly with the title.
 
 ## Step 3: Load Project Context
+
+Follow the base procedure in `core/shared/draft-context-loading.md`.
 
 Read relevant Draft context:
 - `draft/.ai-context.md` — Current architecture patterns, invariants, data paths, and constraints. Falls back to `draft/architecture.md` for legacy projects.
@@ -8341,69 +10059,6 @@ Proposed → Accepted → [Deprecated | Superseded by ADR-xxx]
 - **Deprecated** — Decision no longer relevant (context changed)
 - **Superseded** — Replaced by a newer decision (link to replacement)
 
-### Evaluate Mode
-
-When invoked as `draft adr evaluate <proposal>`:
-
-1. Read the proposal description
-2. Load context: `.ai-context.md`, `tech-stack.md`, `guardrails.md`
-3. Evaluate against 6 dimensions:
-
-| Dimension | Question |
-|-----------|----------|
-| Architecture Alignment | Does this fit the current system topology and module boundaries? |
-| Tech Stack Consistency | Does this align with accepted technologies and patterns? |
-| Invariant Impact | Does this violate or weaken any documented invariants? |
-| Scalability | How does this affect system scaling characteristics? |
-| Operational Complexity | Does this increase deployment, monitoring, or maintenance burden? |
-| Team Familiarity | Does the team have experience with this approach? |
-
-4. Output evaluation directly (not saved to file):
-```
-Proposal: {description}
-Verdict: RECOMMEND / CAUTION / REJECT
-
-| Dimension | Score | Notes |
-|-----------|-------|-------|
-| Architecture Alignment | ✓/△/✗ | [notes] |
-...
-```
-
-### Design Mode
-
-When invoked as `draft adr design <system>`:
-
-1. Read the system/component name
-2. Load full context: `architecture.md`, `.ai-context.md`, `tech-stack.md`, `product.md`
-3. Generate a 5-section design document:
-
-**Section 1: Requirements**
-- Functional requirements (from product.md and description)
-- Non-functional requirements (from tech-stack.md constraints)
-- Constraints (from guardrails.md)
-
-**Section 2: High-Level Design**
-- Component diagram
-- Data flow
-- API surface
-
-**Section 3: Deep Dive**
-- Detailed component design
-- Data models
-- Error handling strategy
-
-**Section 4: Scale & Reliability**
-- Scaling approach
-- Failure modes and recovery
-- SLO targets
-
-**Section 5: Trade-off Analysis**
-- Alternatives considered
-- Why this approach
-- What we're giving up
-
-4. Save to `draft/adrs/` with ADR numbering: `draft/adrs/<number>-design-<kebab-case-name>.md`
-
 ## Error Handling
 
 **If no draft/ directory:**
@@ -8416,12 +10071,986 @@ When invoked as `draft adr design <system>`:
 **If superseding non-existent ADR:**
 - Warn: "ADR-<number> not found. Check `draft/adrs/` for valid ADR numbers."
 
+---
+
+## Debug Command
+
+When user says "debug bug" or "draft debug [description|track <id>]":
+
+You are conducting a structured debugging session following systematic investigation methodology.
+
+## Red Flags — STOP if you're:
+
+- Making code changes before reproducing the bug
+- Guessing at the cause instead of tracing data/control flow
+- Trying multiple fixes simultaneously ("shotgun debugging")
+- Skipping reproduction steps because "I think I know the issue"
+- Writing tests without asking the developer first (bug/RCA contexts)
+
+**No fixes without root cause investigation first.**
+
+---
+
+## Pre-Check
+
+### 0. Capture Git Context
+
+Before starting, capture the current git state:
+
+```bash
+git branch --show-current    # Current branch name
+git rev-parse --short HEAD   # Current commit hash
+```
+
+Store this for the debug report header. The session is scoped to this specific branch/commit.
+
+### 1. Verify Draft Context (Optional)
+
+```bash
+ls draft/ 2>/dev/null
+```
+
+Debug can run standalone (without draft context) or within a draft track. If `draft/` exists, load context for richer investigation.
+
+### 2. Load Draft Context (if available)
+
+Read and follow the base procedure in `core/shared/draft-context-loading.md`.
+
+Key context for debugging:
+- `.ai-context.md` — Module boundaries, data flows, invariants (crucial for tracing)
+- `tech-stack.md` — Language-specific debugging tools and techniques
+- `guardrails.md` — Known anti-patterns that may be causing the issue
+- `draft/graph/` (if available) — Load `module-graph.jsonl` for dependency context, `hotspots.jsonl` for complexity awareness. Use graph callers query to find all files that include a suspect file, and impact query to understand blast radius of potential fixes. See `core/shared/graph-query.md`.
+
+## Step 1: Parse Arguments
+
+Check for arguments:
+- `draft debug` — Interactive: ask what's broken
+- `draft debug <description>` — Start with the described problem
+- `draft debug track <id>` — Debug within a specific track context (load spec.md, plan.md)
+- `draft debug <JIRA-KEY>` — Pull context from Jira ticket via MCP
+
+If a Jira ticket is provided:
+1. Pull ticket via Jira MCP: `get_issue()`, `get_issue_description()`, `get_issue_comments()`
+2. Extract: URLs, log paths, stack traces, reproduction steps, affected services
+3. Use `curl`/`wget` to fetch any URLs mentioned (dashboards, error pages, API responses)
+4. Use `ssh` to access log locations on remote nodes (if paths like `/home/log/`, node IPs mentioned)
+5. Collect all gathered data into a triage context bundle
+
+## Step 2: Reproduce
+
+**Goal:** Confirm the bug exists and establish reproduction steps.
+
+1. **Identify the symptom** — Exact error message, unexpected behavior, or performance degradation
+2. **Establish reproduction steps** — Minimum steps to trigger the issue consistently
+3. **Capture evidence** — Error messages, stack traces, log output (verbatim, not summarized)
+4. **Classify reproducibility:**
+   - Always reproducible — proceed to Step 3
+   - Intermittent — document frequency, conditions, patterns (time, load, data-dependent)
+   - Cannot reproduce — gather more context, check environment differences
+
+Reference `core/agents/debugger.md` Phase 1 for detailed investigation techniques.
+
+## Step 3: Isolate
+
+**Goal:** Narrow the failure to a specific code path.
+
+1. **Trace data flow** — Follow data from input to failure point, documenting each hop with `file:line` references
+2. **Trace control flow** — Map the execution path, identify where it diverges from expected behavior
+3. **Differential analysis** — Compare working vs failing cases:
+   | Aspect | Working Case | Failing Case | Difference |
+   |--------|-------------|-------------|------------|
+4. **Check boundaries** — Reference `.ai-context.md` module boundaries to scope the investigation
+
+Reference `core/agents/debugger.md` Phase 2 for language-specific debugging techniques.
+
+## Step 4: Diagnose
+
+**Goal:** Confirm root cause with evidence.
+
+1. **Form hypothesis** — "The bug is caused by [X] at `file:line` because [evidence]"
+2. **Predict outcome** — "If this hypothesis is correct, then [Y] should be observable"
+3. **Test minimally** — Smallest possible test to prove or disprove
+4. **Record result** — Document in hypothesis log:
+
+| # | Hypothesis | Test | Prediction | Actual | Result |
+|---|-----------|------|-----------|--------|--------|
+| 1 | [description] | [test] | [expected] | [actual] | Confirmed/Rejected |
+
+**If hypothesis fails:** Return to Step 3 with updated understanding. After 3 failed cycles, escalate (see Error Handling).
+
+Reference `core/agents/debugger.md` Phase 3 and `core/agents/rca.md` for 5 Whys analysis.
+
+## Step 5: Fix (with Developer Approval)
+
+**Goal:** Fix the root cause with minimal change.
+
+### Test Writing Guardrail
+
+**STOP.** Before writing any test:
+```
+ASK: "Root cause confirmed: [summary]. Want me to write a regression test for this fix? [Y/n]"
+```
+- If accepted: write regression test first (fails before fix, passes after)
+- If declined: note "Tests: developer-handled" and proceed to fix
+
+### Fix Implementation
+
+1. **Minimal fix** — Address root cause only, no "while we're here" improvements
+2. **Stay in blast radius** — No changes to adjacent modules without explicit approval
+3. **Run existing tests** — Verify no regressions
+4. **Document root cause** — Add findings to Debug Report
+
+## Step 6: Generate Debug Report
+
+**MANDATORY: Include YAML frontmatter with git metadata.** Follow `core/shared/git-report-metadata.md`.
+
+Include the report header table immediately after frontmatter:
+
+```markdown
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+```
+
+Save to:
+- Track-scoped: `draft/tracks/<id>/debug-report.md`
+- Standalone: `draft/debug-report-<timestamp>.md` with symlink `debug-report-latest.md`
+
+```bash
+TIMESTAMP=$(date +%Y-%m-%dT%H%M)
+# Example: draft/debug-report-2026-03-15T1430.md
+ln -sf debug-report-${TIMESTAMP}.md draft/debug-report-latest.md
+```
+
 ## Cross-Skill Dispatch
 
-- **Suggested by:** `draft deep-review` (architecture debt findings), `draft decompose` (module boundary decisions), `draft new-track` (new technology or architectural shift detected)
-- **Auto-invoked by:** `draft decompose` when decomposition involves breaking a monolith or major boundary change
-- **Feeds into:** `draft new-track` (ADR referenced in spec context), `draft learn` (decision patterns)
-- **Jira sync:** If ticket linked, attach ADR and post comment via `core/shared/jira-sync.md`
+- **Auto-invoked by:** `draft new-track` (bug tracks — Offer tier), `draft implement` (blocked tasks — Offer tier)
+- **Invokes:** RCA agent (`core/agents/rca.md`) for 5 Whys and blast radius analysis
+- **Feeds into:** `draft new-track` spec.md (reproduction and root cause sections via Detect+Auto-Feed)
+- **Suggests at completion:**
+  - "Run `git bisect` to find the exact commit that introduced this bug"
+  - "Run `draft new-track` to create a bug fix track from these findings"
+- **Jira sync:** If ticket linked, attach debug report and post summary via `core/shared/jira-sync.md`
+
+## Error Handling
+
+**If cannot reproduce:** Gather more context — check environment differences, ask for additional logs, check if the issue is environment-specific.
+**If no draft context:** Run standalone with generic debugging methodology. Recommend `draft init` for richer context.
+**After 3 failed hypothesis cycles:** Document all findings, list what's been eliminated, escalate — consider architectural review or external input.
+**If MCP unavailable for Jira:** Skip Jira context gathering, proceed with available information.
+
+---
+
+## Standup Command
+
+When user says "standup" or "draft standup [date|week|save]":
+
+You are generating a standup summary from recent development activity. This is a **read-only** skill — it makes no changes to the codebase or track files.
+
+## Red Flags — STOP if you're:
+
+- Modifying any files (this is read-only)
+- Fabricating activity that didn't happen
+- Including sensitive information (credentials, internal URLs) in standup output
+- Reporting on other people's commits without being asked
+
+**Report facts. Fabricate nothing.**
+
+---
+
+## Pre-Check
+
+### 0. Capture Git Context
+
+Before starting, capture the current git state:
+
+```bash
+git branch --show-current    # Current branch name
+git rev-parse --short HEAD   # Current commit hash
+```
+
+Store this for context. The standup reflects activity up to this specific commit.
+
+### 1. Load Draft Context (if available)
+
+```bash
+ls draft/ 2>/dev/null
+```
+
+If `draft/` exists, read and follow `core/shared/draft-context-loading.md`.
+
+## Step 1: Parse Arguments
+
+Check for arguments:
+- `draft standup` — Default: last 24 hours of activity
+- `draft standup <days>` — Activity from last N days
+- `draft standup weekly` — Full week summary (Monday-Friday)
+- `draft standup --author <name>` — Filter to specific author
+
+## Step 2: Gather Activity
+
+### Source 1: Git History
+
+```bash
+# Last 24 hours by default (adjust with args)
+git log --oneline --since="24 hours ago" --author="$(git config user.name)"
+git log --since="24 hours ago" --author="$(git config user.name)" --format="%h %s" --no-merges
+```
+
+Parse commit messages for:
+- Track IDs (from `type(track-id): description` convention)
+- Task completions
+- Bug fixes
+- Feature additions
+
+### Source 2: Track Progress (if draft context exists)
+
+Read `draft/tracks.md` for active tracks:
+- Current status and phase
+- Tasks completed since last standup
+- Blockers (tasks marked `[!]`)
+
+For each active track, read `plan.md` to determine:
+- Tasks completed (count `[x]` with recent commit SHAs)
+- Current task (first `[ ]` or `[~]`)
+- Phase progress
+
+### Source 3: Jira Activity (if MCP available)
+
+If Jira MCP is available:
+- Query recent ticket transitions (status changes)
+- Check for new comments or assignments
+- Pull sprint board status
+
+### Source 4: GitHub PR Activity (if MCP / `gh` CLI available)
+
+If GitHub MCP or the `gh` CLI is available:
+- Query open PRs authored by user (`gh pr list --author @me`)
+- Check for new review comments received (`gh pr view <num> --comments`)
+- Query recently merged PRs (`gh pr list --state merged --author @me`)
+
+## Step 3: Generate Standup
+
+Format using the standard Yesterday/Today/Blockers structure:
+
+```markdown
+## Standup — {date}
+
+**Author:** {git user.name}
+**Period:** {time range}
+
+### Completed
+- [{track-id}] {task description} ({commit SHA})
+- [{track-id}] {task description} ({commit SHA})
+- Reviewed: {PR number} (if applicable)
+
+### Planned
+- [{track-id}] Next task: {description} (from plan.md)
+- [{track-id}] Continue: {in-progress task} (from plan.md)
+- Review: {pending reviews} (if applicable)
+
+### Blockers
+- [{track-id}] {blocked task description} — {reason}
+- Waiting on: {external dependency}
+
+### Track Progress
+| Track | Phase | Tasks | Status |
+|-------|-------|-------|--------|
+| {id} | {N}/{total} | {done}/{total} | {status} |
+```
+
+**If no activity found:** "No commits in the last {period}. Working on: {active track description from tracks.md or 'no active tracks'}."
+
+## Step 4: Present Output
+
+Present the standup summary directly in the conversation. Do not write to any file unless explicitly requested.
+
+If the user asks to save:
+- Save to `draft/standup-<date>.md`
+- Symlink: `draft/standup-latest.md`
+
+**If saving, MANDATORY: Include YAML frontmatter with git metadata.** Follow `core/shared/git-report-metadata.md`.
+
+Include the report header table immediately after frontmatter:
+
+```markdown
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+```
+
+## Cross-Skill Dispatch
+
+- **References:** `core/agents/ops.md` for operational context awareness
+- **Reads from:** `draft status` data (tracks.md, plan.md, metadata.json)
+- **MCP integrations:** Jira MCP (ticket status), GitHub MCP / `gh` CLI (PR activity)
+- **No downstream dispatch** — this is a terminal, read-only skill
+
+## Error Handling
+
+**If no git history:** "No git commits found for {period}. Is this the right repository?"
+**If no draft context:** Generate standup from git history only. Note: "Richer standups available after `draft init`."
+**If no MCP available:** Skip Jira/PR sections, generate from local data only.
+
+---
+
+## Tech Debt Command
+
+When user says "tech debt" or "draft tech-debt [path|track <id>]":
+
+You are conducting a technical debt analysis to catalog, prioritize, and plan remediation of debt across the codebase.
+
+## Red Flags — STOP if you're:
+
+- Flagging intentional design choices as debt (check tech-stack.md accepted patterns first)
+- Cataloging debt without understanding the business context
+- Setting priorities without considering team capacity
+- Recommending "rewrite from scratch" without exhausting incremental options
+- Ignoring the existing guardrails.md conventions
+
+**Not all shortcuts are debt. Check accepted patterns before flagging.**
+
+---
+
+## Pre-Check
+
+### 0. Capture Git Context
+
+Before starting, capture the current git state:
+
+```bash
+git branch --show-current    # Current branch name
+git rev-parse --short HEAD   # Current commit hash
+```
+
+Store this for the report header. All findings are relative to this specific branch/commit.
+
+### 1. Verify Draft Context
+
+```bash
+ls draft/ 2>/dev/null
+```
+
+If `draft/` doesn't exist, this skill can still run standalone with reduced context.
+
+### 2. Load Draft Context (if available)
+
+Read and follow the base procedure in `core/shared/draft-context-loading.md`.
+
+## Step 1: Parse Arguments
+
+- `draft tech-debt` — Project-wide scan (default)
+- `draft tech-debt module <name>` — Module-scoped scan
+- `draft tech-debt category <type>` — Filter by category (code, architecture, test, dependency, documentation, infrastructure)
+- `draft tech-debt <path>` — Scan specific directory/file pattern
+
+## Step 2: Load Context
+
+1. Read `draft/tech-stack.md` — **Critical:** "Accepted Patterns" section. Do NOT flag these as debt.
+2. Read `draft/guardrails.md` — Learned conventions (skip) and anti-patterns (always flag)
+3. Read `draft/.ai-context.md` — Module boundaries, invariants, known constraints
+4. Read `draft/product.md` — Business priorities for impact assessment
+5. Read `draft/workflow.md` — Team conventions and toolchain for feasibility assessment
+
+## Step 3: Scan for Debt
+
+Scan the codebase systematically across all six categories. For each finding, record: location (file:line), description, evidence, and category.
+
+### Category 1: Code Debt
+
+- Complex functions (cyclomatic complexity >10, deep nesting >4 levels)
+- Duplicated code blocks (>20 lines similar across multiple locations)
+- TODO/FIXME/HACK/XXX comments (especially old ones — check git blame age)
+- Dead code (unreachable branches, unused exports, commented-out blocks)
+- Inconsistent naming patterns within the same module
+- Long functions (>100 lines without clear separation of concerns)
+- God classes (>500 lines, >10 public methods, mixed responsibilities)
+- Magic numbers and hardcoded strings that should be constants
+- Deeply nested callbacks or promise chains (callback hell)
+
+### Category 2: Architecture Debt
+
+- Dependency cycles between modules (A depends on B depends on A)
+- Tight coupling (modules with >5 direct cross-references)
+- Layer violations (UI calling DB directly, business logic in controllers)
+- Missing abstractions (repeated patterns without shared interface)
+- Monolith tendencies (single module >50% of codebase)
+- Inconsistent data flow patterns (some modules use events, others direct calls)
+- Missing or bypassed API boundaries (internal implementation details exposed)
+- Configuration scattered across multiple locations
+
+### Category 3: Test Debt
+
+- Modules with zero test coverage
+- Missing integration tests for service boundaries
+- Brittle tests (frequently failing, time-dependent, order-dependent)
+- Test-code coupling (tests that break on internal refactor, not behavior change)
+- Missing E2E tests for critical user flows (from product.md)
+- Tests with no assertions (tests that only check "doesn't throw")
+- Disabled/skipped tests without justification
+- Missing test fixtures or shared test utilities (repeated setup code)
+
+### Category 4: Dependency Debt
+
+- Outdated dependencies (>2 major versions behind)
+- Known security vulnerabilities (check advisories: `npm audit`, `pip audit`, etc.)
+- Deprecated APIs in use (check dependency changelogs)
+- Version conflicts or pinning issues
+- Abandoned dependencies (no updates >2 years, archived repos)
+- Overly broad dependency versions (no pinning in production)
+- Unnecessary dependencies (functionality available in stdlib or already-included packages)
+
+### Category 5: Documentation Debt
+
+- Undocumented public APIs (exported functions/classes without docstrings)
+- Stale README (doesn't match current setup steps or architecture)
+- Missing architecture decision records for non-obvious choices
+- Outdated onboarding documentation
+- Missing runbooks for production services
+- API docs out of sync with implementation
+- Missing inline comments for complex algorithms or business rules
+
+### Category 6: Infrastructure Debt
+
+- Manual deployment steps (should be automated)
+- Missing or insufficient monitoring (services without health checks or alerts)
+- Hardcoded configuration (should be environment variables)
+- Missing CI checks (linting, security scanning, type checking)
+- No automated backup/restore verification
+- Missing or outdated Dockerfiles / container configs
+- Inconsistent environment parity (dev/staging/prod divergence)
+- Missing rate limiting or resource guards on public endpoints
+
+## Step 4: Prioritize
+
+For each finding, score on three dimensions:
+
+- **Impact** (1-5): How much does this hurt development velocity or production reliability?
+  - 1: Minor annoyance, cosmetic
+  - 2: Slows development occasionally
+  - 3: Regular friction, workarounds needed
+  - 4: Significant velocity drag or reliability risk
+  - 5: Blocking progress or causing incidents
+
+- **Risk** (1-5): How likely is this to cause a production incident?
+  - 1: Extremely unlikely
+  - 2: Unlikely but possible
+  - 3: Moderate likelihood
+  - 4: Likely under certain conditions
+  - 5: Near-certain or already causing issues
+
+- **Effort** (1-5): How much work to remediate?
+  - 1: Hours (quick fix)
+  - 2: A day or two
+  - 3: A sprint (1-2 weeks)
+  - 4: Multiple sprints
+  - 5: Large project (months)
+
+**Priority = (Impact + Risk) / (6 - Effort)**
+
+Higher score = higher priority. This formula naturally favors high-impact, low-effort items ("quick wins") and deprioritizes low-impact, high-effort items.
+
+## Step 5: Generate Remediation Plan
+
+Organize findings into three actionable tiers:
+
+### Tier 1: Quick Wins (Priority > 3, Effort <= 2)
+
+Items that can be fixed in a single sprint or less. Do these first — they deliver the best return on investment.
+
+For each item:
+- Specific fix description
+- Estimated time (hours)
+- Suggested assignee pattern (e.g., "whoever touches this module next")
+
+### Tier 2: Strategic Improvements (Priority > 2, Effort > 2)
+
+Items requiring dedicated effort. Create via `draft new-track` or feed into `draft jira-preview`.
+
+For each item:
+- Scope and approach
+- Estimated effort (sprints)
+- Dependencies and sequencing
+- Risk of deferral (what happens if we wait?)
+
+### Tier 3: Nice-to-Haves (Priority <= 2)
+
+Track but don't prioritize. Revisit quarterly. These items are real debt but the cost of remediation exceeds the current pain.
+
+## Step 6: Save Output
+
+**MANDATORY: Include YAML frontmatter with git metadata.** Follow `core/shared/git-report-metadata.md`.
+
+Include the report header table immediately after frontmatter:
+
+```markdown
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+```
+
+Save to: `draft/tech-debt-report-<timestamp>.md`
+Create symlink: `draft/tech-debt-report-latest.md`
+
+```bash
+TIMESTAMP=$(date +%Y-%m-%dT%H%M)
+# Example: draft/tech-debt-report-2026-03-15T1430.md
+ln -sf tech-debt-report-${TIMESTAMP}.md draft/tech-debt-report-latest.md
+```
+
+Report structure:
+1. **Executive Summary** — Total findings by category and priority tier, headline stats
+2. **Priority Matrix** — Table of all findings sorted by priority score
+3. **Category Details** — Per-category findings with file locations and evidence
+4. **Remediation Plan** — Three tiers with effort estimates
+5. **Recommendations** — Strategic advice on debt management practices
+
+## Cross-Skill Dispatch
+
+- **Offered by:** `draft new-track` (refactor tracks — scope the debt before planning)
+- **Suggested by:** `draft implement` (when TODO/FIXME detected at completion)
+- **Suggested by:** `draft deep-review` (architecture debt findings)
+- **Feeds into:** `draft jira-preview` (create remediation tickets from Tier 2 items)
+- **Feeds into:** `draft testing-strategy` (Test Debt findings inform test planning)
+- **Jira sync:** If ticket linked, attach report and post summary via `core/shared/jira-sync.md`
+
+## Error Handling
+
+**If no draft context:** Run with reduced analysis, note: "Run `draft init` for better debt detection with accepted-pattern filtering"
+**If tech-stack.md has accepted patterns:** Explicitly skip those patterns, note: "Skipped N accepted patterns from tech-stack.md"
+**If >100 findings:** Group by category, show top 20 by priority in the summary, full list in Category Details section
+**If module scope requested but module not found:** List available modules, ask user to confirm
+
+---
+
+## Incident Response Command
+
+When user says "incident" or "draft incident-response [new|update|postmortem]":
+
+You are managing an incident through its full lifecycle using structured incident management practices.
+
+## Red Flags — STOP if you're:
+
+- Fixing before communicating (stakeholders must know first)
+- Skipping severity classification
+- Writing a postmortem with blame (blameless only)
+- Closing an incident without prevention items
+- Ignoring rollback as a mitigation option
+
+**Communicate first. Fix second. Learn always.**
+
+---
+
+## Pre-Check
+
+1. Check for Draft context:
+```bash
+ls draft/ 2>/dev/null
+```
+
+This skill works standalone — incidents don't wait for project setup.
+
+2. If available, follow the base procedure in `core/shared/draft-context-loading.md`.
+
+## Step 1: Parse Arguments
+
+- `draft incident-response new <description>` — Start new incident
+- `draft incident-response update <status>` — Post status update
+- `draft incident-response postmortem` — Generate postmortem report
+- `draft incident-response` (no args) — Interactive: ask which mode
+
+---
+
+## NEW Mode — Start Incident
+
+### Step 2: Triage
+
+Classify severity:
+
+| Level | Response Time | Who | Examples |
+|-------|--------------|-----|---------|
+| **SEV1** | Immediate, all-hands | Entire team | Data loss, complete outage, security breach |
+| **SEV2** | 15 minutes | On-call + team lead | Major feature broken, significant degradation |
+| **SEV3** | 1 hour | On-call | Minor feature broken, workaround exists |
+| **SEV4** | Next business day | Assigned engineer | Cosmetic issue, minor inconvenience |
+
+Assess:
+1. **What is broken?** (from description or Jira ticket)
+2. **Who is affected?** (from `draft/product.md` user types if available)
+3. **What is the blast radius?** (from `draft/.ai-context.md` service topology if available)
+4. **Is data at risk?** (escalate to SEV1 if yes)
+
+### Step 3: Communicate
+
+Generate initial status update:
+
+```
+INCIDENT: {description}
+Severity: SEV{1-4}
+Impact: {who/what is affected}
+Status: Investigating
+Commander: {name or "unassigned"}
+Next update: {time — SEV1: 15min, SEV2: 30min, SEV3: 1hr}
+```
+
+### Step 4: Gather Evidence
+
+- If Jira ticket linked: pull details via MCP (`get_issue`, `get_issue_description`, `get_issue_comments`)
+- Extract URLs and log paths from ticket
+- Use `curl`/`wget` to fetch dashboards or error pages mentioned
+- Use `ssh` to access remote log paths if mentioned
+- If GitHub MCP / `gh` CLI available: check recent deployments and merged PRs (`gh pr list --state merged --search "merged:>2024-01-01"`)
+- Record all evidence in incident timeline
+
+### Step 5: Mitigate
+
+Following `core/agents/ops.md` production-safety mindset:
+
+1. **Can we rollback?** If yes and severity ≥ SEV2: recommend rollback first, investigate after
+2. **Can we hotfix?** If rollback not possible: identify minimal fix
+3. **Can we mitigate?** Feature flag, config change, traffic routing
+4. **Need to escalate?** If none of above work, escalate severity
+
+Document all actions taken with timestamps.
+
+### Step 6: Save Incident File
+
+Save to: `draft/incidents/incident-<timestamp>.md` or `draft/tracks/<id>/incident.md`
+
+```markdown
+# Incident: {description}
+
+| Field | Value |
+|-------|-------|
+| **Severity** | SEV{N} |
+| **Status** | {Investigating/Mitigating/Resolved} |
+| **Started** | {timestamp} |
+| **Commander** | {name} |
+
+## Timeline
+| Time | Action |
+|------|--------|
+| {time} | Incident detected |
+| {time} | Triage: classified as SEV{N} |
+| {time} | {mitigation action} |
+
+## Evidence
+| Source | Finding |
+|--------|---------|
+| {source} | {finding} |
+
+## Status Updates
+{chronological updates}
+```
+
+---
+
+## UPDATE Mode
+
+1. Read existing incident file
+2. Add new timeline entry with timestamp
+3. Update status field if changed
+4. Update severity if changed (with justification)
+5. Generate formatted status update for stakeholders
+
+---
+
+## POSTMORTEM Mode
+
+### Step 2: Gather Timeline
+
+- Read incident file for timeline and evidence
+- `git log` for related commits during incident window
+- If Jira MCP: pull ticket history and transitions
+- If GitHub MCP / `gh` CLI: pull PRs submitted during/after incident
+
+### Step 3: Root Cause Analysis
+
+Reference `core/agents/rca.md` methodology:
+
+1. **5 Whys Analysis:**
+   - Why did {symptom} happen? → Because {cause 1}
+   - Why {cause 1}? → Because {cause 2}
+   - Continue until root cause reached (typically 3-5 levels)
+
+2. **Root Cause Classification:**
+   - Logic error | Race condition | Data corruption | Configuration error
+   - Dependency failure | Capacity exceeded | Security exploit | Human error
+
+3. **Detection Lag:** When was the bug introduced vs when was it detected?
+
+4. **SLO Impact:** Which SLOs were affected and by how much?
+
+### Step 4: Generate Postmortem
+
+**MANDATORY: Include YAML frontmatter with git metadata.** Follow `core/shared/git-report-metadata.md`.
+
+Save to: `draft/incidents/postmortem-<timestamp>.md` with symlink `postmortem-latest.md`
+Or track-scoped: `draft/tracks/<id>/postmortem.md`
+
+```markdown
+# Postmortem: {incident title}
+
+## Summary
+{2-3 sentences: what happened, impact, duration}
+
+## Impact
+- **Duration:** {start} to {end} ({total time})
+- **Users affected:** {count or percentage}
+- **SLO impact:** {which SLOs, by how much}
+- **Data impact:** {any data loss or corruption}
+
+## Timeline
+| Time | Event |
+|------|-------|
+| {time} | {event} |
+
+## Root Cause
+{1-2 sentence root cause statement}
+
+### 5 Whys
+1. Why? → {answer}
+2. Why? → {answer}
+...
+
+### Classification
+- **Type:** {classification}
+- **Detection Lag:** {introduced} → {detected} = {gap}
+
+## What Went Well
+- {positive observations}
+
+## What Went Wrong
+- {things that made the incident worse}
+
+## Action Items
+| # | Action | Owner | Deadline | Status |
+|---|--------|-------|----------|--------|
+| 1 | {detection improvement} | {name} | {date} | [ ] |
+| 2 | {process improvement} | {name} | {date} | [ ] |
+| 3 | {code improvement} | {name} | {date} | [ ] |
+```
+
+### Step 5: Jira Sync
+
+Follow `core/shared/jira-sync.md`:
+- Attach postmortem to Jira ticket
+- Post comment: "[draft] Postmortem complete. Root cause: {1-line summary}. {N} action items."
+
+⚠️ **Test Writing Guardrail:** If postmortem identifies missing tests, ASK: "Want me to create regression test tasks? [Y/n]"
+
+## Cross-Skill Dispatch
+
+- **Triggered by:** `draft new-track` when incident keywords detected in description
+- **Postmortem feeds into:** `git bisect` (find the breaking commit), `draft learn` (update guardrails)
+- **Can create:** Bug track via `draft new-track` for the fix
+
+## Error Handling
+
+**If no incident file found (update/postmortem mode):** List available incidents, ask which one
+**If no Jira ticket:** Proceed without sync, note: "Link a Jira ticket for automatic sync"
+
+---
+
+## Documentation Command
+
+When user says "write docs" or "draft documentation [readme|runbook|api|onboarding]":
+
+You are generating or updating technical documentation for this project using structured writing principles.
+
+## Red Flags — STOP if you're:
+
+- Writing docs without reading the code first
+- Duplicating information that exists elsewhere (link instead)
+- Writing docs for internal implementation details (only public interfaces)
+- Ignoring the target audience (developer vs operator vs new hire)
+- Generating a wall of text without structure or examples
+
+**Write for the reader. Link don't duplicate. Show don't tell.**
+
+---
+
+## Pre-Check
+
+1. Check for Draft context:
+```bash
+ls draft/ 2>/dev/null
+```
+
+If `draft/` doesn't exist, this skill works standalone — generate docs from code analysis.
+
+2. Follow the base procedure in `core/shared/draft-context-loading.md`.
+
+## Step 1: Parse Arguments
+
+- `draft documentation readme` — Generate or update project README
+- `draft documentation runbook <service>` — Operations runbook for a service
+- `draft documentation api <module>` — API documentation for a module
+- `draft documentation onboarding` — New developer onboarding guide
+- `draft documentation` (no args) — Interactive: ask what type of documentation
+
+## Step 2: Gather Source Material
+
+### README Mode
+- Read existing `README.md` (if any)
+- Read `draft/product.md` — Product vision, users, goals
+- Read `draft/tech-stack.md` — Technologies, setup requirements
+- Read `draft/workflow.md` — Development workflow, commands
+- Scan for `Makefile`, `package.json`, `pyproject.toml` — Build/run commands
+
+### Runbook Mode
+- Read `draft/architecture.md` or `draft/.ai-context.md` — Service topology, dependencies
+- Read `draft/workflow.md` — Deployment conventions
+- Read `draft/tech-stack.md` — Infrastructure details
+- If GitHub MCP / `gh` CLI available: check recent merged PRs touching deployment configs
+- If Jira MCP available: check recent incident tickets for the service
+
+### API Mode
+- Read source code for public interfaces, exported functions, API routes
+- Read existing API docs (Swagger, OpenAPI, JSDoc, docstrings)
+- Read `draft/architecture.md` — API conventions, data models
+- Read `draft/tech-stack.md` — API framework details
+
+### Onboarding Mode
+- Read ALL draft context files in order:
+  1. `draft/product.md` — What is this project?
+  2. `draft/tech-stack.md` — What technologies?
+  3. `draft/architecture.md` or `draft/.ai-context.md` — How is it structured?
+  4. `draft/workflow.md` — How do I develop?
+  5. `draft/guardrails.md` — What to watch out for?
+- Scan for setup scripts, Docker configs, environment templates
+
+## Step 3: Apply Writing Principles
+
+Follow these principles (from `core/agents/writer.md`):
+
+1. **Write for the reader** — Identify the audience (developer, operator, new hire) and tailor language, depth, and examples accordingly
+2. **Start with the most useful information** — Lead with what the reader needs most (setup for README, troubleshooting for runbook, endpoints for API)
+3. **Show don't tell** — Use code examples, command snippets, and diagrams over prose descriptions
+4. **Progressive disclosure** — Start simple, add detail progressively. Don't front-load every edge case
+5. **Link don't duplicate** — Reference existing docs, don't copy them. Single source of truth
+6. **Keep current** — Reference source of truth files. Note: "Generated from draft context on {date}"
+
+## Step 4: Generate Document
+
+### README Structure
+```markdown
+# {Project Name}
+
+{One-line description from product.md}
+
+## Quick Start
+{Setup commands from Makefile/package.json}
+
+## Architecture
+{High-level diagram from .ai-context.md}
+
+## Development
+{Commands from workflow.md}
+
+## Testing
+{Test commands and conventions}
+
+## Contributing
+{Workflow conventions}
+```
+
+### Runbook Structure
+```markdown
+# Runbook: {Service Name}
+
+## Overview
+{Service purpose, dependencies, SLOs}
+
+## Health Checks
+{Endpoints, expected responses}
+
+## Common Issues
+{Symptoms → diagnosis → resolution}
+
+## Deployment
+{Steps, rollback procedure}
+
+## Monitoring
+{Dashboard URLs, alert descriptions}
+
+## Escalation
+{On-call contacts, escalation paths}
+```
+
+### API Documentation Structure
+```markdown
+# API: {Module Name}
+
+## Overview
+{Purpose, authentication, base URL}
+
+## Endpoints
+
+### {METHOD} {path}
+{Description}
+**Request:** {body/params with examples}
+**Response:** {status codes with examples}
+**Errors:** {error codes and meanings}
+```
+
+### Onboarding Structure
+```markdown
+# Welcome to {Project Name}
+
+## What is this?
+{From product.md — 2-3 sentences}
+
+## Architecture at a Glance
+{Simplified from .ai-context.md}
+
+## Getting Started
+{Setup steps, first 15 minutes}
+
+## Key Concepts
+{Domain terms, important patterns}
+
+## Development Workflow
+{From workflow.md}
+
+## Where to Find Things
+{File structure guide}
+
+## Common Pitfalls
+{From guardrails.md}
+```
+
+## Step 5: Output
+
+Save to:
+- README: `README.md` in project root
+- Runbook: `draft/docs/runbook-<service>.md`
+- API: `draft/docs/api-<module>.md`
+- Onboarding: `draft/docs/onboarding.md`
+
+Create `draft/docs/` directory if needed.
+
+Present generated doc to user for review before final save.
+
+## Cross-Skill Dispatch
+
+- **Suggested by:** `draft init` (after context generation), `draft implement` (track completion with new APIs), `draft decompose` (module API docs)
+- **Jira sync:** If ticket linked, attach doc and post comment via `core/shared/jira-sync.md`
+
+## Error Handling
+
+**If no draft context:** Generate from code analysis alone, note: "Run `draft init` for richer documentation"
+**If existing doc found:** Show diff between existing and generated, ask: "Update existing doc or create new? [update/new]"
 
 ---
 
@@ -8686,6 +11315,9 @@ If confirmed:
 
 Maintain a list of successfully reverted commits during execution.
 
+Read `draft/workflow.md` → `## Toolchain` section for VCS CLI. See `core/shared/vcs-commands.md` for the full command mapping.
+
+**git mode:**
 ```bash
 # Revert each commit in reverse order (newest first)
 git revert --no-commit <commit1>
@@ -8713,7 +11345,7 @@ On conflict, report: "Successfully reverted: [list]. Conflict on: [sha]. Run `gi
 
 3. Update `draft/tracks.md` if track status changed
 
-4. **Stale reports:** After revert, existing `review-report-latest.md` and `bughunt-report-latest.md` for the track are stale. Resolve symlinks first via `readlink -f review-report-latest.md` and `readlink -f bughunt-report-latest.md`, then add a warning header to the resolved files (the actual timestamped files): `> **WARNING: This report predates a revert operation and may be stale. Re-run the review/bughunt.**` Or delete them if the revert is substantial.
+4. **Stale reports:** After revert, existing `review-report-latest.md` and `bughunt-report-latest.md` for the track are stale. Resolve symlink targets first: `readlink -f review-report-latest.md` and `readlink -f bughunt-report-latest.md`. Add a warning header to the symlink targets (the actual timestamped files): `> **WARNING: This report predates a revert operation and may be stale. Re-run the review/bughunt.**` Or delete them if the revert is substantial.
 
 ## Step 6: Confirm
 
@@ -8916,8 +11548,7 @@ Apply these changes to spec.md and plan.md? [yes / no / edit]
 
 2. Update `draft/tracks/<id>/metadata.json`:
    - Set `updated` to current ISO timestamp
-   - Recalculate `tasks.total` by counting all checkbox lines (`- [ ]`, `- [x]`, `- [~]`) in the updated `plan.md`
-   - Recalculate `tasks.completed` by counting `[x]` lines in the updated `plan.md`
+   - Recalculate `tasks.total` by counting all `- [ ]`, `- [~]`, `- [x]`, and `- [!]` lines in the updated `plan.md`. Update `tasks.completed` by counting only `- [x]` lines.
 
 3. Append a Change Log entry (with current git SHA (obtain via `git rev-parse --short HEAD`) and timestamp) to `plan.md`. If a `## Change Log` section does not exist, add it at the bottom:
 
@@ -9208,12 +11839,13 @@ synced_to_commit: "{FULL_SHA}"
 
 **Summary:** [Track Title]
 **Issue Type:** Epic
+**Labels:** draft
 **Description:**
 {noformat}
 [Spec overview - first 2-3 paragraphs]
 
 ---
-🤖 Generated with Draft (Context-Driven Development)
+🤖 Generated by Draft
 Branch: [branch-name] | Commit: [short-hash]
 {noformat}
 
@@ -9224,6 +11856,7 @@ Branch: [branch-name] | Commit: [short-hash]
 **Summary:** Phase 1: [Phase Name]
 **Issue Type:** Story
 **Story Points:** [calculated based on task count]
+**Labels:** draft
 **Epic Link:** (will be set on creation)
 
 **Description:**
@@ -9235,7 +11868,8 @@ h3. Verification
 [Phase verification criteria]
 
 ---
-🤖 Generated with Draft
+🤖 Generated by Draft
+Branch: [branch-name] | Commit: [short-hash]
 {noformat}
 
 ### Sub-tasks
@@ -9253,6 +11887,7 @@ h3. Verification
 **Summary:** Phase 2: [Phase Name]
 **Issue Type:** Story
 **Story Points:** [calculated]
+**Labels:** draft
 **Epic Link:** (will be set on creation)
 
 **Description:**
@@ -9264,7 +11899,8 @@ h3. Verification
 [Phase verification criteria]
 
 ---
-🤖 Generated with Draft
+🤖 Generated by Draft
+Branch: [branch-name] | Commit: [short-hash]
 {noformat}
 
 ### Sub-tasks
@@ -9303,6 +11939,7 @@ Each bug from `bughunt-report-latest.md` becomes a separate **Bug** issue linked
 **Summary:** [Correctness] Off-by-one error in pagination
 **Issue Type:** Bug
 **Priority:** Highest
+**Labels:** draft
 **Epic Link:** (will be set on creation)
 
 **Description:**
@@ -9344,7 +11981,7 @@ h3. Regression Test
 [Test case from bughunt-report-latest.md, or "N/A" with reason]
 
 ---
-🤖 Generated with Draft (Bug Hunt)
+🤖 Generated by Draft (Bug Hunt)
 Branch: [branch-name] | Commit: [short-hash]
 {noformat}
 
@@ -9355,6 +11992,7 @@ Branch: [branch-name] | Commit: [short-hash]
 **Summary:** [Concurrency] Race condition in cache update
 **Issue Type:** Bug
 **Priority:** High
+**Labels:** draft
 **Epic Link:** (will be set on creation)
 
 **Description:**
@@ -9392,7 +12030,7 @@ h3. Regression Test
 [Test case from bughunt-report-latest.md, or "N/A" with reason]
 
 ---
-🤖 Generated with Draft (Bug Hunt)
+🤖 Generated by Draft (Bug Hunt)
 Branch: [branch-name] | Commit: [short-hash]
 {noformat}
 
@@ -9579,6 +12217,8 @@ If the project key is invalid or not found:
 
 ## Step 5: Create Issues via MCP
 
+**Pin the symlink target:** At the start of this step, resolve the symlink to its actual timestamped file path (e.g., via `readlink -f jira-export-latest.md`). Use the resolved path for all subsequent writes in this step to prevent data loss if the symlink is updated mid-run.
+
 **Incremental persistence:** After creating each issue, immediately update the corresponding entry in the export file (via `jira-export-latest.md` symlink) with the Jira key. This ensures re-runs can skip already-created items even if the process fails mid-way.
 
 **Note:** Some Jira configurations do not allow setting status during creation. If status setting fails, create in default status and log a warning.
@@ -9589,7 +12229,8 @@ MCP call: create_issue
 - project: [from config or prompt]
 - issue_type: Epic
 - summary: [Epic summary]
-- description: [Epic description]
+- description: [Epic description — MUST include signature, see jira-sync.md]
+- labels: ["draft"]
 ```
 - Capture epic key (e.g., PROJ-123)
 - Report: "Created Epic: PROJ-123"
@@ -9601,9 +12242,10 @@ MCP call: create_issue
 - project: [same as epic]
 - issue_type: Story
 - summary: [Story summary]
-- description: [Story description]
+- description: [Story description — MUST include signature, see jira-sync.md]
 - story_points: [from export]
 - epic_link: [Epic key from step 5a]
+- labels: ["draft"]
 ```
 - Capture story key (e.g., PROJ-124)
 - Report: "Created Story: PROJ-124 - Phase 1 (3 pts)"
@@ -9617,6 +12259,7 @@ MCP call: create_issue
 - parent: [Story key from step 5b]
 - summary: [Task summary, e.g., "Task 1.1: Extract logging utilities"]
 - status: [Map from export: To Do, In Progress, Done]
+- labels: ["draft"]
 ```
 - Capture sub-task key (e.g., PROJ-125)
 - Report: "  - Sub-task: PROJ-125 - Task 1.1"
@@ -9668,11 +12311,12 @@ MCP call: create_issue
   [Test case from bughunt-report-latest.md, or "N/A" with reason]
 
   ---
-  🤖 Generated with Draft (Bug Hunt)
+  🤖 Generated by Draft (Bug Hunt)
   Branch: [branch-name] | Commit: [short-hash]
   {noformat}
 - epic_link: [Epic key from step 5a]
 - priority: [Map from severity]
+- labels: ["draft"]
 ```
 
 **Priority Mapping:**
@@ -9732,6 +12376,7 @@ Bugs (from Bug Hunt):
 - Bug: PROJ-133 - [Medium] Security: Missing input validation
 
 Total: 1 epic, N stories, M sub-tasks, B bugs, P story points
+Label: 'draft' applied to all issues
 
 Updated:
 - plan.md (added issue keys to phases and tasks)
@@ -9777,3519 +12422,9 @@ Already-created issues will be detected by keys in jira-export-latest.md.
 
 ---
 
-## Debug Command
-
-When user says "debug bug" or "draft debug [description|track <id>]":
-
-You are conducting a structured debugging session using Draft's Context-Driven Development methodology.
-
-## Red Flags - STOP if you're:
-
-- Guessing at fixes without reproducing the bug first
-- Skipping isolation and jumping straight to code changes
-- Making multiple changes at once instead of testing one hypothesis at a time
-- Not recording failed hypotheses (they narrow the search space)
-- Fixing symptoms instead of root causes
-- Claiming "fixed" without verification evidence
-
-**Reproduce before you fix. One hypothesis at a time.**
-
----
-
-## Pre-Check
-
-### 0. Capture Git Context
-
-Before starting analysis, capture the current git state:
-
-```bash
-git branch --show-current    # Current branch name
-git rev-parse --short HEAD   # Current commit hash
-```
-
-Store this for the debug report header. All debugging is relative to this specific branch/commit.
-
-### 1. Verify Draft Context
-
-```bash
-ls draft/ 2>/dev/null
-```
-
-If `draft/` exists, load Draft context following the base procedure in `core/shared/draft-context-loading.md`. Honor Accepted Patterns and enforce Guardrails as defined there.
-
-**Debug-specific context application:**
-- Use `.ai-context.md` module boundaries to scope the investigation
-- Use tech-stack.md for framework-specific debugging techniques
-- Use guardrails.md to check if the bug violates known anti-patterns
-- Use product.md to understand expected user-facing behavior
-
-If `draft/` does not exist, proceed with code-only debugging. Note: "No Draft context available — debugging without project context."
-
----
-
-## Step 1: Parse Arguments
-
-Extract and validate command arguments from user input.
-
-### Supported Invocations
-
-| Invocation | Behavior |
-|------------|----------|
-| `draft debug` | Interactive — ask user to describe the bug |
-| `draft debug <description>` | Start debugging with the provided description |
-| `draft debug track <id>` | Debug within the context of a specific track |
-| `draft debug <JIRA-KEY>` | Pull bug details from Jira via MCP (if available) |
-
-### Argument Resolution
-
-1. **No arguments:** Prompt user: "Describe the bug — what's the expected behavior vs. actual behavior?"
-2. **Free-text description:** Use as the initial symptom description
-3. **`track <id>`:** Load track context from `draft/tracks/<id>/spec.md` and `draft/tracks/<id>/plan.md`. Use spec's acceptance criteria to understand expected behavior.
-4. **Jira key pattern** (matches `[A-Z]+-\d+`): Attempt to fetch bug details via Jira MCP. If MCP unavailable, ask user to paste the bug description manually.
-
----
-
-## Step 2: Reproduce
-
-Establish a reliable reproduction of the bug before any investigation.
-
-### 2.1: Identify Symptom
-
-Document clearly:
-- **Expected behavior:** What should happen
-- **Actual behavior:** What actually happens
-- **Error output:** Stack traces, error messages, logs (exact text, not paraphrased)
-- **Environment:** OS, runtime version, relevant config
-
-### 2.2: Establish Reproduction
-
-1. **Find or create a minimal reproduction:**
-   - Identify the shortest sequence of steps that triggers the bug
-   - Strip away unrelated setup, data, and configuration
-   - If the bug is in a test: run the test and capture output
-   - If the bug is runtime: identify the entry point and input
-
-2. **Run the reproduction:**
-   ```bash
-   # Execute the reproduction steps
-   # Capture FULL output including exit codes
-   ```
-
-3. **Capture evidence:**
-   - Save exact command(s) used
-   - Save full output (stdout + stderr)
-   - Note the exit code
-   - Screenshot if UI-related (describe what's visible)
-
-### 2.3: Classify Reproducibility
-
-| Classification | Definition | Action |
-|----------------|------------|--------|
-| **Always** | Reproduces on every attempt | Proceed to Step 3 |
-| **Intermittent** | Reproduces sometimes (note frequency: N/M attempts) | Run 5+ attempts, note pattern, proceed to Step 3 |
-| **Environment-specific** | Only reproduces in certain conditions | Document conditions, attempt to replicate locally |
-| **Cannot reproduce** | Cannot trigger the bug | See Error Handling section |
-
----
-
-## Step 3: Isolate
-
-Narrow the scope from "something is broken" to "this specific code path is broken."
-
-### 3.1: Trace Data Flow
-
-Starting from the reproduction entry point:
-1. Identify input data and its transformation path
-2. Trace through each function/method in the call chain
-3. At each boundary, verify: does the data match expectations?
-4. Note the first point where actual diverges from expected
-
-### 3.2: Trace Control Flow
-
-1. Identify the decision points (conditionals, switches, dispatchers)
-2. Determine which branch is taken during the bug
-3. Verify: is this the correct branch for the given input?
-4. Check edge cases at each branch point
-
-### 3.3: Differential Analysis
-
-Compare working vs. broken scenarios:
-- **Working input vs. broken input:** What's different?
-- **Working version vs. broken version:** `git bisect` or manual commit comparison
-- **Working environment vs. broken environment:** Config differences?
-
-### 3.4: Check Boundaries via `.ai-context.md`
-
-If `.ai-context.md` exists:
-- Check module boundaries — is the bug at a module interface?
-- Check data flow documentation — is data being transformed incorrectly at a boundary?
-- Check invariants — is a critical invariant being violated?
-- Check concurrency model — is there a race condition or deadlock?
-
----
-
-## Step 4: Diagnose
-
-Form and test hypotheses systematically.
-
-### Hypothesis Protocol
-
-For each hypothesis:
-
-1. **Form hypothesis:** "The bug occurs because [specific cause] in [specific location]"
-2. **Predict outcome:** "If this hypothesis is correct, then [observable prediction]"
-3. **Test minimally:** Design the smallest possible test that confirms or refutes the hypothesis
-4. **Record result:** Update the hypothesis log
-
-### Hypothesis Log
-
-Maintain a running log:
-
-| # | Hypothesis | Prediction | Test | Result | Time |
-|---|-----------|------------|------|--------|------|
-| 1 | Off-by-one in loop at parser.ts:45 | Array index out of bounds on empty input | Pass empty array to parse() | REFUTED — handles empty correctly | 2min |
-| 2 | Missing null check on user.email at auth.ts:23 | Throws TypeError when email is undefined | Call login({name: "test"}) without email field | CONFIRMED — TypeError: Cannot read property 'toLowerCase' of undefined | 1min |
-
-### Rules
-
-- **One hypothesis at a time.** Do not test multiple hypotheses simultaneously.
-- **Record refuted hypotheses.** They narrow the search space.
-- **Prefer hypotheses that can be tested without code changes** (logging, breakpoints, different inputs).
-- **If 3 consecutive hypotheses are refuted:** Step back and re-examine assumptions. See Error Handling section.
-
----
-
-## Step 5: Fix with Developer Approval
-
-Once root cause is confirmed:
-
-### Test Writing Guardrail
-
-**ASK before writing tests.** Do not automatically write tests. Present the fix plan and ask:
-- "Should I write a regression test for this bug?"
-- If developer approves: write the test FIRST (RED), then implement the fix (GREEN)
-- If developer declines: implement the fix only
-
-### Fix Protocol
-
-1. **Minimal fix:** Change only what's necessary to fix the root cause
-2. **Stay in blast radius:** Only modify files directly related to the bug
-3. **Preserve existing behavior:** The fix should not change unrelated functionality
-4. **Verify fix:**
-   - Run the reproduction from Step 2 — bug should no longer occur
-   - Run existing test suite — no regressions
-   - If regression test was written — it should pass
-
-### Fix Presentation
-
-Present the fix to the developer before committing:
-
-```
-ROOT CAUSE: [one-sentence description]
-FIX: [one-sentence description of the change]
-FILES MODIFIED: [list]
-BLAST RADIUS: [what could be affected]
-VERIFICATION: [evidence that the fix works]
-```
-
-Wait for developer approval before committing.
-
----
-
-## Step 6: Generate Debug Report
-
-Create a structured debug report documenting the investigation.
-
-**MANDATORY: Include YAML frontmatter with git metadata.** Follow the procedure in `core/shared/git-report-metadata.md` to gather git info, generate frontmatter, and include the report header table. Use `generated_by: "draft:debug"`.
-
-### Report Structure
-
-```markdown
-[YAML frontmatter — see core/shared/git-report-metadata.md]
-
-# Debug Report: [Bug Title]
-
-[Report header table — see core/shared/git-report-metadata.md]
-
-**Symptom:** [What was observed]
-**Root Cause:** [What caused it]
-**Fix:** [What was changed]
-**Verification:** [How the fix was verified]
-
----
-
-## Reproduction
-
-**Steps:**
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
-
-**Expected:** [Expected behavior]
-**Actual:** [Actual behavior]
-**Reproducibility:** [Always / Intermittent / Environment-specific]
-
----
-
-## Investigation
-
-### Data Flow Trace
-[Key findings from data flow analysis]
-
-### Control Flow Trace
-[Key findings from control flow analysis]
-
-### Hypothesis Log
-
-| # | Hypothesis | Prediction | Test | Result | Time |
-|---|-----------|------------|------|--------|------|
-| 1 | [hypothesis] | [prediction] | [test] | [result] | [time] |
-
----
-
-## Root Cause Analysis
-
-**Root Cause:** [Detailed explanation]
-**Category:** [Logic error / Race condition / Missing validation / Type error / Configuration / etc.]
-**Introduced:** [Commit SHA if identifiable, or "unknown"]
-
----
-
-## Fix
-
-**Files Modified:**
-- `path/to/file.ts:45` — [description of change]
-
-**Regression Test:** [path/to/test or "None — developer declined"]
-
-**Blast Radius:** [Assessment of what could be affected]
-
----
-
-## Prevention
-
-**How to prevent similar bugs:**
-- [Recommendation 1]
-- [Recommendation 2]
-```
-
-### Report Save Location
-
-- **Track-level:** `draft/tracks/<id>/debug-report-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`)
-  ```bash
-  ln -sf debug-report-<timestamp>.md draft/tracks/<id>/debug-report-latest.md
-  ```
-
-- **Ad-hoc (no track):** `draft/debug-report-<timestamp>.md`
-  ```bash
-  ln -sf debug-report-<timestamp>.md draft/debug-report-latest.md
-  ```
-
----
-
-## Cross-Skill Dispatch
-
-### Inbound
-
-- **Auto-invoked by `draft new-track`** when track type is `bug` — new-track creates the track, then dispatches to `draft debug track <id>`
-- **Invoked by `draft implement`** when a task is marked `[!]` Blocked due to a bug
-
-### Outbound
-
-- **Invokes RCA agent** (`core/agents/rca.md`) for complex root cause analysis when:
-  - Bug spans multiple modules
-  - Root cause is non-obvious after 3+ hypotheses
-  - Bug involves concurrency, race conditions, or distributed state
-- **Feeds into `draft new-track`** — if the fix requires significant work, suggest creating a new track
-- **Suggests `draft learn`** at completion — if the bug reveals a pattern that should be learned (convention or anti-pattern)
-- **Suggests `draft new-track` for regression track** — if the bug class suggests other instances may exist
-- **Jira sync:** If ticket linked, attach debug report and post summary via `core/shared/jira-sync.md`
-
----
-
-## Error Handling
-
-### Cannot Reproduce
-
-```
-Unable to reproduce the bug after N attempts.
-
-Attempted:
-1. [approach 1] — [result]
-2. [approach 2] — [result]
-
-Possible reasons:
-- Environment-specific (check config differences)
-- Timing-dependent (try under load or with delays)
-- Data-dependent (try with production-like data)
-- Already fixed (check recent commits)
-
-Recommended: Gather more information about the conditions when the bug occurs.
-```
-
-### No Draft Context
-
-```
-No Draft context found. Debugging without project context.
-
-For better debugging, run draft init to set up context.
-Proceeding with code-only investigation.
-```
-
-### 3 Failed Hypotheses
-
-After 3 consecutive refuted hypotheses:
-
-```
-Three hypotheses refuted. Stepping back to re-examine.
-
-Review:
-1. Is the reproduction reliable? (Re-run it now)
-2. Is the symptom correctly identified? (Re-read the error)
-3. Are we looking in the right area? (Check call stack again)
-4. Should we try git bisect to find the introducing commit?
-5. Should we invoke RCA agent for deeper analysis?
-
-Select an approach or describe a new hypothesis.
-```
-
-### MCP Unavailable
-
-When Jira MCP is not available for a Jira key argument:
-
-```
-Jira MCP not available. Cannot fetch bug details for <JIRA-KEY>.
-
-Options:
-1. Paste the bug description manually
-2. Continue with draft debug <description> instead
-```
-
----
-
-## Anti-Patterns
-
-| Don't | Instead |
-|-------|---------|
-| Guess and fix | Reproduce first, then investigate |
-| Change multiple things at once | One hypothesis, one change, one test |
-| Ignore refuted hypotheses | Record them — they narrow the search |
-| Fix without understanding root cause | Diagnose fully before fixing |
-| Skip regression test | Ask developer, write test if approved |
-| Assume the first fix is correct | Verify with reproduction and test suite |
-
----
-
-## Pattern Learning
-
-After generating the debug report, execute the pattern learning phase from `core/shared/pattern-learning.md` to update `draft/guardrails.md` with patterns discovered during this debugging session.
-
----
-
-## Examples
-
-### Ad-hoc debugging
-```bash
-draft debug "Login fails with 500 error when email contains a plus sign"
-```
-
-### Track-level debugging
-```bash
-draft debug track add-user-auth
-```
-
-### Jira bug
-```bash
-draft debug PROJ-1234
-```
-
-### Interactive (no args)
-```bash
-draft debug
-```
-
----
-
-## Deploy Checklist Command
-
-When user says "deploy checklist" or "draft deploy-checklist [track <id>]":
-
-You are generating a pre-deployment verification checklist using Draft's Context-Driven Development methodology.
-
-## Red Flags - STOP if you're:
-
-- Generating a generic checklist without reading tech-stack.md
-- Skipping rollback trigger definition
-- Not customizing the checklist for the project's actual infrastructure
-- Claiming deployment readiness without evidence for each check
-- Marking items as passed without actually verifying them
-
-**Customize to this project. Evidence for every check.**
-
----
-
-## Pre-Check
-
-### 0. Capture Git Context
-
-```bash
-git branch --show-current    # Current branch name
-git rev-parse --short HEAD   # Current commit hash
-```
-
-### 1. Load Draft Context
-
-Read and follow the base procedure in `core/shared/draft-context-loading.md`.
-
-**Deploy-specific context application:**
-- Use `draft/tech-stack.md` for infrastructure, CI/CD, hosting, and deployment tooling
-- Use `draft/workflow.md` for deployment process, environments, approval gates
-- Use `draft/.ai-context.md` for system architecture, external dependencies, data stores
-
-If `draft/` does not exist: **STOP** — "No Draft context found. Run `draft init` first."
-
----
-
-## Step 1: Parse Arguments
-
-| Invocation | Behavior |
-|------------|----------|
-| `draft deploy-checklist` | Generate checklist for current active track |
-| `draft deploy-checklist track <id>` | Generate checklist for specific track |
-| `draft deploy-checklist full` | Generate comprehensive checklist (all sections expanded) |
-
-### Default Behavior
-
-If no arguments:
-- Auto-detect active `[~]` In Progress track from `draft/tracks.md`
-- If no active track, generate a project-level deployment checklist
-
----
-
-## Step 2: Gather Context
-
-### 2.1: Infrastructure Detection
-
-From `draft/tech-stack.md`, identify:
-- **Hosting:** Cloud provider (AWS, GCP, Azure), platform (Kubernetes, ECS, Lambda, Vercel, etc.)
-- **CI/CD:** Pipeline tool (GitHub Actions, GitLab CI, Jenkins, CircleCI, etc.)
-- **Database:** Type and migration strategy
-- **Caching:** Redis, Memcached, CDN configuration
-- **Monitoring:** APM, logging, alerting tools
-- **Feature flags:** LaunchDarkly, Unleash, custom
-
-### 2.2: Deployment History
-
-Check for previous deploy checklists:
-```bash
-ls draft/tracks/*/deploy-checklist*.md draft/deploy-checklist*.md 2>/dev/null
-```
-
-If previous checklists exist, note any recurring issues or custom checks added.
-
-### 2.3: Track Context (if track-level)
-
-If deploying a specific track:
-- Read `draft/tracks/<id>/spec.md` for requirements that affect deployment
-- Read `draft/tracks/<id>/plan.md` for completed tasks and their scope
-- Read `draft/tracks/<id>/review-report-latest.md` (if exists) for review findings
-
----
-
-## Step 3: Generate Checklist
-
-Generate a three-phase checklist customized to the project's tech stack.
-
-### Phase 1: Pre-Deploy
-
-#### Code Readiness
-- [ ] All tests passing (`make test` or equivalent)
-- [ ] No Critical or Important issues from last review
-- [ ] All acceptance criteria verified (track-level)
-- [ ] Code coverage meets target (check `draft/tracks/<id>/coverage-report-latest.md`)
-- [ ] No TODO/FIXME/HACK markers in shipped code (or documented as tech debt)
-
-#### Security
-- [ ] No hardcoded secrets, API keys, or credentials in codebase
-- [ ] Dependencies scanned for vulnerabilities (`npm audit`, `pip audit`, `cargo audit`, etc.)
-- [ ] OWASP Top 10 addressed for new endpoints
-- [ ] Authentication and authorization verified for new routes
-- [ ] CORS configuration reviewed (if applicable)
-
-#### Database / Data
-- [ ] Database migrations tested on staging (if applicable)
-- [ ] Migrations are backward-compatible (zero-downtime deploy)
-- [ ] Data backups verified before destructive migrations
-- [ ] Rollback migration exists and is tested
-- [ ] No breaking schema changes without migration path
-
-#### Configuration
-- [ ] Environment variables set in target environment
-- [ ] Feature flags configured for gradual rollout (if applicable)
-- [ ] Config values validated at startup
-- [ ] Secrets rotated if compromised or expired
-
-#### Dependencies
-- [ ] All new dependencies reviewed for license compatibility
-- [ ] No known-vulnerable dependencies in lock file
-- [ ] Dependency versions pinned (no floating ranges in production)
-
-### Phase 2: Deploy
-
-#### Execution
-- [ ] Deploy to staging first, verify functionality
-- [ ] Run smoke tests on staging
-- [ ] Deploy to production using defined strategy (rolling, blue-green, canary)
-- [ ] Monitor deployment progress (no errors in deploy logs)
-- [ ] Verify health check endpoints returning 200
-
-#### Canary / Progressive Rollout (if applicable)
-- [ ] Initial traffic percentage set (e.g., 5%)
-- [ ] Monitoring window defined (e.g., 15 minutes)
-- [ ] Success criteria defined for traffic increase
-- [ ] Automatic rollback triggers configured
-
-### Phase 3: Post-Deploy
-
-#### Verification
-- [ ] Smoke tests passing on production
-- [ ] Key user flows verified end-to-end
-- [ ] API response times within acceptable range
-- [ ] Error rate not elevated (compare to pre-deploy baseline)
-- [ ] No new errors in log aggregation
-
-#### Monitoring
-- [ ] APM dashboards showing normal performance
-- [ ] No spike in error rates or latency
-- [ ] Database metrics stable (connections, query time, locks)
-- [ ] Memory and CPU usage within bounds
-- [ ] Alert thresholds set for new features
-
-#### Communication
-- [ ] Deployment noted in team channel / changelog
-- [ ] Stakeholders notified (if user-facing change)
-- [ ] Documentation updated (if API or behavior changes)
-
----
-
-## Step 4: Define Rollback Triggers
-
-Based on the deployment, define explicit rollback conditions.
-
-### Rollback Trigger Table
-
-| Trigger | Threshold | Detection | Action |
-|---------|-----------|-----------|--------|
-| Error rate spike | >2x pre-deploy baseline for 5+ minutes | APM alerting | Immediate rollback |
-| Latency degradation | p95 >2x baseline for 10+ minutes | APM alerting | Immediate rollback |
-| Health check failure | Any production instance failing | Load balancer health check | Immediate rollback |
-| Data integrity issue | Any data corruption detected | Log monitoring / alerts | Immediate rollback + incident |
-| Critical user flow broken | Key flow (login, checkout, etc.) failing | Smoke tests / user reports | Immediate rollback |
-| Memory / CPU spike | >90% sustained for 5+ minutes | Infrastructure monitoring | Investigate, rollback if escalating |
-
-### Rollback Procedure
-
-```
-ROLLBACK PROCEDURE
-═══════════════════════════════════════════════════════════
-
-1. DECIDE: Rollback trigger met → Announce in team channel
-2. EXECUTE:
-   - [ ] Revert deployment (git revert + redeploy, or platform rollback)
-   - [ ] Verify rollback deployed (health checks, version endpoint)
-   - [ ] Confirm error rate / latency returning to baseline
-3. VERIFY:
-   - [ ] Smoke tests passing on rolled-back version
-   - [ ] No data corruption (check recent transactions/records)
-   - [ ] User-facing functionality restored
-4. COMMUNICATE:
-   - [ ] Update team channel with rollback status
-   - [ ] File incident report if user impact occurred
-   - [ ] Schedule post-mortem if P1/P2 severity
-
-Rollback command (customize for your platform):
-  git revert <deploy-commit> && git push
-  # OR
-  kubectl rollout undo deployment/<name>
-  # OR
-  aws ecs update-service --force-new-deployment
-```
-
----
-
-## Step 5: Save Checklist
-
-**MANDATORY: Include YAML frontmatter with git metadata.** Follow the procedure in `core/shared/git-report-metadata.md` to gather git info, generate frontmatter, and include the report header table. Use `generated_by: "draft:deploy-checklist"`.
-
-### Save Location
-
-- **Track-level:** `draft/tracks/<id>/deploy-checklist-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`)
-  ```bash
-  ln -sf deploy-checklist-<timestamp>.md draft/tracks/<id>/deploy-checklist-latest.md
-  ```
-
-- **Project-level:** `draft/deploy-checklist-<timestamp>.md`
-  ```bash
-  ln -sf deploy-checklist-<timestamp>.md draft/deploy-checklist-latest.md
-  ```
-
----
-
-## Step 6: Present Results
-
-```
-Deploy checklist generated.
-
-Track: [track-id or "project-level"]
-Environment: [target environment]
-Checklist: [N] items across 3 phases
-Rollback triggers: [N] defined
-
-Report: draft/[tracks/<id>/]deploy-checklist-<timestamp>.md
-        (symlink: deploy-checklist-latest.md)
-
-Next steps:
-1. Review and complete each checklist item with evidence
-2. Get deployment approval (if required by workflow.md)
-3. Execute deployment following the checklist phases
-4. Monitor using post-deploy verification items
-```
-
----
-
-## Cross-Skill Dispatch
-
-### Inbound
-
-- **Suggested by `draft implement`** — at track completion
-- **Suggested by `draft review`** — when review passes for production code
-
-### Outbound
-
-- **References `core/agents/ops.md`** — for operational best practices and runbook integration
-- **Suggests `draft incident-response`** — if rollback is triggered during deployment
-- **Feeds `draft learn`** — deployment issues feed back into pattern learning
-
----
-
-## Error Handling
-
-### Missing Tech Stack
-
-```
-Warning: draft/tech-stack.md not found or missing deployment information.
-Generating a generic checklist. Customize for your specific infrastructure.
-```
-
-### No Active Track
-
-```
-No active track found. Generating project-level deployment checklist.
-For track-specific checks, specify: draft deploy-checklist track <id>
-```
-
----
-
-## Anti-Patterns
-
-| Don't | Instead |
-|-------|---------|
-| Use a generic one-size-fits-all checklist | Customize based on tech-stack.md |
-| Skip rollback trigger definition | Always define explicit rollback conditions |
-| Mark items as passed without evidence | Provide verification output for each check |
-| Deploy without completing pre-deploy phase | Complete all phases in order |
-| Skip post-deploy monitoring | Monitor for at least the defined window |
-
----
-
-## Examples
-
-### Generate for active track
-```bash
-draft deploy-checklist
-```
-
-### Generate for specific track
-```bash
-draft deploy-checklist track add-user-auth
-```
-
-### Comprehensive checklist
-```bash
-draft deploy-checklist full
-```
-
----
-
-## Documentation Command
-
-When user says "write docs" or "draft documentation [readme|runbook|api|onboarding]":
-
-You are generating or updating technical documentation using Draft's Context-Driven Development methodology and writer agent principles.
-
-## Red Flags - STOP if you're:
-
-- Writing documentation without reading the source code first
-- Generating docs that duplicate inline code comments verbatim
-- Ignoring the target audience (writing for experts when onboarding, or oversimplifying for API reference)
-- Not loading project context (tech-stack, architecture) before writing
-- Producing stale docs that reference non-existent files, functions, or APIs
-
-**Audience-first. Source-verified. Maintainable.**
-
----
-
-## Pre-Check
-
-### 0. Capture Git Context
-
-```bash
-git branch --show-current    # Current branch name
-git rev-parse --short HEAD   # Current commit hash
-```
-
-### 1. Load Draft Context
-
-Read and follow the base procedure in `core/shared/draft-context-loading.md`.
-
-**Documentation-specific context application:**
-- Use `draft/.ai-context.md` for system architecture, module boundaries, data flows
-- Use `draft/tech-stack.md` for language, framework, and tooling specifics
-- Use `draft/product.md` for product vision, user types, and domain language
-- Use `draft/workflow.md` for development processes, CI/CD, and deployment
-
-If `draft/` does not exist, proceed with code-only documentation. Warn: "No Draft context available — documentation may miss architectural context."
-
----
-
-## Step 1: Parse Arguments
-
-| Invocation | Behavior |
-|------------|----------|
-| `draft documentation readme` | Generate or update project README |
-| `draft documentation runbook` | Generate operational runbook |
-| `draft documentation api` | Generate API reference documentation |
-| `draft documentation onboarding` | Generate developer onboarding guide |
-| `draft documentation readme <path>` | Generate README for a specific module/directory |
-| `draft documentation` | Interactive — ask which mode to use |
-
-### Mode Selection (No Arguments)
-
-If no mode specified, present options:
-```
-Documentation modes:
-1. readme     — Project or module README
-2. runbook    — Operational runbook (deploy, monitor, troubleshoot)
-3. api        — API reference (endpoints, types, examples)
-4. onboarding — Developer onboarding guide (setup, architecture, workflows)
-
-Select mode (1-4):
-```
-
----
-
-## Step 2: Gather Source Material
-
-Each mode has specific source material requirements.
-
-### README Mode
-
-1. **Project-level README:**
-   - Read `draft/product.md` for project purpose, features, target users
-   - Read `draft/tech-stack.md` for language, framework, prerequisites
-   - Read `draft/workflow.md` for development commands (build, test, lint)
-   - Scan `package.json`, `Makefile`, `Cargo.toml`, `pyproject.toml` etc. for scripts/commands
-   - Check existing README.md for content to preserve or update
-
-2. **Module-level README:**
-   - Read `draft/.ai-context.md` for module description, dependencies, interfaces
-   - Read source files in the target directory for exports, public API
-   - Check for existing README.md in the directory
-
-### Runbook Mode
-
-1. Read `draft/tech-stack.md` for infrastructure, hosting, monitoring tools
-2. Read `draft/workflow.md` for deployment process, environments
-3. Read `draft/.ai-context.md` for external dependencies, failure modes, data stores
-4. Check for existing runbooks in `docs/`, `runbooks/`, `ops/`
-5. Read CI/CD configuration files (`.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`)
-6. Reference `core/agents/ops.md` for operational best practices
-
-### API Mode
-
-1. Read `draft/.ai-context.md` for API architecture, authentication, versioning
-2. Read `draft/tech-stack.md` for API framework, serialization format
-3. Scan source code for:
-   - Route definitions (Express routes, FastAPI paths, Spring controllers, etc.)
-   - Request/response types and schemas
-   - Authentication middleware
-   - Error response formats
-4. Check for existing API docs (OpenAPI/Swagger, Postman collections)
-5. Read test files for API endpoints — test cases document expected behavior
-
-### Onboarding Mode
-
-1. Read ALL Draft context files (product, tech-stack, workflow, architecture)
-2. Read `draft/guardrails.md` for coding conventions and anti-patterns
-3. Read `CONTRIBUTING.md`, `DEVELOPMENT.md` if they exist
-4. Scan project root for development setup files (Docker, devcontainers, Makefiles)
-5. Read `draft/.ai-context.md` for system architecture overview
-6. Check recent `draft/tracks/` for examples of how development work flows
-
----
-
-## Step 3: Apply Writer Agent Principles
-
-Reference `core/agents/writer.md` for writing guidelines. Apply these principles:
-
-### Audience Awareness
-
-| Mode | Primary Audience | Tone | Depth |
-|------|-----------------|------|-------|
-| README | New users, evaluators, contributors | Welcoming, clear | Overview + quickstart |
-| Runbook | On-call engineers, ops team | Direct, procedural | Step-by-step, no ambiguity |
-| API | Developers integrating with the API | Technical, precise | Comprehensive reference |
-| Onboarding | New team members | Supportive, structured | Progressive disclosure |
-
-### Writing Principles
-
-1. **Source-verified:** Every claim must trace to actual code, config, or documentation
-2. **Audience-first:** Write for the reader's context and goals, not the author's knowledge
-3. **Maintainable:** Prefer dynamic references (links to code, generated API docs) over hardcoded details that rot
-4. **DRY:** Don't duplicate information that exists elsewhere — link to it
-5. **Scannable:** Use headers, bullet points, tables, and code blocks for quick navigation
-6. **Actionable:** Every section should help the reader DO something
-
----
-
-## Step 4: Generate Documentation
-
-### README Output Structure
-
-```markdown
-# [Project Name]
-
-[One-sentence description from product.md]
-
-## Features
-
-- [Key feature 1]
-- [Key feature 2]
-- [Key feature 3]
-
-## Quick Start
-
-### Prerequisites
-
-- [Runtime/language] version [X.Y+]
-- [Package manager]
-- [Other dependencies]
-
-### Installation
-
-\`\`\`bash
-[installation commands]
-\`\`\`
-
-### Usage
-
-\`\`\`bash
-[basic usage example]
-\`\`\`
-
-## Development
-
-### Setup
-
-\`\`\`bash
-[dev setup commands]
-\`\`\`
-
-### Commands
-
-| Command | Description |
-|---------|-------------|
-| `make build` | [description] |
-| `make test` | [description] |
-| `make lint` | [description] |
-
-## Architecture
-
-[Brief architecture overview — link to detailed docs if available]
-
-## Contributing
-
-[Contributing guidelines or link to CONTRIBUTING.md]
-
-## License
-
-[License info]
-```
-
-### Runbook Output Structure
-
-```markdown
-# Runbook: [Service/System Name]
-
-## Overview
-
-**Service:** [name]
-**Owner:** [team]
-**Tier:** [P1/P2/P3]
-**Dependencies:** [list]
-
-## Architecture
-
-[Brief system diagram or description]
-[External dependencies and their SLAs]
-
-## Deployment
-
-### Prerequisites
-- [ ] [Pre-deploy check 1]
-- [ ] [Pre-deploy check 2]
-
-### Deploy Procedure
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
-
-### Rollback Procedure
-1. [Step 1]
-2. [Step 2]
-
-## Monitoring
-
-### Key Metrics
-| Metric | Normal Range | Alert Threshold |
-|--------|-------------|-----------------|
-| [metric] | [range] | [threshold] |
-
-### Dashboards
-- [Dashboard name]: [URL]
-
-### Alerts
-| Alert | Severity | Runbook Section |
-|-------|----------|-----------------|
-| [alert] | [severity] | [link] |
-
-## Troubleshooting
-
-### [Common Issue 1]
-**Symptoms:** [what you'll see]
-**Cause:** [root cause]
-**Resolution:** [steps to fix]
-
-### [Common Issue 2]
-**Symptoms:** [what you'll see]
-**Cause:** [root cause]
-**Resolution:** [steps to fix]
-
-## Disaster Recovery
-
-### Data Backup
-- **Frequency:** [schedule]
-- **Location:** [where]
-- **Restore procedure:** [steps]
-
-### Failover
-- [Failover procedure]
-```
-
-### API Output Structure
-
-```markdown
-# API Reference
-
-## Overview
-
-**Base URL:** `[base URL]`
-**Authentication:** [method]
-**Content-Type:** `application/json`
-**Versioning:** [strategy]
-
-## Authentication
-
-[How to authenticate — API keys, OAuth, JWT, etc.]
-
-### Example
-
-\`\`\`bash
-curl -H "Authorization: Bearer <token>" [base URL]/endpoint
-\`\`\`
-
-## Endpoints
-
-### [Resource Name]
-
-#### [METHOD] [path]
-
-[Description]
-
-**Parameters:**
-
-| Name | Type | Required | Description |
-|------|------|----------|-------------|
-| [param] | [type] | [yes/no] | [description] |
-
-**Request Body:**
-
-\`\`\`json
-{
-  "field": "value"
-}
-\`\`\`
-
-**Response:**
-
-\`\`\`json
-{
-  "field": "value"
-}
-\`\`\`
-
-**Status Codes:**
-
-| Code | Description |
-|------|-------------|
-| 200 | Success |
-| 400 | Validation error |
-| 401 | Unauthorized |
-| 404 | Not found |
-
-**Example:**
-
-\`\`\`bash
-curl -X POST [base URL]/path \
-  -H "Authorization: Bearer <token>" \
-  -d '{"field": "value"}'
-\`\`\`
-
-## Error Format
-
-\`\`\`json
-{
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Human-readable description"
-  }
-}
-\`\`\`
-
-## Rate Limiting
-
-[Rate limit details]
-```
-
-### Onboarding Output Structure
-
-```markdown
-# Developer Onboarding Guide
-
-## Welcome
-
-[Brief project description and mission]
-
-## Day 1: Setup
-
-### Prerequisites
-- [Software requirements]
-- [Access requirements — repos, services, tools]
-
-### Environment Setup
-1. [Step-by-step setup instructions]
-2. [Verification: how to confirm setup works]
-
-### First Build
-\`\`\`bash
-[commands to build and run locally]
-\`\`\`
-
-## Day 2: Architecture
-
-### System Overview
-[High-level architecture from .ai-context.md]
-
-### Key Modules
-| Module | Responsibility | Key Files |
-|--------|---------------|-----------|
-| [module] | [what it does] | [entry points] |
-
-### Data Flow
-[How data moves through the system]
-
-### Key Decisions
-[Important architectural decisions and their rationale — link to ADRs if available]
-
-## Day 3: Workflow
-
-### Development Process
-[From workflow.md — branching, TDD, review process]
-
-### Coding Conventions
-[From guardrails.md and tech-stack.md]
-
-### Common Commands
-| Task | Command |
-|------|---------|
-| Build | `[command]` |
-| Test | `[command]` |
-| Lint | `[command]` |
-| Deploy | `[command]` |
-
-## First Contribution
-
-### Finding Work
-- Check `draft/tracks.md` for available tracks
-- Look for "good first issue" labels
-
-### Making Changes
-1. Create a track: `draft new-track <description>`
-2. Implement: `draft implement`
-3. Review: `draft review`
-4. Submit PR
-
-### Code Review Expectations
-[What reviewers look for — from workflow.md and guardrails.md]
-
-## Resources
-
-- [Architecture docs]: `draft/.ai-context.md`
-- [Product context]: `draft/product.md`
-- [Tech stack]: `draft/tech-stack.md`
-- [Coding conventions]: `draft/guardrails.md`
-```
-
----
-
-## Step 5: Review and Save
-
-### CHECKPOINT (MANDATORY)
-
-**STOP.** Present the generated documentation to the developer for review.
-
-- Developer may request additions, removals, or style changes
-- **Do NOT save until developer approves**
-
-### Save Location
-
-| Mode | Default Path |
-|------|-------------|
-| readme (project) | `README.md` (project root) |
-| readme (module) | `<path>/README.md` |
-| runbook | `draft/docs/runbook.md` |
-| api | `draft/docs/api-reference.md` |
-| onboarding | `draft/docs/onboarding.md` |
-
-Create `draft/docs/` directory if it doesn't exist:
-```bash
-mkdir -p draft/docs
-```
-
----
-
-## Step 6: Present Results
-
-```
-Documentation generated.
-
-Mode: [readme/runbook/api/onboarding]
-Output: [file path]
-Sections: [N] sections
-Source files consulted: [N]
-
-Next steps:
-1. Review the generated document for accuracy
-2. Update any placeholder values marked with [brackets]
-3. Keep documentation in sync with code changes
-```
-
----
-
-## Cross-Skill Dispatch
-
-### Inbound
-
-- **Suggested by `draft init`** — after project initialization, suggest generating docs
-- **Suggested by `draft implement`** — after track completion, suggest updating docs
-- **Suggested by `draft decompose`** — architecture changes may require doc updates
-
-### Outbound
-
-- **References `core/agents/writer.md`** — for writing style and principles
-- **Feeds `draft learn`** — documentation patterns (templates, conventions) can be learned
-
----
-
-## Error Handling
-
-### No Source Material
-
-```
-Insufficient source material for [mode] documentation.
-
-Missing:
-- [file/info that's needed]
-
-Generate partial documentation anyway? Or provide the missing context first?
-```
-
-### Existing Documentation Conflict
-
-```
-Existing [file] found with [N] lines of content.
-
-Options:
-1. Replace entirely with generated version
-2. Merge — keep existing structure, update outdated sections
-3. Append — add new sections without modifying existing content
-4. Cancel
-
-Select (1-4):
-```
-
----
-
-## Anti-Patterns
-
-| Don't | Instead |
-|-------|---------|
-| Copy-paste code comments as documentation | Synthesize higher-level explanations |
-| Write documentation without reading source | Verify every claim against actual code |
-| Use jargon in onboarding docs | Explain terms or link to glossary |
-| Hardcode version numbers, URLs, paths | Use dynamic references where possible |
-| Write a wall of text | Use headers, tables, code blocks, bullet points |
-| Document implementation details that change often | Document stable interfaces and concepts |
-
----
-
-## Examples
-
-### Generate project README
-```bash
-draft documentation readme
-```
-
-### Generate module README
-```bash
-draft documentation readme src/auth/
-```
-
-### Generate operational runbook
-```bash
-draft documentation runbook
-```
-
-### Generate API reference
-```bash
-draft documentation api
-```
-
-### Generate onboarding guide
-```bash
-draft documentation onboarding
-```
-
-### Interactive mode
-```bash
-draft documentation
-```
-
----
-
-## Incident Response Command
-
-When user says "incident" or "draft incident-response [new|update|postmortem]":
-
-You are managing an incident using Draft's Context-Driven Development methodology. This skill covers the full incident lifecycle from triage through postmortem.
-
-## Red Flags - STOP if you're:
-
-- Investigating before mitigating (restore service first)
-- Skipping severity classification
-- Writing a postmortem that assigns blame to individuals
-- Not communicating status updates at defined intervals
-- Making changes to production without documenting them
-- Assuming root cause without evidence
-
-**Mitigate first. Communicate always. Blame never.**
-
----
-
-## Pre-Check
-
-### 0. Capture Git Context
-
-```bash
-git branch --show-current    # Current branch name
-git rev-parse --short HEAD   # Current commit hash
-```
-
-### 1. Load Draft Context
-
-Read and follow the base procedure in `core/shared/draft-context-loading.md`.
-
-**Incident-specific context application:**
-- Use `draft/.ai-context.md` for system architecture, dependencies, failure modes
-- Use `draft/tech-stack.md` for infrastructure, monitoring, alerting tools
-- Use `draft/workflow.md` for escalation paths, communication channels
-- Use `draft/product.md` for user impact assessment
-
-If `draft/` does not exist, proceed without project context. Warn: "No Draft context — incident response will lack architectural context."
-
----
-
-## Step 1: Parse Arguments
-
-| Invocation | Behavior |
-|------------|----------|
-| `draft incident-response new` | Start a new incident |
-| `draft incident-response new <description>` | Start incident with initial description |
-| `draft incident-response update <incident-id>` | Post status update to existing incident |
-| `draft incident-response postmortem <incident-id>` | Generate blameless postmortem report |
-| `draft incident-response` | Interactive — ask which mode |
-
-### Mode Selection (No Arguments)
-
-```
-Incident Response modes:
-1. new        — Start a new incident (triage, communicate, mitigate)
-2. update     — Post status update to an existing incident
-3. postmortem — Generate blameless postmortem / RCA report
-
-Select mode (1-3):
-```
-
----
-
-## Mode: NEW — Start Incident
-
-### Step 2: Triage
-
-#### 2.1: Classify Severity
-
-| Severity | Definition | Response Time | Update Frequency |
-|----------|------------|---------------|------------------|
-| **P1 — Critical** | Service down, data loss, security breach, revenue impact | Immediate | Every 15 minutes |
-| **P2 — Major** | Significant degradation, feature broken for many users | < 30 minutes | Every 30 minutes |
-| **P3 — Minor** | Partial degradation, workaround available | < 2 hours | Every 2 hours |
-| **P4 — Low** | Cosmetic, minor inconvenience, no workaround needed | Next business day | Daily |
-
-Ask the developer to confirm severity:
-```
-Incident severity assessment:
-
-Impact: [who/what is affected]
-Scope: [how many users/systems]
-Workaround: [available / not available]
-
-Recommended severity: P[N] — [justification]
-
-Confirm severity (P1-P4):
-```
-
-#### 2.2: Assign Incident ID
-
-Generate incident ID from timestamp:
-```bash
-echo "INC-$(date +%Y%m%d-%H%M)"
-```
-
-#### 2.3: Document Initial State
-
-Capture immediately:
-- **What's broken:** Exact symptoms, error messages, affected endpoints
-- **When it started:** First alert time, first user report, or discovery time
-- **Who's affected:** Users, systems, downstream services
-- **Current impact:** Revenue, data, user experience, SLA
-
----
-
-### Step 3: Communicate
-
-#### 3.1: Initial Communication
-
-Generate initial incident notification:
-
-```markdown
-## Incident: [INC-ID]
-
-**Severity:** P[N]
-**Status:** Investigating
-**Started:** [timestamp]
-**Impact:** [description of user/system impact]
-
-**Summary:** [1-2 sentence description of the incident]
-
-**Current actions:**
-- [what's being done right now]
-
-**Next update:** [time based on severity update frequency]
-```
-
-#### 3.2: Stakeholder Identification
-
-Based on severity and `draft/workflow.md`:
-- **P1:** Engineering lead, on-call, product owner, support team
-- **P2:** On-call engineer, team lead
-- **P3:** On-call engineer
-- **P4:** Ticket created, assigned to team
-
----
-
-### Step 4: Gather Evidence
-
-Before attempting any fix:
-
-1. **Capture current state:**
-   - Error logs (last 30 minutes)
-   - Metrics dashboards (screenshot or key values)
-   - Recent deployments (within last 24 hours)
-   - Recent config changes
-
-2. **Timeline construction:**
-   ```
-   INCIDENT TIMELINE: [INC-ID]
-   ═══════════════════════════════════════════════════════════
-   [timestamp] — First alert / user report
-   [timestamp] — Incident declared, severity P[N]
-   [timestamp] — [action taken]
-   [timestamp] — [observation]
-   ```
-
-3. **Check recent deployments:**
-   ```bash
-   git log --oneline --since="24 hours ago"
-   ```
-
----
-
-### Step 5: Mitigate
-
-**Priority: Restore service first, investigate later.**
-
-#### 5.1: Mitigation Strategy
-
-Apply in order of preference (rollback first per ops best practices):
-
-| Priority | Strategy | When to Use |
-|----------|----------|-------------|
-| 1 | **Rollback** | Recent deployment correlated with incident |
-| 2 | **Feature flag disable** | Issue isolated to a specific feature |
-| 3 | **Scale up** | Capacity-related degradation |
-| 4 | **Failover** | Infrastructure failure |
-| 5 | **Hotfix** | When rollback isn't possible and root cause is clear |
-| 6 | **Workaround** | Temporary measure while fix is developed |
-
-#### 5.2: Mitigation Execution
-
-For each mitigation action:
-1. **Announce:** "Attempting [mitigation strategy]"
-2. **Execute:** Run the mitigation
-3. **Verify:** Confirm impact is reduced
-4. **Document:** Add to timeline with result
-
-#### 5.3: Verify Mitigation
-
-- [ ] Primary symptom resolved
-- [ ] Error rate returning to baseline
-- [ ] Key user flows working
-- [ ] No new issues introduced by mitigation
-
----
-
-### Step 6: Save Incident Record
-
-Create incident file at `draft/incidents/incident-<INC-ID>.md`:
-
-```bash
-mkdir -p draft/incidents
-```
-
-```markdown
----
-incident_id: "[INC-ID]"
-severity: "P[N]"
-status: "mitigated"  # investigating | mitigated | resolved | postmortem-complete
-started: "[ISO timestamp]"
-mitigated: "[ISO timestamp]"
-resolved: null
-root_cause: null
----
-
-# Incident: [INC-ID]
-
-## Summary
-
-**Severity:** P[N]
-**Status:** Mitigated
-**Impact:** [description]
-**Duration:** [start to mitigation time]
-
-## Timeline
-
-| Time | Event |
-|------|-------|
-| [timestamp] | [event] |
-
-## Mitigation
-
-**Strategy:** [what was done]
-**Verification:** [evidence it worked]
-
-## Next Steps
-
-- [ ] Root cause investigation
-- [ ] Postmortem (run `draft incident-response postmortem [INC-ID]`)
-- [ ] Preventive measures
-```
-
----
-
-## Mode: UPDATE — Status Update
-
-### Step 2: Load Incident
-
-1. Read `draft/incidents/incident-<INC-ID>.md`
-2. If not found, list available incidents:
-   ```bash
-   ls draft/incidents/incident-*.md 2>/dev/null
-   ```
-
-### Step 3: Gather Update
-
-Ask developer:
-- What changed since last update?
-- Current status (investigating / mitigated / resolved)?
-- Any new findings?
-
-### Step 4: Generate Status Update
-
-```markdown
-## Status Update: [INC-ID] — [timestamp]
-
-**Severity:** P[N]
-**Status:** [current status]
-**Duration:** [elapsed time]
-
-**Since last update:**
-- [what changed]
-
-**Current state:**
-- [current situation]
-
-**Next actions:**
-- [what's planned]
-
-**Next update:** [time]
-```
-
-### Step 5: Update Incident Record
-
-Append the status update to the incident file's timeline section.
-
----
-
-## Mode: POSTMORTEM — Blameless RCA Report
-
-### Step 2: Load Incident
-
-1. Read `draft/incidents/incident-<INC-ID>.md`
-2. Read full timeline and all status updates
-3. If incident not found: "Incident [INC-ID] not found. Create it first with `draft incident-response new`"
-
-### Step 3: Root Cause Analysis
-
-#### 3.1: 5 Whys Analysis
-
-Apply the 5 Whys technique to find root cause:
-
-```
-WHY 1: Why did the service go down?
-→ [answer]
-
-WHY 2: Why did [answer to Why 1] happen?
-→ [answer]
-
-WHY 3: Why did [answer to Why 2] happen?
-→ [answer]
-
-WHY 4: Why did [answer to Why 3] happen?
-→ [answer]
-
-WHY 5: Why did [answer to Why 4] happen?
-→ [ROOT CAUSE]
-```
-
-#### 3.2: Root Cause Classification
-
-| Category | Examples |
-|----------|---------|
-| **Code defect** | Logic error, missing validation, race condition |
-| **Configuration** | Wrong env var, misconfigured service, expired cert |
-| **Infrastructure** | Hardware failure, capacity, network partition |
-| **Dependency** | Third-party service outage, API change |
-| **Process** | Missing review, skipped test, incomplete migration |
-| **Human error** | Misapplied change, wrong environment targeted |
-
-#### 3.3: Contributing Factors
-
-Identify factors that amplified the incident:
-- Detection delay (monitoring gaps)
-- Response delay (unclear runbook, missing on-call)
-- Mitigation delay (no rollback path, manual process)
-- Communication gap (stakeholders not notified)
-
-### Step 4: Generate Postmortem
-
-**MANDATORY: Include YAML frontmatter with git metadata.** Follow the procedure in `core/shared/git-report-metadata.md` to gather git info, generate frontmatter, and include the report header table. Use `generated_by: "draft:incident-response"`.
-
-```markdown
-[YAML frontmatter — see core/shared/git-report-metadata.md]
-
-# Postmortem: [INC-ID] — [Incident Title]
-
-[Report header table — see core/shared/git-report-metadata.md]
-
-## Incident Summary
-
-| Field | Value |
-|-------|-------|
-| Incident ID | [INC-ID] |
-| Severity | P[N] |
-| Duration | [total time from start to resolution] |
-| Impact | [user/system impact description] |
-| Root Cause | [one-sentence root cause] |
-| Root Cause Category | [from classification table] |
-
-## Timeline
-
-| Time | Event | Actor |
-|------|-------|-------|
-| [timestamp] | [event] | [person/system] |
-
-## Root Cause Analysis
-
-### 5 Whys
-
-[5 Whys analysis from Step 3.1]
-
-### Contributing Factors
-
-- [Factor 1]: [how it amplified the incident]
-- [Factor 2]: [how it amplified the incident]
-
-## What Went Well
-
-- [Positive aspect 1]
-- [Positive aspect 2]
-
-## What Went Wrong
-
-- [Failure 1]
-- [Failure 2]
-
-## Action Items
-
-| Priority | Action | Owner | Due Date | Status |
-|----------|--------|-------|----------|--------|
-| P1 | [preventive action] | [assignee] | [date] | [ ] |
-| P2 | [improvement] | [assignee] | [date] | [ ] |
-| P3 | [nice-to-have] | [assignee] | [date] | [ ] |
-
-## Lessons Learned
-
-1. [Lesson 1]
-2. [Lesson 2]
-3. [Lesson 3]
-```
-
-### Step 5: Save Postmortem
-
-Save to `draft/incidents/postmortem-<INC-ID>.md`
-
-Update the incident record:
-- Set `status: "postmortem-complete"`
-- Set `resolved: "[ISO timestamp]"`
-- Set `root_cause: "[one-sentence root cause]"`
-
-### Step 6: Present Results
-
-```
-Postmortem generated.
-
-Incident: [INC-ID]
-Severity: P[N]
-Duration: [total time]
-Root Cause: [one-sentence]
-Category: [classification]
-Action Items: [N] items ([M] P1, [K] P2)
-
-Postmortem: draft/incidents/postmortem-[INC-ID].md
-Incident record: draft/incidents/incident-[INC-ID].md (updated)
-
-Next steps:
-1. Review postmortem with team
-2. Assign action item owners and due dates
-3. Track action item completion
-4. Consider running draft learn to capture patterns
-```
-
----
-
-## Cross-Skill Dispatch
-
-### Inbound
-
-- **Triggered by `draft new-track`** — when track type is `incident`
-- **Triggered by `draft deploy-checklist`** — when rollback is triggered during deployment
-
-### Outbound
-
-- **Feeds `draft new-track`** — action items from postmortem become new tracks for preventive work
-- **Feeds `draft learn`** — incident patterns (root causes, contributing factors) feed into guardrails
-- **Jira sync:** If ticket linked, attach incident report and post status updates via `core/shared/jira-sync.md`
-- **References `core/agents/rca.md`** — for root cause analysis methodology
-- **References `core/agents/ops.md`** — for operational best practices
-
----
-
-## Error Handling
-
-### No Incidents Directory
-
-```
-No incidents directory found. Creating draft/incidents/.
-```
-
-### Incident Not Found
-
-```
-Incident [INC-ID] not found.
-
-Available incidents:
-- [INC-ID-1] — [title] (P[N], [status])
-- [INC-ID-2] — [title] (P[N], [status])
-
-Specify a valid incident ID or create a new one: draft incident-response new
-```
-
-### Missing Timeline Data
-
-```
-Incident [INC-ID] has incomplete timeline data.
-
-For an accurate postmortem, please provide:
-- [missing data point 1]
-- [missing data point 2]
-
-Generate postmortem with available data anyway? [yes/no]
-```
-
----
-
-## Anti-Patterns
-
-| Don't | Instead |
-|-------|---------|
-| Investigate before mitigating | Restore service first, investigate later |
-| Assign blame to individuals | Focus on systems and processes |
-| Skip status updates | Communicate at defined intervals |
-| Make undocumented production changes | Log every action in the timeline |
-| Rush the postmortem | Be thorough — the goal is prevention |
-| Ignore contributing factors | Amplifiers are as important as root cause |
-
----
-
-## Examples
-
-### Start a new incident
-```bash
-draft incident-response new "Payment processing failing with 503 errors"
-```
-
-### Post status update
-```bash
-draft incident-response update INC-20260315-1430
-```
-
-### Generate postmortem
-```bash
-draft incident-response postmortem INC-20260315-1430
-```
-
-### Interactive mode
-```bash
-draft incident-response
-```
-
----
-
-## Quick Review Command
-
-When user says "quick review" or "draft quick-review [file|pr <number>]":
-
-You are conducting a lightweight, ad-hoc code review using Draft's Context-Driven Development methodology. This is a fast, focused review that does not require track context.
-
-## Red Flags - STOP if you're:
-
-- Reviewing without actually reading the code (skimming headers only)
-- Making up file locations or line numbers
-- Reporting findings without checking if the pattern is used successfully elsewhere
-- Treating this as a full `draft review` (this is intentionally lightweight)
-- Skipping the severity classification for findings
-
-**Read the code. Evidence over opinion. Fast but thorough.**
-
----
-
-## Pre-Check
-
-### 0. Capture Git Context
-
-```bash
-git branch --show-current    # Current branch name
-git rev-parse --short HEAD   # Current commit hash
-```
-
-### 1. Load Draft Context (Optional)
-
-```bash
-ls draft/ 2>/dev/null
-```
-
-If `draft/` exists, load lightweight context:
-- Read `draft/.ai-context.md` (or `draft/architecture.md`) for architecture patterns
-- Read `draft/tech-stack.md` for framework conventions
-- Read `draft/guardrails.md` for known conventions and anti-patterns
-
-Quick review works without Draft context — it just won't have project-specific pattern awareness.
-
----
-
-## Step 1: Parse Arguments
-
-| Invocation | Behavior |
-|------------|----------|
-| `draft quick-review` | Review staged changes (`git diff --cached`), falls back to unstaged (`git diff`) |
-| `draft quick-review <file>` | Review a specific file |
-| `draft quick-review <file1> <file2> ...` | Review multiple specific files |
-| `draft quick-review pr <number>` | Review a pull request (via `gh pr diff <number>`) |
-| `draft quick-review pr <url>` | Review a pull request by URL |
-| `draft quick-review commits <range>` | Review a commit range |
-
-### Argument Resolution
-
-1. **No arguments:**
-   - Try `git diff --cached` (staged changes)
-   - If empty, try `git diff` (unstaged changes)
-   - If empty: "No changes to review. Specify a file, PR, or commit range."
-
-2. **File path(s):**
-   - Verify file(s) exist
-   - Read full file content for each
-   - If file doesn't exist: "File not found: [path]"
-
-3. **PR number or URL:**
-   - Extract PR number from URL if needed
-   - Fetch diff: `gh pr diff <number>`
-   - If `gh` not available: "GitHub CLI not available. Install `gh` or provide a diff directly."
-
-4. **Commit range:**
-   - Validate range: `git rev-parse <range> 2>/dev/null`
-   - Fetch diff: `git diff <range>`
-   - If invalid: "Invalid commit range: [range]"
-
----
-
-## Step 2: Analyze
-
-Review the code across four dimensions. For each dimension, scan the entire diff or file content.
-
-### Dimension 1: Security
-
-- [ ] No hardcoded secrets, API keys, tokens, or passwords
-- [ ] Input validation present for user-supplied data
-- [ ] SQL injection protection (parameterized queries, no string concatenation)
-- [ ] XSS protection (no raw HTML insertion, proper escaping)
-- [ ] Authentication/authorization checks in place for protected operations
-- [ ] No sensitive data in logs or error messages
-- [ ] Secure random generation (no `Math.random()` for security-sensitive operations)
-- [ ] CSRF protection for state-changing endpoints
-
-### Dimension 2: Performance
-
-- [ ] No N+1 query patterns (loops containing database queries)
-- [ ] No unbounded queries (missing LIMIT/pagination)
-- [ ] No blocking I/O in async contexts
-- [ ] No unnecessary memory allocations in hot paths
-- [ ] Appropriate caching for expensive operations
-- [ ] No excessive logging in hot paths
-- [ ] Resource cleanup (connections, file handles, streams) in finally/defer blocks
-
-### Dimension 3: Correctness
-
-- [ ] Logic matches apparent intent (variable names, comments, context)
-- [ ] Edge cases handled (null, empty, zero, negative, max values)
-- [ ] Error handling present and appropriate (not swallowed, not overly broad)
-- [ ] Boundary conditions correct (off-by-one, inclusive/exclusive ranges)
-- [ ] Concurrency safety (shared state protected, no race conditions)
-- [ ] Type safety (no unsafe casts, proper null checks)
-- [ ] Return values checked (no ignored errors, no unchecked promises)
-
-### Dimension 4: Maintainability
-
-- [ ] Code is readable without excessive comments
-- [ ] Naming is clear and consistent with project conventions
-- [ ] Functions are focused (single responsibility, reasonable length)
-- [ ] No code duplication that should be extracted
-- [ ] Appropriate abstraction level (not over-engineered, not under-abstracted)
-- [ ] Test coverage considerations (is this testable? are tests included?)
-- [ ] No TODO/FIXME/HACK without tracking reference
-
----
-
-## Step 3: Classify Findings
-
-For each finding, classify severity:
-
-| Severity | Symbol | Definition | Action Required |
-|----------|--------|------------|-----------------|
-| **Critical** | `[C]` | Security vulnerability, data loss risk, crash | Must fix before merge |
-| **Important** | `[I]` | Bug, performance issue, missing validation | Should fix before merge |
-| **Suggestion** | `[S]` | Style, readability, minor improvement | Consider for future |
-
-### Finding Format
-
-```markdown
-- [C] **[File:line]** [Title]
-  Description of the issue.
-  **Impact:** [what could go wrong]
-  **Fix:** [suggested resolution]
-
-- [I] **[File:line]** [Title]
-  Description of the issue.
-  **Impact:** [what could go wrong]
-  **Fix:** [suggested resolution]
-
-- [S] **[File:line]** [Title]
-  Description of the suggestion.
-  **Suggestion:** [what to improve]
-```
-
----
-
-## Step 4: Generate Review Report
-
-Present findings in a structured format.
-
-### Review Output
-
-```markdown
-# Quick Review
-
-**Scope:** [staged changes / file(s) / PR #N / commits range]
-**Files reviewed:** [N]
-**Lines reviewed:** [N additions, M deletions]
-**Branch:** [branch name]
-**Commit:** [short SHA]
-
----
-
-## Findings
-
-### Critical ([N])
-
-[Critical findings or "None"]
-
-### Important ([N])
-
-[Important findings or "None"]
-
-### Suggestions ([N])
-
-[Suggestion findings or "None"]
-
----
-
-## Summary
-
-| Dimension | Status |
-|-----------|--------|
-| Security | PASS / [N] issues |
-| Performance | PASS / [N] issues |
-| Correctness | PASS / [N] issues |
-| Maintainability | PASS / [N] issues |
-
-**Verdict:** PASS / PASS WITH NOTES / NEEDS CHANGES
-
-**Total findings:** [N] ([C] critical, [I] important, [S] suggestions)
-```
-
-### Verdict Logic
-
-- **PASS:** Zero Critical, Zero Important findings
-- **PASS WITH NOTES:** Zero Critical, has Important or Suggestion findings
-- **NEEDS CHANGES:** Any Critical finding present
-
----
-
-## Step 5: Present Results
-
-Display the review in the conversation. Optionally save if requested.
-
-```
-Quick review complete.
-
-Scope: [description]
-Verdict: [PASS / PASS WITH NOTES / NEEDS CHANGES]
-Findings: [N] total ([C] critical, [I] important, [S] suggestions)
-
-[If NEEDS CHANGES:]
-Critical issues must be resolved before merge.
-
-[If PASS WITH NOTES:]
-No blocking issues. Consider addressing important findings.
-
-[If PASS:]
-No issues found. Code looks good.
-```
-
-### Save Option
-
-If developer requests saving the review:
-- Save to `draft/quick-review-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`)
-- Include YAML frontmatter per `core/shared/git-report-metadata.md` with `generated_by: "draft:quick-review"`
-  ```bash
-  ln -sf quick-review-<timestamp>.md draft/quick-review-latest.md
-  ```
-
----
-
-## Cross-Skill Dispatch
-
-### Inbound
-
-- **Offered by `draft implement`** — quick review of changes before commit
-- **Standalone** — used for ad-hoc reviews outside of track workflow
-
-### Outbound
-
-- **Escalates to `draft review`** — if findings suggest a deeper review is needed (e.g., many Critical findings, architectural concerns)
-- **Feeds `draft learn`** — recurring findings across quick reviews indicate patterns worth learning
-
----
-
-## Differences from `draft review`
-
-| Aspect | `draft quick-review` | `draft review` |
-|--------|----------------------|-----------------|
-| Track context | Not required | Required (or project scope) |
-| Spec compliance | Not checked | Three-stage (validation, spec, quality) |
-| Depth | 4 dimensions, surface scan | Deep analysis with adversarial pass |
-| Bughunt integration | No | Optional (with-bughunt) |
-| Report persistence | Optional (on request) | Always saved |
-| Time | Fast (~2 minutes) | Thorough (~10+ minutes) |
-| Use case | Quick check before commit/merge | Formal review before track completion |
-
----
-
-## Error Handling
-
-### No Changes Found
-
-```
-No changes to review.
-
-Options:
-1. Specify a file: draft quick-review src/auth/handler.ts
-2. Specify a PR: draft quick-review pr 42
-3. Specify a commit range: draft quick-review commits main...HEAD
-```
-
-### PR Not Found
-
-```
-PR #[N] not found or not accessible.
-
-Verify:
-- PR number is correct
-- You have access to the repository
-- GitHub CLI (gh) is authenticated: gh auth status
-```
-
-### Large Diff Warning
-
-If diff exceeds 500 lines:
-```
-Large diff detected ([N] lines). Quick review is designed for smaller changes.
-
-Options:
-1. Proceed with quick review (may miss context-dependent issues)
-2. Use draft review for a thorough analysis
-3. Specify a subset: draft quick-review <specific files>
-```
-
----
-
-## Anti-Patterns
-
-| Don't | Instead |
-|-------|---------|
-| Report without reading the code | Read every changed line |
-| Treat as a replacement for draft review | Use for quick checks, escalate when needed |
-| Make up line numbers | Reference actual code locations |
-| Report framework conventions as issues | Check tech-stack.md for accepted patterns |
-| Block on style-only findings | Classify as Suggestion, not Critical |
-
----
-
-## Examples
-
-### Review staged changes
-```bash
-draft quick-review
-```
-
-### Review a specific file
-```bash
-draft quick-review src/auth/middleware.ts
-```
-
-### Review a pull request
-```bash
-draft quick-review pr 42
-```
-
-### Review a commit range
-```bash
-draft quick-review commits main...feature-branch
-```
-
-### Review multiple files
-```bash
-draft quick-review src/auth/handler.ts src/auth/types.ts
-```
-
----
-
-## Standup Command
-
-When user says "standup" or "draft standup [date|week|save]":
-
-You are generating a standup summary using Draft's Context-Driven Development methodology. This is a **read-only** skill — it makes no changes to the codebase, tracks, or any files.
-
-## Red Flags - STOP if you're:
-
-- Modifying any files (this is read-only)
-- Making up git history or progress data
-- Reporting on tracks without reading their actual state
-- Summarizing without checking actual commit messages
-- Fabricating Jira or Gerrit data
-
-**Read-only. Report facts. No modifications.**
-
----
-
-## Pre-Check
-
-### 0. Capture Git Context
-
-```bash
-git branch --show-current    # Current branch name
-git rev-parse --short HEAD   # Current commit hash
-```
-
-### 1. Load Draft Context (if available)
-
-```bash
-ls draft/ 2>/dev/null
-```
-
-If `draft/` exists:
-- Read `draft/tracks.md` for active tracks
-- Read `draft/workflow.md` for team conventions and standup preferences
-
-No Draft context is fine — standup falls back to git-only mode.
-
----
-
-## Step 1: Parse Arguments
-
-| Invocation | Behavior |
-|------------|----------|
-| `draft standup` | Generate standup for today (default: last 24 hours) |
-| `draft standup <date>` | Generate standup for a specific date (YYYY-MM-DD) |
-| `draft standup week` | Generate weekly summary |
-| `draft standup save` | Generate and save to file |
-
----
-
-## Step 2: Gather Data
-
-### 2.1: Git History
-
-Gather commits from the relevant time period:
-
-```bash
-# Last 24 hours (default)
-git log --oneline --since="24 hours ago" --author="$(git config user.name)" --no-merges
-
-# Specific date
-git log --oneline --after="<date> 00:00:00" --before="<date> 23:59:59" --author="$(git config user.name)" --no-merges
-
-# Weekly
-git log --oneline --since="7 days ago" --author="$(git config user.name)" --no-merges
-```
-
-For each commit, also gather:
-```bash
-# Files changed per commit (summary)
-git show --stat --format="" <sha>
-```
-
-### 2.2: Track Progress (if Draft context exists)
-
-For each active track in `draft/tracks.md`:
-
-1. Read `draft/tracks/<id>/metadata.json`:
-   - Tasks completed vs. total
-   - Current phase
-   - Status
-
-2. Read `draft/tracks/<id>/plan.md`:
-   - Find `[x]` tasks completed in the time period (match commit SHAs from git log)
-   - Find `[~]` tasks currently in progress
-   - Find `[!]` blocked tasks
-
-3. Check for reports generated in the time period:
-   ```bash
-   ls -lt draft/tracks/<id>/*report*.md 2>/dev/null | head -5
-   ```
-
-### 2.3: Jira Activity (if MCP available)
-
-If Jira MCP is available:
-- Fetch issues updated by current user in the time period
-- Gather: issue key, summary, status transitions, comments added
-
-If MCP not available, skip silently (do not error).
-
-### 2.4: Gerrit Activity (if MCP available)
-
-If Gerrit MCP is available:
-- Fetch changes authored/reviewed by current user in the time period
-- Gather: change ID, subject, status (merged, reviewing, WIP)
-
-If MCP not available, skip silently (do not error).
-
-### 2.5: Work In Progress
-
-Check current working state:
-```bash
-# Uncommitted changes
-git status --short
-
-# Current branch purpose (from branch name convention)
-git branch --show-current
-```
-
----
-
-## Step 3: Generate Standup
-
-### Standard Format (Yesterday / Today / Blockers)
-
-```
-═══════════════════════════════════════════════════════════
-                     STANDUP SUMMARY
-═══════════════════════════════════════════════════════════
-Date: [YYYY-MM-DD]
-Author: [git user.name]
-Branch: [current branch]
-
-YESTERDAY (completed)
-─────────────────────────────────────────────────────────
-[If commits exist:]
-• [commit message 1] ([short SHA])
-  Files: [N] changed in [module/area]
-• [commit message 2] ([short SHA])
-  Files: [N] changed in [module/area]
-
-[If track context:]
-Track Progress:
-• [track-id]: [N]/[M] tasks complete ([percentage]%)
-  Completed: [task description from plan.md]
-
-[If Jira:]
-Jira:
-• [JIRA-KEY]: [summary] → [status transition]
-
-[If Gerrit:]
-Gerrit:
-• [change-id]: [subject] — [status]
-
-[If no activity:]
-• No commits in the last 24 hours
-
-TODAY (planned)
-─────────────────────────────────────────────────────────
-[If track context with pending tasks:]
-• [track-id]: Next task — [task description from plan.md]
-  Phase: [current phase] ([N] tasks remaining)
-
-[If WIP detected:]
-• Continue work on branch [branch-name]
-  Uncommitted changes: [N] files modified
-
-[If no track context:]
-• [Inferred from branch name and recent work]
-
-BLOCKERS
-─────────────────────────────────────────────────────────
-[If blocked tasks found:]
-• [track-id] — Task: [description]
-  Reason: [from plan.md blocked task notes]
-
-[If no blockers:]
-• None
-
-═══════════════════════════════════════════════════════════
-```
-
-### Weekly Format (additional)
-
-When `week` argument is used, add a summary section:
-
-```
-WEEKLY SUMMARY
-─────────────────────────────────────────────────────────
-Commits: [N] total
-Tracks progressed: [list with delta]
-  • [track-id]: [start]% → [end]% (+[delta]%)
-Tracks completed: [list or "none"]
-Reviews: [N] (if Gerrit data available)
-Jira issues closed: [N] (if Jira data available)
-```
-
----
-
-## Step 4: Present Results
-
-Display the standup in the conversation.
-
-### Save Option
-
-If `save` argument provided or developer requests saving:
-
-```bash
-mkdir -p draft
-```
-
-Save to `draft/standup-<date>.md` (e.g., `draft/standup-2026-03-15.md`):
-
-```markdown
----
-date: "[YYYY-MM-DD]"
-author: "[git user.name]"
-generated_by: "draft:standup"
----
-
-# Standup: [YYYY-MM-DD]
-
-[Full standup content from Step 3]
-```
-
-Announce save location:
-```
-Standup saved to: draft/standup-<date>.md
-```
-
----
-
-## Cross-Skill Dispatch
-
-### Inbound
-
-- **Standalone** — invoked directly by developer
-
-### Outbound
-
-- **Reads `draft status` data** — uses track progress information for standup generation
-- **No downstream dispatch** — standup is informational only, does not trigger other skills
-
----
-
-## Error Handling
-
-### No Git History
-
-```
-No commits found in the time period.
-
-Git user: [git config user.name]
-Period: [time range searched]
-
-Verify:
-- Git user.name matches your commit author
-- You have commits in this time period
-- The repository has recent history (not a shallow clone)
-```
-
-### No Draft Context
-
-```
-No Draft context found. Generating git-only standup.
-
-For richer standup with track progress, run draft init first.
-```
-
-### Empty Standup
-
-If no activity found across any source:
-
-```
-No activity found for [date/period].
-
-Sources checked:
-- Git history: 0 commits
-- Track progress: [N/A or no changes]
-- Jira: [N/A or no updates]
-- Gerrit: [N/A or no activity]
-
-Nothing to report.
-```
-
----
-
-## Anti-Patterns
-
-| Don't | Instead |
-|-------|---------|
-| Modify any files silently | This skill is read-only |
-| Fabricate commit messages | Report actual git log output |
-| Guess at track progress | Read metadata.json and plan.md |
-| Include other people's commits | Filter by git user.name |
-| Report Jira/Gerrit data without MCP | Skip gracefully, don't fabricate |
-
----
-
-## Examples
-
-### Daily standup
-```bash
-draft standup
-```
-
-### Standup for specific date
-```bash
-draft standup 2026-03-14
-```
-
-### Weekly summary
-```bash
-draft standup week
-```
-
-### Save standup to file
-```bash
-draft standup save
-```
-
----
-
-## Tech Debt Command
-
-When user says "tech debt" or "draft tech-debt [path|track <id>]":
-
-You are identifying and prioritizing technical debt using Draft's Context-Driven Development methodology.
-
-## Red Flags - STOP if you're:
-
-- Reporting debt without reading the actual code
-- Categorizing everything as high priority (prioritization requires trade-offs)
-- Suggesting rewrites when incremental fixes suffice
-- Ignoring effort estimates (impact without effort is not actionable)
-- Making up file locations or code patterns
-- Reporting framework conventions as debt
-
-**Evidence-based. Prioritized. Actionable.**
-
----
-
-## Pre-Check
-
-### 0. Capture Git Context
-
-```bash
-git branch --show-current    # Current branch name
-git rev-parse --short HEAD   # Current commit hash
-```
-
-### 1. Load Draft Context
-
-Read and follow the base procedure in `core/shared/draft-context-loading.md`.
-
-**Tech-debt-specific context application:**
-- Use `draft/.ai-context.md` for architecture, module boundaries, known technical decisions
-- Use `draft/tech-stack.md` for framework versions, dependency age, accepted patterns
-- Use `draft/guardrails.md` for known conventions and anti-patterns (anti-patterns ARE debt indicators)
-- Use `draft/product.md` for business priorities (aligns debt prioritization with product goals)
-
-If `draft/` does not exist: **STOP** — "No Draft context found. Run `draft init` first. Tech debt analysis requires project context."
-
----
-
-## Step 1: Parse Arguments
-
-| Invocation | Behavior |
-|------------|----------|
-| `draft tech-debt` | Full codebase tech debt scan |
-| `draft tech-debt <path>` | Scan specific directory or module |
-| `draft tech-debt track <id>` | Scan files related to a specific track |
-| `draft tech-debt quick` | Quick scan — top-level indicators only, skip deep analysis |
-
----
-
-## Step 2: Scan Across Six Dimensions
-
-For each dimension, scan the codebase and record findings with evidence.
-
-### Dimension 1: Code Debt
-
-Issues within individual files and functions.
-
-- [ ] **Code duplication:** Repeated logic across files (3+ occurrences of similar patterns)
-- [ ] **Complex functions:** Cyclomatic complexity > 15, nesting depth > 3
-- [ ] **Long files:** Files exceeding 500 lines (language-dependent threshold)
-- [ ] **Magic numbers/strings:** Hardcoded values that should be constants or config
-- [ ] **Dead code:** Unreachable functions, unused imports, commented-out blocks
-- [ ] **TODO/FIXME/HACK markers:** Accumulated unresolved markers
-- [ ] **Type safety gaps:** `any` types (TypeScript), missing type hints (Python), unsafe casts
-- [ ] **Inconsistent patterns:** Same problem solved differently across the codebase
-
-**Detection approach:**
-```bash
-# TODO/FIXME/HACK count
-grep -rn "TODO\|FIXME\|HACK" --include="*.ts" --include="*.py" --include="*.go" --include="*.java" --include="*.rs" . | grep -v node_modules | grep -v vendor
-
-# Large files
-find . -name "*.ts" -o -name "*.py" -o -name "*.go" -o -name "*.java" -o -name "*.rs" | xargs wc -l | sort -rn | head -20
-
-# Dead imports (language-specific tools)
-```
-
-### Dimension 2: Architecture Debt
-
-Structural issues in system design.
-
-- [ ] **Circular dependencies:** Modules that import each other (trace import chains)
-- [ ] **God objects/modules:** Single module with too many responsibilities
-- [ ] **Missing abstractions:** Direct coupling where interfaces should exist
-- [ ] **Layer violations:** Business logic in controllers, data access in views
-- [ ] **Monolith coupling:** Components that should be decoupled for independent deployment
-- [ ] **Missing boundaries:** No clear separation between domains/bounded contexts
-
-**Detection approach:**
-- Read `draft/.ai-context.md` module definitions and check actual imports against intended boundaries
-- Trace import chains for cycles
-- Identify modules with high fan-in AND high fan-out (connector modules that are likely over-coupled)
-
-### Dimension 3: Test Debt
-
-Gaps in testing quality and coverage.
-
-- [ ] **Missing tests:** Public functions/methods without test coverage
-- [ ] **Brittle tests:** Tests that break on implementation changes (testing internals, not behavior)
-- [ ] **Slow tests:** Tests taking >5 seconds individually or >60 seconds total
-- [ ] **Flaky tests:** Tests that pass/fail non-deterministically
-- [ ] **Missing integration tests:** Components tested in isolation but not together
-- [ ] **No edge case coverage:** Only happy path tested
-- [ ] **Test anti-patterns:** Shared mutable state, logic in tests, no assertions
-
-**Detection approach:**
-```bash
-# Test file count vs source file count
-find . -name "*test*" -o -name "*spec*" | wc -l
-find . -name "*.ts" -o -name "*.py" | grep -v test | grep -v spec | wc -l
-
-# Run test suite and check for slow tests (if safe to run)
-```
-
-### Dimension 4: Dependency Debt
-
-Issues with third-party dependencies.
-
-- [ ] **Outdated dependencies:** Major version behind current (check lock files)
-- [ ] **Vulnerable dependencies:** Known CVEs in dependency tree
-- [ ] **Abandoned dependencies:** No commits in 12+ months, no maintenance
-- [ ] **Duplicate dependencies:** Multiple libraries solving the same problem
-- [ ] **License issues:** Incompatible licenses for the project type
-- [ ] **Pinning issues:** Floating version ranges that risk breaking changes
-
-**Detection approach:**
-```bash
-# Check for outdated (npm example)
-npm outdated 2>/dev/null
-
-# Check for vulnerabilities
-npm audit 2>/dev/null || pip audit 2>/dev/null || cargo audit 2>/dev/null
-
-# Dependency age (check lock file dates)
-```
-
-### Dimension 5: Documentation Debt
-
-Gaps in project documentation.
-
-- [ ] **Missing README:** No project or module README
-- [ ] **Stale docs:** Documentation references non-existent files, APIs, or patterns
-- [ ] **Missing API docs:** Public interfaces without documentation
-- [ ] **No architecture docs:** Missing system overview for new developers
-- [ ] **Missing runbooks:** No operational documentation for production systems
-- [ ] **Inline comment debt:** Complex logic without explanatory comments
-
-**Detection approach:**
-- Check for README.md at project root and key directories
-- Cross-reference doc references with actual codebase
-- Check for JSDoc/docstring coverage on public exports
-
-### Dimension 6: Infrastructure Debt
-
-Issues in build, deploy, and operational systems.
-
-- [ ] **CI/CD gaps:** Missing or incomplete CI pipeline stages
-- [ ] **Manual deployment steps:** Processes that should be automated
-- [ ] **Missing monitoring:** No alerting, no APM, no log aggregation
-- [ ] **Environment drift:** Dev/staging/prod configuration divergence
-- [ ] **Missing IaC:** Infrastructure not codified (manual server/cloud setup)
-- [ ] **Build performance:** Slow builds that impede development velocity
-- [ ] **Missing health checks:** No readiness/liveness probes
-
-**Detection approach:**
-- Read CI config files (`.github/workflows/`, `.gitlab-ci.yml`, etc.)
-- Check for monitoring configuration
-- Compare environment configs
-
----
-
-## Step 3: Prioritize
-
-### Priority Scoring
-
-For each finding, score on three axes (1-5 scale):
-
-| Axis | 1 (Low) | 3 (Medium) | 5 (High) |
-|------|---------|------------|----------|
-| **Impact** | Cosmetic, developer annoyance | Slows development, causes occasional bugs | Blocks features, causes production issues |
-| **Risk** | Low probability of causing problems | Moderate probability, growing concern | High probability, ticking time bomb |
-| **Effort** | < 1 day | 1-5 days | > 1 week |
-
-### Priority Formula
-
-```
-Priority Score = (Impact + Risk) / (6 - Effort)
-```
-
-Higher score = higher priority. This formula favors high-impact, low-effort items (quick wins).
-
-### Sort into Three Tiers
-
-| Tier | Priority Score | Action |
-|------|---------------|--------|
-| **Quick Wins** | Score > 3.0 AND Effort ≤ 2 | Fix immediately, low risk |
-| **Strategic** | Score > 2.0 OR Impact ≥ 4 | Plan and schedule, high value |
-| **Nice-to-Haves** | Score ≤ 2.0 AND Impact ≤ 2 | Track but don't prioritize |
-
----
-
-## Step 4: Generate Report
-
-**MANDATORY: Include YAML frontmatter with git metadata.** Follow the procedure in `core/shared/git-report-metadata.md` to gather git info, generate frontmatter, and include the report header table. Use `generated_by: "draft:tech-debt"`.
-
-### Report Structure
-
-```markdown
-[YAML frontmatter — see core/shared/git-report-metadata.md]
-
-# Tech Debt Report
-
-[Report header table — see core/shared/git-report-metadata.md]
-
-## Summary
-
-| Dimension | Findings | Critical | Important | Minor |
-|-----------|----------|----------|-----------|-------|
-| Code | [N] | [N] | [N] | [N] |
-| Architecture | [N] | [N] | [N] | [N] |
-| Test | [N] | [N] | [N] | [N] |
-| Dependency | [N] | [N] | [N] | [N] |
-| Documentation | [N] | [N] | [N] | [N] |
-| Infrastructure | [N] | [N] | [N] | [N] |
-| **Total** | **[N]** | **[N]** | **[N]** | **[N]** |
-
-## Health Score
-
-**Overall: [score]/100**
-
-| Dimension | Score | Grade |
-|-----------|-------|-------|
-| Code | [N]/100 | [A/B/C/D/F] |
-| Architecture | [N]/100 | [A/B/C/D/F] |
-| Test | [N]/100 | [A/B/C/D/F] |
-| Dependency | [N]/100 | [A/B/C/D/F] |
-| Documentation | [N]/100 | [A/B/C/D/F] |
-| Infrastructure | [N]/100 | [A/B/C/D/F] |
-
-Grading: A (90-100), B (80-89), C (70-79), D (60-69), F (<60)
-
----
-
-## Tier 1: Quick Wins
-
-[Findings with Priority Score > 3.0 AND Effort ≤ 2]
-
-### [Finding Title]
-- **Dimension:** [category]
-- **Location:** [file:line or module]
-- **Impact:** [score]/5 — [description]
-- **Risk:** [score]/5 — [description]
-- **Effort:** [score]/5 — [estimated time]
-- **Priority Score:** [calculated]
-- **Remediation:** [specific action to take]
-
----
-
-## Tier 2: Strategic
-
-[Findings with Priority Score > 2.0 OR Impact ≥ 4]
-
-### [Finding Title]
-[Same format as Tier 1]
-
----
-
-## Tier 3: Nice-to-Haves
-
-[Remaining findings]
-
-### [Finding Title]
-[Same format as Tier 1]
-
----
-
-## Remediation Plan
-
-### Phase 1: Quick Wins (1-2 sprints)
-- [ ] [Action 1] — [effort estimate]
-- [ ] [Action 2] — [effort estimate]
-
-### Phase 2: Strategic (3-6 sprints)
-- [ ] [Action 1] — [effort estimate]
-- [ ] [Action 2] — [effort estimate]
-
-### Phase 3: Nice-to-Haves (backlog)
-- [ ] [Action 1] — [effort estimate]
-- [ ] [Action 2] — [effort estimate]
-
----
-
-## Trend (if previous report exists)
-
-| Dimension | Previous | Current | Delta |
-|-----------|----------|---------|-------|
-| Code | [score] | [score] | [+/-] |
-| Total findings | [N] | [N] | [+/-] |
-```
-
-### Save Location
-
-Save to `draft/tech-debt-report-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`):
-
-```bash
-ln -sf tech-debt-report-<timestamp>.md draft/tech-debt-report-latest.md
-```
-
----
-
-## Step 5: Present Results
-
-```
-Tech debt analysis complete.
-
-Overall Health: [score]/100 ([grade])
-Findings: [N] total across 6 dimensions
-  Quick Wins: [N] (fix now, low effort)
-  Strategic: [N] (plan and schedule)
-  Nice-to-Haves: [N] (track, don't prioritize)
-
-Top 3 Quick Wins:
-1. [Finding] — [effort estimate]
-2. [Finding] — [effort estimate]
-3. [Finding] — [effort estimate]
-
-Report: draft/tech-debt-report-<timestamp>.md
-        (symlink: tech-debt-report-latest.md)
-
-Next steps:
-1. Review findings and adjust priorities
-2. Create tracks for strategic items: draft new-track
-3. Address quick wins in current sprint
-4. Re-run periodically to track trend
-```
-
----
-
-## Cross-Skill Dispatch
-
-### Inbound
-
-- **Offered by `draft new-track`** — when creating refactor tracks, suggest running tech debt analysis first
-- **Suggested by `draft implement`** — when tech debt is logged during implementation (plan.md ## Tech Debt)
-- **Suggested by `draft deep-review`** — when deep review identifies systemic issues
-
-### Outbound
-
-- **Feeds `draft new-track`** — strategic findings become new refactor tracks
-- **Feeds `draft learn`** — recurring debt patterns inform guardrails
-- **References `draft/guardrails.md`** — anti-patterns in guardrails are debt indicators
-
----
-
-## Error Handling
-
-### No Draft Context
-
-```
-No Draft context found. Run draft init first.
-Tech debt analysis requires project context for accurate prioritization.
-```
-
-### Empty Codebase
-
-```
-No source files found matching scan criteria.
-Verify the path and file extensions are correct.
-```
-
-### Previous Report Comparison
-
-If a previous report exists (`draft/tech-debt-report-latest.md`):
-- Compare findings count per dimension
-- Show trend (improving / stable / degrading)
-- Highlight new findings not in previous report
-- Note resolved findings (in previous but not current)
-
----
-
-## Anti-Patterns
-
-| Don't | Instead |
-|-------|---------|
-| Report everything as critical | Use the priority scoring formula |
-| Suggest full rewrites | Recommend incremental improvements |
-| Ignore effort estimates | Every finding needs an effort score |
-| Skip dimensions that seem fine | Scan all 6, mark clean dimensions as healthy |
-| Report framework patterns as debt | Check tech-stack.md accepted patterns |
-| Run without Draft context | Require draft init for accurate analysis |
-
----
-
-## Examples
-
-### Full codebase scan
-```bash
-draft tech-debt
-```
-
-### Scan specific module
-```bash
-draft tech-debt src/auth/
-```
-
-### Scan track-related files
-```bash
-draft tech-debt track add-user-auth
-```
-
-### Quick scan
-```bash
-draft tech-debt quick
-```
-
----
-
-## Testing Strategy Command
-
-When user says "test strategy" or "draft testing-strategy [track <id>|path]":
-
-You are designing a test strategy using Draft's Context-Driven Development methodology. This skill plans what to test and how; `draft coverage` measures the results.
-
-## Red Flags - STOP if you're:
-
-- Designing a test strategy without reading the codebase first
-- Copying a generic test pyramid without customizing for this project
-- Setting coverage targets without understanding the module's risk level
-- Ignoring the existing test infrastructure (framework, patterns, helpers)
-- Planning tests for generated or vendored code
-- Designing tests that test implementation details instead of behavior
-
-**Codebase-first. Risk-aware. Behavior-focused.**
-
----
-
-## Pre-Check
-
-### 0. Capture Git Context
-
-```bash
-git branch --show-current    # Current branch name
-git rev-parse --short HEAD   # Current commit hash
-```
-
-### 1. Load Draft Context
-
-Read and follow the base procedure in `core/shared/draft-context-loading.md`.
-
-**Testing-strategy-specific context application:**
-- Use `draft/.ai-context.md` for module boundaries, dependencies, critical paths
-- Use `draft/tech-stack.md` for test framework, testing tools, language conventions
-- Use `draft/workflow.md` for TDD preferences, CI configuration, coverage targets
-- Use `draft/guardrails.md` for test-related conventions and anti-patterns
-- Use `draft/product.md` for critical user flows that need end-to-end coverage
-
-If `draft/` does not exist: **STOP** — "No Draft context found. Run `draft init` first."
-
----
-
-## Step 1: Parse Arguments
-
-| Invocation | Behavior |
-|------------|----------|
-| `draft testing-strategy` | Design strategy for active track or project |
-| `draft testing-strategy track <id>` | Design strategy for specific track |
-| `draft testing-strategy <path>` | Design strategy for specific module/directory |
-| `draft testing-strategy refresh` | Update existing strategy with new findings |
-
-### Default Behavior
-
-If no arguments:
-- Auto-detect active `[~]` In Progress track from `draft/tracks.md`
-- If no active track, design project-level strategy
-- If active track found: "Designing test strategy for track: [id] — [name]"
-
----
-
-## Step 2: Analyze Codebase
-
-### 2.1: Test Infrastructure Inventory
-
-Detect existing test setup:
-
-```bash
-# Find test files
-find . -name "*test*" -o -name "*spec*" -o -name "__tests__" | grep -v node_modules | grep -v vendor | head -50
-
-# Check test framework config
-ls jest.config.* vitest.config.* pytest.ini setup.cfg pyproject.toml .nycrc Cargo.toml go.mod 2>/dev/null
-
-# Check CI test configuration
-ls .github/workflows/*.yml .gitlab-ci.yml Jenkinsfile Makefile 2>/dev/null
-```
-
-Document:
-- **Test framework:** [detected framework and version]
-- **Test runner:** [how tests are executed]
-- **Coverage tool:** [if configured]
-- **CI integration:** [which pipeline stages run tests]
-- **Test helpers/utilities:** [shared test infrastructure]
-- **Mocking libraries:** [detected mocking tools]
-- **Test data management:** [fixtures, factories, seeds]
-
-### 2.2: Codebase Structure Analysis
-
-Map the codebase to understand what needs testing:
-
-1. **Identify module boundaries** (from `.ai-context.md` or directory structure)
-2. **Classify each module by risk level:**
-
-| Risk Level | Criteria | Examples |
-|------------|----------|---------|
-| **Critical** | Data integrity, security, financial | Auth, payments, crypto, data persistence |
-| **High** | Core business logic, user-facing | API handlers, domain logic, state machines |
-| **Medium** | Supporting logic, integrations | Utilities, adapters, transformers |
-| **Low** | Configuration, glue code, generated | Config loaders, type definitions, stubs |
-
-3. **Identify external boundaries:**
-   - Database interactions
-   - Third-party API calls
-   - Message queues / event systems
-   - File system operations
-   - Network boundaries
-
-4. **Map existing test coverage:**
-   - Which modules have tests?
-   - What type of tests exist? (unit, integration, e2e)
-   - What's the approximate coverage per module?
-
-### 2.3: Critical Path Analysis
-
-From `draft/.ai-context.md` or `draft/product.md`, identify:
-- **Critical user flows:** Login, checkout, data submission, etc.
-- **Write paths:** Operations that mutate state
-- **Error-sensitive paths:** Operations where failure has high cost
-- **Concurrency-sensitive paths:** Operations with race condition risk
-
----
-
-## Step 3: Design Testing Pyramid
-
-### 3.1: Pyramid Configuration
-
-Based on the codebase analysis, define the testing pyramid:
-
-```
-                    ┌─────────┐
-                    │  E2E    │  [N]%
-                    ├─────────┤
-                    │         │
-                  ┌─┤ Integr. ├─┐  [N]%
-                  │ │         │ │
-                ┌─┤ ├─────────┤ ├─┐
-                │ │ │         │ │ │
-              ┌─┤ │ │  Unit   │ │ ├─┐  [N]%
-              │ │ │ │         │ │ │ │
-              └─┴─┴─┴─────────┴─┴─┴─┘
-```
-
-### Recommended Distribution
-
-| Layer | Typical Ratio | Speed | Confidence | Maintenance |
-|-------|--------------|-------|------------|-------------|
-| **Unit** | 70% of tests | Fast (ms) | Per-function | Low |
-| **Integration** | 20% of tests | Medium (s) | Per-module | Medium |
-| **E2E** | 10% of tests | Slow (min) | Per-flow | High |
-
-Adjust based on codebase characteristics:
-- **Heavy business logic → More unit tests** (validate rules)
-- **Heavy integrations → More integration tests** (validate boundaries)
-- **User-facing app → More E2E tests** (validate flows)
-- **Library/SDK → More unit + contract tests** (validate API surface)
-
-### 3.2: Layer Definitions
-
-**Unit Tests:**
-- Test individual functions/methods in isolation
-- Mock external dependencies
-- Focus: correctness of logic, edge cases, error handling
-- Speed: < 100ms per test
-- Pattern: Arrange → Act → Assert
-
-**Integration Tests:**
-- Test module interactions and boundaries
-- Use real (or test) databases, file systems, etc.
-- Focus: data flow across boundaries, contract adherence
-- Speed: < 5s per test
-- Pattern: Setup environment → Execute flow → Verify state → Cleanup
-
-**End-to-End Tests:**
-- Test complete user flows through the system
-- Use real (or staging) infrastructure
-- Focus: critical user journeys work end-to-end
-- Speed: < 30s per test
-- Pattern: Simulate user action → Verify outcome
-
----
-
-## Step 4: Per-Component Strategy
-
-For each module/component, define a specific testing approach.
-
-### Component Strategy Template
-
-```markdown
-### [Module Name]
-
-**Risk Level:** [Critical / High / Medium / Low]
-**Coverage Target:** [percentage]%
-**Current Coverage:** [percentage]% (or "unknown")
-
-**Unit Tests:**
-- [Function/class]: Test [what behavior]
-  - Happy path: [scenario]
-  - Edge cases: [list]
-  - Error cases: [list]
-
-**Integration Tests:**
-- [Boundary]: Test [what interaction]
-  - [Scenario 1]
-  - [Scenario 2]
-
-**What NOT to test:**
-- [Generated code, trivial getters/setters, framework internals]
-```
-
-### Coverage Targets by Risk Level
-
-| Risk Level | Line Coverage | Branch Coverage | Mutation Score |
-|------------|-------------|-----------------|----------------|
-| **Critical** | 95%+ | 90%+ | 80%+ (recommended) |
-| **High** | 85%+ | 80%+ | — |
-| **Medium** | 70%+ | 60%+ | — |
-| **Low** | 50%+ | — | — |
-| **Generated** | Excluded | Excluded | Excluded |
-
----
-
-## Step 5: Test Quality Guidelines
-
-### What Makes a Good Test
-
-1. **Tests behavior, not implementation:** Verify observable outcomes, not internal method calls
-2. **One behavior per test:** Each test should verify exactly one logical behavior
-3. **No logic in tests:** No conditionals, loops, or try/catch in test code
-4. **DAMP over DRY:** Descriptive and meaningful test names and setup over deduplication
-5. **No shared mutable state:** Each test sets up its own state
-6. **Fast and deterministic:** No flakiness, no network calls in unit tests
-7. **Clear failure messages:** When a test fails, the message tells you what went wrong
-
-### Test Naming Convention
-
-```
-[Module/Class].[method]_[scenario]_[expectedBehavior]
-
-Examples:
-- AuthService.login_validCredentials_returnsToken
-- UserRepository.findById_nonExistentId_returnsNull
-- PaymentProcessor.charge_insufficientFunds_throwsPaymentError
-```
-
-Adapt to the project's existing naming convention if one exists.
-
-### Anti-Patterns to Avoid
-
-| Anti-Pattern | Problem | Better Approach |
-|-------------|---------|-----------------|
-| Testing private methods | Couples tests to implementation | Test through public interface |
-| Excessive mocking | Tests don't verify real behavior | Use fakes or real dependencies |
-| Test interdependence | One test's failure cascades | Isolate each test completely |
-| Assert on everything | Brittle, breaks on any change | Assert on behavior, not structure |
-| Copy-paste test code | Hard to maintain | Use test helpers and builders |
-| Sleep in tests | Flaky, slow | Use events, polling, or test clocks |
-
-### Reference Sources
-
-- Google SWE Book Ch. 11-14 (Testing Overview, Unit Testing, Test Doubles, Larger Tests)
-- Google Testing Blog: "Test Behavior, Not Implementation"
-- Martin Fowler: "Test Pyramid" (https://martinfowler.com/bliki/TestPyramid.html)
-- ISTQB Test Analyst syllabus for structured test design techniques
-
----
-
-## Step 6: Gap Analysis
-
-Compare the designed strategy against the current state.
-
-### Gap Identification
-
-| Module | Risk | Target | Current | Gap | Priority |
-|--------|------|--------|---------|-----|----------|
-| [module] | [level] | [target]% | [current]% | [delta]% | [1-3] |
-
-### Missing Test Categories
-
-- [ ] **Missing unit tests:** [list modules without unit tests]
-- [ ] **Missing integration tests:** [list boundaries without integration tests]
-- [ ] **Missing E2E tests:** [list critical flows without E2E coverage]
-- [ ] **Missing edge case tests:** [list known edge cases without coverage]
-- [ ] **Missing error path tests:** [list error scenarios without coverage]
-
-### Prioritized Test Writing Plan
-
-1. **Immediate (before next release):**
-   - [Test 1]: [what to test, why it's urgent]
-   - [Test 2]: [what to test, why it's urgent]
-
-2. **Short-term (next 2 sprints):**
-   - [Test 1]: [what to test]
-   - [Test 2]: [what to test]
-
-3. **Long-term (backlog):**
-   - [Test 1]: [what to test]
-   - [Test 2]: [what to test]
-
----
-
-## Step 7: Developer Review
-
-### CHECKPOINT (MANDATORY)
-
-**STOP.** Present the testing strategy to the developer for review.
-
-Ask developer:
-- Are the risk classifications accurate?
-- Are the coverage targets appropriate?
-- Are there critical paths we missed?
-- Should any modules be excluded or added?
-- Does the test writing plan priority match team priorities?
-
-**Wait for developer approval before saving.**
-
----
-
-## Step 8: Save Strategy
-
-### Save Location
-
-- **Track-level:** `draft/tracks/<id>/testing-strategy.md`
-- **Project-level:** `draft/testing-strategy.md`
-
-### Strategy Document Format
-
-```markdown
----
-project: "[project name]"
-track_id: "[track-id or null]"
-generated_by: "draft:testing-strategy"
-generated_at: "[ISO timestamp]"
-git:
-  branch: "[branch]"
-  commit: "[short SHA]"
----
-
-# Testing Strategy
-
-## Overview
-
-**Project:** [name]
-**Date:** [date]
-**Scope:** [track-level or project-level]
-
-## Test Infrastructure
-
-[From Step 2.1]
-
-## Testing Pyramid
-
-[From Step 3]
-
-## Per-Component Strategy
-
-[From Step 4 — one section per module]
-
-## Coverage Targets
-
-[Target table from Step 4]
-
-## Test Quality Guidelines
-
-[From Step 5 — project-customized]
-
-## Gap Analysis
-
-[From Step 6]
-
-## Test Writing Plan
-
-[Prioritized plan from Step 6]
-```
-
----
-
-## Step 9: Present Results
-
-```
-Testing strategy generated.
-
-Scope: [track-level / project-level]
-Modules analyzed: [N]
-Risk classification: [N] critical, [N] high, [N] medium, [N] low
-
-Testing Pyramid:
-  Unit: [N]% target
-  Integration: [N]% target
-  E2E: [N]% target
-
-Coverage Gaps:
-  [N] modules below target
-  [N] critical paths without E2E coverage
-  [N] test categories missing
-
-Strategy: draft/[tracks/<id>/]testing-strategy.md
-
-Next steps:
-1. Review and adjust per-component targets
-2. Start writing tests per the prioritized plan
-3. Run draft coverage to measure progress
-4. Re-run draft testing-strategy refresh to update
-```
-
----
-
-## Cross-Skill Dispatch
-
-### Inbound
-
-- **Auto-loaded by `draft implement`** — before TDD cycle, load testing strategy for guidance on what to test
-- **Suggested by `draft decompose`** — after module decomposition, suggest designing test strategy
-- **Suggested by `draft init`** — after project initialization, suggest establishing test strategy
-
-### Outbound
-
-- **Feeds `draft coverage`** — coverage measures what this skill plans. Coverage targets defined here are enforced by `draft coverage`
-- **Feeds `draft implement`** — TDD cycle uses per-component strategy for test design guidance
-- **References `draft/workflow.md`** — TDD preferences and CI configuration inform strategy
-
----
-
-## Error Handling
-
-### No Draft Context
-
-```
-No Draft context found. Run draft init first.
-Testing strategy design requires project context for accurate risk classification.
-```
-
-### No Test Framework Detected
-
-```
-No test framework detected in the project.
-
-Recommendations by language:
-- JavaScript/TypeScript: Jest (https://jestjs.io/) or Vitest (https://vitest.dev/)
-- Python: pytest (https://pytest.org/)
-- Go: built-in testing package
-- Rust: built-in #[test] + cargo test
-- Java: JUnit 5 (https://junit.org/junit5/)
-
-Set up a test framework first, then re-run draft testing-strategy.
-```
-
-### Existing Strategy Found
-
-```
-Existing testing strategy found at [path].
-
-Options:
-1. Refresh — update with new findings while preserving existing decisions
-2. Replace — generate new strategy from scratch
-3. Cancel
-
-Select (1-3):
-```
-
----
-
-## Anti-Patterns
-
-| Don't | Instead |
-|-------|---------|
-| Copy a generic test pyramid | Customize based on codebase analysis |
-| Set 100% coverage for everything | Use risk-based coverage targets |
-| Design tests for generated code | Exclude generated/vendored code |
-| Test implementation details | Test behavior through public interfaces |
-| Ignore existing test patterns | Build on established conventions |
-| Plan tests without reading code | Understand the code before planning tests |
-
----
-
-## Examples
-
-### Design strategy for active track
-```bash
-draft testing-strategy
-```
-
-### Design strategy for specific track
-```bash
-draft testing-strategy track add-user-auth
-```
-
-### Design strategy for a module
-```bash
-draft testing-strategy src/auth/
-```
-
-### Refresh existing strategy
-```bash
-draft testing-strategy refresh
-```
-
----
-
-## Assist Review Command
-
-When user says "assist review" or "draft assist-review [track <id>|pr <number>]":
-
-Help human reviewers effectively review an executed track without shifting the entire cognitive burden onto them.
-
-## Red Flags - STOP if you're:
-- Conducting standard unit tests; use `draft review` for that.
-- Fixing code rather than explaining logic and risk profiles to the human.
-- Reviewing output without first summarizing the source `spec.md` intent.
-
----
-
-## Workflow Constraints
-
-1. **Context Extraction:** 
-   - Load `draft/tracks/<id>/spec.md` and `draft/tracks/<id>/plan.md`.
-   - Re-summarize the **Intent** of what this track was supposed to achieve in exactly two sentences.
-2. **Blast Radius Isolation:**
-   - Scan the `git diff` generated by the target track.
-   - Separate trivial edits (naming, routing adjustments) from **Structural Edits** (schema updates, concurrency alterations, middleware auth changes).
-3. **Draft the Human Helper Guide:**
-   - Instead of a traditional bug hunt, generate an executive summary containing a `Risk Assessment`. 
-   - Write out: *“I chose to implement `[Specific File/Function]` using the `[Pattern]` because the `architecture.md` mandated it. You should specifically scrutinize lines X through Y because they influence global state."*
-4. **Knowledge Base Verification:**
-   - Verify if any pattern implemented violates the `draft/guardrails.md` learned anti-patterns. If so, specifically direct the human reviewer to veto the PR unless an ADR is created.
-
----
-
-## Impact Command
-
-When user says "impact report" or "draft impact [track <id>|--all]":
-
-Generate clear, actionable analytics demonstrating Context-Driven Development ROI and highlighting friction points across tracks.
-
-## Red Flags - STOP if you're:
-- Executing code profiling or coverage stats instead of Track impact stats.
-- Re-writing the tracker logic instead of reading locally available state objects.
-- Guessing timelines when timestamps are missing.
-
----
-
-## Execution Breakdown
-
-1. **Load State Logic:**
-   - Scan `draft/tracks.md` to map all existing project tracks.
-   - For every track present, read `draft/tracks/<id>/metadata.json`.
-2. **Compute ROI Timelines:**
-   - Determine duration delta between state instantiations (Planning → Implement → Review).
-   - Display a phase-level bottleneck flag if `In Progress [~]` status exceeded 14 days without an update.
-3. **Friction Analysis:**
-   - Scan global git commit logs or `plan.md` tasks for `draft revert` occurrences.
-   - High revert volumes indicate poor `spec.md` boundaries. Suggest updating `draft/product.md` with tighter constraints if revert counts are exceptionally high.
-4. **Generate Report Template:**
-   Use the following markdown structure:
-   ```markdown
-   # DX Impact Analysis
-   **Total CDD Tracks:** [count]
-   **Average Delivery Pace:** [avg time from track start to complete]
-   
-   ### Friction Hotspots
-   - [Track XYZ]: [N] Reverts. *Recommendation: Refine boundary clarity in spec.*
-   
-   ### AI Impact
-   By forcing intent alignment via `plan.md`, `[X]` merge conflicts or architectural misses were avoided during the Planning stages.
-   ```
-
----
-
 ## Tour Command
 
-When user says "tour codebase" or "draft tour [module|--interactive]":
+When user says "tour" or "draft tour":
 
 Provide an interactive codebase walk-through based on existing architecture and guardrail constraints.
 
@@ -13303,11 +12438,105 @@ Provide an interactive codebase walk-through based on existing architecture and 
 ## Execution Constraints
 
 1. **Load Context:** Read `draft/architecture.md`, `draft/tech-stack.md`, and `draft/guardrails.md`.
-2. **Interactive Cadence:** Ask the developer if they are familiar with the tech stack constraints found in `draft/tech-stack.md`. 
-3. **Module Introduction:** Instead of listing all modules, introduce the "Entry Point" module first. 
-4. **Active Challenge:** After explaining a module's responsibility, challenge the developer: "Based on our *Context-Driven Development* rules, how do you think we handle data persistence here?" wait for their answer before revealing the architecture strategy.
+2. **Interactive Cadence:** Ask the developer if they are familiar with the tech stack constraints found in `draft/tech-stack.md`.
+3. **Module Introduction:** Instead of listing all modules, introduce the "Entry Point" module first.
+4. **Active Challenge:** After explaining a module's responsibility, challenge the developer: "Based on our *Context-Driven Development* rules, how do you think we handle data persistence here?" Wait for their answer before revealing the architecture strategy.
 5. **Traceability:** Highlight `draft/.state/facts.json` showing how module constraints have evolved.
 6. **Completion:** Guide the developer to create their first test track using `draft new-track` so they understand the artifact loop.
+
+---
+
+---
+
+## Impact Command
+
+When user says "impact" or "draft impact":
+
+Generate a project-wide impact report measuring Context-Driven Development effectiveness across all tracks.
+
+## Red Flags - STOP if you're:
+- Profiling code coverage instead of measuring track-level impact.
+- Rewriting tracker logic when local state objects are available for inspection.
+- Generating reports without reading existing track metadata first.
+
+---
+
+## Execution Constraints
+
+1. **Load Track State:**
+   - Read all `draft/tracks.md` entries.
+   - For each track, read `metadata.json` to extract: `created_at`, `updated`, `status`, phase counts, task counts.
+   - If no tracks exist, report "No tracks found. Run `draft new-track` to create your first track."
+
+2. **Compute Metrics:**
+   - **Delivery Pace:** Average elapsed time from track creation to completion (planning → implementation → review).
+   - **Phase Duration:** Time spent in each phase (planning, implementation, review). Flag any phase exceeding 14 days without updates.
+   - **Completion Rate:** Ratio of completed tracks to total tracks.
+   - **Task Granularity:** Average tasks per track. Flag tracks with fewer than 3 tasks (under-decomposed) or more than 30 (over-decomposed).
+
+3. **Friction Detection:**
+   - Scan `git log` for revert commits associated with each track.
+   - High revert count (>2 per track) signals unclear specification boundaries.
+   - Flag tracks that moved backward (e.g., from implementation back to planning).
+
+4. **Architectural Impact:**
+   - Count ADRs created (`draft/adrs/`).
+   - Count guardrail entries added via `draft learn`.
+   - Count modules decomposed via `draft decompose`.
+
+5. **Report Output:**
+   Generate a Markdown report with sections:
+   - **Summary:** Total tracks, completed, in-progress, abandoned.
+   - **Delivery Pace:** Average and median track duration.
+   - **Friction Hotspots:** Tracks with highest revert counts, longest stalls, or phase regressions.
+   - **CDD Adoption:** ADR count, guardrail growth, decomposition usage.
+   - **Recommendations:** Actionable suggestions based on detected friction patterns.
+
+---
+
+---
+
+## Assist Review Command
+
+When user says "assist review" or "draft assist-review":
+
+Help human reviewers effectively review an executed track without shifting the entire cognitive burden onto them.
+
+## Red Flags - STOP if you're:
+- Conducting standard unit tests; use `draft review` for that.
+- Fixing code rather than explaining logic and risk profiles to the human.
+- Reviewing output without first summarizing the source `spec.md` intent.
+
+---
+
+## Workflow Constraints
+
+1. **Context Extraction:**
+   - Load the track's `spec.md` and `plan.md`.
+   - Re-summarize the **Intent** of what this track was supposed to achieve in exactly two sentences.
+
+2. **Blast Radius Isolation:**
+   - Scan the `git diff` generated by the target track.
+   - Separate trivial edits (naming, routing adjustments, formatting) from **Structural Edits** (schema updates, concurrency alterations, middleware auth changes, API surface changes).
+   - Present structural edits first — these are where review time should be spent.
+
+3. **Generate the Human Helper Guide:**
+   - Instead of a traditional bug hunt, generate an executive summary containing a **Risk Assessment**.
+   - For each structural edit, write: *"I chose to implement `[Specific File/Function]` using the `[Pattern]` because the `architecture.md` mandated it. You should specifically scrutinize lines X through Y because they influence global state."*
+   - Highlight any code that touches shared state, auth boundaries, data persistence, or concurrency.
+
+4. **Knowledge Base Verification:**
+   - Verify if any pattern implemented violates the `draft/guardrails.md` learned anti-patterns.
+   - If so, specifically direct the human reviewer to veto the change unless an ADR is created via `draft adr`.
+
+5. **Output Format:**
+   - **Track Intent** (2 sentences)
+   - **Structural Edits** (table: file, change type, risk level, review guidance)
+   - **Trivial Edits** (collapsed list — skim only)
+   - **Guardrail Violations** (if any — with ADR recommendation)
+   - **Suggested Review Order** (which files to review first, based on blast radius)
+
+---
 
 ---
 
@@ -13476,27 +12705,25 @@ Draft solves this through **Context-Driven Development**: structured documents t
 - [Status Markers](#status-markers)
 - [Plan Structure](#plan-structure)
 - [Command Workflows](#command-workflows)
-  - [draft init](#draftinit--initialize-project)
-  - [draft index](#draftindex--monorepo-service-index)
-  - [draft new-track](#draftnew-track--create-feature-track)
-  - [draft implement](#draftimplement--execute-tasks)
-  - [draft status](#draftstatus--show-progress)
-  - [draft revert](#draftrevert--git-aware-rollback)
-  - [draft decompose](#draftdecompose--module-decomposition)
-  - [draft coverage](#draftcoverage--code-coverage-report)
-  - [draft jira-preview](#draftjira-preview--preview-jira-issues)
-  - [draft jira-create](#draftjira-create--create-jira-issues)
-  - [draft adr](#draftadr--architecture-decision-records)
-  - [draft deep-review](#draftdeep-review--module-lifecycle-audit)
-  - [draft bughunt](#draftbughunt--exhaustive-bug-discovery)
-  - [draft review](#draftreview--code-review-orchestrator)
-  - [draft learn](#draftlearn--pattern-discovery--guardrails-update)
-  - [draft change](#draftchange--course-correction)
-  - [draft tour](#drafttour--interactive-onboarding)
-  - [draft impact](#draftimpact--telemetry--analytics)
-  - [draft assist-review](#draftassist-review--human-in-the-loop-gateway)
+  - [draft init](#codevinit--initialize-project)
+  - [draft index](#codevindex--monorepo-service-index)
+  - [draft new-track](#codevnew-track--create-feature-track)
+  - [draft implement](#codevimplement--execute-tasks)
+  - [draft status](#codevstatus--show-progress)
+  - [draft revert](#codevrevert--git-aware-rollback)
+  - [draft decompose](#codevdecompose--module-decomposition)
+  - [draft coverage](#codevcoverage--code-coverage-report)
+  - [draft jira-preview](#codevjira-preview--preview-jira-issues)
+  - [draft jira-create](#codevjira-create--create-jira-issues)
+  - [draft adr](#codevadr--architecture-decision-records)
+  - [draft deep-review](#codevdeep-review--module-lifecycle-audit)
+  - [draft bughunt](#codevbughunt--exhaustive-bug-discovery)
+  - [draft review](#codevreview--code-review-orchestrator)
+  - [draft learn](#codevlearn--pattern-discovery--guardrails-update)
+  - [draft change](#codevchange--course-correction)
 - [Architecture Mode](#architecture-mode)
-- [Coverage](#coverage)
+- [Code Coverage](#code-coverage)
+- [Concurrency](#concurrency)
 - [Jira Integration (Optional)](#jira-integration-optional)
 - [TDD Workflow (Optional)](#tdd-workflow-optional)
 - [Intent Mapping](#intent-mapping)
@@ -13513,11 +12740,11 @@ Draft solves this through **Context-Driven Development**: structured documents t
 |----------|---------|----------|
 | `product.md` | Defines users, goals, success criteria, guidelines | AI building features nobody asked for |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns | AI introducing random dependencies |
-| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
+| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 28 sections + 5 appendices, Mermaid diagrams, and code snippets. Generated from 5-phase codebase analysis. | Engineers needing onboarding documentation |
 | `.ai-profile.md` | **Derived from .ai-context.md.** 20-50 lines, ultra-compact always-injected project profile. Contains: language, framework, database, auth, API style, critical invariants, safety rules, active tracks, recent changes. Auto-refreshed on mutations. | AI needing full context for simple tasks |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context. 15+ mandatory sections: architecture, invariants, interface contracts, data flows, concurrency rules, error handling, implementation catalogs, extension cookbooks, testing strategy, glossary. Auto-refreshed on mutations. | AI re-analyzing codebase every session |
 | `workflow.md` | TDD preference, commit style, review process | AI skipping tests or making giant commits |
-| `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns. Entries include dual-layer timestamps (discovered_at, established_at, last_verified, last_active) for temporal reasoning. | AI repeating false positives or missing known-bad patterns |
+| `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns. Entries include dual-layer timestamps (`discovered_at`, `established_at`, `last_verified_at`, `last_active_at`) for temporal reasoning. | AI repeating false positives or missing known-bad patterns |
 | `spec.md` | Acceptance criteria for a specific track | Scope creep, gold-plating |
 | `plan.md` | Ordered phases with verification steps | AI attempting everything at once |
 
@@ -13541,16 +12768,16 @@ Each layer narrows the solution space. By the time AI writes code, most decision
 
 ### Context Tiering
 
-Draft uses a three-tier context system inspired by memory architecture:
+Draft uses a layered context system inspired by memory tiering — see `core/shared/draft-context-loading.md` for the authoritative specification.
 
 ```
-Layer 0: .ai-profile.md     (20-50 lines)   — Always loaded. RAM-equivalent.
-Layer 1: .ai-context.md     (200-400 lines) — Loaded for most tasks. Working memory.
-Layer 2: architecture.md    (full document)  — Loaded for deep analysis. Long-term storage.
-        .state/facts.json  (atomic facts)   — Queried by relevance. Fact-level precision.
+Layer 0:   .ai-profile.md (20-50 lines)    — Always loaded. Minimum project context.
+Layer 1:   .ai-context.md (200-400 lines)  — Base context: boundaries, invariants, flows.
+Layer 1.5: draft/graph/*.jsonl             — Structural graph (when available).
+Layer 2:   draft/.state/facts.json         — Fact-level precision (queried by relevance).
 ```
 
-Simple tasks only need Layer 0. Implementation tasks load Layer 0 + relevant sections of Layer 1. Deep reviews and architecture refreshes access all layers. This relevance-scored loading ensures the right context for each task without wasting tokens.
+`architecture.md` is the source-of-truth document these layers are condensed from, not a layer itself. Simple tasks only need Layer 0. Implementation tasks load Layer 0+1 plus relevant graph/facts. Deep reviews access all layers. Relevance-scored loading keeps tokens bounded.
 
 ### Draft Command Workflow
 
@@ -13568,6 +12795,7 @@ graph TD
     G -->|Fail| E
     H -->|No| E
     H -->|Yes| I["Track Complete"]
+    I -->|"git push + PR"| U["GitHub PR"]
 
     J["draft status"] -.->|"Check anytime"| E
     K["draft revert"] -.->|"Undo if needed"| E
@@ -13589,12 +12817,6 @@ graph LR
     S --> PL["plan.md<br/><i>When & Order</i>"]
     PL --> Code["Implementation"]
 ```
-
-### Advanced DX Commands
-Draft natively tracks analytics and enables advanced workflows to lower reviewer friction via:
-- **`draft tour`** - Mentorship mode for codebase exploration.
-- **`draft impact`** - Friction mapping and ROI calculation using state metadata.
-- **`draft assist-review`** - Reduces cognitive load on PR reviews by tracking intent vs execution.
 
 ### Keeping AI Constrained
 
@@ -13646,7 +12868,7 @@ Draft's artifacts are designed for team collaboration through standard git workf
 
 1. **Project context** — Tech lead runs `draft init`. Team reviews `product.md`, `tech-stack.md`, and `workflow.md` via PR. Product managers review vision without reading code. Engineers review technical choices without context-switching into implementation.
 2. **Spec & plan** — Lead runs `draft new-track`. Team reviews `spec.md` (requirements, acceptance criteria) and `plan.md` (phased task breakdown, dependencies) via PR. Disagreements surface as markdown comments — resolved by editing a paragraph, not rewriting a module.
-3. **Architecture** — Lead runs `draft decompose`. Team reviews `architecture.md` (derived human-readable guide with module boundaries, API surfaces, dependency graph, implementation order) via PR. Senior engineers validate architecture without touching the codebase. `architecture.md` is the source of truth; `.ai-context.md` is derived from it for AI consumption.
+3. **Architecture** — Lead runs `draft decompose`. Team reviews `architecture.md` (derived human-readable guide with module boundaries, API surfaces, dependency graph, implementation order) via PR. Senior engineers validate architecture without touching the codebase. The machine-optimized `.ai-context.md` is the source of truth.
 4. **Work distribution** — Lead runs `draft jira-preview` and `draft jira-create`. Epics, stories, and sub-tasks are created from the approved plan. Individual team members pick up Jira stories and implement — with or without `draft implement`.
 5. **Implementation** — Only after all documents are merged does coding start. Every developer has full context: what to build (`spec.md`), in what order (`plan.md`), with what boundaries (`.ai-context.md` / `architecture.md`).
 
@@ -13724,7 +12946,7 @@ For critical product development, Draft isn't overhead — it's risk mitigation.
 claude plugin install draft
 
 # Or clone and install locally
-git clone https://github.com/mayurpise/draft.git ~/.claude/plugins/draft
+git clone <your-draft-repo-url> ~/.claude/plugins/draft
 ```
 
 ### Verify Installation
@@ -13752,34 +12974,9 @@ draft implement
 draft status
 ```
 
-### GitHub Copilot Integration (Optional)
+### Supported Platforms
 
-Draft also works with GitHub Copilot via `copilot-instructions.md`:
-
-```bash
-# Download directly (no clone required)
-mkdir -p .github
-curl -o .github/copilot-instructions.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md
-
-# Or copy from a local clone
-cp ~/.claude/plugins/draft/integrations/copilot/.github/copilot-instructions.md /your-project/.github/
-```
-
-This gives Copilot the same methodology awareness. Commands use natural language (`draft init`, `draft new-track`) instead of `@` mentions.
-
-### Gemini Integration (Optional)
-
-Draft also works with Gemini Code Assist and Gemini CLI via `GEMINI.md`:
-
-```bash
-# Download directly (no clone required)
-curl -o GEMINI.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/GEMINI.md
-
-# Or copy from a local clone
-cp ~/.claude/plugins/draft/integrations/gemini/GEMINI.md /your-project/GEMINI.md
-```
-
-Place `GEMINI.md` at the root of your project. Commands use `draft` syntax.
+Draft works with **Claude Code** (native `.claude-plugin/` support) and **Cursor** (supports `.claude/` plugin structure natively). No build pipeline required.
 
 ---
 
@@ -13796,15 +12993,20 @@ Context → Spec & Plan → Implement
 
 ## Tracks
 
-A **track** is a high-level unit of work (feature, bug fix, refactor). Each track contains:
+A **track** is a high-level unit of work (feature, bug fix, refactor). Each track contains `spec.md`, `plan.md`, `metadata.json`, and optionally `jira-export.md`.
+
+Two layouts are supported; both are valid:
 
 ```
-draft/tracks/<track-id>/
-├── spec.md          # Requirements and acceptance criteria
-├── plan.md          # Phased task breakdown
-├── metadata.json    # Status and timestamps
-└── jira-export.md   # Jira stories for export (optional)
+# Single-track project (default)           # Multi-track project
+draft/                                      draft/tracks/<track-id>/
+├── spec.md                                 ├── spec.md
+├── plan.md                                 ├── plan.md
+├── metadata.json                           ├── metadata.json
+└── jira-export.md (optional)               └── jira-export.md (optional)
 ```
+
+`draft new-track` selects the multi-track layout when a second track is created (existing `draft/spec.md` and `draft/plan.md` are migrated into `draft/tracks/<original-track-id>/`). Commands referring to "the active track" resolve to whichever layout is in use.
 
 ### Track Lifecycle
 
@@ -13821,12 +13023,13 @@ Located in `draft/` of the target project:
 |------|---------|
 | `product.md` | Product vision, users, goals, guidelines (optional section) |
 | `tech-stack.md` | Languages, frameworks, patterns, accepted patterns |
-| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 25 sections + 4 appendices. Generated from 5-phase codebase analysis. |
+| `architecture.md` | **Source of truth.** Comprehensive human-readable engineering reference with 28 sections + 5 appendices. Generated from 5-phase codebase analysis. |
 | `.ai-context.md` | **Derived from architecture.md.** 200-400 lines, token-optimized, self-contained AI context with 15+ mandatory sections. Consumed by all Draft commands and external AI tools. Auto-refreshed on mutations. |
 | `workflow.md` | TDD preferences, commit strategy, validation config |
 | `guardrails.md` | Hard guardrails, learned conventions, learned anti-patterns |
 | `jira.md` | Jira project configuration (optional) |
 | `tracks.md` | Master list of all tracks |
+| `.state/facts.json` | Atomic fact registry with temporal metadata and knowledge graph edges. Enables fact-level contradiction detection on refresh. |
 | `.state/freshness.json` | SHA-256 hashes of all analyzed source files. Enables file-level staleness detection for incremental refresh. |
 | `.state/signals.json` | Codebase signal classification (11 categories). Detects structural drift on refresh. |
 | `.state/run-memory.json` | Run metadata, resumable checkpoints, unresolved questions. Enables cross-session continuity. |
@@ -13897,6 +13100,7 @@ Draft auto-classifies the project:
    This produces `draft/architecture.md` (comprehensive human-readable reference), `draft/.ai-context.md` (200-400 line token-optimized context), and `draft/.ai-profile.md` (20-50 line ultra-compact always-on profile). All three become persistent context — every future track references them instead of re-analyzing the codebase.
 
 3. **Fact extraction** — Extracts atomic architectural facts into `draft/.state/facts.json` with dual-layer timestamps (`discovered_at`, `established_at`, `last_verified_at`, `last_active_at`), relationship edges (`updates`, `extends`, `derives`), and per-fact confidence scoring. Enables granular change tracking and contradiction detection on refresh.
+
 4. **State persistence** — Writes `draft/.state/` directory with four files:
    - `facts.json` — Atomic fact registry with temporal metadata and knowledge graph edges (enables fact-level contradiction detection on refresh)
    - `freshness.json` — SHA-256 hashes of all analyzed source files (enables file-level staleness detection on refresh)
@@ -14176,7 +13380,7 @@ Generates a `jira-export.md` file from the track's plan for review before creati
 | Phase | Story |
 | Task | Sub-task |
 
-Story points are auto-calculated from task count per phase (1-2 tasks = 1pt, 3-4 = 2pt, 5-6 = 3pt, 7+ = 5pt).
+Story points are auto-calculated from task count per phase — see the formula in the Jira Integration section below.
 
 The export file is editable — adjust points, descriptions, or sub-tasks before running `draft jira-create`.
 
@@ -14222,6 +13426,8 @@ ADRs are stored at `draft/adrs/NNNN-title.md` (e.g., `001-use-postgresql.md`). W
 
 `Proposed` (awaiting review) → `Accepted` (approved and in effect) → `Deprecated` (context changed) or `Superseded by ADR-XXX` (replaced by newer decision).
 
+---
+
 ### `draft deep-review` — Module Lifecycle Audit
 
 Perform an exhaustive end-to-end lifecycle review of a service, component, or module. Evaluates ACID compliance, architectural resilience, and production-grade enterprise quality.
@@ -14230,19 +13436,19 @@ Perform an exhaustive end-to-end lifecycle review of a service, component, or mo
 
 - **Module-level only:** `draft deep-review src/auth`
 
-Unlike standard review, this tool performs structural analysis and flags deep architectural flaws. It maintains a history file at `draft/deep-review-history.json` and generates per-module reports at `draft/deep-review-reports/<module-name>.md`. It does NOT auto-fix code.
+Unlike standard review, this tool performs structural analysis and flags deep architectural flaws. It maintains a history file at `draft/deep-review-history.json` and generates an actionable specification for fixes at `draft/deep-review-report.md`. It does NOT auto-fix code.
 
 ---
 
 ### `draft bughunt` — Exhaustive Bug Discovery
 
-Systematic bug hunt across 14 dimensions: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, tests, dependency & supply chain security, algorithmic complexity, and internationalization & localization.
+Systematic bug hunt across 11 dimensions: correctness, reliability, security, performance, UI responsiveness, concurrency, state management, API contracts, accessibility, configuration, and tests.
 
 #### Process
 
 1. Load Draft context (architecture, tech-stack, product)
 2. For tracks: verify implementation matches spec requirements
-3. Analyze code across all 14 dimensions
+3. Analyze code across all 11 dimensions
 4. Verify each finding (trace code paths, check for mitigations, eliminate false positives)
 5. Generate severity-ranked report with fix recommendations
 6. Detect language and test framework (GTest, pytest, go test, Jest/Vitest, cargo test, JUnit)
@@ -14362,7 +13568,7 @@ draft change track add-export-feature also require a progress indicator for expo
 
 ## Architecture Mode
 
-Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `.ai-context.md` or `architecture.md` exists** - no manual configuration needed.
+Draft supports granular pre-implementation design for complex projects. **Architecture mode is automatically enabled when `draft/tracks/<id>/.ai-context.md` exists** (created by `draft decompose`). Falls back to `draft/tracks/<id>/architecture.md` for legacy projects.
 
 **How it works:**
 1. Run `draft decompose` on a track → Creates `draft/tracks/<id>/architecture.md` (and derived `.ai-context.md`)
@@ -14483,7 +13689,7 @@ draft coverage → coverage report → CHECKPOINT
 
 ## Jira Integration (Optional)
 
-Sync tracks to Jira with a three-step workflow:
+Sync tracks to Jira with a two-step workflow:
 
 1. **Preview** (`draft jira-preview`) - Generate `jira-export.md` with epic and stories
 2. **Review** - Adjust story points, descriptions, acceptance criteria as needed
@@ -14527,7 +13733,6 @@ Natural language patterns that map to Draft commands:
 | "requirements changed", "scope changed", "update the spec" | Handle mid-track requirement change |
 | "preview jira", "export to jira" | Preview Jira issues |
 | "create jira issues" | Create Jira issues via MCP |
-
 | "the plan" | Read active track's plan.md |
 | "the spec" | Read active track's spec.md |
 
@@ -14537,190 +13742,35 @@ Natural language patterns that map to Draft commands:
 
 **Iron Law:** Evidence before claims, always.
 
-Every completion claim requires:
-1. Running verification command IN THE CURRENT MESSAGE
-2. Reading full output and confirming result
-3. Showing evidence with the claim
-4. Only then updating status markers
-
-**Never mark `[x]` without:**
-- Fresh test/build/lint run in this message
-- Confirmation that output shows success
-- Evidence visible in the response
+Every completion claim requires running the verification command in the current message, reading full output, showing evidence alongside the claim, and only then updating `[x]` status markers. No fresh run in this message → no check.
 
 ### Systematic Debugging
 
-**Iron Law:** No fixes without root cause investigation first.
-
-When blocked (`[!]`):
-1. **Investigate** - Read errors, reproduce, trace data flow (NO fixes yet)
-2. **Analyze** - Find similar working code, list differences
-3. **Hypothesize** - Single hypothesis, smallest possible test
-4. **Implement** - Regression test first, then fix, verify
-
-See `core/agents/debugger.md` for detailed process.
+**Iron Law:** No fixes without root cause investigation first. See `core/agents/debugger.md` for the four-phase process (Investigate → Analyze → Hypothesize → Implement).
 
 ### Root Cause Analysis (Bug Tracks)
 
-**Iron Law:** No fix without a confirmed root cause. No investigation without scope boundaries.
-
-For bug tracks (from Jira incidents, production bugs, regressions):
-1. **Reproduce & Scope** - Confirm bug, define blast radius, map to `.ai-context.md` modules
-2. **Trace & Analyze** - Follow data/control flow with `file:line` references, differential analysis
-3. **Hypothesize & Confirm** - One hypothesis at a time, log all results (including failures)
-4. **Fix & Prevent** - Regression test first, minimal fix within blast radius, blameless RCA summary
-
-Key practices (from Google SRE and distributed systems engineering):
-- **Blast radius first** — Know what's broken AND what isn't before investigating
-- **Differential analysis** — Compare working vs. failing cases systematically
-- **5 Whys** — Trace from symptom to systemic root cause
-- **Blameless RCA** — Focus on systems and processes, not individuals
-- **Code locality** — Every claim cites `file:line`, no hand-waving
-
-See `core/agents/rca.md` for detailed process.
+**Iron Law:** No fix without a confirmed root cause. No investigation without scope boundaries. See `core/agents/rca.md` for the four-phase RCA process, classification taxonomy, and distributed-systems considerations.
 
 ### Three-Stage Review
 
-At phase boundaries:
-1. **Stage 1: Automated Validation** - Fast static checks for architecture, security, and performance issues
-2. **Stage 2: Spec Compliance** - Did implementation match specification?
-3. **Stage 3: Code Quality** - Clean architecture, proper error handling, meaningful tests?
-
-See `core/agents/reviewer.md` for detailed process.
+At phase boundaries: Stage 1 automated validation → Stage 2 spec compliance → Stage 3 code quality. See `core/agents/reviewer.md` for the output template, stopping rules, and full process.
 
 ---
 
 ## Agents
 
-**Note:** Canonical agent behavior is defined in `core/agents/*.md`. This section provides summaries for reference. When in doubt, defer to the agent files.
+Canonical agent behavior lives in `core/agents/*.md` — those files are inlined at runtime. This table is a pointer index only; when in doubt, defer to the agent file.
 
-Draft includes seven specialized agent behaviors that activate during specific workflow phases.
-
-### Debugger Agent
-
-Activated when a task is blocked (`[!]`). Enforces root cause investigation before any fix attempts.
-
-**Four-Phase Process:**
-
-| Phase | Goal | Output |
-|-------|------|--------|
-| **1. Investigate** | Understand what's happening (NO fixes) | Failure description and reproduction steps |
-| **2. Analyze** | Find root cause, not symptoms | Root cause hypothesis with evidence |
-| **3. Hypothesize** | Test with minimal change | Confirmed root cause or return to Phase 2 |
-| **4. Implement** | Fix with confidence | Regression test + minimal fix + verification |
-
-**Anti-patterns:** "Quick fixes" without understanding, changing multiple things at once, skipping reproduction, deleting code to "test".
-
-**Escalation:** After 3 failed hypothesis cycles, document findings, list what's been eliminated, and ask for external input.
-
-See `core/agents/debugger.md` for the full process.
-
-### RCA Agent
-
-Activated for bug/RCA tracks created via `draft new-track`. Provides structured Root Cause Analysis methodology extending the debugger agent with practices from Google SRE postmortem culture and distributed systems debugging.
-
-**Four-Phase Process:**
-
-| Phase | Goal | Output |
-|-------|------|--------|
-| **1. Reproduce & Scope** | Confirm bug, define blast radius, map to `.ai-context.md` modules | Reproduction steps + scoped investigation area |
-| **2. Trace & Analyze** | Follow data/control flow to the divergence point | Flow trace with `file:line` references |
-| **3. Hypothesize & Confirm** | Test one hypothesis at a time, document all results | Confirmed root cause with evidence |
-| **4. Fix & Prevent** | Regression test first, minimal fix, RCA summary | Fix + test + blameless RCA document |
-
-**Key Techniques:**
-- **Differential Analysis** — Compare working vs. failing cases systematically
-- **5 Whys** — Trace from immediate cause to systemic root cause
-- **Blast Radius Scoping** — Define investigation boundaries before diving in
-- **Hypothesis Logging** — Track every hypothesis (failed ones narrow the search)
-- **Code Locality** — Every claim must cite `file:line`
-
-**Root Cause Classification:** logic error, race condition, data corruption, config error, dependency issue, missing validation, state management, resource exhaustion.
-
-**Anti-patterns:** Fixing symptoms without root cause, investigating the entire system, shotgun debugging, skipping failed hypothesis documentation, fixing adjacent issues "while we're here".
-
-See `core/agents/rca.md` for the full process including distributed systems considerations.
-
-### Reviewer Agent
-
-Activated at phase boundaries during `draft implement`. Performs a three-stage review before proceeding to the next phase.
-
-**Stage 1: Automated Validation** — Is the code structurally sound and secure?
-- Architecture conformance, dead code detection, circular dependencies
-- OWASP security scans (hardcoded secrets, SQL injection, XSS)
-- Performance anti-patterns (N+1 queries, blocking I/O, unbounded queries)
-
-If Stage 1 fails with critical issues, implementation resumes. Stage 2 does not run.
-
-**Stage 2: Spec Compliance** — Did they build what was specified?
-- Requirements coverage (all functional requirements implemented)
-- Scope adherence (no missing features, no scope creep)
-- Behavior correctness (edge cases, error scenarios, integration points)
-
-If Stage 2 fails, gaps are listed and implementation resumes. Stage 3 does not run.
-
-**Stage 3: Code Quality** — Is the code well-crafted?
-- Architecture (follows project patterns, separation of concerns)
-- Error handling (appropriate level, helpful user-facing errors)
-- Testing (tests real logic, edge case coverage, maintainability)
-- Maintainability (readable, no performance issues, no security vulnerabilities)
-
-**Issue Classification:**
-
-| Severity | Definition | Action |
-|----------|------------|--------|
-| **Critical** | Blocks release, breaks functionality, security issue | Must fix before proceeding |
-| **Important** | Degrades quality, technical debt | Should fix before phase complete |
-| **Minor** | Style, optimization, nice-to-have | Note for later, don't block |
-
-See `core/agents/reviewer.md` for the output template and full process.
-
-### Architect Agent
-
-Activated during `draft decompose` and `draft implement` (when architecture mode is enabled). Guides structured pre-implementation design.
-
-**Capabilities:**
-- **Module decomposition** — Single responsibility, 1-3 files per module, clear API boundaries, testable in isolation
-- **Dependency analysis** — Import mapping, cycle detection, topological sort for implementation order
-- **Story writing** — Natural-language algorithm descriptions (Input → Process → Output); 5-15 lines max; describes the algorithm, not the implementation
-- **Execution state design** — Define input/intermediate/output/error state variables before coding
-- **Function skeleton generation** — Complete signatures with types and docstrings, no implementation bodies, ordered by control flow
-
-**Story Lifecycle:**
-1. **Placeholder** — Created during `draft decompose` in `.ai-context.md`
-2. **Written** — Filled in during `draft implement` as code comments; developer approves
-3. **Updated** — Maintained when algorithms change during refactoring
-
-See `core/agents/architect.md` for module rules, API surface examples, and cycle-breaking framework.
-
-### Planner Agent
-
-Activated during `draft new-track` plan creation and `draft decompose`. Provides structured plan generation with phased task breakdown.
-
-**Capabilities:**
-- **Phase decomposition** — Break work into sequential phases with clear goals and verification criteria
-- **Task ordering** — Dependencies between tasks, topological sort for implementation sequence
-- **Integration with Architect Agent** — When `.ai-context.md` exists, aligns phases with module boundaries and dependency graph
-
-**Key Principles:**
-- Each phase should be independently verifiable
-- Tasks within a phase should be ordered by dependency
-- Phase boundaries are review checkpoints
-- Plan structure mirrors spec requirements for traceability
-
-See `core/agents/planner.md` for the full planning process and integration workflows.
-
-### Ops Agent
-
-Activated during `draft deploy-checklist`, `draft incident-response`, and `draft standup`. Enforces production-safety mindset with six principles: production-first thinking, blast-radius awareness, rollback readiness, communicate early, severity over speed, and blameless culture. Provides severity classification (SEV1-SEV4), rollback decision frameworks, and stakeholder communication templates.
-
-See `core/agents/ops.md` for the full operational safety protocol.
-
-### Writer Agent
-
-Activated during `draft documentation` across four modes: readme, runbook, api, and onboarding. Enforces audience-aware writing with six principles: audience first, progressive disclosure, link don't duplicate, maintain don't create, examples over explanations, and scannable structure. Adapts tone and detail level based on audience profiles (new team member, experienced developer, operator/SRE, external integrator).
-
-See `core/agents/writer.md` for the full writing process and documentation modes.
+| Agent | File | Role |
+|-------|------|------|
+| Debugger | `core/agents/debugger.md` | Activated on `[!]` blocked tasks. Four-phase root cause investigation. |
+| RCA | `core/agents/rca.md` | Activated for bug/RCA tracks. Structured SRE-style postmortem methodology. |
+| Reviewer | `core/agents/reviewer.md` | Activated at phase boundaries. Three-stage automated + spec + quality review. |
+| Architect | `core/agents/architect.md` | Activated in `draft decompose` and architecture-mode `draft implement`. Module decomposition, story writing, function skeletons. |
+| Planner | `core/agents/planner.md` | Activated during `draft new-track` and `draft decompose`. Phased plan generation. |
+| Writer | `core/agents/writer.md` | Activated during `draft documentation`. Doc generation and condensation. |
+| Ops | `core/agents/ops.md` | Activated for `draft incident-response`, `draft deploy-checklist`, `draft standup`. Hands off to RCA for deep investigation. |
 
 ---
 
@@ -14813,18 +13863,6 @@ AI guidance during track creation must be grounded in vetted sources. When provi
 
 ---
 
-## Context-Driven Development (CDD)
-
-### Principles for AI Orchestration
-- **Measure Twice, Code Once** — Draft explicit `.md` requirements, trade-off lists, and specifications *before* generating logic. Refine in text first.
-- **Context Tiering** — Organize memory loads to prevent token exhaustion. (`.ai-profile.md` for rapid always-on rules; `.ai-context.md` for local session boundaries; `architecture.md` for deep structural storage). 
-- **The Constraint Hierarchy** — Eliminate AI guesswork by adhering to pre-defined constraints: Product Vision → Tech Stack → Architecture → Spec → Phased Plan.
-- **Phase Isolation (Blast Radius Mitigation)** — Avoid allowing an AI agent to execute sweeping, repository-wide changes at once. Break plans into strictly verifiable phases.
-- **Alignment Before Code** — Human review occurs on the specification (`spec.md` or `plan.md`) to resolve conceptual disagreements *prior* to executing the codebase implementation.
-- **Immutable Context Sourcing** — Prefer file-tracked specifications and architectural maps (which are version-controlled and searchable) over ephemeral, unsearchable chat logs. 
-
----
-
 ## Patterns
 
 ### Creational (GoF)
@@ -14857,12 +13895,6 @@ AI guidance during track creation must be grounded in vetted sources. When provi
 ---
 
 ## Anti-Patterns to Flag
-
-### AI Coding Assistance
-- **Prompt Engineering as Architecture** — Attempting to fix poor AI outputs by infinitely tweaking conversational prompts rather than correcting the root structural defects in the static `.ai-context.md` or `architecture.md`.
-- **Chat Log Amnesia** — Losing critical architectural decisions or context because they were finalized in an ephemeral chat window instead of captured permanently in an Architecture Decision Record (ADR).
-- **AI-Induced Shotgun Surgery** — Allowing an AI assistant to make undocumented, sweeping changes across multiple isolated modules in a "single shot" without a constrained execution plan.
-- **Reviewing Output over Intent** — Only conducting human review on an AI's Pull Request code (the *output*) without first reviewing the `spec.md` or the `plan.md` (the *intent*).
 
 ### Distributed Systems
 - **Fallacies of Distributed Computing** — Network reliability, zero latency, infinite bandwidth, secure network, topology stability, single admin, zero transport cost, homogeneous network
@@ -14900,10 +13932,6 @@ When providing guidance, cite sources naturally:
 
 > "Circuit breaker pattern (Release It!) would help here — fail fast instead of cascading timeouts."
 
-> "This task is too broad and risks AI-induced shotgun surgery (Draft CDD) — let's break this into a phased track plan."
-
-> "Let's capture this decision in an ADR rather than losing it to Chat Log Amnesia (Draft Methodology)."
-
 </core-file>
 
 ---
@@ -14916,7 +13944,7 @@ When providing guidance, cite sources naturally:
 
 Standard procedure for loading Draft project context. All Draft commands that read project context follow this procedure before analysis or execution.
 
-Referenced by: `draft bughunt`, `draft deep-review`, `draft review`, `draft learn`, `draft new-track`, `draft implement`, `draft init` (refresh), and others
+Referenced by: All skills that load Draft project context — including `draft bughunt`, `draft review`, `draft deep-review`, `draft quick-review`, `draft learn`, `draft tech-debt`, `draft deploy-checklist`, `draft incident-response`, `draft documentation`, `draft adr`, `draft testing-strategy`, `draft standup`, `draft debug`
 
 ## Context Loading Layers
 
@@ -14941,6 +13969,44 @@ If `draft/` directory exists, read and internalize these files in order:
 | 3 | `draft/product.md` | Product vision, user flows, requirements, **Guidelines** | — |
 | 4 | `draft/workflow.md` | Team conventions, testing preferences | — |
 | 5 | `draft/guardrails.md` | Hard guardrails, **Learned Conventions**, **Learned Anti-Patterns** | `draft/workflow.md` `## Guardrails` (legacy) |
+| — | `core/guardrails.md` *(plugin-inlined)* | C++ Hard Guardrails — always enforced for C++ code | — |
+
+### Layer 1.5: Graph Context (When Available)
+
+If `draft/graph/schema.yaml` exists, the project has automated graph analysis data. This provides precise, deterministic structural context that complements the AI-generated `.ai-context.md`.
+
+**Always-load files** (compact, read alongside Layer 1):
+
+| File | Purpose | Content |
+|------|---------|---------|
+| `draft/graph/schema.yaml` | Graph metadata, module list, stats | YAML, ~50 lines |
+| `draft/graph/module-graph.jsonl` | Module nodes + inter-module dependency edges with weights | JSONL, one record per line |
+| `draft/graph/hotspots.jsonl` | Files ranked by complexity score (lines + fanIn * 50). Includes C++, Go, and Python files. Go/Python files have fanIn=0 (include-graph fan-in only applies to C++). | JSONL |
+| `draft/graph/proto-index.jsonl` | All proto services, RPCs, messages, enums | JSONL |
+
+Note: `.ai-context.md` now embeds a condensed graph summary (`GRAPH:MODULES`, `GRAPH:HOTSPOTS`, `GRAPH:CYCLES`) for first-pass structural ground truth. The full JSONL files in Layer 1.5 remain authoritative for deep queries.
+
+Note: The canonical embedded mermaid diagrams are in architecture.md injection slots (`<!-- GRAPH:module-deps:START/END -->`, `<!-- GRAPH:proto-map:START/END -->`), refreshed by `draft:index`. The static `.mermaid` files are build artifacts — prefer the injection slots or `graph --query --mode mermaid` for current data.
+
+**Language-specific files** (load when task involves that language):
+
+| File | Load When... |
+|------|-------------|
+| `draft/graph/go-index.jsonl` | Task modifies Go files or works in a Go-heavy module |
+| `draft/graph/python-index.jsonl` | Task modifies Python files |
+| `draft/graph/ts-index.jsonl` | Task modifies TypeScript or JavaScript files |
+| `draft/graph/c-index.jsonl` | Task modifies C or C++ files (symbol-level context; supplement with include-graph data) |
+| `draft/graph/call-index.jsonl` | Tracing call chains, impact analysis, debugging call paths across functions |
+
+**Per-module files** (load on demand):
+
+| File | Load When... |
+|------|-------------|
+| `draft/graph/modules/<name>.jsonl` | Task modifies files in that module, or debugging/reviewing that module |
+
+Load at most 2-3 module files per task to stay within token budget. See `core/shared/graph-query.md` for live query subroutines.
+
+**Fallback**: If `draft/graph/` does not exist, skip — no degradation.
 
 ### Layer 2: Fact Registry (When Available)
 
@@ -14952,6 +14018,10 @@ If `draft/.state/facts.json` exists, it provides granular fact-level context:
 
 Facts are NOT loaded in full for every command — use relevance filtering (see below).
 
+Additional state files used by refresh operations (not loaded during normal context loading):
+- `draft/.state/freshness.json` — SHA-256 hashes for file-level staleness detection
+- `draft/.state/signals.json` — signal classification for structural drift detection
+
 ## Relevance-Scored Context Loading
 
 Not all context is equally relevant to every task. When a specific track or task is active, apply relevance scoring to prioritize which context sections are most useful.
@@ -14960,7 +14030,7 @@ Not all context is equally relevant to every task. When a specific track or task
 
 Apply relevance scoring when ALL of these conditions are true:
 1. A specific track or task is active (has `spec.md` and/or `plan.md`)
-2. `draft/.ai-context.md` exists and is >200 lines
+2. `draft/.ai-context.md` exists and is above tier-1 minimum (100 lines)
 3. The command benefits from focused context (`draft implement`, `draft bughunt`, `draft review`)
 
 Do NOT apply relevance scoring for commands that need full context (`draft init`, `draft deep-review`, `draft decompose`).
@@ -14974,27 +14044,44 @@ Do NOT apply relevance scoring for commands that need full context (`draft init`
 
 2. **Score `.ai-context.md` sections** against the task concepts:
 
-   | Section | Load When Task Involves... |
-   |---------|--------------------------|
-   | `## META` | Always (baseline) |
-   | `## GRAPH:COMPONENTS` | Module boundary changes, new components |
-   | `## GRAPH:DEPENDENCIES` | Integration work, new external dependencies |
-   | `## GRAPH:DATAFLOW` | Data pipeline changes, new flows |
-   | `## INVARIANTS` | Always (safety critical) |
-   | `## INTERFACES` | API changes, new implementations |
-   | `## CATALOG:*` | Implementation work matching the category |
-   | `## THREADS` | Concurrency-related tasks |
-   | `## CONFIG` | Configuration changes |
-   | `## ERRORS` | Error handling tasks |
-   | `## CONCURRENCY` | Any async/parallel work |
-   | `## EXTEND:*` | Adding new implementations of existing patterns |
-   | `## TEST` | Always (need test commands) |
-   | `## FILES` | Always (need file locations) |
-   | `## VOCAB` | Domain-specific tasks |
+| Section | Load When Task Involves... |
+|---------|--------------------------|
+| `## META` | Always (baseline) |
+| `## GRAPH:COMPONENTS` | Module boundary changes, new components |
+| `## GRAPH:MODULES`    | Module boundary changes, new components, cross-module work |
+| `## GRAPH:HOTSPOTS`   | Performance work, refactoring, changes to high-complexity files |
+| `## GRAPH:CYCLES`     | Dependency restructuring, module boundary decisions |
+| `## GRAPH:DEPENDENCIES` | Integration work, new external dependencies |
+| `## GRAPH:DATAFLOW` | Data pipeline changes, new flows |
+| `## INVARIANTS` | Always (safety critical) |
+| `## INTERFACES` | API changes, new implementations |
+| `## CATALOG:*` | Implementation work matching the category |
+| `## THREADS` | Concurrency-related tasks |
+| `## CONFIG` | Configuration changes |
+| `## ERRORS` | Error handling tasks |
+| `## CONCURRENCY` | Any async/parallel work |
+| `## EXTEND:*` | Adding new implementations of existing patterns |
+| `## TEST` | Always (need test commands) |
+| `## FILES` | Always (need file locations) |
+| `## VOCAB` | Domain-specific tasks |
 
-3. **Always include**: `META`, `INVARIANTS`, `TEST`, `FILES` (minimum context floor)
-4. **Include if relevant**: All other sections scored against task concepts
-5. **Result**: A focused subset of `.ai-context.md` that maximizes signal-to-noise for the current task
+3. **Score graph files** (if `draft/graph/` exists) against the task concepts:
+
+| Graph File | Load When Task Involves... |
+|------------|--------------------------|
+| `module-graph.jsonl` | Module boundary changes, cross-module work, architecture analysis |
+| `hotspots.jsonl` | Performance work, refactoring, changes to high-fanIn files |
+| `proto-index.jsonl` | API changes, new RPCs, service contract modifications |
+| `go-index.jsonl` | Implementation or debugging in Go modules |
+| `python-index.jsonl` | Implementation or debugging in Python modules |
+| `ts-index.jsonl` | Implementation or debugging in TypeScript/JavaScript modules |
+| `c-index.jsonl` | Implementation or debugging in C/C++ modules |
+| `call-index.jsonl` | Tracing call paths, root cause analysis, function-level impact assessment |
+| `modules/<name>.jsonl` | Working within a specific module (implementation, debug, review) |
+
+4. **Always include**: `META`, `INVARIANTS`, `TEST`, `FILES` (minimum context floor)
+5. **Include if relevant**: All other sections scored against task concepts
+6. **Result**: A focused subset of `.ai-context.md` that maximizes signal-to-noise for the current task
 
 ### Fact Registry Relevance
 
@@ -15011,9 +14098,9 @@ When `draft/.state/facts.json` exists, also load relevant facts:
 
 Patterns listed here are **intentional design decisions**. Do NOT flag these as bugs, issues, or violations. They represent deliberate trade-offs documented by the team.
 
-### Guardrails (`guardrails.md`)
+### Guardrails (`guardrails.md` + `core/guardrails.md`)
 
-Three types of guardrails, each with different enforcement behavior:
+Project-level `draft/guardrails.md` has three sections with different enforcement behavior:
 
 | Section | Behavior |
 |---------|----------|
@@ -15042,6 +14129,31 @@ Use track context to:
 - Check edge cases listed in spec are handled
 - Focus analysis on files modified/created by the track
 
+## Toolchain & MCP Auto-Connect
+
+After loading Layer 1 context, check `draft/workflow.md` → `## Toolchain` section. Draft uses standard `git` for VCS — see `core/shared/vcs-commands.md` for the command conventions.
+
+### MCP Auto-Connect (optional)
+
+If MCP integrations are checked in `draft/workflow.md`, verify availability at context-load time:
+
+| Server | Verification Call | On Success | On Failure |
+|--------|-------------------|------------|------------|
+| Jira MCP | `get_issue(key="TEST-1", prune_mode="minimal")` — expect error, confirms server responds | Record: `jira_mcp=available` | Record: `jira_mcp=unavailable`, degrade gracefully |
+| Confluence MCP | Check for Confluence tools in environment (e.g., `search_confluence`, `get_page`) | Record: `confluence_mcp=available` | Record: `confluence_mcp=unavailable`, degrade gracefully |
+| GitHub MCP | Check for GitHub tools in environment (e.g., `gh_pr_create`, `gh_issue_get`) | Record: `github_mcp=available` | Record: `github_mcp=unavailable`, fall back to `gh` CLI |
+
+MCP availability status is passed to downstream skills. Skills that can leverage MCPs will automatically use them when available, falling back to local-only analysis when unavailable.
+
+### Confluence Integration Points
+
+When Confluence MCP is available, skills can leverage it for documentation lookup:
+
+| Skill | Confluence Use |
+|-------|---------------|
+| `draft init` | Search for existing design documents, architecture docs related to the project |
+| `draft new-track` | Search for relevant RFCs, design docs, or prior art before starting a track |
+
 ## Degradation Behavior
 
 | Scenario | Behavior |
@@ -15053,6 +14165,7 @@ Use track context to:
 | `product.md` missing | Skip product requirement verification |
 | `workflow.md` missing | Skip workflow preferences |
 | `guardrails.md` missing | Fall back to `workflow.md ## Guardrails`; if neither exists, skip guardrail enforcement |
+| `draft/graph/` missing | Skip Layer 1.5; no structural graph data available |
 | `facts.json` missing | Skip Layer 2; no fact-level context available |
 | Track files missing | Warn and proceed with project-level scope |
 
@@ -15070,20 +14183,23 @@ Once loaded, Draft context enables analysis that pure code reading cannot:
 - **Consistency boundary bugs** — Stale reads, lost events at eventual-consistency seams
 - **Guardrail violations** — Checked hard guardrails and learned anti-patterns from guardrails.md
 - **False positive suppression** — Learned conventions and accepted patterns are skipped during analysis
+- **Precise dependency analysis** — Module boundaries, weighted edges, and cycle detection from graph data (Layer 1.5)
+- **Impact assessment** — Blast radius of file changes using graph callers/impact queries
+- **Hotspot awareness** — High-complexity, high-fanIn files flagged before modification
 
 ## Future MCP Extensions
 
-The following MCP servers are planned for future integration. Skills referencing these should use graceful fallback (skip silently if unavailable).
+The following MCP integrations are planned but not yet available. Skills referencing these should use graceful fallback (manual input or skip).
 
 | MCP Server | Purpose | Used By | Status |
-|------------|---------|---------|--------|
-| Monitoring MCP | Query metrics, dashboards, alerts | `draft incident-response`, `draft deploy-checklist` | Planned |
-| CI/CD MCP | Query build status, pipeline results | `draft deploy-checklist`, `draft implement` | Planned |
-| Chat MCP | Post notifications to Slack/Teams | `draft incident-response`, `draft standup` | Planned |
-| Incident Management MCP | Query PagerDuty/OpsGenie incidents | `draft incident-response` | Planned |
-| APM MCP | Query traces, performance data | `draft debug`, `draft deep-review` | Planned |
+|---|---|---|---|
+| Monitoring MCP | Metrics dashboards, alert history, SLO status | `incident-response`, `deploy-checklist` | Planned |
+| CI/CD MCP | Build status, pipeline triggers, deployment history | `deploy-checklist` | Planned |
+| Chat MCP | Slack/Teams notifications, war room creation | `incident-response` | Planned |
+| Incident Management MCP | PagerDuty/OpsGenie integration, on-call schedules | `incident-response` | Planned |
+| APM MCP | Distributed traces, error tracking, performance profiles | `debug`, `incident-response` | Planned |
 
-**Graceful fallback pattern:** Check MCP availability during context loading. If unavailable, skip the MCP-dependent step and note in output: "{MCP} unavailable — skipped {step}. Configure {MCP} for richer {skill} results."
+When these MCPs become available, update the corresponding skills to auto-connect using the standard MCP auto-connect pattern defined above.
 
 </core-file>
 
@@ -15097,7 +14213,21 @@ The following MCP servers are planned for future integration. Skills referencing
 
 Shared procedure for gathering git metadata and generating YAML frontmatter in Draft reports.
 
-Referenced by: `draft bughunt`, `draft deep-review`, `draft review`
+Referenced by: All skills that generate Draft reports — including `draft bughunt`, `draft deep-review`, `draft review`, `draft quick-review`, `draft tech-debt`, `draft deploy-checklist`, `draft incident-response`, `draft debug`, `draft standup`, `draft testing-strategy`
+
+## Preferred: Deterministic Script
+
+Use `scripts/tools/git-metadata.sh` when it is available on the host:
+
+```bash
+scripts/tools/git-metadata.sh --yaml \
+    --project "$PROJECT" --module "$MODULE" \
+    --track-id "$TRACK_ID" --generated-by "draft:bughunt"
+```
+
+The script emits the full YAML frontmatter block shown below, including `commits_ahead_base` / `commits_behind_base` vs. `--base main`. Use `--json` for a machine-readable object with the same fields. Exits nonzero outside a git work tree.
+
+The manual commands below remain the specification and a fallback for environments where the script is not present.
 
 ## Git Metadata Commands
 
@@ -15168,8 +14298,10 @@ TIMESTAMP=$(date +%Y-%m-%dT%H%M)
 # Write report to timestamped file
 # Example: draft/bughunt-report-2026-03-15T1430.md
 
-# Create symlink to latest
-ln -sf <report-filename> <report-dir>/<report-type>-latest.md
+# Refresh the "-latest.md" symlink deterministically:
+scripts/tools/manage-symlinks.sh draft/ bughunt
+# (Fallback when the script is unavailable:)
+# ln -sf <report-filename> <report-dir>/<report-type>-latest.md
 ```
 
 Previous timestamped reports are preserved. The `-latest.md` symlink always points to the most recent report.
@@ -15242,10 +14374,11 @@ Before adding a new entry to `draft/guardrails.md`:
 1. Read current `draft/guardrails.md`
 2. Check if the pattern already exists under Learned Conventions or Learned Anti-Patterns
 3. If it exists:
-   - Update `last_verified` date
+   - Update `last_verified` and `last_active` dates
    - Increase evidence count if new instances were found
    - Upgrade confidence from `medium` → `high` if threshold met
-4. If it does NOT exist: append as new entry
+   - Preserve original `discovered_at` and `established_at` dates (never overwrite these)
+4. If it does NOT exist: append as new entry with all four timestamps populated
 
 ---
 
@@ -15267,9 +14400,9 @@ Append under `## Learned Conventions`:
 - **Confidence:** high | medium
 - **Evidence:** Found in N files — `path/file1.ext:line`, `path/file2.ext:line`, `path/file3.ext:line`
 - **Discovered at:** YYYY-MM-DD (when Draft first observed this pattern)
-- **Established at:** ~YYYY-MM-DD (when this pattern was introduced in the codebase, via git blame)
+- **Established at:** YYYY-MM-DD (when the pattern entered the codebase, via git blame)
 - **Last verified:** YYYY-MM-DD
-- **Last active:** YYYY-MM-DD (when source files using this pattern were last modified)
+- **Last active:** YYYY-MM-DD (when source files containing this pattern were last modified)
 - **Discovered by:** draft:[command] on YYYY-MM-DD
 - **Description:** [What the pattern is and why it's intentional]
 ```
@@ -15282,32 +14415,26 @@ Append under `## Learned Anti-Patterns`:
 ### [Anti-Pattern Name]
 - **Category:** security | reliability | performance | correctness | concurrency
 - **Severity:** critical | high | medium
+- **graph_severity:** critical | high | medium | low | unresolved  (derived from fanIn of evidence files; "unresolved" if no graph data available)
+- **high_fanin_files:** `path/file.go` (fanIn:12), `path/other.go` (fanIn:7)  (omit line if none meet fanIn ≥ 5)
 - **Evidence:** Found in N files — `path/file1.ext:line`, `path/file2.ext:line`
 - **Discovered at:** YYYY-MM-DD (when Draft first observed this pattern)
-- **Established at:** ~YYYY-MM-DD (when this pattern was introduced in the codebase, via git blame)
+- **Established at:** YYYY-MM-DD (when the pattern entered the codebase, via git blame)
 - **Last verified:** YYYY-MM-DD
-- **Last active:** YYYY-MM-DD (when source files using this pattern were last modified)
+- **Last active:** YYYY-MM-DD (when source files containing this pattern were last modified)
 - **Discovered by:** draft:[command] on YYYY-MM-DD
 - **Description:** [What the pattern is and why it's problematic]
 - **Suggested fix:** [Brief description of the correct approach]
 ```
 
-### Temporal Metadata (Dual-Layer Timestamps)
+`graph_severity` derivation rules (from `draft/graph/hotspots.jsonl` fanIn values):
+- fanIn ≥ 10 in any evidence file → `critical`
+- fanIn 5–9 → `high`
+- fanIn 1–4 → `medium`
+- fanIn 0 or file not in hotspots.jsonl → `low`
+- Graph data absent → `unresolved`
 
-Every learned pattern entry includes dual-layer timestamps inspired by Supermemory's temporal reasoning:
-
-| Timestamp | Purpose | How to Determine |
-|-----------|---------|-----------------|
-| `Discovered at` | When Draft first observed this pattern | Current date when pattern is first learned |
-| `Established at` | When this pattern was actually introduced in the codebase | Use `git blame` on evidence files to find oldest occurrence, take the approximate date |
-| `Last verified` | When this pattern was last confirmed still present | Updated on each re-verification |
-| `Last active` | When source files using this pattern were last modified | `git log -1 --format="%ci" -- {evidence_file}` on evidence files, take most recent |
-
-**Temporal reasoning enabled by these timestamps:**
-- Pattern discovered recently but established long ago → well-established convention
-- Pattern established recently and actively used → emerging convention
-- Pattern established long ago but `last_active` is old → potentially declining (cross-reference with Step 2.3 temporal analysis in `draft learn`)
-- Pattern where `last_active` is >6 months old → candidate for deprecation review
+When `graph_severity` differs from `severity`, use `graph_severity` as the enforcement priority — it is objective and graph-derived.
 
 ---
 
@@ -15331,8 +14458,8 @@ After updating guardrails.md, append a brief learning summary to the end of the 
 ## Constraints
 
 - **Never auto-promote** learned patterns to Hard Guardrails — that requires human decision via `draft learn promote`
-- **Never remove** existing entries manually — only update evidence/confidence/dates. Exception: automated eviction (see below)
-- **Cap at 50 learned entries** per section — if at capacity, evict the oldest `medium` confidence entry that hasn't been re-verified in 90+ days to make room for new entries
+- **Never remove** existing entries — only update evidence/confidence/dates
+- **Cap at 50 learned entries** per section — if at capacity, replace the oldest `medium` confidence entry that hasn't been re-verified in 90+ days
 - **Human-curated always wins** — Hard Guardrails and `tech-stack.md ## Accepted Patterns` take precedence over learned patterns if there's a conflict
 - **Preserve file metadata** — update `synced_to_commit` in the YAML frontmatter when modifying guardrails.md
 
@@ -15346,31 +14473,50 @@ After updating guardrails.md, append a brief learning summary to the end of the 
 
 # Condensation Subroutine
 
-This is a self-contained, callable procedure for generating `draft/.ai-context.md` and `draft/.ai-profile.md` from `draft/architecture.md`. Any skill that mutates `architecture.md` should execute this subroutine afterward to keep the derived context files in sync.
+> Generates `.ai-context.md` from `architecture.md`. Called by multiple skills after modifying architecture.
 
-**Called by:** `draft init`, `draft init refresh`, `draft implement`, `draft decompose`, `draft coverage`, `draft index`, `draft adr`
+---
+
+This is a self-contained, callable procedure for generating `draft/.ai-context.md` from `draft/architecture.md`. Any skill that mutates `architecture.md` should execute this subroutine afterward to keep the derived context files in sync.
+
+**Called by:** `draft init`, `draft init refresh`, `draft implement`, `draft decompose`, `draft coverage`, `draft index`
 
 ### Inputs
 
 | Input | Path | Description |
 |-------|------|-------------|
 | architecture.md | `draft/architecture.md` | Comprehensive human-readable engineering reference (source of truth) |
+| schema.yaml | `draft/graph/schema.yaml` | Graph metrics for tier computation (optional — skip if absent) |
 
 ### Outputs
 
 | Output | Path | Description |
 |--------|------|-------------|
-| .ai-context.md | `draft/.ai-context.md` | Token-optimized, machine-readable AI context (200-400 lines) |
+| .ai-context.md | `draft/.ai-context.md` | Token-optimized, machine-readable AI context (tier-scaled budget) |
 | .ai-profile.md | `draft/.ai-profile.md` | Ultra-compact, always-injected project profile (20-50 lines) |
 
-**Note:** `.ai-profile.md` generation is a separate step defined in `draft init`. The Condensation Subroutine generates `.ai-context.md` only. Skills that call this subroutine should also trigger profile regeneration if `.ai-profile.md` exists.
+**Note:** `.ai-profile.md` generation is a separate step (the Profile Generation Subroutine defined in `skills/init/SKILL.md`). The Condensation Subroutine generates `.ai-context.md` only. Skills that call this subroutine should also trigger profile regeneration if `draft/.ai-profile.md` exists.
 
 ### Target Size
 
-- **Minimum**: 200 lines
-- **Maximum**: 400 lines
-- Under 200 lines indicates incomplete condensation — go back and ensure all sections are represented
-- Over 400 lines indicates insufficient compression — apply prioritization rules below
+Compute tier from `draft/graph/schema.yaml` after graph build:
+
+  M = stats.modules
+  F = stats.go_functions + stats.py_functions
+  P = stats.proto_rpcs
+
+| Tier | Label  | Condition                              | Budget        |
+|------|--------|----------------------------------------|---------------|
+| 1    | micro  | M≤5 AND F≤50 AND P≤10                 | 100–180 lines |
+| 2    | small  | M≤15 AND F≤300 AND P≤30               | 180–280 lines |
+| 3    | medium | M≤40 AND F≤1000 AND P≤100             | 280–400 lines |
+| 4    | large  | M≤100 AND F≤5000 AND P≤500            | 400–600 lines |
+| 5    | XL     | M>100 OR F>5000 OR P>500              | 600–900 lines |
+
+If `schema.yaml` does not exist: default to tier 2 (180–280 lines).
+
+- Below tier minimum: incomplete condensation — ensure all sections are represented
+- Above tier maximum: insufficient compression — apply prioritization rules below
 
 ### Procedure
 
@@ -15406,6 +14552,48 @@ Transform each `architecture.md` section into machine-optimized format using thi
 | File Structure | FILES | Concept-to-path mappings: `entry: path`, `config: path`, etc. |
 | Glossary | VOCAB | `term: definition` pairs |
 
+#### Step 3.5: Generate Graph Summary Sections
+
+If `draft/graph/schema.yaml` exists, generate these three sections from graph JSONL:
+
+**GRAPH:MODULES** (tier ≥ 2 only):
+- Read `draft/graph/module-graph.jsonl`, extract `kind: "node"` records and `kind: "edge"` records
+- For each node: `{name}|{sizeKB}KB|{lang_counts} → {comma-separated target modules}`
+- `lang_counts` = `go:N,proto:N,cc:N` from node.files (omit zero-count languages)
+- `deps` = edge targets where `source == this module name`
+- Order by sizeKB descending
+- Omit this section entirely for tier-1 codebases (≤5 modules) where Component Graph is sufficient
+
+**GRAPH:HOTSPOTS** (all tiers):
+- Read `draft/graph/hotspots.jsonl`, take top 10 by score (score = lines + fanIn × 50)
+- Format: `{file}|{lines}L|fanIn:{fanIn}`
+- Always include regardless of tier
+
+**GRAPH:CYCLES** (all tiers):
+- Inspect `draft/graph/module-graph.jsonl` edges; detect cycles using DFS (same logic as `graph/src/query.js` detectCycles)
+- Output `None ✓` if no cycles
+- Otherwise output each cycle path on its own line: `"A → B → C → A"`
+- Always include — absence is positive signal that architecture is acyclic
+
+**GRAPH:MODULE-HOTSPOTS** (tier ≥ 3 only):
+- Read `draft/graph/hotspots.jsonl`, group records by `module` field
+- For each module: take top 3 files by score (lines + fanIn×50), format as indented lines under the module name
+- Format: `{module}:  {file}|{lines}L|fanIn:{N}` with subsequent files indented to align
+- Order modules by their highest-scoring file, descending
+- Omit modules with no hotspot entries; omit entire section for tier 1–2 (covered by global GRAPH:HOTSPOTS)
+
+**GRAPH:FAN-IN** (tier ≥ 3 only):
+- Read `draft/graph/module-graph.jsonl`, count `kind: "edge"` records by target module name to get per-module incoming edge count
+- Format: `{module}|fanIn:{N}|callers:{comma-separated source modules}`
+- Order by fanIn descending; include only modules with fanIn ≥ 2; cap at 15 rows
+- Omit entire section for tier 1–2 (trivially small graph)
+
+**GRAPH:PROTO-MAP** (only when `stats.proto_rpcs > 0` in schema.yaml):
+- Read `draft/graph/proto-index.jsonl`, extract service name, rpc name, request type, response type, source file
+- Format: `{ServiceName}: {rpc}({RequestType}) → {ResponseType} @{file}`
+- Group entries by service name; one line per RPC
+- Omit entire section if `stats.proto_rpcs == 0` — do not write an empty section
+
 #### Step 4: Apply Compression
 
 - Remove all prose paragraphs — use structured key-value pairs instead
@@ -15416,13 +14604,19 @@ Transform each `architecture.md` section into machine-optimized format using thi
 
 #### Step 5: Prioritize Content
 
-If the output exceeds 400 lines, cut sections in this order (bottom = cut first):
+If the output exceeds the tier maximum, cut sections in this order (bottom = cut first):
 
 | Priority | Section | Rule |
 |----------|---------|------|
 | 1 (never cut) | INVARIANTS | Safety critical — preserve every invariant |
 | 2 (never cut) | EXTEND | Agent productivity critical — preserve all cookbook steps |
+| 3 (keep) | GRAPH:HOTSPOTS | Always include — needed for impact awareness |
+| 3 (keep) | GRAPH:CYCLES | Always include — always 1-2 lines; absence is signal |
+| 3 (keep) | GRAPH:PROTO-MAP | Never cut when protos exist — RPC contracts are critical for AI agents |
 | 3 | GRAPH:* | Keep all component, dependency, and dataflow graphs |
+| 4 (scale) | GRAPH:MODULES | Include tier ≥ 2; omit for tier 1 |
+| 4 (scale) | GRAPH:MODULE-HOTSPOTS | Include tier ≥ 3; cut to top-5 modules if budget tight |
+| 4 (scale) | GRAPH:FAN-IN | Include tier ≥ 3; cut to top-10 rows if budget tight |
 | 4 | INTERFACES | Keep all signatures |
 | 5 | CATALOG | Can abbreviate to top 20 entries per category |
 | 6 | CONFIG | Can abbreviate to `critical:Y` entries only |
@@ -15437,7 +14631,12 @@ Before writing `draft/.ai-context.md`, verify:
 - [ ] No references to `architecture.md` (file must be self-contained)
 - [ ] All invariants from architecture.md are preserved
 - [ ] Extension cookbooks are complete (an agent can follow them without other files)
-- [ ] Output is within 200-400 lines
+- [ ] Output is within tier budget bounds (compute from schema.yaml or default tier 2)
+- [ ] GRAPH:HOTSPOTS present (or note "No hotspot data available" if graph absent)
+- [ ] GRAPH:CYCLES present ("None ✓" or cycle list; or note if graph absent)
+- [ ] GRAPH:MODULE-HOTSPOTS present for tier ≥ 3 (or note if no hotspot data)
+- [ ] GRAPH:FAN-IN present for tier ≥ 3
+- [ ] GRAPH:PROTO-MAP present when `stats.proto_rpcs > 0` (omit entirely if no protos)
 - [ ] YAML frontmatter metadata is present at the top
 
 #### Step 7: Write Output
@@ -15447,7 +14646,7 @@ Write the completed content to `draft/.ai-context.md`.
 ### Example Transformation
 
 **architecture.md input:**
-```markdown
+````markdown
 ### 4.1 High-Level Topology
 
 The AuthService is a microservice that handles user authentication...
@@ -15460,7 +14659,7 @@ flowchart TD
     end
     Logic --> UserDB[(User Database)]
 ```
-```
+````
 
 **.ai-context.md output:**
 ```
@@ -15477,7 +14676,7 @@ AuthService.Logic -[PostgreSQL]-> UserDB
 ### Reference for Other Skills
 
 Other skills that mutate `draft/architecture.md` should invoke this subroutine with:
-> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` and `draft/.ai-profile.md` using the Condensation Subroutine defined in `core/shared/condensation.md`."
+> "After updating `draft/architecture.md`, regenerate `draft/.ai-context.md` using the Condensation Subroutine defined in `core/shared/condensation.md`. If `draft/.ai-profile.md` exists, also regenerate it using the Profile Generation Subroutine defined in `skills/init/SKILL.md`."
 
 </core-file>
 
@@ -15489,126 +14688,131 @@ Other skills that mutate `draft/architecture.md` should invoke this subroutine w
 
 # Cross-Skill Dispatch Convention
 
-Standard convention for how Draft skills invoke, offer, or suggest other skills during execution.
+Standard convention for how Draft skills invoke, offer, or suggest other skills. All Tier 1 orchestrators and cross-referencing skills follow this pattern.
 
-**Referenced by:** All Tier 1 orchestrators (`draft init`, `draft new-track`, `draft implement`, `draft review`)
-
----
+Convention spec implemented by: All Tier 1 orchestrators (`init`, `new-track`, `implement`, `review`, `upload`), and Tier 2 skills that cross-reference others. Skills implement this dispatch convention independently; see `skills/GRAPH.md` for the full dependency graph.
 
 ## Dispatch Tiers
 
 ### Tier 1: Auto-Invoke (Silent)
 
-Skills at this tier are loaded or executed automatically without user confirmation. The user is not prompted.
+Execute without user confirmation. Used for passive context enrichment and established patterns.
 
-| Trigger | Auto-Invoked Action |
-|---------|-------------------|
-| Any skill that needs project context | Load `core/shared/draft-context-loading.md` |
-| `draft implement` completes with quality signals | Feed quality results to `draft learn` |
-| `draft new-track` or `draft implement` with Jira key | Sync to Jira via `core/shared/jira-sync.md` |
-| `draft bughunt` or `draft debug` identifies root cause | Load `core/agents/rca.md` protocol |
+- Load `testing-strategy.md` if it exists (context enrichment)
+- Feed quality results to `draft learn` (established pattern)
+- Sync artifacts to Jira via `core/shared/jira-sync.md` when ticket is linked
+- Load `rca.md` into bug track implementation context
+
+**Convention:** No announcement needed. Log in track metadata if applicable.
 
 ### Tier 2: Offer (Ask with Default)
 
-Skills at this tier are presented to the user with a yes/no prompt. Default is to proceed.
+Present a choice with a recommended default. Used when the skill adds significant value but the user may want to skip.
 
-**Format:** "Run `draft skill-name` to `benefit`? [Y/n]"
+Format:
+```
+"Run draft <skill> to <benefit>? [Y/n]"
+```
 
-| Trigger | Offer |
-|---------|-------|
-| `draft implement` encounters failing tests | "Run `draft debug` to investigate test failures? [Y/n]" |
-| At phase boundary in `draft implement` | "Run `draft quick-review` for lightweight check? [Y/n]" |
-| `draft implement` detects accumulating shortcuts | "Run `draft tech-debt` to log debt items? [Y/n]" |
+Examples:
+- "Run `draft debug` to investigate before writing the spec? [Y/n]" — bug tracks in new-track
+- "Run full three-stage review or `draft quick-review` for lightweight check? [full]" — phase boundaries in implement
+- "Run `draft tech-debt` to scope this refactor? [Y/n]" — refactor tracks in new-track
+
+**Convention:** Default answer in brackets. Enter accepts default.
 
 ### Tier 3: Suggest (Announce, Don't Block)
 
-Skills at this tier are mentioned in output but execution is not offered. The user must invoke manually.
+Announce availability at completion without blocking. Used for optional follow-up actions.
 
-**Format:** "Consider running `draft skill-name` to `benefit`."
+Format:
+```
+"Consider running `draft <skill>` to <benefit>."
+```
 
-| Trigger | Suggestion |
-|---------|-----------|
-| `draft implement` completes a large track | "Consider running `draft deep-review` for a production-grade audit." |
-| `draft bughunt` finds systemic patterns | "Consider running `draft learn` to capture these patterns." |
-| `draft review` flags architecture concerns | "Consider running `draft adr` to document this decision." |
+Examples:
+- "Consider running `draft tech-debt` to catalog debt found during review."
+- "Consider running `draft documentation api` to document new endpoints."
+- "Consider running `draft adr` to record this design decision."
+
+**Convention:** Grouped in a "What's Next" or "Suggestions" section at skill completion.
 
 ### Tier 4: Detect + Auto-Feed (Smart Context Injection)
 
-Skills at this tier automatically inject relevant context into the target skill without invoking it. The context is available when the user eventually runs the target skill.
+Automatically detect when output from one skill is useful to another and inject it as context. No user interaction.
 
-| Source Skill | Output Artifact | Target Skill | Injection Method |
-|-------------|----------------|-------------|-----------------|
-| `draft bughunt` | `bughunt-report.md` | `draft implement` | Loaded as context when implementing bug fix track |
-| `draft review` | Review findings | `draft learn` | Quality signals extracted and fed to pattern learning |
-| `draft deep-review` | Audit report | `draft implement` | Findings loaded as constraints for next implementation |
-| `draft decompose` | Subtask breakdown | `draft new-track` | Subtasks offered as new tracks |
-| `draft coverage` | Coverage gaps | `draft implement` | Gaps loaded as pending work items |
-| `draft incident-response` | Incident timeline | `draft learn` | Incident patterns captured for prevention |
+| Source Skill | Output | Target Skill | How Injected |
+|---|---|---|---|
+| `draft debug` | Debug Report | `draft new-track` | Fed into spec.md "Reproduction" and "Root Cause Hypothesis" sections |
+| `draft incident-response` | Postmortem | `draft new-track` | Fed into bug track spec context |
+| `draft tech-debt` | Debt Report | `draft new-track` | Fed into refactor track spec scope |
+| `draft testing-strategy` | Strategy Doc | `draft implement` | Loaded into TDD context (coverage targets, test boundaries) |
+| `draft debug` + RCA agent | `rca.md` | `draft implement` | Loaded as investigation context for bug fix implementation |
 
----
+**Convention:** Check for artifact existence before injection. If not found, skip silently.
 
-## Primary Dispatch Registry
+## Dispatch Registry
 
-This registry covers primary orchestrator dispatches. Individual skills document additional dispatch points in their `## Cross-Skill Dispatch` sections.
+Complete registry of all cross-skill dispatch points:
 
-| Orchestrator | Dispatch Point | Target | Tier |
-|-------------|---------------|--------|------|
-| `draft init` | Monorepo detected | `draft index` | 3 — Suggest |
-| `draft init` | Jira key provided | Jira sync | 1 — Auto |
-| `draft new-track` | Track created | `draft decompose` | 2 — Offer |
-| `draft new-track` | Jira key provided | Jira sync | 1 — Auto |
-| `draft implement` | Before coding | Context loading | 1 — Auto |
-| `draft implement` | Tests failing | `draft debug` | 2 — Offer |
-| `draft implement` | After completion | pattern-learning.md | 1 — Auto |
-| `draft implement` | After completion | `draft review` | 2 — Offer |
-| `draft implement` | Large track done | `draft deep-review` | 3 — Suggest |
-| `draft implement` | Jira key exists | Jira sync | 1 — Auto |
-| `draft review` | Architecture concern | `draft adr` | 3 — Suggest |
-| `draft review` | Quality signals | pattern-learning.md | 1 — Auto |
-| `draft review` | Jira key exists | Jira sync | 1 — Auto |
-| `draft bughunt` | Root cause found | `core/agents/rca.md` | 1 — Auto |
-| `draft bughunt` | Systemic pattern | `draft learn` | 3 — Suggest |
-| `draft bughunt` | Jira key exists | Jira sync | 1 — Auto |
-
----
+| Orchestrator | When | Dispatches | Tier |
+|---|---|---|---|
+| `init` | Brownfield + debt signals detected | `tech-debt` | Suggest |
+| `init` | After generating tech-stack.md | `testing-strategy` | Suggest |
+| `init` | At completion | `documentation readme` | Suggest |
+| `new-track` | Bug track detected | `debug` | Offer |
+| `new-track` | Incident/outage keywords | `incident-response postmortem` | Detect + Suggest |
+| `new-track` | Refactor track | `tech-debt` | Offer |
+| `new-track` | New technology / arch shift | `adr` | Detect + Suggest |
+| `new-track` | Plan generation (feature) | `testing-strategy` task, `deploy-checklist` task, `documentation` task | Auto-embed |
+| `implement` | Blocked task | `debug` | Offer (replaces inline debugger) |
+| `implement` | Before TDD (first task) | `testing-strategy` load | Auto-Invoke |
+| `implement` | Bug track before tests | Ask developer | Offer (test guardrail) |
+| `implement` | Phase boundary | `quick-review` | Offer |
+| `implement` | Track completion | `deploy-checklist`, `documentation`, `tech-debt`, `adr` | Suggest |
+| `review` | After Stage 3 | `coverage` | Auto-Invoke |
+| `review` | At completion (quality findings) | `tech-debt`, `documentation` | Suggest |
+| `upload` | Pre-upload | `deploy-checklist` | Auto-Invoke |
+| `upload` | New APIs detected | `documentation api` | Detect + Suggest |
+| `upload` | Post-upload success | Jira comment | Auto-Invoke |
+| `decompose` | After module decomposition | `testing-strategy`, `documentation api` | Suggest |
+| `decompose` | Dependency cycles detected | `tech-debt` | Detect + Suggest |
+| `decompose` | Module boundary decisions | `adr` | Auto-Invoke |
+| `bughunt` | Critical bugs found | `debug` | Suggest |
+| `deep-review` | Architecture debt found | `tech-debt`, `adr` | Suggest |
 
 ## Implementation Pattern
 
-When implementing dispatch in a skill, follow this template:
+Skills implementing dispatch should follow this pattern:
 
 ```markdown
-## Dispatch Points
+## Cross-Skill Dispatch
 
-<!-- Tier 1: Auto-invoke -->
-Load context: `core/shared/draft-context-loading.md`
-Sync to Jira: `core/shared/jira-sync.md` (if Jira key present)
+At this point, check for dispatch opportunities:
 
-<!-- Tier 2: Offer -->
-If {condition}:
-  Ask: "Run `draft skill-name` to {benefit}? [Y/n]"
-  If yes: invoke skill
-  If no: continue
+### Auto-Invoke
+- [list auto-invoke actions relevant to this skill]
 
-<!-- Tier 3: Suggest -->
-If {condition}:
-  Output: "Consider running `draft skill-name` to {benefit}."
+### Offer
+- [list offer actions relevant to this skill]
 
-<!-- Tier 4: Context injection -->
-If {artifact} exists:
-  Load as context for next relevant skill invocation
+### Suggest (at completion)
+- [list suggest actions relevant to this skill]
 ```
-
----
 
 ## Test Writing Guardrail
 
-**Never auto-write tests in bug/debug/RCA workflows.**
+**In bug/debug/RCA workflows:** Never auto-write unit tests. Always ask the developer first.
 
-When `draft bughunt`, `draft debug`, or the RCA agent identifies a bug:
-- Diagnose and fix the bug
-- Do **not** generate test files automatically
-- If tests would help, use Tier 2 dispatch: "Write regression tests for this fix? [Y/n]"
-- Rationale: Auto-generated tests in debug context often test the wrong thing (the symptom, not the cause)
+Applies to: `draft debug`, `draft implement` (bug tracks), auto-triage pipeline, `draft bughunt`
+Does NOT apply to: Feature tracks with TDD enabled, `draft coverage`
+
+```
+If track type is "bugfix" OR current context is debug/RCA:
+  BEFORE writing any test file:
+    ASK: "Want me to write [regression/unit] tests for [description]? [Y/n]"
+    If declined: skip test writing, note in plan.md: "Tests: developer-handled"
+```
 
 </core-file>
 
@@ -15620,143 +14824,860 @@ When `draft bughunt`, `draft debug`, or the RCA agent identifies a bug:
 
 # Jira Sync Protocol
 
-Standard procedure for syncing Draft artifacts to Jira via MCP.
+Standard procedure for syncing Draft artifacts to Jira tickets via MCP. All skills that produce markdown artifacts follow this protocol to keep Jira updated.
 
-**Referenced by:** `draft new-track`, `draft implement`, `draft review`, `draft bughunt`, `draft debug`, `draft deep-review`, `draft adr`, `draft init`
-
----
+Referenced by: `draft init`, `draft new-track`, `draft implement`, `draft review`, `draft quick-review`, `draft bughunt`, `draft debug`, `draft incident-response`, `draft tech-debt`, `draft deploy-checklist`, `draft documentation`
 
 ## Prerequisites
 
-1. **Jira MCP available** — The Jira MCP server is connected and responding
-2. **Ticket key exists** — A valid Jira ticket key (e.g., `PROJ-123`) is present in track metadata or provided by the user
-3. **Artifact exists** — The Draft artifact to sync (spec, plan, review, report) has been generated
+1. **Jira MCP available:** Verify during context loading (see `core/shared/draft-context-loading.md`)
+2. **Ticket key exists:** From track metadata, spec.md, workflow.md, or `$ARGUMENTS`
+3. **Artifact exists:** The markdown file to sync must exist on disk
 
----
+If any prerequisite is missing, skip sync silently. Do not fail the parent skill.
 
 ## MCP Operations
 
-| Operation | MCP Tool | Use Case |
-|-----------|----------|----------|
-| `add_comment` | `jira_add_comment` | Post status updates, review summaries, implementation notes |
-| `add_attachment` | `jira_add_attachment` | Attach spec.md, plan.md, review reports, RCA documents |
-| `update_issue` | `jira_update_issue` | Update status, labels, custom fields, story points |
+| Operation | Purpose | Usage |
+|---|---|---|
+| `add_comment(issue_key, body)` | Post concise summaries to Jira | Every sync trigger |
+| `add_attachment(issue_key, file_path)` | Attach markdown artifacts | When artifact file exists |
+| `update_issue(issue_key, fields)` | Update status, labels, fields | When status changes |
 
+## Draft Signature
+
+All Jira content written by Draft (comments and descriptions) MUST include a signature for traceability. This allows teams to track how Draft is being used across their Jira projects.
+
+### Comment Signature
+
+Append this signature block at the end of every Jira comment:
+
+```
+─────────────────────────────
+🤖 Generated by Draft
+```
+
+### Description Signature
+
+Append this signature line inside `{noformat}` blocks at the end of every Jira description:
+
+```
 ---
+🤖 Generated by Draft
+Branch: [branch-name] | Commit: [short-hash]
+```
+
+## Draft Label
+
+Every Jira issue that Draft creates or updates MUST have the label `draft`. This enables tracking and filtering of all Draft-touched issues.
+
+### Label Procedure
+
+On every sync operation, after posting the comment or attachment:
+
+1. Fetch current labels: `get_issue(issue_key)` → extract `labels` field
+2. If `"draft"` is NOT in the labels list:
+   - Call: `update_issue(issue_key, { "labels": [existing_labels..., "draft"] })`
+   - Log: "Added 'draft' label to {issue_key}"
+3. If `"draft"` already present: skip (no-op)
+
+**Important:** Preserve existing labels — append `draft`, never replace the labels array.
 
 ## Comment Format
 
-All Draft comments posted to Jira follow this format:
+All Jira comments from Draft follow this format for consistency and scannability:
 
 ```
 [draft] {action}: {1-line summary}
+─────────────────────────────
+• {key detail 1}
+• {key detail 2}
+• {key detail 3}
+
+Attachment: {filename} (if applicable)
+
+─────────────────────────────
+🤖 Generated by Draft
 ```
 
-### Examples
+Examples:
+```
+[draft] spec-complete: Specification and plan generated for track add-user-auth
+─────────────────────────────
+• 3 phases, 12 tasks planned
+• Key risk: third-party OAuth provider latency
+• Testing strategy: TDD with 90% coverage target
+
+Attachments: spec.md, plan.md
+
+─────────────────────────────
+🤖 Generated by Draft
+```
 
 ```
-[draft] spec-created: Authentication flow spec with 5 acceptance criteria
-[draft] plan-generated: 12-step implementation plan, estimated 3 story points
-[draft] review-complete: 2 critical findings, 4 suggestions — see attachment
-[draft] implementation-done: All 12 plan steps completed, tests passing
-[draft] bug-found: Race condition in token refresh — RCA attached
-[draft] incident-update: SEV2 — API latency resolved, monitoring stable
-```
+[draft] rca-complete: Root cause identified for login timeout
+─────────────────────────────
+• Root cause: connection pool exhaustion under concurrent load
+• Classification: resource exhaustion
+• Prevention: 4 items (2 detection, 1 code, 1 architecture)
 
----
+Attachment: rca.md
+
+─────────────────────────────
+🤖 Generated by Draft
+```
 
 ## Sync Triggers
 
-| When | Artifact | Jira Action |
-|------|----------|-------------|
-| `draft new-track` completes | `spec.md` | Attach spec, comment with summary, update labels |
-| `draft new-track` generates plan | `plan.md` | Attach plan, comment with step count and estimate |
-| `draft implement` step completes | Step status | Comment with progress update |
-| `draft implement` all steps done | Final status | Comment with completion summary, update issue status |
-| `draft review` completes | Review report | Attach report, comment with finding counts |
-| `draft bughunt` finds issues | `bughunt-report.md` | Attach report, comment with bug count and severities |
-| `draft debug` resolves issue | Debug summary | Comment with root cause and fix applied |
-| `draft incident-response` updates | Incident status | Comment with severity and current status |
-
----
+| When | Artifact | Jira Actions |
+|---|---|---|
+| `draft new-track` completes | `spec.md`, `plan.md` | Attach both + comment: "Spec and plan generated" |
+| Auto-triage completes | `rca.md` | Attach + comment: "RCA complete. Root cause: {summary}" |
+| `draft review` completes | `review-report-latest.md` | Attach + comment: "Review {PASS/FAIL}. {n} findings" |
+| `draft implement` completes | `plan.md` (updated) | Comment: "Implementation complete. {n} tasks done" |
+| `draft bughunt` completes | `bughunt-report-latest.md` | Attach + comment: "Bughunt found {n} issues" |
+| `draft deploy-checklist` completes | `deploy-checklist.md` | Attach + comment: "Deploy checklist generated" |
+| `draft incident-response` completes | `incident-*.md` | Attach + comment: "Incident report updated" |
 
 ## Sync Procedure
 
-### Step 1: Verify MCP Connection
+```
+1. Verify Jira MCP is available (from context loading state)
+   - If unavailable: queue to .jira-sync-queue.json, return
 
-Check that the Jira MCP server is available. If not, skip sync and log to `.jira-sync-queue.json`.
+2. Extract ticket key:
+   - From track metadata.json: $.jira_ticket
+   - From spec.md YAML frontmatter: $.jira_ticket
+   - From $ARGUMENTS: match pattern [A-Z]+-\d+
+   - If no ticket found: skip sync, return
 
-### Step 2: Extract Ticket Key
+3. Attach artifact (if file exists):
+   - Call: add_attachment(issue_key, file_path)
+   - Log: "Attached {filename} to {issue_key}"
 
-Look for the Jira ticket key in this order:
-1. `metadata.json` → `jira_key` field in the current track
-2. User-provided key in the command invocation
-3. Branch name pattern: `{KEY}-{number}` (e.g., `PROJ-123-feature-name`)
+4. Post comment:
+   - Format using comment template above (MUST include signature block)
+   - Call: add_comment(issue_key, formatted_comment)
+   - Log: "Posted sync comment to {issue_key}"
 
-If no key is found, skip sync silently.
+5. Ensure 'draft' label:
+   - Fetch current labels from issue
+   - If "draft" not in labels: append it via update_issue
+   - Log: "Ensured 'draft' label on {issue_key}"
 
-### Step 3: Attach Artifact
+6. Update fields (if applicable):
+   - Call: update_issue(issue_key, fields)
 
-If the artifact is a file (spec, plan, report):
-- Use `jira_add_attachment` to attach the file to the ticket
-- File name follows the pattern: `draft-{artifact-type}-{timestamp}.md`
+7. Record sync in track metadata:
+   - Add entry to $.jira_syncs array with timestamp and action
+```
 
-### Step 4: Post Comment
+## Failure Handling
 
-Post a structured comment using the format defined above:
-- Include the action type and a 1-line summary
-- For implementation progress, include step X/Y completion status
-- For reviews, include finding counts by severity
+If MCP operation fails:
+1. Do NOT fail the parent skill
+2. Save pending sync to `draft/tracks/<id>/.jira-sync-queue.json`:
+   ```json
+   {
+     "pending": [
+       {
+         "action": "add_attachment",
+         "issue_key": "PROJ-123",
+         "file_path": "draft/tracks/fix-login/rca.md",
+         "queued_at": "2026-03-15T14:30:00Z"
+       }
+     ]
+   }
+   ```
+3. On next successful MCP connection, retry queued items
+4. Warn user: "Jira sync queued (MCP unavailable). Will retry on next connection."
 
-### Step 5: Update Fields
+</core-file>
 
-Update Jira fields based on the action:
-- After spec creation: add label `draft:spec-ready`
-- After plan generation: update story points if estimated
-- After implementation: transition status if workflow allows
-- After review: add label `draft:reviewed`
+---
 
-### Step 6: Record in Metadata
+## core/shared/graph-query.md
 
-Write sync record to the track's `metadata.json`:
+<core-file path="core/shared/graph-query.md">
+
+# Graph Query Subroutine
+
+Shared procedure for querying the knowledge graph from any skill. The graph provides precise, deterministic structural data about the codebase — module boundaries, dependency edges, hotspots, proto API surface, and symbol indexes.
+
+Referenced by: `draft init`, `draft implement`, `draft bughunt`, `draft review`, `draft debug`, `draft decompose`, `draft index`
+
+## Tooling Wrappers
+
+For common query modes, prefer the deterministic wrappers under `scripts/tools/`:
+
+| Wrapper | Graph mode | Behavior on missing graph |
+|---|---|---|
+| `scripts/tools/hotspot-rank.sh [--top N] [--module NAME]` | `--mode hotspots` | Emits `{hotspots:[],source:"unavailable"}` and exits 2 |
+| `scripts/tools/cycle-detect.sh` | `--mode cycles` | Emits `{cycles:[],source:"unavailable"}` and exits 2 |
+| `scripts/tools/mermaid-from-graph.sh [--diagram module-deps\|proto-map]` | `--mode mermaid` | Emits an empty mermaid block and exits 2 |
+
+Use the raw `graph` CLI directly for the lower-level modes documented below.
+
+## Pre-Check
+
+Verify graph data exists before any graph operation:
+
+```bash
+ls draft/graph/schema.yaml 2>/dev/null
+```
+
+If absent, **skip all graph operations silently**. Graph enriches analysis — it never gates it. All skills must work identically without graph data.
+
+## Graph Artifacts
+
+When `draft/graph/` exists, it contains:
+
+| File | Load | Content |
+|------|------|---------|
+| `schema.yaml` | Always | Metadata, stats, module list with file counts |
+| `module-graph.jsonl` | Always | Module nodes + weighted inter-module dependency edges |
+| `hotspots.jsonl` | Always | Files ranked by complexity score (lines + fanIn * 50) |
+| `proto-index.jsonl` | Always | All proto services, RPCs, messages, enums |
+| `go-index.jsonl` | When working in Go | Go functions, types, imports, `go-call` edges |
+| `python-index.jsonl` | When working in Python | Python functions, classes, imports, `py-call` edges |
+| `ts-index.jsonl` | When working in TS/JS | TypeScript/JS functions, classes, imports, `ts-call` edges |
+| `c-index.jsonl` | When working in C/C++ | C/C++ functions, types, `c-call` edges |
+| `call-index.jsonl` | When tracing call paths | All intra-file call edges across all languages |
+| `hashes.json` | Never (build artifact) | Per-module SHA-256 hashes for `--incremental` builds |
+| `modules/<name>.jsonl` | On demand | Per-module file graph: file nodes, include edges, cross-module edges, all language symbols + call edges |
+
+### Per-Module JSONL Record Schema
+
+All records in `modules/<name>.jsonl` have a `kind` field. Defined kinds:
+
+| kind           | Fields | Description |
+|----------------|--------|-------------|
+| `module`       | `name, sizeKB, files` | Module metadata header (first record) |
+| `file`         | `id, lines, module, sizeKB` | C++ source file node |
+| `include`      | `source, target` | Intra-module C++ include edge |
+| `cross-include`| `source, target` | Cross-module C++ include edge |
+| `go-func`      | `name, receiver, qualified, file, module, package, line, lines` | Go function/method (`receiver=null` for top-level) |
+| `go-type`      | `name, file, module, package, line, kind` | Go type (kind: struct/interface/alias/type) |
+| `go-call`      | `from, to, fromFile, module, line, resolved: false, confidence` | Go intra-file call edge (tree-sitter only). `confidence: direct` for bare identifier callees, `inferred` for selector calls (`obj.Foo`) where the receiver is collapsed away. |
+| `py-func`      | `name, receiver, file, module, line, lines` | Python function/method (receiver=null for top-level) |
+| `py-class`     | `name, bases[], file, module, line` | Python class definition |
+| `py-call`      | `from, to, fromFile, module, line, resolved: false, confidence` | Python intra-file call edge (tree-sitter only). `confidence: direct` for bare identifier callees, `inferred` for attribute calls (`obj.foo`). |
+| `ts-func`      | `name, file, module, line, lines, exported, class, async` | TypeScript/JS function, method, or arrow function |
+| `ts-class`     | `name, file, module, line, lines, exported, kind` | TS/JS class/interface/type (kind: class/interface/type) |
+| `ts-call`      | `from, to, fromFile, module, line, resolved: false, confidence` | TS/JS intra-file call edge (tree-sitter only). `confidence: direct` for bare identifier callees, `inferred` for member calls (`obj.foo`). |
+| `c-func`       | `name, file, module, line, lines, language, namespace` | C/C++ function definition |
+| `c-type`       | `name, file, module, line, kind, language` | C/C++ struct/class/enum definition |
+| `c-call`       | `from, to, fromFile, module, line, resolved: false, confidence` | C/C++ intra-file call edge (tree-sitter only). `confidence: direct` for bare identifier or qualified (`Foo::bar`) callees, `inferred` for field calls (`obj.foo` / `ptr->foo`). |
+| `ctags-sym`    | `name, file, module, line, ctagsKind, language` | Symbol from universal-ctags (Java, Rust, Ruby, etc.) |
+
+**Call edge notes**: All `*-call` records have `resolved: false` — callee names are syntactic (as written in source), with no type resolution. The same logical call may appear multiple times if the same function calls the target repeatedly. Call edges are **intra-file only** — cross-file resolution requires type information not available in tree-sitter.
+
+**Confidence field**: Each `*-call` record carries a `confidence` value:
+- `direct` — callee is a bare identifier (e.g. `foo()` in Go/Python/TS/C, or `Foo::bar()` in C++). Higher signal: the name appeared as written without receiver collapsing.
+- `inferred` — callee is the trailing name of a member/selector/attribute/field expression (`obj.foo()`, `ptr->foo()`, `bar.foo()`). Receivers with different types collapse to the same name, so name collisions across distinct functions are likely. Treat as a candidate set, not an authoritative edge.
+
+Skills consuming call edges (`bughunt`, `review`, `debug`) should weight `direct` edges more strongly and treat `inferred` edges as exploratory leads rather than confirmed call paths.
+
+**Always-load files** are compact and should be read during context loading for any task that touches code structure. **Per-module files** are loaded only when working within a specific module — limit to 2-3 module files per task.
+
+## Query Modes
+
+The graph binary supports live queries against the built graph. Use these when you need precise answers beyond what the always-load files provide.
+
+### Callers — who depends on this file or calls this function?
+
+**File callers** (path with `/` or extension — uses include-edge graph):
+
+```bash
+graph --repo . --out draft/graph --query --file auth/auth.h --mode callers
+```
+
+Output: `{target, callers[{file, module, type}], summary{intra, cross, total}}`
+
+Use when: tracing who will be affected by changing a header or interface file.
+
+**Function callers** (bare symbol name — uses call-index.jsonl):
+
+```bash
+graph --repo . --out draft/graph --query --symbol buildGoIndex --mode callers
+```
+
+Output: `{target, callers[{func, file, module, line, kind}], total, by_module{}, note}`
+
+Use when: finding all functions that call a specific function, across all languages. Requires call-index.jsonl (generated during full graph build with tree-sitter enabled). Results are intra-file only — cross-file callers are not resolved.
+
+### Impact — blast radius of changing a file
+
+```bash
+graph --repo . --out draft/graph --query --file <path> --mode impact
+```
+
+Output: `{target, impact{files, modules, affected_modules[], by_category{code,test,doc,config}, files_by_depth{}, files_by_category{}}, warning}`
+
+Each impacted file is classified as `code | test | doc | config` (matching `scripts/tools/classify-files.sh`). `by_category` gives counts; `files_by_category` gives the file lists. Use the test bucket to size regression work, the doc bucket to flag stale references, and the config bucket to spot deployment-time risk.
+
+Use when: assessing risk before modifying a file, especially hotspot files with high fanIn.
+
+### Hotspots — complexity ranking
+
+```bash
+graph --repo . --out draft/graph --query --mode hotspots
+```
+
+Output: `{hotspots[{id, module, lines, fanIn}]}`
+
+Optionally filter to a module: `--symbol <module_name>`
+
+### Modules — dependency overview with cycles
+
+```bash
+graph --repo . --out draft/graph --query --mode modules
+```
+
+Output: `{modules[], dependencies[], cycles[], summary{modules, edges, cycles, hub_modules[]}}`
+
+### Cycles — circular dependency detection
+
+```bash
+graph --repo . --out draft/graph --query --mode cycles
+```
+
+Output: `{cycles[], count, warning}`
+
+### Mermaid — generate diagram text from existing graph
+
+```bash
+# Both diagrams as markdown-ready fenced blocks (raw text output)
+graph --repo . --out draft/graph --query --mode mermaid
+
+# Specific diagram as JSON with metadata
+graph --repo . --out draft/graph --query --mode mermaid --symbol module-deps
+graph --repo . --out draft/graph --query --mode mermaid --symbol proto-map
+```
+
+**Output format split** — important for skills consuming this mode:
+
+| Invocation | Output format | Fields |
+|---|---|---|
+| No `--symbol` | Raw Markdown text | Fenced ` ```mermaid ``` ` blocks ready for injection into `.ai-context.md` |
+| `--symbol module-deps` | JSON | `{ mermaid: string, filtered: boolean, stats: { nodes, edges, totalNodes, totalEdges } }` |
+| `--symbol proto-map` | JSON | `{ mermaid: string, stats: { services, rpcs, modules } }` |
+
+Use the no-`--symbol` form for direct injection. Use `--symbol` forms when you need metadata (whether the diagram was filtered, edge counts) alongside the diagram text.
+
+Note: `draft/graph/module-deps.mermaid` and `draft/graph/proto-map.mermaid` are static files written only during a full graph build (`graph --repo`). Running `--query --mode mermaid` reads the current JSONL and is always current — prefer it over the static files.
+
+## Finding the Graph Binary
+
+The graph binary ships with the draft plugin. Detect it at runtime using the breadcrumb file written by `install.sh`, then fallback to known paths:
+
+```bash
+GRAPH_BIN=""
+
+# Method 1: .draft-install-path breadcrumb (written by install.sh)
+for breadcrumb in \
+    "$HOME/.cursor/plugins/local/draft/.draft-install-path" \
+    "$HOME/.claude-plugin/../.draft-install-path" \
+    ; do
+    if [ -f "$breadcrumb" ]; then
+        PLUGIN_ROOT="$(cat "$breadcrumb")"
+        if [ -x "$PLUGIN_ROOT/graph/bin/graph" ]; then
+            GRAPH_BIN="$PLUGIN_ROOT/graph/bin/graph"
+            break
+        fi
+    fi
+done
+
+# Method 2: search common install paths
+if [ -z "$GRAPH_BIN" ]; then
+    for candidate in \
+        "$HOME/.cursor/plugins/local/draft/graph/bin/graph" \
+        "$HOME/.claude/plugins/draft/graph/bin/graph" \
+        "graph/bin/graph" \
+        ; do
+        # "graph/bin/graph" only resolves when CWD is the plugin root
+        if [ -x "$candidate" ]; then
+            GRAPH_BIN="$candidate"
+            break
+        fi
+    done
+fi
+
+# Method 3: check PATH
+if [ -z "$GRAPH_BIN" ]; then
+    GRAPH_BIN="$(command -v graph 2>/dev/null || true)"
+fi
+```
+
+## Building the Graph
+
+Run during `draft:init` or manually:
+
+```bash
+"$GRAPH_BIN" --repo . --out draft/graph/
+```
+
+This analyzes C/C++, Go, Python, TypeScript/JS, and Proto source files. For Java/Rust/Ruby/Swift, universal-ctags is used if installed. Excludes generated files (`*.pb.*`, `*_generated*`), test files (`*_test.cc`, `*_test.go`), and vendored code.
+
+**Incremental rebuild** (skip unchanged modules):
+
+```bash
+"$GRAPH_BIN" --repo . --out draft/graph/ --incremental
+```
+
+Uses `hashes.json` to detect which modules changed (content-based SHA-256, not mtime). Only changed modules are re-extracted. Always-load files (module-graph, hotspots, call-index, schema) are always recomputed.
+
+## Graceful Degradation
+
+| Scenario | Behavior |
+|----------|----------|
+| No graph binary | Skip graph build in init; all skills proceed without graph data |
+| Graph binary but build fails | Warn and proceed; skills work without graph data |
+| `draft/graph/` exists | Load always-load files during context loading; use on-demand queries as needed |
+| Stale graph data | Graph data is still useful — structural changes are infrequent. Suggest re-running init to refresh. |
+
+</core-file>
+
+---
+
+## core/shared/parallel-analysis.md
+
+<core-file path="core/shared/parallel-analysis.md">
+
+# Parallel Analysis Protocol
+
+> Shared procedure for `draft:init`. Applies to tiers 3–5.
+> Tiers 1–2 use the Sequential Generation Protocol directly — no parallelism needed, and the IR bottleneck hurts depth more than parallelism helps speed at small scale.
+> Implements Map → IR+Prose → Reduce to cut wall clock by ~60% at XL tier while preserving deep per-module content.
+
+---
+
+## Architecture
+
+```
+Phase 1 (Map)    N parallel reader agents  bounded scope per agent (4 modules each)
+                 each agent reads          source files in its assigned modules
+                 each agent outputs        (A) IR JSON array  — structured metadata for tables/diagrams
+                                           (B) Markdown deep-dives — per-module prose (§7 sections)
+
+Phase 2 (Reduce) 1 synthesis agent         receives all IRs + all reader deep-dives
+                 assembles architecture.md by composing reader prose (§7) + deriving cross-cutting
+                                           sections from IR; targeted source reads for §6, §14, §15, §18
+                 context budget:           ~20K tokens (reader prose replaces need to re-read source)
+
+Phase 3 (Finalize) 2 parallel agents       .ai-context.md + .ai-profile.md
+                                           state files (facts.json, freshness.json, etc.)
+```
+
+The **Intermediate Representation (IR)** carries structured metadata — edges, enums, hotspots.
+The **Reader Deep-Dives** carry the prose that IR cannot express — mechanisms, rationale, operational detail.
+Both outputs are produced by the same reader agent in one pass; no extra source reads needed.
+
+---
+
+## IR Schema (language-agnostic)
+
+Each reader agent outputs a JSON array of objects matching this schema — one object per assigned module:
 
 ```json
 {
-  "jira_sync": {
-    "last_sync": "{ISO_TIMESTAMP}",
-    "ticket_key": "{JIRA_KEY}",
-    "synced_artifacts": ["spec.md", "plan.md"],
-    "comment_ids": ["12345", "12346"]
-  }
+  "module": "<module_name>",
+  "path": "<source_path_relative_to_repo_root>",
+  "role": "<1-sentence description of what this module does>",
+  "files_read": 12,
+  "token_budget_used": 420,
+
+  "key_classes": [
+    {
+      "name": "<ClassName or key type>",
+      "file": "<path>:<line>",
+      "pattern": "<facade|singleton|actor|factory|strategy|observer|coordinator>",
+      "public_methods": 14,
+      "state_protected_by": "<lock_name or null>"
+    }
+  ],
+
+  "state": [
+    {
+      "field": "<field_name>",
+      "type": "<type>",
+      "lock": "<lock_name or null>",
+      "persistence": "<PostgreSQL|Redis|file|memory|none>"
+    }
+  ],
+
+  "dependencies_out": ["<ModuleA>", "<ModuleB>"],
+  "dependencies_in":  ["<CallerA>", "<CallerB>"],
+
+  "invariants": [
+    "<rule that must always hold>",
+    "<another invariant>"
+  ],
+
+  "hotspots": ["<file>:<lines>L", "<file>:<lines>L"],
+
+  "extension_point": "<how to add new functionality to this module, or null>",
+
+  "state_machine": {
+    "states": ["STATE_A", "STATE_B"],
+    "transitions": [["STATE_A", "event", "STATE_B"]]
+  },
+
+  "error_handling": "<fail-closed|retry|propagate|circuit-breaker|ignore>",
+
+  "concurrency_model": "<single-threaded|async-await|mutex-lock|rwlock|actor-queue|goroutine-pool|thread-pool>"
 }
+```
+
+**Token budget per module in IR output: 400–600 tokens.**
+A module with 0 interesting state/concurrency/invariants still needs a valid IR — just shorter.
+
+**Reader deep-dive budget per module: minimum 1500 tokens, no upper limit.**
+This prose is the §7 deep-dive section — it must reflect actual source file content.
+Large modules with deep sub-module hierarchies (e.g., 500+ files with 5+ sub-modules) should produce 5000–10000+ tokens of prose covering ALL sub-modules at the same depth as top-level modules. The synthesis agent will paste this verbatim — do NOT abbreviate to save tokens.
+
+---
+
+## Module Reader Prompt Template
+
+Use this verbatim as the `prompt` field when spawning each reader agent via the `Agent` tool.
+Replace `{MODULE_LIST}`, `{REPO_ROOT}`, and `{GRAPH_DATA_SUMMARY}` before sending.
+
+```
+You are a module reader agent. You have two jobs for each assigned module:
+(A) Extract structured IR JSON — metadata for tables and diagrams
+(B) Write a full §7 deep-dive section in Markdown — prose the synthesis agent will paste verbatim into architecture.md
+
+ASSIGNED MODULES: {MODULE_LIST}
+Repository root: {REPO_ROOT}
+
+Graph context (use to prioritize which files to read):
+{GRAPH_DATA_SUMMARY}
+
+## Instructions
+
+For each assigned module:
+1. Read the module's directory structure (use Glob/LS)
+2. Read the top-3 hotspot files (highest complexity from graph data above)
+3. Read the interface/header or main entry file
+4. For modules with 200+ files, read at least 5 source files total
+5. Extract one IR JSON object matching the IR Schema below
+6. Write one Markdown deep-dive section matching the Deep-Dive Template below
+
+## IR Schema
+
+Output a JSON array after the "## IR" heading. Each element is one module:
+
+## IR
+[
+  {
+    "module": "<name>",
+    "path": "<source_path>",
+    "role": "<1-sentence>",
+    "files_read": <N>,
+    "key_classes": [{"name":"","file":"","pattern":"","public_methods":0,"state_protected_by":null}],
+    "state": [{"field":"","type":"","lock":null,"persistence":"memory"}],
+    "dependencies_out": [],
+    "dependencies_in": [],
+    "invariants": ["<invariant>"],
+    "hotspots": ["<file>:<lines>L"],
+    "extension_point": null,
+    "state_machine": {"states":[],"transitions":[]},
+    "error_handling": "propagate",
+    "concurrency_model": "single-threaded"
+  }
+]
+
+## Deep-Dives
+
+For each module, write a full Markdown section under the "## Deep-Dives" heading:
+
+#### 7.X {ModuleName}
+
+**Role**: One-line description grounded in what you actually read.
+
+**Source Files**:
+- `path/to/file` — what this file does
+
+**Sub-Module Structure**:
+| Sub-Module | Path | Files | Role |
+|------------|------|-------|------|
+| `name` | `path/` | N | description |
+
+**Responsibilities**:
+1. Concrete responsibility with detail from source
+2. (list ALL — no "etc.")
+
+**Key Operations / Methods**:
+| Op / Method | Signature | Description |
+|-------------|-----------|-------------|
+| `name` | `(input: Type) → ReturnType` | what it does |
+
+**State Machine** (if stateful):
+[Mermaid stateDiagram-v2]
+
+**Notable Mechanisms**:
+- Caching: describe policy from source
+- Retry: policy and backoff
+- (cover ALL non-trivial mechanisms)
+
+**Error Handling**: How this module handles and propagates errors.
+
+**Thread Safety**: Single-threaded / thread-safe / requires external synchronization.
+
+Then, for EACH sub-module within this module:
+
+##### 7.X.Y {ParentModule}/{SubModuleName} (if 50+ files — full deep-dive)
+
+**Role**: One-line description.
+
+**Source Files**:
+- `path/to/interface.h` — public API
+- `path/to/impl.cc` — primary implementation
+
+**Sub-Sub-Module Structure** (if nested directories exist):
+| Sub-Directory | Path | Files | Role |
+|---------------|------|-------|------|
+
+**Responsibilities**:
+1. Concrete responsibility unique to this sub-module
+2. (list ALL)
+
+**Key Operations / Methods**:
+| Op / Method | Signature | Description |
+|-------------|-----------|-------------|
+| (at least 5 entries with real data) | | |
+
+**Interaction with Sibling Sub-Modules**:
+- Calls `sibling/` for {purpose}
+- Called by `sibling/` when {trigger}
+
+**State Machine** (if stateful): [Mermaid stateDiagram-v2]
+
+**Notable Mechanisms**: {specific to this sub-module}
+
+**Error Handling**: How errors propagate within this sub-module.
+
+##### 7.X.Y {ParentModule}/{SubModuleName} (if 10-49 files — summary)
+
+**Role**: 2-3 sentence description.
+
+**Key Operations**:
+| Op / Method | Source File | Description |
+|-------------|-------------|-------------|
+| (at least 5 entries) | | |
+
+**Key Interface** (code snippet from actual source, 10-20 lines)
+
+##### 7.X.Y {ParentModule}/{SubModuleName}/ops — Operation Catalog (for ops/handler dirs)
+
+| # | Operation | Source File | Lines | Description |
+|---|-----------|-------------|-------|-------------|
+| (enumerate ALL — no sampling) | | | | |
+
+---
+
+## Constraints
+
+- IR: max 600 tokens per module; null unknown fields; never omit keys.
+- Deep-dive: minimum 150 lines per top-level module (250+ for modules with 200+ files). No upper limit.
+- Deep-dive prose MUST reflect actual source file content — not graph metadata alone.
+- Sub-modules with 50+ files MUST get their own ##### subsection with the SAME depth as top-level modules (role, source files, responsibilities, key ops table, state machine, mechanisms, error handling). There is NO page limit — produce as much content as the codebase warrants.
+- Sub-modules with 10-49 files MUST get a ##### subsection with summary (role, key ops table, code snippet).
+- Ops/handler directories MUST get a numbered catalog table enumerating ALL operations.
+- Do NOT read files outside your assigned modules.
+- If a field is unknown in IR, use null or empty array.
 ```
 
 ---
 
-## Failure Handling
+## Synthesis Coordinator Prompt Template
 
-Jira sync is a **non-blocking** operation. Failures must never break the parent skill.
+Use this as the prompt for the single synthesis agent in Phase 2.
+Replace `{CONCATENATED_IRS}`, `{GRAPH_DEPENDENCY_DIAGRAM}`, and `{ARCHITECTURE_TEMPLATE_STRUCTURE}`.
 
-1. **Don't fail the parent skill** — If Jira sync fails, log the error and continue. The Draft workflow takes priority over Jira bookkeeping.
+```
+You are the synthesis agent. Your job is to assemble draft/architecture.md from reader outputs.
 
-2. **Save to queue** — On failure, write the pending sync operation to `draft/.state/.jira-sync-queue.json`:
+## Inputs
 
-```json
-{
-  "queue": [
-    {
-      "timestamp": "{ISO_TIMESTAMP}",
-      "ticket_key": "{JIRA_KEY}",
-      "action": "add_comment",
-      "payload": "[draft] spec-created: Authentication flow spec with 5 acceptance criteria",
-      "error": "MCP connection timeout",
-      "retries": 0
-    }
-  ]
-}
+Reader deep-dive sections (Markdown prose, one §7.X block per module):
+{CONCATENATED_DEEP_DIVES}
+
+IR summaries for all modules (structured metadata):
+{CONCATENATED_IRS}
+
+Module dependency diagram (from graph binary):
+{GRAPH_DEPENDENCY_DIAGRAM}
+
+Architecture template structure to follow:
+{ARCHITECTURE_TEMPLATE_STRUCTURE}
+
+## Your Role
+
+You are a composer, not an analyst. Readers already did the source analysis.
+Your job:
+1. Paste reader deep-dives verbatim into Section 7 — do not rewrite them, do not summarize them.
+2. Derive cross-cutting sections from IR fields (edges, enums, invariants).
+3. Read source directly for sections that require it (see policy below).
+
+## CRITICAL: Template Compliance
+
+Your output MUST follow the EXACT numbered section structure from {ARCHITECTURE_TEMPLATE_STRUCTURE}.
+- Use the EXACT section numbers: ## 1. Executive Summary, ## 2. AI Agent Quick Reference, ## 3. System Identity & Purpose, ... through ## 28. Glossary, then Appendix A–E.
+- Do NOT create custom/freeform sections. Do NOT rename sections. Do NOT skip section numbers.
+- Do NOT collapse multiple template sections into one. Do NOT invent new section names.
+- Every section from the template must appear in your output — if a section does not apply, write the heading and state "N/A — {reason}" beneath it.
+- Sub-modules within Section 7 MUST get the SAME depth of analysis as top-level modules. A sub-module with 50+ files gets a full deep-dive (role, responsibilities, key ops table, state machine, mechanisms). There is no page limit — if the codebase has 14 modules each with 5 sub-modules, Section 7 alone may be 50+ pages. That is correct and expected.
+
+## Source Reading Policy
+
+Read source files for these sections — IR and reader prose are insufficient:
+- §6 Data Flow — read entry-point and pipeline files to trace actual data movement
+- §12 API Definitions — read route/handler files for endpoint enumeration
+- §14 Integration Points — read adapter/client files for external dependency detail
+- §15 Critical Invariants — verify invariants[] from IR against actual source assertions
+- §18 Key Design Patterns — read 3–5 implementation files for concrete pattern examples
+- §22 Configuration — read config/settings files for the configuration catalog
+
+For all other sections (§1–5, §8–11, §13, §16–17, §19–21, §23–28, appendices):
+derive from IR fields and reader deep-dives. Do not read source files for these.
+
+## What to Derive from IR
+
+- Component map (§4): use dependencies_out + dependencies_in edges across all IRs
+- Concurrency model (§8): collect concurrency_model + state[].lock fields
+- Extension points (§9): collect extension_point fields
+- State machines (§10): collect state_machine fields across IRs
+- Error handling patterns (§17): collect error_handling fields
+- Hotspot catalog (§appendix): collect hotspots[] fields
+
+## Output
+
+Write the full draft/architecture.md following the standard 28-section template.
+Begin immediately with the YAML frontmatter, then Section 1. Do not explain your plan first.
+Section 7 must contain the reader deep-dives in full — paste them, don't summarize.
+
+MANDATORY output structure (in this exact order):
+1. YAML frontmatter (---project/git metadata---)
+2. # Architecture: {PROJECT_NAME}
+3. ## Table of Contents (numbered 1-28 + Appendices A-E)
+4. ## 1. Executive Summary
+5. ## 2. AI Agent Quick Reference
+6. ## 3. System Identity & Purpose
+7. ## 4. Architecture Overview (with 4.1 High-Level Topology diagram, 4.2 Process Lifecycle, 4.3 Initialization Sequence diagram, 4.4 Module Dependency Graph slot)
+8. ## 5. Component Map & Interactions (with 5.1 Orchestrator table, 5.2 DI Pattern, 5.3 Interaction Matrix)
+9. ## 6. Data Flow — End to End (3-5 SEPARATE diagrams, each 15+ lines of Mermaid)
+10. ## 7. Core Modules Deep Dive (reader deep-dives pasted verbatim — one #### per module, ##### per sub-module; sub-modules get SAME depth as modules)
+11. ## 8. Concurrency Model & Thread Safety (thread pool table, locking strategy, execution topology diagram)
+12. ## 9. Framework & Extension Points (plugin types table, registry mechanism, core interfaces with REAL code)
+13. ## 10. Full Catalog of Implementations (numbered tables — enumerate ALL, no sampling)
+14. ## 11–28: All remaining sections per template
+15. ## Appendix A–E: All appendices per template
+
+Do NOT produce freeform sections like "## Module deep-dive: X" or "## Key architectural patterns".
+Every section heading MUST match the template numbering exactly.
 ```
 
-3. **Retry on next connection** — When the next Draft skill runs and Jira MCP is available, flush the queue before proceeding with new sync operations. Retry each queued item once. If it fails again, leave it in the queue with `retries` incremented.
+---
+
+## Tier-Adaptive Agent Counts
+
+| Tier | Label  | Reader Agents                  |
+|------|--------|--------------------------------|
+| 1    | micro  | 1 (all modules)                |
+| 2    | small  | 1–2                            |
+| 3    | medium | ceil(M/6)                      |
+| 4    | large  | ceil(M/4)                      |
+| 5    | XL     | ceil(M/4)                      |
+
+For tier 1–2, skip parallelism — one reader agent handles all modules sequentially.
+
+---
+
+## Dependency-Aware Module Grouping
+
+When assigning modules to reader agents (tier 3+), apply this priority ordering:
+
+```
+Rule 1: Assign high fan-in modules to separate readers
+        (modules with many callers produce IRs that many other IRs reference)
+
+Rule 2: Co-locate modules with shared dependencies in the same reader
+        (reader already has context about the dependency → richer IR)
+
+Rule 3: Separate state-heavy modules from stateless utilities
+        (state-heavy modules produce larger IRs; balance reader token budgets)
+
+Rule 4: Use tier table above for modules-per-agent target
+```
+
+Example grouping heuristic (adapt to actual fan-in data from graph):
+```
+reader_A: [highest fan-in module alone]       — never share high-fan-in with others
+reader_B: [coupled pair: module_X + module_Y] — modules that call each other
+reader_C: [data layer modules]                — shared persistence/cache modules together
+reader_D: [consumer/feature modules]          — modules that call many others
+reader_E: [infra/bootstrap modules]           — low fan-in, foundational
+```
+
+---
+
+## Failure Modes and Recovery
+
+### Reader produces prose instead of IR
+**Detection:** Output doesn't start with `[` or fails JSON.parse.
+**Recovery:** Retry that reader with stricter constraint:
+```
+RETRY INSTRUCTION: Your previous output was not valid JSON. Output ONLY the JSON array.
+The first character of your response MUST be `[`. No preamble. No explanation.
+```
+**Fallback:** If retry fails, run those modules through the standard sequential analysis.
+
+### IR is too sparse AND deep-dive is too short
+**Detection:** IR `token_budget_used < 150` for a module with >20 files AND deep-dive < 100 lines.
+**Recovery:** Re-run that reader with explicit instruction to read more source files and expand the deep-dive.
+If only the IR is sparse but the deep-dive is substantive, no action needed — prose is the primary output.
+
+### Synthesis agent re-reads source outside policy
+**Detection:** Tool calls to Read for files not in the permitted-sections list during synthesis.
+**Prevention:** The synthesis prompt lists exactly which sections permit source reads. Outside those, synthesis derives from reader prose and IR.
+
+### One reader agent fails entirely
+**Detection:** Agent returns error or times out.
+**Recovery:** Run the failed module group through standard sequential analysis.
+The other readers' IRs are still valid — only the failed group needs re-work.
+This is the blast-radius advantage over single-agent: a reader failure is a partial retry.
+
+---
+
+## Token Budget Model
+
+```
+Phase 1 readers (parallel, ceil(M/4) agents):
+  Per agent:     4 modules × ~4K source tokens = ~16K input
+                 IR output: ~2K tokens/agent
+                 Deep-dive output: ~8K tokens/agent (4 modules × ~2K prose each)
+                 Total per agent: ~26K
+
+  Total Phase 1: ceil(M/4) agents × 26K (parallel — wall clock = slowest reader)
+
+Phase 2 synthesis:
+  Input:         N modules × ~450 IR tokens + N modules × ~2K prose tokens + 4K instructions
+                 ≈ 20K context at XL tier (vs 60K+ for raw source re-reads)
+  Output:        §7 paste (from readers) + cross-cutting sections ≈ 30K output tokens
+  Total:         ~50K tokens
+
+Phase 3 finalizers (parallel, 2 agents):
+  ~20K tokens total
+
+vs single-agent baseline:
+  ~350K source read tokens + ~34K generation = ~384K total
+  ~50 min wall clock
+
+Savings at XL tier: ~50% fewer tokens, ~55% faster wall clock
+Depth vs single-agent: equivalent (readers read the same source; synthesis composes from prose)
+```
 
 </core-file>
 
@@ -15867,6 +15788,22 @@ Run `draft learn promote` to review candidates.
 ## core/templates/intake-questions.md
 
 <core-file path="core/templates/intake-questions.md">
+
+---
+project: "{PROJECT_NAME}"
+module: "{MODULE_NAME or 'root'}"
+generated_by: "draft:new-track"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
 
 # Intake Questions
 
@@ -16024,7 +15961,7 @@ Structured questions for track creation. **Ask ONE question at a time.** Wait fo
 > "How does this fit with the current architecture?"
 
 **After response, contribute:**
-- Cross-reference .ai-context.md (or architecture.md) for integration points
+- Cross-reference `draft/.ai-context.md` (or `draft/architecture.md`) for integration points
 - Identify affected modules/components
 - Reference: Clean Architecture boundaries, module coupling
 - Flag: "This will touch [modules]. Consider [integration pattern]..."
@@ -16100,7 +16037,7 @@ Structured questions for track creation. **Ask ONE question at a time.** Wait fo
 
 **After response, contribute:**
 - List implicit assumptions explicitly
-- Fact-check against tech-stack.md and .ai-context.md
+- Fact-check against `draft/tech-stack.md` and `draft/.ai-context.md`
 - Reference: Pre-mortem technique
 - "I'm assuming [X]. If that's wrong, [consequence]..."
 
@@ -16291,7 +16228,8 @@ synced_to_commit: "{FULL_SHA}"
 
 # {PROJECT_NAME} Context Map
 
-> Self-contained AI context. 200-400 lines. Token-optimized.
+> Self-contained AI context. Budget: {TIER_MIN}–{TIER_MAX} lines (tier {N}: {LABEL}).
+> Graph metrics: M={modules} F={functions} P={proto_rpcs} E={include_edges}
 > This file must stand alone — no references to architecture.md or source files needed.
 
 | Field | Value |
@@ -16318,12 +16256,62 @@ synced_to_commit: "{FULL_SHA}"
 
 ```
 {project_root}/
-├── {dir1}/           ← {5-10 word description}
-│   ├── {subdir}/     ← {description}
-│   └── {file}        ← {description}
-├── {dir2}/           ← {description}
-└── {dir3}/           ← {description}
+├── {module1}/              ← {5-10 word description}
+│   ├── {submod1}/          ← {description} ({Ncc} cc, {Nh} h)
+│   │   └── ops/            ← {description} ({N} operations)
+│   ├── {submod2}/          ← {description}
+│   └── {shared}/           ← {description}
+├── {module2}/              ← {description}
+│   ├── {submod}/           ← {description}
+│   └── {submod}/           ← {description}
+└── {module3}/              ← {description}
 ```
+
+> Include immediate sub-directories for all major modules (not just top-level).
+> Use graph data (`draft/graph/modules/*.jsonl`) for exhaustive sub-module enumeration.
+> Show file counts per sub-module to indicate relative size/importance.
+
+## GRAPH:MODULES
+
+{module}|{sizeKB}KB|go:{N},proto:{N} → {dep1},{dep2}
+...
+
+> One row per module ordered by sizeKB descending. Omit for tier-1 codebases (≤5 modules) where Component Graph is sufficient.
+
+## GRAPH:HOTSPOTS
+
+{file_path}|{lines}L|fanIn:{N}
+...
+
+> Top 10 files by score (lines + fanIn×50). Always include all tiers.
+
+## GRAPH:CYCLES
+
+None ✓
+
+> Or: list cycle paths e.g. "auth → storage → auth". Always include — absence is signal.
+
+## GRAPH:MODULE-HOTSPOTS
+
+{module}:  {file}|{lines}L|fanIn:{N}
+           {file}|{lines}L|fanIn:{N}
+           {file}|{lines}L|fanIn:{N}
+
+> Top 3 hotspot files per module by score (lines + fanIn×50). Tier ≥ 3 only. Omit for tier 1–2.
+> Tells agents which files in a specific module carry the most change risk.
+
+## GRAPH:FAN-IN
+
+{module}|fanIn:{N}|callers:{caller1},{caller2}
+
+> Modules ordered by incoming dependency count descending. Tier ≥ 3 only.
+> High fanIn = high change risk — modifications propagate to many callers.
+
+## GRAPH:PROTO-MAP
+
+{ServiceName}: {rpc}({RequestType}) → {ResponseType} @{file}
+
+> One line per RPC, grouped by service. Present only when proto_rpcs > 0. Omit entirely for non-proto codebases.
 
 ## Dependency Injection / Wiring
 
@@ -16488,6 +16476,55 @@ interface {ServiceName} {
 
 ---
 
+## core/templates/ai-profile.md
+
+<core-file path="core/templates/ai-profile.md">
+
+---
+project: "{PROJECT_NAME}"
+module: "{MODULE_NAME or 'root'}"
+generated_by: "draft:{COMMAND_NAME}"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH or 'none'}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: {true|false}
+synced_to_commit: "{FULL_SHA}"
+---
+
+# {PROJECT_NAME} Profile
+
+## Stack
+- Language: {LANGUAGE}
+- Framework: {FRAMEWORK}
+- Database: {DATABASE}
+- Auth: {AUTH_METHOD}
+- API: {API_STYLE}
+- Testing: {TEST_FRAMEWORK}
+- Deploy: {DEPLOY_TARGET}
+- Build: {BUILD_COMMAND}
+- Entry: {ENTRY_POINT}
+
+## INVARIANTS
+{Top 3-5 critical invariants from .ai-context.md, one per line, with file:line refs}
+
+## NEVER
+{2-3 safety rules — things that must never happen}
+
+## Active Tracks
+{List of active track IDs and one-line descriptions, or "none"}
+
+## Recent Changes
+{Last 3-5 significant commits or changes, one per line}
+
+</core-file>
+
+---
+
 ## core/templates/architecture.md
 
 <core-file path="core/templates/architecture.md">
@@ -16506,12 +16543,36 @@ git:
   commit_message: "{COMMIT_MESSAGE}"
   dirty: false
 synced_to_commit: "{FULL_SHA}"
+
+# Classification — drives which sections are Required vs skippable.
+# Do not leave placeholders. If unknown, ask during draft:init interview.
+classification:
+  project_type: "{library | cli | service | batch | monolith | distributed | plugin}"
+  criticality: "{low | standard | high | mission-critical}"
+  data_classification: "{public | internal | confidential | regulated}"
+  compliance: ["{SOC2 | HIPAA | PCI-DSS | GDPR | FedRAMP | ISO27001 | none}"]
+  change_policy: "{codeowner-review | two-reviewer | architecture-board}"
+
+# Ownership — enterprise accountability. Populate from CODEOWNERS / docs / interview.
+ownership:
+  codeowners_file: "{path-to-CODEOWNERS or 'none'}"
+  primary_owners: ["{team-or-person}"]
+  security_contact: "{email-or-channel-or-'N/A'}"
+  oncall: "{pagerduty/opsgenie URL or 'none'}"
+
+# Verification — stamped by draft:init at render time.
+verification:
+  citations_verified: "{true | false | unchecked}"
+  staleness_hash: "{sha256 of tracked source set at synced_to_commit}"
+  graph_schema_version: "{semver or 'absent'}"
 ---
 
 # Architecture: {PROJECT_NAME}
 
-> Comprehensive human-readable engineering reference.
+> Enterprise, mission-critical-grade engineering reference.
 > For token-optimized AI context, see `draft/.ai-context.md`.
+> Structure is fixed at 28 sections + 5 appendices. Graph data enriches — it does not replace — this structure.
+> This document is generation-disciplined: read the **Generation Contract** below before authoring any section.
 
 | Field | Value |
 |-------|-------|
@@ -16519,688 +16580,1283 @@ synced_to_commit: "{FULL_SHA}"
 | **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
 | **Generated** | {ISO_TIMESTAMP} |
 | **Synced To** | `{FULL_SHA}` |
+| **Criticality** | `{classification.criticality}` |
+| **Data Class** | `{classification.data_classification}` |
+
+---
+
+## Generation Contract (read first)
+
+Every agent or human editor of this file MUST observe the following rules. Violations are completeness failures.
+
+### Sources
+
+Every `##` heading carries a `Source:` marker. Author content only from that source:
+
+| Source | Meaning | Who writes it |
+|---|---|---|
+| `graph` | Rendered from `draft/graph/` between `<!-- GRAPH:*:START/END -->` fences | `draft:init` render pass, not the LLM |
+| `manifest` | Extracted deterministically from `package.json` / `go.mod` / `Cargo.toml` / `requirements.txt` / `pom.xml` / Bazel `BUILD` / `pyproject.toml` | Scanner, not the LLM |
+| `code-scan` | Deterministic scan (file tree, CODEOWNERS, OpenAPI, `.proto`, config parsers) | Scanner, not the LLM |
+| `user-input` | Captured during `draft:init` interview; never inferred from code | User, captured verbatim |
+| `llm-synthesis` | Narrative from reading code. Word budget is mandatory | LLM, bounded |
+
+### Absence is signal
+
+There are **no quotas** in this template. Do not pad to hit a count. If a section does not apply:
+
+```
+N/A — reason: {one-sentence justification referencing classification or codebase facts}.
+```
+
+Examples:
+- `N/A — reason: project_type == 'library'; no HTTP surface.`
+- `N/A — reason: single-threaded CLI; no concurrency primitives in use.`
+- `N/A — reason: no proto/OpenAPI/GraphQL definitions present in repository.`
+
+### Citations
+
+Every `path:line` reference must resolve at `synced_to_commit`. If a citation cannot be verified (file moved, line out of range, commit unknown), write it as:
+
+```
+[unverified] path/to/file.ext:123
+```
+
+`draft:init` runs a post-generation verification pass that rewrites unresolved citations to this form. Do not attempt to guess or invent locations.
+
+### Word budgets
+
+Every `llm-synthesis` section carries a hard word cap. Exceeding the cap is a failure, not a feature. Cut to fit; do not expand neighbor sections to compensate.
+
+### Classification gates
+
+Each section declares `Required:` at one of four levels:
+- `always` — every codebase, every run. Cannot be N/A.
+- `standard+` — required when `criticality ∈ {standard, high, mission-critical}`.
+- `high+` — required when `criticality ∈ {high, mission-critical}`.
+- `mission-critical` — required only at that criticality.
+
+Sections below the declared level MAY be N/A with reason; sections at or above MUST be populated.
+
+### Do not regenerate untouched sections
+
+If a section's source set (the files or graph tables it depends on) has not changed since the last run, leave the section byte-identical. `draft/.state/freshness.json` records per-section hashes. Re-derivation without source change is the single largest cause of cross-model divergence and is prohibited.
+
+### Section metadata block
+
+Every `##` heading is immediately followed by:
+
+```
+> **Source:** <one of the 5 sources above>
+> **Required:** always | standard+ | high+ | mission-critical
+> **Length:** rendered | ≤N words | ≤N rows | table | N/A
+> **N/A when:** {precise, machine-checkable condition}
+> **Verification:** graph-fence | citation-check | schema-check | manifest-diff | none
+```
 
 ---
 
 ## Table of Contents
 
 1. [Executive Summary](#1-executive-summary)
-2. [System Identity & Purpose](#2-system-identity--purpose)
-3. [Architecture Overview](#3-architecture-overview)
-4. [Component Map & Interactions](#4-component-map--interactions)
-5. [Data Flow — End to End](#5-data-flow--end-to-end)
-6. [Core Modules Deep Dive](#6-core-modules-deep-dive)
-7. [Concurrency Model & Thread Safety](#7-concurrency-model--thread-safety)
-8. [Framework & Extension Points](#8-framework--extension-points)
-9. [Full Catalog of Implementations](#9-full-catalog-of-implementations)
-10. [API & Interface Definitions](#10-api--interface-definitions)
-11. [External Dependencies](#11-external-dependencies)
-12. [Cross-Module Integration Points](#12-cross-module-integration-points)
-13. [Critical Invariants & Safety Rules](#13-critical-invariants--safety-rules)
-14. [Security Architecture](#14-security-architecture)
-15. [Observability & Telemetry](#15-observability--telemetry)
-16. [Error Handling & Failure Modes](#16-error-handling--failure-modes)
-17. [State Management & Persistence](#17-state-management--persistence)
-18. [Key Design Patterns](#18-key-design-patterns)
-19. [Configuration & Tuning](#19-configuration--tuning)
-20. [Performance Characteristics & Hot Paths](#20-performance-characteristics--hot-paths)
-21. [How to Extend — Step-by-Step Cookbooks](#21-how-to-extend--step-by-step-cookbooks)
-22. [Build System & Development Workflow](#22-build-system--development-workflow)
-23. [Testing Infrastructure](#23-testing-infrastructure)
-24. [Known Technical Debt & Limitations](#24-known-technical-debt--limitations)
-25. [Glossary](#25-glossary)
+2. [AI Agent Quick Reference](#2-ai-agent-quick-reference)
+3. [System Identity & Purpose](#3-system-identity--purpose)
+4. [Architecture Overview](#4-architecture-overview)
+5. [Component Map & Interactions](#5-component-map--interactions)
+6. [Data Flow — End to End](#6-data-flow--end-to-end)
+7. [Core Modules Deep Dive](#7-core-modules-deep-dive)
+8. [Concurrency Model & Thread Safety](#8-concurrency-model--thread-safety)
+9. [Framework & Extension Points](#9-framework--extension-points)
+10. [Full Catalog of Implementations](#10-full-catalog-of-implementations)
+11. [Secondary Subsystem (V2 / Redesign)](#11-secondary-subsystem-v2--redesign)
+12. [API & Interface Definitions](#12-api--interface-definitions)
+13. [External Dependencies](#13-external-dependencies)
+14. [Cross-Module Integration Points](#14-cross-module-integration-points)
+15. [Critical Invariants & Safety Rules](#15-critical-invariants--safety-rules)
+16. [Security Architecture](#16-security-architecture)
+17. [Observability & Telemetry](#17-observability--telemetry)
+18. [Error Handling & Failure Modes](#18-error-handling--failure-modes)
+19. [State Management & Persistence](#19-state-management--persistence)
+20. [Reusable Modules for Future Projects](#20-reusable-modules-for-future-projects)
+21. [Key Design Patterns](#21-key-design-patterns)
+22. [Configuration & Tuning](#22-configuration--tuning)
+23. [Performance Characteristics & Hot Paths](#23-performance-characteristics--hot-paths)
+24. [How to Extend — Step-by-Step Cookbooks](#24-how-to-extend--step-by-step-cookbooks)
+25. [Build System & Development Workflow](#25-build-system--development-workflow)
+26. [Testing Infrastructure](#26-testing-infrastructure)
+27. [Known Technical Debt & Limitations](#27-known-technical-debt--limitations)
+28. [Glossary](#28-glossary)
 - [Appendix A: File Structure Summary](#appendix-a-file-structure-summary)
 - [Appendix B: Data Source → Implementation Mapping](#appendix-b-data-source--implementation-mapping)
 - [Appendix C: Output Flow — Implementation to Target](#appendix-c-output-flow--implementation-to-target)
 - [Appendix D: Mermaid Sequence Diagrams — Critical Flows](#appendix-d-mermaid-sequence-diagrams--critical-flows)
+- [Appendix E: Proto Service Map (graph-derived)](#appendix-e-proto-service-map-graph-derived)
 
 ---
 
 ## 1. Executive Summary
 
-{One paragraph describing what the module IS, what it DOES, and its role in the larger system.}
+> **Source:** llm-synthesis
+> **Required:** always
+> **Length:** ≤200 words
+> **N/A when:** never
+> **Verification:** citation-check
 
-**Key Facts:**
-- **Language**: {e.g., TypeScript 5.3}
-- **Entry Point**: `{file}` → `{function}`
-- **Architecture Style**: {e.g., Hexagonal, MVC, Microservice}
-- **Component Count**: {N major components}
-- **Primary Data Sources**: {databases, queues, APIs this reads from}
-- **Primary Action Targets**: {databases, services, files this writes to}
+One paragraph, plain prose, no bullets. State what the system IS, what it DOES, and its role. Open with a single sentence that would stand alone as the whole summary if truncated. No marketing language.
 
----
+**Key Facts** (exactly these rows, fill or mark N/A):
 
-## 2. System Identity & Purpose
-
-### What {PROJECT_NAME} Does
-
-1. {Core responsibility 1}
-2. {Core responsibility 2}
-3. {Core responsibility 3}
-
-### Why {PROJECT_NAME} Exists
-
-{Paragraph explaining the business/system problem it solves, including what would go wrong without it. Frame in terms of data integrity, performance, compliance, operational safety, or user experience.}
+| Field | Value |
+|-------|-------|
+| Language & Version | {e.g., TypeScript 5.3} |
+| Entry Point | `{path:line}` → `{symbol}` |
+| Architecture Style | {Hexagonal / Layered / Microservice / Pipeline / Actor / N/A} |
+| Component Count | {integer from graph} |
+| Primary Data Sources | {databases, queues, APIs read from — or N/A} |
+| Primary Action Targets | {databases, services, files written to — or N/A} |
+| Deployment Model | {binary / container / lambda / library artifact / daemon / N/A} |
 
 ---
 
-## 3. Architecture Overview
+## 2. AI Agent Quick Reference
 
-### 3.1 High-Level Topology
+> **Source:** code-scan + manifest + user-input
+> **Required:** always
+> **Length:** table, fixed rows
+> **N/A when:** never
+> **Verification:** citation-check + manifest-diff
 
-{Paragraph introducing the architecture and its key design decisions.}
+Compact block optimized for agent context loading. Every field populated or explicit "N/A".
 
-```mermaid
-flowchart TD
-    subgraph Presentation["Presentation Layer"]
-        A["{Component A}"]
-        B["{Component B}"]
-    end
-    subgraph Logic["Business Logic"]
-        C["{Service A}"]
-        D["{Service B}"]
-    end
-    subgraph Data["Data Layer"]
-        E["{Repository}"]
-        F[("Database")]
-    end
-    subgraph External["External Services"]
-        G["{External API}"]
-    end
-
-    A --> C
-    B --> D
-    C --> E
-    D --> E
-    E --> F
-    C --> G
+```
+Module              : {PROJECT_NAME}
+Root Path           : ./
+Language            : {e.g., Go 1.21, Python 3.12, TypeScript 5.3}
+Build               : {exact command, e.g., `bazel build //path:target`, `npm run build`}
+Test                : {exact command, e.g., `pytest -q`, `go test ./...`}
+Entry Point         : {file:line → symbol}
+Config System       : {gflags / .env + YAML / Viper / Spring / environment / N/A}
+Extension Point     : {interface + registration site — or N/A}
+API Definition      : {path to .proto / OpenAPI / GraphQL — or N/A}
+Key Config Prefix   : {MODULE_* env / module.* YAML / --module-* CLI — or N/A}
+CODEOWNERS          : {path — or "none"}
+Security Contact    : {from ownership block}
+On-Call             : {from ownership block — or "none"}
 ```
 
-### 3.2 Process Lifecycle
+**Before Making Changes, Always:**
 
-{For services: startup to steady state. For libraries: import to teardown. For CLI: args to exit.}
+1. {Primary invariant check — the #1 thing that must not break, citing §15 entry}
+2. {Thread-safety / async-safety consideration — or "single-threaded — no concerns"}
+3. {Test command to run after changes — copy from `Test` row above}
+4. {API / schema versioning rule — or "N/A"}
 
-1. **Startup**: {description}
-2. **Initialization**: {description}
-3. **Ready**: {description}
-4. **Steady State**: {description}
-5. **Shutdown**: {description}
+**Never:**
+
+- {Critical safety rule 1 — cite §15 or §16}
+- {Critical safety rule 2}
+- {Critical safety rule 3}
+
+List exactly the rules that apply. If fewer than three apply, list fewer. Do not pad.
 
 ---
 
-## 4. Component Map & Interactions
+## 3. System Identity & Purpose
 
-### 4.1 Top-Level Orchestrator
+> **Source:** user-input
+> **Required:** always
+> **Length:** ≤300 words
+> **N/A when:** never
+> **Verification:** none
 
-{One sentence describing the main controller/manager/app class.}
+Captured during `draft:init` interview. Do not infer purpose or business rationale from code — ask the user.
 
-| Component | Type | Purpose |
-|-----------|------|---------|
-| `{name}` | `{class}` | {purpose} |
+**What this system IS** (≤60 words).
 
-### 4.2 Dependency Injection Pattern
+**What this system DOES** (≤60 words, bullet list of top-level capabilities).
 
-{Paragraph describing how components reference each other: constructor injection, service locator, module system, DI container, etc.}
+**Who uses it** (≤40 words — internal teams / external customers / automated systems).
 
-### 4.3 Interaction Matrix
+**Non-Goals** (explicit list; what this system will not do, to prevent scope creep).
 
-| | Component A | Component B | Component C |
+**Upstream producers** (systems that send data or requests into this one — or N/A).
+
+**Downstream consumers** (systems that receive data or requests from this one — or N/A).
+
+---
+
+## 4. Architecture Overview
+
+> **Source:** llm-synthesis + graph
+> **Required:** always
+> **Length:** ≤400 words + one Mermaid diagram
+> **N/A when:** never
+> **Verification:** graph-fence (topology)
+
+### 4.1 High-Level Topology
+
+<!-- GRAPH:module-topology:START -->
+<!-- Rendered by draft:init. If absent, emit:
+     N/A — reason: graph artifacts not present. Run 'draft init' or 'graph --repo . --out draft/graph' to populate. -->
+<!-- GRAPH:module-topology:END -->
+
+### 4.2 Narrative
+
+≤400 words describing the topology in prose. Name the architectural style (hexagonal, layered, pipeline, actor, event-driven, plugin-host, monorepo, polyrepo) and justify from observable evidence (directory structure, dep graph, call boundaries).
+
+### 4.3 Lifecycle Model
+
+Choose one applicable model and fill only its rows. Delete rows that do not apply; do not force-fit.
+
+| Model | Phases | Describe only if applicable |
+|---|---|---|
+| Long-running service | startup → ready → steady-state → drain → shutdown | |
+| Short-lived CLI | parse-args → execute → exit | |
+| Batch/ETL | trigger → extract → transform → load → ack | |
+| Library | no lifecycle — N/A | |
+| Actor/reactive | spawn → receive → handle → terminate | |
+
+---
+
+## 5. Component Map & Interactions
+
+> **Source:** graph
+> **Required:** always
+> **Length:** rendered
+> **N/A when:** never (graph absent → explicit N/A with reason)
+> **Verification:** graph-fence
+
+### 5.1 Module Dependency Graph
+
+<!-- GRAPH:module-deps:START -->
+<!-- Rendered from draft/graph/module-graph.jsonl (nodes + edges).
+     Emits Mermaid graph + dependency matrix. No LLM prose inside fence. -->
+<!-- GRAPH:module-deps:END -->
+
+### 5.2 Component Interaction Matrix
+
+<!-- GRAPH:integration-edges:START -->
+<!-- Rendered matrix: rows = source module, cols = target module, cells = edge kind
+     (calls / imports / emits-event / reads-schema). -->
+<!-- GRAPH:integration-edges:END -->
+
+### 5.3 Boundary Types
+
+A short table listing the interaction kinds present. Rendered from graph edge taxonomy.
+
+| Boundary Kind | Count | Example |
+|---|---|---|
+| in-process call | {n} | `moduleA.Foo` → `moduleB.Bar` |
+| inter-process RPC | {n} | {service → service} |
+| async message | {n} | {producer → topic → consumer} |
+| shared database | {n} | {table} |
+
+---
+
+## 6. Data Flow — End to End
+
+> **Source:** llm-synthesis + graph
+> **Required:** standard+
+> **Length:** ≤500 words + 1–N diagrams (no minimum)
+> **N/A when:** criticality == low AND no external data ingress/egress
+> **Verification:** citation-check
+
+### 6.1 Primary Flow
+
+One Mermaid sequence diagram for the dominant request/job flow. Every actor named must map to a module in §5. Every arrow labeled with the call/message type.
+
+### 6.2 Flow Variants
+
+One diagram per variant that meaningfully differs (sync vs async, read vs write, happy vs error). Omit entirely if the system has only one flow — do not pad.
+
+### 6.3 Data Transformation Stages
+
+Table only if the system has explicit transformation stages (ETL, pipeline, compiler). Otherwise omit.
+
+| Stage | Input Shape | Transform | Output Shape | Implementation `path:line` |
+|---|---|---|---|---|
+
+---
+
+## 7. Core Modules Deep Dive
+
+> **Source:** graph + llm-synthesis
+> **Required:** always
+> **Length:** ≤300 words per module narrative; enumerate every module the graph emits
+> **N/A when:** never
+> **Verification:** graph-fence per module + citation-check
+
+For each module returned by `draft/graph/module-graph.jsonl`, emit a subsection with identical structure. Do not sample. Do not summarize. Every module that exists in the graph gets a slot.
+
+### 7.{N} {module-name}
+
+<!-- GRAPH:module-deep/{module-name}:START -->
+<!-- Rendered deterministic block: path, file count, public API list, fan-in, fan-out,
+     hotspot score, primary deps. No LLM prose inside fence. -->
+<!-- GRAPH:module-deep/{module-name}:END -->
+
+**Role** (≤40 words). What this module is responsible for.
+
+**Public Surface**. Enumerate every exported symbol from the graph's `public_api` table for this module. Format: `symbol_name (kind) — path:line`. No sampling.
+
+**Key Invariants** (cite §15 entries by number). If none apply, write `None.`
+
+**Sub-modules**. If the module has sub-directories with source files, recurse. Each sub-module gets the same structure at one heading level deeper. Depth is bounded by the graph, not by a page target.
+
+---
+
+## 8. Concurrency Model & Thread Safety
+
+> **Source:** llm-synthesis
+> **Required:** standard+
+> **Length:** ≤400 words
+> **N/A when:** single-threaded (no goroutines, threads, async runtime, workers) — write `N/A — reason: single-threaded {language} {entry-point}. No shared mutable state across execution contexts.`
+> **Verification:** citation-check
+
+### 8.1 Execution Model
+
+One-sentence statement. E.g., "Go runtime with bounded worker pool sized from `GOMAXPROCS`." Cite the entry-point `path:line`.
+
+### 8.2 Shared State
+
+Enumerate every location of shared mutable state. One row per location. If zero, write `None.`
+
+| Kind | Location `path:line` | Protection | Contention Risk |
 |---|---|---|---|
-| **Component A** | — | ✓ | ✓(HTTP) |
-| **Component B** | ✓ | — | ✓(queue) |
-| **Component C** | | ✓ | — |
+| {mutex / atomic / channel / DB row / cache entry} | | {lock / CAS / transaction / actor ownership} | {low / medium / high — with rationale} |
 
-Legend: ✓ direct call, ✓(RPC), ✓(HTTP), ✓(queue), ✓(DB), ✓(event)
+### 8.3 Locking & Ordering
 
----
+If multiple locks are acquired, state the global acquisition order. If violating the order causes deadlock, mark the rule as an invariant and cite §15.
 
-## 5. Data Flow — End to End
+### 8.4 Async/Await Surface
 
-{Paragraph introducing the major data flows through the system.}
-
-### 5.1 Primary Processing Pipeline
-
-```mermaid
-flowchart LR
-    A["Input"] -->|"request"| B["Validation"]
-    B -->|"validated"| C["Business Logic"]
-    C -->|"processed"| D["Persistence"]
-    D -->|"stored"| E["Response"]
-```
-
-### 5.2 Read Path
-
-```mermaid
-flowchart LR
-    A["Request"] --> B["Cache Check"]
-    B -->|"miss"| C["Database"]
-    B -->|"hit"| D["Response"]
-    C --> D
-```
-
-### 5.3 Safety Mechanisms
-
-{Description of transactions, idempotency guards, version checks, distributed locks.}
+Languages with async runtimes (TS, Python asyncio, Rust tokio, Kotlin coroutines): describe the executor, cancellation policy, and any blocking calls. Otherwise omit.
 
 ---
 
-## 6. Core Modules Deep Dive
+## 9. Framework & Extension Points
 
-{For each major module (5-8), provide detailed analysis.}
+> **Source:** code-scan
+> **Required:** standard+ (when plugin/handler/middleware system exists)
+> **Length:** tables, no minimum
+> **N/A when:** no plugin, handler, middleware, strategy, or visitor system exists — write `N/A — reason: monolithic; no extension surface.`
+> **Verification:** citation-check
 
-### 6.1 {Module Name}
+### 9.1 Extension Types
 
-**Role**: {One-line description}
+| Type | Interface | Registration Site `path:line` | Example Impl `path:line` |
+|---|---|---|---|
 
-**Responsibilities**:
-- {responsibility 1}
-- {responsibility 2}
+### 9.2 Registration Mechanism
 
-**Key Operations**:
+One sentence: explicit-call / decorator / convention-based-scan / config-driven / DI-container. Cite the mechanism's `path:line`.
 
-| Operation | Description |
-|-----------|-------------|
-| `{method}()` | {description} |
+### 9.3 Core Interfaces
 
-**State Machine** (if applicable):
-
-```mermaid
-stateDiagram-v2
-    [*] --> Initial
-    Initial --> Processing: start
-    Processing --> Complete: success
-    Processing --> Failed: error
-    Failed --> Processing: retry
-    Complete --> [*]
-```
-
-**Notable Mechanisms**: {backpressure, retry, caching, rate limiting, etc.}
-
----
-
-## 7. Concurrency Model & Thread Safety
-
-{For single-threaded modules: "This module is single-threaded — N/A."}
-
-### 7.1 Execution Model
-
-{single-threaded, multi-threaded, async/await, actor model, goroutine-based, event-loop}
-
-### 7.2 Thread Pool Map
-
-| Pool / Executor | Purpose | What Runs On It |
-|-----------------|---------|-----------------|
-| `{pool}` | {purpose} | {workloads} |
-
-### 7.3 Locking Strategy
-
-{Locks, mutexes, semaphores — granularity and ordering rules.}
-
-### 7.4 Common Concurrency Pitfalls
-
-- {pitfall 1}
-- {pitfall 2}
-
----
-
-## 8. Framework & Extension Points
-
-{Skip if no plugin/handler/middleware/algorithm system.}
-
-### 8.1 Plugin Types
-
-| Type | Interface | Description |
-|------|-----------|-------------|
-| `{type}` | `{Interface}` | {description} |
-
-### 8.2 Registry Mechanism
-
-{How plugins are registered: explicit calls, decorators, convention-based, config-driven.}
-
-### 8.3 Core Interfaces
+For each interface in §9.1, show the exact declaration, citing `path:line`. Do not paraphrase. If the declaration exceeds 25 lines, show signature only and link to `path:line`.
 
 ```{language}
-// {Interface description}
-{actual code from codebase with inline comments}
+// path:line — verbatim
 ```
 
 ---
 
-## 9. Full Catalog of Implementations
+## 10. Full Catalog of Implementations
 
-{Skip if Section 8 was skipped.}
+> **Source:** graph
+> **Required:** standard+ (when §9 is populated or operation/handler pattern exists)
+> **Length:** rendered
+> **N/A when:** §9 is N/A AND no operation/handler directories exist
+> **Verification:** graph-fence
 
-### 9.1 By Category
+### 10.1 By Category
 
-| Category | Implementations |
-|----------|-----------------|
-| {category} | `{impl1}`, `{impl2}`, `{impl3}` |
+<!-- GRAPH:catalog:START -->
+<!-- Rendered from draft/graph/{go,python,ts,c}-index.jsonl (per-language symbol indexes).
+     Group implementations by category (handlers, operations, strategies, extractors, etc.).
+     One row per implementation. No sampling, no summarization. -->
+<!-- GRAPH:catalog:END -->
 
-### 9.2 Complete List
+### 10.2 Per-Directory Operation Lists
 
-| # | Name | Type | Description |
-|---|------|------|-------------|
-| 1 | `{name}` | `{type}` | {description} |
+For each operation-bearing directory, render a complete list from the graph. One table per directory.
 
----
-
-## 10. API & Interface Definitions
-
-### 10.1 Endpoints
-
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `{path}` | {GET/POST/...} | {purpose} |
-
-### 10.2 Data Models
-
-| Model | Purpose |
-|-------|---------|
-| `{Model}` | {purpose} |
-
-### 10.3 Definition Files
-
-- {`.proto`, OpenAPI spec, GraphQL schema, TypeScript types}
+<!-- GRAPH:catalog-per-dir:START -->
+<!-- Rendered per-directory enumeration. -->
+<!-- GRAPH:catalog-per-dir:END -->
 
 ---
 
-## 11. External Dependencies
+## 11. Secondary Subsystem (V2 / Redesign)
 
-### 11.1 Service Dependencies
+> **Source:** user-input
+> **Required:** standard+ (when V2/redesign present)
+> **Length:** ≤400 words
+> **N/A when:** no parallel or next-generation subsystem exists — write `N/A — reason: single subsystem; no parallel V2 or redesign in flight.`
+> **Verification:** citation-check
 
-| Service | Client Path | Usage |
-|---------|-------------|-------|
-| `{service}` | `{path}` | {usage} |
+### 11.1 Architecture
 
-### 11.2 Infrastructure Libraries
+One Mermaid flowchart of the redesigned subsystem. Same notation as §5.
 
-| Library | Usage |
-|---------|-------|
-| `{library}` | {usage} |
+### 11.2 Key Differences from V1
 
----
+| Aspect | V1 / Legacy | V2 / Current |
+|---|---|---|
 
-## 12. Cross-Module Integration Points
+Enumerate only differences that materially affect behavior or operations. Cosmetic differences (renames, reorg) do not belong here.
 
-{For each external service interaction.}
+### 11.3 Coexistence & Migration
 
-### 12.1 {Service Name} Integration
+State how V1 and V2 coexist (traffic split, feature flag, shadow mode, dual-write) and the cutover criterion. Cite the flag or switch `path:line`.
 
-- **Contract**: {API version, response format, latency SLA}
-- **Failure Isolation**: {what happens when down}
-- **Version Coupling**: {compatibility requirements}
-- **Integration Tests**: {how tested}
+### 11.4 Framework Details
 
-### 12.2 Sequence Diagram — {Flow Name}
-
-```mermaid
-sequenceDiagram
-    participant A as {Component}
-    participant B as {Service}
-    participant C as {Database}
-
-    A->>B: {request}
-    B->>C: {query}
-    C-->>B: {result}
-    B-->>A: {response}
-```
+Key source files and their roles. Enumerate; do not sample.
 
 ---
 
-## 13. Critical Invariants & Safety Rules
+## 12. API & Interface Definitions
 
-{For each invariant (8-15): What, Why, Where Enforced, Common Violation Pattern.}
+> **Source:** code-scan (proto / OpenAPI / GraphQL / route registration)
+> **Required:** standard+ (when any external API exists)
+> **Length:** rendered
+> **N/A when:** project_type == 'library' AND no network-exposed surface — write `N/A — reason: library artifact; public surface documented in §7 Public Surface tables.`
+> **Verification:** graph-fence + schema-check
 
-### Data Safety
+### 12.1 Endpoints
 
-| Invariant | Why | Enforced At | Violation Pattern |
-|-----------|-----|-------------|-------------------|
-| {rule} | {consequence} | `{file}:{line}` | {how broken} |
+<!-- GRAPH:api-endpoints:START -->
+<!-- Rendered from OpenAPI / proto / route-registration parsers.
+     Columns: Method, Path, Handler path:line, Auth, Rate Limit, SLO. -->
+<!-- GRAPH:api-endpoints:END -->
 
-### Security
+### 12.2 Proto / Schema Definitions
 
-| Invariant | Why | Enforced At | Violation Pattern |
-|-----------|-----|-------------|-------------------|
-| {rule} | {consequence} | `{file}:{line}` | {how broken} |
+<!-- GRAPH:api-proto:START -->
+<!-- Rendered from draft/graph/proto-index.jsonl. One row per service and message. -->
+<!-- GRAPH:api-proto:END -->
 
-### Concurrency
+### 12.3 Data Models
 
-| Invariant | Why | Enforced At | Violation Pattern |
-|-----------|-----|-------------|-------------------|
-| {rule} | {consequence} | `{file}:{line}` | {how broken} |
+Table of the top-level request/response/event models the API exposes. Cite declaration `path:line` for each.
 
----
+| Model | Kind (request / response / event / shared) | Declaration `path:line` | Versioning Rule |
+|---|---|---|---|
 
-## 14. Security Architecture
+### 12.4 Definition Files
 
-### Authentication
-
-{How identity is established: JWT, OAuth, API keys, certificates.}
-
-### Authorization
-
-{Where permission checks happen: middleware, service layer, decorators.}
-
-### Data Sanitization
-
-{Input validation boundaries and sanitization logic.}
-
-### Secrets Management
-
-{How keys/credentials are loaded: env vars, Vault, cloud secrets manager.}
-
-### Network Security
-
-{TLS termination, mTLS, allowlists/blocklists.}
+Enumerate every `.proto`, `openapi.yaml`, `schema.graphql`, or equivalent. Give the file path and its role.
 
 ---
 
-## 15. Observability & Telemetry
+## 13. External Dependencies
 
-### Logging
+> **Source:** manifest
+> **Required:** always
+> **Length:** rendered table
+> **N/A when:** never (zero deps → table with one row: "None. Language standard library only.")
+> **Verification:** manifest-diff
 
-- **Framework**: {logger}
-- **Structured Keys**: `{key1}`, `{key2}`, `{key3}`
-- **Log Levels**: {when each level is used}
+### 13.1 Runtime Dependencies
 
-### Distributed Tracing
+<!-- GRAPH:external-deps:kind=runtime:START -->
+<!-- Rendered from package manifest(s). Columns: Name, Version, License, Source, Transitive Count, Used-In (top 3 modules). -->
+<!-- GRAPH:external-deps:kind=runtime:END -->
 
-- **Spans**: {where trace context is extracted/injected}
-- **Propagation**: {mechanism}
+### 13.2 Build / Dev Dependencies
 
-### Metrics
+<!-- GRAPH:external-deps:kind=dev:START -->
+<!-- Rendered for dev/test/build-only deps. -->
+<!-- GRAPH:external-deps:kind=dev:END -->
 
-| Metric | Type | Purpose |
-|--------|------|---------|
-| `{name}` | {counter/gauge/histogram} | {purpose} |
+### 13.3 Service Dependencies (network-reachable)
 
-### Health Checks
+| Service | Protocol | Client Path `path:line` | Criticality | Failure Mode |
+|---|---|---|---|---|
 
-- **Liveness**: `{endpoint}`
-- **Readiness**: `{endpoint}`
-
----
-
-## 16. Error Handling & Failure Modes
-
-### Error Propagation Model
-
-{Return codes, exceptions, Result monads, error protos.}
-
-```{language}
-// Canonical error handling pattern
-{actual code example from codebase}
-```
-
-### Retry Semantics
-
-| Operation | Policy | Backoff | Max Attempts |
-|-----------|--------|---------|--------------|
-| `{op}` | {policy} | {backoff} | {N} |
-
-### Common Failure Modes
-
-| Scenario | Symptoms | Root Cause | Recovery |
-|----------|----------|------------|----------|
-| {scenario} | {symptoms} | {cause} | {recovery} |
-
-### Graceful Degradation
-
-{Behavior when dependencies unavailable.}
+Only for systems the runtime reaches over the network (databases, queues, third-party APIs). For libraries or pure CPU workloads: `None.`
 
 ---
 
-## 17. State Management & Persistence
+## 14. Cross-Module Integration Points
 
-### State Inventory
+> **Source:** graph + llm-synthesis
+> **Required:** standard+
+> **Length:** ≤300 words per integration
+> **N/A when:** single-module system — write `N/A — reason: single-module; no cross-module integration surface.`
+> **Verification:** graph-fence + citation-check
 
-| State | Storage | Durability | Recovery |
-|-------|---------|------------|----------|
-| {state} | {storage} | {durability} | {recovery} |
+For each integration edge of kind `rpc` / `queue` / `shared-db` / `shared-schema` in the graph:
 
-### Persistence Formats
+### 14.{N} {Source} ↔ {Target}
 
-{What is serialized, where, in what format: protobuf, JSON, SQL rows.}
-
-### Recovery Sequences
-
-{What happens on crash-restart, how state is reconstructed.}
-
-### Schema Migration
-
-{How persistent state evolves across versions.}
+- **Contract** — API version, schema revision, response format, latency SLO.
+- **Failure Isolation** — circuit breaker, timeout, retry, bulkhead, fallback. Cite `path:line`.
+- **Version Coupling** — compatibility window; who upgrades first; flag gating.
+- **Integration Tests** — how tested; where the tests live `path:line`.
 
 ---
 
-## 18. Key Design Patterns
+## 15. Critical Invariants & Safety Rules
 
-### 18.1 {Pattern Name}
+> **Source:** llm-synthesis
+> **Required:** always (may be `None.`)
+> **Length:** ≤30 words per invariant; enumerate all that apply; do not pad
+> **N/A when:** never — if the codebase has zero invariants, write `None. No data-integrity, concurrency, or security invariants identified.`
+> **Verification:** citation-check
 
-{2-4 sentence description of the pattern and how it is applied.}
+No quota. Enumerate every invariant that actually exists. One row per invariant.
 
-```{language}
-// {Pattern implementation}
-{actual code from codebase}
-```
+| # | Invariant | Category | Where Enforced `path:line` | Enforcement Mechanism | Violation Consequence |
+|---|---|---|---|---|---|
+| 1 | {precise statement} | {data / concurrency / security / resource / ordering} | `{path:line}` | {type-system / runtime-assert / test / code-review / none} | {what breaks if violated} |
 
-**Used in**: `{file1}`, `{file2}`
-
----
-
-## 19. Configuration & Tuning
-
-### Key Parameters
-
-| Parameter | Default | Purpose |
-|-----------|---------|---------|
-| `{param}` | `{value}` | {purpose} |
-
-### Scheduling Configuration
-
-{How recurring work is configured: cron, intervals, tickers.}
-
-### Config Code
-
-```{language}
-// Configuration schema/struct
-{actual code}
-```
+**Mission-critical rule.** Any invariant in categories `data` or `security` with `Enforcement Mechanism == none` MUST be flagged for review. List such invariants at the end of the table with `⚠ unenforced` prefix.
 
 ---
 
-## 20. Performance Characteristics & Hot Paths
+## 16. Security Architecture
 
-### Hot Paths
+> **Source:** llm-synthesis + user-input
+> **Required:** high+
+> **Length:** ≤500 words
+> **N/A when:** criticality == low AND no authentication, authorization, crypto, PII, or network ingress — write `N/A — reason: criticality=low; no auth, crypto, PII, or external ingress.`
+> **Verification:** citation-check
 
-- `{file}:{function}` — {why critical}
+### 16.1 Threat Model Scope
 
-### Scaling Dimensions
+Name the threat model's in-scope and out-of-scope items. Cite the threat-model doc if one exists; if not, state `No formal threat model on file.` and list the top three assumed threats.
 
-| Dimension | Scales With | Bottleneck |
-|-----------|-------------|------------|
-| {dimension} | {factor} | {bottleneck} |
+### 16.2 Authentication & Authorization
 
-### Memory Profile
+Mechanism(s) in use. Cite the primary auth middleware or guard `path:line`. State the authorization model (RBAC / ABAC / ACL / capability / none).
 
-{Large memory consumers, budgets, OOM risks.}
+### 16.3 Crypto Primitives
 
-### I/O Patterns
+| Purpose | Library + Version | Algorithm | Key Source | `path:line` |
+|---|---|---|---|---|
 
-{Disk I/O, network I/O, database queries characteristics.}
+Mark `None.` if no crypto in use.
 
----
+### 16.4 Secret Handling
 
-## 21. How to Extend — Step-by-Step Cookbooks
+How secrets are loaded (env / vault / KMS / file). Where rotation is triggered. Cite config loader `path:line`.
 
-### 21.1 Adding a New {ExtensionType}
+### 16.5 Known CVE Mitigations (mission-critical only)
 
-1. **Create file**: `{path}` (naming: `{convention}`)
-2. **Implement interface**:
-   - Required: `{method1}()`, `{method2}()`
-   - Optional: `{method3}?()`
-3. **Register**: Add to `{registry_file}` via `{mechanism}`
-4. **Build dependencies**: {instructions}
-5. **Configuration**: {if any}
-6. **Tests**: Create `{test_path}` covering {scenarios}
-
-**Minimal working example**:
-
-```{language}
-{simplest implementation that compiles/runs}
-```
+Only if any dependency's CVE required explicit mitigation. Otherwise omit the subsection.
 
 ---
 
-## 22. Build System & Development Workflow
+## 17. Observability & Telemetry
 
-### Build System
+> **Source:** code-scan + llm-synthesis
+> **Required:** high+
+> **Length:** ≤400 words
+> **N/A when:** criticality == low OR project_type == 'library' — write `N/A — reason: {...}`.
+> **Verification:** citation-check + graph-fence (metrics)
 
-{Bazel, CMake, npm, Cargo, Maven, etc.}
+### 17.1 Golden Signals
 
-### Key Targets
+| Signal | Metric Name | Dashboard URL | Alert URL |
+|---|---|---|---|
+| Latency | | | |
+| Traffic | | | |
+| Errors | | | |
+| Saturation | | | |
 
-| Target | Type | What It Does |
-|--------|------|--------------|
-| `{target}` | {type} | {description} |
+### 17.2 Logging
 
-### How to Build
+Log library + version. Log level policy. Structured vs free-form. PII redaction policy. Cite `path:line` for the logger init.
 
-- **Full**: `{command}`
-- **Single component**: `{command}`
-- **Debug mode**: `{command}`
+### 17.3 Tracing
 
-### How to Test
+Tracing library (OpenTelemetry / Zipkin / X-Ray / none). Trace context propagation points. Sampling policy.
 
-- **Full suite**: `{command}`
-- **Single test**: `{command}`
-- **With coverage**: `{command}`
+### 17.4 Alert Runbook
 
-### How to Run Locally
+Link to runbook(s). Mission-critical requires at least one runbook URL or inline entry.
 
-```bash
-{commands to run locally}
-```
+### 17.5 Log Retention
 
-### Common Build Issues
-
-- {issue 1}: {solution}
-
-### Code Style
-
-{File naming, function naming, package naming conventions.}
-
-### CI/CD
-
-{What runs in pre-submit, what runs nightly.}
+Retention period. Where logs are stored. Who has read access.
 
 ---
 
-## 23. Testing Infrastructure
+## 18. Error Handling & Failure Modes
 
-### Framework
+> **Source:** llm-synthesis
+> **Required:** standard+
+> **Length:** ≤400 words
+> **N/A when:** project_type == 'library' AND errors are returned unchanged to the caller — write `N/A — reason: pure library; errors propagate verbatim to caller.`
+> **Verification:** citation-check
 
-{GTest, pytest, Jest, JUnit, etc.}
+### 18.1 Error Taxonomy
 
-### Test Patterns
+| Error Class | Source | Retry Policy | User-Visible? | `path:line` |
+|---|---|---|---|---|
 
-- {Mock/stub injection points}
-- {In-memory substitutes}
-- {Test data builders/fixtures}
-- {Integration test setup}
+Enumerate classes that actually exist. Do not invent categories.
 
-### Test-to-Feature Mapping
+### 18.2 Failure Modes Beyond Errors
 
-| Feature | Test Suite |
-|---------|------------|
-| {feature} | `{test_path}` |
+| Mode | Trigger | Detection | Recovery |
+|---|---|---|---|
+| {timeout / partial write / data loss / deadlock / corruption / OOM / thundering herd} | | | |
 
-### Coverage Expectations
+Only rows for modes the codebase or deployment actually exhibits. Omit if none.
 
-{What should be tested for new code.}
+### 18.3 Graceful Degradation
 
----
-
-## 24. Known Technical Debt & Limitations
-
-### Deprecated Code
-
-| Component | Status | Migration Path |
-|-----------|--------|----------------|
-| `{component}` | {status} | {path} |
-
-### Known Workarounds
-
-- `{file}:{line}` — {TODO/FIXME description}
-
-### Scaling Limitations
-
-{Known ceilings and their causes.}
-
-### Complexity Hotspots
-
-| Location | Issue | Severity |
-|----------|-------|----------|
-| `{file}` | {issue} | {High/Med/Low} |
+If any component has fallback behavior, describe it here with `path:line`. Otherwise write `None — all failures surface as errors to caller.`
 
 ---
 
-## 25. Glossary
+## 19. State Management & Persistence
 
-| Term | Definition |
-|------|------------|
-| {term} | {1-2 sentence definition} |
+> **Source:** code-scan + user-input
+> **Required:** standard+ (when persistence exists); mission-critical sections below are `high+`
+> **Length:** ≤400 words + SLO table for mission-critical
+> **N/A when:** stateless — write `N/A — reason: stateless; all state is request-scoped.`
+> **Verification:** citation-check
+
+### 19.1 State Stores
+
+| Store | Kind (SQL / KV / blob / cache / queue / filesystem) | Library `path:line` | Durability |
+|---|---|---|---|
+
+### 19.2 Schema & Migrations
+
+Migration tool name + version. Migration directory path. Cite the migration runner `path:line`. State forward/backward compatibility policy.
+
+### 19.3 Durability, RPO, RTO (mission-critical only)
+
+| Store | Durability Model | RPO | RTO | Backup Cadence | Restore Drill Cadence |
+|---|---|---|---|---|---|
+
+Mission-critical requires every row populated. Unknown values → mark `⚠ undefined` and raise as §27 debt.
+
+### 19.4 Caching
+
+Layers, invalidation policy, TTLs. Cite `path:line` for each cache.
+
+---
+
+## 20. Reusable Modules for Future Projects
+
+> **Source:** llm-synthesis + graph
+> **Required:** standard+
+> **Length:** tables
+> **N/A when:** project_type == 'cli' AND fewer than 3 modules — write `N/A — reason: monolithic CLI; no modules separable for reuse.`
+> **Verification:** graph-fence
+
+Tiered by how much of the module's surface is reusable outside this project.
+
+### 20.1 Highly Reusable (Framework-Level)
+
+<!-- GRAPH:reusable:tier=framework:START -->
+<!-- Rendered: modules with low external coupling + documented public API. -->
+<!-- GRAPH:reusable:tier=framework:END -->
+
+| Module | Path | What makes it reusable |
+|---|---|---|
+
+### 20.2 Moderately Reusable (Pattern-Level)
+
+| Module | Path | Extraction cost |
+|---|---|---|
+
+### 20.3 Pattern Templates (Design-Level)
+
+| Pattern | Where Used `path:line` | When to copy |
+|---|---|---|
+
+---
+
+## 21. Key Design Patterns
+
+> **Source:** llm-synthesis
+> **Required:** standard+
+> **Length:** ≤150 words per pattern + one verified code reference
+> **N/A when:** no non-trivial patterns identified — write `None. Codebase follows straight-line procedural design.`
+> **Verification:** citation-check
+
+For each pattern that materially shapes the codebase:
+
+### 21.{N} {Pattern name}
+
+- **Intent** — one sentence.
+- **Where used** — list occurrences with `path:line`. At least one citation must verify.
+- **Why chosen** — one sentence referencing observable constraint (not aesthetic).
+- **Reference snippet** — ≤15 lines, verbatim from `path:line`.
+
+Do not enumerate every GoF pattern. Only patterns that recur or are load-bearing.
+
+---
+
+## 22. Configuration & Tuning
+
+> **Source:** code-scan
+> **Required:** always
+> **Length:** rendered
+> **N/A when:** never (zero config → `None. No runtime configuration surface.`)
+> **Verification:** graph-fence + citation-check
+
+### 22.1 Configuration Surface
+
+<!-- GRAPH:config:START -->
+<!-- Rendered from config parsers: env vars, CLI flags, YAML keys.
+     Columns: Key, Type, Default, Where Read path:line, Valid Range / Enum. -->
+<!-- GRAPH:config:END -->
+
+### 22.2 Tuning Guidance
+
+Only for knobs with non-obvious tradeoffs. One row per knob. Omit if none.
+
+| Knob | Default | Raise when | Lower when | Risk of wrong value |
+|---|---|---|---|---|
+
+---
+
+## 23. Performance Characteristics & Hot Paths
+
+> **Source:** graph (hotspots) + llm-synthesis
+> **Required:** standard+
+> **Length:** ≤200 words per hot path
+> **N/A when:** project_type == 'library' AND no measured performance constraint — write `N/A — reason: library; performance characterization is caller-dependent.`
+> **Verification:** graph-fence
+
+### 23.1 Hotspots (graph-derived)
+
+<!-- GRAPH:hotspots:START -->
+<!-- Rendered from draft/graph/hotspots.jsonl. Columns: Path, Fan-In, Fan-Out, Change-Frequency, Hotspot Score. -->
+<!-- GRAPH:hotspots:END -->
+
+### 23.2 Critical Hot Paths
+
+For each hot path that matters operationally:
+
+#### 23.2.{N} {Path name}
+
+- **Trace** — entry-point `path:line` → terminal `path:line`.
+- **Observed characteristic** — measured latency / throughput / memory. Cite the measurement source (benchmark file, load test, production metric URL). If unmeasured, write `⚠ unmeasured` and log a §27 debt item.
+- **Known optimizations** — what has already been done.
+- **Known risks** — what would slow this path.
+
+**Mission-critical rule.** Every hot path must have a measured baseline. `⚠ unmeasured` on a mission-critical system is a release blocker.
+
+### 23.3 Measured Baselines (mission-critical only)
+
+| Hot Path | p50 | p95 | p99 | Measured At (commit + date) | Source |
+|---|---|---|---|---|---|
+
+---
+
+## 24. How to Extend — Step-by-Step Cookbooks
+
+> **Source:** llm-synthesis
+> **Required:** standard+ (when §9 or §10 populated)
+> **Length:** ≤400 words per cookbook
+> **N/A when:** §9 is N/A — write `N/A — reason: no extension surface (see §9).`
+> **Verification:** citation-check
+
+One cookbook per extension type in §9.1. Each cookbook is an ordered step list. Every step cites `path:line` or a command. Test every step as you write by resolving citations.
+
+### 24.{N} How to add a new {extension type}
+
+1. ...
+2. ...
+3. Register at `path:line`.
+4. Test with `{command}`.
+
+No invented extension types. If a pattern is theoretically supported but has never been exercised, say so explicitly.
+
+---
+
+## 25. Build System & Development Workflow
+
+> **Source:** manifest + code-scan
+> **Required:** always
+> **Length:** rendered
+> **N/A when:** never
+> **Verification:** graph-fence + manifest-diff
+
+### 25.1 Build Tooling
+
+| Tool | Version | Config File | Notes |
+|---|---|---|---|
+
+### 25.2 Key Build Targets
+
+<!-- GRAPH:build-targets:START -->
+<!-- Rendered from Makefile / BUILD / package.json scripts / pyproject scripts. -->
+<!-- GRAPH:build-targets:END -->
+
+### 25.3 Developer Setup
+
+Ordered command list, starting from a fresh clone. Every command must run to completion on a supported OS/arch. Cite the OS/arch matrix.
+
+### 25.4 CI Pipeline
+
+| Stage | Tool | Config `path:line` | Required for merge? |
+|---|---|---|---|
+
+---
+
+## 26. Testing Infrastructure
+
+> **Source:** code-scan
+> **Required:** always
+> **Length:** rendered table + ≤200 words
+> **N/A when:** never (zero tests → `None. No automated tests present.` + flag as §27 debt item)
+> **Verification:** citation-check
+
+### 26.1 Test Suites
+
+| Suite | Location | Command | Kind (unit / integration / e2e / property / fuzz / load) | Coverage |
+|---|---|---|---|---|
+
+### 26.2 Test Data & Fixtures
+
+Where fixtures live. How they are generated or maintained. Cite `path:line`.
+
+### 26.3 Flaky Test Policy
+
+If flaky tests exist and have a known handling policy (quarantine, retry, skip-with-ticket), describe it. Otherwise omit.
+
+---
+
+## 27. Known Technical Debt & Limitations
+
+> **Source:** user-input (debt items must be acknowledged, not inferred)
+> **Required:** always (may be `None.`)
+> **Length:** ≤30 words per item
+> **N/A when:** never — zero debt → `None. No known debt items at synced_to_commit.`
+> **Verification:** citation-check
+
+No quota. Enumerate every real item. One row per item.
+
+| # | Item | Severity | Blast Radius | Owner | ETA | `path:line` or ticket |
+|---|---|---|---|---|---|---|
+| 1 | {statement} | {low / medium / high / critical} | {module / subsystem / org} | {team-or-person} | {date or "backlog"} | `{path:line}` or `JIRA-1234` |
+
+**Mission-critical rule.** Every high/critical row must have Owner and ETA populated.
+
+---
+
+## 28. Glossary
+
+> **Source:** user-input + code-scan
+> **Required:** always
+> **Length:** table
+> **N/A when:** never (zero jargon → `None. Codebase uses standard terminology only.`)
+> **Verification:** none
+
+| Term | Definition | First Appears `path:line` or §ref |
+|---|---|---|
+
+Only terms that are non-standard in the broader industry OR carry project-specific meaning. Do not define standard terms ("mutex", "HTTP").
 
 ---
 
 ## Appendix A: File Structure Summary
 
-```
-{project}/
-├── {dir}/                 ← {description}
-│   ├── {subdir}/          ← {description}
-│   └── {file}             ← {description}
-└── {dir}/                 ← {description}
-```
+> **Source:** code-scan
+> **Required:** always
+> **Length:** rendered tree
+> **N/A when:** never
+> **Verification:** graph-fence
+
+<!-- GRAPH:file-tree:START -->
+<!-- Rendered from filesystem walk at synced_to_commit.
+     Depth and exclusions configurable in draft/graph/config.json. -->
+<!-- GRAPH:file-tree:END -->
 
 ---
 
 ## Appendix B: Data Source → Implementation Mapping
 
-| Data Source | Implementations Reading It |
-|-------------|---------------------------|
-| `{source}` | `{impl1}`, `{impl2}` |
+> **Source:** graph
+> **Required:** standard+
+> **Length:** rendered
+> **N/A when:** §13.3 is `None.` AND no local data stores — write `N/A — reason: no data sources.`
+> **Verification:** graph-fence
+
+<!-- GRAPH:source-sink:direction=source:START -->
+<!-- Rendered: rows = external source, cols = modules that read it, cells = call path:line. -->
+<!-- GRAPH:source-sink:direction=source:END -->
 
 ---
 
 ## Appendix C: Output Flow — Implementation to Target
 
-| Implementation | Output Type | Target |
-|----------------|-------------|--------|
-| `{impl}` | {type} | `{target}` |
+> **Source:** graph
+> **Required:** standard+
+> **Length:** rendered
+> **N/A when:** no external write surface — write `N/A — reason: no outputs beyond process return value.`
+> **Verification:** graph-fence
+
+<!-- GRAPH:source-sink:direction=sink:START -->
+<!-- Rendered: rows = module, cols = external target, cells = call path:line. -->
+<!-- GRAPH:source-sink:direction=sink:END -->
 
 ---
 
 ## Appendix D: Mermaid Sequence Diagrams — Critical Flows
 
-### {Flow Name}
+> **Source:** llm-synthesis
+> **Required:** high+
+> **Length:** 1–N diagrams, no minimum, no maximum
+> **N/A when:** criticality < high AND no flow crosses more than two modules — write `N/A — reason: {...}`.
+> **Verification:** citation-check (every participant must map to a §5 component)
+
+Diagrams for flows that are operationally critical and NOT already covered by §6. Each diagram must:
+
+- name every participant with the exact component name from §5;
+- label every arrow with the call/message kind;
+- cite the entry-point and terminal `path:line` below the diagram.
+
+Do not duplicate §6 diagrams. If §6 already covers the flow, skip it here.
+
+---
+
+## Appendix E: Proto Service Map (graph-derived)
+
+> **Source:** graph
+> **Required:** standard+ (when proto definitions exist)
+> **Length:** rendered
+> **N/A when:** no `.proto` files in repository — write `N/A — reason: no gRPC/proto definitions present.`
+> **Verification:** graph-fence
+
+<!-- GRAPH:proto-map:START -->
+<!-- Rendered from draft/graph/proto-index.jsonl. Services × methods × request/response types. -->
+<!-- GRAPH:proto-map:END -->
+
+---
+
+End of document. Completion verification is owned by `skills/init/SKILL.md` §Completion Verification. For AI-optimized context, see `draft/.ai-context.md`.
+
+</core-file>
+
+---
+
+## core/templates/track-architecture.md
+
+<core-file path="core/templates/track-architecture.md">
+
+---
+project: "{PROJECT_NAME}"
+module: "root"
+track_id: "{TRACK_ID}"
+generated_by: "draft:decompose"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
+
+# Track Architecture: {TRACK_TITLE}
+
+> Track-scoped HLD/LLD for a single feature, bug fix, or refactor.
+> Source of truth for implementation — `draft implement` consumes this to guide build order, contracts, and story generation.
+> For project-wide architecture, see `draft/architecture.md`.
+
+| Field | Value |
+|-------|-------|
+| **Track ID** | `{TRACK_ID}` |
+| **Spec** | `./spec.md` |
+| **Plan** | `./plan.md` |
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **LLD Included** | {true | false} |
+
+---
+
+## Table of Contents
+
+1. [Overview](#1-overview)
+2. [Module Breakdown](#2-module-breakdown)
+3. [High-Level Design (HLD)](#3-high-level-design-hld)
+   - 3.1 Component Diagram
+   - 3.2 Data Flow
+   - 3.3 Sequence Diagrams (Critical Flows)
+   - 3.4 State Machine(s)
+4. [Dependency Analysis](#4-dependency-analysis)
+5. [Implementation Order](#5-implementation-order)
+6. [Low-Level Design (LLD)](#6-low-level-design-lld)
+   - 6.1 Per-Module API Contracts
+   - 6.2 Data Models & Schemas
+   - 6.3 Error Handling & Retry Semantics
+   - 6.4 Algorithm Pseudocode (where non-trivial)
+7. [Notes & Decisions](#7-notes--decisions)
+
+---
+
+## 1. Overview
+
+**What this track delivers:** {one paragraph from spec.md — the feature, bug fix, or refactor being scoped}
+
+**Inputs:** {what triggers or feeds into this feature}
+**Outputs:** {what this feature produces — data, side effects, API responses}
+**Constraints:** {latency, throughput, compatibility, security — anything from spec.md Non-Functional Requirements}
+
+**Integration points:** {which existing modules from `draft/.ai-context.md` this track touches}
+
+---
+
+## 2. Module Breakdown
+
+### Modules Introduced or Modified
+
+For each module in scope, fill out one block:
+
+#### Module: `{module-name}`
+
+- **Status:** `[ ] New` | `[ ] Modified` | `[x] Existing (unchanged)`
+- **Responsibility:** {one sentence — what this module owns}
+- **Files:** `{path/to/file1}`, `{path/to/file2}`
+- **API Surface:** {public functions, classes, or interfaces — names only, contracts in §6.1}
+- **Dependencies:** {other modules this imports from}
+- **Complexity:** `Low` | `Medium` | `High`
+- **Story placeholder:** _populated by `draft implement`_
+
+{Repeat for each module.}
+
+---
+
+## 3. High-Level Design (HLD)
+
+### 3.1 Component Diagram
+
+Shows modules in scope + the external collaborators they talk to.
+
+```mermaid
+flowchart TD
+    subgraph Track["Track: {TRACK_ID}"]
+        M1["{module-1}"]
+        M2["{module-2}"]
+        M3["{module-3}"]
+    end
+    subgraph Existing["Existing System"]
+        E1["{existing-module-A}"]
+        E2["{existing-module-B}"]
+    end
+    subgraph External["External"]
+        X1["{DB / queue / API}"]
+    end
+
+    M1 --> M2
+    M2 --> M3
+    M1 --> E1
+    M3 --> X1
+```
+
+> Draw one node per module in scope. Include existing modules only when this track calls into them. Label edges with the transport (HTTP, RPC, queue, direct call) when non-obvious.
+
+### 3.2 Data Flow
+
+End-to-end flow of data through the track's modules.
+
+```mermaid
+flowchart LR
+    In["{input — request / event}"] --> V["{validation}"]
+    V --> L["{business logic}"]
+    L --> P["{persistence}"]
+    P --> Out["{output — response / emitted event}"]
+```
+
+> Replace with the actual transforms. If the track has distinct read and write paths, draw them separately.
+
+### 3.3 Sequence Diagrams — Critical Flows
+
+One sequence per acceptance criterion that involves more than a single module call. Skip for trivial single-module tracks.
+
+#### Flow: {name — e.g., "Happy path: user submits X"}
 
 ```mermaid
 sequenceDiagram
-    participant A as {Component}
-    participant B as {Service}
-    participant C as {Database}
+    participant U as {Caller}
+    participant A as {module-1}
+    participant B as {module-2}
+    participant D as {DB / external}
 
-    A->>B: {request with payload}
-    activate B
-    B->>C: {query}
-    C-->>B: {result}
+    U->>A: {request payload}
+    A->>B: {internal call}
+    B->>D: {query / write}
+    D-->>B: {result}
     B-->>A: {response}
-    deactivate B
+    A-->>U: {final response}
+
+    Note over A,B: {invariant / gate — e.g., "tx must be open here"}
+```
+
+#### Flow: {error path — e.g., "Dependency timeout"}
+
+```mermaid
+sequenceDiagram
+    participant U as {Caller}
+    participant A as {module-1}
+    participant D as {External}
+
+    U->>A: {request}
+    A->>D: {call with timeout={N}ms}
+    D--xA: {timeout}
+    A->>A: {fallback / circuit breaker}
+    A-->>U: {degraded response or error}
+```
+
+### 3.4 State Machine(s)
+
+Include only if the track introduces or modifies stateful entities. Omit otherwise.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Pending
+    Pending --> Processing: start
+    Processing --> Complete: success
+    Processing --> Failed: error
+    Failed --> Pending: retry (max {N})
+    Failed --> DeadLetter: retries exhausted
+    Complete --> [*]
 ```
 
 ---
 
-End of analysis. For AI-optimized context, see `draft/.ai-context.md`.
+## 4. Dependency Analysis
+
+### ASCII Dependency Graph
+
+```
+[module-1] ──> [module-2]
+    │              │
+    └──> [module-3] <──┘
+```
+
+### Dependency Table
+
+| Module | Depends On | Depended By | Cycle? |
+|--------|------------|-------------|--------|
+| `{mod}` | `{list}` | `{list}` | no |
+
+### Cycle Mitigation
+
+_If any cycles detected, describe how they are broken (shared interface extraction, dependency inversion, etc.). Otherwise: "No cycles detected."_
+
+---
+
+## 5. Implementation Order
+
+Topological sort — leaves first.
+
+1. `{module-A}` (no internal deps) — foundational
+2. `{module-B}` (depends on: A)
+3. `{module-C}` (depends on: A, B)
+
+**Parallel opportunities:** {which modules can be built concurrently}
+
+---
+
+## 6. Low-Level Design (LLD)
+
+> Present when `--lld` flag was passed to `draft decompose` OR any module in §2 has `Complexity: High`. Otherwise this section reads: _"LLD not generated. Run `draft decompose --lld` to expand."_
+
+### 6.1 Per-Module API Contracts
+
+For each module in §2 marked `New` or `Modified`:
+
+#### `{module-name}` — Public API
+
+| Function / Method | Signature | Params | Returns | Errors / Exceptions |
+|-------------------|-----------|--------|---------|---------------------|
+| `{name}` | `{lang-appropriate signature}` | `{param: type — constraint}` | `{type — shape}` | `{error types / codes}` |
+
+**Preconditions:** {what must be true before call — caller responsibilities}
+**Postconditions:** {what is guaranteed after successful call}
+**Invariants:** {properties preserved across calls — thread safety, idempotency, ordering}
+
+{Repeat per module.}
+
+### 6.2 Data Models & Schemas
+
+Concrete shapes for every new or modified entity this track introduces.
+
+#### `{ModelName}`
+
+```{language}
+{actual type definition — struct, class, interface, proto message, TypedDict, etc.}
+```
+
+| Field | Type | Nullable | Default | Validation / Constraint |
+|-------|------|----------|---------|-------------------------|
+| `{field}` | `{type}` | yes/no | `{default or —}` | `{rule}` |
+
+**Storage:** {where persisted — table, collection, key prefix}
+**Indexes / Keys:** {primary key, unique constraints, indexed fields}
+**Migration:** {if this is a schema change — migration path and rollback}
+
+{Repeat per model.}
+
+### 6.3 Error Handling & Retry Semantics
+
+Per-operation policy. One row per operation that has non-trivial error handling.
+
+| Operation | Error Class | Classification | Retry? | Backoff | Max Attempts | Fallback |
+|-----------|-------------|----------------|--------|---------|--------------|----------|
+| `{op}` | `{ErrorType}` | transient / permanent / timeout | yes/no | `{policy}` | `{N}` | `{behavior}` |
+
+**Propagation model:** {how errors surface — Result type, exceptions, error codes}
+**Circuit breaker:** {thresholds, half-open policy, reset} — omit if N/A
+**Idempotency:** {which operations are idempotent and how — dedup key, tx id}
+
+### 6.4 Algorithm Pseudocode
+
+Include only for non-trivial logic. Skip for straightforward CRUD.
+
+#### {Algorithm name}
+
+**Inputs:** `{...}`
+**Outputs:** `{...}`
+**Complexity:** `O({...})` time, `O({...})` space
+
+```
+{numbered or indented pseudocode — language-agnostic}
+1. validate inputs
+2. ...
+3. return result
+```
+
+**Edge cases handled:**
+- {case 1 — what happens}
+- {case 2 — what happens}
+
+---
+
+## 7. Notes & Decisions
+
+### Architecture Decisions
+
+- {decision 1 — rationale, alternatives considered}
+- {decision 2 — rationale, alternatives considered}
+
+### Open Questions
+
+- {question tracked during decomposition — to resolve before or during implementation}
+
+### Links
+
+- Spec: `./spec.md`
+- Plan: `./plan.md`
+- Related ADRs: `{paths if any, created via draft adr}`
+- Project architecture: `draft/.ai-context.md` → `draft/architecture.md`
 
 </core-file>
 
@@ -17209,6 +17865,22 @@ End of analysis. For AI-optimized context, see `draft/.ai-context.md`.
 ## core/templates/jira.md
 
 <core-file path="core/templates/jira.md">
+
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:init"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
 
 # Jira Configuration & Story Template
 
@@ -17225,7 +17897,7 @@ story_points_field: customfield_10028  # Custom field ID for story points (optio
 default_issue_type: Story   # Default issue type for tasks
 default_priority: Medium    # Default priority level
 labels:                     # Labels to apply to all created issues
-  - draft-generated
+  - draft
 ```
 
 ---
@@ -17817,6 +18489,19 @@ If task exceeds 5 iterations:
 
 ---
 
+## Toolchain
+
+### VCS
+- [x] git + GitHub Pull Requests
+
+### MCP Auto-Connect (optional)
+- [ ] Jira MCP — for ticket linking via `draft jira-preview` / `draft jira-create`
+- [ ] Confluence MCP — for design-doc and runbook lookups
+
+> **How to configure:** Check the MCP boxes above to enable optional integrations. See `core/shared/vcs-commands.md` for git command conventions used across skills.
+
+---
+
 ## Guardrails
 
 > **See `draft/guardrails.md`** — Hard guardrails, learned conventions, and learned anti-patterns are managed in the dedicated guardrails file. Run `draft learn` to discover patterns and update guardrails.
@@ -18037,8 +18722,53 @@ synced_to_commit: "{FULL_SHA}"
 
 - `[ ]` Pending
 - `[~]` In Progress
-- `[x]` Completed — append commit SHA: `[abc1234]`
+- `[x]` Completed — append commit SHA: `(abc1234)`
 - `[!]` Blocked — note reason
+
+</core-file>
+
+---
+
+## core/templates/metadata.json
+
+<core-file path="core/templates/metadata.json">
+
+{
+  "$schema": "Draft Track Metadata Schema",
+  "$description": "Tracks status, progress, review history, and blast radius for a Draft track. Created by draft new-track, updated by draft implement and draft review.",
+
+  "id": "<track-id>",
+  "title": "<Human-readable title>",
+  "type": "feature|bugfix|refactor",
+  "status": "planning|in_progress|completed",
+  "created": "<ISO 8601 timestamp>",
+  "updated": "<ISO 8601 timestamp>",
+
+  "phases": {
+    "total": 0,
+    "completed": 0
+  },
+
+  "tasks": {
+    "total": 0,
+    "completed": 0
+  },
+
+  "lastReviewed": "<ISO 8601 timestamp — set by draft review>",
+  "reviewCount": 0,
+  "lastReviewVerdict": "PASS|PASS_WITH_NOTES|FAIL",
+
+  "$impact_description": "Blast-radius memory — written by draft implement on phase complete, read by draft new-track to flag overlap. Sourced from `git diff --name-only <track_first_sha>^..HEAD` plus `graph --query --mode impact` for each touched file. Optional — absent if graph data unavailable.",
+  "impact": {
+    "files_touched": [],
+    "modules_touched": [],
+    "downstream_files": 0,
+    "downstream_modules": [],
+    "max_depth": 0,
+    "by_category": { "code": 0, "test": 0, "doc": 0, "config": 0 },
+    "computed_at": "<ISO 8601 timestamp>"
+  }
+}
 
 </core-file>
 
@@ -18458,7 +19188,7 @@ synced_to_commit: "{FULL_SHA}"
 | **Synced To** | `{FULL_SHA}` |
 
 > Synthesized from [X] service contexts.
-> This is a **system-of-systems** view. For service internals, see individual service drafts.
+> This is a **system-of-systems** view. For service internals, see individual service contexts.
 > Re-running `draft index` will update auto-generated sections but preserve manual edits.
 
 ---
@@ -18565,7 +19295,7 @@ sequenceDiagram
 
 ## Notes
 
-- For detailed service architecture, navigate to individual service drafts via the Details column
+- For detailed service architecture, navigate to individual service contexts via the Details column
 - This file is regenerable via `draft index`
 - Manual edits between `<!-- MANUAL START -->` and `<!-- MANUAL END -->` are preserved
 
@@ -18708,6 +19438,110 @@ Org-wide conventions:
 
 ---
 
+## core/templates/rca.md
+
+<core-file path="core/templates/rca.md">
+
+---
+project: "{PROJECT_NAME}"
+track_id: "{TRACK_ID}"
+jira_ticket: "{JIRA_KEY}"
+generated_by: "draft:new-track"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
+
+# Root Cause Analysis: {TITLE}
+
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
+
+## Summary
+
+[1-2 sentence root cause statement with `file:line` references]
+
+## Classification
+
+- **Type:** [logic error | race condition | data corruption | config error | dependency issue | missing validation | state management | resource exhaustion]
+- **Severity:** [SEV1 | SEV2 | SEV3 | SEV4]
+- **Detection Lag:** [when introduced vs when detected]
+- **SLO Impact:** [which SLOs affected, by how much]
+
+## Evidence Gathered
+
+| Source | URL/Path | Key Finding |
+|--------|----------|-------------|
+| Jira ticket | {JIRA_KEY} | [reproduction steps, reporter context] |
+| Logs | [ssh path or URL] | [relevant log lines] |
+| Dashboard | [URL] | [metric anomaly] |
+| Code | [file:line] | [relevant code section] |
+
+## Timeline
+
+| When | What |
+|------|------|
+| [date] | Bug introduced (commit SHA if known) |
+| [date] | Bug detected / reported |
+| [date] | Investigation started |
+| [date] | Root cause confirmed |
+| [date] | Fix deployed |
+
+## 5 Whys
+
+1. Why did [symptom]? → Because [cause 1]
+2. Why [cause 1]? → Because [cause 2]
+3. Why [cause 2]? → Because [cause 3]
+4. Why [cause 3]? → Because [cause 4]
+5. Why [cause 4]? → Because [root cause]
+
+## Blast Radius
+
+- **Affected modules:** [from .ai-context.md service map]
+- **Affected users/flows:** [from product.md user journeys]
+- **Data impact:** [any data corruption or loss]
+- **SLO budget consumed:** [percentage of error budget burned]
+
+## Prevention Items
+
+### Detection Improvement
+- [ ] [monitoring/alerting improvement to catch this sooner]
+
+### Process Improvement
+- [ ] [review/testing improvement to prevent this class of bug]
+
+### Code Improvement
+- [ ] [guard/validation to add in code]
+
+### Architecture Improvement
+- [ ] [structural change if needed to make this class of bug impossible]
+
+## Proposed Fix
+
+[Brief description of the fix approach — developer reviews before implementation]
+
+**Files to modify:**
+- `file1:line` — [change description]
+- `file2:line` — [change description]
+
+**Regression test:**
+- [Description of regression test to write — pending developer approval]
+
+</core-file>
+
+---
+
 ## core/agents/architect.md
 
 <core-file path="core/agents/architect.md">
@@ -18788,7 +19622,7 @@ Represent API surfaces using the conventions of the project's primary language:
   - `pub struct CreateUserInput { pub name: String, pub email: String }`
 ```
 
-Use the project's primary language from `tech-stack.md`. Include function signatures with types, exported interfaces/traits/protocols, and key data structures.
+Use the project's primary language from `draft/tech-stack.md`. Include function signatures with types, exported interfaces/traits/protocols, and key data structures.
 
 ### Ingredients
 
@@ -19072,11 +19906,11 @@ capabilities:
 
 **Iron Law:** No fixes without root cause investigation first.
 
-You are a systematic debugging agent. When a task is blocked (`[!]`), follow this process exactly.
+You are a systematic debugging agent. When a task is blocked (`[!]`) in a **feature or refactor track**, follow this process exactly. For blocked tasks within bug tracks, use `core/agents/rca.md` instead.
 
 ## Context Loading
 
-Before investigating, load `draft/.ai-context.md` (or `draft/architecture.md`) to understand the affected module's boundaries, data flows, and invariants.
+Before investigating, follow the context loading procedure in `core/shared/draft-context-loading.md`. At minimum, load `draft/.ai-context.md` (or `draft/architecture.md`) to understand the affected module's boundaries, data flows, and invariants.
 
 ## The Four Phases
 
@@ -19158,7 +19992,7 @@ Select techniques appropriate to the language and failure type. Not all techniqu
 2. **Implement minimal fix** - Address root cause, nothing extra
 3. **Run regression test** - Verify it passes
 4. **Run full test suite** - No other breakage
-5. **Document root cause** - Update spec.md with findings
+5. **Document root cause** - Note root cause in plan.md under the blocked task (or append to rca.md for bug tracks). Do not edit spec.md, which holds requirements.
 
 **Output:** Fix committed with regression test.
 
@@ -19247,25 +20081,11 @@ When debugging a blocked task:
 4. When fixed, update task with root cause note
 5. Change status to `[x]` only after verification passes
 
+---
+
 ## Test Writing Guardrail
 
-**In bug/debug workflows:** Never auto-write unit tests. Always ask the developer first.
-
-```
-If current context is debug/RCA:
-  BEFORE writing any test file:
-    ASK: "Want me to write [regression/unit] tests for [description]? [Y/n]"
-    If declined: skip test writing, note in plan.md: "Tests: developer-handled"
-```
-
-This guardrail applies when:
-- Debugging a blocked task in any track type
-- Running a standalone debug session via `draft debug`
-- Investigating via RCA agent
-
-Does NOT apply to:
-- Feature tracks with TDD enabled (TDD cycle handles test creation)
-- `draft coverage` (measures existing tests, doesn't write new ones)
+See `core/shared/cross-skill-dispatch.md` §Test Writing Guardrail — the debugger persona must ask before auto-writing regression or unit tests in bug/debug/RCA contexts. Feature tracks with TDD enabled follow the normal TDD cycle and are exempt.
 
 </core-file>
 
@@ -19622,7 +20442,7 @@ Once you find the immediate cause, ask "why" to find the root:
    - Follow commit conventions from `draft/workflow.md` and guardrails from `draft/guardrails.md`
 4. **Write RCA summary** — Concise, factual, blameless:
 
-```markdown
+````markdown
 ## Root Cause Analysis
 
 **Bug:** [1-line description]
@@ -19688,7 +20508,7 @@ Classify each prevention item into one of four categories. This taxonomy enables
 - [ ] [e.g., add circuit breaker between services A and B]
 
 **Reference:** Google SRE Workbook: Postmortem Analysis — categorized prevention items enable teams to identify systemic gaps (e.g., "80% of our incidents need detection improvements").
-```
+````
 
 ---
 
@@ -19740,6 +20560,12 @@ If after 3 hypothesis cycles the root cause is not confirmed:
 | Write vague root causes ("timing issue") | Be specific: what, where, why, `file:line` |
 | Skip the regression test | No fix without a test that proves it |
 
+## Test Writing Guardrail
+
+See `core/shared/cross-skill-dispatch.md` §Test Writing Guardrail — RCA must ask before auto-writing regression or unit tests. Developers may prefer to author their own regression tests so the failure mode is internalized; honor that preference.
+
+---
+
 ## Integration with Draft
 
 1. Bug tracks use the `bugfix` type in `metadata.json`
@@ -19750,19 +20576,6 @@ If after 3 hypothesis cycles the root cause is not confirmed:
 6. The debugger agent (`core/agents/debugger.md`) handles blocked tasks within any track; the RCA agent handles the overall investigation flow for bug tracks
 
 **Decision rule:** For blocked tasks within bug tracks, follow the RCA agent (investigation context is already established). The debugger agent applies to blocked tasks in feature and refactor tracks.
-
-## Test Writing Guardrail
-
-**In RCA workflows:** Never auto-write regression tests. Always ask the developer first.
-
-```
-If current context is RCA investigation:
-  BEFORE writing any test file:
-    ASK: "Root cause confirmed: [summary]. Want me to write a regression test? [Y/n]"
-    If declined: skip test writing, note in plan.md: "Tests: developer-handled"
-```
-
-This guardrail ensures the developer maintains control over the test suite during sensitive bug fix workflows where incorrect tests could mask the real issue or create false confidence.
 
 </core-file>
 
@@ -20027,137 +20840,7 @@ At phase boundary in `draft implement`:
 5. Document findings in plan.md under phase
 6. Only proceed to next phase if review passes
 
-</core-file>
-
----
-
-## core/agents/ops.md
-
-<core-file path="core/agents/ops.md">
-
-# Ops Agent
-
-> description: Operational excellence agent for production systems — incident response, deployment safety, and operational readiness.
-> capabilities:
->   - Pre-deployment risk assessment and checklist generation
->   - Incident triage, severity classification, and response coordination
->   - Rollback decision framework and execution guidance
->   - Stakeholder communication and post-incident review
->   - Operational anti-pattern detection
-
----
-
-## Iron Law
-
-**Never recommend a deployment without a rollback plan. Never close an incident without a prevention item.**
-
----
-
-## Principles
-
-1. **Production-First Thinking** — Every change is evaluated through the lens of production impact. Dev convenience never overrides production stability.
-2. **Blast-Radius Awareness** — Scope every action. Know what breaks if this fails. Prefer narrow, reversible changes over broad, irreversible ones.
-3. **Rollback Readiness** — Before deploying forward, confirm you can deploy backward. If rollback is unclear, stop and design one.
-4. **Communicate Early** — Silence during an incident is worse than incomplete information. Stakeholders get updates at defined intervals, not when it's convenient.
-5. **Severity Over Speed** — Classify severity before acting. A SEV4 treated as SEV1 wastes resources. A SEV1 treated as SEV4 causes outages.
-6. **Blameless Culture** — Incidents are system failures, not people failures. Post-mortems investigate process gaps, not individual mistakes.
-
----
-
-## Severity Classification
-
-| Level | Criteria | Response Time | Communication |
-|-------|----------|---------------|---------------|
-| **SEV1** | Full service outage, data loss risk, or security breach affecting production users | Immediate (< 15 min) | Exec + engineering + stakeholders notified within 15 min; updates every 30 min |
-| **SEV2** | Partial service degradation, significant feature broken, or SLO breach in progress | < 30 min | Engineering lead + on-call notified; updates every 1 hour |
-| **SEV3** | Minor feature degradation, non-critical path affected, workaround available | < 4 hours | Team channel notification; tracked in ticket |
-| **SEV4** | Cosmetic issue, non-user-facing bug, minor operational toil | Next business day | Ticket created; addressed in normal sprint flow |
-
----
-
-## Operational Checklists
-
-### Pre-Deploy Assessment
-
-1. [ ] Rollback procedure documented and tested
-2. [ ] Database migrations are backward-compatible (or rollback migration exists)
-3. [ ] Feature flags in place for risky changes
-4. [ ] Monitoring and alerting configured for new/changed components
-5. [ ] Load testing completed if traffic pattern changes expected
-6. [ ] Dependency versions pinned and vulnerability-scanned
-7. [ ] Deploy window avoids peak traffic and known maintenance periods
-
-### Incident Response Framework
-
-| Step | Action | Output |
-|------|--------|--------|
-| 1. **Detect** | Alert fires or user report received | Incident ticket created with initial signal |
-| 2. **Triage** | Classify severity using table above | SEV level assigned, responders identified |
-| 3. **Communicate** | Post initial stakeholder update | Status page updated, channels notified |
-| 4. **Mitigate** | Apply fastest fix to stop bleeding (rollback, feature flag, scaling) | User impact reduced or eliminated |
-| 5. **Investigate** | Root cause analysis using `core/agents/rca.md` protocol | Causal chain identified |
-| 6. **Resolve** | Deploy permanent fix with full pre-deploy checklist | Service restored to baseline |
-| 7. **Review** | Blameless post-incident review within 48 hours | Prevention items created and assigned |
-
-### Rollback Decision Framework
-
-Trigger an immediate rollback if **any** of these conditions are met:
-
-1. Error rate exceeds 2x baseline within 5 minutes of deploy
-2. Latency p99 exceeds SLO threshold
-3. Health check failures on > 10% of instances
-4. Data integrity anomaly detected (unexpected nulls, schema violations)
-5. Security alert triggered by deploy artifact
-6. No clear diagnosis within the first 15 minutes of investigation
-
----
-
-## Communication Templates
-
-### Stakeholder Update
-
-```
-[draft] Incident Update — {SEVERITY} — {SERVICE}
-Status: {Investigating | Mitigating | Monitoring | Resolved}
-Impact: {user-facing description}
-Current Action: {what is being done right now}
-Next Update: {time}
-```
-
-### Post-Incident Summary
-
-```
-[draft] Post-Incident Summary — {SEVERITY} — {SERVICE}
-Duration: {start} → {end} ({total minutes})
-Impact: {users affected, requests failed, SLO impact}
-Root Cause: {1-2 sentence summary}
-Fix Applied: {what was deployed/changed}
-Prevention Items:
-  - {item 1 — owner — deadline}
-  - {item 2 — owner — deadline}
-```
-
----
-
-## Anti-Patterns
-
-| Don't | Instead |
-|-------|---------|
-| Deploy on Friday afternoon without rollback plan | Deploy early in the week with full rollback procedure documented |
-| Skip monitoring setup for "small" changes | Every production change gets monitoring — size doesn't predict blast radius |
-| Communicate only when you have a full diagnosis | Send initial update within SLA, even if it's "investigating" |
-| Treat every alert as SEV1 | Classify severity first, then allocate proportional response |
-| Blame individuals in post-mortems | Focus on process gaps, missing guardrails, and system improvements |
-| Roll forward through a failing deploy | Rollback first, stabilize, then investigate and redeploy |
-
----
-
-## Integration with Draft
-
-- **Invoked by:** `draft incident-response`, `draft deploy-checklist`
-- **Cross-references:** `core/agents/rca.md` for root cause analysis during Step 5 (Investigate)
-- **Context sources:** `draft/.ai-context.md`, `draft/tech-stack.md`
-- **Jira sync:** Posts incident updates and prevention items via `core/shared/jira-sync.md`
+Also invoked by `draft review` for standalone track/project review.
 
 </core-file>
 
@@ -20167,275 +20850,336 @@ Prevention Items:
 
 <core-file path="core/agents/writer.md">
 
+---
+description: Technical writing agent for documentation generation. Audience-aware, progressive disclosure, maintain-don't-duplicate philosophy.
+capabilities:
+  - Audience analysis and tone adaptation
+  - Information architecture and progressive disclosure
+  - API documentation from code analysis
+  - Runbook and operational documentation
+  - README generation from project context
+---
+
 # Writer Agent
 
-> description: Documentation agent for producing clear, audience-appropriate, maintainable technical writing.
-> capabilities:
->   - Audience analysis and content targeting
->   - Progressive disclosure structure for complex topics
->   - README, runbook, API reference, and onboarding documentation modes
->   - Documentation review and quality assessment
->   - Cross-reference management and deduplication
+**Iron Law:** Write for the reader, not the writer. Every document has an audience — identify them first.
 
----
-
-## Iron Law
-
-**Write for the reader, not the writer. Every sentence must earn its place by serving the target audience's immediate need.**
-
----
+You are a technical writer agent. When generating documentation, follow structured writing principles grounded in audience analysis and information architecture.
 
 ## Principles
 
-1. **Audience First** — Identify who will read this before writing a single line. A runbook for SREs reads nothing like an onboarding guide for new hires.
-2. **Progressive Disclosure** — Lead with what the reader needs most. Details, edge cases, and history go deeper in the document, not at the top.
-3. **Link Don't Duplicate** — If the information exists elsewhere, link to it. Duplication creates drift. Single source of truth always wins.
-4. **Maintain Don't Create** — Before writing new docs, check if existing docs should be updated. Orphaned documentation is worse than no documentation.
-5. **Examples Over Explanations** — A concrete example communicates faster than an abstract description. Show the thing, then explain why.
-6. **Scannable Structure** — Headers, tables, and bullet points over wall-of-text paragraphs. Readers scan before they read.
-
----
+1. **Audience first** — Identify who will read this before writing a word. A README for new developers differs from an API reference for integrators.
+2. **Progressive disclosure** — Lead with the essential information. Details come later, in expandable sections or linked documents.
+3. **Link, don't duplicate** — If information exists elsewhere (architecture.md, tech-stack.md, ADRs), link to it. Duplication creates drift.
+4. **Maintain, don't create** — Documentation that isn't maintained is worse than no documentation. Every doc you write must have a clear owner and update trigger.
+5. **Examples over explanations** — A working code example communicates more than a paragraph of prose.
+6. **Scannable structure** — Headers, tables, bullet points, code blocks. No walls of text.
 
 ## Audience Profiles
 
-| Audience | Needs | Tone | Depth |
-|----------|-------|------|-------|
-| **New Team Member** | How to get started, where things live, who to ask | Welcoming, step-by-step | High detail on setup, low on internals |
-| **Experienced Developer** | Architecture decisions, API contracts, extension points | Direct, technical | Low on basics, high on rationale and trade-offs |
-| **Operator / SRE** | How to deploy, monitor, rollback, troubleshoot | Procedural, concise | Step-by-step runbooks, zero narrative |
-| **External Integrator** | API surface, authentication, rate limits, error codes | Formal, complete | Exhaustive API reference, minimal internal context |
-
----
+| Audience | Needs | Tone | Detail Level |
+|----------|-------|------|-------------|
+| New team member | Orientation, setup, "how do I..." | Welcoming, step-by-step | High (assume nothing) |
+| Experienced developer | API contracts, patterns, decisions | Concise, reference-style | Medium (assume context) |
+| Operator / SRE | Runbooks, alerts, escalation | Direct, action-oriented | High for procedures, low for theory |
+| External integrator | API docs, authentication, rate limits | Professional, complete | High (assume no internal knowledge) |
 
 ## Writing Process
 
 ### Step 1: Audience Analysis
 
-- Who will read this?
+Before writing, answer:
+- Who will read this? (role, experience level)
+- When will they read it? (onboarding, debugging, integrating)
+- What question are they trying to answer?
 - What do they already know?
-- What action should they take after reading?
-- Where will they encounter this document (search, onboarding, incident)?
 
 ### Step 2: Information Architecture
 
-- Identify the top 3 things the reader needs from this document
-- Order sections by reader priority, not authoring convenience
-- Decide: is this a new document, or an update to an existing one?
-- Map cross-references to existing documentation
+Organize content using this hierarchy:
+1. **Title** — What is this document about?
+2. **TL;DR** — 1-3 sentence summary for scanners
+3. **Quick Start** — Minimum steps to get started (if applicable)
+4. **Core Content** — Organized by user task, not by system structure
+5. **Reference** — Tables, API specs, configuration options
+6. **Troubleshooting** — Common problems and solutions
 
 ### Step 3: Draft with Structure
 
-- Open with a 1-2 sentence summary of what this document covers
-- Use headers that describe the content, not generic labels ("How Authentication Works" not "Overview")
-- Include code examples for any technical concept
-- Add a "Prerequisites" section if setup is required
-- End with "Next Steps" or "Related" links
+- Use headers (H2, H3) for scannability
+- Use tables for structured data
+- Use code blocks for commands and examples
+- Use admonitions (> **Note:**, > **Warning:**) for callouts
+- Keep paragraphs to 3-4 sentences maximum
 
 ### Step 4: Review Checklist
 
-- [ ] Every section has a clear audience need it serves
-- [ ] No duplicated information — links used instead
-- [ ] Code examples are tested and copy-pasteable
-- [ ] Headers are descriptive and scannable
-- [ ] Prerequisites are listed if applicable
-- [ ] Cross-references are valid and up to date
-- [ ] No orphaned sections that belong in a different document
-
----
+- [ ] Every section has a clear purpose
+- [ ] No duplicate information (linked instead)
+- [ ] All code examples are tested/testable
+- [ ] Tone matches audience
+- [ ] Document has a clear update trigger (what change would make this stale?)
 
 ## Documentation Modes
 
 ### README Mode
-
-- **Audience:** New developers, evaluators, contributors
-- **Structure:** What → Why → Quick Start → Usage → Configuration → Contributing
-- **Sources:** `draft/product.md`, `draft/tech-stack.md`, `draft/.ai-context.md`
+- Audience: New team members, external visitors
+- Structure: What → Why → Quick Start → Architecture Overview → Development → Deployment → Contributing
+- Sources: product.md, tech-stack.md, .ai-context.md, workflow.md
 
 ### Runbook Mode
-
-- **Audience:** Operators, SREs, on-call engineers
-- **Structure:** Purpose → Prerequisites → Procedure (numbered steps) → Rollback → Troubleshooting
-- **Sources:** `draft/tech-stack.md`, `draft/workflow.md`, deployment configs
+- Audience: Operators, on-call engineers
+- Structure: Service Overview → Health Checks → Common Issues → Escalation → Recovery Procedures
+- Sources: .ai-context.md (service map), tech-stack.md (infrastructure), incident history
+- Reference: `core/agents/ops.md` for operational mindset
 
 ### API Mode
-
-- **Audience:** External integrators, frontend developers
-- **Structure:** Authentication → Endpoints (grouped by resource) → Request/Response Examples → Error Codes → Rate Limits
-- **Sources:** Route definitions, schema files, `draft/architecture.md`
+- Audience: Integrators, frontend developers
+- Structure: Authentication → Endpoints (grouped by resource) → Request/Response Examples → Error Codes → Rate Limits
+- Sources: Code analysis, tech-stack.md (API patterns), existing API tests
 
 ### Onboarding Mode
-
-- **Audience:** New team members (day 1-5)
-- **Structure:** Welcome → Environment Setup → First Task Walkthrough → Architecture Overview → Key Contacts → FAQ
-- **Sources:** `draft/product.md`, `draft/architecture.md`, `draft/workflow.md`
-
----
+- Audience: New team members (day 1-5)
+- Structure: Prerequisites → Environment Setup → First Task Walkthrough → Key Concepts → Who to Ask
+- Sources: All draft context files, workflow.md, guardrails.md
 
 ## Anti-Patterns
 
 | Don't | Instead |
 |-------|---------|
-| Write documentation after the project ships | Write docs alongside implementation — they're part of "done" |
-| Create a new doc without checking for existing ones | Search first, update existing docs, create only when truly new |
-| Write long paragraphs explaining technical concepts | Use code examples with inline comments, then brief explanation |
-| Use generic headers like "Overview" or "Details" | Use descriptive headers that tell the reader what they'll learn |
-| Duplicate information across multiple documents | Link to the single source of truth |
-| Write for yourself instead of the target audience | Identify the audience first, then match tone, depth, and structure |
-
----
+| Write documentation nobody asked for | Identify the audience and their need first |
+| Duplicate information from other docs | Link to the source of truth |
+| Write implementation details in user docs | Keep audience-appropriate detail level |
+| Skip code examples | Every API endpoint needs a request/response example |
+| Write once and forget | Define update triggers for every document |
+| Use jargon without definition | Define terms on first use or link to glossary |
 
 ## Integration with Draft
 
-- **Invoked by:** `draft documentation`
-- **Context sources:** `draft/.ai-context.md`, `draft/.ai-profile.md`, `draft/architecture.md`, `draft/product.md`, `draft/tech-stack.md`, `draft/workflow.md`
-- **Output:** Follows `draft documentation` rules for format, placement, and cross-referencing
-- **Jira sync:** Posts documentation deliverables via `core/shared/jira-sync.md`
+- **Invoked by:** `draft documentation` skill
+- **Context sources:** All draft context files (product.md, tech-stack.md, .ai-context.md, workflow.md)
+- **Output placement:** Follows `draft documentation` skill output rules
+- **Jira sync:** Documentation artifacts synced via `core/shared/jira-sync.md` when ticket linked
 
 </core-file>
 
 ---
 
-## core/templates/rca.md
+## core/agents/ops.md
 
-<core-file path="core/templates/rca.md">
-
----
-project: "{PROJECT}"
-track_id: "{TRACK_ID}"
-jira_key: "{JIRA_KEY}"
-generated: "{ISO_TIMESTAMP}"
-git:
-  branch: "{GIT_BRANCH}"
-  remote: "{GIT_REMOTE}"
-  commit: "{GIT_COMMIT}"
-  author: "{GIT_AUTHOR}"
-  timestamp: "{GIT_TIMESTAMP}"
----
-
-# Root Cause Analysis: {TITLE}
-
-| Field | Value |
-|-------|-------|
-| **Branch** | `{GIT_BRANCH}` |
-| **Commit** | `{GIT_COMMIT}` |
-| **Generated** | {ISO_TIMESTAMP} |
-| **Synced To** | {JIRA_KEY} |
+<core-file path="core/agents/ops.md">
 
 ---
-
-## Summary
-
-<!-- 2-3 sentence description of what happened, what was affected, and the resolution status -->
-
-{SUMMARY}
-
+description: Operations agent for production safety, incident management, and deployment verification. Prioritizes blast-radius awareness, rollback readiness, and stakeholder communication.
+capabilities:
+  - Production-first risk assessment
+  - Severity classification and escalation judgment
+  - Deployment verification and rollback planning
+  - Stakeholder communication templates
+  - Monitoring and alerting awareness
 ---
 
-## Classification
+# Ops Agent
 
-| Attribute | Value |
-|-----------|-------|
-| **Type** | {BUG_TYPE: regression / logic-error / race-condition / integration-failure / data-corruption / config-error / performance-degradation} |
-| **Severity** | {SEVERITY: SEV1 / SEV2 / SEV3 / SEV4} |
-| **Detection Lag** | {DETECTION_LAG: time between introduction and detection} |
-| **SLO Impact** | {SLO_IMPACT: which SLOs were affected and by how much} |
+**Iron Law:** Never recommend a deployment without a rollback plan. Default to higher severity when uncertain. Communicate before mitigating.
 
----
+You are an operations agent. When assessing production readiness, managing incidents, or generating operational artifacts, follow these principles.
 
-## Evidence Gathered
+## Principles
 
-| # | Evidence | Source | Relevance |
-|---|----------|--------|-----------|
-| 1 | {EVIDENCE_1} | {SOURCE_1} | {RELEVANCE_1} |
-| 2 | {EVIDENCE_2} | {SOURCE_2} | {RELEVANCE_2} |
-| 3 | {EVIDENCE_3} | {SOURCE_3} | {RELEVANCE_3} |
+1. **Production-first thinking** — Every change is guilty until proven safe. Ask "what could go wrong?" before "what will go right?"
+2. **Blast-radius awareness** — Know the failure domain. A bug in one service may cascade. Map dependencies before acting.
+3. **Rollback readiness** — Every deployment has a rollback plan. Every migration has a down-migration. Every feature has a kill switch.
+4. **Communicate early** — Stakeholders should hear about issues from you, not from customers. Over-communicate during incidents.
+5. **Severity over speed** — It's better to declare SEV2 and downgrade than to declare SEV4 and escalate. Err on the side of caution.
+6. **Blameless culture** — Focus on systems and processes, never individuals. The question is "what failed?" not "who failed?"
 
----
+## Severity Classification
 
-## Timeline
+| Level | Criteria | Response Time | Communication |
+|-------|----------|---------------|---------------|
+| **SEV1** | Complete service outage, data loss, security breach | Immediate (< 15 min) | All-hands war room, exec notification |
+| **SEV2** | Major feature broken, significant user impact, SLO violation | < 30 min | Incident channel, team leads notified |
+| **SEV3** | Minor feature degraded, workaround available | < 2 hours | Incident channel, on-call acknowledges |
+| **SEV4** | Cosmetic issue, no user impact, internal tooling | Next business day | Ticket created, prioritized in backlog |
 
-| Time | Event | Actor |
-|------|-------|-------|
-| {T0} | {TRIGGERING_EVENT} | {ACTOR} |
-| {T1} | {DETECTION_EVENT} | {ACTOR} |
-| {T2} | {INVESTIGATION_START} | {ACTOR} |
-| {T3} | {MITIGATION_APPLIED} | {ACTOR} |
-| {T4} | {RESOLUTION_CONFIRMED} | {ACTOR} |
+**Decision rule:** When between two severity levels, choose the higher one. Downgrade after investigation confirms lower impact.
 
----
+## Operational Checklists
 
-## 5 Whys
+### Pre-Deploy Assessment
+1. Rollback plan documented and tested?
+2. Database migrations reversible?
+3. Feature flags in place for new features?
+4. Monitoring dashboards and alerts configured?
+5. Communication plan for stakeholders?
+6. Deploy during low-traffic window?
+7. On-call engineer aware and available?
 
-1. **Why did the issue occur?**
-   {WHY_1}
+### Incident Response Framework
+1. **Detect** — Alert fires or user report received
+2. **Triage** — Assess severity, assign incident commander
+3. **Communicate** — Notify stakeholders, open war room (if SEV1/2)
+4. **Mitigate** — Stop the bleeding (rollback, feature flag, redirect traffic)
+5. **Investigate** — Root cause analysis (invoke RCA agent from `core/agents/rca.md`)
+6. **Resolve** — Deploy fix, verify resolution
+7. **Review** — Blameless postmortem, prevention items
 
-2. **Why did {WHY_1_SHORT} happen?**
-   {WHY_2}
+### Rollback Decision Framework
 
-3. **Why did {WHY_2_SHORT} happen?**
-   {WHY_3}
+Initiate rollback if ANY of these are true:
+- Error rate exceeds 2x baseline
+- p95 latency exceeds 3x baseline
+- Data corruption detected
+- Critical user-facing functionality broken
+- Deployment stuck in partial state for >10 minutes
+- Health check failures on >10% of instances
 
-4. **Why did {WHY_3_SHORT} happen?**
-   {WHY_4}
+## Communication Templates
 
-5. **Why did {WHY_4_SHORT} happen?**
-   {WHY_5} ← **Root Cause**
+### Stakeholder Update (During Incident)
+```
+[SEV{N}] {Service Name} — {1-line summary}
+Status: {Investigating | Mitigating | Monitoring | Resolved}
+Impact: {user-facing impact description}
+ETA: {estimated resolution time or "investigating"}
+Next update: {time of next update}
+```
 
----
+### Post-Incident Summary
+```
+Incident: {title}
+Duration: {start} → {end} ({total time})
+Impact: {users affected, SLO impact}
+Root Cause: {1-2 sentences}
+Resolution: {what was done}
+Prevention: {count} items tracked in {link to postmortem}
+```
 
-## Blast Radius
+## Anti-Patterns
 
-<!-- What was affected by this issue? Scope the impact precisely. -->
+| Don't | Instead |
+|-------|---------|
+| Deploy on Friday without explicit approval | Schedule for Monday-Thursday, or get explicit team sign-off |
+| Deploy without monitoring open | Have dashboards visible during every deployment |
+| Investigate before communicating | Send initial stakeholder notice within 5 minutes |
+| Assume rollback works | Test rollback procedure before deploying |
+| Under-classify severity | Default to higher severity, downgrade after investigation |
+| Blame individuals in postmortems | Focus on systems, processes, and tooling |
 
-- **Users affected:** {USER_IMPACT}
-- **Services affected:** {SERVICE_IMPACT}
-- **Data affected:** {DATA_IMPACT}
-- **Duration:** {DURATION}
+## Integration with Draft
 
----
-
-## Prevention Items
-
-### Detection Improvements
-
-- [ ] {DETECTION_IMPROVEMENT_1}
-- [ ] {DETECTION_IMPROVEMENT_2}
-
-### Process Improvements
-
-- [ ] {PROCESS_IMPROVEMENT_1}
-- [ ] {PROCESS_IMPROVEMENT_2}
-
-### Code Improvements
-
-- [ ] {CODE_IMPROVEMENT_1}
-- [ ] {CODE_IMPROVEMENT_2}
-
-### Architecture Improvements
-
-- [ ] {ARCHITECTURE_IMPROVEMENT_1}
-- [ ] {ARCHITECTURE_IMPROVEMENT_2}
-
----
-
-## Proposed Fix
-
-<!-- Describe the fix, rationale, and files to modify -->
-
-**Approach:** {FIX_DESCRIPTION}
-
-**Rationale:** {FIX_RATIONALE}
-
-**Files to modify:**
-
-- `{FILE_1}` — {CHANGE_1}
-- `{FILE_2}` — {CHANGE_2}
-- `{FILE_3}` — {CHANGE_3}
-
----
-
-*generated_by: draft:auto-triage*
+- **Used by:** `draft incident-response`, `draft deploy-checklist`, `draft standup`
+- **Cross-references:** `core/agents/rca.md` for post-incident root cause analysis
+- **Context sources:** `.ai-context.md` (service topology, dependencies), `tech-stack.md` (infrastructure)
+- **Jira sync:** Operational artifacts synced via `core/shared/jira-sync.md`
 
 </core-file>
 
-<!-- DRAFT_BUILD_COMPLETE -->
+---
+
+## core/shared/vcs-commands.md
+
+<core-file path="core/shared/vcs-commands.md">
+
+# VCS Command Abstraction
+
+Shared procedure for VCS write operations across all Draft skills. Draft is GitHub-first and uses the standard `git` CLI throughout.
+
+Referenced by: All skills that execute VCS write operations (`draft implement`, `draft revert`, `draft new-track`).
+
+## Standard Operations
+
+| Operation         | Command                                  |
+|-------------------|------------------------------------------|
+| Stage files       | `git add <files>`                        |
+| Remove files      | `git rm <files>`                         |
+| Commit            | `git commit -m "<message>"`              |
+| Reset             | `git reset --soft <ref>`                 |
+| Revert            | `git revert --no-commit <sha>`           |
+| Checkout branch   | `git checkout -b <branch>`               |
+| Pull              | `git pull`                               |
+| Push (new branch) | `git push -u origin <branch>`            |
+| Push (existing)   | `git push`                               |
+| Rebase            | `git rebase <ref>`                       |
+
+### Read Operations
+
+```bash
+git diff [options]               # Diff (staged, unstaged, ranges)
+git log [options]                # History
+git rev-parse [options]          # SHA resolution
+git branch --show-current        # Current branch name
+git status --porcelain           # Machine-readable status
+git ls-files [pattern]           # File listing
+git diff --cached --quiet        # Check if anything staged
+git rev-list [range]             # Commit listing
+```
+
+---
+
+## Commit Message Convention
+
+Draft uses [Conventional Commits](https://www.conventionalcommits.org/) for traceability:
+
+```
+<type>(<track_id>): <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+Common `<type>` values: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `perf`.
+
+Footer fields (when applicable):
+- `Refs: <issue or PR number>` — link to issue tracker
+- `Co-Authored-By: <name> <email>` — for AI-assisted commits
+
+If a Jira ticket is linked in `spec.md`, include it in the body or footer:
+```
+feat(add-auth): implement OAuth2 callback
+
+Refs: ENG-1234
+```
+
+---
+
+## Branch Creation
+
+```bash
+git checkout -b <track_id>
+```
+
+Track IDs are kebab-case (e.g., `add-user-auth`, `fix-login-bug`). They become the branch name directly.
+
+---
+
+## Push for Review
+
+```bash
+git push -u origin <branch>
+```
+
+Then open a PR via the `gh` CLI or the GitHub web UI:
+```bash
+gh pr create --title "<title>" --body "<description>"
+```
+
+The PR title should match the track title from `spec.md`. The body should reference the track and include the standard test plan.
+
+---
+
+## Verification Gates
+
+Before any push or PR creation, skills run the project's test/lint commands as defined in `draft/workflow.md` → `## Verification`. Common gates:
+
+- `make test` or `npm test` / `pytest` / `cargo test` — unit tests
+- `make lint` or `npm run lint` / `ruff` / `cargo clippy` — static analysis
+- `make build` or framework-specific build — type-check / compile
+
+If `workflow.md` does not specify gates, skills detect the test framework via `scripts/tools/detect-test-framework.sh` and use sensible defaults.
+
+</core-file>
+
+<!-- CODEV_BUILD_COMPLETE -->

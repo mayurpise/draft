@@ -1,3 +1,19 @@
+---
+project: "{PROJECT_NAME}"
+module: "root"
+generated_by: "draft:init"
+generated_at: "{ISO_TIMESTAMP}"
+git:
+  branch: "{LOCAL_BRANCH}"
+  remote: "{REMOTE/BRANCH}"
+  commit: "{FULL_SHA}"
+  commit_short: "{SHORT_SHA}"
+  commit_date: "{COMMIT_DATE}"
+  commit_message: "{COMMIT_MESSAGE}"
+  dirty: false
+synced_to_commit: "{FULL_SHA}"
+---
+
 # Jira Configuration & Story Template
 
 ## Project Configuration
@@ -13,7 +29,7 @@ story_points_field: customfield_10028  # Custom field ID for story points (optio
 default_issue_type: Story   # Default issue type for tasks
 default_priority: Medium    # Default priority level
 labels:                     # Labels to apply to all created issues
-  - draft-generated
+  - draft
 ```
 
 ---

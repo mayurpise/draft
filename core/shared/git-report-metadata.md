@@ -2,7 +2,21 @@
 
 Shared procedure for gathering git metadata and generating YAML frontmatter in Draft reports.
 
-Referenced by: `/draft:bughunt`, `/draft:deep-review`, `/draft:review`
+Referenced by: All skills that generate Draft reports — including `/draft:bughunt`, `/draft:deep-review`, `/draft:review`, `/draft:quick-review`, `/draft:tech-debt`, `/draft:deploy-checklist`, `/draft:incident-response`, `/draft:debug`, `/draft:standup`, `/draft:testing-strategy`
+
+## Preferred: Deterministic Script
+
+Use `scripts/tools/git-metadata.sh` when it is available on the host:
+
+```bash
+scripts/tools/git-metadata.sh --yaml \
+    --project "$PROJECT" --module "$MODULE" \
+    --track-id "$TRACK_ID" --generated-by "draft:bughunt"
+```
+
+The script emits the full YAML frontmatter block shown below, including `commits_ahead_base` / `commits_behind_base` vs. `--base main`. Use `--json` for a machine-readable object with the same fields. Exits nonzero outside a git work tree.
+
+The manual commands below remain the specification and a fallback for environments where the script is not present.
 
 ## Git Metadata Commands
 
@@ -73,8 +87,10 @@ TIMESTAMP=$(date +%Y-%m-%dT%H%M)
 # Write report to timestamped file
 # Example: draft/bughunt-report-2026-03-15T1430.md
 
-# Create symlink to latest
-ln -sf <report-filename> <report-dir>/<report-type>-latest.md
+# Refresh the "-latest.md" symlink deterministically:
+scripts/tools/manage-symlinks.sh draft/ bughunt
+# (Fallback when the script is unavailable:)
+# ln -sf <report-filename> <report-dir>/<report-type>-latest.md
 ```
 
 Previous timestamped reports are preserved. The `-latest.md` symlink always points to the most recent report.

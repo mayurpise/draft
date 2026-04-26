@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
-# Test suite for core file inlining
+# Test suite for core file registry
 #
 # What this tests:
 # - All files listed in CORE_FILES array exist on disk
-# - Each core file appears in Copilot output wrapped in <core-file> tags
-# - Each core file appears in Gemini output wrapped in <core-file> tags
-# - No WARNING about missing core files on build stderr
+# - No duplicate entries in CORE_FILES
 #
 # Usage:
 #   ./tests/test-core-files.sh
@@ -13,21 +11,13 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-BUILD_SCRIPT="$ROOT_DIR/scripts/build-integrations.sh"
-CORE_DIR="$ROOT_DIR/core"
-COPILOT_OUTPUT="$ROOT_DIR/integrations/copilot/.github/copilot-instructions.md"
 
 source "$SCRIPT_DIR/test-helpers.sh"
+# Source lib.sh for canonical CORE_FILES and CORE_DIR
+source "$ROOT_DIR/scripts/lib.sh"
 
-echo "=== Core file inlining tests ==="
+echo "=== Core file registry tests ==="
 echo ""
-
-# Extract CORE_FILES array from build script
-CORE_FILES_RAW=$(sed -n '/^CORE_FILES=(/,/^)/p' "$BUILD_SCRIPT" | grep -v '^CORE_FILES=(' | grep -v '^)' | grep -v '^\s*#' | sed 's/^[[:space:]]*"//' | sed 's/"[[:space:]]*$//' | grep -v '^\s*$')
-CORE_FILES=()
-while IFS= read -r line; do
-    [[ -n "$line" ]] && CORE_FILES+=("$line")
-done <<< "$CORE_FILES_RAW"
 
 echo "## Core files count: ${#CORE_FILES[@]}"
 echo ""
@@ -45,52 +35,34 @@ for core_file in "${CORE_FILES[@]}"; do
 done
 assert "All CORE_FILES entries exist on disk" "$ALL_EXIST"
 
-# --- Ensure outputs are current ---
+# --- Every file on disk is in CORE_FILES (no orphans) ---
 echo ""
-echo "## Rebuilding outputs..."
-"$BUILD_SCRIPT" > /dev/null 2>&1 || true
-
-# --- Core files appear in Copilot output ---
-echo ""
-echo "## Core files in Copilot output"
-ALL_IN_COPILOT=true
-COPILOT_MISSING=()
-for core_file in "${CORE_FILES[@]}"; do
-    [[ -z "$core_file" ]] && continue
-    TAG="<core-file path=\"core/${core_file}\">"
-    if ! grep -qF "$TAG" "$COPILOT_OUTPUT" 2>/dev/null; then
-        COPILOT_MISSING+=("$core_file")
-        ALL_IN_COPILOT=false
-    fi
-done
-if [[ "$ALL_IN_COPILOT" == "false" ]]; then
-    for missing in "${COPILOT_MISSING[@]}"; do
-        echo "  MISSING in Copilot: $missing"
+echo "## No orphaned files"
+ALL_REGISTERED=true
+while IFS= read -r -d '' file; do
+    rel_path="${file#"$CORE_DIR/"}"
+    found=false
+    for core_file in "${CORE_FILES[@]}"; do
+        if [[ "$rel_path" == "$core_file" ]]; then
+            found=true
+            break
+        fi
     done
-fi
-assert "All core files inlined in Copilot output with <core-file> tags" "$ALL_IN_COPILOT"
+    if [[ "$found" == false ]]; then
+        echo "  ORPHAN: $rel_path (on disk but not in CORE_FILES)"
+        ALL_REGISTERED=false
+    fi
+done < <(find "$CORE_DIR" -type f -print0 | sort -z)
+assert "Every file on disk under core/ is listed in CORE_FILES" "$ALL_REGISTERED"
 
-# (Removed Gemini output array check)
-
-# --- Closing tags present ---
+# --- No duplicates ---
 echo ""
-echo "## Closing tags"
-COPILOT_OPEN=$(grep -c '<core-file path=' "$COPILOT_OUTPUT" 2>/dev/null || true)
-COPILOT_CLOSE=$(grep -c '</core-file>' "$COPILOT_OUTPUT" 2>/dev/null || true)
-assert "Copilot output has matching open/close core-file tags ($COPILOT_OPEN/$COPILOT_CLOSE)" \
-    "$([[ "$COPILOT_OPEN" -eq "$COPILOT_CLOSE" ]] && echo true || echo false)"
-
-# (Removed Gemini closing tag check)
-
-# --- No missing-file warnings ---
-echo ""
-echo "## No missing file warnings"
-BUILD_STDERR=$("$BUILD_SCRIPT" 2>&1 >/dev/null || true)
-MISSING_WARNS=$(echo "$BUILD_STDERR" | grep -c "Core file not found" || true)
-assert "Build produces no 'Core file not found' warnings" \
-    "$([[ "${MISSING_WARNS:-0}" -eq 0 ]] && echo true || echo false)"
+echo "## No duplicates"
+DUPES=$(printf '%s\n' "${CORE_FILES[@]}" | sort | uniq -d)
+assert "CORE_FILES has no duplicate entries" \
+    "$([[ -z "$DUPES" ]] && echo true || echo false)"
 
 # --- Summary ---
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="
-exit $FAIL
+exit "$FAIL"

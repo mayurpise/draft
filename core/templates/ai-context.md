@@ -16,7 +16,8 @@ synced_to_commit: "{FULL_SHA}"
 
 # {PROJECT_NAME} Context Map
 
-> Self-contained AI context. 200-400 lines. Token-optimized.
+> Self-contained AI context. Budget: {TIER_MIN}–{TIER_MAX} lines (tier {N}: {LABEL}).
+> Graph metrics: M={modules} F={functions} P={proto_rpcs} E={include_edges}
 > This file must stand alone — no references to architecture.md or source files needed.
 
 | Field | Value |
@@ -43,12 +44,62 @@ synced_to_commit: "{FULL_SHA}"
 
 ```
 {project_root}/
-├── {dir1}/           ← {5-10 word description}
-│   ├── {subdir}/     ← {description}
-│   └── {file}        ← {description}
-├── {dir2}/           ← {description}
-└── {dir3}/           ← {description}
+├── {module1}/              ← {5-10 word description}
+│   ├── {submod1}/          ← {description} ({Ncc} cc, {Nh} h)
+│   │   └── ops/            ← {description} ({N} operations)
+│   ├── {submod2}/          ← {description}
+│   └── {shared}/           ← {description}
+├── {module2}/              ← {description}
+│   ├── {submod}/           ← {description}
+│   └── {submod}/           ← {description}
+└── {module3}/              ← {description}
 ```
+
+> Include immediate sub-directories for all major modules (not just top-level).
+> Use graph data (`draft/graph/modules/*.jsonl`) for exhaustive sub-module enumeration.
+> Show file counts per sub-module to indicate relative size/importance.
+
+## GRAPH:MODULES
+
+{module}|{sizeKB}KB|go:{N},proto:{N} → {dep1},{dep2}
+...
+
+> One row per module ordered by sizeKB descending. Omit for tier-1 codebases (≤5 modules) where Component Graph is sufficient.
+
+## GRAPH:HOTSPOTS
+
+{file_path}|{lines}L|fanIn:{N}
+...
+
+> Top 10 files by score (lines + fanIn×50). Always include all tiers.
+
+## GRAPH:CYCLES
+
+None ✓
+
+> Or: list cycle paths e.g. "auth → storage → auth". Always include — absence is signal.
+
+## GRAPH:MODULE-HOTSPOTS
+
+{module}:  {file}|{lines}L|fanIn:{N}
+           {file}|{lines}L|fanIn:{N}
+           {file}|{lines}L|fanIn:{N}
+
+> Top 3 hotspot files per module by score (lines + fanIn×50). Tier ≥ 3 only. Omit for tier 1–2.
+> Tells agents which files in a specific module carry the most change risk.
+
+## GRAPH:FAN-IN
+
+{module}|fanIn:{N}|callers:{caller1},{caller2}
+
+> Modules ordered by incoming dependency count descending. Tier ≥ 3 only.
+> High fanIn = high change risk — modifications propagate to many callers.
+
+## GRAPH:PROTO-MAP
+
+{ServiceName}: {rpc}({RequestType}) → {ResponseType} @{file}
+
+> One line per RPC, grouped by service. Present only when proto_rpcs > 0. Omit entirely for non-proto codebases.
 
 ## Dependency Injection / Wiring
 

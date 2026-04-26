@@ -24,7 +24,7 @@ synced_to_commit: "{FULL_SHA}"
 | **Synced To** | `{FULL_SHA}` |
 
 > Synthesized from [X] service contexts.
-> This is a **system-of-systems** view. For service internals, see individual service drafts.
+> This is a **system-of-systems** view. For service internals, see individual service contexts.
 > Re-running `/draft:index` will update auto-generated sections but preserve manual edits.
 
 ---
@@ -131,6 +131,6 @@ sequenceDiagram
 
 ## Notes
 
-- For detailed service architecture, navigate to individual service drafts via the Details column
+- For detailed service architecture, navigate to individual service contexts via the Details column
 - This file is regenerable via `/draft:index`
 - Manual edits between `<!-- MANUAL START -->` and `<!-- MANUAL END -->` are preserved

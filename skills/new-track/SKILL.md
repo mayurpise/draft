@@ -42,6 +42,12 @@ If missing, tell user: "Project not initialized. Run `/draft:init` first."
 - Read `draft/workflow.md` — TDD preference, commit conventions, review process
 - Read `draft/guardrails.md` (if exists) — hard guardrails, learned conventions, learned anti-patterns
 - Read `draft/tracks.md` — existing tracks to check for overlap or dependencies
+- **Scan recent track impact memory** (overlap detection): for each completed track in `draft/tracks/*/metadata.json` updated within the last 30 days, read the `impact` block (if present). Build a map `module → [recent_track_ids]`. After Step 4 (scope distillation), once the candidate modules for the new track are known, intersect them with this map. If overlap exists, surface it in the intake summary:
+  ```
+  Overlap warning: track <id> recently touched modules <A>, <B>.
+  Review draft/tracks/<id>/metadata.json#impact before proceeding.
+  ```
+  This is informational, not blocking — the user decides whether to proceed, depend on the prior track, or rebase scope.
 
 4. Load guidance references:
 - Read `core/templates/intake-questions.md` — structured questions for intake
@@ -53,18 +59,15 @@ Create a short, kebab-case ID from the description (use the stripped description
 - "Add user authentication" → `add-user-auth`
 - "Fix login bug" → `fix-login-bug`
 
-If the description is empty (e.g., `--quick` with no text), ask the user: "What should this track be called? (brief description)"
-
-Check if `draft/tracks/<track_id>/` already exists. If collision detected, append `-<ISO-date>` suffix (e.g., `feature-auth-2026-02-21`). If the suffixed path also exists, append `-2`, `-3`, etc. until a free path is found.
+Check if `draft/tracks/<track_id>/` already exists. If collision detected, append `-<ISO-date>` suffix (e.g., `feature-auth-2026-02-21`). Verify the suffixed path is also free before proceeding.
 
 ### Branch Creation (Toolchain-Aware)
 
-Read `draft/workflow.md` → `## Toolchain` section to determine VCS mode:
-- **git mode:** `git checkout -b <track_id>`
-- **cot mode with Jira ticket:** `cot checkout -t <JIRA_ID> -s <track_id>`
-- **cot mode without Jira ticket:** `cot checkout <track_id>`
+See `core/shared/vcs-commands.md` for command conventions.
 
-If no toolchain section found, default to git mode.
+```bash
+git checkout -b <track_id>
+```
 
 ## Step 1.5: Quick Mode Path (`--quick` only)
 
@@ -75,7 +78,7 @@ Skip all intake conversation. Ask only two questions:
 1. "What exactly needs to change? (1-2 sentences)"
 2. "How will you know it's done? (list acceptance criteria)"
 
-Then create the track directory and generate both files directly:
+Then generate both files directly:
 
 ```bash
 mkdir -p draft/tracks/<track_id>
@@ -140,22 +143,18 @@ Next: /draft:implement
 
 Create the track directory and draft files immediately with skeleton structure:
 
-```bash
-mkdir -p draft/tracks/<track_id>
-```
-
 ### Create `draft/tracks/<track_id>/spec-draft.md`:
 
 **MANDATORY: Include YAML frontmatter with git metadata.** Gather git info first:
 
 ```bash
-git branch --show-current 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo "none"  # LOCAL_BRANCH
+git branch --show-current                    # LOCAL_BRANCH
 git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "none"  # REMOTE/BRANCH
-git rev-parse HEAD 2>/dev/null || echo "none"                      # FULL_SHA
-git rev-parse --short HEAD 2>/dev/null || echo "none"              # SHORT_SHA
-git log -1 --format=%ci HEAD 2>/dev/null || echo "none"            # COMMIT_DATE
-git log -1 --format=%s HEAD 2>/dev/null || echo "none"             # COMMIT_MESSAGE
-git status --porcelain 2>/dev/null | head -1 | wc -l               # 0 = clean, >0 = dirty
+git rev-parse HEAD                           # FULL_SHA
+git rev-parse --short HEAD                   # SHORT_SHA
+git log -1 --format=%ci HEAD                 # COMMIT_DATE
+git log -1 --format=%s HEAD                  # COMMIT_MESSAGE
+git status --porcelain | head -1 | wc -l     # 0 = clean, >0 = dirty
 ```
 
 ```markdown
@@ -440,21 +439,27 @@ After each answer:
 
 **Checkpoint:** "Acceptance criteria so far: [list]. Missing anything?"
 
-### Step 3A.5: Cross-Skill Integration
+---
 
-At this point, check for cross-skill dispatch opportunities:
+### Step 3A.5: Cross-Skill Integration (Feature/Refactor)
 
-**Refactor Tracks → Tech-Debt Offer:**
-If track type is "refactor" (detected from description keywords: refactor, clean up, reorganize, migrate, upgrade):
+#### Refactor Tracks → Tech-Debt Offer
+
+If track type is refactor:
 ```
-"Run `/draft:tech-debt` to scope this refactor before writing the spec? [Y/n]"
+"Want to run a tech-debt analysis to prioritize what to address?
+  → /draft:tech-debt scans 6 debt categories with prioritization
+  Run tech-debt analysis? [Y/n]"
 ```
-- If accepted: run tech-debt analysis, feed findings into spec scope section
-- If declined: proceed with manual scoping
+If accepted: invoke `/draft:tech-debt`, use its prioritized output to scope the refactor spec.
 
-**Design Decision Detection → ADR Suggestion:**
-If the spec involves any of: new technology adoption, architectural boundary changes, API redesign, data model changes:
-- Suggest: "This involves a significant design decision. Run `/draft:adr` to document it? [Y/n]"
+#### Design Decision Detection → ADR Suggestion
+
+If spec introduces technology not in `tech-stack.md` or changes service boundaries in `.ai-context.md`:
+```
+"This involves a significant design decision. Consider running:
+  → /draft:adr to document the architectural decision"
+```
 
 ---
 
@@ -490,46 +495,74 @@ AI contribution: Suggest investigation approach, reference debugging patterns.
 
 Update spec-draft.md with bug-specific structure after gathering sufficient context.
 
-### Step 3B.5: Auto-Triage Pipeline
-
-For bug tracks, execute this automated triage pipeline:
+### Step 3B.5: Auto-Triage Pipeline (Bug Tracks)
 
 **Trigger:** Track type is bug/RCA AND any of: Jira ticket ID found, description contains "incident", "outage", "SEV", "regression", "crash".
 
-If trigger conditions not met, skip to Step 4.
+When triggered, execute the auto-triage pipeline before proceeding to Step 4:
 
-1. **Gather External Context:**
-   - If Jira ticket provided: pull via MCP (`get_issue()`, `get_issue_description()`, `get_issue_comments()`)
-   - Extract URLs, log paths, stack traces, reproduction steps, affected services
-   - Use `curl`/`wget` to fetch any URLs mentioned (dashboards, error pages, API responses)
-   - Use `ssh` to access log locations on remote nodes (if paths like `/home/log/`, node IPs mentioned)
+#### Triage Step 1: Gather External Context
 
-2. **Offer Debug Session:**
-   "Run `/draft:debug` to investigate before writing the spec? [Y/n]"
-   - If accepted: launch debug session, feed findings back into spec
-   - If declined: proceed with spec generation from available context
+If Jira ticket provided:
+1. Pull ticket via Jira MCP: `get_issue()`, `get_issue_description()`, `get_issue_comments()`
+2. Extract from ticket: URLs, log paths, stack traces, reproduction steps, affected services
+3. Use `curl`/`wget` to fetch any URLs mentioned (dashboards, error pages, API responses)
+4. Use `ssh` to access log locations on remote nodes (if paths like `/home/log/`, node IPs mentioned)
+5. Collect all gathered data into a triage context bundle
 
-3. **RCA Analysis (if sufficient context):**
-   - Apply 5 Whys methodology (reference `core/agents/rca.md`)
-   - Classify root cause type
-   - Assess blast radius using `.ai-context.md` module boundaries
+#### Triage Step 2: Offer Debug Session
 
-4. **Generate rca.md:**
-   - Save to `draft/tracks/<id>/rca.md` using `core/templates/rca.md` template
-   - This feeds into `/draft:implement` as investigation context
+```
+"Bug track detected with [Jira context / error description]. Run a structured debug session before writing the spec?
+  → /draft:debug will help reproduce and isolate the issue
+  Run debug session? [Y/n]"
+```
 
-5. **Jira Sync:**
-   - If ticket linked: attach rca.md and post comment via `core/shared/jira-sync.md`
+If accepted:
+- Invoke `/draft:debug` with gathered triage context
+- Feed the Debug Report into spec-draft.md "Reproduction" and "Root Cause Hypothesis" sections
 
-6. **Developer Checkpoint:**
-   "Root cause hypothesis: [summary]. Blast radius: [scope]. Proceed with spec generation? [Y/n]"
-   - "Want me to write regression tests for this? [Y/n]"
+#### Triage Step 3: RCA Analysis
+
+If debug session produced findings:
+- Invoke RCA agent methodology from `core/agents/rca.md`
+- Perform 5 Whys analysis using debug findings
+- Assess blast radius from `.ai-context.md`
+- Quantify SLO impact
+
+#### Triage Step 4: Generate rca.md
+
+Create `draft/tracks/<track_id>/rca.md` using the template from `core/templates/rca.md`:
+- Include root cause, classification, timeline, evidence, prevention items
+- Include YAML frontmatter with git metadata
+- Link to debug report and gathered evidence
+
+#### Triage Step 5: Sync to Jira
+
+If Jira ticket linked, sync via `core/shared/jira-sync.md`:
+- Attach `rca.md` to ticket
+- Post comment: "[draft] rca-complete: Root cause identified — {1-line summary}. Prevention: {count} items."
+
+#### Triage Step 6: Developer Checkpoint
+
+```
+"RCA complete. Findings:
+  Root cause: {summary}
+  Classification: {type}
+  Blast radius: {affected modules}
+
+  → Want me to write regression tests for this? [Y/n]
+  → Ready to proceed with the fix? [Y/n]"
+```
+
+Only proceed to spec/plan generation after developer approval.
 
 ### Step 3B.6: Incident Context Detection
 
-Check if incident keywords detected in description (outage, incident, P0, SEV1, production down):
-- If postmortem exists: load as context for spec generation
-- Suggest: "Consider running `/draft:incident-response postmortem` for formal post-incident analysis"
+If track description contains "incident", "outage", "SEV", or "postmortem":
+- Check for existing postmortem: `ls draft/tracks/*/incident-*.md 2>/dev/null`
+- If none found, suggest: "Run `/draft:incident-response postmortem` first to capture incident context."
+- If found, feed postmortem findings into spec-draft.md.
 
 ---
 
@@ -632,6 +665,19 @@ Use fixed 3-phase structure:
 
 Reference `core/agents/rca.md` for detailed process.
 
+### Conditional Plan Tasks (Auto-Embedded)
+
+Based on track context, automatically include these tasks in the appropriate plan phase:
+
+- **If track modifies production code:** Add final task in last phase:
+  `- [ ] Run /draft:deploy-checklist before deploying`
+
+- **If spec mentions new APIs, services, or components:** Add documentation task:
+  `- [ ] Update documentation (run /draft:documentation api|runbook)`
+
+- **If testing-strategy.md exists or TDD enabled:** Add in Phase 1:
+  `- [ ] Verify testing strategy covers this track (run /draft:testing-strategy if not done)`
+
 Present plan-draft.md for review.
 
 ---
@@ -694,11 +740,7 @@ Count all `- [ ]` task lines in `plan.md` and set `tasks.total` in `metadata.jso
 Before updating tracks.md, verify metadata.json was written successfully:
 
 ```bash
-# Validate JSON (try python3 first, fall back to node, then jq)
-cat draft/tracks/<track_id>/metadata.json | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null \
-  || node -e "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'))" < draft/tracks/<track_id>/metadata.json 2>/dev/null \
-  || jq . draft/tracks/<track_id>/metadata.json >/dev/null 2>&1 \
-  || echo "INVALID"
+cat draft/tracks/<track_id>/metadata.json | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null || echo "INVALID"
 ```
 
 If invalid or missing:
@@ -762,17 +804,37 @@ Key decisions documented in spec.md Conversation Log.
 
 Next: Review the spec and plan, then run `/draft:implement` to begin."
 
+---
+
 ## Cross-Skill Dispatch
 
-### Conditional Plan Tasks
-When generating plan.md, auto-embed these tasks based on context:
-- All tracks: add "Run `/draft:testing-strategy`" task if no testing strategy exists
-- Feature tracks with new APIs: add "Run `/draft:documentation api`" task
-- All tracks: add "Run `/draft:deploy-checklist`" as a final pre-deployment verification task
+### Jira Sync at Completion
 
-### At Completion
-- **Jira sync:** If ticket linked, attach spec.md and plan.md, post comment: "[draft] spec-complete: Specification and plan generated for track {id}" via `core/shared/jira-sync.md`
-- **Bug tracks:** "Run `/draft:debug track {id}` to begin structured investigation"
-- **Feature tracks:** "Review the spec and plan, then run `/draft:implement` to begin"
-- If track scope is large or involves multiple modules: "Run `/draft:decompose` to break this into modules? [Y/n]"
-- **Refactor tracks:** "Run `/draft:tech-debt` to catalog debt items before implementation"
+If Jira ticket is linked (from spec.md or metadata.json), sync via `core/shared/jira-sync.md`:
+- Attach `spec.md` and `plan.md` to ticket
+- Post comment: "[draft] spec-complete: Specification and plan generated for track {id}. {phase_count} phases, {task_count} tasks."
+
+### Completion Suggestions
+
+Based on track type, suggest relevant follow-ups:
+
+**Bug tracks:**
+```
+"Track ready for implementation. Also consider:
+  → /draft:incident-response postmortem — If this bug caused an incident
+  → git bisect — Find the exact commit that introduced this bug"
+```
+
+**Feature tracks:**
+```
+"Track ready for implementation.
+  Next: /draft:implement
+  Also: /draft:testing-strategy — Define test approach for this feature"
+```
+
+**Refactor tracks:**
+```
+"Track ready for implementation.
+  Next: /draft:implement
+  Also: /draft:adr — Document refactoring decisions"
+```

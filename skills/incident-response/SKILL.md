@@ -5,524 +5,225 @@ description: Incident management lifecycle — triage, communicate, mitigate, po
 
 # Incident Response
 
-You are managing an incident using Draft's Context-Driven Development methodology. This skill covers the full incident lifecycle from triage through postmortem.
+You are managing an incident through its full lifecycle using structured incident management practices.
 
-## Red Flags - STOP if you're:
+## Red Flags — STOP if you're:
 
-- Investigating before mitigating (restore service first)
+- Fixing before communicating (stakeholders must know first)
 - Skipping severity classification
-- Writing a postmortem that assigns blame to individuals
-- Not communicating status updates at defined intervals
-- Making changes to production without documenting them
-- Assuming root cause without evidence
+- Writing a postmortem with blame (blameless only)
+- Closing an incident without prevention items
+- Ignoring rollback as a mitigation option
 
-**Mitigate first. Communicate always. Blame never.**
+**Communicate first. Fix second. Learn always.**
 
 ---
 
 ## Pre-Check
 
-### 0. Capture Git Context
-
+1. Check for Draft context:
 ```bash
-git branch --show-current    # Current branch name
-git rev-parse --short HEAD   # Current commit hash
+ls draft/ 2>/dev/null
 ```
 
-### 1. Load Draft Context
+This skill works standalone — incidents don't wait for project setup.
 
-Read and follow the base procedure in `core/shared/draft-context-loading.md`.
-
-**Incident-specific context application:**
-- Use `draft/.ai-context.md` for system architecture, dependencies, failure modes
-- Use `draft/tech-stack.md` for infrastructure, monitoring, alerting tools
-- Use `draft/workflow.md` for escalation paths, communication channels
-- Use `draft/product.md` for user impact assessment
-
-If `draft/` does not exist, proceed without project context. Warn: "No Draft context — incident response will lack architectural context."
-
----
+2. If available, follow the base procedure in `core/shared/draft-context-loading.md`.
 
 ## Step 1: Parse Arguments
 
-| Invocation | Behavior |
-|------------|----------|
-| `/draft:incident-response new` | Start a new incident |
-| `/draft:incident-response new <description>` | Start incident with initial description |
-| `/draft:incident-response update <incident-id>` | Post status update to existing incident |
-| `/draft:incident-response postmortem <incident-id>` | Generate blameless postmortem report |
-| `/draft:incident-response` | Interactive — ask which mode |
-
-### Mode Selection (No Arguments)
-
-```
-Incident Response modes:
-1. new        — Start a new incident (triage, communicate, mitigate)
-2. update     — Post status update to an existing incident
-3. postmortem — Generate blameless postmortem / RCA report
-
-Select mode (1-3):
-```
+- `/draft:incident-response new <description>` — Start new incident
+- `/draft:incident-response update <status>` — Post status update
+- `/draft:incident-response postmortem` — Generate postmortem report
+- `/draft:incident-response` (no args) — Interactive: ask which mode
 
 ---
 
-## Mode: NEW — Start Incident
+## NEW Mode — Start Incident
 
 ### Step 2: Triage
 
-#### 2.1: Classify Severity
+Classify severity:
 
-| Severity | Definition | Response Time | Update Frequency |
-|----------|------------|---------------|------------------|
-| **P1 — Critical** | Service down, data loss, security breach, revenue impact | Immediate | Every 15 minutes |
-| **P2 — Major** | Significant degradation, feature broken for many users | < 30 minutes | Every 30 minutes |
-| **P3 — Minor** | Partial degradation, workaround available | < 2 hours | Every 2 hours |
-| **P4 — Low** | Cosmetic, minor inconvenience, no workaround needed | Next business day | Daily |
+| Level | Response Time | Who | Examples |
+|-------|--------------|-----|---------|
+| **SEV1** | Immediate, all-hands | Entire team | Data loss, complete outage, security breach |
+| **SEV2** | 15 minutes | On-call + team lead | Major feature broken, significant degradation |
+| **SEV3** | 1 hour | On-call | Minor feature broken, workaround exists |
+| **SEV4** | Next business day | Assigned engineer | Cosmetic issue, minor inconvenience |
 
-Ask the developer to confirm severity:
-```
-Incident severity assessment:
-
-Impact: [who/what is affected]
-Scope: [how many users/systems]
-Workaround: [available / not available]
-
-Recommended severity: P[N] — [justification]
-
-Confirm severity (P1-P4):
-```
-
-#### 2.2: Assign Incident ID
-
-Generate incident ID from timestamp:
-```bash
-echo "INC-$(date +%Y%m%d-%H%M)"
-```
-
-#### 2.3: Document Initial State
-
-Capture immediately:
-- **What's broken:** Exact symptoms, error messages, affected endpoints
-- **When it started:** First alert time, first user report, or discovery time
-- **Who's affected:** Users, systems, downstream services
-- **Current impact:** Revenue, data, user experience, SLA
-
----
+Assess:
+1. **What is broken?** (from description or Jira ticket)
+2. **Who is affected?** (from `draft/product.md` user types if available)
+3. **What is the blast radius?** (from `draft/.ai-context.md` service topology if available)
+4. **Is data at risk?** (escalate to SEV1 if yes)
 
 ### Step 3: Communicate
 
-#### 3.1: Initial Communication
+Generate initial status update:
 
-Generate initial incident notification:
-
-```markdown
-## Incident: [INC-ID]
-
-**Severity:** P[N]
-**Status:** Investigating
-**Started:** [timestamp]
-**Impact:** [description of user/system impact]
-
-**Summary:** [1-2 sentence description of the incident]
-
-**Current actions:**
-- [what's being done right now]
-
-**Next update:** [time based on severity update frequency]
 ```
-
-#### 3.2: Stakeholder Identification
-
-Based on severity and `draft/workflow.md`:
-- **P1:** Engineering lead, on-call, product owner, support team
-- **P2:** On-call engineer, team lead
-- **P3:** On-call engineer
-- **P4:** Ticket created, assigned to team
-
----
+INCIDENT: {description}
+Severity: SEV{1-4}
+Impact: {who/what is affected}
+Status: Investigating
+Commander: {name or "unassigned"}
+Next update: {time — SEV1: 15min, SEV2: 30min, SEV3: 1hr}
+```
 
 ### Step 4: Gather Evidence
 
-Before attempting any fix:
-
-1. **Capture current state:**
-   - Error logs (last 30 minutes)
-   - Metrics dashboards (screenshot or key values)
-   - Recent deployments (within last 24 hours)
-   - Recent config changes
-
-2. **Timeline construction:**
-   ```
-   INCIDENT TIMELINE: [INC-ID]
-   ═══════════════════════════════════════════════════════════
-   [timestamp] — First alert / user report
-   [timestamp] — Incident declared, severity P[N]
-   [timestamp] — [action taken]
-   [timestamp] — [observation]
-   ```
-
-3. **Check recent deployments:**
-   ```bash
-   git log --oneline --since="24 hours ago"
-   ```
-
----
+- If Jira ticket linked: pull details via MCP (`get_issue`, `get_issue_description`, `get_issue_comments`)
+- Extract URLs and log paths from ticket
+- Use `curl`/`wget` to fetch dashboards or error pages mentioned
+- Use `ssh` to access remote log paths if mentioned
+- If GitHub MCP / `gh` CLI available: check recent deployments and merged PRs (`gh pr list --state merged --search "merged:>2024-01-01"`)
+- Record all evidence in incident timeline
 
 ### Step 5: Mitigate
 
-**Priority: Restore service first, investigate later.**
+Following `core/agents/ops.md` production-safety mindset:
 
-#### 5.1: Mitigation Strategy
+1. **Can we rollback?** If yes and severity ≥ SEV2: recommend rollback first, investigate after
+2. **Can we hotfix?** If rollback not possible: identify minimal fix
+3. **Can we mitigate?** Feature flag, config change, traffic routing
+4. **Need to escalate?** If none of above work, escalate severity
 
-Apply in order of preference (rollback first per ops best practices):
+Document all actions taken with timestamps.
 
-| Priority | Strategy | When to Use |
-|----------|----------|-------------|
-| 1 | **Rollback** | Recent deployment correlated with incident |
-| 2 | **Feature flag disable** | Issue isolated to a specific feature |
-| 3 | **Scale up** | Capacity-related degradation |
-| 4 | **Failover** | Infrastructure failure |
-| 5 | **Hotfix** | When rollback isn't possible and root cause is clear |
-| 6 | **Workaround** | Temporary measure while fix is developed |
+### Step 6: Save Incident File
 
-#### 5.2: Mitigation Execution
-
-For each mitigation action:
-1. **Announce:** "Attempting [mitigation strategy]"
-2. **Execute:** Run the mitigation
-3. **Verify:** Confirm impact is reduced
-4. **Document:** Add to timeline with result
-
-#### 5.3: Verify Mitigation
-
-- [ ] Primary symptom resolved
-- [ ] Error rate returning to baseline
-- [ ] Key user flows working
-- [ ] No new issues introduced by mitigation
-
----
-
-### Step 6: Save Incident Record
-
-Create incident file at `draft/incidents/incident-<INC-ID>.md`:
-
-```bash
-mkdir -p draft/incidents
-```
+Save to: `draft/incidents/incident-<timestamp>.md` or `draft/tracks/<id>/incident.md`
 
 ```markdown
----
-incident_id: "[INC-ID]"
-severity: "P[N]"
-status: "mitigated"  # investigating | mitigated | resolved | postmortem-complete
-started: "[ISO timestamp]"
-mitigated: "[ISO timestamp]"
-resolved: null
-root_cause: null
----
-
-# Incident: [INC-ID]
-
-## Summary
-
-**Severity:** P[N]
-**Status:** Mitigated
-**Impact:** [description]
-**Duration:** [start to mitigation time]
-
-## Timeline
-
-| Time | Event |
-|------|-------|
-| [timestamp] | [event] |
-
-## Mitigation
-
-**Strategy:** [what was done]
-**Verification:** [evidence it worked]
-
-## Next Steps
-
-- [ ] Root cause investigation
-- [ ] Postmortem (run `/draft:incident-response postmortem [INC-ID]`)
-- [ ] Preventive measures
-```
-
----
-
-## Mode: UPDATE — Status Update
-
-### Step 2: Load Incident
-
-1. Read `draft/incidents/incident-<INC-ID>.md`
-2. If not found, list available incidents:
-   ```bash
-   ls draft/incidents/incident-*.md 2>/dev/null
-   ```
-
-### Step 3: Gather Update
-
-Ask developer:
-- What changed since last update?
-- Current status (investigating / mitigated / resolved)?
-- Any new findings?
-
-### Step 4: Generate Status Update
-
-```markdown
-## Status Update: [INC-ID] — [timestamp]
-
-**Severity:** P[N]
-**Status:** [current status]
-**Duration:** [elapsed time]
-
-**Since last update:**
-- [what changed]
-
-**Current state:**
-- [current situation]
-
-**Next actions:**
-- [what's planned]
-
-**Next update:** [time]
-```
-
-### Step 5: Update Incident Record
-
-Append the status update to the incident file's timeline section.
-
----
-
-## Mode: POSTMORTEM — Blameless RCA Report
-
-### Step 2: Load Incident
-
-1. Read `draft/incidents/incident-<INC-ID>.md`
-2. Read full timeline and all status updates
-3. If incident not found: "Incident [INC-ID] not found. Create it first with `/draft:incident-response new`"
-
-### Step 3: Root Cause Analysis
-
-#### 3.1: 5 Whys Analysis
-
-Apply the 5 Whys technique to find root cause:
-
-```
-WHY 1: Why did the service go down?
-→ [answer]
-
-WHY 2: Why did [answer to Why 1] happen?
-→ [answer]
-
-WHY 3: Why did [answer to Why 2] happen?
-→ [answer]
-
-WHY 4: Why did [answer to Why 3] happen?
-→ [answer]
-
-WHY 5: Why did [answer to Why 4] happen?
-→ [ROOT CAUSE]
-```
-
-#### 3.2: Root Cause Classification
-
-| Category | Examples |
-|----------|---------|
-| **Code defect** | Logic error, missing validation, race condition |
-| **Configuration** | Wrong env var, misconfigured service, expired cert |
-| **Infrastructure** | Hardware failure, capacity, network partition |
-| **Dependency** | Third-party service outage, API change |
-| **Process** | Missing review, skipped test, incomplete migration |
-| **Human error** | Misapplied change, wrong environment targeted |
-
-#### 3.3: Contributing Factors
-
-Identify factors that amplified the incident:
-- Detection delay (monitoring gaps)
-- Response delay (unclear runbook, missing on-call)
-- Mitigation delay (no rollback path, manual process)
-- Communication gap (stakeholders not notified)
-
-### Step 4: Generate Postmortem
-
-**MANDATORY: Include YAML frontmatter with git metadata.** Follow the procedure in `core/shared/git-report-metadata.md` to gather git info, generate frontmatter, and include the report header table. Use `generated_by: "draft:incident-response"`.
-
-```markdown
-[YAML frontmatter — see core/shared/git-report-metadata.md]
-
-# Postmortem: [INC-ID] — [Incident Title]
-
-[Report header table — see core/shared/git-report-metadata.md]
-
-## Incident Summary
+# Incident: {description}
 
 | Field | Value |
 |-------|-------|
-| Incident ID | [INC-ID] |
-| Severity | P[N] |
-| Duration | [total time from start to resolution] |
-| Impact | [user/system impact description] |
-| Root Cause | [one-sentence root cause] |
-| Root Cause Category | [from classification table] |
+| **Severity** | SEV{N} |
+| **Status** | {Investigating/Mitigating/Resolved} |
+| **Started** | {timestamp} |
+| **Commander** | {name} |
 
 ## Timeline
+| Time | Action |
+|------|--------|
+| {time} | Incident detected |
+| {time} | Triage: classified as SEV{N} |
+| {time} | {mitigation action} |
 
-| Time | Event | Actor |
-|------|-------|-------|
-| [timestamp] | [event] | [person/system] |
+## Evidence
+| Source | Finding |
+|--------|---------|
+| {source} | {finding} |
 
-## Root Cause Analysis
-
-### 5 Whys
-
-[5 Whys analysis from Step 3.1]
-
-### Contributing Factors
-
-- [Factor 1]: [how it amplified the incident]
-- [Factor 2]: [how it amplified the incident]
-
-## What Went Well
-
-- [Positive aspect 1]
-- [Positive aspect 2]
-
-## What Went Wrong
-
-- [Failure 1]
-- [Failure 2]
-
-## Action Items
-
-| Priority | Action | Owner | Due Date | Status |
-|----------|--------|-------|----------|--------|
-| P1 | [preventive action] | [assignee] | [date] | [ ] |
-| P2 | [improvement] | [assignee] | [date] | [ ] |
-| P3 | [nice-to-have] | [assignee] | [date] | [ ] |
-
-## Lessons Learned
-
-1. [Lesson 1]
-2. [Lesson 2]
-3. [Lesson 3]
-```
-
-### Step 5: Save Postmortem
-
-Save to `draft/incidents/postmortem-<INC-ID>.md`
-
-Update the incident record:
-- Set `status: "postmortem-complete"`
-- Set `resolved: "[ISO timestamp]"`
-- Set `root_cause: "[one-sentence root cause]"`
-
-### Step 6: Present Results
-
-```
-Postmortem generated.
-
-Incident: [INC-ID]
-Severity: P[N]
-Duration: [total time]
-Root Cause: [one-sentence]
-Category: [classification]
-Action Items: [N] items ([M] P1, [K] P2)
-
-Postmortem: draft/incidents/postmortem-[INC-ID].md
-Incident record: draft/incidents/incident-[INC-ID].md (updated)
-
-Next steps:
-1. Review postmortem with team
-2. Assign action item owners and due dates
-3. Track action item completion
-4. Consider running /draft:learn to capture patterns
+## Status Updates
+{chronological updates}
 ```
 
 ---
+
+## UPDATE Mode
+
+1. Read existing incident file
+2. Add new timeline entry with timestamp
+3. Update status field if changed
+4. Update severity if changed (with justification)
+5. Generate formatted status update for stakeholders
+
+---
+
+## POSTMORTEM Mode
+
+### Step 2: Gather Timeline
+
+- Read incident file for timeline and evidence
+- `git log` for related commits during incident window
+- If Jira MCP: pull ticket history and transitions
+- If GitHub MCP / `gh` CLI: pull PRs submitted during/after incident
+
+### Step 3: Root Cause Analysis
+
+Reference `core/agents/rca.md` methodology:
+
+1. **5 Whys Analysis:**
+   - Why did {symptom} happen? → Because {cause 1}
+   - Why {cause 1}? → Because {cause 2}
+   - Continue until root cause reached (typically 3-5 levels)
+
+2. **Root Cause Classification:**
+   - Logic error | Race condition | Data corruption | Configuration error
+   - Dependency failure | Capacity exceeded | Security exploit | Human error
+
+3. **Detection Lag:** When was the bug introduced vs when was it detected?
+
+4. **SLO Impact:** Which SLOs were affected and by how much?
+
+### Step 4: Generate Postmortem
+
+**MANDATORY: Include YAML frontmatter with git metadata.** Follow `core/shared/git-report-metadata.md`.
+
+Save to: `draft/incidents/postmortem-<timestamp>.md` with symlink `postmortem-latest.md`
+Or track-scoped: `draft/tracks/<id>/postmortem.md`
+
+```markdown
+# Postmortem: {incident title}
+
+## Summary
+{2-3 sentences: what happened, impact, duration}
+
+## Impact
+- **Duration:** {start} to {end} ({total time})
+- **Users affected:** {count or percentage}
+- **SLO impact:** {which SLOs, by how much}
+- **Data impact:** {any data loss or corruption}
+
+## Timeline
+| Time | Event |
+|------|-------|
+| {time} | {event} |
+
+## Root Cause
+{1-2 sentence root cause statement}
+
+### 5 Whys
+1. Why? → {answer}
+2. Why? → {answer}
+...
+
+### Classification
+- **Type:** {classification}
+- **Detection Lag:** {introduced} → {detected} = {gap}
+
+## What Went Well
+- {positive observations}
+
+## What Went Wrong
+- {things that made the incident worse}
+
+## Action Items
+| # | Action | Owner | Deadline | Status |
+|---|--------|-------|----------|--------|
+| 1 | {detection improvement} | {name} | {date} | [ ] |
+| 2 | {process improvement} | {name} | {date} | [ ] |
+| 3 | {code improvement} | {name} | {date} | [ ] |
+```
+
+### Step 5: Jira Sync
+
+Follow `core/shared/jira-sync.md`:
+- Attach postmortem to Jira ticket
+- Post comment: "[draft] Postmortem complete. Root cause: {1-line summary}. {N} action items."
+
+⚠️ **Test Writing Guardrail:** If postmortem identifies missing tests, ASK: "Want me to create regression test tasks? [Y/n]"
 
 ## Cross-Skill Dispatch
 
-### Inbound
-
-- **Triggered by `/draft:new-track`** — when track type is `incident`
-- **Triggered by `/draft:deploy-checklist`** — when rollback is triggered during deployment
-
-### Outbound
-
-- **Feeds `/draft:new-track`** — action items from postmortem become new tracks for preventive work
-- **Feeds `/draft:learn`** — incident patterns (root causes, contributing factors) feed into guardrails
-- **Jira sync:** If ticket linked, attach incident report and post status updates via `core/shared/jira-sync.md`
-- **References `core/agents/rca.md`** — for root cause analysis methodology
-- **References `core/agents/ops.md`** — for operational best practices
-
----
+- **Triggered by:** `/draft:new-track` when incident keywords detected in description
+- **Postmortem feeds into:** `git bisect` (find the breaking commit), `/draft:learn` (update guardrails)
+- **Can create:** Bug track via `/draft:new-track` for the fix
 
 ## Error Handling
 
-### No Incidents Directory
-
-```
-No incidents directory found. Creating draft/incidents/.
-```
-
-### Incident Not Found
-
-```
-Incident [INC-ID] not found.
-
-Available incidents:
-- [INC-ID-1] — [title] (P[N], [status])
-- [INC-ID-2] — [title] (P[N], [status])
-
-Specify a valid incident ID or create a new one: /draft:incident-response new
-```
-
-### Missing Timeline Data
-
-```
-Incident [INC-ID] has incomplete timeline data.
-
-For an accurate postmortem, please provide:
-- [missing data point 1]
-- [missing data point 2]
-
-Generate postmortem with available data anyway? [yes/no]
-```
-
----
-
-## Anti-Patterns
-
-| Don't | Instead |
-|-------|---------|
-| Investigate before mitigating | Restore service first, investigate later |
-| Assign blame to individuals | Focus on systems and processes |
-| Skip status updates | Communicate at defined intervals |
-| Make undocumented production changes | Log every action in the timeline |
-| Rush the postmortem | Be thorough — the goal is prevention |
-| Ignore contributing factors | Amplifiers are as important as root cause |
-
----
-
-## Examples
-
-### Start a new incident
-```bash
-/draft:incident-response new "Payment processing failing with 503 errors"
-```
-
-### Post status update
-```bash
-/draft:incident-response update INC-20260315-1430
-```
-
-### Generate postmortem
-```bash
-/draft:incident-response postmortem INC-20260315-1430
-```
-
-### Interactive mode
-```bash
-/draft:incident-response
-```
+**If no incident file found (update/postmortem mode):** List available incidents, ask which one
+**If no Jira ticket:** Proceed without sync, note: "Link a Jira ticket for automatic sync"

@@ -2,7 +2,7 @@
 
 Standard procedure for loading Draft project context. All Draft commands that read project context follow this procedure before analysis or execution.
 
-Referenced by: `/draft:bughunt`, `/draft:deep-review`, `/draft:review`, `/draft:learn`, `/draft:new-track`, `/draft:implement`, `/draft:init` (refresh), and others
+Referenced by: All skills that load Draft project context — including `/draft:bughunt`, `/draft:review`, `/draft:deep-review`, `/draft:quick-review`, `/draft:learn`, `/draft:tech-debt`, `/draft:deploy-checklist`, `/draft:incident-response`, `/draft:documentation`, `/draft:adr`, `/draft:testing-strategy`, `/draft:standup`, `/draft:debug`
 
 ## Context Loading Layers
 
@@ -27,6 +27,44 @@ If `draft/` directory exists, read and internalize these files in order:
 | 3 | `draft/product.md` | Product vision, user flows, requirements, **Guidelines** | — |
 | 4 | `draft/workflow.md` | Team conventions, testing preferences | — |
 | 5 | `draft/guardrails.md` | Hard guardrails, **Learned Conventions**, **Learned Anti-Patterns** | `draft/workflow.md` `## Guardrails` (legacy) |
+| — | `core/guardrails.md` *(plugin-inlined)* | C++ Hard Guardrails — always enforced for C++ code | — |
+
+### Layer 1.5: Graph Context (When Available)
+
+If `draft/graph/schema.yaml` exists, the project has automated graph analysis data. This provides precise, deterministic structural context that complements the AI-generated `.ai-context.md`.
+
+**Always-load files** (compact, read alongside Layer 1):
+
+| File | Purpose | Content |
+|------|---------|---------|
+| `draft/graph/schema.yaml` | Graph metadata, module list, stats | YAML, ~50 lines |
+| `draft/graph/module-graph.jsonl` | Module nodes + inter-module dependency edges with weights | JSONL, one record per line |
+| `draft/graph/hotspots.jsonl` | Files ranked by complexity score (lines + fanIn * 50). Includes C++, Go, and Python files. Go/Python files have fanIn=0 (include-graph fan-in only applies to C++). | JSONL |
+| `draft/graph/proto-index.jsonl` | All proto services, RPCs, messages, enums | JSONL |
+
+Note: `.ai-context.md` now embeds a condensed graph summary (`GRAPH:MODULES`, `GRAPH:HOTSPOTS`, `GRAPH:CYCLES`) for first-pass structural ground truth. The full JSONL files in Layer 1.5 remain authoritative for deep queries.
+
+Note: The canonical embedded mermaid diagrams are in architecture.md injection slots (`<!-- GRAPH:module-deps:START/END -->`, `<!-- GRAPH:proto-map:START/END -->`), refreshed by `draft:index`. The static `.mermaid` files are build artifacts — prefer the injection slots or `graph --query --mode mermaid` for current data.
+
+**Language-specific files** (load when task involves that language):
+
+| File | Load When... |
+|------|-------------|
+| `draft/graph/go-index.jsonl` | Task modifies Go files or works in a Go-heavy module |
+| `draft/graph/python-index.jsonl` | Task modifies Python files |
+| `draft/graph/ts-index.jsonl` | Task modifies TypeScript or JavaScript files |
+| `draft/graph/c-index.jsonl` | Task modifies C or C++ files (symbol-level context; supplement with include-graph data) |
+| `draft/graph/call-index.jsonl` | Tracing call chains, impact analysis, debugging call paths across functions |
+
+**Per-module files** (load on demand):
+
+| File | Load When... |
+|------|-------------|
+| `draft/graph/modules/<name>.jsonl` | Task modifies files in that module, or debugging/reviewing that module |
+
+Load at most 2-3 module files per task to stay within token budget. See `core/shared/graph-query.md` for live query subroutines.
+
+**Fallback**: If `draft/graph/` does not exist, skip — no degradation.
 
 ### Layer 2: Fact Registry (When Available)
 
@@ -38,6 +76,10 @@ If `draft/.state/facts.json` exists, it provides granular fact-level context:
 
 Facts are NOT loaded in full for every command — use relevance filtering (see below).
 
+Additional state files used by refresh operations (not loaded during normal context loading):
+- `draft/.state/freshness.json` — SHA-256 hashes for file-level staleness detection
+- `draft/.state/signals.json` — signal classification for structural drift detection
+
 ## Relevance-Scored Context Loading
 
 Not all context is equally relevant to every task. When a specific track or task is active, apply relevance scoring to prioritize which context sections are most useful.
@@ -46,7 +88,7 @@ Not all context is equally relevant to every task. When a specific track or task
 
 Apply relevance scoring when ALL of these conditions are true:
 1. A specific track or task is active (has `spec.md` and/or `plan.md`)
-2. `draft/.ai-context.md` exists and is >200 lines
+2. `draft/.ai-context.md` exists and is above tier-1 minimum (100 lines)
 3. The command benefits from focused context (`/draft:implement`, `/draft:bughunt`, `/draft:review`)
 
 Do NOT apply relevance scoring for commands that need full context (`/draft:init`, `/draft:deep-review`, `/draft:decompose`).
@@ -60,27 +102,44 @@ Do NOT apply relevance scoring for commands that need full context (`/draft:init
 
 2. **Score `.ai-context.md` sections** against the task concepts:
 
-   | Section | Load When Task Involves... |
-   |---------|--------------------------|
-   | `## META` | Always (baseline) |
-   | `## GRAPH:COMPONENTS` | Module boundary changes, new components |
-   | `## GRAPH:DEPENDENCIES` | Integration work, new external dependencies |
-   | `## GRAPH:DATAFLOW` | Data pipeline changes, new flows |
-   | `## INVARIANTS` | Always (safety critical) |
-   | `## INTERFACES` | API changes, new implementations |
-   | `## CATALOG:*` | Implementation work matching the category |
-   | `## THREADS` | Concurrency-related tasks |
-   | `## CONFIG` | Configuration changes |
-   | `## ERRORS` | Error handling tasks |
-   | `## CONCURRENCY` | Any async/parallel work |
-   | `## EXTEND:*` | Adding new implementations of existing patterns |
-   | `## TEST` | Always (need test commands) |
-   | `## FILES` | Always (need file locations) |
-   | `## VOCAB` | Domain-specific tasks |
+| Section | Load When Task Involves... |
+|---------|--------------------------|
+| `## META` | Always (baseline) |
+| `## GRAPH:COMPONENTS` | Module boundary changes, new components |
+| `## GRAPH:MODULES`    | Module boundary changes, new components, cross-module work |
+| `## GRAPH:HOTSPOTS`   | Performance work, refactoring, changes to high-complexity files |
+| `## GRAPH:CYCLES`     | Dependency restructuring, module boundary decisions |
+| `## GRAPH:DEPENDENCIES` | Integration work, new external dependencies |
+| `## GRAPH:DATAFLOW` | Data pipeline changes, new flows |
+| `## INVARIANTS` | Always (safety critical) |
+| `## INTERFACES` | API changes, new implementations |
+| `## CATALOG:*` | Implementation work matching the category |
+| `## THREADS` | Concurrency-related tasks |
+| `## CONFIG` | Configuration changes |
+| `## ERRORS` | Error handling tasks |
+| `## CONCURRENCY` | Any async/parallel work |
+| `## EXTEND:*` | Adding new implementations of existing patterns |
+| `## TEST` | Always (need test commands) |
+| `## FILES` | Always (need file locations) |
+| `## VOCAB` | Domain-specific tasks |
 
-3. **Always include**: `META`, `INVARIANTS`, `TEST`, `FILES` (minimum context floor)
-4. **Include if relevant**: All other sections scored against task concepts
-5. **Result**: A focused subset of `.ai-context.md` that maximizes signal-to-noise for the current task
+3. **Score graph files** (if `draft/graph/` exists) against the task concepts:
+
+| Graph File | Load When Task Involves... |
+|------------|--------------------------|
+| `module-graph.jsonl` | Module boundary changes, cross-module work, architecture analysis |
+| `hotspots.jsonl` | Performance work, refactoring, changes to high-fanIn files |
+| `proto-index.jsonl` | API changes, new RPCs, service contract modifications |
+| `go-index.jsonl` | Implementation or debugging in Go modules |
+| `python-index.jsonl` | Implementation or debugging in Python modules |
+| `ts-index.jsonl` | Implementation or debugging in TypeScript/JavaScript modules |
+| `c-index.jsonl` | Implementation or debugging in C/C++ modules |
+| `call-index.jsonl` | Tracing call paths, root cause analysis, function-level impact assessment |
+| `modules/<name>.jsonl` | Working within a specific module (implementation, debug, review) |
+
+4. **Always include**: `META`, `INVARIANTS`, `TEST`, `FILES` (minimum context floor)
+5. **Include if relevant**: All other sections scored against task concepts
+6. **Result**: A focused subset of `.ai-context.md` that maximizes signal-to-noise for the current task
 
 ### Fact Registry Relevance
 
@@ -97,9 +156,9 @@ When `draft/.state/facts.json` exists, also load relevant facts:
 
 Patterns listed here are **intentional design decisions**. Do NOT flag these as bugs, issues, or violations. They represent deliberate trade-offs documented by the team.
 
-### Guardrails (`guardrails.md`)
+### Guardrails (`guardrails.md` + `core/guardrails.md`)
 
-Three types of guardrails, each with different enforcement behavior:
+Project-level `draft/guardrails.md` has three sections with different enforcement behavior:
 
 | Section | Behavior |
 |---------|----------|
@@ -128,6 +187,31 @@ Use track context to:
 - Check edge cases listed in spec are handled
 - Focus analysis on files modified/created by the track
 
+## Toolchain & MCP Auto-Connect
+
+After loading Layer 1 context, check `draft/workflow.md` → `## Toolchain` section. Draft uses standard `git` for VCS — see `core/shared/vcs-commands.md` for the command conventions.
+
+### MCP Auto-Connect (optional)
+
+If MCP integrations are checked in `draft/workflow.md`, verify availability at context-load time:
+
+| Server | Verification Call | On Success | On Failure |
+|--------|-------------------|------------|------------|
+| Jira MCP | `get_issue(key="TEST-1", prune_mode="minimal")` — expect error, confirms server responds | Record: `jira_mcp=available` | Record: `jira_mcp=unavailable`, degrade gracefully |
+| Confluence MCP | Check for Confluence tools in environment (e.g., `search_confluence`, `get_page`) | Record: `confluence_mcp=available` | Record: `confluence_mcp=unavailable`, degrade gracefully |
+| GitHub MCP | Check for GitHub tools in environment (e.g., `gh_pr_create`, `gh_issue_get`) | Record: `github_mcp=available` | Record: `github_mcp=unavailable`, fall back to `gh` CLI |
+
+MCP availability status is passed to downstream skills. Skills that can leverage MCPs will automatically use them when available, falling back to local-only analysis when unavailable.
+
+### Confluence Integration Points
+
+When Confluence MCP is available, skills can leverage it for documentation lookup:
+
+| Skill | Confluence Use |
+|-------|---------------|
+| `/draft:init` | Search for existing design documents, architecture docs related to the project |
+| `/draft:new-track` | Search for relevant RFCs, design docs, or prior art before starting a track |
+
 ## Degradation Behavior
 
 | Scenario | Behavior |
@@ -139,6 +223,7 @@ Use track context to:
 | `product.md` missing | Skip product requirement verification |
 | `workflow.md` missing | Skip workflow preferences |
 | `guardrails.md` missing | Fall back to `workflow.md ## Guardrails`; if neither exists, skip guardrail enforcement |
+| `draft/graph/` missing | Skip Layer 1.5; no structural graph data available |
 | `facts.json` missing | Skip Layer 2; no fact-level context available |
 | Track files missing | Warn and proceed with project-level scope |
 
@@ -156,17 +241,20 @@ Once loaded, Draft context enables analysis that pure code reading cannot:
 - **Consistency boundary bugs** — Stale reads, lost events at eventual-consistency seams
 - **Guardrail violations** — Checked hard guardrails and learned anti-patterns from guardrails.md
 - **False positive suppression** — Learned conventions and accepted patterns are skipped during analysis
+- **Precise dependency analysis** — Module boundaries, weighted edges, and cycle detection from graph data (Layer 1.5)
+- **Impact assessment** — Blast radius of file changes using graph callers/impact queries
+- **Hotspot awareness** — High-complexity, high-fanIn files flagged before modification
 
 ## Future MCP Extensions
 
-The following MCP servers are planned for future integration. Skills referencing these should use graceful fallback (skip silently if unavailable).
+The following MCP integrations are planned but not yet available. Skills referencing these should use graceful fallback (manual input or skip).
 
 | MCP Server | Purpose | Used By | Status |
-|------------|---------|---------|--------|
-| Monitoring MCP | Query metrics, dashboards, alerts | `/draft:incident-response`, `/draft:deploy-checklist` | Planned |
-| CI/CD MCP | Query build status, pipeline results | `/draft:deploy-checklist`, `/draft:implement` | Planned |
-| Chat MCP | Post notifications to Slack/Teams | `/draft:incident-response`, `/draft:standup` | Planned |
-| Incident Management MCP | Query PagerDuty/OpsGenie incidents | `/draft:incident-response` | Planned |
-| APM MCP | Query traces, performance data | `/draft:debug`, `/draft:deep-review` | Planned |
+|---|---|---|---|
+| Monitoring MCP | Metrics dashboards, alert history, SLO status | `incident-response`, `deploy-checklist` | Planned |
+| CI/CD MCP | Build status, pipeline triggers, deployment history | `deploy-checklist` | Planned |
+| Chat MCP | Slack/Teams notifications, war room creation | `incident-response` | Planned |
+| Incident Management MCP | PagerDuty/OpsGenie integration, on-call schedules | `incident-response` | Planned |
+| APM MCP | Distributed traces, error tracking, performance profiles | `debug`, `incident-response` | Planned |
 
-**Graceful fallback pattern:** Check MCP availability during context loading. If unavailable, skip the MCP-dependent step and note in output: "{MCP} unavailable — skipped {step}. Configure {MCP} for richer {skill} results."
+When these MCPs become available, update the corresponding skills to auto-connect using the standard MCP auto-connect pattern defined above.

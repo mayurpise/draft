@@ -1,0 +1,36 @@
+{
+  "$schema": "Draft Track Metadata Schema",
+  "$description": "Tracks status, progress, review history, and blast radius for a Draft track. Created by /draft:new-track, updated by /draft:implement and /draft:review.",
+
+  "id": "<track-id>",
+  "title": "<Human-readable title>",
+  "type": "feature|bugfix|refactor",
+  "status": "planning|in_progress|completed",
+  "created": "<ISO 8601 timestamp>",
+  "updated": "<ISO 8601 timestamp>",
+
+  "phases": {
+    "total": 0,
+    "completed": 0
+  },
+
+  "tasks": {
+    "total": 0,
+    "completed": 0
+  },
+
+  "lastReviewed": "<ISO 8601 timestamp — set by /draft:review>",
+  "reviewCount": 0,
+  "lastReviewVerdict": "PASS|PASS_WITH_NOTES|FAIL",
+
+  "$impact_description": "Blast-radius memory — written by /draft:implement on phase complete, read by /draft:new-track to flag overlap. Sourced from `git diff --name-only <track_first_sha>^..HEAD` plus `graph --query --mode impact` for each touched file. Optional — absent if graph data unavailable.",
+  "impact": {
+    "files_touched": [],
+    "modules_touched": [],
+    "downstream_files": 0,
+    "downstream_modules": [],
+    "max_depth": 0,
+    "by_category": { "code": 0, "test": 0, "doc": 0, "config": 0 },
+    "computed_at": "<ISO 8601 timestamp>"
+  }
+}

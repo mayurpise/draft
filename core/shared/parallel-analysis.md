@@ -1,0 +1,434 @@
+# Parallel Analysis Protocol
+
+> Shared procedure for `draft:init`. Applies to tiers 3–5.
+> Tiers 1–2 use the Sequential Generation Protocol directly — no parallelism needed, and the IR bottleneck hurts depth more than parallelism helps speed at small scale.
+> Implements Map → IR+Prose → Reduce to cut wall clock by ~60% at XL tier while preserving deep per-module content.
+
+---
+
+## Architecture
+
+```
+Phase 1 (Map)    N parallel reader agents  bounded scope per agent (4 modules each)
+                 each agent reads          source files in its assigned modules
+                 each agent outputs        (A) IR JSON array  — structured metadata for tables/diagrams
+                                           (B) Markdown deep-dives — per-module prose (§7 sections)
+
+Phase 2 (Reduce) 1 synthesis agent         receives all IRs + all reader deep-dives
+                 assembles architecture.md by composing reader prose (§7) + deriving cross-cutting
+                                           sections from IR; targeted source reads for §6, §14, §15, §18
+                 context budget:           ~20K tokens (reader prose replaces need to re-read source)
+
+Phase 3 (Finalize) 2 parallel agents       .ai-context.md + .ai-profile.md
+                                           state files (facts.json, freshness.json, etc.)
+```
+
+The **Intermediate Representation (IR)** carries structured metadata — edges, enums, hotspots.
+The **Reader Deep-Dives** carry the prose that IR cannot express — mechanisms, rationale, operational detail.
+Both outputs are produced by the same reader agent in one pass; no extra source reads needed.
+
+---
+
+## IR Schema (language-agnostic)
+
+Each reader agent outputs a JSON array of objects matching this schema — one object per assigned module:
+
+```json
+{
+  "module": "<module_name>",
+  "path": "<source_path_relative_to_repo_root>",
+  "role": "<1-sentence description of what this module does>",
+  "files_read": 12,
+  "token_budget_used": 420,
+
+  "key_classes": [
+    {
+      "name": "<ClassName or key type>",
+      "file": "<path>:<line>",
+      "pattern": "<facade|singleton|actor|factory|strategy|observer|coordinator>",
+      "public_methods": 14,
+      "state_protected_by": "<lock_name or null>"
+    }
+  ],
+
+  "state": [
+    {
+      "field": "<field_name>",
+      "type": "<type>",
+      "lock": "<lock_name or null>",
+      "persistence": "<PostgreSQL|Redis|file|memory|none>"
+    }
+  ],
+
+  "dependencies_out": ["<ModuleA>", "<ModuleB>"],
+  "dependencies_in":  ["<CallerA>", "<CallerB>"],
+
+  "invariants": [
+    "<rule that must always hold>",
+    "<another invariant>"
+  ],
+
+  "hotspots": ["<file>:<lines>L", "<file>:<lines>L"],
+
+  "extension_point": "<how to add new functionality to this module, or null>",
+
+  "state_machine": {
+    "states": ["STATE_A", "STATE_B"],
+    "transitions": [["STATE_A", "event", "STATE_B"]]
+  },
+
+  "error_handling": "<fail-closed|retry|propagate|circuit-breaker|ignore>",
+
+  "concurrency_model": "<single-threaded|async-await|mutex-lock|rwlock|actor-queue|goroutine-pool|thread-pool>"
+}
+```
+
+**Token budget per module in IR output: 400–600 tokens.**
+A module with 0 interesting state/concurrency/invariants still needs a valid IR — just shorter.
+
+**Reader deep-dive budget per module: minimum 1500 tokens, no upper limit.**
+This prose is the §7 deep-dive section — it must reflect actual source file content.
+Large modules with deep sub-module hierarchies (e.g., 500+ files with 5+ sub-modules) should produce 5000–10000+ tokens of prose covering ALL sub-modules at the same depth as top-level modules. The synthesis agent will paste this verbatim — do NOT abbreviate to save tokens.
+
+---
+
+## Module Reader Prompt Template
+
+Use this verbatim as the `prompt` field when spawning each reader agent via the `Agent` tool.
+Replace `{MODULE_LIST}`, `{REPO_ROOT}`, and `{GRAPH_DATA_SUMMARY}` before sending.
+
+```
+You are a module reader agent. You have two jobs for each assigned module:
+(A) Extract structured IR JSON — metadata for tables and diagrams
+(B) Write a full §7 deep-dive section in Markdown — prose the synthesis agent will paste verbatim into architecture.md
+
+ASSIGNED MODULES: {MODULE_LIST}
+Repository root: {REPO_ROOT}
+
+Graph context (use to prioritize which files to read):
+{GRAPH_DATA_SUMMARY}
+
+## Instructions
+
+For each assigned module:
+1. Read the module's directory structure (use Glob/LS)
+2. Read the top-3 hotspot files (highest complexity from graph data above)
+3. Read the interface/header or main entry file
+4. For modules with 200+ files, read at least 5 source files total
+5. Extract one IR JSON object matching the IR Schema below
+6. Write one Markdown deep-dive section matching the Deep-Dive Template below
+
+## IR Schema
+
+Output a JSON array after the "## IR" heading. Each element is one module:
+
+## IR
+[
+  {
+    "module": "<name>",
+    "path": "<source_path>",
+    "role": "<1-sentence>",
+    "files_read": <N>,
+    "key_classes": [{"name":"","file":"","pattern":"","public_methods":0,"state_protected_by":null}],
+    "state": [{"field":"","type":"","lock":null,"persistence":"memory"}],
+    "dependencies_out": [],
+    "dependencies_in": [],
+    "invariants": ["<invariant>"],
+    "hotspots": ["<file>:<lines>L"],
+    "extension_point": null,
+    "state_machine": {"states":[],"transitions":[]},
+    "error_handling": "propagate",
+    "concurrency_model": "single-threaded"
+  }
+]
+
+## Deep-Dives
+
+For each module, write a full Markdown section under the "## Deep-Dives" heading:
+
+#### 7.X {ModuleName}
+
+**Role**: One-line description grounded in what you actually read.
+
+**Source Files**:
+- `path/to/file` — what this file does
+
+**Sub-Module Structure**:
+| Sub-Module | Path | Files | Role |
+|------------|------|-------|------|
+| `name` | `path/` | N | description |
+
+**Responsibilities**:
+1. Concrete responsibility with detail from source
+2. (list ALL — no "etc.")
+
+**Key Operations / Methods**:
+| Op / Method | Signature | Description |
+|-------------|-----------|-------------|
+| `name` | `(input: Type) → ReturnType` | what it does |
+
+**State Machine** (if stateful):
+[Mermaid stateDiagram-v2]
+
+**Notable Mechanisms**:
+- Caching: describe policy from source
+- Retry: policy and backoff
+- (cover ALL non-trivial mechanisms)
+
+**Error Handling**: How this module handles and propagates errors.
+
+**Thread Safety**: Single-threaded / thread-safe / requires external synchronization.
+
+Then, for EACH sub-module within this module:
+
+##### 7.X.Y {ParentModule}/{SubModuleName} (if 50+ files — full deep-dive)
+
+**Role**: One-line description.
+
+**Source Files**:
+- `path/to/interface.h` — public API
+- `path/to/impl.cc` — primary implementation
+
+**Sub-Sub-Module Structure** (if nested directories exist):
+| Sub-Directory | Path | Files | Role |
+|---------------|------|-------|------|
+
+**Responsibilities**:
+1. Concrete responsibility unique to this sub-module
+2. (list ALL)
+
+**Key Operations / Methods**:
+| Op / Method | Signature | Description |
+|-------------|-----------|-------------|
+| (at least 5 entries with real data) | | |
+
+**Interaction with Sibling Sub-Modules**:
+- Calls `sibling/` for {purpose}
+- Called by `sibling/` when {trigger}
+
+**State Machine** (if stateful): [Mermaid stateDiagram-v2]
+
+**Notable Mechanisms**: {specific to this sub-module}
+
+**Error Handling**: How errors propagate within this sub-module.
+
+##### 7.X.Y {ParentModule}/{SubModuleName} (if 10-49 files — summary)
+
+**Role**: 2-3 sentence description.
+
+**Key Operations**:
+| Op / Method | Source File | Description |
+|-------------|-------------|-------------|
+| (at least 5 entries) | | |
+
+**Key Interface** (code snippet from actual source, 10-20 lines)
+
+##### 7.X.Y {ParentModule}/{SubModuleName}/ops — Operation Catalog (for ops/handler dirs)
+
+| # | Operation | Source File | Lines | Description |
+|---|-----------|-------------|-------|-------------|
+| (enumerate ALL — no sampling) | | | | |
+
+---
+
+## Constraints
+
+- IR: max 600 tokens per module; null unknown fields; never omit keys.
+- Deep-dive: minimum 150 lines per top-level module (250+ for modules with 200+ files). No upper limit.
+- Deep-dive prose MUST reflect actual source file content — not graph metadata alone.
+- Sub-modules with 50+ files MUST get their own ##### subsection with the SAME depth as top-level modules (role, source files, responsibilities, key ops table, state machine, mechanisms, error handling). There is NO page limit — produce as much content as the codebase warrants.
+- Sub-modules with 10-49 files MUST get a ##### subsection with summary (role, key ops table, code snippet).
+- Ops/handler directories MUST get a numbered catalog table enumerating ALL operations.
+- Do NOT read files outside your assigned modules.
+- If a field is unknown in IR, use null or empty array.
+```
+
+---
+
+## Synthesis Coordinator Prompt Template
+
+Use this as the prompt for the single synthesis agent in Phase 2.
+Replace `{CONCATENATED_IRS}`, `{GRAPH_DEPENDENCY_DIAGRAM}`, and `{ARCHITECTURE_TEMPLATE_STRUCTURE}`.
+
+```
+You are the synthesis agent. Your job is to assemble draft/architecture.md from reader outputs.
+
+## Inputs
+
+Reader deep-dive sections (Markdown prose, one §7.X block per module):
+{CONCATENATED_DEEP_DIVES}
+
+IR summaries for all modules (structured metadata):
+{CONCATENATED_IRS}
+
+Module dependency diagram (from graph binary):
+{GRAPH_DEPENDENCY_DIAGRAM}
+
+Architecture template structure to follow:
+{ARCHITECTURE_TEMPLATE_STRUCTURE}
+
+## Your Role
+
+You are a composer, not an analyst. Readers already did the source analysis.
+Your job:
+1. Paste reader deep-dives verbatim into Section 7 — do not rewrite them, do not summarize them.
+2. Derive cross-cutting sections from IR fields (edges, enums, invariants).
+3. Read source directly for sections that require it (see policy below).
+
+## CRITICAL: Template Compliance
+
+Your output MUST follow the EXACT numbered section structure from {ARCHITECTURE_TEMPLATE_STRUCTURE}.
+- Use the EXACT section numbers: ## 1. Executive Summary, ## 2. AI Agent Quick Reference, ## 3. System Identity & Purpose, ... through ## 28. Glossary, then Appendix A–E.
+- Do NOT create custom/freeform sections. Do NOT rename sections. Do NOT skip section numbers.
+- Do NOT collapse multiple template sections into one. Do NOT invent new section names.
+- Every section from the template must appear in your output — if a section does not apply, write the heading and state "N/A — {reason}" beneath it.
+- Sub-modules within Section 7 MUST get the SAME depth of analysis as top-level modules. A sub-module with 50+ files gets a full deep-dive (role, responsibilities, key ops table, state machine, mechanisms). There is no page limit — if the codebase has 14 modules each with 5 sub-modules, Section 7 alone may be 50+ pages. That is correct and expected.
+
+## Source Reading Policy
+
+Read source files for these sections — IR and reader prose are insufficient:
+- §6 Data Flow — read entry-point and pipeline files to trace actual data movement
+- §12 API Definitions — read route/handler files for endpoint enumeration
+- §14 Integration Points — read adapter/client files for external dependency detail
+- §15 Critical Invariants — verify invariants[] from IR against actual source assertions
+- §18 Key Design Patterns — read 3–5 implementation files for concrete pattern examples
+- §22 Configuration — read config/settings files for the configuration catalog
+
+For all other sections (§1–5, §8–11, §13, §16–17, §19–21, §23–28, appendices):
+derive from IR fields and reader deep-dives. Do not read source files for these.
+
+## What to Derive from IR
+
+- Component map (§4): use dependencies_out + dependencies_in edges across all IRs
+- Concurrency model (§8): collect concurrency_model + state[].lock fields
+- Extension points (§9): collect extension_point fields
+- State machines (§10): collect state_machine fields across IRs
+- Error handling patterns (§17): collect error_handling fields
+- Hotspot catalog (§appendix): collect hotspots[] fields
+
+## Output
+
+Write the full draft/architecture.md following the standard 28-section template.
+Begin immediately with the YAML frontmatter, then Section 1. Do not explain your plan first.
+Section 7 must contain the reader deep-dives in full — paste them, don't summarize.
+
+MANDATORY output structure (in this exact order):
+1. YAML frontmatter (---project/git metadata---)
+2. # Architecture: {PROJECT_NAME}
+3. ## Table of Contents (numbered 1-28 + Appendices A-E)
+4. ## 1. Executive Summary
+5. ## 2. AI Agent Quick Reference
+6. ## 3. System Identity & Purpose
+7. ## 4. Architecture Overview (with 4.1 High-Level Topology diagram, 4.2 Process Lifecycle, 4.3 Initialization Sequence diagram, 4.4 Module Dependency Graph slot)
+8. ## 5. Component Map & Interactions (with 5.1 Orchestrator table, 5.2 DI Pattern, 5.3 Interaction Matrix)
+9. ## 6. Data Flow — End to End (3-5 SEPARATE diagrams, each 15+ lines of Mermaid)
+10. ## 7. Core Modules Deep Dive (reader deep-dives pasted verbatim — one #### per module, ##### per sub-module; sub-modules get SAME depth as modules)
+11. ## 8. Concurrency Model & Thread Safety (thread pool table, locking strategy, execution topology diagram)
+12. ## 9. Framework & Extension Points (plugin types table, registry mechanism, core interfaces with REAL code)
+13. ## 10. Full Catalog of Implementations (numbered tables — enumerate ALL, no sampling)
+14. ## 11–28: All remaining sections per template
+15. ## Appendix A–E: All appendices per template
+
+Do NOT produce freeform sections like "## Module deep-dive: X" or "## Key architectural patterns".
+Every section heading MUST match the template numbering exactly.
+```
+
+---
+
+## Tier-Adaptive Agent Counts
+
+| Tier | Label  | Reader Agents                  |
+|------|--------|--------------------------------|
+| 1    | micro  | 1 (all modules)                |
+| 2    | small  | 1–2                            |
+| 3    | medium | ceil(M/6)                      |
+| 4    | large  | ceil(M/4)                      |
+| 5    | XL     | ceil(M/4)                      |
+
+For tier 1–2, skip parallelism — one reader agent handles all modules sequentially.
+
+---
+
+## Dependency-Aware Module Grouping
+
+When assigning modules to reader agents (tier 3+), apply this priority ordering:
+
+```
+Rule 1: Assign high fan-in modules to separate readers
+        (modules with many callers produce IRs that many other IRs reference)
+
+Rule 2: Co-locate modules with shared dependencies in the same reader
+        (reader already has context about the dependency → richer IR)
+
+Rule 3: Separate state-heavy modules from stateless utilities
+        (state-heavy modules produce larger IRs; balance reader token budgets)
+
+Rule 4: Use tier table above for modules-per-agent target
+```
+
+Example grouping heuristic (adapt to actual fan-in data from graph):
+```
+reader_A: [highest fan-in module alone]       — never share high-fan-in with others
+reader_B: [coupled pair: module_X + module_Y] — modules that call each other
+reader_C: [data layer modules]                — shared persistence/cache modules together
+reader_D: [consumer/feature modules]          — modules that call many others
+reader_E: [infra/bootstrap modules]           — low fan-in, foundational
+```
+
+---
+
+## Failure Modes and Recovery
+
+### Reader produces prose instead of IR
+**Detection:** Output doesn't start with `[` or fails JSON.parse.
+**Recovery:** Retry that reader with stricter constraint:
+```
+RETRY INSTRUCTION: Your previous output was not valid JSON. Output ONLY the JSON array.
+The first character of your response MUST be `[`. No preamble. No explanation.
+```
+**Fallback:** If retry fails, run those modules through the standard sequential analysis.
+
+### IR is too sparse AND deep-dive is too short
+**Detection:** IR `token_budget_used < 150` for a module with >20 files AND deep-dive < 100 lines.
+**Recovery:** Re-run that reader with explicit instruction to read more source files and expand the deep-dive.
+If only the IR is sparse but the deep-dive is substantive, no action needed — prose is the primary output.
+
+### Synthesis agent re-reads source outside policy
+**Detection:** Tool calls to Read for files not in the permitted-sections list during synthesis.
+**Prevention:** The synthesis prompt lists exactly which sections permit source reads. Outside those, synthesis derives from reader prose and IR.
+
+### One reader agent fails entirely
+**Detection:** Agent returns error or times out.
+**Recovery:** Run the failed module group through standard sequential analysis.
+The other readers' IRs are still valid — only the failed group needs re-work.
+This is the blast-radius advantage over single-agent: a reader failure is a partial retry.
+
+---
+
+## Token Budget Model
+
+```
+Phase 1 readers (parallel, ceil(M/4) agents):
+  Per agent:     4 modules × ~4K source tokens = ~16K input
+                 IR output: ~2K tokens/agent
+                 Deep-dive output: ~8K tokens/agent (4 modules × ~2K prose each)
+                 Total per agent: ~26K
+
+  Total Phase 1: ceil(M/4) agents × 26K (parallel — wall clock = slowest reader)
+
+Phase 2 synthesis:
+  Input:         N modules × ~450 IR tokens + N modules × ~2K prose tokens + 4K instructions
+                 ≈ 20K context at XL tier (vs 60K+ for raw source re-reads)
+  Output:        §7 paste (from readers) + cross-cutting sections ≈ 30K output tokens
+  Total:         ~50K tokens
+
+Phase 3 finalizers (parallel, 2 agents):
+  ~20K tokens total
+
+vs single-agent baseline:
+  ~350K source read tokens + ~34K generation = ~384K total
+  ~50 min wall clock
+
+Savings at XL tier: ~50% fewer tokens, ~55% faster wall clock
+Depth vs single-agent: equivalent (readers read the same source; synthesis composes from prose)
+```

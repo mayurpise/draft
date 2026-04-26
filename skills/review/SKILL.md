@@ -170,7 +170,7 @@ Once track is resolved:
 For project-level reviews (no track context):
 
 1. **Load Draft context (if available):**
-   Follow the base procedure in `core/shared/draft-context-loading.md`. Honor Accepted Patterns and enforce Guardrails as defined there.
+   Read and follow the base procedure in `core/shared/draft-context-loading.md`.
 
 2. **Note limitations:**
    - No spec.md → Skip Stage 1 (spec compliance)
@@ -236,6 +236,12 @@ For the files changed in the diff, perform static checks using `grep` or similar
 1. **Architecture Conformance:** Search for pattern violations documented in `draft/.ai-context.md`. (e.g. `import * from 'database'` in a React component).
 2. **Dead Code:** Check for newly exported functions/classes in the diff that have 0 references across the codebase.
 3. **Dependency Cycles:** Trace the import chains for new imports to ensure no circular dependencies (e.g., A → B → C → A) are introduced.
+4. **Graph Boundary Check** (if `draft/graph/module-graph.jsonl` exists):
+   - For each changed file, identify its module from the graph
+   - Check if any new cross-module includes were added in the diff
+   - Verify they follow the established dependency direction from `module-graph.jsonl` edges
+   - Flag reverse-direction dependencies (module A now depends on module B, but only B→A existed before) as "Potential architecture violation — new dependency direction"
+   - Check if changes introduce files in modules listed in graph cycles — flag as higher risk
 4. **Security Scan (OWASP):** Scan the diff for:
    - Hardcoded secrets and API keys
    - SQL injection risks (string concatenation in queries)
@@ -369,7 +375,7 @@ For each flagged function, report: file path, function name, estimated complexit
 
 #### Adversarial Pass (When Zero Findings)
 
-If Stage 3 produces zero findings across all four dimensions, do NOT accept "clean" without one more look. Ask these 5 questions explicitly:
+If Stage 3 produces zero findings across all four dimensions, do NOT accept "clean" without one more look. Ask these 7 questions explicitly:
 
 1. **Error paths** — Is every error/exception handled? Are any failure modes silently swallowed?
 2. **Edge cases** — Are there boundary conditions (empty input, max values, concurrent access) not covered by tests?
@@ -519,9 +525,9 @@ ln -sf review-report-<timestamp>.md draft/tracks/<id>/review-report-latest.md
 ## Integrations
 
 ### Bug Hunt Results
-- **Critical bugs:** N found
-- **High severity:** N found
-- **Medium severity:** N found
+- **Critical:** N found
+- **Important:** N found
+- **Minor:** N found
 - Full report: `./bughunt-report-latest.md`
 
 ---
@@ -786,13 +792,36 @@ After generating the review report, execute the pattern learning phase from `cor
 /draft:review track my-feature with-bughunt
 ```
 
+---
+
 ## Cross-Skill Dispatch
 
-- **Auto-invokes:** `/draft:coverage` after Stage 3 if TDD is enabled for the track
-- **At completion, suggests based on findings:**
-  - If tech debt patterns found: "Run `/draft:tech-debt` to catalog and prioritize debt items"
-  - If documentation gaps: "Run `/draft:documentation` to address documentation findings"
-  - If design decisions need recording: "Run `/draft:adr` to document architectural decisions"
-- If architecture concerns found in review: "Consider running `/draft:deep-review` for a production-grade module audit"
-- If review passes and track modifies production code: "Consider running `/draft:deploy-checklist` before deployment"
-- **Jira sync:** If ticket linked, attach review report and post comment: "[draft] review-complete: {verdict} — {n} findings ({critical} critical)" via `core/shared/jira-sync.md`
+### Auto-Invoke at Completion
+
+- **Coverage check:** If TDD enabled in workflow.md, auto-run `/draft:coverage` and include results in review report
+
+### Suggestions at Completion
+
+After review completion, based on findings:
+
+**If significant code quality findings:**
+```
+"Review complete. Consider:
+  → /draft:tech-debt — Catalog and prioritize the technical debt found"
+```
+
+**If new public APIs lack documentation:**
+```
+  → /draft:documentation api — Document new API endpoints"
+```
+
+**If undocumented design decisions discovered:**
+```
+  → /draft:adr — Record architectural decisions found during review"
+```
+
+### Jira Sync
+
+If Jira ticket linked, sync via `core/shared/jira-sync.md`:
+- Attach `review-report-latest.md` to ticket
+- Post comment: "[draft] review-complete: {PASS/FAIL}. {n} findings: {critical} critical, {suggestions} suggestions."

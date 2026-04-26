@@ -12,20 +12,13 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-BUILD_SCRIPT="$ROOT_DIR/scripts/build-integrations.sh"
-SKILLS_DIR="$ROOT_DIR/skills"
 
 source "$SCRIPT_DIR/test-helpers.sh"
+# Source lib.sh for canonical SKILL_ORDER and SKILLS_DIR
+source "$ROOT_DIR/scripts/lib.sh"
 
 echo "=== SKILL_ORDER completeness tests ==="
 echo ""
-
-# Extract SKILL_ORDER from build script
-SKILL_ORDER_RAW=$(sed -n '/^SKILL_ORDER=(/,/^)/p' "$BUILD_SCRIPT" | grep -v '^SKILL_ORDER=(' | grep -v '^)' | tr -d ' ' | grep -v '^\s*$')
-SKILL_ORDER=()
-while IFS= read -r line; do
-    [[ -n "$line" ]] && SKILL_ORDER+=("$line")
-done <<< "$SKILL_ORDER_RAW"
 
 # Get actual skill directories
 DISK_SKILLS=()
@@ -89,4 +82,4 @@ assert "SKILL_ORDER has no duplicate entries" \
 # --- Summary ---
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="
-exit $FAIL
+exit "$FAIL"

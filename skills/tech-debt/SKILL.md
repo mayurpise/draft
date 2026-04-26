@@ -5,18 +5,17 @@ description: Identify, categorize, and prioritize technical debt across six dime
 
 # Tech Debt
 
-You are identifying and prioritizing technical debt using Draft's Context-Driven Development methodology.
+You are conducting a technical debt analysis to catalog, prioritize, and plan remediation of debt across the codebase.
 
-## Red Flags - STOP if you're:
+## Red Flags — STOP if you're:
 
-- Reporting debt without reading the actual code
-- Categorizing everything as high priority (prioritization requires trade-offs)
-- Suggesting rewrites when incremental fixes suffice
-- Ignoring effort estimates (impact without effort is not actionable)
-- Making up file locations or code patterns
-- Reporting framework conventions as debt
+- Flagging intentional design choices as debt (check tech-stack.md accepted patterns first)
+- Cataloging debt without understanding the business context
+- Setting priorities without considering team capacity
+- Recommending "rewrite from scratch" without exhausting incremental options
+- Ignoring the existing guardrails.md conventions
 
-**Evidence-based. Prioritized. Actionable.**
+**Not all shortcuts are debt. Check accepted patterns before flagging.**
 
 ---
 
@@ -24,398 +23,210 @@ You are identifying and prioritizing technical debt using Draft's Context-Driven
 
 ### 0. Capture Git Context
 
+Before starting, capture the current git state:
+
 ```bash
 git branch --show-current    # Current branch name
 git rev-parse --short HEAD   # Current commit hash
 ```
 
-### 1. Load Draft Context
+Store this for the report header. All findings are relative to this specific branch/commit.
+
+### 1. Verify Draft Context
+
+```bash
+ls draft/ 2>/dev/null
+```
+
+If `draft/` doesn't exist, this skill can still run standalone with reduced context.
+
+### 2. Load Draft Context (if available)
 
 Read and follow the base procedure in `core/shared/draft-context-loading.md`.
 
-**Tech-debt-specific context application:**
-- Use `draft/.ai-context.md` for architecture, module boundaries, known technical decisions
-- Use `draft/tech-stack.md` for framework versions, dependency age, accepted patterns
-- Use `draft/guardrails.md` for known conventions and anti-patterns (anti-patterns ARE debt indicators)
-- Use `draft/product.md` for business priorities (aligns debt prioritization with product goals)
-
-If `draft/` does not exist: **STOP** — "No Draft context found. Run `/draft:init` first. Tech debt analysis requires project context."
-
----
-
 ## Step 1: Parse Arguments
 
-| Invocation | Behavior |
-|------------|----------|
-| `/draft:tech-debt` | Full codebase tech debt scan |
-| `/draft:tech-debt <path>` | Scan specific directory or module |
-| `/draft:tech-debt track <id>` | Scan files related to a specific track |
-| `/draft:tech-debt quick` | Quick scan — top-level indicators only, skip deep analysis |
+- `/draft:tech-debt` — Project-wide scan (default)
+- `/draft:tech-debt module <name>` — Module-scoped scan
+- `/draft:tech-debt category <type>` — Filter by category (code, architecture, test, dependency, documentation, infrastructure)
+- `/draft:tech-debt <path>` — Scan specific directory/file pattern
 
----
+## Step 2: Load Context
 
-## Step 2: Scan Across Six Dimensions
+1. Read `draft/tech-stack.md` — **Critical:** "Accepted Patterns" section. Do NOT flag these as debt.
+2. Read `draft/guardrails.md` — Learned conventions (skip) and anti-patterns (always flag)
+3. Read `draft/.ai-context.md` — Module boundaries, invariants, known constraints
+4. Read `draft/product.md` — Business priorities for impact assessment
+5. Read `draft/workflow.md` — Team conventions and toolchain for feasibility assessment
 
-For each dimension, scan the codebase and record findings with evidence.
+## Step 3: Scan for Debt
 
-### Dimension 1: Code Debt
+Scan the codebase systematically across all six categories. For each finding, record: location (file:line), description, evidence, and category.
 
-Issues within individual files and functions.
+### Category 1: Code Debt
 
-- [ ] **Code duplication:** Repeated logic across files (3+ occurrences of similar patterns)
-- [ ] **Complex functions:** Cyclomatic complexity > 15, nesting depth > 3
-- [ ] **Long files:** Files exceeding 500 lines (language-dependent threshold)
-- [ ] **Magic numbers/strings:** Hardcoded values that should be constants or config
-- [ ] **Dead code:** Unreachable functions, unused imports, commented-out blocks
-- [ ] **TODO/FIXME/HACK markers:** Accumulated unresolved markers
-- [ ] **Type safety gaps:** `any` types (TypeScript), missing type hints (Python), unsafe casts
-- [ ] **Inconsistent patterns:** Same problem solved differently across the codebase
+- Complex functions (cyclomatic complexity >10, deep nesting >4 levels)
+- Duplicated code blocks (>20 lines similar across multiple locations)
+- TODO/FIXME/HACK/XXX comments (especially old ones — check git blame age)
+- Dead code (unreachable branches, unused exports, commented-out blocks)
+- Inconsistent naming patterns within the same module
+- Long functions (>100 lines without clear separation of concerns)
+- God classes (>500 lines, >10 public methods, mixed responsibilities)
+- Magic numbers and hardcoded strings that should be constants
+- Deeply nested callbacks or promise chains (callback hell)
 
-**Detection approach:**
-```bash
-# TODO/FIXME/HACK count
-grep -rn "TODO\|FIXME\|HACK" --include="*.ts" --include="*.py" --include="*.go" --include="*.java" --include="*.rs" . | grep -v node_modules | grep -v vendor
+### Category 2: Architecture Debt
 
-# Large files
-find . -name "*.ts" -o -name "*.py" -o -name "*.go" -o -name "*.java" -o -name "*.rs" | xargs wc -l | sort -rn | head -20
+- Dependency cycles between modules (A depends on B depends on A)
+- Tight coupling (modules with >5 direct cross-references)
+- Layer violations (UI calling DB directly, business logic in controllers)
+- Missing abstractions (repeated patterns without shared interface)
+- Monolith tendencies (single module >50% of codebase)
+- Inconsistent data flow patterns (some modules use events, others direct calls)
+- Missing or bypassed API boundaries (internal implementation details exposed)
+- Configuration scattered across multiple locations
 
-# Dead imports (language-specific tools)
-```
+### Category 3: Test Debt
 
-### Dimension 2: Architecture Debt
+- Modules with zero test coverage
+- Missing integration tests for service boundaries
+- Brittle tests (frequently failing, time-dependent, order-dependent)
+- Test-code coupling (tests that break on internal refactor, not behavior change)
+- Missing E2E tests for critical user flows (from product.md)
+- Tests with no assertions (tests that only check "doesn't throw")
+- Disabled/skipped tests without justification
+- Missing test fixtures or shared test utilities (repeated setup code)
 
-Structural issues in system design.
+### Category 4: Dependency Debt
 
-- [ ] **Circular dependencies:** Modules that import each other (trace import chains)
-- [ ] **God objects/modules:** Single module with too many responsibilities
-- [ ] **Missing abstractions:** Direct coupling where interfaces should exist
-- [ ] **Layer violations:** Business logic in controllers, data access in views
-- [ ] **Monolith coupling:** Components that should be decoupled for independent deployment
-- [ ] **Missing boundaries:** No clear separation between domains/bounded contexts
+- Outdated dependencies (>2 major versions behind)
+- Known security vulnerabilities (check advisories: `npm audit`, `pip audit`, etc.)
+- Deprecated APIs in use (check dependency changelogs)
+- Version conflicts or pinning issues
+- Abandoned dependencies (no updates >2 years, archived repos)
+- Overly broad dependency versions (no pinning in production)
+- Unnecessary dependencies (functionality available in stdlib or already-included packages)
 
-**Detection approach:**
-- Read `draft/.ai-context.md` module definitions and check actual imports against intended boundaries
-- Trace import chains for cycles
-- Identify modules with high fan-in AND high fan-out (connector modules that are likely over-coupled)
+### Category 5: Documentation Debt
 
-### Dimension 3: Test Debt
+- Undocumented public APIs (exported functions/classes without docstrings)
+- Stale README (doesn't match current setup steps or architecture)
+- Missing architecture decision records for non-obvious choices
+- Outdated onboarding documentation
+- Missing runbooks for production services
+- API docs out of sync with implementation
+- Missing inline comments for complex algorithms or business rules
 
-Gaps in testing quality and coverage.
+### Category 6: Infrastructure Debt
 
-- [ ] **Missing tests:** Public functions/methods without test coverage
-- [ ] **Brittle tests:** Tests that break on implementation changes (testing internals, not behavior)
-- [ ] **Slow tests:** Tests taking >5 seconds individually or >60 seconds total
-- [ ] **Flaky tests:** Tests that pass/fail non-deterministically
-- [ ] **Missing integration tests:** Components tested in isolation but not together
-- [ ] **No edge case coverage:** Only happy path tested
-- [ ] **Test anti-patterns:** Shared mutable state, logic in tests, no assertions
+- Manual deployment steps (should be automated)
+- Missing or insufficient monitoring (services without health checks or alerts)
+- Hardcoded configuration (should be environment variables)
+- Missing CI checks (linting, security scanning, type checking)
+- No automated backup/restore verification
+- Missing or outdated Dockerfiles / container configs
+- Inconsistent environment parity (dev/staging/prod divergence)
+- Missing rate limiting or resource guards on public endpoints
 
-**Detection approach:**
-```bash
-# Test file count vs source file count
-find . -name "*test*" -o -name "*spec*" | wc -l
-find . -name "*.ts" -o -name "*.py" | grep -v test | grep -v spec | wc -l
+## Step 4: Prioritize
 
-# Run test suite and check for slow tests (if safe to run)
-```
+For each finding, score on three dimensions:
 
-### Dimension 4: Dependency Debt
+- **Impact** (1-5): How much does this hurt development velocity or production reliability?
+  - 1: Minor annoyance, cosmetic
+  - 2: Slows development occasionally
+  - 3: Regular friction, workarounds needed
+  - 4: Significant velocity drag or reliability risk
+  - 5: Blocking progress or causing incidents
 
-Issues with third-party dependencies.
+- **Risk** (1-5): How likely is this to cause a production incident?
+  - 1: Extremely unlikely
+  - 2: Unlikely but possible
+  - 3: Moderate likelihood
+  - 4: Likely under certain conditions
+  - 5: Near-certain or already causing issues
 
-- [ ] **Outdated dependencies:** Major version behind current (check lock files)
-- [ ] **Vulnerable dependencies:** Known CVEs in dependency tree
-- [ ] **Abandoned dependencies:** No commits in 12+ months, no maintenance
-- [ ] **Duplicate dependencies:** Multiple libraries solving the same problem
-- [ ] **License issues:** Incompatible licenses for the project type
-- [ ] **Pinning issues:** Floating version ranges that risk breaking changes
+- **Effort** (1-5): How much work to remediate?
+  - 1: Hours (quick fix)
+  - 2: A day or two
+  - 3: A sprint (1-2 weeks)
+  - 4: Multiple sprints
+  - 5: Large project (months)
 
-**Detection approach:**
-```bash
-# Check for outdated (npm example)
-npm outdated 2>/dev/null
+**Priority = (Impact + Risk) / (6 - Effort)**
 
-# Check for vulnerabilities
-npm audit 2>/dev/null || pip audit 2>/dev/null || cargo audit 2>/dev/null
+Higher score = higher priority. This formula naturally favors high-impact, low-effort items ("quick wins") and deprioritizes low-impact, high-effort items.
 
-# Dependency age (check lock file dates)
-```
+## Step 5: Generate Remediation Plan
 
-### Dimension 5: Documentation Debt
+Organize findings into three actionable tiers:
 
-Gaps in project documentation.
+### Tier 1: Quick Wins (Priority > 3, Effort <= 2)
 
-- [ ] **Missing README:** No project or module README
-- [ ] **Stale docs:** Documentation references non-existent files, APIs, or patterns
-- [ ] **Missing API docs:** Public interfaces without documentation
-- [ ] **No architecture docs:** Missing system overview for new developers
-- [ ] **Missing runbooks:** No operational documentation for production systems
-- [ ] **Inline comment debt:** Complex logic without explanatory comments
+Items that can be fixed in a single sprint or less. Do these first — they deliver the best return on investment.
 
-**Detection approach:**
-- Check for README.md at project root and key directories
-- Cross-reference doc references with actual codebase
-- Check for JSDoc/docstring coverage on public exports
+For each item:
+- Specific fix description
+- Estimated time (hours)
+- Suggested assignee pattern (e.g., "whoever touches this module next")
 
-### Dimension 6: Infrastructure Debt
+### Tier 2: Strategic Improvements (Priority > 2, Effort > 2)
 
-Issues in build, deploy, and operational systems.
+Items requiring dedicated effort. Create via `/draft:new-track` or feed into `/draft:jira-preview`.
 
-- [ ] **CI/CD gaps:** Missing or incomplete CI pipeline stages
-- [ ] **Manual deployment steps:** Processes that should be automated
-- [ ] **Missing monitoring:** No alerting, no APM, no log aggregation
-- [ ] **Environment drift:** Dev/staging/prod configuration divergence
-- [ ] **Missing IaC:** Infrastructure not codified (manual server/cloud setup)
-- [ ] **Build performance:** Slow builds that impede development velocity
-- [ ] **Missing health checks:** No readiness/liveness probes
+For each item:
+- Scope and approach
+- Estimated effort (sprints)
+- Dependencies and sequencing
+- Risk of deferral (what happens if we wait?)
 
-**Detection approach:**
-- Read CI config files (`.github/workflows/`, `.gitlab-ci.yml`, etc.)
-- Check for monitoring configuration
-- Compare environment configs
+### Tier 3: Nice-to-Haves (Priority <= 2)
 
----
+Track but don't prioritize. Revisit quarterly. These items are real debt but the cost of remediation exceeds the current pain.
 
-## Step 3: Prioritize
+## Step 6: Save Output
 
-### Priority Scoring
+**MANDATORY: Include YAML frontmatter with git metadata.** Follow `core/shared/git-report-metadata.md`.
 
-For each finding, score on three axes (1-5 scale):
-
-| Axis | 1 (Low) | 3 (Medium) | 5 (High) |
-|------|---------|------------|----------|
-| **Impact** | Cosmetic, developer annoyance | Slows development, causes occasional bugs | Blocks features, causes production issues |
-| **Risk** | Low probability of causing problems | Moderate probability, growing concern | High probability, ticking time bomb |
-| **Effort** | < 1 day | 1-5 days | > 1 week |
-
-### Priority Formula
-
-```
-Priority Score = (Impact + Risk) / (6 - Effort)
-```
-
-Higher score = higher priority. This formula favors high-impact, low-effort items (quick wins).
-
-### Sort into Three Tiers
-
-| Tier | Priority Score | Action |
-|------|---------------|--------|
-| **Quick Wins** | Score > 3.0 AND Effort ≤ 2 | Fix immediately, low risk |
-| **Strategic** | Score > 2.0 OR Impact ≥ 4 | Plan and schedule, high value |
-| **Nice-to-Haves** | Score ≤ 2.0 AND Impact ≤ 2 | Track but don't prioritize |
-
----
-
-## Step 4: Generate Report
-
-**MANDATORY: Include YAML frontmatter with git metadata.** Follow the procedure in `core/shared/git-report-metadata.md` to gather git info, generate frontmatter, and include the report header table. Use `generated_by: "draft:tech-debt"`.
-
-### Report Structure
+Include the report header table immediately after frontmatter:
 
 ```markdown
-[YAML frontmatter — see core/shared/git-report-metadata.md]
-
-# Tech Debt Report
-
-[Report header table — see core/shared/git-report-metadata.md]
-
-## Summary
-
-| Dimension | Findings | Critical | Important | Minor |
-|-----------|----------|----------|-----------|-------|
-| Code | [N] | [N] | [N] | [N] |
-| Architecture | [N] | [N] | [N] | [N] |
-| Test | [N] | [N] | [N] | [N] |
-| Dependency | [N] | [N] | [N] | [N] |
-| Documentation | [N] | [N] | [N] | [N] |
-| Infrastructure | [N] | [N] | [N] | [N] |
-| **Total** | **[N]** | **[N]** | **[N]** | **[N]** |
-
-## Health Score
-
-**Overall: [score]/100**
-
-| Dimension | Score | Grade |
-|-----------|-------|-------|
-| Code | [N]/100 | [A/B/C/D/F] |
-| Architecture | [N]/100 | [A/B/C/D/F] |
-| Test | [N]/100 | [A/B/C/D/F] |
-| Dependency | [N]/100 | [A/B/C/D/F] |
-| Documentation | [N]/100 | [A/B/C/D/F] |
-| Infrastructure | [N]/100 | [A/B/C/D/F] |
-
-Grading: A (90-100), B (80-89), C (70-79), D (60-69), F (<60)
-
----
-
-## Tier 1: Quick Wins
-
-[Findings with Priority Score > 3.0 AND Effort ≤ 2]
-
-### [Finding Title]
-- **Dimension:** [category]
-- **Location:** [file:line or module]
-- **Impact:** [score]/5 — [description]
-- **Risk:** [score]/5 — [description]
-- **Effort:** [score]/5 — [estimated time]
-- **Priority Score:** [calculated]
-- **Remediation:** [specific action to take]
-
----
-
-## Tier 2: Strategic
-
-[Findings with Priority Score > 2.0 OR Impact ≥ 4]
-
-### [Finding Title]
-[Same format as Tier 1]
-
----
-
-## Tier 3: Nice-to-Haves
-
-[Remaining findings]
-
-### [Finding Title]
-[Same format as Tier 1]
-
----
-
-## Remediation Plan
-
-### Phase 1: Quick Wins (1-2 sprints)
-- [ ] [Action 1] — [effort estimate]
-- [ ] [Action 2] — [effort estimate]
-
-### Phase 2: Strategic (3-6 sprints)
-- [ ] [Action 1] — [effort estimate]
-- [ ] [Action 2] — [effort estimate]
-
-### Phase 3: Nice-to-Haves (backlog)
-- [ ] [Action 1] — [effort estimate]
-- [ ] [Action 2] — [effort estimate]
-
----
-
-## Trend (if previous report exists)
-
-| Dimension | Previous | Current | Delta |
-|-----------|----------|---------|-------|
-| Code | [score] | [score] | [+/-] |
-| Total findings | [N] | [N] | [+/-] |
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
 ```
 
-### Save Location
-
-Save to `draft/tech-debt-report-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`, e.g., `2026-03-15T1430`):
+Save to: `draft/tech-debt-report-<timestamp>.md`
+Create symlink: `draft/tech-debt-report-latest.md`
 
 ```bash
-ln -sf tech-debt-report-<timestamp>.md draft/tech-debt-report-latest.md
+TIMESTAMP=$(date +%Y-%m-%dT%H%M)
+# Example: draft/tech-debt-report-2026-03-15T1430.md
+ln -sf tech-debt-report-${TIMESTAMP}.md draft/tech-debt-report-latest.md
 ```
 
----
-
-## Step 5: Present Results
-
-```
-Tech debt analysis complete.
-
-Overall Health: [score]/100 ([grade])
-Findings: [N] total across 6 dimensions
-  Quick Wins: [N] (fix now, low effort)
-  Strategic: [N] (plan and schedule)
-  Nice-to-Haves: [N] (track, don't prioritize)
-
-Top 3 Quick Wins:
-1. [Finding] — [effort estimate]
-2. [Finding] — [effort estimate]
-3. [Finding] — [effort estimate]
-
-Report: draft/tech-debt-report-<timestamp>.md
-        (symlink: tech-debt-report-latest.md)
-
-Next steps:
-1. Review findings and adjust priorities
-2. Create tracks for strategic items: /draft:new-track
-3. Address quick wins in current sprint
-4. Re-run periodically to track trend
-```
-
----
+Report structure:
+1. **Executive Summary** — Total findings by category and priority tier, headline stats
+2. **Priority Matrix** — Table of all findings sorted by priority score
+3. **Category Details** — Per-category findings with file locations and evidence
+4. **Remediation Plan** — Three tiers with effort estimates
+5. **Recommendations** — Strategic advice on debt management practices
 
 ## Cross-Skill Dispatch
 
-### Inbound
-
-- **Offered by `/draft:new-track`** — when creating refactor tracks, suggest running tech debt analysis first
-- **Suggested by `/draft:implement`** — when tech debt is logged during implementation (plan.md ## Tech Debt)
-- **Suggested by `/draft:deep-review`** — when deep review identifies systemic issues
-
-### Outbound
-
-- **Feeds `/draft:new-track`** — strategic findings become new refactor tracks
-- **Feeds `/draft:learn`** — recurring debt patterns inform guardrails
-- **References `draft/guardrails.md`** — anti-patterns in guardrails are debt indicators
-
----
+- **Offered by:** `/draft:new-track` (refactor tracks — scope the debt before planning)
+- **Suggested by:** `/draft:implement` (when TODO/FIXME detected at completion)
+- **Suggested by:** `/draft:deep-review` (architecture debt findings)
+- **Feeds into:** `/draft:jira-preview` (create remediation tickets from Tier 2 items)
+- **Feeds into:** `/draft:testing-strategy` (Test Debt findings inform test planning)
+- **Jira sync:** If ticket linked, attach report and post summary via `core/shared/jira-sync.md`
 
 ## Error Handling
 
-### No Draft Context
-
-```
-No Draft context found. Run /draft:init first.
-Tech debt analysis requires project context for accurate prioritization.
-```
-
-### Empty Codebase
-
-```
-No source files found matching scan criteria.
-Verify the path and file extensions are correct.
-```
-
-### Previous Report Comparison
-
-If a previous report exists (`draft/tech-debt-report-latest.md`):
-- Compare findings count per dimension
-- Show trend (improving / stable / degrading)
-- Highlight new findings not in previous report
-- Note resolved findings (in previous but not current)
-
----
-
-## Anti-Patterns
-
-| Don't | Instead |
-|-------|---------|
-| Report everything as critical | Use the priority scoring formula |
-| Suggest full rewrites | Recommend incremental improvements |
-| Ignore effort estimates | Every finding needs an effort score |
-| Skip dimensions that seem fine | Scan all 6, mark clean dimensions as healthy |
-| Report framework patterns as debt | Check tech-stack.md accepted patterns |
-| Run without Draft context | Require /draft:init for accurate analysis |
-
----
-
-## Examples
-
-### Full codebase scan
-```bash
-/draft:tech-debt
-```
-
-### Scan specific module
-```bash
-/draft:tech-debt src/auth/
-```
-
-### Scan track-related files
-```bash
-/draft:tech-debt track add-user-auth
-```
-
-### Quick scan
-```bash
-/draft:tech-debt quick
-```
+**If no draft context:** Run with reduced analysis, note: "Run `/draft:init` for better debt detection with accepted-pattern filtering"
+**If tech-stack.md has accepted patterns:** Explicitly skip those patterns, note: "Skipped N accepted patterns from tech-stack.md"
+**If >100 findings:** Group by category, show top 20 by priority in the summary, full list in Category Details section
+**If module scope requested but module not found:** List available modules, ask user to confirm

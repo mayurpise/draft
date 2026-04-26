@@ -74,5 +74,5 @@ synced_to_commit: "{FULL_SHA}"
 
 - `[ ]` Pending
 - `[~]` In Progress
-- `[x]` Completed — append commit SHA: `[abc1234]`
+- `[x]` Completed — append commit SHA: `(abc1234)`
 - `[!]` Blocked — note reason

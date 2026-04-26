@@ -23,7 +23,7 @@ You are computing and reporting code coverage for the active track or a specific
 2. Find active track from `draft/tracks.md`
 3. If track has `architecture.md` (track-level) or project has `.ai-context.md`, identify current module for scoping
 4. Look for `coverage_target` in `draft/workflow.md`. Check for per-module targets first (see Per-Module Coverage Enforcement below); if absent, default to 95%.
-5. Check if `draft/tracks/<id>/bughunt-report-latest.md` exists for cross-referencing (see Coverage-Bughunt Cross-Reference below)
+5. Check if `draft/tracks/<id>/bughunt-report-latest.md` (track scope) or `draft/bughunt-report-latest.md` (project scope) exists for cross-referencing (see Coverage-Bughunt Cross-Reference below)
 
 If no active track and no argument provided:
 - Tell user: "No active track. Provide a path or track ID, or run `/draft:new-track` first."
@@ -97,7 +97,9 @@ src/auth/jwt.ts:78       Defensive null check (unreachable via public API)
 ═══════════════════════════════════════════════════════════
 ```
 
-## Step 5b: Branch/Condition Coverage (Optional)
+## Step 6: Branch/Condition Coverage (Optional)
+
+If the project's test framework supports branch/condition coverage (e.g., Istanbul, coverage.py branch mode), execute this step. Otherwise skip to Step 7.
 
 Beyond line coverage, evaluate branch coverage for modules with complex conditional logic:
 
@@ -114,7 +116,7 @@ Beyond line coverage, evaluate branch coverage for modules with complex conditio
 
 Include branch coverage percentage in the report alongside line coverage when branch analysis is performed.
 
-## Step 6: Analyze Gaps
+## Step 7: Analyze Gaps
 
 For files below target (using per-module targets when configured — see Per-Module Coverage Enforcement):
 
@@ -137,7 +139,7 @@ For files below target (using per-module targets when configured — see Per-Mod
       - Expected: throws AuthError with code TOKEN_EXPIRED
    ```
 
-## Step 6b: Characterization Testing (Brownfield/Legacy Code)
+## Step 7b: Characterization Testing (Brownfield/Legacy Code)
 
 When encountering modules with 0% or very low coverage that need refactoring, do not attempt to write unit tests for untested legacy code directly. Instead, apply the Golden Master / Approval Testing approach (ref: Michael Feathers, "Working Effectively with Legacy Code"):
 
@@ -153,7 +155,7 @@ When encountering modules with 0% or very low coverage that need refactoring, do
 
 Present characterization testing recommendations in the gap analysis when applicable.
 
-## Step 6c: Mutation Testing Awareness
+## Step 7c: Mutation Testing Awareness
 
 After measuring line coverage (and branch coverage if applicable), prompt the engineer to consider mutation testing for critical modules. Mutation testing introduces small code changes (mutants) into the source; if existing tests still pass, the mutant "survived," indicating weak test assertions even at high line coverage.
 
@@ -176,7 +178,7 @@ After measuring line coverage (and branch coverage if applicable), prompt the en
 
 Include mutation testing recommendations in the report when applicable, but do not block coverage completion on mutation analysis — it is advisory.
 
-## Step 6d: Coverage-Bughunt Cross-Reference
+## Step 7d: Coverage-Bughunt Cross-Reference
 
 If a bughunt report exists (`draft/tracks/<id>/bughunt-report-latest.md` or `draft/bughunt-report-latest.md`):
 
@@ -238,7 +240,7 @@ src/utils/logger.ts       75.0%  [infrastructure: 70%]  PASS
 src/generated/api.ts       —     [generated: excluded]
 ```
 
-## Step 7: Developer Review
+## Step 8: Developer Review
 
 ### CHECKPOINT (MANDATORY)
 
@@ -252,7 +254,7 @@ Ask developer:
 
 **Wait for developer approval before recording results.**
 
-## Step 8: Record Results
+## Step 9: Record Results
 
 After developer approves:
 

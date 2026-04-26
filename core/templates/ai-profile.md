@@ -1,37 +1,40 @@
 ---
 project: "{PROJECT_NAME}"
-module: "root"
-generated_by: "draft:init"
+module: "{MODULE_NAME or 'root'}"
+generated_by: "draft:{COMMAND_NAME}"
 generated_at: "{ISO_TIMESTAMP}"
 git:
   branch: "{LOCAL_BRANCH}"
-  remote: "{REMOTE/BRANCH}"
+  remote: "{REMOTE/BRANCH or 'none'}"
   commit: "{FULL_SHA}"
   commit_short: "{SHORT_SHA}"
   commit_date: "{COMMIT_DATE}"
   commit_message: "{COMMIT_MESSAGE}"
-  dirty: false
+  dirty: {true|false}
 synced_to_commit: "{FULL_SHA}"
 ---
 
-LANG: {language} {version}
-FRAMEWORK: {primary_framework} {framework_version}
-DB: {database_system}
-AUTH: {auth_mechanism}
-API: {api_style}, {route_pattern}
-TEST: {test_framework}
-DEPLOY: {deployment_target}
-BUILD: {build_command}
-ENTRY: {entry_file} -> {entry_function}
+# {PROJECT_NAME} Profile
 
-INVARIANTS:
-- {critical_invariant_1}
-- {critical_invariant_2}
-- {critical_invariant_3}
+## Stack
+- Language: {LANGUAGE}
+- Framework: {FRAMEWORK}
+- Database: {DATABASE}
+- Auth: {AUTH_METHOD}
+- API: {API_STYLE}
+- Testing: {TEST_FRAMEWORK}
+- Deploy: {DEPLOY_TARGET}
+- Build: {BUILD_COMMAND}
+- Entry: {ENTRY_POINT}
 
-NEVER:
-- {safety_rule_1}
-- {safety_rule_2}
+## INVARIANTS
+{Top 3-5 critical invariants from .ai-context.md, one per line, with file:line refs}
 
-ACTIVE_TRACKS: {track_ids_and_names}
-RECENT_CHANGES: {summary_of_recent_commits}
+## NEVER
+{2-3 safety rules — things that must never happen}
+
+## Active Tracks
+{List of active track IDs and one-line descriptions, or "none"}
+
+## Recent Changes
+{Last 3-5 significant commits or changes, one per line}

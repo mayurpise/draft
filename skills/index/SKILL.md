@@ -403,6 +403,11 @@ Analyze extracted data to build dependency graph:
 1. Look for service name references in each service's architecture.md
 2. Look for API client imports or service URLs in tech-stack.md
 3. Look for mentions in product.md that reference other services
+4. **Graph-enriched detection** (if individual services have `draft/graph/` directories):
+   - Read each service's `draft/graph/proto-index.jsonl` to map which service defines vs consumes which RPCs
+   - Cross-reference proto consumers with proto producers to build precise inter-service dependency edges
+   - Read `draft/graph/module-graph.jsonl` per service for internal module structure
+   - This provides deterministic, code-level dependency data that supplements the heuristic name-matching above
 
 Build a dependency map:
 ```
@@ -413,15 +418,7 @@ api-gateway: [auth-service, billing-service]
 
 ### Step 6.1b: Cycle Detection
 
-Perform a depth-first walk of the dependency graph to detect circular dependencies:
-1. For each service, follow its `dependencies` array recursively
-2. Track visited nodes in the current path
-3. If a service appears in its own dependency chain, emit a WARNING in `dependency-graph.md`:
-   ```
-   WARNING: Circular dependency detected: A → B → C → A
-   ```
-4. Mark the cycle in `manifest.json` with `"circular": true` on the affected services
-5. Cycles are non-fatal — continue processing, but flag them prominently
+**Cycle detection:** Walk the dependency graph depth-first from each service. If a cycle is detected (service A depends on B depends on ... depends on A), emit a `> WARNING: Circular dependency detected: A → B → ... → A` line in `dependency-graph.md`, mark the back-edge with `circular: true` in `manifest.json`'s dependency entry, and continue processing. Do not fail on cycles — report and proceed.
 
 ### Step 6.2: Resolve Dependents (Reverse Lookup)
 
@@ -615,7 +612,7 @@ Read all service product.md files and synthesize:
 # Architecture: [Org/Product Name]
 
 > Synthesized from X service contexts by `/draft:index` on <date>.
-> This is a system-of-systems view. For service internals, see individual service drafts.
+> This is a system-of-systems view. For service internals, see individual service contexts.
 
 ## System Overview
 
@@ -692,7 +689,7 @@ graph TD
 
 ## Notes
 
-- For detailed service architecture, navigate to individual service drafts
+- For detailed service architecture, navigate to individual service contexts
 - This file is regenerable via `/draft:index`
 - Manual edits to non-synthesized sections will be preserved on re-index
 ```
@@ -743,7 +740,7 @@ graph TD
 
 ### 7.7 Synthesize `draft/.ai-context.md` (if not exists or is placeholder)
 
-After generating `draft/architecture.md`, derive a condensed `draft/.ai-context.md` using the Condensation Subroutine (defined in `core/shared/condensation.md`). This provides a token-optimized, self-contained AI context file at the root level aggregating all service knowledge.
+After generating `draft/architecture.md`, derive a condensed `draft/.ai-context.md` using the Condensation Subroutine (as defined in `core/shared/condensation.md`). This provides a token-optimized, self-contained AI context file at the root level aggregating all service knowledge.
 
 - Read the synthesized `draft/architecture.md`
 - Condense into 200-400 lines covering: system overview, service catalog, inter-service dependencies, shared infrastructure, cross-cutting patterns, critical invariants, and entry points
@@ -780,6 +777,36 @@ reindex_triggers:
   - "service added"
   - "service removed"
   - "weekly"
+```
+
+## Step 8.5: Refresh Graph Injection Slots
+
+For each initialized service with both `draft/architecture.md` AND `draft/graph/schema.yaml`:
+
+**A. Read current `architecture.md` into memory.**
+
+**B. Regenerate slot content from graph JSONL:**
+- `GRAPH:module-deps` → run `graph --repo . --out draft/graph --query --mode mermaid --symbol module-deps`
+  Parse JSON response, extract `.mermaid` string + `filtered` flag + stats
+- `GRAPH:proto-map` → run `graph --repo . --out draft/graph --query --mode mermaid --symbol proto-map`
+  Parse JSON response, extract `.mermaid` string + stats
+- `GRAPH:hotspots` → read `draft/graph/hotspots.jsonl`, build top-10 markdown table:
+  `| File | Lines | fanIn | Score |` with one row per hotspot, ordered by score descending
+
+**C. For each slot, find `<!-- GRAPH:{id}:START -->` ... `<!-- GRAPH:{id}:END -->` markers.**
+Replace entire block (inclusive of markers) with regenerated content.
+If a marker pair is absent (legacy file): insert slot at the designated position and log:
+`"Injected GRAPH:{id} slot into architecture.md (slot was absent — legacy file upgraded)"`
+
+**D. Write updated `architecture.md` back to disk.**
+Update frontmatter: `generated_by = "draft:index"`, `generated_at = now`.
+
+**E. Re-run Condensation Subroutine** (condensation.md) to propagate updated hotspot data into `.ai-context.md` GRAPH:HOTSPOTS and recompute tier budget. If `.ai-profile.md` exists, regenerate via Profile Generation Subroutine.
+
+**F. Report per service:**
+```
+✓ <service>: refreshed 3 graph slots (module-deps, proto-map, hotspots)
+✓ <service>: regenerated .ai-context.md (tier N, {lines} lines)
 ```
 
 ## Step 9: Completion Report
@@ -844,3 +871,5 @@ When regenerating, the skill:
 2. Identifies manually-added sections (not marked as auto-generated)
 3. Preserves those sections while updating auto-generated parts
 4. Sections between `<!-- MANUAL START -->` and `<!-- MANUAL END -->` are never overwritten
+
+**Graph injection slots** (`<!-- GRAPH:...:START -->` / `<!-- GRAPH:...:END -->`) are ALWAYS overwritten during refresh — they are auto-managed. Never place manual content between these markers. Use `<!-- MANUAL START -->` / `<!-- MANUAL END -->` for content you want preserved near a slot.

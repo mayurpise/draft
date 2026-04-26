@@ -5,17 +5,17 @@ description: Lightweight ad-hoc code review for a PR, diff, or file. Four dimens
 
 # Quick Review
 
-You are conducting a lightweight, ad-hoc code review using Draft's Context-Driven Development methodology. This is a fast, focused review that does not require track context.
+You are performing a lightweight, ad-hoc code review. This is the fast alternative to `/draft:review` — no track context needed, focused on a specific PR, diff, or file set.
 
-## Red Flags - STOP if you're:
+## Red Flags — STOP if you're:
 
-- Reviewing without actually reading the code (skimming headers only)
-- Making up file locations or line numbers
-- Reporting findings without checking if the pattern is used successfully elsewhere
-- Treating this as a full `/draft:review` (this is intentionally lightweight)
-- Skipping the severity classification for findings
+- Reviewing without reading the code first
+- Providing generic feedback not grounded in the actual code
+- Missing security implications in authentication/authorization code
+- Ignoring error handling paths
+- Reviewing a whole module when asked for a specific file
 
-**Read the code. Evidence over opinion. Fast but thorough.**
+**Read the code. Ground every finding in a specific line.**
 
 ---
 
@@ -23,326 +23,150 @@ You are conducting a lightweight, ad-hoc code review using Draft's Context-Drive
 
 ### 0. Capture Git Context
 
+Before starting, capture the current git state:
+
 ```bash
 git branch --show-current    # Current branch name
 git rev-parse --short HEAD   # Current commit hash
 ```
 
-### 1. Load Draft Context (Optional)
+Store this for the review report header. The review is scoped to this specific branch/commit.
+
+### 1. Load Draft Context (if available)
 
 ```bash
 ls draft/ 2>/dev/null
 ```
 
-If `draft/` exists, load lightweight context:
-- Read `draft/.ai-context.md` (or `draft/architecture.md`) for architecture patterns
-- Read `draft/tech-stack.md` for framework conventions
-- Read `draft/guardrails.md` for known conventions and anti-patterns
+If `draft/` exists, read and follow `core/shared/draft-context-loading.md`. This enriches review with project patterns, guardrails, and accepted patterns from `tech-stack.md`.
 
-Quick review works without Draft context — it just won't have project-specific pattern awareness.
-
----
+If no draft context, proceed with generic review — still valuable.
 
 ## Step 1: Parse Arguments
 
-| Invocation | Behavior |
-|------------|----------|
-| `/draft:quick-review` | Review staged changes (`git diff --cached`), falls back to unstaged (`git diff`) |
-| `/draft:quick-review <file>` | Review a specific file |
-| `/draft:quick-review <file1> <file2> ...` | Review multiple specific files |
-| `/draft:quick-review pr <number>` | Review a pull request (via `gh pr diff <number>`) |
-| `/draft:quick-review pr <url>` | Review a pull request by URL |
-| `/draft:quick-review commits <range>` | Review a commit range |
+Check for arguments:
+- `/draft:quick-review` — Review staged changes (`git diff --cached`) or current branch diff
+- `/draft:quick-review <file>` — Review specific file(s)
+- `/draft:quick-review <PR-URL>` — Review a pull request (via GitHub MCP / `gh` CLI)
+- `/draft:quick-review <commit-range>` — Review specific commits
 
-### Argument Resolution
+Determine the diff to review:
+1. If PR URL: fetch via GitHub MCP or `gh pr diff <num>`
+2. If file path: read the file(s)
+3. If commit range: `git diff <range>`
+4. Default: `git diff HEAD~1..HEAD` (last commit)
 
-1. **No arguments:**
-   - Try `git diff --cached` (staged changes)
-   - If empty, try `git diff` (unstaged changes)
-   - If empty: "No changes to review. Specify a file, PR, or commit range."
+## Step 2: Four-Dimension Review
 
-2. **File path(s):**
-   - Verify file(s) exist
-   - Read full file content for each
-   - If file doesn't exist: "File not found: [path]"
-
-3. **PR number or URL:**
-   - Extract PR number from URL if needed
-   - Fetch diff: `gh pr diff <number>`
-   - If `gh` not available: "GitHub CLI not available. Install `gh` or provide a diff directly."
-
-4. **Commit range:**
-   - Validate range: `git rev-parse <range> 2>/dev/null`
-   - Fetch diff: `git diff <range>`
-   - If invalid: "Invalid commit range: [range]"
-
----
-
-## Step 2: Analyze
-
-Review the code across four dimensions. For each dimension, scan the entire diff or file content.
+Review the code across four dimensions. For each finding, cite the specific `file:line`.
 
 ### Dimension 1: Security
 
-- [ ] No hardcoded secrets, API keys, tokens, or passwords
-- [ ] Input validation present for user-supplied data
-- [ ] SQL injection protection (parameterized queries, no string concatenation)
-- [ ] XSS protection (no raw HTML insertion, proper escaping)
-- [ ] Authentication/authorization checks in place for protected operations
-- [ ] No sensitive data in logs or error messages
-- [ ] Secure random generation (no `Math.random()` for security-sensitive operations)
-- [ ] CSRF protection for state-changing endpoints
+- Authentication/authorization gaps
+- Input validation and sanitization
+- SQL injection, XSS, CSRF vulnerabilities
+- Secrets or credentials in code
+- OWASP Top 10 patterns
+- Insecure deserialization
 
 ### Dimension 2: Performance
 
-- [ ] No N+1 query patterns (loops containing database queries)
-- [ ] No unbounded queries (missing LIMIT/pagination)
-- [ ] No blocking I/O in async contexts
-- [ ] No unnecessary memory allocations in hot paths
-- [ ] Appropriate caching for expensive operations
-- [ ] No excessive logging in hot paths
-- [ ] Resource cleanup (connections, file handles, streams) in finally/defer blocks
+- N+1 query patterns
+- Missing indexes for frequent queries
+- Unnecessary allocations in hot paths
+- Missing caching opportunities
+- Unbounded loops or recursion
+- Large payload serialization
 
 ### Dimension 3: Correctness
 
-- [ ] Logic matches apparent intent (variable names, comments, context)
-- [ ] Edge cases handled (null, empty, zero, negative, max values)
-- [ ] Error handling present and appropriate (not swallowed, not overly broad)
-- [ ] Boundary conditions correct (off-by-one, inclusive/exclusive ranges)
-- [ ] Concurrency safety (shared state protected, no race conditions)
-- [ ] Type safety (no unsafe casts, proper null checks)
-- [ ] Return values checked (no ignored errors, no unchecked promises)
+- Logic errors, off-by-one, null handling
+- Race conditions in concurrent code
+- Error handling gaps (uncaught exceptions, missing error paths)
+- Edge cases not covered
+- State management issues
+- Contract violations (API, type, invariant)
 
 ### Dimension 4: Maintainability
 
-- [ ] Code is readable without excessive comments
-- [ ] Naming is clear and consistent with project conventions
-- [ ] Functions are focused (single responsibility, reasonable length)
-- [ ] No code duplication that should be extracted
-- [ ] Appropriate abstraction level (not over-engineered, not under-abstracted)
-- [ ] Test coverage considerations (is this testable? are tests included?)
-- [ ] No TODO/FIXME/HACK without tracking reference
-
----
+- Code clarity and naming
+- DRY violations (repeated logic)
+- Dead code or unreachable paths
+- Missing or misleading comments
+- Test coverage for new logic
+- Consistency with project patterns (from tech-stack.md if available)
 
 ## Step 3: Classify Findings
 
-For each finding, classify severity:
+Classify each finding:
 
-| Severity | Symbol | Definition | Action Required |
-|----------|--------|------------|-----------------|
-| **Critical** | `[C]` | Security vulnerability, data loss risk, crash | Must fix before merge |
-| **Important** | `[I]` | Bug, performance issue, missing validation | Should fix before merge |
-| **Suggestion** | `[S]` | Style, readability, minor improvement | Consider for future |
-
-### Finding Format
-
-```markdown
-- [C] **[File:line]** [Title]
-  Description of the issue.
-  **Impact:** [what could go wrong]
-  **Fix:** [suggested resolution]
-
-- [I] **[File:line]** [Title]
-  Description of the issue.
-  **Impact:** [what could go wrong]
-  **Fix:** [suggested resolution]
-
-- [S] **[File:line]** [Title]
-  Description of the suggestion.
-  **Suggestion:** [what to improve]
-```
-
----
+| Severity | Action | Description |
+|----------|--------|-------------|
+| Critical | Must fix before merge | Security vulnerabilities, data corruption risks, crashes |
+| Important | Should fix | Performance issues, logic bugs, error handling gaps |
+| Suggestion | Nice to have | Style improvements, refactoring opportunities, documentation |
 
 ## Step 4: Generate Review Report
 
-Present findings in a structured format.
-
-### Review Output
+Present findings organized by severity:
 
 ```markdown
-# Quick Review
+## Quick Review: {scope description}
 
-**Scope:** [staged changes / file(s) / PR #N / commits range]
-**Files reviewed:** [N]
-**Lines reviewed:** [N additions, M deletions]
-**Branch:** [branch name]
-**Commit:** [short SHA]
+**Reviewer:** Draft Quick Review
+**Scope:** {files/PR/commits reviewed}
+**Date:** {ISO_TIMESTAMP}
 
----
+### Summary
+- Critical: {count}
+- Important: {count}
+- Suggestion: {count}
 
-## Findings
+### Verdict: {PASS | PASS WITH NOTES | NEEDS CHANGES}
 
-### Critical ([N])
+### Findings
 
-[Critical findings or "None"]
+#### Critical
+1. **[finding title]** — `file:line`
+   [description and recommendation]
 
-### Important ([N])
+#### Important
+...
 
-[Important findings or "None"]
+#### Suggestion
+...
 
-### Suggestions ([N])
-
-[Suggestion findings or "None"]
-
----
-
-## Summary
-
-| Dimension | Status |
-|-----------|--------|
-| Security | PASS / [N] issues |
-| Performance | PASS / [N] issues |
-| Correctness | PASS / [N] issues |
-| Maintainability | PASS / [N] issues |
-
-**Verdict:** PASS / PASS WITH NOTES / NEEDS CHANGES
-
-**Total findings:** [N] ([C] critical, [I] important, [S] suggestions)
+### What Went Well
+[2-3 positive observations about the code — good patterns, clean logic, thorough error handling]
 ```
 
-### Verdict Logic
+If track-scoped, save to `draft/tracks/<id>/quick-review-<timestamp>.md`.
 
-- **PASS:** Zero Critical, Zero Important findings
-- **PASS WITH NOTES:** Zero Critical, has Important or Suggestion findings
-- **NEEDS CHANGES:** Any Critical finding present
+**MANDATORY: Include YAML frontmatter with git metadata when saving.** Follow `core/shared/git-report-metadata.md`.
 
----
+Include the report header table immediately after frontmatter:
 
-## Step 5: Present Results
-
-Display the review in the conversation. Optionally save if requested.
-
+```markdown
+| Field | Value |
+|-------|-------|
+| **Branch** | `{LOCAL_BRANCH}` → `{REMOTE/BRANCH}` |
+| **Commit** | `{SHORT_SHA}` — {COMMIT_MESSAGE} |
+| **Generated** | {ISO_TIMESTAMP} |
+| **Synced To** | `{FULL_SHA}` |
 ```
-Quick review complete.
-
-Scope: [description]
-Verdict: [PASS / PASS WITH NOTES / NEEDS CHANGES]
-Findings: [N] total ([C] critical, [I] important, [S] suggestions)
-
-[If NEEDS CHANGES:]
-Critical issues must be resolved before merge.
-
-[If PASS WITH NOTES:]
-No blocking issues. Consider addressing important findings.
-
-[If PASS:]
-No issues found. Code looks good.
-```
-
-### Save Option
-
-If developer requests saving the review:
-- Save to `draft/quick-review-<timestamp>.md` (where `<timestamp>` is generated via `date +%Y-%m-%dT%H%M`)
-- Include YAML frontmatter per `core/shared/git-report-metadata.md` with `generated_by: "draft:quick-review"`
-  ```bash
-  ln -sf quick-review-<timestamp>.md draft/quick-review-latest.md
-  ```
-
----
 
 ## Cross-Skill Dispatch
 
-### Inbound
-
-- **Offered by `/draft:implement`** — quick review of changes before commit
-- **Standalone** — used for ad-hoc reviews outside of track workflow
-
-### Outbound
-
-- **Escalates to `/draft:review`** — if findings suggest a deeper review is needed (e.g., many Critical findings, architectural concerns)
-- **Feeds `/draft:learn`** — recurring findings across quick reviews indicate patterns worth learning
-
----
-
-## Differences from `/draft:review`
-
-| Aspect | `/draft:quick-review` | `/draft:review` |
-|--------|----------------------|-----------------|
-| Track context | Not required | Required (or project scope) |
-| Spec compliance | Not checked | Three-stage (validation, spec, quality) |
-| Depth | 4 dimensions, surface scan | Deep analysis with adversarial pass |
-| Bughunt integration | No | Optional (with-bughunt) |
-| Report persistence | Optional (on request) | Always saved |
-| Time | Fast (~2 minutes) | Thorough (~10+ minutes) |
-| Use case | Quick check before commit/merge | Formal review before track completion |
-
----
+- **Offered by:** `/draft:implement` at phase boundaries as lightweight alternative to full review
+- **Escalates to:** `/draft:review` if critical findings require deeper analysis
+- **Feeds into:** `/draft:learn` (findings update guardrails via pattern learning)
+- **Suggests at completion:**
+  - If many findings: "Consider running `/draft:review` for full three-stage analysis"
+  - If security findings: "Consider running `/draft:deep-review` for security audit"
+- **Jira sync:** If ticket linked, attach review and post summary via `core/shared/jira-sync.md`
 
 ## Error Handling
 
-### No Changes Found
-
-```
-No changes to review.
-
-Options:
-1. Specify a file: /draft:quick-review src/auth/handler.ts
-2. Specify a PR: /draft:quick-review pr 42
-3. Specify a commit range: /draft:quick-review commits main...HEAD
-```
-
-### PR Not Found
-
-```
-PR #[N] not found or not accessible.
-
-Verify:
-- PR number is correct
-- You have access to the repository
-- GitHub CLI (gh) is authenticated: gh auth status
-```
-
-### Large Diff Warning
-
-If diff exceeds 500 lines:
-```
-Large diff detected ([N] lines). Quick review is designed for smaller changes.
-
-Options:
-1. Proceed with quick review (may miss context-dependent issues)
-2. Use /draft:review for a thorough analysis
-3. Specify a subset: /draft:quick-review <specific files>
-```
-
----
-
-## Anti-Patterns
-
-| Don't | Instead |
-|-------|---------|
-| Report without reading the code | Read every changed line |
-| Treat as a replacement for /draft:review | Use for quick checks, escalate when needed |
-| Make up line numbers | Reference actual code locations |
-| Report framework conventions as issues | Check tech-stack.md for accepted patterns |
-| Block on style-only findings | Classify as Suggestion, not Critical |
-
----
-
-## Examples
-
-### Review staged changes
-```bash
-/draft:quick-review
-```
-
-### Review a specific file
-```bash
-/draft:quick-review src/auth/middleware.ts
-```
-
-### Review a pull request
-```bash
-/draft:quick-review pr 42
-```
-
-### Review a commit range
-```bash
-/draft:quick-review commits main...feature-branch
-```
-
-### Review multiple files
-```bash
-/draft:quick-review src/auth/handler.ts src/auth/types.ts
-```
+**If no diff/file found:** "No changes to review. Specify a file, PR URL, or commit range."
+**If MCP unavailable for PR:** Fall back to local git diff. "GitHub MCP and `gh` CLI unavailable. Reviewing local diff instead."
+**If no draft context:** Proceed with generic review patterns. Note: "Review enriched when draft context is available (run `/draft:init`)."

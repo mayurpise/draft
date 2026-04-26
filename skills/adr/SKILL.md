@@ -1,6 +1,6 @@
 ---
 name: adr
-description: Architecture Decision Records with evaluate and design modes. Document significant technical decisions with context, alternatives, and consequences.
+description: Create and manage Architecture Decision Records. Documents significant technical decisions with context, alternatives, and consequences. Also supports evaluate (assess proposals) and design (system design) modes.
 ---
 
 # Architecture Decision Records
@@ -77,6 +77,103 @@ If argument is `supersede <number>`:
 5. In the NEW ADR's References section, add: "Supersedes ADR-<old_number>"
 6. Stop here after updating.
 
+### Evaluate Mode
+
+If argument starts with `evaluate`:
+- `/draft:adr evaluate <proposal or description>` — Evaluate a design proposal
+
+1. Read the proposal (from arguments, pasted text, file path, or ask user to describe)
+2. Load project context: `draft/tech-stack.md`, `draft/.ai-context.md`, `draft/architecture.md`
+3. Check existing ADRs in `draft/adrs/` for related decisions
+4. Evaluate against six dimensions:
+   - **Architecture alignment:** Does it fit current patterns?
+   - **Tech stack consistency:** Does it introduce technology not in tech-stack.md?
+   - **Invariant impact:** Does it affect critical invariants from .ai-context.md?
+   - **Scalability:** How does it scale with data/users/team growth?
+   - **Operational complexity:** What new operational burden does it add?
+   - **Team familiarity:** Does the team have experience with this approach?
+
+5. Output evaluation report (do not save to file — display directly):
+
+```
+# Design Evaluation: <Title>
+
+## Summary
+[1-2 sentence assessment]
+
+## Alignment Analysis
+| Dimension | Assessment | Notes |
+|-----------|------------|-------|
+| Architecture alignment | ✅ Aligned / ⚠️ Partial / ❌ Conflict | [detail] |
+| Tech stack consistency | ✅/⚠️/❌ | [detail] |
+| Invariant impact | ✅/⚠️/❌ | [detail] |
+| Scalability | ✅/⚠️/❌ | [detail] |
+| Operational complexity | ✅/⚠️/❌ | [detail] |
+| Team familiarity | ✅/⚠️/❌ | [detail] |
+
+## Risks
+- [Risk and mitigation strategy]
+
+## Recommendation
+[Accept as-is / Accept with modifications / Reconsider approach / Reject — with reasoning]
+
+## Next Steps
+If this leads to a decision: `/draft:adr "<decision title>"` to document it
+If this needs a full design: `/draft:adr design "<system>"` to design it
+```
+
+Stop here after evaluation.
+
+### Design Mode
+
+If argument starts with `design`:
+- `/draft:adr design <system or component>` — Full system/component design
+
+1. Gather requirements:
+   - Ask user or extract from arguments: What does it need to do?
+   - **Functional requirements** — Features and behaviors
+   - **Non-functional requirements** — Scale, latency, availability, cost targets
+   - **Constraints** — Team size, timeline, existing tech stack (from `draft/tech-stack.md`)
+
+2. Load project context: same as ADR creation (Step 3 of main flow)
+
+3. Design using 5-section framework:
+
+   **Section 1: Requirements**
+   - Functional requirements (bulleted list)
+   - Non-functional requirements (table: dimension, target, rationale)
+   - Constraints and assumptions
+
+   **Section 2: High-Level Design**
+   - Component diagram (ASCII)
+   - Data flow description
+   - API contracts (key endpoints/interfaces)
+   - Storage choices with rationale
+
+   **Section 3: Deep Dive**
+   - Data model design (key entities and relationships)
+   - API endpoint design (REST/GraphQL/gRPC with examples)
+   - Caching strategy (what, where, TTL, invalidation)
+   - Queue/event design (if applicable)
+   - Error handling and retry logic
+
+   **Section 4: Scale & Reliability**
+   - Load estimation (requests/sec, data growth)
+   - Scaling strategy (horizontal vs vertical)
+   - Failover and redundancy
+   - Monitoring and alerting requirements
+
+   **Section 5: Trade-off Analysis**
+   - Key trade-offs made (table: decision, alternative, why this choice)
+   - What to revisit as the system grows
+   - Risks and mitigations
+
+4. Determine design document number using same ADR numbering (Step 4 of main flow)
+5. Save to `draft/adrs/<number>-design-<kebab-case-title>.md` with YAML frontmatter and git metadata (same format as ADR creation, Step 5)
+6. Present for review (same as Step 6 of main flow)
+
+Stop here after design.
+
 ## Step 2: Gather Decision Context
 
 If in interactive mode (no title provided), ask:
@@ -88,6 +185,8 @@ If in interactive mode (no title provided), ask:
 If title provided, proceed directly with the title.
 
 ## Step 3: Load Project Context
+
+Follow the base procedure in `core/shared/draft-context-loading.md`.
 
 Read relevant Draft context:
 - `draft/.ai-context.md` — Current architecture patterns, invariants, data paths, and constraints. Falls back to `draft/architecture.md` for legacy projects.
@@ -228,69 +327,6 @@ Proposed → Accepted → [Deprecated | Superseded by ADR-xxx]
 - **Deprecated** — Decision no longer relevant (context changed)
 - **Superseded** — Replaced by a newer decision (link to replacement)
 
-### Evaluate Mode
-
-When invoked as `/draft:adr evaluate <proposal>`:
-
-1. Read the proposal description
-2. Load context: `.ai-context.md`, `tech-stack.md`, `guardrails.md`
-3. Evaluate against 6 dimensions:
-
-| Dimension | Question |
-|-----------|----------|
-| Architecture Alignment | Does this fit the current system topology and module boundaries? |
-| Tech Stack Consistency | Does this align with accepted technologies and patterns? |
-| Invariant Impact | Does this violate or weaken any documented invariants? |
-| Scalability | How does this affect system scaling characteristics? |
-| Operational Complexity | Does this increase deployment, monitoring, or maintenance burden? |
-| Team Familiarity | Does the team have experience with this approach? |
-
-4. Output evaluation directly (not saved to file):
-```
-Proposal: {description}
-Verdict: RECOMMEND / CAUTION / REJECT
-
-| Dimension | Score | Notes |
-|-----------|-------|-------|
-| Architecture Alignment | ✓/△/✗ | [notes] |
-...
-```
-
-### Design Mode
-
-When invoked as `/draft:adr design <system>`:
-
-1. Read the system/component name
-2. Load full context: `architecture.md`, `.ai-context.md`, `tech-stack.md`, `product.md`
-3. Generate a 5-section design document:
-
-**Section 1: Requirements**
-- Functional requirements (from product.md and description)
-- Non-functional requirements (from tech-stack.md constraints)
-- Constraints (from guardrails.md)
-
-**Section 2: High-Level Design**
-- Component diagram
-- Data flow
-- API surface
-
-**Section 3: Deep Dive**
-- Detailed component design
-- Data models
-- Error handling strategy
-
-**Section 4: Scale & Reliability**
-- Scaling approach
-- Failure modes and recovery
-- SLO targets
-
-**Section 5: Trade-off Analysis**
-- Alternatives considered
-- Why this approach
-- What we're giving up
-
-4. Save to `draft/adrs/` with ADR numbering: `draft/adrs/<number>-design-<kebab-case-name>.md`
-
 ## Error Handling
 
 **If no draft/ directory:**
@@ -302,10 +338,3 @@ When invoked as `/draft:adr design <system>`:
 
 **If superseding non-existent ADR:**
 - Warn: "ADR-<number> not found. Check `draft/adrs/` for valid ADR numbers."
-
-## Cross-Skill Dispatch
-
-- **Suggested by:** `/draft:deep-review` (architecture debt findings), `/draft:decompose` (module boundary decisions), `/draft:new-track` (new technology or architectural shift detected)
-- **Auto-invoked by:** `/draft:decompose` when decomposition involves breaking a monolith or major boundary change
-- **Feeds into:** `/draft:new-track` (ADR referenced in spec context), `/draft:learn` (decision patterns)
-- **Jira sync:** If ticket linked, attach ADR and post comment via `core/shared/jira-sync.md`

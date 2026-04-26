@@ -43,6 +43,12 @@ Draft skills are designed for single-agent, single-track execution. Do not run m
    - Identify which invariants reference files this task will modify (same file or same module)
    - Keep matching invariants as **active constraints** for this task — these govern code generation, not just review
    - If invariants reference lock ordering, fail-closed behavior, or data integrity rules: these are non-negotiable during implementation
+9. **Load graph context** (if `draft/graph/schema.yaml` exists):
+   - Read `draft/graph/hotspots.jsonl` — check if any files this task will modify appear as hotspots
+   - If modifying a hotspot file (high fanIn), warn: "This task modifies {file} (fanIn={N}). Changes here affect many downstream files. Consider running a graph impact query."
+   - Read `draft/graph/modules/<module>.jsonl` for the module(s) being modified — gives file-level dependency context
+   - See `core/shared/graph-query.md` for on-demand query subroutines (callers, impact)
+10. Update the track's entry in `draft/tracks.md` from `[ ]` to `[~]` In Progress
 
 If no active track found:
 - Tell user: "No active track found. Run `/draft:new-track` to create one."
@@ -51,7 +57,6 @@ If no active track found:
 - Automatically enabled when `.ai-context.md` or `architecture.md` exists (file-based, no flag needed)
 - Track-level architecture.md created by `/draft:decompose`
 - Project-level `.ai-context.md` created by `/draft:init`
-9. **Update track status**: Update the track's entry in `draft/tracks.md` from `[ ]` to `[~] In Progress` (if not already in progress)
 
 ## Step 1.5: Readiness Gate (Fresh Start Only)
 
@@ -68,7 +73,7 @@ For each acceptance criterion in `spec.md`:
 ### Sync Check (if `.ai-context.md` exists)
 
 Compare the `synced_to_commit` values in the YAML frontmatter of `spec.md` and `plan.md`.
-- **Skip if** either file has no YAML frontmatter or no `synced_to_commit` field (quick-mode tracks omit it). If skipped, note: "Sync check skipped — quick-mode track (no frontmatter)."
+- **Skip if** either file has no YAML frontmatter or no `synced_to_commit` field (quick-mode tracks omit it).
 - If they differ: "⚠️ Spec and plan were synced to different commits — verify they are still aligned."
 
 ### Result
@@ -81,6 +86,25 @@ Readiness issues found (see above). Proceed anyway or update first? [proceed/upd
 - `update` → stop here and let the user refine spec or plan before re-running
 
 **No issues:** Print `Readiness check passed.` and continue to Step 2.
+
+## Step 1.7: Testing Strategy Loading
+
+Before starting TDD cycle for the first task:
+
+1. Check for testing strategy:
+   - Track-level: `draft/tracks/<id>/testing-strategy.md`
+   - Project-level: `draft/testing-strategy.md` or `draft/testing-strategy-latest.md`
+2. If found: load coverage targets, test boundaries, and strategy into TDD context
+3. If not found and TDD is enabled: suggest "Run `/draft:testing-strategy` to define test approach"
+
+### Bug Track Test Guardrail
+
+If track type is `bugfix` (from metadata.json):
+```
+BEFORE writing any test file:
+  ASK: "This is a bug fix track. Want me to write tests as part of the fix? [Y/n]"
+  If declined: skip TDD cycle, note in plan.md: "Tests: developer-handled"
+```
 
 ## Step 2: Find Next Task
 
@@ -96,18 +120,11 @@ Scan `plan.md` for the first uncompleted task:
 - "Resolve the blockage manually before continuing implementation"
 - Do NOT attempt to implement blocked tasks
 
-If resuming `[~]` task, check for partial work:
-1. **Detect existing changes**: Run `git diff --name-only` and `git diff --cached --name-only` to find uncommitted files related to this task
-2. **Check for partial implementation**: Read the task description, then scan the target files for TODO/FIXME markers or incomplete implementations
-3. **Assess state**: Does the partial work compile/pass lint? Run a quick validation (`build` or `lint` if available)
-4. **Decision**:
-   - If partial work is substantial and valid → continue from where it left off
-   - If partial work is broken or minimal → ask user: "Found partial work for this task. Continue from current state or start fresh?"
-   - If no partial work detected (task was just marked `[~]` but nothing changed) → proceed as new task
+If resuming `[~]` task, check for partial work.
 
 ## Step 2.5: Write Story (Architecture Mode Only)
 
-**Activation:** Only runs when architecture mode is enabled (Step 1.6) — i.e., any of `draft/tracks/<id>/architecture.md`, `draft/.ai-context.md`, or `draft/architecture.md` exists.
+**Activation:** Only runs when `.ai-context.md` or `architecture.md` exists (track-level or project-level).
 
 When the next task involves creating or substantially modifying a code file:
 
@@ -149,7 +166,7 @@ See `core/agents/architect.md` for story writing guidelines.
 
 ### Step 3.0: Design Before Code (Architecture Mode Only)
 
-**Activation:** Only runs when architecture mode is enabled (Step 1.6) — i.e., any of `draft/tracks/<id>/architecture.md`, `draft/.ai-context.md`, or `draft/architecture.md` exists.
+**Activation:** Only runs when `.ai-context.md` or `architecture.md` exists (track-level or project-level).
 **Skip for trivial tasks** - Config updates, type-only changes, single-function tasks where the design is obvious.
 
 #### 3.0a. Execution State Design
@@ -288,33 +305,6 @@ When a task involves refactoring existing code that lacks test coverage, run thi
 4. Characterization tests serve as a safety net — if they break during refactoring, the behavioral change is intentional or a regression
 - Reference: "Working Effectively with Legacy Code" (Michael Feathers)
 
-### Step 2.7: Testing Strategy Loading
-
-Before starting the TDD cycle, check for testing strategy context:
-
-1. Check for track-level strategy: `draft/tracks/<id>/testing-strategy.md`
-2. If not found, check project-level: `draft/testing-strategy.md`
-3. If found, load coverage targets and test boundaries as TDD context
-4. If not found, proceed with default TDD approach
-
-### Bug Track Test Guardrail
-
-If the current track type is `bugfix` (from `metadata.json`):
-
-**STOP** before writing any test:
-```
-ASK: "Root cause confirmed: [summary]. Want me to write a regression test for this fix? [Y/n]"
-```
-- If accepted: write regression test first (fails before fix, passes after)
-- If declined: note "Tests: developer-handled" in plan.md and proceed to fix
-
-### Bug Track RCA Integration
-
-For bug tracks, check if `draft/tracks/<id>/rca.md` exists:
-- If found: load as investigation context for the fix implementation
-- This provides root cause analysis, blast radius, and prevention items from the auto-triage pipeline
-- After fix is verified: update `draft/tracks/<id>/rca.md` Prevention Items with actual fix details
-
 ### If TDD Enabled:
 
 **Iron Law:** No production code without a failing test first.
@@ -397,23 +387,13 @@ When implementing new API endpoints, message handlers, or service-to-service int
 **3a. Implement**
 ```
 1. Implement the task as specified
-2. Run existing test suite if one exists (do NOT skip existing tests even when TDD is off)
-3. If no test suite exists, perform manual verification:
-   - For API changes: test with a sample request/response
-   - For UI changes: describe the visual state before and after
-   - For logic changes: trace through at least one happy path and one error path
-4. Show verification evidence (test output, screenshot, or trace)
-5. Announce: "Implementation complete — verified by [method]"
+2. Test manually or run existing tests
+3. Announce: "Implementation complete"
 ```
-
-**Minimum quality bar (even without TDD):**
-- Existing tests must still pass — never break them
-- New code must compile/lint without errors
-- Edge cases listed in spec.md must be addressed (not just the happy path)
 
 ### Implementation Chunk Limit (Architecture Mode Only)
 
-**Activation:** Only when architecture mode is enabled (Step 1.6).
+**Activation:** Only when `.ai-context.md` or `architecture.md` exists (track-level or project-level).
 
 If the implementation diff for a task exceeds **~200 lines**:
 
@@ -443,22 +423,17 @@ After completing each task:
    - Stage only files changed by this task (never `git add .`)
    - `git add <specific files>`
    - Verify staged changes exist before committing: `git diff --cached --quiet`. If nothing staged, skip the commit step.
-   - `git commit -m "type(<track_id>): task description"`
-   - **If commit fails:**
-     - Pre-commit hook failure → read hook output, fix the flagged issues, re-stage, and retry commit (do NOT use `--no-verify`)
-     - Lock file error (`index.lock`) → check for concurrent git processes; if none, remove the lock file and retry
-     - Other git error → report the error to user, mark task as `[~]` (in progress, not complete), do NOT proceed
+   - `git commit -m "type(<track_id>): task description"` (Conventional Commits — see `core/shared/vcs-commands.md`)
+   - If a Jira ticket is linked in `spec.md`, reference it in the commit body: `Refs: <JIRA_ID>`.
    - Get commit SHA: `git rev-parse --short HEAD`
    - Do NOT proceed to the next task without committing
    - Do NOT batch multiple tasks into one commit
 
 2. Update `plan.md`:
    - Change `[ ]` to `[x]` for the completed task
-   - Add the commit SHA next to the task: `[x] Task description [abc1234]`
+   - Add the commit SHA next to the task: `[x] Task description (abc1234)`
 
 3. Update `metadata.json`:
-   - Read current `metadata.json` first — verify `tasks.completed` is a number
-   - If malformed or missing: HALT with "metadata.json is corrupted — expected tasks.completed to be a number, got: [actual value]"
    - Increment `tasks.completed`
    - Update `updated` timestamp
 
@@ -466,20 +441,14 @@ After completing each task:
    - Read back `plan.md` - confirm task marked `[x]` with SHA
    - Read back `metadata.json` - confirm `tasks.completed` incremented
    - If EITHER verification fails:
-     - **First**, revert the task marker in `plan.md` from `[x]` to `[!]` (do not leave it as `[x]` if metadata is inconsistent)
-     - Add recovery message: "State update failed after commit <SHA>. Recovery: manually mark task `[x]` in plan.md line X, update metadata.json tasks.completed to Y"
-     - Specify which file(s) failed: plan.md, metadata.json, or both
+     - Mark task as `[!]` Blocked in plan.md
+     - Add recovery message: "State update failed after commit <SHA>. Recovery: manually edit plan.md line X to mark `[x]`, update metadata.json tasks.completed to Y"
      - HALT - require manual intervention before continuing
 
 5. If `.ai-context.md` or `architecture.md` exists for the track:
    - Update module status markers (`[ ]` → `[~]` when first task in module starts, `[~]` → `[x]` when all tasks complete)
    - Fill in Story placeholders with the approved story from Step 2.5
-   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.commit_message` to current HEAD. Update `draft/architecture.md` with structural changes, then run the Condensation Subroutine to regenerate `draft/.ai-context.md`:
-     1. Read the updated `draft/architecture.md`
-     2. Condense it into the token-optimized `.ai-context.md` format (see `core/templates/ai-context.md` for the target structure)
-     3. Preserve all `## INVARIANTS` and `## CONCURRENCY` sections verbatim (safety-critical, never summarize)
-     4. Update `synced_to_commit` in `.ai-context.md` frontmatter to match current HEAD
-     5. Full procedure details: `skills/init/SKILL.md` → "Condensation Subroutine" section
+   - If updating project-level `draft/.ai-context.md`: also update YAML frontmatter `git.commit` and `git.commit_message` to current HEAD. Update `draft/architecture.md` with structural changes, then run the Condensation Subroutine (defined in `core/shared/condensation.md`) to regenerate `draft/.ai-context.md`.
 
 ## Verification Gate (REQUIRED)
 
@@ -503,16 +472,9 @@ Before marking ANY task/phase/track complete:
 
 ---
 
-## Step 4.6: Phase Boundary Detection
-
-After completing Step 4 for each task, check whether the completed task was the **last task in its phase**:
-- Re-read `plan.md` and scan the current phase's task list
-- If ALL tasks in the current phase are now `[x]` → proceed to Step 5 (Phase Boundary Check)
-- If uncompleted tasks remain in the phase → return to Step 2 (Find Next Task)
-
 ## Step 5: Phase Boundary Check
 
-When all tasks in a phase are `[x]` (detected in Step 4.6):
+When all tasks in a phase are `[x]`:
 
 1. Announce: "Phase N complete. Running three-stage review."
 
@@ -536,15 +498,47 @@ When all tasks in a phase are `[x]` (detected in Step 4.6):
 
 See `core/agents/reviewer.md` for detailed review process.
 
+### Quick Review Alternative
+
+At phase boundaries, offer the lightweight alternative:
+```
+"Phase {N} complete. Review options:
+  1. Full three-stage review (recommended) — spec compliance + security + quality
+  2. /draft:quick-review — lightweight 4-dimension check (faster)
+  Choose [1/2, default: 1]:"
+```
+If quick-review chosen, invoke `/draft:quick-review` with the phase's changed files.
+
 2. Run verification steps from plan (tests, builds)
 3. Present review findings to user
 4. If review passes (no Critical issues):
    - Update phase status in plan
    - Update `metadata.json` phases.completed
+   - **Refresh blast-radius memory** (see "Impact Memory" subsection below)
    - Proceed to next phase
 5. If Critical/Important issues found:
    - Document issues in plan.md
    - Fix before proceeding (don't skip)
+
+### Impact Memory (blast-radius snapshot)
+
+After a phase passes review, refresh `metadata.json.impact` so future tracks can detect overlap with this work.
+
+1. **Compute touched files:** From `plan.md`, find the first commit SHA recorded for this track (earliest `[x]` line with `(<sha>)`). Run:
+   ```bash
+   git diff --name-only <first_sha>^..HEAD
+   ```
+   That is the `files_touched` list. Derive `modules_touched` as the unique top-level path segments (e.g. `auth/login.go` → `auth`).
+
+2. **Compute downstream blast radius (graph-aware, optional):** If `draft/graph/schema.yaml` exists, for each file in `files_touched` query:
+   ```bash
+   graph --repo . --out draft/graph --query --file <path> --mode impact
+   ```
+   Aggregate across all files: `downstream_files` = total unique downstream files (deduped), `downstream_modules` = union of `affected_modules`, `max_depth` = max across queries, `by_category` = sum of each query's `by_category`. If the graph is absent, leave these fields as zeros / empty arrays — the snapshot still records the directly-touched files.
+
+3. **Write metadata.json** with the populated `impact` block and `computed_at` set to the current timestamp.
+
+This snapshot is consumed by `/draft:new-track` to surface overlap warnings when a new track touches the same modules as a recently completed track.
 
 ## Step 6: Track Completion
 
@@ -557,7 +551,7 @@ When all phases complete:
      ## Review Settings
      - [x] Auto-review at track completion
      ```
-   - If enabled, invoke the review skill: `/draft:review track <track_id>` (this is a Draft skill invocation, not a shell command)
+   - If enabled, run `/draft:review track <track_id>`
    - Check review results:
      - If block-on-failure enabled AND critical issues found → HALT, require fixes
      - Otherwise, document warnings and continue
@@ -565,14 +559,8 @@ When all phases complete:
 2. Update `plan.md` status to `[x] Completed`
 3. Update `metadata.json` status to `"completed"`
 4. Update `draft/tracks.md`:
-   - Remove the track entry from `## Active` section
-   - Add to `## Completed` section using this format:
-     ```markdown
-     - [x] **<track_id>** — <title> (completed YYYY-MM-DD)
-     ```
-   - If no `## Completed` section exists, create it below `## Active`
-
-   **Write order (important for recovery):** plan.md first → metadata.json second → tracks.md last. If interrupted mid-update, `plan.md` is the source of truth — recovery reads plan.md status and reconstructs metadata.json and tracks.md from it.
+   - Move from Active to Completed section
+   - Add completion date
 
 5. **Verify completion state consistency (CRITICAL):**
    - Read back `plan.md` - confirm status `[x] Completed`
@@ -600,15 +588,6 @@ All acceptance criteria from spec.md should be verified.
 
 Next: Run `/draft:status` to see project overview."
 
-## Session Recovery
-
-If resuming `/draft:implement` in a new session (context was lost mid-implementation):
-
-1. **Detect state**: Read `plan.md` — find the first `[~]` or `[ ]` task. Check `metadata.json` for `tasks.completed` count.
-2. **Check git state**: Run `git log --oneline -5` and `git status` to verify last committed task matches plan.md's last `[x]` entry.
-3. **Reconcile mismatches**: If plan.md shows `[x]` for a task but no matching commit SHA exists in git log, the state update succeeded but the commit was lost (or vice versa). Fix the mismatch before continuing.
-4. **Resume**: Skip to Step 2 (Find Next Task). The readiness gate (Step 1.5) will be skipped automatically since `[x]` tasks exist.
-
 ## Error Handling
 
 **If blocked:**
@@ -621,6 +600,12 @@ If resuming `/draft:implement` in a new session (context was lost mid-implementa
   4. **Implement** - Regression test first, then fix
 - Do NOT attempt random fixes
 - Document root cause when found
+
+**Recommended:** Instead of inline debugging, invoke `/draft:debug` skill for a structured session:
+```
+"Task blocked: {description}. Run /draft:debug for structured investigation? [Y/n]"
+```
+The debug skill provides: Reproduce → Isolate → Diagnose → Fix methodology with debug report output.
 
 **If test fails unexpectedly:**
 - Don't mark complete
@@ -672,29 +657,43 @@ Phase Progress: N/M tasks
 Overall: X% complete
 ```
 
+---
+
 ## Cross-Skill Dispatch
 
-### At Phase Boundaries
-- **Review Offer:** At each phase boundary, present options:
-  ```
-  Phase {N} complete. Review options:
-    1. Full three-stage review (recommended)
-    2. /draft:quick-review — lightweight 4-dimension check (faster)
-    Choose [1/2, default: 1]:
-  ```
-- **Debug for Blocked Tasks:** When a task is marked `[!]` Blocked, instead of inline debugging, offer:
-  ```
-  Task blocked: {description}. Run /draft:debug for structured investigation? [Y/n]
-  ```
+### At Track Completion (Step 6)
 
-### At Track Completion
-Based on context, suggest relevant follow-ups:
-- If track modifies production code: "Run `/draft:deploy-checklist` to verify deployment readiness"
-- If track added new APIs or services: "Run `/draft:documentation api` to document new endpoints"
-- If implementation contains TODO/FIXME/HACK comments: "Run `/draft:tech-debt` to catalog debt items"
-- If new patterns or dependencies were introduced: "Run `/draft:adr` to record the decisions"
-- If testing strategy exists: "Run `/draft:coverage` to verify test targets were met"
+After announcing track completion, suggest relevant follow-ups based on context:
 
-### Jira Sync
-If a Jira ticket is linked in `metadata.json`:
-- At completion: post comment "[draft] implementation-complete: {n} tasks done across {m} phases" via `core/shared/jira-sync.md`
+**If track modifies production code:**
+```
+"Track complete! Consider:
+  → /draft:deploy-checklist — Pre-deployment verification"
+```
+
+**If track added new APIs/services/components:**
+```
+  → /draft:documentation — Update documentation for new components"
+```
+
+**If implementation contains TODO/FIXME/HACK comments:**
+```
+  → /draft:tech-debt — Catalog any new technical debt introduced"
+```
+
+**If new patterns or dependencies not in tech-stack.md:**
+```
+  → /draft:adr — Document this design decision"
+```
+
+### Jira Sync at Completion
+
+If Jira ticket linked, sync via `core/shared/jira-sync.md`:
+- Post comment: "[draft] implementation-complete: All {n} tasks done. Ready for review."
+
+### Bug Track with rca.md
+
+If implementing a bug track and `draft/tracks/<id>/rca.md` exists:
+- Load rca.md as context for the implementation
+- Reference root cause, blast radius, and prevention items during fix
+- After fix: update rca.md "Proposed Fix" section with actual fix details

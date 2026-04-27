@@ -21083,4 +21083,4 @@ If `workflow.md` does not specify gates, skills detect the test framework via `s
 
 </core-file>
 
-<!-- CODEV_BUILD_COMPLETE -->
+<!-- DRAFT_BUILD_COMPLETE -->

@@ -497,7 +497,7 @@ COMMON_HEADER2
 
     # Completeness sentinel — verified by verify_output
     echo ""
-    echo "<!-- CODEV_BUILD_COMPLETE -->"
+    echo "<!-- DRAFT_BUILD_COMPLETE -->"
 }
 
 # ─────────────────────────────────────────────────────────
@@ -507,8 +507,8 @@ COMMON_HEADER2
 verify_output() {
     local output_file="$1"
 
-    local line_count old_syntax_count at_codev_count
-    read -r line_count old_syntax_count at_codev_count < <(awk '
+    local line_count old_syntax_count at_draft_count
+    read -r line_count old_syntax_count at_draft_count < <(awk '
         {
             total_lines++
             if (/\/draft:/) old_count++
@@ -522,7 +522,7 @@ verify_output() {
     echo "  Lines: $line_count"
 
     # Verify completeness sentinel
-    if ! tail -5 "$output_file" | grep -q "CODEV_BUILD_COMPLETE"; then
+    if ! tail -5 "$output_file" | grep -q "DRAFT_BUILD_COMPLETE"; then
         echo "  FAIL: Missing completeness sentinel — output may be truncated" >&2
         return 1
     fi
@@ -551,8 +551,8 @@ verify_output() {
     fi
 
     # Verify no @draft references remain
-    if [[ "$at_codev_count" -gt 0 ]]; then
-        echo "  WARNING: Found $at_codev_count '@draft' references (should be 0)" >&2
+    if [[ "$at_draft_count" -gt 0 ]]; then
+        echo "  WARNING: Found $at_draft_count '@draft' references (should be 0)" >&2
         echo "  Offending lines:" >&2
         grep -n '@draft' "$output_file" | head -5 >&2
         return 1

@@ -1553,8 +1553,8 @@ a { color: inherit; text-decoration: none; }
 /* Theme toggle button (injected by theme-toggle.js) */
 .theme-toggle {
     position: fixed;
-    top: 0.75rem;
-    right: 0.75rem;
+    bottom: 1.25rem;
+    right: 1.25rem;
     width: 36px;
     height: 36px;
     display: flex;
@@ -1567,6 +1567,7 @@ a { color: inherit; text-decoration: none; }
     z-index: 1000;
     transition: all 0.2s var(--ease-out);
     color: var(--text-secondary);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.10);
 }
 .theme-toggle:hover {
     transform: scale(1.05);

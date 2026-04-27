@@ -324,6 +324,91 @@
     margin: 2.75rem 0;
 }
 
+/* ─── SHARE BAR ───────────────────────────────────────── */
+
+.post-share {
+    margin-top: 3.5rem;
+    padding: 1.5rem 1.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.post-share-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+}
+
+.post-share-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.95rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, transform 0.2s;
+    font-family: inherit;
+}
+
+.share-btn:hover {
+    transform: translateY(-1px);
+    color: var(--text-primary);
+}
+
+.share-btn[data-net="linkedin"]:hover { border-color: #0a66c2; color: #0a66c2; }
+.share-btn[data-net="x"]:hover { border-color: var(--text-primary); }
+.share-btn[data-net="hn"]:hover { border-color: #ff6600; color: #ff6600; }
+.share-btn[data-net="copy"]:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+.share-btn svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.share-btn.copied {
+    border-color: var(--accent-emerald);
+    color: var(--accent-emerald);
+}
+
+[data-theme="dark"] .post-share {
+    background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .share-btn {
+    background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .share-btn[data-net="linkedin"]:hover { color: #58a6ff; border-color: #58a6ff; }
+[data-theme="dark"] .share-btn[data-net="x"]:hover { color: var(--text-primary); border-color: var(--text-primary); }
+
+@media (max-width: 540px) {
+    .post-share {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1.25rem 1.25rem;
+    }
+}
+
 /* ─── POST FOOTER ─────────────────────────────────────── */
 
 .post-footer {

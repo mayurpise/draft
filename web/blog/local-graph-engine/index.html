@@ -218,6 +218,28 @@ graph --repo . --query --file path/to/file --mode impact</code></pre>
                 <p>Then commit <code>draft/graph/</code>. Your repo now carries its own structural memory &mdash; and your AI assistant just got a lot less guessy.</p>
             </div>
 
+            <aside class="post-share" aria-label="Share this post">
+                <span class="post-share-label">Share</span>
+                <div class="post-share-buttons">
+                    <button type="button" class="share-btn" data-net="linkedin" aria-label="Share on LinkedIn">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/></svg>
+                        <span class="share-btn-label">LinkedIn</span>
+                    </button>
+                    <button type="button" class="share-btn" data-net="x" aria-label="Share on X">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25h6.83l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        <span class="share-btn-label">X</span>
+                    </button>
+                    <button type="button" class="share-btn" data-net="hn" aria-label="Share on Hacker News">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M0 0v24h24V0zm6.51 4h2.27l3.22 6.24L15.21 4h2.28l-4.36 8.21V20h-2.26v-7.79z"/></svg>
+                        <span class="share-btn-label">Hacker News</span>
+                    </button>
+                    <button type="button" class="share-btn" data-net="copy" aria-label="Copy link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        <span class="share-btn-label">Copy link</span>
+                    </button>
+                </div>
+            </aside>
+
             <footer class="post-footer">
                 <p>Draft is open source: <a href="https://github.com/mayurpise/draft">github.com/mayurpise/draft</a>. The graph engine lives under <code>graph/</code>, the deterministic shell helpers under <code>scripts/tools/</code>, and the methodology under <code>core/</code>.</p>
                 <p><a href="../">&larr; Back to all posts</a></p>
@@ -227,5 +249,6 @@ graph --repo . --query --file path/to/file --mode impact</code></pre>
 
     <script src="../../js/theme-toggle.js"></script>
     <script src="../../js/main.js"></script>
+    <script src="../share.js"></script>
 </body>
 </html>

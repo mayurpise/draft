@@ -526,7 +526,7 @@
    ───────────────────────────────────────────── */
 .theme-toggle {
     position: fixed;
-    top: 1.25rem;
+    bottom: 1.25rem;
     right: 1.25rem;
     width: 38px;
     height: 38px;
@@ -537,9 +537,10 @@
     border: 1px solid var(--border);
     border-radius: 50%;
     cursor: pointer;
-    z-index: 100;
+    z-index: 200;
     transition: all 0.2s var(--ease-out);
     color: var(--text-secondary);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 .theme-toggle:hover {
     transform: scale(1.05);

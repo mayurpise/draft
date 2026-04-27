@@ -1452,9 +1452,18 @@ a { color: inherit; text-decoration: none; }
 
 /* Override hardcoded white surfaces in dark mode */
 [data-theme="dark"] .header-bar,
-[data-theme="dark"] .top-nav-book {
+[data-theme="dark"] .top-nav-book,
+[data-theme="dark"] .book-topbar {
     background: rgba(13, 17, 22, 0.92);
     border-bottom-color: var(--border);
+}
+[data-theme="dark"] .topbar-github {
+    background: var(--bg-tertiary);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+[data-theme="dark"] .book-topbar-divider {
+    background: var(--border);
 }
 [data-theme="dark"] .copy-btn {
     background: rgba(22, 27, 36, 0.7);

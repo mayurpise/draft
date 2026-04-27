@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Draft Blog — Notes on Context-Driven Development</title>
-    <meta name="description" content="Essays and field notes on Context-Driven Development, Draft's knowledge graph, AI coding methodology, and getting LLMs to do production work.">
+    <title>Blog — Draft</title>
+    <meta name="description" content="Field notes on Context-Driven Development, Draft's knowledge graph, AI coding methodology, and getting LLMs to do production work.">
     <meta name="author" content="Mayur Pise">
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#0a0d12">
     <meta name="robots" content="index, follow">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-    <meta property="og:title" content="Draft Blog — Notes on Context-Driven Development">
-    <meta property="og:description" content="Essays and field notes on Context-Driven Development, Draft's knowledge graph, AI coding methodology, and getting LLMs to do production work.">
+    <meta property="og:title" content="Blog — Draft">
+    <meta property="og:description" content="Field notes on Context-Driven Development, Draft's knowledge graph, and getting AI to write production code.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://getdraft.dev/blog/">
     <meta property="og:image" content="https://getdraft.dev/social-preview.png">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Draft Blog — Notes on Context-Driven Development">
-    <meta name="twitter:description" content="Essays and field notes on Context-Driven Development, Draft's knowledge graph, AI coding methodology, and getting LLMs to do production work.">
+    <meta name="twitter:title" content="Blog — Draft">
+    <meta name="twitter:description" content="Field notes on Context-Driven Development, Draft's knowledge graph, and getting AI to write production code.">
     <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
     <link rel="canonical" href="https://getdraft.dev/blog/">
     <link rel="alternate" type="application/rss+xml" title="Draft Blog RSS" href="https://getdraft.dev/feed.xml">
@@ -38,61 +38,81 @@
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     </noscript>
 
-    <link rel="stylesheet" href="../book/css/book.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/animations.css">
+    <link rel="stylesheet" href="../css/redesign-v24.css">
     <link rel="stylesheet" href="blog.css">
     <script>
     (function(){try{var t=localStorage.getItem('draft-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)t='dark';if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
     </script>
 </head>
 <body>
+    <div id="cursor-glow" aria-hidden="true"></div>
 
-    <header class="book-topbar">
-        <div class="book-topbar-left">
-            <a href="https://getdraft.dev" class="book-topbar-logo">Draft <span>Blog</span></a>
+    <nav class="top-nav" id="top-nav">
+        <a href="../" class="nav-logo">Draft</a>
+        <div class="nav-links">
+            <a href="../#features">Features</a>
+            <a href="../#commands">Commands</a>
+            <a href="../#install">Install</a>
+            <a href="../#audience">Who It's For</a>
+            <a href="../book/">Book</a>
+            <a href="./" class="active">Blog</a>
         </div>
-        <div class="book-topbar-right">
-            <a href="https://getdraft.dev" class="book-topbar-link">Home</a>
-            <a href="https://getdraft.dev/book/" class="book-topbar-link">Book</a>
-            <a href="https://getdraft.dev/feed.xml" class="book-topbar-link">RSS</a>
-            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="topbar-github">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                GitHub
+        <div class="nav-actions">
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="nav-github">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                Star on GitHub
             </a>
         </div>
-    </header>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
 
-    <main class="blog-index">
-        <section class="blog-hero">
-            <p class="blog-eyebrow">Field notes</p>
-            <h1>The Draft Blog</h1>
-            <p class="blog-subtitle">Essays on Context-Driven Development, the knowledge-graph engine, and what it actually takes to make AI write production code.</p>
-        </section>
+    <main class="blog-page">
+        <div class="blog-container">
 
-        <section class="post-list">
-            <article class="post-card">
-                <a href="local-graph-engine/" class="post-card-link">
-                    <p class="post-card-meta"><time datetime="2026-04-26">April 26, 2026</time> &middot; 6 min read</p>
-                    <h2 class="post-card-title">Your AI Assistant Doesn't Understand Your Codebase. Here's the Fix That Lives Inside Your Repo.</h2>
-                    <p class="post-card-excerpt">Most "AI for code" tools improve context by sending more of your code to a third party. Draft's graph engine does the opposite: a local, deterministic, version-controlled knowledge graph that ships with the plugin. No MCP server, no SaaS, no embeddings, no API key, no leaked code.</p>
-                    <span class="post-card-cta">Read post <span aria-hidden="true">&rarr;</span></span>
+            <section class="blog-hero">
+                <a href="https://getdraft.dev/feed.xml" class="release-pill">
+                    <span class="release-pill-tag">RSS</span>
+                    <span class="release-pill-text">Subscribe to new posts</span>
+                    <span class="release-pill-arrow">&rarr;</span>
                 </a>
-            </article>
+                <h1>The <span class="gradient-text">Draft Blog</span></h1>
+                <p class="blog-subtitle">Field notes on Context-Driven Development, the knowledge-graph engine, and what it actually takes to make AI write production code.</p>
+            </section>
 
-            <article class="post-card">
-                <a href="replaced-kiro-with-free-plugin/" class="post-card-link">
-                    <p class="post-card-meta"><time datetime="2026-04-20">April 20, 2026</time> &middot; 7 min read</p>
-                    <h2 class="post-card-title">I Replaced Kiro With a Free Plugin &mdash; Here's What Happened</h2>
-                    <p class="post-card-excerpt">Amazon's Kiro and Draft both solve the same problem: AI coding without structure is chaos. The similarities end there. Bug hunting, ACID enforcement, three-stage review, architecture discovery, IDE portability, and a $0 price tag &mdash; the honest comparison.</p>
-                    <span class="post-card-cta">Read post <span aria-hidden="true">&rarr;</span></span>
-                </a>
-            </article>
-        </section>
+            <section class="post-list">
+                <article class="post-card">
+                    <a href="local-graph-engine/" class="post-card-link">
+                        <p class="post-card-meta"><time datetime="2026-04-26">April 26, 2026</time> &middot; 6 min read</p>
+                        <h2 class="post-card-title">Your AI Assistant Doesn't Understand Your Codebase. Here's the Fix That Lives Inside Your Repo.</h2>
+                        <p class="post-card-excerpt">Most "AI for code" tools improve context by sending more of your code to a third party. Draft's graph engine does the opposite: a local, deterministic, version-controlled knowledge graph that ships with the plugin. No MCP server, no SaaS, no embeddings, no API key, no leaked code.</p>
+                        <span class="post-card-cta">Read post <span class="post-card-cta-arrow" aria-hidden="true">&rarr;</span></span>
+                    </a>
+                </article>
 
-        <section class="blog-cta">
-            <p>Want every post in your feed reader? <a href="https://getdraft.dev/feed.xml">Subscribe via RSS</a>. Want the long-form deep dive? <a href="https://getdraft.dev/book/">Read the Draft Book</a>.</p>
-        </section>
+                <article class="post-card">
+                    <a href="replaced-kiro-with-free-plugin/" class="post-card-link">
+                        <p class="post-card-meta"><time datetime="2026-04-20">April 20, 2026</time> &middot; 7 min read</p>
+                        <h2 class="post-card-title">I Replaced Kiro With a Free Plugin &mdash; Here's What Happened</h2>
+                        <p class="post-card-excerpt">Amazon's Kiro and Draft both solve the same problem: AI coding without structure is chaos. The similarities end there. Bug hunting, ACID enforcement, three-stage review, architecture discovery, IDE portability, and a $0 price tag &mdash; the honest comparison.</p>
+                        <span class="post-card-cta">Read post <span class="post-card-cta-arrow" aria-hidden="true">&rarr;</span></span>
+                    </a>
+                </article>
+            </section>
+
+            <section class="blog-cta">
+                <p>Want every post in your feed reader? <a href="https://getdraft.dev/feed.xml">Subscribe via RSS</a>. Want the long-form deep dive? <a href="../book/">Read the Draft Book</a>.</p>
+            </section>
+
+        </div>
     </main>
 
     <script src="../js/theme-toggle.js"></script>
+    <script src="../js/main.js"></script>
 </body>
 </html>

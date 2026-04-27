@@ -15,6 +15,24 @@
     </image>
 
     <item>
+      <title>Your AI Assistant Doesn't Understand Your Codebase. Here's the Fix That Lives Inside Your Repo.</title>
+      <link>https://getdraft.dev/blog/local-graph-engine/</link>
+      <description>Most AI-for-code tools improve context by sending more of your code to a third party. Draft's graph engine takes the opposite path: a local, deterministic, version-controlled knowledge graph that ships with the plugin. No MCP server, no SaaS, no embeddings, no API key, no leaked code.</description>
+      <pubDate>Sun, 26 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>https://getdraft.dev/blog/local-graph-engine/</guid>
+      <category>Blog</category>
+    </item>
+
+    <item>
+      <title>I Replaced Kiro With a Free Plugin -- Here's What Happened</title>
+      <link>https://getdraft.dev/blog/replaced-kiro-with-free-plugin/</link>
+      <description>Amazon's Kiro and Draft both solve the same problem: AI coding without structure is chaos. The similarities end there. Bug hunting, ACID enforcement, three-stage review, architecture discovery, IDE portability, and a $0 price tag -- the honest comparison.</description>
+      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>https://getdraft.dev/blog/replaced-kiro-with-free-plugin/</guid>
+      <category>Blog</category>
+    </item>
+
+    <item>
       <title>Chapter 0: What is Draft?</title>
       <link>https://getdraft.dev/book/what-is-draft/</link>
       <description>What Draft is, what it is not, who it is for, and what you get. An overview of 28 commands and 7 specialized agents for structured AI development.</description>

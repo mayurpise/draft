@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decomposing a Payment Gateway Integration: A Real /draft:decompose Walkthrough — Draft Blog</title>
+    <meta name="description" content="A real /draft:decompose run on a multi-provider payment integration. Eight modules, a circular dependency caught and broken before any code, and an LLD with contracts for the two high-complexity modules.">
+    <meta name="author" content="Mayur Pise">
+    <meta name="theme-color" content="#0a0d12">
+    <meta name="keywords" content="draft decompose, module decomposition, dependency cycle, ai code planning, architecture decomposition, payment gateway, claude code plugin, llm software design">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta property="og:title" content="Decomposing a Payment Gateway Integration: A Real /draft:decompose Walkthrough">
+    <meta property="og:description" content="Eight modules, a circular dependency caught and broken before any code, and an LLD with contracts for the two high-complexity modules.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://getdraft.dev/blog/decompose-payment-gateway/">
+    <meta property="og:image" content="https://getdraft.dev/social-preview.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Decomposing a Payment Gateway Integration: A Real /draft:decompose Walkthrough">
+    <meta name="twitter:description" content="From tangled task list to four cleanly-phased module builds, with a circular dependency caught before a single line of code.">
+    <meta name="twitter:image" content="https://getdraft.dev/social-preview.png">
+    <link rel="canonical" href="https://getdraft.dev/blog/decompose-payment-gateway/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Decomposing a Payment Gateway Integration: A Real /draft:decompose Walkthrough",
+      "description": "A real /draft:decompose run on a multi-provider payment integration. Eight modules, a circular dependency caught and broken before any code, and an LLD with contracts for the two high-complexity modules.",
+      "datePublished": "2026-05-03",
+      "dateModified": "2026-05-03",
+      "url": "https://getdraft.dev/blog/decompose-payment-gateway/",
+      "author": { "@type": "Person", "name": "Mayur Pise", "url": "https://github.com/mayurpise" },
+      "publisher": { "@type": "Organization", "name": "Draft", "url": "https://getdraft.dev" },
+      "image": "https://getdraft.dev/social-preview.png",
+      "inLanguage": "en"
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6X062B4B7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-F6X062B4B7');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </noscript>
+
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="../../css/animations.css">
+    <link rel="stylesheet" href="../../css/redesign-v24.css">
+    <link rel="stylesheet" href="../blog.css">
+    <script>
+    (function(){try{var t=localStorage.getItem('draft-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)t='dark';if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
+    </script>
+</head>
+<body>
+    <div id="cursor-glow" aria-hidden="true"></div>
+
+    <nav class="top-nav" id="top-nav">
+        <a href="../../" class="nav-logo">Draft</a>
+        <div class="nav-links">
+            <a href="../../#features">Features</a>
+            <a href="../../#commands">Commands</a>
+            <a href="../../#install">Install</a>
+            <a href="../../#audience">Who It's For</a>
+            <a href="../../book/">Book</a>
+            <a href="../" class="active">Blog</a>
+        </div>
+        <div class="nav-actions">
+            <a href="https://github.com/mayurpise/draft" target="_blank" rel="noopener noreferrer" class="nav-github">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                Star on GitHub
+            </a>
+        </div>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <main class="blog-page">
+        <article class="blog-container">
+
+            <a href="../" class="post-back">&larr; All posts</a>
+
+            <header class="post-header">
+                <p class="post-meta"><time datetime="2026-05-03">May 3, 2026</time> &middot; 8 min read</p>
+                <h1>Decomposing a Payment Gateway Integration: A Real <code>/draft:decompose</code> Walkthrough</h1>
+                <p class="post-deck">A real run on a 14-file track. Eight modules, a circular dependency caught and broken <em>before</em> any code was written, and an LLD with contracts for the two high-complexity modules.</p>
+            </header>
+
+            <div class="post-body">
+                <h2>The Bottom Line</h2>
+                <p>Most developers who try <code>/draft:decompose</code> for the first time treat it like a planning tool. It isn't. It's an <strong>architectural guardrail that forces module boundaries to exist before your AI assistant gets a chance to invent random tasks</strong>. The output isn't a to-do list &mdash; it's a dependency graph, an implementation order, and (when complexity is high) a per-module contract.</p>
+                <p>Below is a real run on a 14-file track that went from a tangled task list to four cleanly-phased module builds, with a <strong>circular dependency caught and broken before any code was written</strong>.</p>
+
+                <h2>The Track: "Add Multi-Provider Payment Support"</h2>
+                <p>Existing system: a Node.js checkout service with a single hardcoded Stripe integration. ~6,000 lines, no payment abstraction, retries hardcoded, audit logs sprinkled across handlers. The spec landed in <code>draft/tracks/payments-multi-provider/spec.md</code>:</p>
+<pre><code># Multi-Provider Payment Support
+
+## Problem
+Single Stripe integration is blocking enterprise deals
+that require Adyen and PayPal. Refund flow is buggy.
+Webhooks have no signature verification.
+
+## Acceptance
+- Stripe, Adyen, PayPal supported behind one provider interface
+- Idempotent charge requests (retry-safe)
+- Signed webhook verification per provider
+- Refunds work for all three providers
+- Full audit trail (who, what, when, response)
+- Zero-downtime migration from existing Stripe path</code></pre>
+                <p>A senior engineer would call this two sprints. Most AI assistants will write a 25-task plan in two minutes that misses three of those concerns.</p>
+
+                <h2>What Happens If You Skip Decomposition</h2>
+                <p>Run <code>/draft:implement</code> directly on the spec above without decomposition, and you get something like:</p>
+<pre><code>- [ ] Task 1.1: Add Stripe adapter
+- [ ] Task 1.2: Add Adyen adapter
+- [ ] Task 1.3: Add PayPal adapter
+- [ ] Task 1.4: Add database column for provider
+- [ ] Task 1.5: Add webhook endpoint
+- [ ] Task 1.6: Implement signature verification
+- [ ] Task 1.7: Add refund logic
+- [ ] Task 1.8: Add audit logging
+... (17 more tasks)</code></pre>
+                <p>This plan is buildable, but every task touches every other module. There are no clean test boundaries. The "audit logging" task ends up scattered across 11 files. The "refund logic" task hits the same handler six times across the build. By task 14 the plan starts contradicting tasks 3&ndash;7.</p>
+                <p>The problem isn't the AI. The problem is that <strong>nobody drew the modules first</strong>.</p>
+
+                <h2>Running <code>/draft:decompose --lld</code></h2>
+                <p>The skill loads <code>product.md</code>, <code>tech-stack.md</code>, the track's <code>spec.md</code>, and the existing knowledge graph (<code>draft/graph/module-graph.jsonl</code>). It scans the existing checkout codebase, identifies seven candidate modules, and prints a checkpoint:</p>
+<pre><code>═══════════════════════════════════════════════════════════
+                   MODULE BREAKDOWN
+═══════════════════════════════════════════════════════════
+
+Scope: Track: payments-multi-provider
+
+MODULE 1: provider-adapter
+  Responsibility: Translate generic payment requests to
+                  provider-specific API calls.
+  Files: src/payments/providers/{stripe,adyen,paypal}.ts
+  API: ProviderAdapter.charge(), .refund(), .verifySignature()
+  Dependencies: provider-types
+  Complexity: Medium
+
+MODULE 2: provider-types
+  Responsibility: Shared types for charge/refund/webhook payloads.
+  Files: src/payments/types.ts
+  API: ChargeRequest, ChargeResult, WebhookEvent
+  Dependencies: none
+  Complexity: Low
+
+MODULE 3: payment-router
+  Responsibility: Pick a provider per merchant/region/currency
+                  and route the call.
+  Files: src/payments/router.ts
+  API: PaymentRouter.charge(), .refund()
+  Dependencies: provider-adapter, provider-types,
+                payment-status-port
+  Complexity: High
+
+MODULE 4: webhook-dispatcher
+  Responsibility: Verify signature, normalize event, dispatch.
+  Files: src/payments/webhook.ts
+  API: WebhookDispatcher.handle()
+  Dependencies: provider-adapter, provider-types,
+                refund-orchestrator
+  Complexity: Medium
+
+MODULE 5: refund-orchestrator
+  Responsibility: Multi-step refund with reconciliation.
+  Files: src/payments/refund.ts, src/payments/refund-state.ts
+  API: RefundOrchestrator.start(), .complete()
+  Dependencies: payment-router, audit-log
+  Complexity: High
+
+MODULE 6: audit-log
+  Responsibility: Append-only structured payment audit trail.
+  Files: src/payments/audit.ts
+  API: AuditLog.record()
+  Dependencies: provider-types
+  Complexity: Low
+
+MODULE 7: idempotency-store
+  Responsibility: Persist client idempotency keys with TTL.
+  Files: src/payments/idempotency.ts
+  API: IdempotencyStore.claim(), .lookup()
+  Dependencies: none
+  Complexity: Low
+
+═══════════════════════════════════════════════════════════</code></pre>
+                <p>Two modules are <strong>High complexity</strong> &mdash; <code>payment-router</code> and <code>refund-orchestrator</code>. That auto-triggers LLD generation. The skill notifies:</p>
+                <blockquote>
+                    <p><em>One or more modules are High complexity &mdash; generating LLD automatically.</em></p>
+                </blockquote>
+                <p>I made one edit in dialogue: I asked the skill to make <code>audit-log</code> a hard dependency of every state-changing module rather than treating it as a side concern. The skill regenerated the table and the dependency edges.</p>
+
+                <h2>The Cycle &mdash; and How <code>/draft:decompose</code> Breaks It</h2>
+                <p>When the skill ran dependency analysis (Step 4), it printed:</p>
+<pre><code>DEPENDENCY ANALYSIS
+─────────────────────────────────────────────────────────
+⚠ Circular dependency detected:
+
+  payment-router  ──> webhook-dispatcher
+                            │
+                            ▼
+                     refund-orchestrator
+                            │
+                            ▼
+                     payment-router  (cycle)
+
+Reason:
+  - payment-router needs webhook-dispatcher to know
+    when async charges settle.
+  - webhook-dispatcher delegates refund webhooks to
+    refund-orchestrator.
+  - refund-orchestrator calls payment-router to
+    actually issue the refund.
+
+Proposed break:
+  Extract `payment-status-port` (interface module).
+  - Both payment-router and webhook-dispatcher depend
+    on the port.
+  - refund-orchestrator depends only on payment-router.
+  - The port is a 30-line file, no business logic.
+
+Apply break? [y/N]</code></pre>
+                <p>This is the part nobody wants to discover at task 17. I accepted the break. The skill added an eighth module (<code>payment-status-port</code>) and re-ran topological sort.</p>
+
+                <h2>Generated Mermaid Topology</h2>
+                <p>The track-architecture file got a component diagram. Mermaid lives inline in <code>architecture.md</code>, so when <code>/draft:implement</code> reads context later, it sees the topology before writing code:</p>
+<pre><code>flowchart TD
+  subgraph "in scope"
+    R[payment-router]
+    A[provider-adapter]
+    W[webhook-dispatcher]
+    F[refund-orchestrator]
+    P[payment-status-port]
+    I[idempotency-store]
+    L[audit-log]
+    T[provider-types]
+  end
+  subgraph "existing"
+    C[checkout-service]
+  end
+  subgraph "external"
+    S[(Stripe API)]
+    Y[(Adyen API)]
+    PP[(PayPal API)]
+  end
+
+  C --> R
+  R --> A
+  R --> P
+  W --> P
+  W --> F
+  F --> R
+  F --> L
+  R --> I
+  A --> S
+  A --> Y
+  A --> PP</code></pre>
+                <p>And a sequence diagram for the happy-path charge:</p>
+<pre><code>sequenceDiagram
+  participant C as Checkout
+  participant R as payment-router
+  participant I as idempotency-store
+  participant A as provider-adapter
+  participant L as audit-log
+
+  C ->> R: charge(req)
+  R ->> I: claim(idempotency_key)
+  I -->> R: claimed
+  R ->> A: charge(req, provider=stripe)
+  A ->> Stripe: POST /charges
+  Stripe -->> A: 200 OK
+  A -->> R: ChargeResult
+  R ->> L: record(charge.success)
+  R -->> C: ChargeResult</code></pre>
+                <p>This isn't decoration. It's input the AI reads before writing handlers.</p>
+
+                <h2>Implementation Order</h2>
+<pre><code>1. provider-types         (leaf)
+2. idempotency-store      (leaf)
+3. audit-log              (leaf)
+4. payment-status-port    (leaf, extracted to break cycle)
+5. provider-adapter       (depends on: provider-types)
+6. payment-router         (depends on: provider-adapter,
+                          payment-status-port,
+                          idempotency-store, audit-log)
+7. webhook-dispatcher     (depends on: provider-adapter,
+                          payment-status-port)
+8. refund-orchestrator    (depends on: payment-router,
+                          audit-log)
+
+Parallel opportunities:
+  • Phase 1: provider-types, idempotency-store, audit-log,
+             payment-status-port (all independent — 4-way parallel)
+  • Phase 3: webhook-dispatcher and refund-orchestrator
+             can start in parallel after payment-router lands</code></pre>
+                <p>Eight modules. Four phases. Two parallel windows. Nothing invented.</p>
+
+                <h2>The LLD: Contracts for the High-Complexity Modules</h2>
+                <p>Because two modules were marked High, <code>--lld</code> populated &sect;6 of <code>architecture.md</code>. For <code>payment-router</code>:</p>
+<pre><code>// §6.1 — payment-router API Contract
+interface PaymentRouter {
+  /**
+   * Pre:  req.idempotency_key is non-empty
+   * Pre:  req.amount > 0
+   * Post: ChargeResult.id is unique
+   * Invariant: idempotent — repeat calls with the same
+   *            key return the original ChargeResult
+   * Errors:
+   *   - ProviderError       (transient, retry w/ backoff)
+   *   - SignatureError      (permanent, do not retry)
+   *   - IdempotencyConflict (permanent, return original)
+   */
+  charge(req: ChargeRequest): Promise&lt;ChargeResult&gt;
+}</code></pre>
+                <p>&sect;6.3 documents retry policy per error class &mdash; exponential backoff for transient, no retry for permanent, circuit breaker after 5 consecutive transient errors per provider. <code>/draft:implement</code> later compiles tests from these contracts &mdash; the AI doesn't get to invent a different error taxonomy mid-build.</p>
+
+                <h2>plan.md, Restructured</h2>
+                <p>Step 6 of the skill regenerated <code>plan.md</code> with phases mapped to modules:</p>
+<pre><code>## Phase 1: Foundation (parallelizable)
+- [ ] Task 1.1: provider-types
+- [ ] Task 1.2: idempotency-store
+- [ ] Task 1.3: audit-log
+- [ ] Task 1.4: payment-status-port
+
+## Phase 2: Adapters
+- [ ] Task 2.1: provider-adapter (Stripe)
+- [ ] Task 2.2: provider-adapter (Adyen)
+- [ ] Task 2.3: provider-adapter (PayPal)
+
+## Phase 3: Router
+- [ ] Task 3.1: payment-router (charge path)
+- [ ] Task 3.2: payment-router (refund path)
+
+## Phase 4: Async (parallelizable)
+- [ ] Task 4.1: webhook-dispatcher
+- [ ] Task 4.2: refund-orchestrator</code></pre>
+                <p>Eleven tasks. Each lives inside one module. Each module has a contract. Each module is testable in isolation.</p>
+
+                <h2>What This Buys You</h2>
+                <ul>
+                    <li><strong>No mid-build surprises.</strong> The cycle was caught before code existed. Discovering it at task 17 would have meant redoing four files.</li>
+                    <li><strong>Real test boundaries.</strong> <code>provider-adapter</code> mocks are stable because the contract is fixed in &sect;6.1. Tests don't churn every time the implementation changes.</li>
+                    <li><strong>Parallel work.</strong> Two engineers (or two AI passes) implement Phase 1 leaves simultaneously. Same for Phase 4.</li>
+                    <li><strong>A reviewable architecture diff.</strong> <code>architecture.md</code> is checked in. PRs that change module boundaries change it visibly &mdash; reviewers get architecture review for free.</li>
+                </ul>
+                <p>The biggest unlock isn't the diagram or the LLD. It's that <code>/draft:implement</code> later reads <code>architecture.md</code> as context. The AI no longer invents a 25-task plan; it implements one module at a time against a contract that already passed your review.</p>
+
+                <h2>Try It</h2>
+<pre><code># In a Draft-initialized repo with an active track
+/draft:decompose --lld
+
+# Or for a project-wide refresh after major refactors
+/draft:decompose project</code></pre>
+                <p>The output is two files: <code>draft/tracks/&lt;id&gt;/architecture.md</code> (or <code>draft/architecture.md</code> for project scope) and a restructured <code>plan.md</code>. Read them. Edit them. Then run <code>/draft:implement</code>.</p>
+                <p>Decomposition isn't extra paperwork. It's the first thing your AI assistant should be reading.</p>
+            </div>
+
+            <aside class="post-share" aria-label="Share this post">
+                <span class="post-share-label">Share</span>
+                <div class="post-share-buttons">
+                    <button type="button" class="share-btn" data-net="linkedin" aria-label="Share on LinkedIn">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/></svg>
+                        <span class="share-btn-label">LinkedIn</span>
+                    </button>
+                    <button type="button" class="share-btn" data-net="x" aria-label="Share on X">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25h6.83l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        <span class="share-btn-label">X</span>
+                    </button>
+                    <button type="button" class="share-btn" data-net="hn" aria-label="Share on Hacker News">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M0 0v24h24V0zm6.51 4h2.27l3.22 6.24L15.21 4h2.28l-4.36 8.21V20h-2.26v-7.79z"/></svg>
+                        <span class="share-btn-label">Hacker News</span>
+                    </button>
+                    <button type="button" class="share-btn" data-net="copy" aria-label="Copy link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        <span class="share-btn-label">Copy link</span>
+                    </button>
+                </div>
+            </aside>
+
+            <footer class="post-footer">
+                <p>Draft is open source: <a href="https://github.com/mayurpise/draft">github.com/mayurpise/draft</a>. The <code>/draft:decompose</code> skill source lives at <code>skills/decompose/SKILL.md</code>; the architect protocol it invokes is in <code>core/agents/architect.md</code>.</p>
+                <p><a href="../">&larr; Back to all posts</a></p>
+            </footer>
+        </article>
+    </main>
+
+    <script src="../../js/theme-toggle.js"></script>
+    <script src="../../js/main.js"></script>
+    <script src="../share.js"></script>
+</body>
+</html>

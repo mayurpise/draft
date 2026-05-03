@@ -76,7 +76,7 @@
         <div class="blog-container">
 
             <section class="blog-hero">
-                <a href="https://getdraft.dev/feed.xml" class="release-pill">
+                <a href="/feed.xml" class="release-pill" target="_blank" rel="noopener" type="application/rss+xml">
                     <span class="release-pill-tag">RSS</span>
                     <span class="release-pill-text">Subscribe to new posts</span>
                     <span class="release-pill-arrow">&rarr;</span>
@@ -86,6 +86,15 @@
             </section>
 
             <section class="post-list">
+                <article class="post-card">
+                    <a href="decompose-payment-gateway/" class="post-card-link">
+                        <p class="post-card-meta"><time datetime="2026-05-03">May 3, 2026</time> &middot; 8 min read</p>
+                        <h2 class="post-card-title">Decomposing a Payment Gateway Integration: A Real <code>/draft:decompose</code> Walkthrough</h2>
+                        <p class="post-card-excerpt">A real run on a 14-file track: eight modules, a circular dependency caught and broken before any code, and an LLD with contracts for the two high-complexity modules. The decomposition skill isn't a planner &mdash; it's an architectural guardrail.</p>
+                        <span class="post-card-cta">Read post <span class="post-card-cta-arrow" aria-hidden="true">&rarr;</span></span>
+                    </a>
+                </article>
+
                 <article class="post-card">
                     <a href="local-graph-engine/" class="post-card-link">
                         <p class="post-card-meta"><time datetime="2026-04-26">April 26, 2026</time> &middot; 6 min read</p>
@@ -106,7 +115,7 @@
             </section>
 
             <section class="blog-cta">
-                <p>Want every post in your feed reader? <a href="https://getdraft.dev/feed.xml">Subscribe via RSS</a>. Want the long-form deep dive? <a href="../book/">Read the Draft Book</a>.</p>
+                <p>Want every post in your feed reader? <a href="/feed.xml" target="_blank" rel="noopener" type="application/rss+xml">Subscribe via RSS</a>. Want the long-form deep dive? <a href="../book/">Read the Draft Book</a>.</p>
             </section>
 
         </div>

@@ -6,13 +6,21 @@
     <description>A comprehensive guide to Draft's Context-Driven Development methodology. 24 chapters covering specs, plans, TDD enforcement, 3-stage code review, 14-dimension bug hunting, and ACID audits for AI coding agents.</description>
     <language>en-us</language>
     <managingEditor>mayur@getdraft.dev (Mayur Pise)</managingEditor>
-    <lastBuildDate>Sat, 05 Apr 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 03 May 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://getdraft.dev/feed.xml" rel="self" type="application/rss+xml"/>
     <image>
       <url>https://getdraft.dev/social-preview.png</url>
       <title>Draft -- Context-Driven Development</title>
       <link>https://getdraft.dev</link>
     </image>
+
+    <item>
+      <title>Decomposing a Payment Gateway Integration: A Real /draft:decompose Walkthrough</title>
+      <link>https://getdraft.dev/blog/decompose-payment-gateway/</link>
+      <description>A real /draft:decompose run on a multi-provider payment integration. Eight modules, a circular dependency caught and broken before any code was written, and an LLD with contracts for the two high-complexity modules. Decomposition is not a planning tool — it's an architectural guardrail that forces module boundaries to exist before the AI invents random tasks.</description>
+      <pubDate>Sun, 03 May 2026 00:00:00 +0000</pubDate>
+      <guid>https://getdraft.dev/blog/decompose-payment-gateway/</guid>
+    </item>
 
     <item>
       <title>Your AI Assistant Doesn't Understand Your Codebase. Here's the Fix That Lives Inside Your Repo.</title>

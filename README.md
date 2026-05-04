@@ -1,8 +1,8 @@
 <h1 align="center">Draft</h1>
 
 <p align="center">
-  <strong>Code intelligence built into your AI coding agent.</strong><br>
-  A knowledge graph + spec-driven planning + three-stage review. One plugin. Free forever.
+  <strong>Stop shipping AI-generated bugs.</strong><br>
+  One command runs a three-stage review on your branch — validation, spec compliance, code quality — and writes the missing tests. Free. Open-source. MIT.
 </p>
 
 <p align="center">
@@ -21,62 +21,75 @@
 
 ---
 
-Draft adds a knowledge graph engine, structured planning, and a three-stage review pipeline to your AI coding agent — so it stops guessing and starts executing pre-approved work, grounded in real understanding of your codebase. Twenty-eight commands cover every stage of the development lifecycle, from architecture discovery to incident response, with full traceability through git-tracked specs and plans.
+## The 60-second pitch
 
-Works with **Claude Code**, **Cursor**, **GitHub Copilot**, and **Gemini**.
+Your AI assistant just wrote 200 lines. Some of them are bugs. Some don't match your patterns. Some skip tests.
+
+```bash
+/draft:review
+```
+
+Three stages, one command:
+
+1. **Validation** — runs your tests, lints, type-checks, and surfaces real failures
+2. **Spec compliance** — checks the diff against the agreed spec, not vibes
+3. **Code quality** — flags hotspots, blast radius, and missing test coverage using a tree-sitter knowledge graph of your repo
+
+Free. No API keys. No paid tier. No vendor lock-in. Catches the 3 bugs you missed before they hit your reviewer.
+
+> *Demo coming soon — for now, [watch the 8-minute walkthrough](https://www.youtube.com/watch?v=gBSwFEFVd7Y).*
 
 ---
 
-## Quickstart
+## Install — Claude Code (30 seconds)
 
-### Claude Code
 ```bash
 /plugin marketplace add mayurpise/draft
 /plugin install draft
-/draft:init                           # Set up project context
-/draft:new-track "Add user auth"      # Create spec + plan
-/draft:implement                      # Build it
+/draft:init       # 5-phase codebase analysis (one-time)
+/draft:review     # ← run this on every branch before you push
 ```
 
+That's it. Run `/draft` for the full command map.
+
+<details>
+<summary><strong>Also works with Cursor, GitHub Copilot, Antigravity, and Gemini →</strong></summary>
+
 ### Cursor
-
-Cursor natively supports the `.claude/` plugin structure. Add via:
-
-Cursor > Settings > Rules, Skills, Subagents > Rules > New > Add from Github:
+Cursor natively supports the `.claude/` plugin structure. Add via *Settings > Rules, Skills, Subagents > Rules > New > Add from Github*:
 ```
 https://github.com/mayurpise/draft.git
 ```
+Then use: `@draft init`, `@draft new-track`, `@draft implement`.
 
-Then use: `@draft init`, `@draft new-track`, `@draft implement`
+### GitHub Copilot
+```bash
+mkdir -p .github && curl -o .github/copilot-instructions.md \
+  https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md
+```
 
-Draft integrates with your AI pair programmer by providing context-optimized instructions. These instructions tell the AI how to follow the Draft methodology and where to find the detailed skills.
+### Gemini
+```bash
+curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/.gemini.md
+```
 
 ### Antigravity IDE
-Draft is used globally with Antigravity IDE by installing the skills to a central location.
-
+Draft is used globally by installing skills to a central location:
 1. Clone Draft to `~/.gemini/antigravity/skills/draft`
-2. Configure `~/.gemini.md` (bootstrap) to point to the global skills:
+2. Configure `~/.gemini.md` to point to the global skills:
 ```markdown
 **Skill Locations:**
 The authoritative Draft implementation skills are located at:
 `/Users/mayurpise/.gemini/antigravity/skills/draft/skills`
 ```
 
-### GitHub Copilot
-For Copilot in VS Code, Draft uses a `.github/copilot-instructions.md` file.
+</details>
 
-```bash
-# Add bootstrap to your project
-mkdir -p .github && curl -o .github/copilot-instructions.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/copilot/.github/copilot-instructions.md
-```
+---
 
-### Gemini
-For Gemini, Draft uses a `.gemini.md` file.
+## Beyond `/draft:review` — 27 more commands
 
-```bash
-# Add bootstrap to your project
-curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integrations/gemini/.gemini.md
-```
+`/draft:review` is the wedge. Once Draft has indexed your repo, you also get spec-driven planning, TDD-enforced implementation, exhaustive bug hunting, deep architectural audits, and 23 more commands covering the full development lifecycle.
 
 ---
 
@@ -114,6 +127,8 @@ curl -o .gemini.md https://raw.githubusercontent.com/mayurpise/draft/main/integr
 | **`/draft:assist-review`** | Summarize intent and highlight structural PR risks for reviewers |
 
 [See full command reference →](core/methodology.md#command-workflows)
+
+> **Recommended next step after install:** run `/draft:init` to index your repo, then `/draft:review` on any branch with AI-generated changes. Once you've seen what it catches, explore the rest.
 
 ---
 

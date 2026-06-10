@@ -1,6 +1,6 @@
 # Plan: Replace the Aether graph engine with codebase-memory-mcp (CLI mode)
 
-> Status: **Proposal — awaiting approval**
+> Status: **In progress** — Phase 0 (spike) complete; Phases 1, 3, 5 (engine layer) landed; Phases 2 & 4 remaining.
 > Branch: `claude/seekdb-draft-artifacts-xukf1v`
 > Scope: Fully retire the vendored Aether `graph` binary (`bin/<arch>/graph`, `graph-clang`) and replace it with [DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp), used **via its CLI** (`codebase-memory-mcp cli <tool> '<json>'`). MCP-server mode is explicitly **out of scope for now**.
 
@@ -27,6 +27,29 @@ This plan executes **Strategy A**. Rationale: it lets us fully delete Aether (th
 
 ---
 
+## 1b. Phase 0 spike — VERIFIED findings (codebase-memory-mcp v0.7.0)
+
+Ran the real binary against this repo (5285 nodes / 5550 edges). Confirmed:
+
+- **CLI:** `codebase-memory-mcp cli <tool> '<json>'`. JSON → **stdout**, `level=…` logs → **stderr** (clean capture).
+- **Index:** `index_repository {repo_path}` → `{project, status, nodes, edges}`. Project name = path slug (`/home/user/draft` → `home-user-draft`); also discoverable via `list_projects[].root_path`.
+- **Storage:** `~/.cache/codebase-memory-mcp/<project>.db` (SQLite). Scratch/derived — git stays source of truth (decision #2 = keep committed artifacts).
+- **Reliable query forms:** `get_architecture` (server-computed hotspots/packages/routes/languages), `trace_path`, `detect_changes`, and **fixed-length** openCypher patterns (single-hop callers, explicit N-cycles).
+- **UNRELIABLE (avoid):** openCypher aggregations (`count`/`WITH` grouping) and multi-pattern joins — return cross-products/empty in this dialect. Tools must use purpose-built endpoints, not ad-hoc Cypher.
+- **Schema is unified, not per-language:** one `Function`/`Method`/`Class`/`Module`/`File`/`Route` model (language inferred from extension). Aether's `go/python/ts/c-index` + `ctags-sym` split **collapses** — drop, don't emulate.
+- **Distribution:** binary is **253 MB** uncompressed / 34 MB tarball. Vendoring 4 arches in LFS (~1 GB) is rejected → **fetch-on-install** (`scripts/fetch-memory-engine.sh`, checksum-verified, pinned `v0.7.0`).
+
+Mode → engine mapping now in force:
+
+| Draft need | Engine call | Tool |
+|---|---|---|
+| hotspots | `get_architecture aspects=[hotspots]` | `hotspot-rank.sh` |
+| cycles | fixed-length `CALLS` openCypher (2- & 3-cycles) | `cycle-detect.sh` |
+| module-deps mermaid | `FILE_CHANGES_WITH` co-change edges | `mermaid-from-graph.sh` |
+| proto-map mermaid | `get_architecture aspects=[routes]` (Route nodes) | `mermaid-from-graph.sh` |
+| callers | single-hop `CALLS` openCypher | (skills, via `query_graph`) |
+| impact / blast-radius | `detect_changes` + `trace_path` | (skills) |
+
 ## 2. Open decisions to confirm before Phase 1
 
 1. **Strategy A vs B** — proceed with the adapter (recommended) or commit to a full native rewrite?
@@ -44,20 +67,20 @@ This plan executes **Strategy A**. Rationale: it lets us fully delete Aether (th
 
 ## 3. Phased plan
 
-### Phase 0 — Spike & decision record (de-risk before touching the repo)
-- [ ] Vendor one platform binary (linux-amd64) into a scratch dir; verify checksum + Sigstore signature.
-- [ ] Run `codebase-memory-mcp cli index_repository` against this repo; capture real output for `get_architecture`, `search_graph`, `trace_path`, `detect_changes`, `query_graph` (openCypher), `get_code_snippet`.
-- [ ] Confirm exact CLI invocation, JSON arg shapes, exit codes, and where output/state lands.
-- [ ] Build the **mapping table**: every Aether artifact + `--mode` → codebase-memory-mcp call(s) → transform needed. Record gaps from §2.3.
-- [ ] Write a short ADR (`draft/` ADR or `docs/adr/`) capturing the strategy, storage, and gap decisions.
+### Phase 0 — Spike & decision record ✅ DONE
+- [x] Fetched + checksum-verified the real binary (v0.7.0); ran it against this repo.
+- [x] Captured real output for `index_repository`, `get_architecture`, `search_graph`, `query_graph`, `trace_path`, `detect_changes`, `get_graph_schema`.
+- [x] Confirmed CLI invocation, JSON arg shapes, stdout/stderr split, storage location.
+- [x] Built the mapping table (see §1b) and recorded all gap decisions inline.
 
-### Phase 1 — Binary resolution & distribution
-- [ ] Rewrite `find_graph_bin()` in `scripts/tools/_lib.sh` to resolve `codebase-memory-mcp` (PATH > `bin/<arch>/codebase-memory-mcp` > install breadcrumb). Keep the function name + `GRAPH_BIN` global so callers don't churn (or rename + thin shim).
-- [ ] Vendor binaries for all 4 targets (`linux-amd64`, `linux-arm64`, `darwin-amd64`, `darwin-arm64`) under `bin/<arch>/`.
-- [ ] Update `.gitattributes` LFS tracking (`bin/*/*/codebase-memory-mcp*` ← was `graph*`/`graph-clang*`).
-- [ ] Update `scripts/build-graph-binaries.sh`, `scripts/package.sh`, `scripts/install.sh` to stage/materialize the new binary; drop `graph-clang`.
-- [ ] Update `verify-graph-binary.sh` to detect the new binary; preserve the `draft/.graph-binary-report.json` report contract (rename fields as needed).
-- [ ] Delete Aether `bin/<arch>/graph` + `graph-clang` binaries and legacy `graph/bin` fallback.
+### Phase 1 — Binary resolution & distribution ✅ DONE
+- [x] Replaced `find_graph_bin()` → `find_memory_bin()` (`MEMORY_BIN`) in `_lib.sh`; resolves `DRAFT_MEMORY_BIN` > PATH > `~/.cache/draft/bin` > vendored `bin/<arch>/`. Added `DRAFT_MEMORY_DISABLE` opt-out + `memory_cli`/`memory_ensure_index`/`memory_project_for_repo` wrappers. **No legacy `graph/bin` fallback.**
+- [x] Chose **fetch-on-install** over vendoring (253 MB binary): new `scripts/fetch-memory-engine.sh` (pinned, checksum-verified) → `~/.cache/draft/bin`.
+- [x] Rewrote `.gitattributes` (dropped all `graph*` LFS tracking).
+- [x] Updated `scripts/install.sh` + `scripts/package.sh`; deleted `scripts/build-graph-binaries.sh`; dropped `graph-clang` everywhere.
+- [x] Rewrote `verify-graph-binary.sh` to detect the engine; report now emits `engine_bin`/`source`/`status`.
+- [x] Deleted vendored Aether `bin/<arch>/graph` + `graph-clang` binaries.
+- [x] Rewrote `bin/README.md` for the fetch model + resolution order.
 
 ### Phase 2 — Adapter: artifact generation (the build path)
 - [ ] Add `scripts/tools/graph-build.sh` (adapter) wrapping `codebase-memory-mcp cli`:
@@ -67,11 +90,11 @@ This plan executes **Strategy A**. Rationale: it lets us fully delete Aether (th
 - [ ] Wire incremental build to the engine's git-watcher / incremental index path.
 - [ ] Update `/draft:init` (Phase 0.1/0.4) and `/draft:index` build invocations to call the adapter instead of `graph --repo … --out …`.
 
-### Phase 3 — Query adapters (live `--mode` parity)
-- [ ] `hotspot-rank.sh` → `get_architecture`/`search_graph` reshaped to `{hotspots:[…], source}`.
-- [ ] `cycle-detect.sh` → `query_graph` openCypher cycle detection reshaped to `{cycles:[…], source}`.
-- [ ] `mermaid-from-graph.sh` → build `module-deps`/`proto-map` mermaid from query output.
-- [ ] Provide adapter coverage for the remaining live modes used inside skills: `impact` (`detect_changes`/`trace_path`), `callers` (`query_graph`), `modules` (`get_architecture`).
+### Phase 3 — Query adapters (live `--mode` parity) ✅ DONE (tools)
+- [x] `hotspot-rank.sh` → `get_architecture` → `{hotspots:[{id,name,fanIn}], source:"memory-graph"}`. Verified against real engine + mock.
+- [x] `cycle-detect.sh` → fixed-length `CALLS` openCypher (2- & 3-cycles) → `{cycles:[…], source}`. Found a real cycle in this repo.
+- [x] `mermaid-from-graph.sh` → `module-deps` from `FILE_CHANGES_WITH`, `proto-map` from Route nodes.
+- [ ] Remaining live modes are invoked *inside skills* (`impact`, `callers`, `modules`) — wired in Phase 4 when skill bodies are updated.
 
 ### Phase 4 — Contract, methodology & skills
 - [ ] Rewrite `core/shared/graph-query.md`: new engine + CLI, retained artifact schema, documented schema deltas, new optional capabilities. **Keep the Mandatory Lookup Contract and Ground-Truth Discipline (G1–G5) unchanged.**
@@ -81,11 +104,12 @@ This plan executes **Strategy A**. Rationale: it lets us fully delete Aether (th
 - [ ] Update `bin/README.md` for the new binary/layout.
 - [ ] Update `core/templates/{architecture,ai-context,hld,lld,metadata.json}` only if slot semantics change (slot names should stay).
 
-### Phase 5 — Tests & regeneration
-- [ ] Update `tests/test-tools-{verify-graph-binary,hotspot-rank,cycle-detect,mermaid-from-graph}.sh` for the new CLI + reshaped outputs.
-- [ ] Add an adapter test: index a small fixture repo → assert produced JSONL matches the schema.
-- [ ] Pin engine version + use a committed fixture so CI is deterministic.
-- [ ] `make build` to regenerate integrations (graph-query.md + skills changed), then `make test` green; `make lint`.
+### Phase 5 — Tests & regeneration 🟡 PARTIAL
+- [x] Rewrote `tests/test-tools-{verify-graph-binary,hotspot-rank,cycle-detect,mermaid-from-graph}.sh` for the new CLI + reshaped outputs (22 assertions, all green).
+- [x] Added a deterministic **mock engine** (`make_mock_memory_engine` in `test-helpers.sh`) so CI needs no 253 MB binary; `DRAFT_MEMORY_DISABLE` drives the unavailable path.
+- [x] Pinned engine version in `fetch-memory-engine.sh` (`v0.7.0`).
+- [ ] Adapter (build-path) test — pending Phase 2.
+- [x] `make build` green. `make test`: all graph suites green (3 unrelated failures are pre-existing **git-signing** sandbox issues — pass with signing off; CI has no signing server).
 
 ### Phase 6 — Cleanup & docs
 - [ ] Remove dead Aether code paths, `graph-clang` references, legacy `graph/bin` fallback.

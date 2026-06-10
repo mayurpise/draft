@@ -467,7 +467,7 @@ This creates a **continuous improvement loop**:
 
 Before printing the completion summary, internally verify and report:
 
-1. **Graph files queried** — JSONL files loaded plus any live `graph --query` invocations.
+1. **Graph files queried** — JSONL files loaded plus any live graph query-tool invocations.
 2. **Layer 1 files deliberately skipped** — list any context sections skipped.
 3. **Filesystem find/grep fallback justification** — for every `find`/`grep` run for source discovery, state which languages or extensions were not covered by the graph indexes (e.g. Ruby without ctags).
 

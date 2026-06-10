@@ -627,7 +627,7 @@ After a phase passes review, refresh `metadata.json.impact` so future tracks can
 
 2. **Compute downstream blast radius (graph-aware, optional):** If `draft/graph/schema.yaml` exists, for each file in `files_touched` query:
    ```bash
-   graph --repo . --out draft/graph --query --file <path> --mode impact
+   scripts/tools/graph-impact.sh --repo . --file <path>
    ```
    Aggregate across all files: `downstream_files` = total unique downstream files (deduped), `downstream_modules` = union of `affected_modules`, `max_depth` = max across queries, `by_category` = sum of each query's `by_category`. If the graph is absent, leave these fields as zeros / empty arrays — the snapshot still records the directly-touched files.
 

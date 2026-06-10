@@ -14,7 +14,7 @@ When `draft/graph/schema.yaml` exists, this skill **must** follow the graph-firs
 1. Load `draft/graph/module-graph.jsonl` for the authoritative module list and inter-module edges.
 2. Load `draft/graph/hotspots.jsonl` to identify candidate modules to split.
 3. Load `draft/graph/modules/<name>.jsonl` on demand for files/symbols inside a candidate module.
-4. Run `graph --query --mode cycles` to enumerate existing cycles before proposing new boundaries.
+4. Run `scripts/tools/cycle-detect.sh --repo .` to enumerate existing cycles before proposing new boundaries.
 
 Filesystem `grep`/`find` for module discovery is only permitted **after** a documented graph miss, using the fallback sentence `Graph returned no match for <X>; falling back to grep.` and recorded in the Graph Usage Report.
 

@@ -760,9 +760,9 @@ For each initialized service with both `draft/architecture.md` AND `draft/graph/
 **A. Read current `architecture.md` into memory.**
 
 **B. Regenerate slot content from graph JSONL:**
-- `GRAPH:module-deps` → run `graph --repo . --out draft/graph --query --mode mermaid --symbol module-deps`
+- `GRAPH:module-deps` → run `scripts/tools/mermaid-from-graph.sh --repo . --diagram module-deps`
   Parse JSON response, extract `.mermaid` string + `filtered` flag + stats
-- `GRAPH:proto-map` → run `graph --repo . --out draft/graph --query --mode mermaid --symbol proto-map`
+- `GRAPH:proto-map` → run `scripts/tools/mermaid-from-graph.sh --repo . --diagram proto-map`
   Parse JSON response, extract `.mermaid` string + stats
 - `GRAPH:hotspots` → read `draft/graph/hotspots.jsonl`, build top-10 markdown table:
   `| File | Lines | fanIn | Score |` with one row per hotspot, ordered by score descending

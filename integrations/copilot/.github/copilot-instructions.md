@@ -599,118 +599,29 @@ If **Greenfield**: skip to Step 2 (Product Definition).
 
 **CRITICAL ORDERING**: Phase 0 (this step) MUST complete before writing any section of architecture.md. The graph provides: (a) exhaustive module list, (b) hotspot-ranked module priority, (c) authoritative proto API surface, (d) mermaid diagrams ready for slot injection, (e) codebase tier for .ai-context.md budget.
 
-### 1. Detect and run graph binary
+### 1. Build the graph snapshot
 
-**Native binary only** (Aether graph): 
+The knowledge-graph engine is `codebase-memory-mcp`, resolved by `scripts/tools/_lib.sh:find_memory_bin` (`DRAFT_MEMORY_BIN` > PATH > `~/.cache/draft/bin` > vendored `bin/<arch>/`). `scripts/install.sh` fetches it; install manually with `scripts/fetch-memory-engine.sh`. Set `DRAFT_MEMORY_DISABLE=1` to opt out.
 
-- First choice: `graph` found on `$PATH` (via `command -v graph`)
-- Second choice: vendored binary under `bin/<arch>/graph` (canonical layout) or legacy `graph/bin/<arch>/graph` where `<arch>` is computed from `uname` to match one of the directories that actually exist (e.g. `darwin-arm64`, `linux-amd64`, `linux-arm64`).
-
-The AI **must** correctly figure out the architecture string so it picks the right pre-copied binary from the directories present under the plugin root (`bin/darwin-arm64/...` etc).
-
-The legacy Node wrapper has been removed. Graceful degradation when no binary is present.
+One command resolves the engine, indexes the repo, and writes the committed snapshot under `draft/graph/`:
 
 ```bash
-GRAPH_BIN=""
-GRAPH_CLANG_BIN=""
-
-# 1. Prefer the canonical verifier (PATH > bundled arch)
-if command -v scripts/tools/verify-graph-binary.sh >/dev/null 2>&1 || \
-   [ -x "./scripts/tools/verify-graph-binary.sh" ]; then
-    VERIFY="./scripts/tools/verify-graph-binary.sh"
-    if REPORT="$($VERIFY --repo . --json 2>/dev/null)"; then
-        GRAPH_BIN=$(echo "$REPORT" | sed -n 's/.*"graph_bin":"\([^"]*\)".*/\1/p')
-        GRAPH_CLANG_BIN=$(echo "$REPORT" | sed -n 's/.*"graph_clang_bin":"\([^"]*\)".*/\1/p' | grep -v '^null$' || true)
-        echo "Graph binary selected via verifier (source=$(echo "$REPORT" | sed -n 's/.*"source":"\([^"]*\)".*/\1/p')): $GRAPH_BIN"
-        [ -n "$GRAPH_CLANG_BIN" ] && echo "  graph-clang companion: $GRAPH_CLANG_BIN (high-fidelity C/C++ enabled)"
-    fi
-fi
-
-# 2. Direct PATH + arch fallback (when verifier not yet available)
-if [ -z "$GRAPH_BIN" ]; then
-    if command -v graph >/dev/null 2>&1; then
-        GRAPH_BIN="$(command -v graph)"
-        echo "Using graph from PATH: $GRAPH_BIN"
-        command -v graph-clang >/dev/null 2>&1 && GRAPH_CLANG_BIN="$(command -v graph-clang)"
-    fi
-fi
-
-if [ -z "$GRAPH_BIN" ]; then
-    # Compute architecture directory name that matches what exists under bin/<arch>/
-    # Supported layout examples: darwin-arm64, linux-amd64, linux-arm64, darwin-x86_64
-    # Canonical layout is bin/<arch>/ (correct); graph/bin/<arch>/ supported for transition
-    os=$(uname -s | tr '[:upper:]' '[:lower:]')
-    machine=$(uname -m)
-    case "$machine" in
-        x86_64|amd64)   arch="amd64" ;;
-        arm64|aarch64)  arch="arm64" ;;
-        *)              arch="$machine" ;;
-    esac
-    ARCH="${os}-${arch}"
-
-    echo "Resolved arch for bundled graph: $ARCH (from uname: $os + $machine)"
-
-    for root in \
-        "$HOME/.cursor/plugins/local/draft" \
-        "$HOME/.claude-plugin/.." \
-        "." \
-        "$HOME/.claude/plugins/draft" \
-        "$HOME/.claude/plugins/local/draft"; do
-        for base in bin graph/bin; do
-            cand="$root/$base/$ARCH/graph"
-            if [ -x "$cand" ]; then
-                GRAPH_BIN="$cand"
-                echo "Using bundled native graph for $ARCH: $GRAPH_BIN (via $base)"
-                clang_cand="$root/$base/$ARCH/graph-clang"
-                [ -x "$clang_cand" ] && GRAPH_CLANG_BIN="$clang_cand"
-                break 2
-            fi
-        done
-    done
-
-    # If the exact ARCH dir didn't exist, try to pick any available arch dir as last resort
-    if [ -z "$GRAPH_BIN" ]; then
-        for root in \
-            "$HOME/.cursor/plugins/local/draft" \
-            "$HOME/.claude-plugin/.." \
-            "." \
-            "$HOME/.claude/plugins/draft"; do
-            for base in bin graph/bin; do
-                if [ -d "$root/$base" ]; then
-                    for d in "$root/$base"/*/; do
-                        [ -d "$d" ] || continue
-                        cand="$d/graph"
-                        if [ -x "$cand" ]; then
-                            GRAPH_BIN="$cand"
-                            ARCH=$(basename "$d")
-                            echo "Falling back to first available bundled graph: $GRAPH_BIN (arch=$ARCH)"
-                            clang_cand="$d/graph-clang"
-                            [ -x "$clang_cand" ] && GRAPH_CLANG_BIN="$clang_cand"
-                            break 3
-                        fi
-                    done
-                fi
-            done
-        done
-    fi
-fi
-
-# Execute
-if [ -n "$GRAPH_BIN" ]; then
-    echo "Running graph build with: $GRAPH_BIN"
-    [ -n "$GRAPH_CLANG_BIN" ] && echo "  (graph-clang: $GRAPH_CLANG_BIN)"
-    "$GRAPH_BIN" --repo . --out draft/graph/ || {
-        echo "WARNING: graph build failed (exit $?) — continuing with manual discovery."
-        GRAPH_BIN=""
-    }
+if scripts/tools/graph-snapshot.sh --repo .; then
+    echo "Graph snapshot written to draft/graph/ (schema.yaml, architecture.json, hotspots.jsonl, *.mermaid)."
 else
-    echo "Graph binary not found — skipping automated graph analysis. Downstream skills degrade gracefully."
+    echo "Graph engine unavailable — skipping automated graph analysis. Downstream skills degrade gracefully."
 fi
 ```
 
-See `core/shared/graph-query.md` and `bin/README.md` for the query contract and binary layout. When a native binary (or `graph-clang`) is chosen, explicit selection messages are printed.
+Optionally record which engine was selected (usage-report contract):
 
-If the build succeeds, `draft/graph/` is populated and later steps consume the always-load artifacts + injection slots exactly as before.
+```bash
+scripts/tools/verify-graph-binary.sh --repo . --json 2>/dev/null || true
+```
+
+See `core/shared/graph-query.md` and `bin/README.md` for the query contract and engine resolution.
+
+If the snapshot succeeds, `draft/graph/` is populated and later steps consume the always-load artifacts + injection slots.
 
 ### 2. If graph build succeeds, load the always-load artifacts
 
@@ -761,34 +672,31 @@ Query for diagram content and write into architecture.md slots using the standar
 
 For Section 4.4 (module-deps slot):
 ```bash
-"$GRAPH_BIN" --repo . --out draft/graph --query --mode mermaid --symbol module-deps
+scripts/tools/mermaid-from-graph.sh --repo . --diagram module-deps
 ```
-Parse JSON response: extract `.mermaid` string and `filtered` flag. Write between the markers:
+The tool emits a ready-to-inject ` ```mermaid ``` ` block (or an empty stub on exit 2). Write between the markers:
 ```
 <!-- GRAPH:module-deps:START -->
-```mermaid
-{diagram content}
-```
-{if filtered: Note: diagram filtered to top edges by weight — N of M total edges shown}
+{mermaid block from the tool}
 <!-- GRAPH:module-deps:END -->
 ```
 
 For Section 20 (hotspots slot):
-Read `draft/graph/hotspots.jsonl`, take top 10 by score, build markdown table:
+Read `draft/graph/hotspots.jsonl` (or run `scripts/tools/hotspot-rank.sh --repo . --top 10`), take the top 10 by fanIn, build a markdown table:
 ```
 <!-- GRAPH:hotspots:START -->
-| File | Lines | fanIn | Score |
-|------|-------|-------|-------|
-| {path} | {lines} | {fanIn} | {score} |
+| Symbol | fanIn |
+|--------|-------|
+| {name} | {fanIn} |
 ...
 <!-- GRAPH:hotspots:END -->
 ```
 
 For Appendix E (proto-map slot):
 ```bash
-"$GRAPH_BIN" --repo . --out draft/graph --query --mode mermaid --symbol proto-map
+scripts/tools/mermaid-from-graph.sh --repo . --diagram proto-map
 ```
-Parse JSON response: extract `.mermaid` string. If no proto files (`stats.services == 0`), write placeholder. Otherwise write:
+The tool emits a ` ```mermaid ``` ` block from detected routes (empty stub if none). Write:
 ```
 <!-- GRAPH:proto-map:START -->
 ```mermaid
@@ -4087,9 +3995,9 @@ For each initialized service with both `draft/architecture.md` AND `draft/graph/
 **A. Read current `architecture.md` into memory.**
 
 **B. Regenerate slot content from graph JSONL:**
-- `GRAPH:module-deps` → run `graph --repo . --out draft/graph --query --mode mermaid --symbol module-deps`
+- `GRAPH:module-deps` → run `scripts/tools/mermaid-from-graph.sh --repo . --diagram module-deps`
   Parse JSON response, extract `.mermaid` string + `filtered` flag + stats
-- `GRAPH:proto-map` → run `graph --repo . --out draft/graph --query --mode mermaid --symbol proto-map`
+- `GRAPH:proto-map` → run `scripts/tools/mermaid-from-graph.sh --repo . --diagram proto-map`
   Parse JSON response, extract `.mermaid` string + stats
 - `GRAPH:hotspots` → read `draft/graph/hotspots.jsonl`, build top-10 markdown table:
   `| File | Lines | fanIn | Score |` with one row per hotspot, ordered by score descending
@@ -5030,7 +4938,7 @@ When `draft/graph/schema.yaml` exists, this skill **must** follow the graph-firs
 1. Load `draft/graph/module-graph.jsonl` for the authoritative module list and inter-module edges.
 2. Load `draft/graph/hotspots.jsonl` to identify candidate modules to split.
 3. Load `draft/graph/modules/<name>.jsonl` on demand for files/symbols inside a candidate module.
-4. Run `graph --query --mode cycles` to enumerate existing cycles before proposing new boundaries.
+4. Run `scripts/tools/cycle-detect.sh --repo .` to enumerate existing cycles before proposing new boundaries.
 
 Filesystem `grep`/`find` for module discovery is only permitted **after** a documented graph miss, using the fallback sentence `Graph returned no match for <X>; falling back to grep.` and recorded in the Graph Usage Report.
 
@@ -6299,7 +6207,7 @@ After a phase passes review, refresh `metadata.json.impact` so future tracks can
 
 2. **Compute downstream blast radius (graph-aware, optional):** If `draft/graph/schema.yaml` exists, for each file in `files_touched` query:
    ```bash
-   graph --repo . --out draft/graph --query --file <path> --mode impact
+   scripts/tools/graph-impact.sh --repo . --file <path>
    ```
    Aggregate across all files: `downstream_files` = total unique downstream files (deduped), `downstream_modules` = union of `affected_modules`, `max_depth` = max across queries, `by_category` = sum of each query's `by_category`. If the graph is absent, leave these fields as zeros / empty arrays — the snapshot still records the directly-touched files.
 
@@ -6813,8 +6721,8 @@ You are generating a pre-deployment verification checklist customized to this pr
 
 When `draft/graph/schema.yaml` exists, this skill **must** follow the graph-first lookup contract in [core/shared/graph-query.md](../../core/shared/graph-query.md) §Mandatory Lookup Contract. Use the graph to validate module boundaries before the deploy:
 
-1. For each file in the deploy diff, run `graph --query --file <path> --mode impact` to enumerate the modules affected — flag any module **not** declared in `hld.md` §Detailed Design as a deployment-scope miss.
-2. Run `graph --query --mode cycles` and `--mode modules` to ensure no fresh cycles were introduced after HLD sign-off.
+1. For each file in the deploy diff, run `scripts/tools/graph-impact.sh --repo . --file <path>` to enumerate the modules affected — flag any module **not** declared in `hld.md` §Detailed Design as a deployment-scope miss.
+2. Run `scripts/tools/cycle-detect.sh --repo .` (and read `draft/graph/architecture.json` for the module overview) to ensure no fresh cycles were introduced after HLD sign-off.
 3. Load `draft/graph/hotspots.jsonl` — any hotspot in the diff escalates the Resiliency row of Phase 0.
 
 Filesystem `grep` is reserved for source-text scans (migration file names, flag-key strings). Module/impact discovery goes through the graph.
@@ -7033,7 +6941,7 @@ ln -sf deploy-checklist-${TIMESTAMP}.md draft/deploy-checklist-latest.md
 
 Before saving the checklist file, internally verify and report:
 
-1. **Graph files queried** — JSONL files loaded plus any live `graph --query` invocations (`impact`, `cycles`, `modules`).
+1. **Graph files queried** — JSONL files loaded plus any live graph query-tool invocations (`impact`, `cycles`, `modules`).
 2. **Layer 1 files deliberately skipped** — list any context sections skipped.
 3. **Filesystem grep fallback justification** — for every `grep`/`find` run, name the concept it searched for.
 
@@ -8136,8 +8044,8 @@ You are conducting a code review using Draft's Context-Driven Development method
 When `draft/graph/schema.yaml` exists, this skill **must** follow the graph-first lookup contract in [core/shared/graph-query.md](../../core/shared/graph-query.md) §Mandatory Lookup Contract. Stage 1 (Automated Validation) **starts from the graph**:
 
 1. Run blast-radius assessment from `draft/graph/hotspots.jsonl` and `draft/graph/module-graph.jsonl` (see Stage 1).
-2. For each changed file with non-trivial diff size, run `graph --query --file <path> --mode impact` to obtain the affected module set deterministically.
-3. For each public symbol modified, run `graph --query --symbol <name> --mode callers` to enumerate downstream callers before judging breaking-change severity.
+2. For each changed file with non-trivial diff size, run `scripts/tools/graph-impact.sh --repo . --file <path>` to obtain the affected module set deterministically.
+3. For each public symbol modified, run `scripts/tools/graph-callers.sh --repo . --symbol <name>` to enumerate downstream callers before judging breaking-change severity.
 
 Filesystem `grep` is reserved for source-text scans (string literals, log messages, regex matches in code) — not for discovering modules, files, or callers when the graph can answer.
 
@@ -9199,7 +9107,7 @@ If Jira ticket linked, sync via `core/shared/jira-sync.md`:
 
 Before printing the final verdict, internally verify and report:
 
-1. **Graph files queried** — which JSONL files were loaded (e.g. `module-graph.jsonl, hotspots.jsonl, call-index.jsonl`) plus any live `graph --query` invocations (impact, callers, cycles).
+1. **Graph files queried** — which JSONL files were loaded (e.g. `architecture.json, hotspots.jsonl`) plus any live graph query-tool invocations (impact, callers, cycles).
 2. **Layer 1 files deliberately skipped** — list any context sections skipped as irrelevant to the diff under review.
 3. **Filesystem grep fallback justification** — for every `grep`/`find` run, state the concept it searched for. Source-text scans (string literals, regex matches in code) are exempt — they are not symbol/file discovery.
 
@@ -11425,7 +11333,7 @@ You are performing a lightweight, ad-hoc code review. This is the fast alternati
 When `draft/graph/schema.yaml` exists, this skill **must** follow the graph-first lookup contract in [core/shared/graph-query.md](../../core/shared/graph-query.md) §Mandatory Lookup Contract. Quick-review keeps the graph load light:
 
 1. Always check `draft/graph/hotspots.jsonl` for every changed file (Step 2 blast-radius pre-check below).
-2. If a finding spans more than one file, run `graph --query --symbol <name> --mode callers` to enumerate the call sites before claiming "no other usages".
+2. If a finding spans more than one file, run `scripts/tools/graph-callers.sh --repo . --symbol <name>` to enumerate the call sites before claiming "no other usages".
 
 Filesystem `grep` is reserved for source-text scans (literal strings, regex patterns). Symbol and caller discovery go through the graph.
 
@@ -11603,7 +11511,7 @@ Include the report header table immediately after frontmatter:
 
 Before printing the review report, internally verify and report:
 
-1. **Graph files queried** — JSONL files loaded plus any live `graph --query` invocations.
+1. **Graph files queried** — JSONL files loaded plus any live graph query-tool invocations.
 2. **Layer 1 files deliberately skipped** — list any context sections skipped.
 3. **Filesystem grep fallback justification** — for every `grep`/`find` run, state the concept it searched for.
 
@@ -11641,8 +11549,8 @@ Perform an exhaustive end-to-end lifecycle review of a service, component, or mo
 When `draft/graph/schema.yaml` exists, this skill **must** follow the graph-first lookup contract in [core/shared/graph-query.md](../../core/shared/graph-query.md) §Mandatory Lookup Contract. Deep-review uses the graph to **narrow review scope** — a key 30–50% scope reduction:
 
 1. Load `draft/graph/modules/<module>.jsonl` for the authoritative file list of the audited module — do not enumerate via `find`.
-2. Run `graph --query --file <each-changed-file> --mode impact` per file in the diff (or per file in the module if no diff) to obtain the affected module set deterministically.
-3. Run `graph --query --mode cycles` and flag any cycle that includes the audited module as Architecture Resilience finding.
+2. Run `scripts/tools/graph-impact.sh --repo . --file <each-changed-file>` per file in the diff (or per file in the module if no diff) to obtain the affected module set deterministically.
+3. Run `scripts/tools/cycle-detect.sh --repo .` and flag any cycle that includes the audited module as Architecture Resilience finding.
 4. Cross-check `draft/graph/hotspots.jsonl` to identify high-fanIn files inside the module — these get deeper inspection.
 
 Filesystem `grep` is reserved for source-text scans (API contract strings, secret patterns, log message audits). Module enumeration and caller tracing go through the graph.
@@ -11917,7 +11825,7 @@ After deep-review audit completion:
 
 Before printing the final report, internally verify and report:
 
-1. **Graph files queried** — JSONL files loaded plus any live `graph --query` invocations (especially `impact` per file in scope).
+1. **Graph files queried** — JSONL files loaded plus any live graph query-tool invocations (especially `impact` per file in scope).
 2. **Layer 1 files deliberately skipped** — list any context sections skipped.
 3. **Filesystem grep fallback justification** — for every `grep`/`find` run, name the concept it searched for. Source-text scans for API contract strings, secrets, or log audits are exempt.
 
@@ -12617,7 +12525,7 @@ This creates a **continuous improvement loop**:
 
 Before printing the completion summary, internally verify and report:
 
-1. **Graph files queried** — JSONL files loaded plus any live `graph --query` invocations.
+1. **Graph files queried** — JSONL files loaded plus any live graph query-tool invocations.
 2. **Layer 1 files deliberately skipped** — list any context sections skipped.
 3. **Filesystem find/grep fallback justification** — for every `find`/`grep` run for source discovery, state which languages or extensions were not covered by the graph indexes (e.g. Ruby without ctags).
 
@@ -13014,8 +12922,8 @@ You are conducting a structured debugging session following systematic investiga
 When `draft/graph/schema.yaml` exists, this skill **must** follow the graph-first lookup contract in [core/shared/graph-query.md](../../core/shared/graph-query.md) §Mandatory Lookup Contract. During Steps 3–4 (Isolate, Diagnose):
 
 1. Locate the suspect file's module via `draft/graph/module-graph.jsonl` before tracing data flow.
-2. Use `graph --query --symbol <fn> --mode callers` to enumerate call sites of suspect functions — not `grep`.
-3. Use `graph --query --file <path> --mode impact` to size the blast radius before proposing a fix.
+2. Use `scripts/tools/graph-callers.sh --repo . --symbol <fn>` to enumerate call sites of suspect functions — not `grep`.
+3. Use `scripts/tools/graph-impact.sh --repo . --file <path>` to size the blast radius before proposing a fix.
 4. Cross-check `draft/graph/hotspots.jsonl` to know whether the file is high-fanIn (any fix needs extra caution).
 
 Filesystem `grep` is reserved for source-text scans (literal error strings, stack-trace symbols when the graph misses). Use the fallback sentence on graph miss.
@@ -13064,7 +12972,7 @@ Key context for debugging:
 - `.ai-context.md` — Module boundaries, data flows, invariants (crucial for tracing)
 - `tech-stack.md` — Language-specific debugging tools and techniques
 - `guardrails.md` — Known anti-patterns that may be causing the issue
-- `draft/graph/` (MANDATORY when present) — Load `module-graph.jsonl` for dependency context, `hotspots.jsonl` for complexity awareness, and `modules/<module>.jsonl` for the suspect module. Use `graph --query --symbol <fn> --mode callers` to find all callers, and `--mode impact` to size blast radius before any fix. See [core/shared/graph-query.md](../../core/shared/graph-query.md).
+- `draft/graph/` (MANDATORY when present) — Load `architecture.json` for dependency/module context and `hotspots.jsonl` for complexity awareness. Use `scripts/tools/graph-callers.sh --repo . --symbol <fn>` to find all callers, and `scripts/tools/graph-impact.sh --repo . --file <path>` to size blast radius before any fix. See [core/shared/graph-query.md](../../core/shared/graph-query.md).
 
 ## Step 1: Parse Arguments
 
@@ -13176,7 +13084,7 @@ ln -sf debug-report-${TIMESTAMP}.md draft/debug-report-latest.md
 
 Before printing the debug report, internally verify and report:
 
-1. **Graph files queried** — JSONL files loaded plus any live `graph --query` invocations.
+1. **Graph files queried** — JSONL files loaded plus any live graph query-tool invocations.
 2. **Layer 1 files deliberately skipped** — list any context sections skipped.
 3. **Filesystem grep fallback justification** — for every `grep`/`find` run, name the concept it searched for.
 
@@ -13399,8 +13307,8 @@ When `draft/graph/schema.yaml` exists, this skill **must** follow the graph-firs
 
 1. Load `draft/graph/hotspots.jsonl` — **rank candidates by `fanIn × complexity`** to surface high-leverage debt first.
 2. Load `draft/graph/module-graph.jsonl` — flag debt in modules involved in cycles as higher priority.
-3. Run `graph --query --mode cycles` to enumerate dependency cycles — every cycle is a candidate architecture-debt entry.
-4. For each catalogued finding, run `graph --query --file <path> --mode impact` so the remediation plan includes blast-radius.
+3. Run `scripts/tools/cycle-detect.sh --repo .` to enumerate dependency cycles — every cycle is a candidate architecture-debt entry.
+4. For each catalogued finding, run `scripts/tools/graph-impact.sh --repo . --file <path>` so the remediation plan includes blast-radius.
 
 Filesystem `grep` (e.g. `scan-markers.sh`) is still primary for TODO/FIXME marker discovery — markers are source-text, not graph-derived. The graph governs **prioritization**, the marker scan governs **discovery**.
 
@@ -13678,7 +13586,7 @@ Rules:
 
 Before printing the final debt report, internally verify and report:
 
-1. **Graph files queried** — JSONL files loaded plus any live `graph --query` invocations (especially `cycles` and `impact`).
+1. **Graph files queried** — JSONL files loaded plus any live graph query-tool invocations (especially `cycles` and `impact`).
 2. **Layer 1 files deliberately skipped** — list any context sections skipped as irrelevant to the categories scanned.
 3. **Filesystem grep fallback justification** — for every `grep`/`find` run beyond `scan-markers.sh`, name the concept it searched for.
 
@@ -16522,32 +16430,24 @@ If `draft/graph/schema.yaml` exists, the project has automated graph analysis da
 
 | File | Purpose | Content |
 |------|---------|---------|
-| `draft/graph/schema.yaml` | Graph metadata, module list, stats | YAML, ~50 lines |
-| `draft/graph/module-graph.jsonl` | Module nodes + inter-module dependency edges with weights | JSONL, one record per line |
-| `draft/graph/hotspots.jsonl` | Files ranked by complexity score (lines + fanIn * 50). Includes C++, Go, and Python files. Go/Python files have fanIn=0 (include-graph fan-in only applies to C++). | JSONL |
-| `draft/graph/proto-index.jsonl` | All proto services, RPCs, messages, enums | JSONL |
+| `draft/graph/schema.yaml` | Snapshot metadata (engine, project, node/edge counts) | YAML, ~15 lines |
+| `draft/graph/architecture.json` | Node labels, edge types, languages, packages (fan-in/out), entry points, routes, hotspots | JSON |
+| `draft/graph/hotspots.jsonl` | Fan-in-ranked symbols, one object per line: `{id, name, fanIn}` | JSONL |
 
-Note: `.ai-context.md` now embeds a condensed graph summary (`GRAPH:MODULES`, `GRAPH:HOTSPOTS`, `GRAPH:CYCLES`) for first-pass structural ground truth. The full JSONL files in Layer 1.5 remain authoritative for deep queries.
+Note: `.ai-context.md` embeds a condensed graph summary (`GRAPH:MODULES`, `GRAPH:HOTSPOTS`, `GRAPH:CYCLES`) for first-pass structural ground truth. `architecture.json` is authoritative for deep structure.
 
-Note: The canonical embedded mermaid diagrams are in architecture.md injection slots (`<!-- GRAPH:module-deps:START/END -->`, `<!-- GRAPH:proto-map:START/END -->`), refreshed by `draft:index`. The static `.mermaid` files are build artifacts — prefer the injection slots or `graph --query --mode mermaid` for current data.
+Note: The canonical embedded mermaid diagrams are in architecture.md injection slots (`<!-- GRAPH:module-deps:START/END -->`, `<!-- GRAPH:proto-map:START/END -->`), refreshed by `draft:index`. For current data, regenerate via `scripts/tools/mermaid-from-graph.sh`.
 
-**Language-specific files** (load when task involves that language):
+**Live structural queries** (run on demand — no per-language index files; the engine's model is unified):
 
-| File | Load When... |
+| Tool | Use When... |
 |------|-------------|
-| `draft/graph/go-index.jsonl` | Task modifies Go files or works in a Go-heavy module |
-| `draft/graph/python-index.jsonl` | Task modifies Python files |
-| `draft/graph/ts-index.jsonl` | Task modifies TypeScript or JavaScript files |
-| `draft/graph/c-index.jsonl` | Task modifies C or C++ files (symbol-level context; supplement with include-graph data) |
-| `draft/graph/call-index.jsonl` | Tracing call chains, impact analysis, debugging call paths across functions |
+| `scripts/tools/graph-callers.sh --symbol <name>` | Enumerating callers of a function |
+| `scripts/tools/graph-impact.sh --file <path>` / `--symbol <name>` | Sizing blast radius before a change |
+| `scripts/tools/cycle-detect.sh` | Checking for call cycles |
+| `scripts/tools/hotspot-rank.sh` | Fan-in ranking (live) |
 
-**Per-module files** (load on demand):
-
-| File | Load When... |
-|------|-------------|
-| `draft/graph/modules/<name>.jsonl` | Task modifies files in that module, or debugging/reviewing that module |
-
-Load at most 2-3 module files per task to stay within token budget. See `core/shared/graph-query.md` for live query subroutines.
+See `core/shared/graph-query.md` for the full query contract.
 
 **Fallback**: If `draft/graph/` does not exist, skip — no degradation.
 
@@ -17590,7 +17490,7 @@ Referenced by: `draft init`, `draft implement`, `draft bughunt`, `draft review`,
 
 Any code-touching skill that needs to discover files, modules, symbols, callers, or blast-radius **MUST** follow this lookup order whenever `draft/graph/schema.yaml` exists:
 
-1. **Graph artifacts first** — `module-graph.jsonl`, `hotspots.jsonl`, `modules/<name>.jsonl`, `proto-index.jsonl`, `{go,python,ts,c,call}-index.jsonl`.
+1. **Graph first** — the committed snapshot (`architecture.json`, `hotspots.jsonl`) and the live query tools (`scripts/tools/graph-callers.sh`, `graph-impact.sh`, `cycle-detect.sh`, `hotspot-rank.sh`).
 2. **Generated context second** — `draft/.ai-context.md`, relevant `draft/architecture.md` slices, track-level `hld.md`/`lld.md`.
 3. **Source file reads third** — narrow via tiers 1–2, then **Read** the candidate files. Reading is **not optional**: see §Ground-Truth Discipline below.
 4. **Filesystem `grep`/`find`/`rg` last** — only after an explicit graph miss.
@@ -17635,10 +17535,10 @@ A single "no" / "list" answer is a halt — fix and re-check before output.
 
 Use this recipe whenever the user names a concept, feature, or domain term ("in-memory shuffle", "auth flow", "ingest pipeline") and you need to locate the implementing files. **Run it before any filesystem search.**
 
-1. **Concept → modules** — `grep` the concept token against `draft/graph/module-graph.jsonl` (`name`, `description` fields) and `draft/.ai-context.md` (module headings). Record the candidate module list.
-2. **Modules → files/symbols** — for each candidate module, load `draft/graph/modules/<name>.jsonl`. Enumerate `file`, `*-func`, `*-class`, `ctags-sym` records. This is the authoritative file list for the module.
-3. **Modules → risk ranking** — cross-reference `draft/graph/hotspots.jsonl`. High-fanIn files in the candidate modules are the most likely entry points for impact.
-4. **Modules → public API** — for API-shaped concepts, consult `draft/graph/proto-index.jsonl` to find RPCs/services whose names or descriptions match.
+1. **Concept → modules** — `grep` the concept token against `draft/graph/architecture.json` (`.packages[].name`) and `draft/.ai-context.md` (module headings). Record the candidate module list.
+2. **Concept → symbols/callers** — for a named function, run `scripts/tools/graph-callers.sh --repo . --symbol <name>` to find call sites, and `scripts/tools/graph-impact.sh --repo . --symbol <name>` for transitive dependents. These are the authoritative structural answers.
+3. **Modules → risk ranking** — cross-reference `draft/graph/hotspots.jsonl` (or `scripts/tools/hotspot-rank.sh`). High-fanIn symbols are the most likely entry points for impact.
+4. **Concept → public API** — for API-shaped concepts, consult `architecture.json` `.routes` (detected HTTP/gRPC/GraphQL routes) for matching service surface.
 5. **Graph miss → grep fallback** — only if steps 1–4 return nothing relevant, emit the fallback sentence and use `grep`/`find`. Narrow the search by file extension and exclude `node_modules`, `vendor`, `dist`, `build`, `.git`.
 
 ## Graph Usage Report (Mandatory Footer)
@@ -17648,7 +17548,7 @@ Every code-touching skill output MUST end with this footer block. The lint check
 ```md
 ## Graph Usage Report
 
-- Graph files queried: <comma-separated list, e.g. `module-graph.jsonl, hotspots.jsonl, modules/scribe.jsonl` — or `NONE` with justification below>
+- Graph files queried: <comma-separated list, e.g. `architecture.json, hotspots.jsonl` and/or query tools like `graph-callers.sh` — or `NONE` with justification below>
 - Modules identified via graph: <comma-separated module names, or `none`>
 - Files identified via graph: <integer count>
 - Filesystem grep fallbacks: <list of `<pattern>` searches with one-line justification each, or `none`>
@@ -17663,7 +17563,7 @@ Skills that emit telemetry via [emit-skill-metrics.sh](../../scripts/tools/emit-
 
 | Field | Type | Description |
 |---|---|---|
-| `graph_queries` | int | Number of graph artifacts loaded plus live `graph --query` invocations during the run |
+| `graph_queries` | int | Number of graph artifacts loaded plus live graph query-tool invocations during the run |
 | `fallback_grep_count` | int | Number of `grep`/`find` fallbacks invoked after an explicit graph miss |
 
 These fields are appended to `~/.draft/metrics.jsonl` along with the existing skill fields (`skill`, `track_id`, etc.) — no new state file is needed. Run `tail -100 ~/.draft/metrics.jsonl | jq -s 'group_by(.skill) | map({skill: .[0].skill, runs: length, avg_graph_queries: ([.[].graph_queries] | add / length), avg_grep_fallbacks: ([.[].fallback_grep_count] | add / length)})'` to monitor adherence per skill.
@@ -17698,222 +17598,125 @@ ls draft/graph/schema.yaml 2>/dev/null
 
 If absent, **skip all graph operations silently**. Graph enriches analysis — it never gates it. All skills must work identically without graph data.
 
-## Graph Artifacts
+## Engine + snapshot model
 
-When `draft/graph/` exists, it contains:
+The graph is produced by the **codebase-memory-mcp** engine (a single binary; see [bin/README.md](../../bin/README.md)). There are two ways skills consume it:
+
+1. **Live queries** (preferred when the engine is resolvable) — the shell tools under `scripts/tools/` drive the engine on demand (it auto-indexes into its own cache). No committed files required.
+2. **Committed snapshot** (`draft/graph/`) — a small, derived, PR-reviewable snapshot written by `scripts/tools/graph-snapshot.sh`. It exists for reviewability and for the Copilot/Gemini integrations, which cannot run the engine but can read committed files. Git remains the source of truth.
+
+When `draft/graph/` exists, the snapshot contains:
 
 | File | Load | Content |
 |------|------|---------|
-| `schema.yaml` | Always | Metadata, stats, module list with file counts |
-| `module-graph.jsonl` | Always | Module nodes + weighted inter-module dependency edges |
-| `hotspots.jsonl` | Always | Files ranked by complexity score (lines + fanIn * 50) |
-| `proto-index.jsonl` | Always | All proto services, RPCs, messages, enums |
-| `go-index.jsonl` | When working in Go | Go functions, types, imports, `go-call` edges |
-| `python-index.jsonl` | When working in Python | Python functions, classes, imports, `py-call` edges |
-| `ts-index.jsonl` | When working in TS/JS | TypeScript/JS functions, classes, imports, `ts-call` edges |
-| `c-index.jsonl` | When working in C/C++ | C/C++ functions, types, `c-call` edges |
-| `call-index.jsonl` | When tracing call paths | All intra-file call edges across all languages |
-| `hashes.json` | Never (build artifact) | Per-module SHA-256 hashes for `--incremental` builds |
-| `modules/<name>.jsonl` | On demand | Per-module file graph: file nodes, include edges, cross-module edges, all language symbols + call edges |
+| `schema.yaml` | Always | Engine + project metadata, node/edge counts, artifact list. Its presence **gates** graph use (see Pre-Check). |
+| `architecture.json` | Always | `get_architecture(all)` output: node labels, edge types, languages, packages (with fan-in/out), entry points, routes, hotspots. |
+| `hotspots.jsonl` | Always | Fan-in-ranked symbols, one JSON object per line: `{id, name, fanIn}`. |
+| `module-deps.mermaid` | Diagram injection | File co-change coupling diagram (`FILE_CHANGES_WITH`). |
+| `proto-map.mermaid` | Diagram injection | Detected service-route diagram (`Route` nodes). |
 
-### Per-Module JSONL Record Schema
+The engine uses a **unified, language-agnostic** node model — `Function`, `Method`, `Class`, `Module`, `File`, `Folder`, `Route`, `Section`, `Variable` (language is inferred from file extension) — and edges `CALLS`, `DEFINES`, `CONTAINS_FILE`, `IMPORTS`, `HTTP_CALLS`, `FILE_CHANGES_WITH`, `SEMANTICALLY_RELATED`, `SIMILAR_TO`. There are **no** per-language index files and no `ctags-sym` fallback; that detail is served by live queries against the unified model.
 
-All records in `modules/<name>.jsonl` have a `kind` field. Defined kinds:
+**Always-load files** are compact and should be read during context loading for any task that touches code structure.
 
-| kind | Fields | Description |
-|----------------|--------|-------------|
-| `module` | `name, sizeKB, files` | Module metadata header (first record) |
-| `file` | `id, lines, module, sizeKB` | C++ source file node |
-| `include` | `source, target` | Intra-module C++ include edge |
-| `cross-include`| `source, target` | Cross-module C++ include edge |
-| `go-func` | `name, receiver, qualified, file, module, package, line, lines` | Go function/method (`receiver=null` for top-level) |
-| `go-type` | `name, file, module, package, line, kind` | Go type (kind: struct/interface/alias/type) |
-| `go-call` | `from, to, fromFile, module, line, resolved: false, confidence` | Go intra-file call edge (tree-sitter only). `confidence: direct` for bare identifier callees, `inferred` for selector calls (`obj.Foo`) where the receiver is collapsed away. |
-| `py-func` | `name, receiver, file, module, line, lines` | Python function/method (receiver=null for top-level) |
-| `py-class` | `name, bases[], file, module, line` | Python class definition |
-| `py-call` | `from, to, fromFile, module, line, resolved: false, confidence` | Python intra-file call edge (tree-sitter only). `confidence: direct` for bare identifier callees, `inferred` for attribute calls (`obj.foo`). |
-| `ts-func` | `name, file, module, line, lines, exported, class, async` | TypeScript/JS function, method, or arrow function |
-| `ts-class` | `name, file, module, line, lines, exported, kind` | TS/JS class/interface/type (kind: class/interface/type) |
-| `ts-call` | `from, to, fromFile, module, line, resolved: false, confidence` | TS/JS intra-file call edge (tree-sitter only). `confidence: direct` for bare identifier callees, `inferred` for member calls (`obj.foo`). |
-| `c-func` | `name, file, module, line, lines, language, namespace` | C/C++ function definition |
-| `c-type` | `name, file, module, line, kind, language` | C/C++ struct/class/enum definition |
-| `c-call` | `from, to, fromFile, module, line, resolved: false, confidence` | C/C++ intra-file call edge (tree-sitter only). `confidence: direct` for bare identifier or qualified (`Foo::bar`) callees, `inferred` for field calls (`obj.foo` / `ptr->foo`). |
-| `ctags-sym` | `name, file, module, line, ctagsKind, language` | Symbol from universal-ctags (Java, Rust, Ruby, etc.) |
+## Query Tools
 
-**Call edge notes**: All `*-call` records have `resolved: false` — callee names are syntactic (as written in source), with no type resolution. The same logical call may appear multiple times if the same function calls the target repeatedly. Call edges are **intra-file only** — cross-file resolution requires type information not available in tree-sitter.
+Live queries go through the shell tools under `scripts/tools/`, which drive the engine and shape results into stable JSON. Each tool resolves the engine (see Finding the Engine), indexes the repo on demand, and emits `source: "memory-graph"` on success or `source: "unavailable"` (non-zero exit) when the engine cannot be resolved. Set `DRAFT_MEMORY_DISABLE=1` to force the engine off; all tools then degrade gracefully.
 
-**Confidence field**: Each `*-call` record carries a `confidence` value:
-- `direct` — callee is a bare identifier (e.g. `foo()` in Go/Python/TS/C, or `Foo::bar()` in C++). Higher signal: the name appeared as written without receiver collapsing.
-- `inferred` — callee is the trailing name of a member/selector/attribute/field expression (`obj.foo()`, `ptr->foo()`, `bar.foo()`). Receivers with different types collapse to the same name, so name collisions across distinct functions are likely. Treat as a candidate set, not an authoritative edge.
-
-Skills consuming call edges (`bughunt`, `review`, `debug`) should weight `direct` edges more strongly and treat `inferred` edges as exploratory leads rather than confirmed call paths.
-
-**Always-load files** are compact and should be read during context loading for any task that touches code structure. **Per-module files** are loaded only when working within a specific module — limit to 2-3 module files per task.
-
-## Query Modes
-
-The graph binary supports live queries against the built graph. Use these when you need precise answers beyond what the always-load files provide.
-
-### Callers — who depends on this file or calls this function?
-
-**File callers** (path with `/` or extension — uses include-edge graph):
+### Callers — who calls this function?
 
 ```bash
-graph --repo . --out draft/graph --query --file auth/auth.h --mode callers
+scripts/tools/graph-callers.sh --repo . --symbol <name>
 ```
 
-Output: `{target, callers[{file, module, type}], summary{intra, cross, total}}`
+Output: `{symbol, callers[{name, file}], source}`. Use when enumerating call sites before claiming "no other usages" or judging breaking-change severity.
 
-Use when: tracing who will be affected by changing a header or interface file.
-
-**Function callers** (bare symbol name — uses call-index.jsonl):
+### Impact — blast radius of a file or symbol
 
 ```bash
-graph --repo . --out draft/graph --query --symbol buildGoIndex --mode callers
+scripts/tools/graph-impact.sh --repo . --file <path>      # changed-file impact (working-tree diff)
+scripts/tools/graph-impact.sh --repo . --symbol <name>    # transitive callers of a function
 ```
 
-Output: `{target, callers[{func, file, module, line, kind}], total, by_module{}, note}`
+Output: `{target, kind, impacted[{name, file, hop}], source}`. Use when sizing risk before modifying a file or symbol, especially high-fan-in hotspots.
 
-Use when: finding all functions that call a specific function, across all languages. Requires call-index.jsonl (generated during full graph build with tree-sitter enabled). Results are intra-file only — cross-file callers are not resolved.
-
-### Impact — blast radius of changing a file
+### Hotspots — fan-in ranking
 
 ```bash
-graph --repo . --out draft/graph --query --file <path> --mode impact
+scripts/tools/hotspot-rank.sh --repo . [--top N]
 ```
 
-Output: `{target, impact{files, modules, affected_modules[], by_category{code,test,doc,config}, files_by_depth{}, files_by_category{}}, warning}`
+Output: `{hotspots[{id, name, fanIn}], source}` (server-computed by the engine).
 
-Each impacted file is classified as `code | test | doc | config` (matching `scripts/tools/classify-files.sh`). `by_category` gives counts; `files_by_category` gives the file lists. Use the test bucket to size regression work, the doc bucket to flag stale references, and the config bucket to spot deployment-time risk.
-
-Use when: assessing risk before modifying a file, especially hotspot files with high fanIn.
-
-### Hotspots — complexity ranking
+### Cycles — call-cycle detection
 
 ```bash
-graph --repo . --out draft/graph --query --mode hotspots
+scripts/tools/cycle-detect.sh --repo .
 ```
 
-Output: `{hotspots[{id, module, lines, fanIn}]}`
+Output: `{cycles[[a,b],[a,b,c]], source}` — fixed-length 2- and 3-node `CALLS` cycles (mutual recursion / tight coupling).
 
-Optionally filter to a module: `--symbol <module_name>`
+### Modules — dependency overview
 
-### Modules — dependency overview with cycles
+Read `draft/graph/architecture.json` (`.packages` for module fan-in/out, `.node_labels`/`.edge_types` for shape, `.routes` for service surface), or regenerate it with `scripts/tools/graph-snapshot.sh --repo .`.
+
+### Mermaid — diagram text
 
 ```bash
-graph --repo . --out draft/graph --query --mode modules
+scripts/tools/mermaid-from-graph.sh --repo . --diagram module-deps   # co-change coupling
+scripts/tools/mermaid-from-graph.sh --repo . --diagram proto-map     # detected routes
 ```
 
-Output: `{modules[], dependencies[], cycles[], summary{modules, edges, cycles, hub_modules[]}}`
+Emits a ready-to-inject ` ```mermaid ``` ` block, or an empty stub (exit 2) when the engine is unavailable. The committed `draft/graph/*.mermaid` snapshots are written by `graph-snapshot.sh`.
 
-### Cycles — circular dependency detection
+### Building / refreshing the snapshot
 
 ```bash
-graph --repo . --out draft/graph --query --mode cycles
+scripts/tools/graph-snapshot.sh --repo .
 ```
 
-Output: `{cycles[], count, warning}`
+Writes the committed `draft/graph/` snapshot (`schema.yaml`, `architecture.json`, `hotspots.jsonl`, `*.mermaid`). Run during `draft init` and `draft index`, or whenever the reviewable graph state should be refreshed.
 
-### Mermaid — generate diagram text from existing graph
+## Finding the Engine (Resolution + Usage Report)
+
+The engine is the `codebase-memory-mcp` binary. Resolution order (implemented by `scripts/tools/_lib.sh:find_memory_bin`):
+
+1. `DRAFT_MEMORY_BIN` — explicit override (pinned installs, testing).
+2. `codebase-memory-mcp` on `$PATH` — global/dev installs.
+3. `~/.cache/draft/bin/codebase-memory-mcp` — the Draft-managed location (`scripts/fetch-memory-engine.sh` installs it here; `scripts/install.sh` runs that on install).
+4. `bin/<os>-<arch>/codebase-memory-mcp` under the plugin/repo root — optional vendored fallback (air-gapped only).
+
+`DRAFT_MEMORY_DISABLE=1` forces the engine off. There is **no** legacy `graph`/`graph-clang` fallback.
+
+The canonical verifier is `scripts/tools/verify-graph-binary.sh` (`--json --verbose --strict`). It resolves and liveness-checks the engine and, in a `draft/` context, writes the usage-report side-effect:
 
 ```bash
-# Both diagrams as markdown-ready fenced blocks (raw text output)
-graph --repo . --out draft/graph --query --mode mermaid
-
-# Specific diagram as JSON with metadata
-graph --repo . --out draft/graph --query --mode mermaid --symbol module-deps
-graph --repo . --out draft/graph --query --mode mermaid --symbol proto-map
+ENGINE_INFO="$(scripts/tools/verify-graph-binary.sh --repo . --json 2>/dev/null || true)"
+# {"status":"ok","engine_bin":"...","source":"managed|path|bundled:<arch>|override","arch":"..."}
 ```
-
-**Output format split** — important for skills consuming this mode:
-
-| Invocation | Output format | Fields |
-|---|---|---|
-| No `--symbol` | Raw Markdown text | Fenced ` ```mermaid ``` ` blocks ready for injection into `.ai-context.md` |
-| `--symbol module-deps` | JSON | `{ mermaid: string, filtered: boolean, stats: { nodes, edges, totalNodes, totalEdges } }` |
-| `--symbol proto-map` | JSON | `{ mermaid: string, stats: { services, rpcs, modules } }` |
-
-Use the no-`--symbol` form for direct injection. Use `--symbol` forms when you need metadata (whether the diagram was filtered, edge counts) alongside the diagram text.
-
-Note: `draft/graph/module-deps.mermaid` and `draft/graph/proto-map.mermaid` are static files written only during a full graph build (`graph --repo`). Running `--query --mode mermaid` reads the current JSONL and is always current — prefer it over the static files.
-
-## Finding the Graph Binary (Binary Preference + Usage Report)
-
-**Preference order** (native first for performance/fidelity):
-1. `graph` (and `graph-clang`) on `$PATH` — allows system-wide or user native installs to take precedence.
-2. Bundled arch-specific native under the Draft plugin tree: `bin/<arch>/graph` (and `graph-clang` — canonical correct layout), where `<arch>` is `linux-amd64`, `darwin-arm64`, etc. (resolved from `uname`).
-3. Legacy locations: `graph/bin/<arch>/graph` or flat `graph/bin/graph` (transition support only).
-
-The canonical resolver is `scripts/tools/verify-graph-binary.sh` (see its `--json --verbose --strict` modes). It:
-- Implements the exact order above.
-- Probes liveness (`--help` / `--version`).
-- Locates the optional `graph-clang` companion using sibling/PATH/bundled rules.
-- On success, optionally writes `draft/.graph-binary-report.json` — the **usage report contract** consumed by status, hygiene, and `graph-usage-report` tooling for auditing which binary (and clang) was active during an init/refresh.
-
-Skills and wrappers should prefer:
-```bash
-# Preferred (new skeleton)
-GRAPH_INFO="$(scripts/tools/verify-graph-binary.sh --repo . --json 2>/dev/null || true)"
-GRAPH_BIN="$(echo "$GRAPH_INFO" | grep -o '"graph_bin":"[^"]*"' | cut -d'"' -f4 || true)"
-# Fallback to legacy inline detection only if verify script absent (keeps all prior behavior working)
-```
-
-When the verify script (or equivalent) is unavailable, the legacy detection still functions unchanged for backward compatibility.
-
-```bash
-# Legacy inline detection (still supported; PATH now checked early)
-GRAPH_BIN=""
-# 1. PATH (native preference)
-if [ -z "$GRAPH_BIN" ]; then
-    GRAPH_BIN="$(command -v graph 2>/dev/null || true)"
-fi
-# 2. Bundled arch-specific (bin/<arch>/graph canonical, or legacy graph/bin/<arch>/graph) via breadcrumb or known paths
-if [ -z "$GRAPH_BIN" ]; then
-    # ... (arch resolution + $PLUGIN_ROOT/bin/$ARCH/graph or graph/bin/...) ...
-fi
-# 3. Legacy graph/bin/graph (Node era flat wrapper)
-if [ -z "$GRAPH_BIN" ]; then
-    # breadcrumb + common paths to graph/bin/graph (Node) or transitional flat locations
-fi
-```
-
-`install.sh` writes the `.draft-install-path` breadcrumb so bundled resolution works after marketplace install.
-
-See `bin/README.md` for the exact (canonical bin/<arch>) layout, Git LFS requirements, and placeholder rules. Legacy Node wrapper references remain for historical context.
 
 ## Usage Report Contract
 
-After successful detection:
-- `draft/.graph-binary-report.json` contains: `detected_at`, `graph_bin`, `graph_clang_bin`, `source` ("path"|"bundled:<arch>"|"legacy"), `arch`, `status`.
-- This enables later tools (e.g. `check-graph-usage-report.sh`) to surface "you are using the fast native binary on darwin-arm64 with graph-clang" or warn on legacy-only in large C++ codebases.
-- The report is a derived artifact (safe to gitignore or prune); it is regenerated on each graph-using command that calls the verifier.
+After successful detection, `draft/.graph-binary-report.json` contains: `detected_at`, `engine_bin`, `source` (`path` | `managed` | `bundled:<arch>` | `override`), `arch`, `status`. It is a derived artifact (safe to prune), regenerated by each graph-using command that calls the verifier.
 
-## Building the Graph
+## Building the Snapshot
 
-Run during `draft:init` or manually:
+Run during `draft:init` / `draft:index`, or manually:
 
 ```bash
-"$GRAPH_BIN" --repo . --out draft/graph/
+scripts/tools/graph-snapshot.sh --repo .
 ```
 
-This analyzes C/C++, Go, Python, TypeScript/JS, and Proto source files. For Java/Rust/Ruby/Swift, universal-ctags is used if installed. Excludes generated files (`*.pb.*`, `*_generated*`), test files (`*_test.cc`, `*_test.go`), and vendored code.
-
-**Incremental rebuild** (skip unchanged modules):
-
-```bash
-"$GRAPH_BIN" --repo . --out draft/graph/ --incremental
-```
-
-Uses `hashes.json` to detect which modules changed (content-based SHA-256, not mtime). Only changed modules are re-extracted. Always-load files (module-graph, hotspots, call-index, schema) are always recomputed.
+The engine indexes C/C++, Go, Python, TypeScript/JS, and more (tree-sitter, 159 languages) plus LSP-assisted resolution for the major ones, and detects HTTP/gRPC/GraphQL routes. Indexing is incremental in the engine (content-based, git-aware); the snapshot is re-derived on each run.
 
 ## Graceful Degradation
 
 | Scenario | Behavior |
 |----------|----------|
-| No graph binary | Skip graph build in init; all skills proceed without graph data |
-| Graph binary but build fails | Warn and proceed; skills work without graph data |
-| `draft/graph/` exists | Load always-load files during context loading; use on-demand queries as needed |
-| Stale graph data | Graph data is still useful — structural changes are infrequent. Suggest re-running init to refresh. |
+| No engine resolvable (or `DRAFT_MEMORY_DISABLE=1`) | Skip graph build in init; all skills proceed without graph data; tools emit `source: unavailable` |
+| Engine present but a query fails | Warn and proceed; skills work without graph data |
+| `draft/graph/` snapshot exists | Load always-load files during context loading; use live query tools as needed |
+| Stale snapshot | Still useful — structural changes are infrequent. Re-run `graph-snapshot.sh` (or init) to refresh. |
 
 </core-file>
 

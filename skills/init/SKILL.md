@@ -478,118 +478,29 @@ If **Greenfield**: skip to Step 2 (Product Definition).
 
 **CRITICAL ORDERING**: Phase 0 (this step) MUST complete before writing any section of architecture.md. The graph provides: (a) exhaustive module list, (b) hotspot-ranked module priority, (c) authoritative proto API surface, (d) mermaid diagrams ready for slot injection, (e) codebase tier for .ai-context.md budget.
 
-### 1. Detect and run graph binary
+### 1. Build the graph snapshot
 
-**Native binary only** (Aether graph): 
+The knowledge-graph engine is `codebase-memory-mcp`, resolved by `scripts/tools/_lib.sh:find_memory_bin` (`DRAFT_MEMORY_BIN` > PATH > `~/.cache/draft/bin` > vendored `bin/<arch>/`). `scripts/install.sh` fetches it; install manually with `scripts/fetch-memory-engine.sh`. Set `DRAFT_MEMORY_DISABLE=1` to opt out.
 
-- First choice: `graph` found on `$PATH` (via `command -v graph`)
-- Second choice: vendored binary under `bin/<arch>/graph` (canonical layout) or legacy `graph/bin/<arch>/graph` where `<arch>` is computed from `uname` to match one of the directories that actually exist (e.g. `darwin-arm64`, `linux-amd64`, `linux-arm64`).
-
-The AI **must** correctly figure out the architecture string so it picks the right pre-copied binary from the directories present under the plugin root (`bin/darwin-arm64/...` etc).
-
-The legacy Node wrapper has been removed. Graceful degradation when no binary is present.
+One command resolves the engine, indexes the repo, and writes the committed snapshot under `draft/graph/`:
 
 ```bash
-GRAPH_BIN=""
-GRAPH_CLANG_BIN=""
-
-# 1. Prefer the canonical verifier (PATH > bundled arch)
-if command -v scripts/tools/verify-graph-binary.sh >/dev/null 2>&1 || \
-   [ -x "./scripts/tools/verify-graph-binary.sh" ]; then
-    VERIFY="./scripts/tools/verify-graph-binary.sh"
-    if REPORT="$($VERIFY --repo . --json 2>/dev/null)"; then
-        GRAPH_BIN=$(echo "$REPORT" | sed -n 's/.*"graph_bin":"\([^"]*\)".*/\1/p')
-        GRAPH_CLANG_BIN=$(echo "$REPORT" | sed -n 's/.*"graph_clang_bin":"\([^"]*\)".*/\1/p' | grep -v '^null$' || true)
-        echo "Graph binary selected via verifier (source=$(echo "$REPORT" | sed -n 's/.*"source":"\([^"]*\)".*/\1/p')): $GRAPH_BIN"
-        [ -n "$GRAPH_CLANG_BIN" ] && echo "  graph-clang companion: $GRAPH_CLANG_BIN (high-fidelity C/C++ enabled)"
-    fi
-fi
-
-# 2. Direct PATH + arch fallback (when verifier not yet available)
-if [ -z "$GRAPH_BIN" ]; then
-    if command -v graph >/dev/null 2>&1; then
-        GRAPH_BIN="$(command -v graph)"
-        echo "Using graph from PATH: $GRAPH_BIN"
-        command -v graph-clang >/dev/null 2>&1 && GRAPH_CLANG_BIN="$(command -v graph-clang)"
-    fi
-fi
-
-if [ -z "$GRAPH_BIN" ]; then
-    # Compute architecture directory name that matches what exists under bin/<arch>/
-    # Supported layout examples: darwin-arm64, linux-amd64, linux-arm64, darwin-x86_64
-    # Canonical layout is bin/<arch>/ (correct); graph/bin/<arch>/ supported for transition
-    os=$(uname -s | tr '[:upper:]' '[:lower:]')
-    machine=$(uname -m)
-    case "$machine" in
-        x86_64|amd64)   arch="amd64" ;;
-        arm64|aarch64)  arch="arm64" ;;
-        *)              arch="$machine" ;;
-    esac
-    ARCH="${os}-${arch}"
-
-    echo "Resolved arch for bundled graph: $ARCH (from uname: $os + $machine)"
-
-    for root in \
-        "$HOME/.cursor/plugins/local/draft" \
-        "$HOME/.claude-plugin/.." \
-        "." \
-        "$HOME/.claude/plugins/draft" \
-        "$HOME/.claude/plugins/local/draft"; do
-        for base in bin graph/bin; do
-            cand="$root/$base/$ARCH/graph"
-            if [ -x "$cand" ]; then
-                GRAPH_BIN="$cand"
-                echo "Using bundled native graph for $ARCH: $GRAPH_BIN (via $base)"
-                clang_cand="$root/$base/$ARCH/graph-clang"
-                [ -x "$clang_cand" ] && GRAPH_CLANG_BIN="$clang_cand"
-                break 2
-            fi
-        done
-    done
-
-    # If the exact ARCH dir didn't exist, try to pick any available arch dir as last resort
-    if [ -z "$GRAPH_BIN" ]; then
-        for root in \
-            "$HOME/.cursor/plugins/local/draft" \
-            "$HOME/.claude-plugin/.." \
-            "." \
-            "$HOME/.claude/plugins/draft"; do
-            for base in bin graph/bin; do
-                if [ -d "$root/$base" ]; then
-                    for d in "$root/$base"/*/; do
-                        [ -d "$d" ] || continue
-                        cand="$d/graph"
-                        if [ -x "$cand" ]; then
-                            GRAPH_BIN="$cand"
-                            ARCH=$(basename "$d")
-                            echo "Falling back to first available bundled graph: $GRAPH_BIN (arch=$ARCH)"
-                            clang_cand="$d/graph-clang"
-                            [ -x "$clang_cand" ] && GRAPH_CLANG_BIN="$clang_cand"
-                            break 3
-                        fi
-                    done
-                fi
-            done
-        done
-    fi
-fi
-
-# Execute
-if [ -n "$GRAPH_BIN" ]; then
-    echo "Running graph build with: $GRAPH_BIN"
-    [ -n "$GRAPH_CLANG_BIN" ] && echo "  (graph-clang: $GRAPH_CLANG_BIN)"
-    "$GRAPH_BIN" --repo . --out draft/graph/ || {
-        echo "WARNING: graph build failed (exit $?) — continuing with manual discovery."
-        GRAPH_BIN=""
-    }
+if scripts/tools/graph-snapshot.sh --repo .; then
+    echo "Graph snapshot written to draft/graph/ (schema.yaml, architecture.json, hotspots.jsonl, *.mermaid)."
 else
-    echo "Graph binary not found — skipping automated graph analysis. Downstream skills degrade gracefully."
+    echo "Graph engine unavailable — skipping automated graph analysis. Downstream skills degrade gracefully."
 fi
 ```
 
-See `core/shared/graph-query.md` and `bin/README.md` for the query contract and binary layout. When a native binary (or `graph-clang`) is chosen, explicit selection messages are printed.
+Optionally record which engine was selected (usage-report contract):
 
-If the build succeeds, `draft/graph/` is populated and later steps consume the always-load artifacts + injection slots exactly as before.
+```bash
+scripts/tools/verify-graph-binary.sh --repo . --json 2>/dev/null || true
+```
+
+See `core/shared/graph-query.md` and `bin/README.md` for the query contract and engine resolution.
+
+If the snapshot succeeds, `draft/graph/` is populated and later steps consume the always-load artifacts + injection slots.
 
 ### 2. If graph build succeeds, load the always-load artifacts
 
@@ -640,34 +551,31 @@ Query for diagram content and write into architecture.md slots using the standar
 
 For Section 4.4 (module-deps slot):
 ```bash
-"$GRAPH_BIN" --repo . --out draft/graph --query --mode mermaid --symbol module-deps
+scripts/tools/mermaid-from-graph.sh --repo . --diagram module-deps
 ```
-Parse JSON response: extract `.mermaid` string and `filtered` flag. Write between the markers:
+The tool emits a ready-to-inject ` ```mermaid ``` ` block (or an empty stub on exit 2). Write between the markers:
 ```
 <!-- GRAPH:module-deps:START -->
-```mermaid
-{diagram content}
-```
-{if filtered: Note: diagram filtered to top edges by weight — N of M total edges shown}
+{mermaid block from the tool}
 <!-- GRAPH:module-deps:END -->
 ```
 
 For Section 20 (hotspots slot):
-Read `draft/graph/hotspots.jsonl`, take top 10 by score, build markdown table:
+Read `draft/graph/hotspots.jsonl` (or run `scripts/tools/hotspot-rank.sh --repo . --top 10`), take the top 10 by fanIn, build a markdown table:
 ```
 <!-- GRAPH:hotspots:START -->
-| File | Lines | fanIn | Score |
-|------|-------|-------|-------|
-| {path} | {lines} | {fanIn} | {score} |
+| Symbol | fanIn |
+|--------|-------|
+| {name} | {fanIn} |
 ...
 <!-- GRAPH:hotspots:END -->
 ```
 
 For Appendix E (proto-map slot):
 ```bash
-"$GRAPH_BIN" --repo . --out draft/graph --query --mode mermaid --symbol proto-map
+scripts/tools/mermaid-from-graph.sh --repo . --diagram proto-map
 ```
-Parse JSON response: extract `.mermaid` string. If no proto files (`stats.services == 0`), write placeholder. Otherwise write:
+The tool emits a ` ```mermaid ``` ` block from detected routes (empty stub if none). Write:
 ```
 <!-- GRAPH:proto-map:START -->
 ```mermaid

@@ -155,6 +155,9 @@ TOOLS=(
     "adr-index.sh"
     "manage-symlinks.sh"
     "mermaid-from-graph.sh"
+    "graph-snapshot.sh"
+    "graph-impact.sh"
+    "graph-callers.sh"
     "validate-frontmatter.sh"
     # Foundations hygiene/verification tools
     "check-graph-usage-report.sh"

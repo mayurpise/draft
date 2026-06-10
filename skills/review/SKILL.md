@@ -12,8 +12,8 @@ You are conducting a code review using Draft's Context-Driven Development method
 When `draft/graph/schema.yaml` exists, this skill **must** follow the graph-first lookup contract in [core/shared/graph-query.md](../../core/shared/graph-query.md) §Mandatory Lookup Contract. Stage 1 (Automated Validation) **starts from the graph**:
 
 1. Run blast-radius assessment from `draft/graph/hotspots.jsonl` and `draft/graph/module-graph.jsonl` (see Stage 1).
-2. For each changed file with non-trivial diff size, run `graph --query --file <path> --mode impact` to obtain the affected module set deterministically.
-3. For each public symbol modified, run `graph --query --symbol <name> --mode callers` to enumerate downstream callers before judging breaking-change severity.
+2. For each changed file with non-trivial diff size, run `scripts/tools/graph-impact.sh --repo . --file <path>` to obtain the affected module set deterministically.
+3. For each public symbol modified, run `scripts/tools/graph-callers.sh --repo . --symbol <name>` to enumerate downstream callers before judging breaking-change severity.
 
 Filesystem `grep` is reserved for source-text scans (string literals, log messages, regex matches in code) — not for discovering modules, files, or callers when the graph can answer.
 
@@ -1075,7 +1075,7 @@ If Jira ticket linked, sync via `core/shared/jira-sync.md`:
 
 Before printing the final verdict, internally verify and report:
 
-1. **Graph files queried** — which JSONL files were loaded (e.g. `module-graph.jsonl, hotspots.jsonl, call-index.jsonl`) plus any live `graph --query` invocations (impact, callers, cycles).
+1. **Graph files queried** — which JSONL files were loaded (e.g. `architecture.json, hotspots.jsonl`) plus any live graph query-tool invocations (impact, callers, cycles).
 2. **Layer 1 files deliberately skipped** — list any context sections skipped as irrelevant to the diff under review.
 3. **Filesystem grep fallback justification** — for every `grep`/`find` run, state the concept it searched for. Source-text scans (string literals, regex matches in code) are exempt — they are not symbol/file discovery.
 

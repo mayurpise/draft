@@ -25,6 +25,7 @@ SKILL_ORDER=(
     draft
     init
     index
+    graph
     new-track
     decompose
     implement
